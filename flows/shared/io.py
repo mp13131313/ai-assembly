@@ -11,6 +11,9 @@ Researcher flow doesn't have to care which one it got.
 from __future__ import annotations
 
 import json
+import logging
+import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -166,6 +169,64 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
             )
 
     return cfg
+
+
+def get_logger(name: str) -> Any:
+    """Return a logger that works inside or outside a Prefect run context.
+
+    Tasks call `get_run_logger()` to get Prefect's structured logger, but
+    that call raises MissingContextError when invoked outside a Prefect
+    task run (e.g. from a rerun script that calls `.fn`). This helper
+    returns the Prefect run logger when available and falls back to a
+    stdlib logger (named `name`, with a stderr handler at INFO) otherwise.
+
+    The stdlib logger is configured once per name; subsequent calls with
+    the same name reuse it without attaching duplicate handlers.
+    """
+    try:
+        from prefect import get_run_logger
+        return get_run_logger()
+    except Exception:
+        logger = logging.getLogger(name)
+        if not logger.handlers:
+            h = logging.StreamHandler(sys.stderr)
+            h.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+            logger.addHandler(h)
+            logger.setLevel(logging.INFO)
+        return logger
+
+
+def extract_json(text: str) -> Any:
+    """Parse the first complete JSON value out of a model response.
+
+    Handles three failure modes seen across Researcher/Provocateur runs:
+    1. Markdown code fence wrapping (```json ... ```)
+    2. Leading/trailing whitespace
+    3. Trailing commentary after a valid JSON value — models occasionally
+       write a short note after the closing brace despite instructions.
+
+    Uses json.JSONDecoder.raw_decode() to extract the first complete
+    value and ignore anything after it. Falls back to locating the
+    first '{' if the leading text isn't itself valid JSON.
+    """
+    t = text.strip()
+    if t.startswith("```"):
+        t = re.sub(r"^```(?:json)?\s*", "", t)
+        t = re.sub(r"\s*```\s*$", "", t)
+        t = t.strip()
+
+    decoder = json.JSONDecoder()
+    try:
+        value, _end = decoder.raw_decode(t)
+        return value
+    except json.JSONDecodeError:
+        start = t.find("{")
+        if start == -1:
+            # Let the original error propagate via strict parse so the
+            # caller sees a meaningful message.
+            return json.loads(t)
+        value, _end = decoder.raw_decode(t[start:])
+        return value
 
 
 def get_member_by_name(cfg: dict[str, Any], name: str) -> dict[str, Any]:

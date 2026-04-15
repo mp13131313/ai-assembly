@@ -27,7 +27,6 @@ cluster abstracts only (not raw extractions).
 from __future__ import annotations
 
 import json
-import logging as _std_logging
 import os
 import random
 import sys
@@ -46,6 +45,8 @@ try:
     from dotenv import load_dotenv
     load_dotenv()
     from flows.shared.io import (
+        extract_json,
+        get_logger,
         load_prompt,
         load_session_package,
         write_json_atomic,
@@ -122,24 +123,11 @@ def _thinking_kwargs(budget_tokens: int) -> dict:
 
 
 # --- Logger shim ----------------------------------------------------------
-#
-# Same pattern as transcription_flow.py: tasks use get_run_logger() which
-# only works inside a Prefect run context. When called directly (e.g. from
-# a test script via `.fn`), fall back to a stdlib logger.
-
-_STDLIB_LOGGER = _std_logging.getLogger("researcher_flow")
-if not _STDLIB_LOGGER.handlers:
-    _h = _std_logging.StreamHandler(sys.stderr)
-    _h.setFormatter(_std_logging.Formatter("%(levelname)s %(message)s"))
-    _STDLIB_LOGGER.addHandler(_h)
-    _STDLIB_LOGGER.setLevel(_std_logging.INFO)
-
+# Delegates to flows.shared.io.get_logger — same implementation used by
+# transcription_flow and provocateur_flow.
 
 def _get_logger():
-    try:
-        return get_run_logger()
-    except Exception:
-        return _STDLIB_LOGGER
+    return get_logger("researcher_flow")
 
 
 # --- Prompts --------------------------------------------------------------
@@ -150,40 +138,6 @@ THEMING_SYSTEM = load_prompt("researcher_theming")
 
 
 # --- Helpers --------------------------------------------------------------
-
-def extract_json(text):
-    """Strip code fences and parse the first complete JSON value in `text`.
-
-    Handles three failure modes we've actually seen in Researcher runs:
-    1. Markdown code fence wrapping (```json ... ```)
-    2. Leading/trailing whitespace
-    3. Trailing commentary after a valid JSON object/array — the model
-       occasionally writes a short note after the closing brace despite
-       being instructed not to. We use json.JSONDecoder.raw_decode() to
-       extract the first complete value and ignore anything after it.
-    """
-    t = text.strip()
-    if t.startswith("```"):
-        lines = t.split("\n")
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        t = "\n".join(lines).strip()
-
-    # raw_decode returns (parsed_value, end_index). Any content past
-    # end_index is silently discarded — which is what we want when
-    # Claude appends trailing notes after the JSON.
-    decoder = json.JSONDecoder()
-    try:
-        value, end = decoder.raw_decode(t)
-        return value
-    except json.JSONDecodeError:
-        # Fall back to strict parse so the original error propagates if
-        # raw_decode can't even find a valid prefix (e.g. empty or
-        # non-JSON leading text).
-        return json.loads(t)
-
 
 def build_extraction_user_prompt(pkg: dict, session_id: str) -> str:
     """Assemble the Node 1 user message from a session package.

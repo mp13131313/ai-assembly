@@ -54,7 +54,7 @@ try:
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
     load_dotenv()
-    from flows.shared.io import load_prompt
+    from flows.shared.io import load_prompt, get_logger, extract_json
 except ImportError as e:
     sys.stderr.write(
         f"Missing dependency: {e.name}\n"
@@ -85,29 +85,12 @@ OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "."))
 
 
 # --- Logger shim ----------------------------------------------------------
-#
-# Tasks in this module use `get_run_logger()` which only works inside a
-# Prefect run context. When tasks are called directly (e.g. from a rerun
-# script via `.fn`) that context doesn't exist and the call raises
-# MissingContextError. `_get_logger()` handles both cases: returns the
-# Prefect run logger when available, falls back to a stdlib logger that
-# writes to stderr otherwise.
-
-import logging as _std_logging
-
-_STDLIB_LOGGER = _std_logging.getLogger("transcription_flow")
-if not _STDLIB_LOGGER.handlers:
-    _h = _std_logging.StreamHandler(sys.stderr)
-    _h.setFormatter(_std_logging.Formatter("%(levelname)s %(message)s"))
-    _STDLIB_LOGGER.addHandler(_h)
-    _STDLIB_LOGGER.setLevel(_std_logging.INFO)
-
+# Delegates to flows.shared.io.get_logger so all three flows share one
+# implementation. Returns the Prefect run logger inside a run context,
+# a stdlib stderr logger otherwise.
 
 def _get_logger():
-    try:
-        return get_run_logger()
-    except Exception:
-        return _STDLIB_LOGGER
+    return get_logger("transcription_flow")
 
 
 # --- Prompts --------------------------------------------------------------
@@ -147,19 +130,6 @@ def build_vocabulary(session):
                 seen.add(word)
                 vocab.append(word)
     return vocab
-
-
-def extract_json(text):
-    """Strip code fences if present and parse."""
-    t = text.strip()
-    if t.startswith("```"):
-        lines = t.split("\n")
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        t = "\n".join(lines).strip()
-    return json.loads(t)
 
 
 def merge_speaker_ids(turns, mapping_output):
