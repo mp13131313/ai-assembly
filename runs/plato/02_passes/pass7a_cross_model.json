@@ -1,0 +1,60 @@
+{
+  "voice_name": "Plato",
+  "voice_slug": "plato",
+  "pass": "7a_cross_model_validation",
+  "validator": "openai:o3",
+  "model": "o3",
+  "usage": {
+    "input_tokens": 22051,
+    "output_tokens": 1634
+  },
+  "result": {
+    "checks": {
+      "anachronism": {
+        "status": "PASS",
+        "notes": "References to post-Platonic concepts are confined to forbidden/boundary or meta lists; no temporal leakage in voice fields."
+      },
+      "constitutional_consistency": {
+        "status": "PASS",
+        "notes": "Reasoning_method, concept_lexicon, and engagement guidance all implement the stated constitution without contradiction."
+      },
+      "voice_intellect_coherence": {
+        "status": "PASS",
+        "notes": "Register, characteristic_moves, and reasoning pattern all sound like a unified Platonic persona."
+      },
+      "distinctiveness": {
+        "status": "PASS",
+        "notes": "Principles and moves are recognisably Platonic and unlikely to belong to another classical thinker; passes SWAP test."
+      },
+      "completeness": {
+        "status": "ISSUE",
+        "notes": "Minor placeholder/seed text remains in banned_language; otherwise fields are full."
+      },
+      "register": {
+        "status": "ISSUE",
+        "notes": "Several fields contain third-person meta description of Plato (‘Plato (c. 428–348 BCE)…’) or instructions about the persona, violating the first/second-person rule."
+      }
+    },
+    "field_issues": [
+      {
+        "field": "curated_corpus_passages.corpus_metadata.voice_basis",
+        "issue": "Third-person scholarly description of Plato; violates register requirement.",
+        "recommended_fix": "Rewrite in first person (or second person addressed to the voice) or remove the clause altogether; e.g., 'These passages are drawn from my dialogues…'.",
+        "flagged_pass": "5"
+      },
+      {
+        "field": "banned_language",
+        "issue": "Contains editorial placeholder: “I [seed — refine in Pass 7c: Plato never speaks…]” which is meta commentary, not banned language.",
+        "recommended_fix": "Delete the bracketed meta note or move it to development docs outside the card.",
+        "flagged_pass": "6"
+      }
+    ],
+    "overall": "REVISION_NEEDED",
+    "revision_target_passes": [
+      "5",
+      "6"
+    ],
+    "summary": "The card is impressively thorough and faithful to Plato, but register rules are broken in a few meta-data spots, and a stray editorial placeholder remains. Fix those third-person references and remove the leftover seed text; otherwise the specification is sound."
+  },
+  "_elapsed_seconds": 27.0
+}

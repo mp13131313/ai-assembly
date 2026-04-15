@@ -436,6 +436,146 @@ stamp("PASS 6: Corpus Curation (Sonnet, selection task)")
 pass6 = call_or_cache(RUN / "02_passes/pass6_corpus.json", "Pass 6", _pass_6)
 
 
+# ---------- PASS 7-pre (Citation Verification) ----------
+# Spec: Sonnet 4.6, temp 0.0, max_tokens 4096. Verifies card claims against
+# (a) primary texts from Node 1c — strongest anchor, and (b) merged dossier.
+# Branches by voice_mode and hostile_sources for verification approach.
+def _pass_7pre():
+    full_card_for_verify = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_verify.update(pass6["fields"])
+    sysp = render("persona_pass_7pre_citation",
+                  type=vi["type"], voice_mode=vi["voice_mode"],
+                  hostile_sources=vi["hostile_sources"])
+    userp = render("persona_pass_7pre_citation_user",
+                   persona_card_json=json.dumps(full_card_for_verify, ensure_ascii=False, indent=2),
+                   primary_texts=primary_block,
+                   merged_dossier=merged_dossier)
+    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
+                    max_tokens=24000, temperature=0.0, thinking_budget=None,
+                    response_format_json=True)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
+            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+stamp("PASS 7-pre: Citation Verification (Sonnet)")
+pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json", "Pass 7-pre", _pass_7pre)
+verif = pass7pre["result"]
+stamp(f"  verification: {verif.get('overall', '?')} | "
+      f"verified={verif.get('summary', {}).get('verified', 0)} "
+      f"unverified={verif.get('summary', {}).get('unverified', 0)} "
+      f"interp={verif.get('summary', {}).get('interpretive', 0)} "
+      f"dossier_only={verif.get('summary', {}).get('dossier_only', 0)} "
+      f"inconsistent={verif.get('summary', {}).get('inconsistent', 0)} "
+      f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
+
+
+# ---------- PASS 7a (Cross-Model Validation) ----------
+# Spec: must NOT be Claude (self-preference bias). gpt-4o preferred -> Gemini fallback -> skip.
+def _pass_7a():
+    full_card_for_validate = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_validate.update(pass6["fields"])
+    sysp = open("flows/shared/prompts/persona_pass_7a_cross_model.md").read()
+    userp = render("persona_pass_7a_cross_model_user",
+                   persona_card_json=json.dumps(full_card_for_validate, ensure_ascii=False, indent=2))
+    # Try o3 first (reasoning-mode for multi-criterion evaluation), then gpt-4o, then Gemini
+    for openai_model in ("o3", "gpt-4o"):
+        try:
+            r = call_openai(system=sysp, user=userp, model=openai_model,
+                            temperature=0.0, max_tokens=8192,
+                            response_format_json=True)
+            return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
+                    "validator": f"openai:{openai_model}", "model": r["model"],
+                    "usage": r["usage"], "result": r["json"]}
+        except Exception as e:
+            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    # Fall back to Gemini
+    try:
+        full_prompt = sysp + "\n\n" + userp
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        # Parse JSON out of Gemini text
+        cleaned = r["text"].strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
+                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "usage": r["usage"], "result": json.loads(cleaned)}
+    except Exception as e:
+        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
+                "validator": "skipped", "result": {"overall": "SKIPPED",
+                "summary": "No cross-model validator available."}}
+
+stamp("PASS 7a: Cross-Model Validation (gpt-4o -> Gemini fallback)")
+pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json", "Pass 7a", _pass_7a)
+stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
+
+
+# ---------- PASS 7b (Worked Provocations) ----------
+# Spec: Sonnet temp 0.4. We use Opus + adaptive thinking — these provocations
+# become runtime few-shot exemplars in the Voice Pipeline; high stakes.
+def _pass_7b():
+    full_card_for_provoke = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_provoke.update(pass6["fields"])
+    sysp = render("persona_pass_7b_provocations",
+                  conference_context=vi["conference_context"],
+                  voice_mode=vi["voice_mode"])
+    userp = render("persona_pass_7b_provocations_user",
+                   persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+                     max_tokens=24000, thinking=True, temperature=1.0)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_worked_provocations",
+            "model": r["model"], "usage": r["usage"], "fields": r["json"]}
+
+stamp("PASS 7b: Worked Provocations (Opus + thinking)")
+pass7b = call_or_cache(RUN / "02_passes/pass7b_provocations.json", "Pass 7b", _pass_7b)
+n_provs = len(pass7b["fields"].get("worked_provocations", []))
+stamp(f"  generated {n_provs} provocation chains")
+
+
+# ---------- PASS 7c (Negative Constraints) ----------
+# Spec: Gemini preferred (cross-model bias avoidance) -> Sonnet fallback (with
+# bias-awareness instruction). Refines banned_language and banned_modes.
+def _pass_7c():
+    voice_fields = pass4a["fields"]
+    userp = render("persona_pass_7c_negative_user",
+                   rhetorical_mode=json.dumps(voice_fields.get("rhetorical_mode", ""), ensure_ascii=False),
+                   characteristic_moves=json.dumps(voice_fields.get("characteristic_moves", []), ensure_ascii=False, indent=2),
+                   register_and_tone=json.dumps(voice_fields.get("register_and_tone", ""), ensure_ascii=False),
+                   banned_language=json.dumps(voice_fields.get("banned_language", []), ensure_ascii=False, indent=2),
+                   banned_modes=json.dumps(voice_fields.get("banned_modes", []), ensure_ascii=False, indent=2),
+                   worked_provocations=json.dumps(pass7b["fields"].get("worked_provocations", []), ensure_ascii=False, indent=2))
+    # Try Gemini first (preferred per spec)
+    sysp_gemini = render("persona_pass_7c_negative", claude_fallback=False)
+    try:
+        full_prompt = sysp_gemini + "\n\n" + userp
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        cleaned = r["text"].strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7c_negative_constraints",
+                "evaluator": "google:gemini-2.5-pro", "model": r["model"],
+                "usage": r["usage"], "result": json.loads(cleaned)}
+    except Exception as e:
+        stamp(f"  WARN: Gemini failed ({type(e).__name__}: {str(e)[:120]}); falling back to Sonnet w/ bias-awareness")
+    # Sonnet fallback with bias-awareness
+    sysp_claude = render("persona_pass_7c_negative", claude_fallback=True)
+    r = call_claude(system=sysp_claude, user=userp, model="claude-sonnet-4-6",
+                    max_tokens=8192, temperature=0.0, thinking_budget=None,
+                    response_format_json=True)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7c_negative_constraints",
+            "evaluator": "anthropic:claude-sonnet-4-6 (bias-aware fallback)",
+            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+stamp("PASS 7c: Negative Constraints (Gemini -> Sonnet fallback)")
+pass7c = call_or_cache(RUN / "02_passes/pass7c_negative.json", "Pass 7c", _pass_7c)
+add_summary = pass7c["result"].get("additions_summary", {})
+stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
+      f"banned_language +{add_summary.get('language_added', 0)} "
+      f"banned_modes +{add_summary.get('modes_added', 0)}")
+
+
 # ---------- FINAL SUMMARY ----------
 def _check_register(card_fields: dict, voice_last_name: str) -> int:
     """Count third-person leaks (voice_last_name + " was/is/believed/argued" patterns)."""
@@ -453,6 +593,15 @@ def _check_register(card_fields: dict, voice_last_name: str) -> int:
 full_card = {**combined_2_3_4, **pass5["fields"]}
 if pass6.get("fields"):
     full_card.update(pass6["fields"])
+# Pass 7b: worked_provocations field
+if pass7b.get("fields"):
+    full_card.update(pass7b["fields"])
+# Pass 7c: refined banned_language and banned_modes (overwrite Pass 4a's seeds)
+if pass7c.get("result"):
+    if pass7c["result"].get("banned_language") is not None:
+        full_card["banned_language"] = pass7c["result"]["banned_language"]
+    if pass7c["result"].get("banned_modes") is not None:
+        full_card["banned_modes"] = pass7c["result"]["banned_modes"]
 
 last_name = vi["name"].split()[-1]
 register_violations = _check_register(full_card, last_name)
@@ -468,6 +617,11 @@ stamp(f"  Pass 4a fields:       {len(pass4a['fields'])} (voice_basis: {pass4a['v
 stamp(f"  Pass 4b fields:       {len(pass4b['fields'])}")
 stamp(f"  Pass 5 fields:        {len(pass5['fields'])}")
 stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
+stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
+stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')})")
+stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('worked_provocations', []))} chains")
+stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
+      f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
 stamp(f"  Total card fields:    {len(full_card)}")
 stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
 stamp(f"  Card saved to:        {RUN}/02_passes/")
@@ -490,28 +644,52 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
 
     "metadata": {
         "passes_completed": [
-            "1a_perplexity", "1c_primary_text_fetch",
+            "1a_perplexity",
+            "1a_dr_claude" if claude_dr_text else "1a_dr_claude_SKIPPED",
+            "1b_gemini", "1c_primary_text_fetch", "1merge_three_way",
             "2_identity_boundaries", "ct_pass2",
             "3_intellectual_core", "ct_pass2_3",
+            "1d_excerpt_selection",
             "4a_voice", "ct_pass2_3_4a",
             "4b_artifact", "ct_pass2_3_4",
             "5_engagement",
             "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
+            "7pre_citation_verification",
+            "7a_cross_model_validation",
+            "7b_worked_provocations",
+            "7c_negative_constraints",
         ],
-        "validation_status": "pending — Phase 3 not yet built",
+        "validation_status": pass7a["result"].get("overall", "unknown"),
         "revision_loops": 0,
-        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "gutenberg:web_fetch"],
+        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),
         "subtype": vi.get("subtype"),
         "deployment_context": vi.get("conference_context", ""),
         "human_review_status": "pending",
+        "approach_c": bool(claude_dr_text),
+        "citation_verification": {
+            "overall": pass7pre["result"].get("overall"),
+            "summary": pass7pre["result"].get("summary", {}),
+            "review_notes": pass7pre["result"].get("review_notes", ""),
+        },
+        "cross_model_validation": {
+            "validator": pass7a.get("validator"),
+            "overall": pass7a["result"].get("overall"),
+            "revision_target_passes": pass7a["result"].get("revision_target_passes", []),
+            "summary": pass7a["result"].get("summary", ""),
+        },
+        "negative_constraints_refinement": {
+            "evaluator": pass7c.get("evaluator"),
+            "additions_summary": pass7c["result"].get("additions_summary", {}),
+        },
         # Diagnostic extras (not in spec but useful for our development)
         "field_counts": {
             "pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
             "pass4a": len(pass4a["fields"]), "pass4b": len(pass4b["fields"]),
             "pass5": len(pass5["fields"]), "pass6": len(pass6.get("fields", {})),
+            "pass7b_provocations": len(pass7b["fields"].get("worked_provocations", [])),
         },
         "register_violations": register_violations,
     },
