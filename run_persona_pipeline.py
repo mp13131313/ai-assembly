@@ -209,6 +209,27 @@ write_json_atomic(RUN / "01_research/merged_dossier.json", {
 stamp(f"  merged_dossier: {len(merged_dossier)} chars")
 
 
+# ---------- REVISION LOOP STATE ----------
+# Per v3.7 spec: when Pass 7a returns REVISION_NEEDED, re-run flagged passes
+# with critique appended to user prompt. Max 2 loops before flagging for
+# human review. Critiques are populated from Pass 7a's field_issues array.
+REVISION_CRITIQUES = {}  # pass_label (str) -> critique block (str)
+
+def _critique_suffix(pass_label: str) -> str:
+    """Return revision critique block appended to a generation pass's user
+    prompt when set. Empty string when not in a revision loop."""
+    crit = REVISION_CRITIQUES.get(pass_label)
+    if not crit:
+        return ""
+    return (
+        f"\n\n=== REVISION REQUEST (Pass 7a flagged this pass) ===\n"
+        f"A cross-model validator reviewed your previous output and flagged "
+        f"the following issues. Address each one in your revised output:\n\n"
+        f"{crit}\n"
+        f"=== END REVISION REQUEST ===\n"
+    )
+
+
 # ---------- HELPER: Claude call wrapper for generation passes ----------
 def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temperature=1.0):
     return call_claude(
@@ -241,7 +262,7 @@ def _pass_2():
     sysp = render("persona_pass_2_identity_boundaries", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
-    userp = render("persona_pass_2_user", merged_dossier=merged_dossier)
+    userp = render("persona_pass_2_user", merged_dossier=merged_dossier) + _critique_suffix("2")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -304,7 +325,7 @@ def _pass_3():
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
-                   chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary)
+                   chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary) + _critique_suffix("3")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -351,7 +372,7 @@ def _pass_4a():
                   hostile_sources=vi["hostile_sources"],
                   corpus_constraint=vi.get("corpus_constraint", "full"))
     userp = render("persona_pass_4a_user", merged_dossier=merged_dossier,
-                   primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary)
+                   primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary) + _critique_suffix("4a")
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
@@ -373,7 +394,7 @@ def _pass_4b():
                    pass_2_3_4a_summary=pass_2_3_4a_summary,
                    rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", "")),
                    characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", [])),
-                   register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", "")))
+                   register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""))) + _critique_suffix("4b")
     r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
                      max_tokens=6144, thinking=False, temperature=0.2)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4b_artifact",
@@ -394,7 +415,7 @@ def _pass_5():
         pass_2_3_4_summary=pass_2_3_4_summary,
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
-    )
+    ) + _critique_suffix("5")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
                      max_tokens=16000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
@@ -426,7 +447,7 @@ def _pass_6():
         rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", ""), ensure_ascii=False),
         characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", []), ensure_ascii=False, indent=2),
         register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""), ensure_ascii=False),
-    )
+    ) + _critique_suffix("6")
     r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
                      max_tokens=8000, thinking=False, temperature=0.1)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "6_corpus_curation",
@@ -509,6 +530,133 @@ def _pass_7a():
 stamp("PASS 7a: Cross-Model Validation (gpt-4o -> Gemini fallback)")
 pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json", "Pass 7a", _pass_7a)
 stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
+
+
+# ---------- REVISION LOOP (per v3.7 spec, max 2) ----------
+# Pass 7a may return REVISION_NEEDED with revision_target_passes + field_issues.
+# Re-run flagged passes with critique appended; invalidate downstream caches;
+# re-run Pass 7a. Loop max 2 times.
+DOWNSTREAM_CHAIN = {
+    "2":  ["pass2_identity_boundaries", "_ct_pass2", "pass3_intellectual_core", "_ct_pass2_3",
+           "pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
+           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+    "3":  ["pass3_intellectual_core", "_ct_pass2_3",
+           "pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
+           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+    "4a": ["pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
+           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+    "4b": ["pass4b_artifact", "_ct_pass2_3_4",
+           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+    "5":  ["pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+    "6":  ["pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+}
+
+# Map from spec target labels (2, 3, 4a, ...) to the runner's pass function +
+# its result variable name. Used to re-bind after re-running.
+PASS_RUNNERS = {
+    "2": ("_pass_2", "pass2"),
+    "3": ("_pass_3", "pass3"),
+    "4a": ("_pass_4a", "pass4a"),
+    "4b": ("_pass_4b", "pass4b"),
+    "5": ("_pass_5", "pass5"),
+    "6": ("_pass_6", "pass6"),
+}
+
+revision_loops = 0
+MAX_REVISION_LOOPS = 2
+
+while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
+    targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
+    targets = [t for t in targets if t in PASS_RUNNERS]  # filter to known passes
+    if not targets:
+        stamp(f"REVISION LOOP: 7a flagged REVISION_NEEDED but no actionable target passes; halting loop")
+        break
+
+    revision_loops += 1
+    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS}: re-running passes {targets}")
+
+    # Build per-pass critiques from field_issues
+    REVISION_CRITIQUES.clear()
+    for issue in pass7a["result"].get("field_issues", []):
+        target = str(issue.get("flagged_pass"))
+        if target not in REVISION_CRITIQUES:
+            REVISION_CRITIQUES[target] = ""
+        REVISION_CRITIQUES[target] += (
+            f"- field: {issue.get('field')}\n"
+            f"  issue: {issue.get('issue')}\n"
+            f"  recommended_fix: {issue.get('recommended_fix')}\n"
+        )
+    # Add general check feedback (anachronism, register, etc.) to ALL targets
+    general_notes = []
+    for check_name, check in pass7a["result"].get("checks", {}).items():
+        if check.get("status") == "ISSUE":
+            general_notes.append(f"- [{check_name}] {check.get('notes', '')}")
+    if general_notes:
+        general_block = "GENERAL ISSUES (apply to all fields you produce):\n" + "\n".join(general_notes) + "\n\n"
+        for t in targets:
+            REVISION_CRITIQUES[t] = general_block + REVISION_CRITIQUES.get(t, "")
+
+    # Compute union of all caches to invalidate (target + downstream)
+    to_invalidate = set()
+    for t in targets:
+        for fname in DOWNSTREAM_CHAIN.get(t, []):
+            to_invalidate.add(fname)
+
+    # Delete cache files
+    for fname in to_invalidate:
+        cache_path = RUN / "02_passes" / f"{fname}.json"
+        if cache_path.exists():
+            cache_path.unlink()
+
+    # Re-run target passes + downstream + Pass 7a in sequence
+    # We re-execute pass functions in order. Each function reads outer-scope
+    # state (pass2["fields"], etc.) so we re-bind those globals as we go.
+    pass_order = ["2", "3", "4a", "4b", "5", "6"]
+    earliest = min((pass_order.index(t) for t in targets), default=0)
+    chain_to_run = pass_order[earliest:]
+
+    for pass_label in chain_to_run:
+        runner_name, var_name = PASS_RUNNERS[pass_label]
+        runner_fn = globals()[runner_name]
+        suffix = {
+            "2": "identity_boundaries", "3": "intellectual_core",
+            "4a": "voice", "4b": "artifact",
+            "5": "engagement", "6": "corpus",
+        }[pass_label]
+        cache_path = RUN / "02_passes" / f"pass{pass_label}_{suffix}.json"
+        result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops})", runner_fn)
+        globals()[var_name] = result
+        # Update derived combined dicts so downstream reads see fresh fields
+        if pass_label == "2":
+            pass_2_summary = _ct_compress(result["fields"], "pass2")
+        elif pass_label == "3":
+            combined_2_3 = {**pass2["fields"], **result["fields"]}
+            pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
+        elif pass_label == "4a":
+            combined_2_3_4a = {**combined_2_3, **result["fields"]}
+            pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
+        elif pass_label == "4b":
+            combined_2_3_4 = {**combined_2_3_4a, **result["fields"]}
+            pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
+
+    # Re-run Pass 7-pre (verifies revised card)
+    pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json",
+                             f"Pass 7-pre (revision loop {revision_loops})", _pass_7pre)
+    verif = pass7pre["result"]
+    stamp(f"  verification (loop {revision_loops}): {verif.get('overall', '?')}")
+
+    # Re-run Pass 7a (re-validates)
+    pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json",
+                           f"Pass 7a (revision loop {revision_loops})", _pass_7a)
+    stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
+
+# Clear critiques after loop ends so subsequent passes (7b, 7c, derive) get clean prompts
+REVISION_CRITIQUES.clear()
+
+if pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops >= MAX_REVISION_LOOPS:
+    stamp(f"REVISION LOOP: hit max {MAX_REVISION_LOOPS} loops, still REVISION_NEEDED — flagged for human review")
+else:
+    stamp(f"REVISION LOOP: complete after {revision_loops} loop(s), final 7a verdict: {pass7a['result'].get('overall', '?')}")
 
 
 # ---------- PASS 7b (Worked Provocations) ----------
@@ -659,7 +807,8 @@ stamp(f"  Pass 4b fields:       {len(pass4b['fields'])}")
 stamp(f"  Pass 5 fields:        {len(pass5['fields'])}")
 stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
 stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
-stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')})")
+stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
+      f"after {revision_loops} revision loop(s)")
 stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('worked_provocations', []))} chains")
 stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
       f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
@@ -703,7 +852,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "derive_provocateur_profile_and_rubric",
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
-        "revision_loops": 0,
+        "revision_loops": revision_loops,
         "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
