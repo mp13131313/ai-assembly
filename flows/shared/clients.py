@@ -81,8 +81,14 @@ def call_perplexity(
 
     sonar-deep-research can take 5-10 minutes for a single query — the
     Prefect task wrapping this should set timeout >= 15 min.
+
+    sonar-deep-research embeds a <think>...</think> chain-of-thought block
+    at the start of the response. We split it: returns `text` (clean
+    deliverable, think stripped) and `think` (the reasoning trace, kept
+    for audit).
     """
     import requests
+    import re
 
     model = model or os.environ.get("PERPLEXITY_MODEL", "sonar-deep-research")
     api_key = os.environ["PERPLEXITY_API_KEY"]
@@ -103,10 +109,23 @@ def call_perplexity(
     )
     resp.raise_for_status()
     data = resp.json()
-    msg = data["choices"][0]["message"]
+    raw_text = data["choices"][0]["message"]["content"]
+
+    # Split <think>...</think> block from deliverable
+    m = re.search(r"<think>(.*?)</think>\s*", raw_text, flags=re.DOTALL)
+    if m:
+        think = m.group(1).strip()
+        text = raw_text[m.end():].strip()
+    else:
+        think = ""
+        text = raw_text.strip()
+
     return {
-        "text": msg["content"],
+        "text": text,
+        "think": think,
+        "raw_text": raw_text,
         "citations": data.get("citations", []),
+        "search_results": data.get("search_results", []),  # newer field name
         "usage": data.get("usage", {}),
         "model": model,
     }
@@ -119,29 +138,47 @@ def call_gemini(
     user: str,
     model: str | None = None,
     temperature: float = 0.2,
-    max_output_tokens: int = 8192,
+    max_output_tokens: int = 16384,
+    thinking_budget: int | None = 0,
 ) -> dict[str, Any]:
-    """One Gemini call. Uses google-generativeai SDK."""
-    import google.generativeai as genai
+    """One Gemini call. Uses google-genai SDK (the supported library; the
+    older google-generativeai package is deprecated as of late 2025).
 
-    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    `thinking_budget=0` disables thinking on 2.5-series models so the
+    output budget isn't consumed by hidden reasoning. Set to None to
+    leave the model default in place, or to a positive int for a budget.
+    """
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
     model_name = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")
-    m = genai.GenerativeModel(model_name)
-    resp = m.generate_content(
-        user,
-        generation_config={
-            "temperature": temperature,
-            "max_output_tokens": max_output_tokens,
-        },
-    )
-    return {
-        "text": resp.text,
-        "model": model_name,
-        "usage": {
-            "input_tokens": getattr(resp.usage_metadata, "prompt_token_count", None),
-            "output_tokens": getattr(resp.usage_metadata, "candidates_token_count", None),
-        } if hasattr(resp, "usage_metadata") else {},
+
+    config_kwargs: dict[str, Any] = {
+        "temperature": temperature,
+        "max_output_tokens": max_output_tokens,
     }
+    if thinking_budget is not None:
+        config_kwargs["thinking_config"] = types.ThinkingConfig(
+            thinking_budget=thinking_budget
+        )
+
+    resp = client.models.generate_content(
+        model=model_name,
+        contents=user,
+        config=types.GenerateContentConfig(**config_kwargs),
+    )
+
+    text = resp.text or ""
+    usage = {}
+    if getattr(resp, "usage_metadata", None):
+        u = resp.usage_metadata
+        usage = {
+            "input_tokens": getattr(u, "prompt_token_count", None),
+            "output_tokens": getattr(u, "candidates_token_count", None),
+            "thoughts_tokens": getattr(u, "thoughts_token_count", None),
+        }
+    return {"text": text, "model": model_name, "usage": usage}
 
 
 # --- OpenAI (GPT-4o for cross-model validation) -------------------------
