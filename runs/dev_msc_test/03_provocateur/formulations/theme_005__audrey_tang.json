@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_005",
+  "member": "Audrey Tang",
+  "mode": "question",
+  "formulation": "The room agreed that algorithms have shattered the shared fact base democracy requires, then immediately demonstrated the problem: one voice called it a regulatory failure, another a civilizational difference, a third a corporate power grab, a fourth the exclusion of conservative speech — four diagnoses of the same crisis with no shared question underneath them. Polis surfaces bridging statements across opinion clusters on a defined question. What does your deliberative architecture do when the participants cannot agree on what the question is?",
+  "theme_display_title": "The Missing Common Question",
+  "context_narrative": "In a morning panel on social media and democracy, Manfred Weber declared the shared fact base essential for democratic compromise destroyed — then the room proved his point in real time. A follow-up session on transatlantic free speech fractured not over the answer but over what was being asked: a Polish foreign minister framed it as civilizational difference, a political theorist called it corporate interest in disguise, a Czech commentator blamed the labeling of opponents, and an American conservative named media exclusion as the real crisis. Regulation was urged and warned against in the same breath, and no one proposed a process for finding common ground when the ground itself was contested.",
+  "selected_quotes": [
+    {
+      "extraction_id": "vox_populi:015",
+      "quote": "The biggest threat to future democracies is that social media has destroyed the shared fact base required for democratic discourse and has made compromise — the core principle of democracy — unrewarded and invisible.",
+      "attribution": "Manfred Weber",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:023",
+      "quote": "Regulation can be harmful if done poorly or prematurely — Argentina's experience with housing price controls that backfired shows the danger, and attempting to regulate AI without understanding it could be similarly damaging.",
+      "attribution": "Daiana Fernández Molero"
+    },
+    {
+      "extraction_id": "west_west_divide:017",
+      "quote": "The way the current US administration defines freedom of speech is really about the rights of American technology companies, not about conservative values; a genuine conservative or nationalist should not accept foreign tech platforms addressing their citizens with AI-driven content.",
+      "attribution": "Ivan Krastev"
+    },
+    {
+      "extraction_id": "west_west_divide:036",
+      "quote": "Conservative political parties have been systematically excluded from public debate in Europe, including by legacy media networks, and this exclusion — not just American tech platforms — is the real freedom-of-speech crisis.",
+      "attribution": "Gladden J. Pappin",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "west_west_divide:002",
+      "quote": "There is a genuine civilizational difference between the US and Europe on freedom of speech: Europe believes in freedom of speech with responsibility, and the US telling Europeans their conception of free speech is censorship is unacceptable imposition of values.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "speaking with intensity"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "vox_populi:015",
+    "vox_populi:016",
+    "vox_populi:023",
+    "vox_populi:028",
+    "west_west_divide:002",
+    "west_west_divide:017",
+    "west_west_divide:036"
+  ],
+  "rationale": "Tang's deliberative tools (Polis, vTaiwan) assume a defined policy question that opinion clusters can bridge; the theme material's most distinctive feature is that participants couldn't converge on what the question even was — pushing Tang toward her stretch territory on whether her model exports beyond contexts where the problem is already legible, while activating her directly on consensus-finding architecture."
+}

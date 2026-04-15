@@ -1,0 +1,556 @@
+{
+  "metadata": {
+    "session_id": "msc2026_breaking_point",
+    "session_title": "Breaking Point: The International Order Between Reform and Destruction",
+    "session_description": "A Main Stage panel at the Munich Security Conference 2026 examining whether the global order has reached a breaking point. The panelists debate whether the world is now defined by might and spheres of influence rather than rules; the costs and risks this creates even for great and middle powers; how defenders of multilateralism and international law should communicate its benefits; where reform of existing international institutions remains promising versus where coalitions of the willing should take over; and how middle and rising powers can leverage their position in a might-makes-right world to keep multilateralism alive.",
+    "session_format": "panel",
+    "track": "Global Order",
+    "date_time": "2026-02-13T14:30:00+01:00/2026-02-13T15:15:00+01:00",
+    "venue": "Munich Security Conference 2026, Main Stage I",
+    "roster": [
+      {
+        "name": "Zanny Minton Beddoes",
+        "title": "Editor-in-Chief (Moderator)",
+        "affiliation": "The Economist",
+        "bio": "British journalist and editor-in-chief of The Economist since 2015, the first woman to hold the role in the publication's 180-year history. Economist by training, with prior experience at the IMF working on the transition economies of Eastern Europe and Russia. Frequently moderates high-profile international affairs panels and is a familiar presence at Davos and Munich. Known for crisp, well-prepped questioning that pushes panelists toward specifics rather than letting them retreat into talking points."
+      },
+      {
+        "name": "Kaja Kallas",
+        "title": "Vice-President of the European Commission and High Representative for Foreign Affairs and Security Policy",
+        "affiliation": "European Commission; former Prime Minister of Estonia",
+        "bio": "European Union's chief diplomat since taking office in late 2024. Former Prime Minister of Estonia (2021–2024), where she became one of Europe's most outspoken voices in support of Ukraine after Russia's full-scale invasion in 2022. Daughter of Siim Kallas, a former Estonian PM and EU commissioner. Frames Russian aggression as an existential threat to the European order and consistently argues for harder sanctions, more weapons to Ukraine, and stronger EU defense capabilities. Member of the MSC Advisory Council."
+      },
+      {
+        "name": "Prince Faisal bin Farhan Al Saud",
+        "title": "Minister of Foreign Affairs",
+        "affiliation": "Kingdom of Saudi Arabia",
+        "bio": "Saudi Arabia's Foreign Minister since 2019. Career diplomat and member of the Saudi royal family, previously ambassador to Germany. Has overseen Saudi Arabia's diplomatic repositioning under Crown Prince Mohammed bin Salman, including the China-brokered rapprochement with Iran in 2023, ongoing efforts toward Israeli-Saudi normalization, and Saudi Arabia's increasingly independent posture between Washington and Beijing. Regular voice at MSC speaking for the Gulf perspective on regional security, Israel-Palestine, and the broader question of how middle powers should navigate a multipolar world."
+      },
+      {
+        "name": "Pedro Arnulfo Sánchez Suárez",
+        "title": "Major General; Minister of National Defence",
+        "affiliation": "Republic of Colombia",
+        "bio": "Colombian Major General and Minister of National Defence under President Gustavo Petro's left-wing government. Career military officer who took the civilian defence role during a period of major shifts in Colombian security policy, including the 'Total Peace' negotiations with armed groups, ongoing tensions with Venezuela and Ecuador, and Colombia's evolving relationship with the United States on counter-narcotics. Speaks from a Latin American perspective on global security questions, with particular attention to how middle powers in the Global South can defend international law without aligning with either Washington or Beijing."
+      },
+      {
+        "name": "Michael Waltz",
+        "title": "Ambassador of the United States of America to the United Nations",
+        "affiliation": "United States of America",
+        "bio": "U.S. Ambassador to the United Nations under the second Trump administration. Former U.S. Representative for Florida's 6th congressional district (2019–2025) and former National Security Advisor to President Trump (early 2025), a role he left under controversy. Retired Green Beret and Special Forces veteran with combat experience in Afghanistan and the Middle East. Hawkish on China, supports a tougher stance against Iran and Venezuela, has been more skeptical of long-term Ukraine aid than the European panelists. Represents the Trump administration's view of international institutions as instruments to be used selectively rather than defended on principle."
+      }
+    ]
+  },
+  "transcript": {
+    "speakers_present": [
+      "Audience Member 1",
+      "Audience Member 2",
+      "Audience Member 3",
+      "Kaja Kallas",
+      "Michael Waltz",
+      "Pedro Arnulfo Sánchez Suárez",
+      "Prince Faisal bin Farhan Al Saud",
+      "Unidentified Speaker 1",
+      "Zanny Minton Beddoes"
+    ],
+    "turns": [
+      {
+        "turn_index": 0,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Good afternoon. Is this working? Yeah. Good afternoon, everybody. Shh. Can I ask you to take your seats or at least quieten your voices? Shh. Because we are now going to follow on from that remarkable opening address by Chancellor Merz to discuss whether— our essay question is, \"The International Order Between Reform and Destruction.\" But I think we've kind of realized that actually something fundamental has shifted. And those of you who were in the room a year ago, we got an inkling of this with Vice President Pence's speech last year. But I think we now all know that the old order has gone. We've just heard Chancellor Merz say the order, as flawed as it has been even in its heyday, no longer exists. We've entered an era that is once again marked by power and big power politics. That is what the German Chancellor just told us. Last month, as you know, many of you will have seen Prime Minister Carney of Canada called it a rupture. And just before he got on his plane to come here to address us tomorrow, Secretary Rubio said, \"The old world is gone.\" We live in a new era of geopolitics. So, I think we can put to one side the question of whether the old order is over. It is over. And so, the question is, what are the characteristics of the new one? Where is it going? How can we shape it? And that is what I hope this extremely distinguished panel of great powers and middle powers, and I won't identify who comes from which, will help us discuss. Kaja Kallas, as you all know, Vice President, High Representative for Foreign Affairs at the European Commission. Welcome. Prince Faisal bin Farhan Al Saud, Minister of Foreign Affairs of the Kingdom of Saudi Arabia. Major General Pedro Arnulfo Sánchez Suárez, Minister of National Defense from Colombia. And last but absolutely not least, Ambassador Michael Waltz, Ambassador of the United States to the United Nations, and of course, as you know, former National Security Advisor to President Trump. So we have the great powers, we have the middle powers, we have the future being built by all of you now. Kaja, let me start with you, if I may. You obviously heard Chancellor Merz just now. First of all, do you agree with him that the old world is gone? And secondly, how would you describe the characteristics of the new world that we are entering?"
+      },
+      {
+        "turn_index": 1,
+        "speaker": "Kaja Kallas",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Yes, I mean, I would take a step back and think why this world order was put in place first time, and it was because that there wouldn't be any wars. I mean, if you think about League of Nations after the First World War, it didn't work because there was a war. Then after the Second World War, we had the United Nations so that there wouldn't be any wars. And now we are here. We have a lot of wars going on. So what is the opposite of the world order — order, or a world that is based on rules — is tyranny and wars. And that is clearly where we are now. Now, every time we have had these big international crises, we have seen that we have also developed the international law further. I mean, League of Nations didn't have the elements that the United Nations had, and now we have to look into the future. So how do we really shape this new world? And one thing that is missing, I think, is accountability. So the rules are there, I think everybody signs up to the United Nations Charter, the principles are there, but what happens if somebody breaches those principles? The accountability is clearly not working. The Security Council is not working the way it was meant to be. The United Nations is not reflecting the world as it currently is. So I think we have to use this opportunity to really develop this world forward, because majority of the countries in the world want a rules-based order, want some kind of rules to govern the way we talk, the way we interact with each other."
+      },
+      {
+        "turn_index": 2,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Prince Faisal, can I ask you, I sometimes, when I'm in your part of the world, people say to me, you know, you Europeans keep going on about the old world order being over, but actually it's always been a might is right world, and you just lived in some kind of a transatlantic cosy bubble, and actually now you see the world that the rest of us live in. I'm paraphrasing and exaggerating slightly, but is there something to that? Is this whole discussion about the world order changing a transatlantic perspective or European perspective more than a broader perspective?"
+      },
+      {
+        "turn_index": 3,
+        "speaker": "Prince Faisal bin Farhan Al Saud",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I mean, the fact that the conversation is now finally at the forefront is certainly a reflection of a Eurocentric view for that order historically. I mean, obviously, it came out of the crisis in Europe, the First World War, and then the Second World War is what gave us the United Nations, is what gave us the foundations of that world order. So, fair enough that there was a certain Eurocentric or transatlantic focus, but the reality is many of us have seen the breakdown of that rules-based order and the reality that might makes right being very much front and centre well before the crisis. I'm very much actually heartened with all that's going on and all the suffering that's being caused by the multitude of wars that we are now dealing with, that actually the conversation is finally taking front and centre, that the system isn't working, that it hasn't delivered. It's something that a lot of us have believed for well over a decade, and I think, you know, if 2014 wasn't enough of a wake-up call, that was unfortunate, but in any case, now, for the first time, I'm actually hearing, even among the great powers, even when you talk, obviously, the US is leading on some of these things and trying to address these deficiencies, but even within Europe, where there was for a long time an attachment to symbolism rather than the realities on the ground. And you saw that even when we tried to address conflicts in various parts of the world, where some of these ideals were kind of an obstacle to actually having real substantive discussions about what are the drivers of these conflicts, and how do we try to mitigate those drivers so that those conflicts come to an end. So I'm, to some extent, actually more optimistic than I was last year because we are actually having these conversations in a much more honest and transparent way, including among the friends in Europe who were, let's say, the most ardent — not adherents, but supporters — of the old system and those that were least willing to admit that it was broken."
+      },
+      {
+        "turn_index": 4,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "But do you think that— I mean, I take your point that perhaps in Europe we are recognizing a world that has existed for many before, but do you think it has become a world that is more might is right, more transactional, less focused on rules?"
+      },
+      {
+        "turn_index": 5,
+        "speaker": "Prince Faisal bin Farhan Al Saud",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I think yes, just because it's become more of a factor even among the biggest players. So, historically, I would say if you look back at the last two decades, you will see that the people that are affected by this principle have been mainly in the Third World, have been mainly in the developing world. Europe especially, certainly the US, had the luxury of being at a remove, being able to kind of say, no, this is not impactful on us. I think obviously the war in Ukraine has brought that home more than anything, and that's why we're having this conversation. But it's always been the case, and — I mean, I think if you look even in conflicts in our region, sometimes it was based on UN mandates, often not."
+      },
+      {
+        "turn_index": 6,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Minister Sánchez, you are the Defense Minister of a country that is in a region which I think has, I don't think any more doubt, has seen a very different approach from the United States, particularly in the last 12 months. The new National Security Strategy articulates it as the Trump corollary to the Monroe Doctrine, which we now all call the Donrow Doctrine [verify] for short. But it is a very clear assertion of power in the United States' backyard. How do you feel about that? And what does it mean for your country and for your region?"
+      },
+      {
+        "turn_index": 7,
+        "speaker": "Pedro Arnulfo Sánchez Suárez",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Thank you. First of all, I would like to switch to Spanish in order to have more fluency in my words. First of all, I would like to thank you all for giving me the opportunity to be here to speak with all of you. This is a conversation heard all around the world, and I would also like to greet you on behalf of the President of the Republic of Colombia, President Gustavo Petro, who was unable to come here due to an environmental emergency that we are currently having in Colombia. This just goes to show that things that happen in one part of the world can affect the entire world. The threat of climate change is real, and we are here, of course, to solve that problem together. I had the opportunity to study at Edwards College [verify] in Montgomery, Alabama, in 2018, and there I learned about the U.S.'s national security strategy, and I would always ask why the American continent didn't figure into this strategy. They spoke about Russia, China, the multipolar world. It was always focused elsewhere and not in the American continent. But then last December, there was a new security strategy that was published, and the main focus was the American continent. And for us, this is a fantastic opportunity because more people die in the United States due to drug-related problems than due to war. In fact, our country, which is battling this foe more than anyone else — more than 2,000 military and police personnel during the past 3.5 years were injured or lost their lives in the fight against drugs. And these are global matters. Drugs are a global problem, but it's also an economic problem. I've been to France and Spain and Qatar, and I've seen how that silent crime can reach those faraway countries. And there are people dying in those countries as well due to problems related to violence. And when President Trump met with President Petro, a week ago, we saw two fundamental elements. First of all, every single country in the world, no matter how powerful they may claim to be, is vulnerable to this worldwide scourge known as disinformation and misinformation. Global Risk [verify] says that after interstate conflicts, misinformation and disinformation is the second greatest risk that we are facing. And in a few years, it might become the greatest risk that we will face due to accelerants such as AI, for example. Secondly, misinformation and disinformation reached President Donald Trump, and it made him believe that Colombia was doing nothing to fight against the drug trade. After that meeting, we were able to establish that 316 million people in the world consume drugs. And this makes it very difficult to do away with the drug trade as long as the demand is still there. And Colombia is the country that does the most to fight against the drug trade. And there is no better ally in the Western Hemisphere, and indeed in the world, in the fight against transnational organized crime. So, when we saw that the new strategy mentioned America First, President Petro took the cap that President Trump gave to him and added an S at the end — Americas — because America doesn't just refer to the United States, it refers to the entire continent. And together, we can do more than separately."
+      },
+      {
+        "turn_index": 8,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "It's certainly true that your President managed to turn around what had been rather a tricky set of interactions when he came to the White House, because just in the weeks before, I believe, President Trump called your president a drug leader and a thug, so hats off, you turned the rhetoric around, and you're right that in the area of drugs, it is important, you're doing something important, it's important that everyone focuses on it, but I wanted to stand back to ask you how you felt about a strategy which asserts US dominance in the Western Hemisphere as explicitly as this National Security Strategy does, because that is a very big shift from the old order of the UN and rules. Ambassador, I can see you saying no. I'll come to you in just a second. Let me just ask the Minister, do you think it is a big shift or are you okay with the fact that the United States thinks that it can do what it likes in its backyard?"
+      },
+      {
+        "turn_index": 9,
+        "speaker": "Pedro Arnulfo Sánchez Suárez",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "The President of the United States doesn't meet with drug traffickers. The President of the United States meets with legitimate heads of state. And that's what happened during that meeting. But there was disinformation that said otherwise. So, President Trump was able to understand that what we've done attacks an economic problem. And this problem has to be dealt with not just with weapons, but also with economic tools. That is why we are trying to convince the rest of the world to purchase cacao instead of coca. When we look at what the United States has been doing, we have seen that every nation is autonomous and they can act for themselves. But the president of Colombia has also stated that there is a global order, that multilateralism exists, that there are organizations such as the United Nations or the Organization of American States to try and tackle these issues. And there is an opportunity there. And what we concluded after the meeting with the United States is similar to what we're saying now. In the case of Colombia, we see a problem that affects us directly, and the main issue is international organized crime. And this is why, alongside the United States, we want to strengthen our defense capacities to do away with this scourge, drug trafficking. That is the focus that our President is maintaining. But it's clear that the United Nations was created so that nations could work together to solve these types of issues. We are in a much more civilized world compared to previous centuries, and I believe that we can create a better world because we all live here. We don't have life on other planets."
+      },
+      {
+        "turn_index": 10,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Thank you. Ambassador Waltz, you've been very patient as you've been hearing my questions. Two questions for you. You are now Ambassador to the United Nations, which is the institution, I would say, that epitomizes the old order most, and yet your administration and your President is, as we heard from Chancellor Merz, we are in a new world now, and a world, I think, which is one where might is right, or at least power projection is playing a much bigger role, and where transactions play a bigger role than rules. How do you square that?"
+      },
+      {
+        "turn_index": 11,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Well, happy to tackle that, and I have a gift for you along those lines. But first, I just wanted to reinforce what the General said. More Americans die from drugs and fentanyl and transnational crime than in any other type of conflict around the world. So this notion that the United States reasserting its leadership in the Western Hemisphere isn't necessarily new. I'd call it overdue. And Colombia and the United States worked quite well with each other under Plan Colombia in the 1990s, in the 2000s, defeated the FARC narco-insurgents. Then we now have — we see the transnational gangs that have taken over Haiti, where the United States spent over $1 billion in 2024 to take on. We've now asserted a new UN-mandated gang suppression force with a more offensive mandate. And we've seen Maduro, who was basically a state sponsor and state backer of narcoterrorism, he is now removed. And you know who is not wringing their hands? The 8 million Venezuelan refugees, a larger refugee crisis than Syria, mind you, that was destabilizing the region, and my former constituents in Congress, the Venezuelans who are seeking asylum in Florida, with tears of joy thanking us. So asserting U.S. leadership has been welcomed, and we're hearing again and again behind the scenes, thank you, from a number of countries, 7 of whom will meet with the president in the coming weeks. To the broader point, look, the president has been clear, and my mandate is clear. We needed to put the UN on a diet. Everyone agrees that reform was needed. We are pushing hard for the UN to go back to basics, to that peacemaking and peacekeeping function that was core to its founding. And the biggest problem we've seen is that it's trying to do too much for everyone and be everything to every nation. So what has been a result of this initial push? The UN has agreed to its first budget cut in its history of 15%, just approved this last December. Nearly 3,000 headquarters bureaucrats will be cut. 18% overall personnel cut, 25% peacekeeping cut. We're going to get the UN back fit to purpose, and again, despite the hand-wringing I hear in the media, I was just in Geneva with a number of humanitarian agencies, and again and again we heard, please keep up the sustained pressure. And I'll just say, we've heard a lot about NATO and the future of multilateralism and our engagement. Who here would argue that NATO is not in a better place now than it was 10 years ago when less than 7 of its contributors met the bare minimum. And with the president's leadership, we are going to reform the UN to get it fit for purpose and back to basics, much like we've done for NATO. He will do for the UN what he's done for NATO the last 10 years."
+      },
+      {
+        "turn_index": 12,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Is the president's goal, is the administration's goal to strengthen the UN so that it continues to be more effectively at the fulcrum of a global order? Or is it the goal to also create alternative institutions? I note that the president has created a Board of Peace, which has a very different membership, and it's—"
+      },
+      {
+        "turn_index": 13,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I have to wait, because that's a bit of inaccurate information. I won't call it misinformation. The United Nations—"
+      },
+      {
+        "turn_index": 14,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Please do correct me."
+      },
+      {
+        "turn_index": 15,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "The United Nations Security Council created the Board of Peace unanimously with countries such as Pakistan, our friends in the UK, France, and others. So attached to that was the president's 20-point peace plan, which every— I saw many leaders who are here today show up at Sharm el-Sheikh in relief to sign because we have the ceasefire in place, because hostages are being released. We now have humanitarian aid going in at levels that the entire world was demanding. So is it going to work? I hope so. But I can tell you what wasn't working — either Hamas in charge or endless war. So the president has charted a third way. And to the point of the Board of Peace, it built on having our Gulf Arab friends, Muslim-majority nations such as Turkey, Pakistan, Indonesia involved. And so to answer your question, what I'd call it is focused multilateralism. We've seen it through this institution that the United Nations blessed. We just saw it through the Critical Minerals Conference. We just saw the first direct flight between Azerbaijan and Armenia in its history, and the first wheat shipments flowing through those countries from Kazakhstan. So I'll just stop with — I have to push back on the premise, The World on the Brink, which I think was the name of this panel. We are returning the world from the brink where it was 18 months ago between Ukraine, Gaza, Iran racing for a nuke, the Houthis shutting down the Suez Canal, the refugee crisis in South America, and on and on. So if you focus on the facts and the results, and if we have to reform multilateralism that hasn't been reformed, frankly, in 80 years, then I think that should be welcomed by the world. And in that guise, I do have my—"
+      },
+      {
+        "turn_index": 16,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Is that for me?"
+      },
+      {
+        "turn_index": 17,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Make the UN Great Again, otherwise known as MUNGA hat. I brought one for everyone, but they've been so popular, I have one for you, Zanny. We could pass it."
+      },
+      {
+        "turn_index": 18,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "There you go. Thank you. I think we'll give that to Kallas. Luckily, I don't have to respond to your accusations of misinformation, because I have the absolute best person to answer this. Do you see the Board of Peace as a strengthening of the overall constellation of global organizations? And if so, why isn't Europe actively pushing it? Let's start there, and then we'll go on."
+      },
+      {
+        "turn_index": 19,
+        "speaker": "Kaja Kallas",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Yes, it is true that the United Nations Security Council resolution foresaw a Board of Peace, but it also foresaw that it's limited in time until 2027. It foresaw that Palestinians have a say, and it also was referring to Gaza, whereas the Board of Peace as the charter is is not referring to any of those. So I think in the Security Council there is a resolution, but this Board of Peace does not reflect that. And one thing — I'm listening to you and I'm thinking it is very good that you want to reform the international order. What is, I think, for the rest of us, the majority of us, important is that in the multilateral system, there is equality of states. I mean, what Faisal was saying as well, if we reform, then we should actually take into account the world as it currently is, where all the states are equal. And also that nobody is above the law. That's why I'm talking about accountability. That if we have rules that we have agreed to, then if somebody breaches those — even the most powerful countries breach those laws — there's also some kind of accountability for these people. Because what we see in the world is that very often you have one guy who decides to start the war against another. So he sends a lot of brothers, fathers, sons to kill other brothers, fathers, and sons. And there is no accountability for that one decision that actually gets so many people killed. And I think if we're talking about the reform of the multilateral system — and I agree that it's good that it's under fire, that's why it's also on the front of these debates — we should respect that all states are equal."
+      },
+      {
+        "turn_index": 20,
+        "speaker": "Unidentified Speaker 1",
+        "role": "audience",
+        "confidence": "high",
+        "text": "Sure."
+      },
+      {
+        "turn_index": 21,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Here's just one thing I would ask everyone to consider. All states are absolutely equal within the UN Charter. The difference, and why the United States is pushing for reform, is the US has historically paid more than 180 countries combined in terms of our dues assessments and voluntary giving. So, of course, when I have to look at mechanics, doctors, nurses, firemen that formerly in my district who are struggling to get their kids to school, but yet I have UN officials who are flying business class around the world."
+      },
+      {
+        "turn_index": 22,
+        "speaker": "Unidentified Speaker 1",
+        "role": "audience",
+        "confidence": "high",
+        "text": "There is—"
+      },
+      {
+        "turn_index": 23,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I can't believe that there is an argument against reform. But on the Board of Peace, look, I would just say this for the people of Gaza, for Israel and the region. There's also a cost to status quo. Status quo was not working. The alternatives were Hamas in charge or Israel in endless conflict. And instead, we have charted a different way, backed by the countries of the region. And you have 8,000 troops that have now been contributed, publicly announced by Indonesia. You will see more in the coming weeks. And you have billions of dollars that, frankly, some countries were not comfortable putting completely through the UN system. So we have a funding mechanism that's now set up under this Board of Peace Charter, in addition to the Palestinian Technocratic Committee."
+      },
+      {
+        "turn_index": 24,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "I'm conscious that we need to open to questions. Ambassador, I just want you to take the lens up a little bit. And you make a lot of very good points about the need to reform and the need to tighten belts. But at a big picture level—"
+      },
+      {
+        "turn_index": 25,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "But no one was doing it. We talked about it endlessly, strongly worded letters. A lot of hand-wringing. No one was doing it, and when we're doing it, it's not so good."
+      },
+      {
+        "turn_index": 26,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Ambassador, I take your point, but if you listen to Chancellor Merz, the questions that we are all asking ourselves is the old system, at a big picture system of multilateral rules, engagement, alliances, is changing, and we are wondering what the United States, where it wants to go and what it wants to do, and is it a world of might is right, great power politics, unconstrained, because — and this is the question to you — does the president believe in a multilateral system where there are rules that would constrain the United States or not?"
+      },
+      {
+        "turn_index": 27,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "NATO is stronger because of our leadership and push for the reforms that were badly needed, namely the contributions. The UN will be stronger at the end of this process. The status quo was unsustainable. And not working in places like Gaza or Azerbaijan-Armenia — you have to ask yourself, why were we 18 months ago in so many active wars around the world? And I think it's a fair question for the president to say, why hasn't the UN been able to resolve issues like a border dispute between Cambodia and Thailand, or Azerbaijan-Armenia, or — we could walk around the world — or Kashmir and India and Pakistan, where we faced a very serious nuclear escalation. So what I'm hearing outside of forums like this privately is, thank you for American leadership. America has to lead. If we have to have more focused plurilateral or focused multilateral organizations to do so, I think that should be perfectly acceptable if we're getting results that result in peace and security."
+      },
+      {
+        "turn_index": 28,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Yeah, okay, thank you. I think that was actually very clear. Questions? Lady here in the fourth row, if you could identify yourself and keep it very brief. Thank you."
+      },
+      {
+        "turn_index": 29,
+        "speaker": "Audience Member 1",
+        "role": "audience",
+        "confidence": "high",
+        "text": "My name is Amal Moudali [verify]. I'm a researcher at Princeton University. I have two quick questions. Mr. Waltz, it's good to see you, and thanks to your efforts. Resolution 2803 was passed and the Board of Peace was established. But the problem that people are having is that the charter of the Board of Peace that came out from the White House later on, it does not mention Gaza and it talks about solving global problems. Doesn't this go beyond the mandate that you got from the United Nations? Can I have a second question?"
+      },
+      {
+        "turn_index": 30,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Why don't we just stick with that one? Because there are a lot of hands went up. That's a very focused question."
+      },
+      {
+        "turn_index": 31,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Look, the Board of Peace is absolutely focused on Gaza. I think you will see that in the meeting next week. But in the formation and its founding documents, the team wanted to leave flexibility to be able to tackle other problems if asked. Again, this was an outcropping of what I think history will look back on, which was an absolutely historic meeting where the president convened the countries of the region and the Muslim-majority nations, namely Pakistan, Turkey, and Indonesia. Just a few weeks prior, we had the strike on downtown Doha from the Israelis. There was a lot of concern that would this diplomatic momentum continue? And just a few months later, we had Sharm el-Sheikh with Abu Mazen from the Palestinians shaking the president's hand in the historic speech at the Knesset, the hostages released, the ceasefire in place, the humanitarian aid flowing, and now an international security force moving. So again, let's focus on the results in Gaza that we're seeing as a result of this action."
+      },
+      {
+        "turn_index": 32,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Thank you. Gentleman there in the second row."
+      },
+      {
+        "turn_index": 33,
+        "speaker": "Audience Member 3",
+        "role": "audience",
+        "confidence": "high",
+        "text": "I'm Mustafa Barghouti from Palestine. I have this question. We are held accountable as Palestinians 3 times a day. Israel is violating the ceasefire already 1,500 times. Who's going to hold Israel accountable? And the second question: how can we call this a board of peace if it has the Prime Minister of Israel in it, but not a single Palestinian in it?"
+      },
+      {
+        "turn_index": 34,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Thank you. Kaja, would you like to answer that? And then maybe Prince Faisal would like to add something."
+      },
+      {
+        "turn_index": 35,
+        "speaker": "Kaja Kallas",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "But this is exactly the point of accountability that I'm saying, that nobody should be above the law. I mean, if we have agreed international rules, then if you are breaching those rules, then you should also be held accountable, whoever you are."
+      },
+      {
+        "turn_index": 36,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Prince Faisal?"
+      },
+      {
+        "turn_index": 37,
+        "speaker": "Prince Faisal bin Farhan Al Saud",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Certainly, I completely agree. And obviously it's not a ceasefire if the guns haven't ceased. I think where I'm most concerned is even if the killing has stopped, the dying hasn't. So aid access is still an issue, and I know that the US team is working on that every day. So one of the reasons we are remaining engaged is just because of that — we do see, it doesn't always translate, unfortunately, into what's happening on the ground, but we do see a consistent engagement on trying to get these things addressed, whether it's the ceasefire violations, whether it's the issue of opening up aid access. And of course, when the resolution was adopted, it was very clear it included language that addressed the right of the Palestinians for self-determination. So certainly, I know from the Kingdom's perspective, many of those countries that signed on to the resolution, many of those countries that have agreed to join the board, we see this very much as one step on the road to Palestinian self-determination. Obviously, the priority needs to be to stop the dying in Gaza, to stabilize that situation, to start the rebuilding, to build the reassurance that there is no longer a threat from Gaza to its neighbors, and then move that to addressing the issue of Palestinian rights. And with that, we believe very strongly that if we don't address holistically the rights of the Palestinians, including the Palestinians of the West Bank — and here this is very critical — the unity of Gaza and the West Bank needs to be maintained, and that can only happen if we stabilize the situation in Gaza, because there's no linkage with a space that is currently in chaos. So we have a lot more to do. We have a meeting coming up, and I'm sure we'll hear more about what's being done. It's a daily effort to stabilize the situation. All the hostages are out now. So now the focus needs to be getting the lives of the Palestinians in Gaza into a much, much better place and allowing that then to be the opening towards a pathway where the Palestinians and the Israelis can live together side by side in peace and harmony."
+      },
+      {
+        "turn_index": 38,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "And I just would add very quickly, we've had over 4,000 trucks per week moving now since Sharm el-Sheikh. Number one, it's not enough, but it is exponentially more than it was. And as the Minister pointed out, there was language in the peace plan that is now in the Security Council resolution post-reform towards Palestinian self-determination and no occupation, no annexation of Gaza, which again, I would argue forcefully that only President Trump could bring all sides, including the Israelis, to the table to get this far. A long way to go, but we are far better than where we were in September of last year."
+      },
+      {
+        "turn_index": 39,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Thank you. There are a lot of hands going up. Question here, very briefly."
+      },
+      {
+        "turn_index": 40,
+        "speaker": "Audience Member 2",
+        "role": "audience",
+        "confidence": "high",
+        "text": "Kaja Napiecka [verify], I'm the chair of the Warsaw Security Forum, Poland. My question to you, Ambassador Waltz, just an honest reply, please. Does America—"
+      },
+      {
+        "turn_index": 41,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I've been pretty straightforward and honest so far."
+      },
+      {
+        "turn_index": 42,
+        "speaker": "Audience Member 2",
+        "role": "audience",
+        "confidence": "high",
+        "text": "Does America need a rules-based order? And if so, what are you willing to also sacrifice? Because you have been backing this world order for years and years. And thanks to the United States of America, many of us, including Poland, has benefited immensely. And what we're seeing now is a withdrawal. That's an honest assessment of many of us. And we just ask ourselves, are you willing to fight with us, the Europeans and others, for this world order? And the same question really to Kaja Kallas. Do you feel that the Europeans are willing to really fight for this order?"
+      },
+      {
+        "turn_index": 43,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Thank you."
+      },
+      {
+        "turn_index": 44,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "And I would follow your question. Are the Europeans willing and able to take the tough financial steps necessary. I'm a recovering politician myself. I know how tough those votes are when you have a social support system. But look, to answer your question directly, absolutely, the American people have underwritten with their hard-earned dollar the global multilateral rules-based order since World War II. However, with $37 trillion in debt and counting, the massive debt load that the Western world is facing, I think it is fair on their behalf to ask 450 million Europeans with the same size economy as the United States to be more self-sustaining in their own defense. And it astounds me why that is so controversial — I mean, it is—"
+      },
+      {
+        "turn_index": 45,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Ambassador, I think it's not."
+      },
+      {
+        "turn_index": 46,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "It's fair — when I go to people in Indiana and Georgia and North Florida that I represented, and it is their money paying more than 180 countries combined into the UN system, it's fair to say, yes, I have to look at them honestly and say it's being well spent, and it's not."
+      },
+      {
+        "turn_index": 47,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Absolutely, and indeed, I think as Chancellor Merz made very clear, the Europeans have belatedly got the message, and there is a recognition that defense spending has gone up and is going to go up further. Europe needs to get its act together, and I'm going to come to Kaja Kallas again. There's an absolute — that was very clear in—"
+      },
+      {
+        "turn_index": 48,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "But it wasn't clear in 2014."
+      },
+      {
+        "turn_index": 49,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "It was — it took — I'm not—"
+      },
+      {
+        "turn_index": 50,
+        "speaker": "Unidentified Speaker 1",
+        "role": "audience",
+        "confidence": "high",
+        "text": "I'm not—"
+      },
+      {
+        "turn_index": 51,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I'm not acting as though things were coming unglued now. It's been coming unglued for 10 years, and no one was responding in an effective way. Now we're asking more forcefully."
+      },
+      {
+        "turn_index": 52,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Yes."
+      },
+      {
+        "turn_index": 53,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "And I think we're seeing good results as a result of the 5%."
+      },
+      {
+        "turn_index": 54,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Well, the question I think that was being asked from the audience was, if the Europeans are responding now, do you still believe in multilateralism, in this order? Do you still believe in it? Or as Chancellor Merz said — and I just wrote it down — even the US is reaching the limits of its own power if it goes alone. Do you agree with him that the US could not go alone?"
+      },
+      {
+        "turn_index": 55,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I mean, I'm looking at the grouping I just discussed of our Gulf Arab allies. I'm looking at the Abraham Accords. I'm looking at the fact that the president didn't need to take on Azerbaijan-Armenia, and he did. He didn't need to take on Pakistan and India, and he did. And we're asking the rest of the world to be there with us in a fair way financially, because there is a cost to the status quo, and the status quo was not sustainable anymore. And that's, I think, on behalf of our constituents, a fair question to ask."
+      },
+      {
+        "turn_index": 56,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "Kaja, how do you respond to that? It's a reasonable point, surely."
+      },
+      {
+        "turn_index": 57,
+        "speaker": "Kaja Kallas",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "No, of course it is, but if you look also at the United Nations and all the contributions, then when it comes to development aid, Europe is doing the biggest share. So I don't really buy this argument that we are not doing anything. You know, in the beginning you said also, is it that actually the rules of the jungle and the might makes right has always been there? And one might say that is true that those who have the power have had different rules, but even in the jungle, animals cooperate. And so you are better off when you work with others. And if you think — in the global picture — if we take the superpowers, what is actually the difference? When, for example, Russia goes to war, they go alone because they don't have allies. When America goes to wars, a lot of us go with you, and we lose our people on the way. So that means that you also need us in order to be this superpower. Because if we look at the bigger picture, in terms of economic might, China is a very, very powerful country. In terms of military might as well. So what is the difference between you and the other superpowers so far? The allies. So I'm coming to this point that of course we are willing to fight for a world where there are some kind of rules, because majority — actually all — the European countries are small countries, or those who haven't realized that they are small countries yet. But we are small countries, so we need a rules-based order. And it is clear that the current rules-based order has been put in place after the Second World War, considering all what was happening there, what were the powers fighting then, and it doesn't serve the world right now. But what serves the world is the rules that are really protecting everybody so that nobody's above the law. And I think that is the difference, that we actually want partnerships that are based on dignity, where we actually listen to the other party and we care also what the other countries are thinking about. So it's not like we make decisions in this Board of Peace Charter, for example, where you don't have to actually take into account anybody who is in that organization, because one person can make the decisions. And that is, I think, the difference in how we see the world, because if countries are treated equally, I think there's also less chance for war and tyranny."
+      },
+      {
+        "turn_index": 58,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "So I realize that I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs. But we're also running out of time. I'm very sorry, but I wanted to end by giving all four of you a chance, and I'm going to start with you, Prince Faisal. I'm going to ask you one question, and then you can offer me one reason for optimism. I'm sorry, I can't get to all the questions. I'm very sorry. I'm sure you'll have another chance to come back to this in a different panel. I'm very, very sorry. The question is, do you think this world that we are going to go into is going to be more dangerous than the world that came before? And secondly, what's the one thing that you would advise us all to focus on to ensure that it was not more dangerous?"
+      },
+      {
+        "turn_index": 59,
+        "speaker": "Prince Faisal bin Farhan Al Saud",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "I think in the interim, yes, just because we are in a transition period between the system that was and the system that probably will be, and that has significant risks. I think economic disparity and inequality, especially as will be created by technological advancements, are a significant risk factor that are also going to impact us, but that over time may actually deliver significant benefits after a period of dislocation. So yes, to the first question, I think we are entering a significant period [verify]. You asked me to kind of end on an optimistic note. The conversation we just had actually is why I'm a bit optimistic, because finally we are being, all of us, honest with each other. We don't agree yet, but we're actually having the conversation. Everybody is saying how they really feel about the system and how it didn't work from their perspective. We heard from the US that the burden sharing wasn't fair. We hear from the Europeans, you've heard from us, in the developing world. We are finally actually having these conversations in a way that removes the edifice and talks about what's really the case. It'll take us some time to actually get to a point where we agree on what the future system's going to look like and how the burden sharing's going to work and how equality of states, even though there is a disparity in interests and in capacity, is going to be addressed. But I think over time, with some pain — as I mentioned, there will be some pain in the process of getting there — I think we will be in a better world."
+      },
+      {
+        "turn_index": 60,
+        "speaker": "Zanny Minton Beddoes",
+        "role": "moderator",
+        "confidence": "high",
+        "text": "So, I am going to end us there on that optimistic note. A spirited conversation. Thank you all. Thank you, Minister Sánchez. Thank you, the rest of you. And now on to the next panel."
+      },
+      {
+        "turn_index": 61,
+        "speaker": "Pedro Arnulfo Sánchez Suárez",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Thank you."
+      },
+      {
+        "turn_index": 62,
+        "speaker": "Michael Waltz",
+        "role": "panelist",
+        "confidence": "high",
+        "text": "Thank you."
+      }
+    ]
+  },
+  "review_queue": {
+    "low_confidence_attributions": [],
+    "diarization_flags": [
+      {
+        "type": "reassigned_turns",
+        "original_label": "speaker_c",
+        "original_attribution": "Prince Faisal bin Farhan Al Saud",
+        "reassigned_turn_indices": [
+          33
+        ],
+        "reassigned_to": "Audience Member 3",
+        "reason": "Turn 33 is a self-introduction as 'Mustafa Barghouti from Palestine' and contains questions directed at the panel from the floor. This is inconsistent with Prince Faisal being the speaker. Mustafa Barghouti is not on the roster and is a distinct audience member from those already identified."
+      },
+      {
+        "type": "reassigned_turns",
+        "original_label": "speaker_d",
+        "original_attribution": "Pedro Arnulfo Sánchez Suárez",
+        "reassigned_turn_indices": [
+          20,
+          22,
+          50
+        ],
+        "reassigned_to": "Unidentified Speaker 1",
+        "reason": "Turns 20 ('Sure.'), 22 ('There is—'), and 50 ('I'm not—') are very short interjections that occur mid-debate between speaker_e (Waltz) and speaker_b (Kallas) turns. Turn 50 in particular mirrors speaker_e's simultaneous 'I'm not—' at turn 51, suggesting diarization confusion between speaker_d and speaker_e labels on brief overlapping speech. These turns do not clearly belong to Sánchez and may be misattributed fragments."
+      },
+      {
+        "type": "potential_split",
+        "labels": [
+          "speaker_d",
+          "speaker_e"
+        ],
+        "note": "Turns 20, 22, and 50 attributed to speaker_d appear to be diarization fragments from the speaker_e/speaker_b exchange rather than genuine Sánchez turns. Turn 50 ('I'm not—') is nearly identical to Waltz's turn 51 opener, suggesting a possible split of a single overlapping utterance across two labels."
+      }
+    ],
+    "verify_markers": [
+      {
+        "index": 6,
+        "text": "Minister Sánchez, you are the Defense Minister of a country that is in a region which I think has, I don't think any more doubt, has seen a very different approach from the United States, particularly in the last 12 months. The new National Security Strategy articulates it as the Trump corollary to the Monroe Doctrine, which we now all call the Donrow Doctrine [verify] for short. But it is a very clear assertion of power in the United States' backyard. How do you feel about that? And what does it mean for your country and for your region?"
+      },
+      {
+        "index": 7,
+        "text": "Thank you. First of all, I would like to switch to Spanish in order to have more fluency in my words. First of all, I would like to thank you all for giving me the opportunity to be here to speak with all of you. This is a conversation heard all around the world, and I would also like to greet you on behalf of the President of the Republic of Colombia, President Gustavo Petro, who was unable to come here due to an environmental emergency that we are currently having in Colombia. This just goes to show that things that happen in one part of the world can affect the entire world. The threat of climate change is real, and we are here, of course, to solve that problem together. I had the opportunity to study at Edwards College [verify] in Montgomery, Alabama, in 2018, and there I learned about the U.S.'s national security strategy, and I would always ask why the American continent didn't figure into this strategy. They spoke about Russia, China, the multipolar world. It was always focused elsewhere and not in the American continent. But then last December, there was a new security strategy that was published, and the main focus was the American continent. And for us, this is a fantastic opportunity because more people die in the United States due to drug-related problems than due to war. In fact, our country, which is battling this foe more than anyone else — more than 2,000 military and police personnel during the past 3.5 years were injured or lost their lives in the fight against drugs. And these are global matters. Drugs are a global problem, but it's also an economic problem. I've been to France and Spain and Qatar, and I've seen how that silent crime can reach those faraway countries. And there are people dying in those countries as well due to problems related to violence. And when President Trump met with President Petro, a week ago, we saw two fundamental elements. First of all, every single country in the world, no matter how powerful they may claim to be, is vulnerable to this worldwide scourge known as disinformation and misinformation. Global Risk [verify] says that after interstate conflicts, misinformation and disinformation is the second greatest risk that we are facing. And in a few years, it might become the greatest risk that we will face due to accelerants such as AI, for example. Secondly, misinformation and disinformation reached President Donald Trump, and it made him believe that Colombia was doing nothing to fight against the drug trade. After that meeting, we were able to establish that 316 million people in the world consume drugs. And this makes it very difficult to do away with the drug trade as long as the demand is still there. And Colombia is the country that does the most to fight against the drug trade. And there is no better ally in the Western Hemisphere, and indeed in the world, in the fight against transnational organized crime. So, when we saw that the new strategy mentioned America First, President Petro took the cap that President Trump gave to him and added an S at the end — Americas — because America doesn't just refer to the United States, it refers to the entire continent. And together, we can do more than separately."
+      },
+      {
+        "index": 29,
+        "text": "My name is Amal Moudali [verify]. I'm a researcher at Princeton University. I have two quick questions. Mr. Waltz, it's good to see you, and thanks to your efforts. Resolution 2803 was passed and the Board of Peace was established. But the problem that people are having is that the charter of the Board of Peace that came out from the White House later on, it does not mention Gaza and it talks about solving global problems. Doesn't this go beyond the mandate that you got from the United Nations? Can I have a second question?"
+      },
+      {
+        "index": 40,
+        "text": "Kaja Napiecka [verify], I'm the chair of the Warsaw Security Forum, Poland. My question to you, Ambassador Waltz, just an honest reply, please. Does America—"
+      },
+      {
+        "index": 59,
+        "text": "I think in the interim, yes, just because we are in a transition period between the system that was and the system that probably will be, and that has significant risks. I think economic disparity and inequality, especially as will be created by technological advancements, are a significant risk factor that are also going to impact us, but that over time may actually deliver significant benefits after a period of dislocation. So yes, to the first question, I think we are entering a significant period [verify]. You asked me to kind of end on an optimistic note. The conversation we just had actually is why I'm a bit optimistic, because finally we are being, all of us, honest with each other. We don't agree yet, but we're actually having the conversation. Everybody is saying how they really feel about the system and how it didn't work from their perspective. We heard from the US that the burden sharing wasn't fair. We hear from the Europeans, you've heard from us, in the developing world. We are finally actually having these conversations in a way that removes the edifice and talks about what's really the case. It'll take us some time to actually get to a point where we agree on what the future system's going to look like and how the burden sharing's going to work and how equality of states, even though there is a disparity in interests and in capacity, is going to be addressed. But I think over time, with some pain — as I mentioned, there will be some pain in the process of getting there — I think we will be in a better world."
+      }
+    ]
+  }
+}

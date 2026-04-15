@@ -1,0 +1,47 @@
+{
+  "theme_id": "theme_002",
+  "member": "Cleopatra",
+  "mode": "proposition",
+  "formulation": "The European center's strategy against populism — institutional firewalls, delivered results, visionary leadership that 'dominates public discourse rather than following public opinion' — is not democracy defending itself. It is an elite class performing legitimacy while refusing to earn it, and the only real question is whether the performance holds long enough to outlast the anger.",
+  "theme_display_title": "The Firewall and the Throne",
+  "context_narrative": "In Munich's populism panels, the European center's strategy for containing the far right came under pressure from two directions at once. Manfred Weber defended the EPP's institutional firewalls — expelling Orbán, refusing coalitions with anti-European parties — and called for leadership bold enough to override public opinion, citing Kohl's unpopular introduction of the euro. But in a separate session, Petr Macinka challenged the EU's democratic credentials directly, arguing that a parliament unable to initiate legislation is no parliament at all. The conference could not close the circle: the institutions meant to answer populism could not demonstrate the democratic legitimacy that populism demands.",
+  "selected_quotes": [
+    {
+      "extraction_id": "vox_populi:004",
+      "quote": "The EPP maintains a clear firewall against cooperation with parties that are not pro-Europe, pro-Ukraine, and pro-rule of law, and he personally expelled Viktor Orbán from the EPP for violating these principles.",
+      "attribution": "Manfred Weber",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:014",
+      "quote": "Fighting populism requires not just delivering on citizens' material concerns but also showing brave, visionary leadership that dominates the public discourse rather than following public opinion — as Kohl did with the euro despite its deep unpopularity in Germany.",
+      "attribution": "Manfred Weber"
+    },
+    {
+      "extraction_id": "west_west_divide:029",
+      "quote": "The sovereign nation-state is the only platform that can guarantee democracy because it is the only way to maintain cultural continuity and keep power within limited, accountable institutions; democracy cannot fully exist at the supranational level.",
+      "attribution": "Petr Macinka",
+      "flavor": "contesting the framing"
+    },
+    {
+      "extraction_id": "vox_populi:029",
+      "quote": "As the EPP maintains its firewall against the far right but occasionally votes with far-right parties on specific issues like migration, how long can this distinction hold before the firewall becomes functionally meaningless?",
+      "attribution": "Moderator"
+    },
+    {
+      "extraction_id": "west_west_divide:010",
+      "quote": "The EU is democratically governed — the European Parliament is elected, the Commission is nominated by elected governments — and the myth that Brussels bureaucrats impose directives on member states is complete nonsense that gave us Brexit.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "pushing back"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "vox_populi:004",
+    "vox_populi:014",
+    "vox_populi:029",
+    "west_west_divide:010",
+    "west_west_divide:029",
+    "west_west_divide:030"
+  ],
+  "rationale": "The proposition lands squarely in Cleopatra's activates_on territory — legitimacy as performed rather than intrinsic, the ruler-ruled relationship under fragile terms, power asymmetry — and gives her decisive, position-taking voice a claim to either endorse as necessary statecraft or condemn as self-deception, drawing on her direct experience governing a sophisticated state whose sovereignty was increasingly performative under Roman hegemony."
+}

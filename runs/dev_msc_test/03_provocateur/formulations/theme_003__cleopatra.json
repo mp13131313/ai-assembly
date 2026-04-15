@@ -1,0 +1,51 @@
+{
+  "theme_id": "theme_003",
+  "member": "Cleopatra",
+  "mode": "proposition",
+  "formulation": "The fiction of sovereign equality in an order dominated by a single power does not protect the weak — it domesticates them, making their survival contingent on performing consent to terms they never set. A ruler who depends on that fiction for legitimacy has already surrendered the sovereignty it was supposed to guarantee.",
+  "theme_display_title": "Sovereignty by Permission",
+  "context_narrative": "At the Munich Security Conference's opening panel on the fracturing international order, the US National Security Advisor argued that American pressure — budget cuts, ad hoc coalitions, 'focused multilateralism' — was forcing overdue reform on moribund institutions. The EU's foreign policy chief pushed back hard, insisting any reformed system must preserve equality of states and hold the powerful accountable. Saudi Arabia's foreign minister reframed the entire debate as a Eurocentric awakening, noting that the developing world has lived under might-makes-right for over a decade. The sharpest unresolved tension: whether the fiction of sovereign equality is a necessary protection for weaker states — or the very mechanism by which their subordination is made invisible.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:014",
+      "quote": "In any reformed multilateral system, equality of states must be preserved and no one — including the most powerful countries — should be above the law.",
+      "attribution": "Kaja Kallas",
+      "flavor": "pushing back, with weight"
+    },
+    {
+      "extraction_id": "breaking_point:011",
+      "quote": "'Focused multilateralism' — ad hoc plurilateral coalitions that deliver concrete results — should be acceptable as a complement or alternative to traditional universal institutions when those institutions fail to resolve conflicts.",
+      "attribution": "Michael Waltz",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:018",
+      "quote": "Venezuelan exiles welcomed US intervention in Venezuela because sovereignty for them was not about oil — they had already lost their country by being forced into exile, and it returned hope after multilateral organizations failed to produce concrete results.",
+      "attribution": "Daiana Fernández Molero"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:023",
+    "breaking_point:002",
+    "breaking_point:003",
+    "breaking_point:014",
+    "breaking_point:011",
+    "breaking_point:031",
+    "breaking_point:029",
+    "vox_populi:018",
+    "vox_populi:019"
+  ],
+  "rationale": "This proposition lands in Cleopatra's core territory — power asymmetry, legitimacy as performed rather than intrinsic, survival under a hegemon's shadow — and contests Krastev's unrefuted claim that the fiction of equality protects the weak; Cleopatra governed under exactly such a fiction with Rome, giving her unique ground to either defend the strategic value of the fiction or confirm its cost, and her decisive stance_tendency ensures a proposition will produce a sharper artifact than a question."
+}

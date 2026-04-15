@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_001",
+  "member": "Hannah Arendt",
+  "mode": "question",
+  "formulation": "Clinton called the intra-Western debate 'almost healthy,' faulting only its methods — intimidation, bullying, cancellation — while Pappin described conservative voices systematically excluded from the institutions where speech matters. Yet both treated 'the West' as a settled inheritance requiring defense, not a question requiring thought. When every faction claims to protect genuine public speech while foreclosing it in the act of speaking, is there still a public realm in which action can appear — or has the debate itself become the thoughtlessness it decries?",
+  "theme_display_title": "A Civilization That Cannot Think Itself",
+  "context_narrative": "At the Munich Security Conference session on the 'West-West divide,' the room split sharply over whether progressive social change had fulfilled or betrayed the West's founding commitments. Clinton argued that expanding freedom to Black people, women, and gay people was the culmination of Western values; Pappin and Macinka countered that post-Cold War progressive overreach had eroded family, borders, and industrial strength. An audience member noted that Secretary Rubio had used 'Western civilization' twelve times where the previous administration would have said 'Western values' — a terminological shift the panel acknowledged but never examined.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:003",
+      "quote": "The intra-Western debate about values is almost healthy — the problem is not disagreement itself but when it is conducted through intimidation, bullying, and cancellation, and when populist nationalism poses challenges to post-war consensus without democratic accountability.",
+      "attribution": "Hillary R. Clinton"
+    },
+    {
+      "extraction_id": "west_west_divide:007",
+      "quote": "After the Cold War, progressive commitments were imported into the victorious system, decision-making shifted from national governments to transnational bodies, and conservative voices were systematically excluded from elite institutions and debates.",
+      "attribution": "Gladden J. Pappin",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:044",
+      "quote": "The distinction between 'Western values' (used by the Biden administration) and 'Western civilization' (used 12 times by Rubio at MSC) is a telling shift in discourse: the panel should clarify which concept they are defending.",
+      "attribution": "Audience Member 6"
+    },
+    {
+      "extraction_id": "west_west_divide:004",
+      "quote": "The West is no longer a unified civilization but a contested territory of values, divided between a conservative vision rooted in national sovereignty and tradition, and a progressive vision of supranational social engineering, with the gap widening.",
+      "attribution": "Petr Macinka",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:006",
+      "quote": "The problem is not that the West doesn't exist but that we have too many Wests — the Cold War West, the West as civilization — and the defining characteristic of the West since the mid-19th century has always been its pluralistic, self-questioning nature.",
+      "attribution": "Ivan Krastev"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:003",
+    "west_west_divide:004",
+    "west_west_divide:006",
+    "west_west_divide:007",
+    "west_west_divide:011",
+    "west_west_divide:032",
+    "west_west_divide:040",
+    "west_west_divide:044"
+  ],
+  "rationale": "The formulation lands on Arendt's core activation territory — thoughtlessness as moral failure and the destruction of the public realm — by turning the day's civilizational debate back on itself and asking whether what appeared to be politics was in fact its absence, pressing against the fault line by suggesting that neither side's claim on 'the West' can constitute political action when both deploy it as ideology rather than question."
+}

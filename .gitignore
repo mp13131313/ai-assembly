@@ -1,0 +1,29 @@
+# Secrets
+.env
+
+# macOS
+.DS_Store
+
+# Python
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Run logs (regenerable, not project memory)
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Scratch — experiments, one-offs, anything disposable
+scratch/
+
+# Audio files (large, not version-controlled anywhere in the tree)
+*.m4a
+*.mp3
+*.wav
+*.mp4
+*.mov
+*.webm

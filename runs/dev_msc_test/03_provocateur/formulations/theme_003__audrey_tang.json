@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_003",
+  "member": "Audrey Tang",
+  "mode": "question",
+  "formulation": "The room diagnosed an accountability deficit no one could solve, then the moderator admitted the conversation itself had reproduced the very power asymmetry it was analyzing — the US and EU dominated while middle powers were squeezed to the margins. You have built processes where adversarial populations surface real consensus at scale. Is the international accountability gap a participation-design problem that better architecture could address, or does the ability of the strongest participant to simply walk away from any process represent a hard constraint no platform can iterate around?",
+  "theme_display_title": "When the Strongest Player Leaves the Room",
+  "context_narrative": "At the Munich Security Conference's lead geopolitical panel, EU High Representative Kaja Kallas and US National Security Adviser Michael Waltz clashed over whether the rules-based order needed reinforced universal institutions or 'focused multilateralism' — ad hoc coalitions built around specific crises by dominant powers. Saudi Arabia's Prince Faisal reframed the entire panic as a Eurocentric awakening, noting that the developing world had lived with might-makes-right for over a decade. Near the session's end, moderator Zanny Minton Beddoes delivered a blunt admission: the panel itself had reproduced the power imbalance it was meant to analyze. No one proposed a workable mechanism for holding powerful states accountable.",
+  "selected_quotes": [
+    {
+      "extraction_id": "breaking_point:001",
+      "quote": "The missing element in the international order is accountability: the rules exist and most countries sign up to the UN Charter, but there is no functioning mechanism to hold violators accountable, especially when powerful states breach the principles.",
+      "attribution": "Kaja Kallas",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:011",
+      "quote": "'Focused multilateralism' — ad hoc plurilateral coalitions that deliver concrete results — should be acceptable as a complement or alternative to traditional universal institutions when those institutions fail to resolve conflicts.",
+      "attribution": "Michael Waltz",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:028",
+      "quote": "I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs.",
+      "attribution": "Zanny Minton Beddoes"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "breaking_point:001",
+    "breaking_point:002",
+    "breaking_point:011",
+    "breaking_point:028",
+    "breaking_point:030",
+    "breaking_point:031"
+  ],
+  "rationale": "The formulation targets Tang's activates_on territory — deliberative mechanisms, consensus-finding at scale, participation as a design problem — and pushes into her stretch by asking whether a model built in a specific democratic context can address geopolitics where the strongest actor can exit any process; the panel's own admitted process failure (028) and the unresolved mechanism gap (030, 031) give her concrete material to reframe toward something actionable."
+}

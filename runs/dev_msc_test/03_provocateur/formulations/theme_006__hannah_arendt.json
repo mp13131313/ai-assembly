@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_006",
+  "member": "Hannah Arendt",
+  "mode": "question",
+  "formulation": "In both Gaza and Ukraine, the case for peace was made in outputs — hostages returned, aid trucks counted, a ceasefire 'however achieved' — while the question of who may appear at the table as a political equal was treated as an obstacle to efficiency. The Board of Peace excludes the people whose future it administers; on Ukraine, speakers argued that only one power's leverage matters and that moral responsibility for who started the war can be bracketed. When a peace process functions by making the political speech and action of the affected peoples unnecessary to its operation, what exactly has it produced — and does such a settlement contain within it the conditions for the next catastrophe?",
+  "theme_display_title": "The Administered Peace",
+  "context_narrative": "Across sessions on Gaza and Ukraine, the room fractured between those defending pragmatic peace mechanisms by their measurable results and those insisting that no peace process can be separated from the question of who is permitted to speak at the table. Michael Waltz cited the Board of Peace's achievements — hostage releases, over four thousand aid trucks per week, a Security Council resolution — as vindication. But Mustafa Barghouti challenged its legitimacy outright, noting it seats Israel's Prime Minister while excluding any Palestinian representation, and Ivan Krastev insisted that peace which brackets who started the war destroys the moral integrity of a nation. No speaker reconciled the gap between what the machinery delivers and what it forecloses.",
+  "selected_quotes": [
+    {
+      "extraction_id": "breaking_point:021",
+      "quote": "Only President Trump could have brought all sides — including Israel — to the table on Gaza, producing a ceasefire, hostage releases, humanitarian aid at over 4,000 trucks per week, and a Security Council resolution committing to no occupation or annexation and Palestinian self-determination.",
+      "attribution": "Michael Waltz"
+    },
+    {
+      "extraction_id": "breaking_point:027",
+      "quote": "The Board of Peace cannot credibly claim to be a peace mechanism when it includes Israel's Prime Minister but excludes any Palestinian representation, and Israel is already violating the ceasefire 1,500 times while Palestinians are held accountable three times a day.",
+      "attribution": "Mustafa Barghouti"
+    },
+    {
+      "extraction_id": "west_west_divide:018",
+      "quote": "You cannot achieve peace in Ukraine by totally bracketing the question of moral responsibility — who started the war matters, and peace that destroys the moral integrity of a nation is not real peace.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:016",
+      "quote": "Ukraine fights first for Ukraine's own future, freedom, and sovereignty — not 'our' freedom — and only the United States currently has the geopolitical power to force Russia to stop the war, so the priority should be a ceasefire however achieved.",
+      "attribution": "Petr Macinka",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "breaking_point:022",
+      "quote": "It's not a ceasefire if the guns haven't ceased; even if killing has stopped, dying hasn't — aid access remains the critical unresolved issue in Gaza.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "responding to the previous speaker"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "breaking_point:021",
+    "breaking_point:027",
+    "breaking_point:022",
+    "breaking_point:013",
+    "west_west_divide:016",
+    "west_west_divide:018",
+    "west_west_divide:041"
+  ],
+  "rationale": "The formulation targets Arendt's core activation — the claim that political life can be replaced by administration — by asking her to diagnose a pattern visible across both conflicts where peace processes deliver measurable outputs while systematically foreclosing the political speech and action of those whose fate is being decided, pressing her to say whether such administered peace is merely incomplete or is structurally generative of further violence."
+}

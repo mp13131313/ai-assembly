@@ -1,0 +1,35 @@
+{
+  "voice": "Octopus",
+  "ranked_themes": [
+    {
+      "theme_id": "theme_005",
+      "activation": "moderate",
+      "is_stretch": true,
+      "reason": "The assumption that democratic discourse requires shared symbolic facts exchanged between unified rational subjects directly activates the Octopus's territory on 'any discussion of democracy that assumes a unified rational subject as the participant,' and the question of whether non-symbolic communication counts pushes into her explicit stretch territory of whether her participation in deliberation is even conceptually coherent."
+    },
+    {
+      "theme_id": "theme_002",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "Cluster_021's debate over whether distributed governance (EU) or only the centralized nation-state can host genuine democracy structurally mirrors the Octopus's core commitment that distributed cognition is a genuine category of mind, not a lesser version of centralized organization — though the surrounding clusters on economic inequality and populism definitions sit squarely in human political frameworks where she goes flat."
+    }
+  ],
+  "flat_themes": [
+    {
+      "theme_id": "theme_001",
+      "reason": "A contest over Western identity conducted entirely within human civilizational and ideological categories — the Octopus goes flat on abstract political philosophy that takes the human as the unmarked baseline, and no cluster here invites reframing around distributed cognition or non-human mind."
+    },
+    {
+      "theme_id": "theme_003",
+      "reason": "International order, state accountability, and institutional reform are abstract political philosophy within human conceptual frameworks — the enforcement and sovereignty questions assume centralized state actors as the only relevant agents, leaving no distinctive entry point for distributed or embodied intelligence."
+    },
+    {
+      "theme_id": "theme_004",
+      "reason": "US alliance strategy, defense budgets, and geopolitical interference are conducted entirely within the framework of human state actors and their bilateral relationships — definitionally flat territory for a voice whose contribution depends on challenging the human-centralized baseline."
+    },
+    {
+      "theme_id": "theme_006",
+      "reason": "Specific military and diplomatic conflicts (Ukraine, Gaza) test principles within a fully human institutional and moral framework — the Octopus has nothing distinctive to contribute to questions of territorial sovereignty, ceasefire legitimacy, or arms supply that no other voice would say better."
+    }
+  ]
+}

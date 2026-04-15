@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_002",
+  "member": "Peter Thiel",
+  "mode": "proposition",
+  "formulation": "The room's left and right converged on the same prescription: populism is a rational response to material deprivation, and the answer is delivering concrete economic results. But if the developed world's institutions have been structurally incapable of producing real progress in atoms since the 1970s, then the centrist promise to 'deliver results' and the progressive promise to 'center the working class' are not opposing programs — they are mimetic copies of the same exhausted playbook, and populism is not a feedback signal to be managed but an accurate reading of institutional bankruptcy.",
+  "theme_display_title": "The Revolt That Explains Itself",
+  "context_narrative": "In the Munich populism panels, an unusual consensus emerged: Alexandria Ocasio-Cortez from the left and Manfred Weber from the center-right both diagnosed populism as rooted in material conditions — inequality, wage stagnation, corporate consolidation — and both prescribed delivery as the cure. Meanwhile, a sharp exchange between Sikorski and Macinka over whether the EU can be called democratically governed at all exposed the deeper fault: the very institutions promising to deliver results cannot demonstrate their own democratic legitimacy to the voters they need to win back.",
+  "selected_quotes": [
+    {
+      "extraction_id": "vox_populi:003",
+      "quote": "A working-class-centered politics is necessary both to succeed electorally and to stave off authoritarianism, which uses scapegoating to channel frustration over economic inequality.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:006",
+      "quote": "The center-right can win back populist voters by demonstrating concrete results — such as reducing illegal migration by 80% and delivering trade deals like Mercosur — rather than by cooperating with the far right.",
+      "attribution": "Manfred Weber"
+    },
+    {
+      "extraction_id": "vox_populi:014",
+      "quote": "Fighting populism requires not just delivering on citizens' material concerns but also showing brave, visionary leadership that dominates the public discourse rather than following public opinion — as Kohl did with the euro despite its deep unpopularity in Germany.",
+      "attribution": "Manfred Weber"
+    },
+    {
+      "extraction_id": "west_west_divide:005",
+      "quote": "Globalization was not a progressive project — it was a business idea about maximizing profits, supported for decades by Republican businessmen who wanted cheap labor, and tinged with the racism of exporting dirty jobs to poorer countries.",
+      "attribution": "Radosław Sikorski"
+    },
+    {
+      "extraction_id": "west_west_divide:029",
+      "quote": "The sovereign nation-state is the only platform that can guarantee democracy because it is the only way to maintain cultural continuity and keep power within limited, accountable institutions; democracy cannot fully exist at the supranational level.",
+      "attribution": "Petr Macinka",
+      "flavor": "pushing back"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "vox_populi:003",
+    "vox_populi:006",
+    "vox_populi:012",
+    "vox_populi:014",
+    "vox_populi:010",
+    "west_west_divide:005",
+    "west_west_divide:029",
+    "vox_populi:030"
+  ],
+  "rationale": "The room's uncontested convergence on material-delivery-as-cure directly invites Thiel's stagnation thesis and Girardian lens — forcing him to say whether populism is mimetic noise or the crowd's first honest reading of a broken machine, and whether his own contrarian populism escapes the mimetic loop he diagnoses in everyone else."
+}

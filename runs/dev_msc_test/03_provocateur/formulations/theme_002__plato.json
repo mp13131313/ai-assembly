@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_002",
+  "member": "Plato",
+  "mode": "question",
+  "formulation": "One speaker called populism 'the very meaning of politics' — hearing people's frustrations and translating them into policy. The room agreed the pain is real: wages stagnant, communities gutted, governing parties deaf. But nobody asked whether a demos that correctly feels its suffering might still misdiagnose the cure — and if so, whether the statesman who delivers what the people demand is healing the city or flattering it.",
+  "theme_display_title": "The People's Cure",
+  "context_narrative": "In a panel on populism's roots and remedies, the Czech president declared that populism is simply politics done well — listening to citizens and translating their frustrations into policy. Alexandria Ocasio-Cortez traced those frustrations to material betrayal: stagnant wages, a party that dismissed working-class demands as too extreme even while claiming to serve working people. A European Parliament leader countered with Kohl and Adenauer — leaders who pushed through deeply unpopular measures they believed were necessary. No one converged on criteria for when responsive listening becomes something else entirely.",
+  "selected_quotes": [
+    {
+      "extraction_id": "vox_populi:010",
+      "quote": "Populism should not automatically be labeled as something bad; listening to people's frustrations and translating them into policy is the very meaning of politics — the problem begins only when populism is turned against the institutions that protect democracy.",
+      "attribution": "Petr Pavel",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:001",
+      "quote": "The Democratic Party betrayed its working-class base by dismissing populist demands like a $15 minimum wage, tuition-free public college, and expanded healthcare as too extreme, even while claiming to listen to working people.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:003",
+      "quote": "A working-class-centered politics is necessary both to succeed electorally and to stave off authoritarianism, which uses scapegoating to channel frustration over economic inequality.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:014",
+      "quote": "Fighting populism requires not just delivering on citizens' material concerns but also showing brave, visionary leadership that dominates the public discourse rather than following public opinion — as Kohl did with the euro despite its deep unpopularity in Germany.",
+      "attribution": "Manfred Weber"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "vox_populi:010",
+    "vox_populi:001",
+    "vox_populi:003",
+    "vox_populi:012",
+    "vox_populi:014",
+    "vox_populi:027"
+  ],
+  "rationale": "Pavel's claim that populism is 'the very meaning of politics' lands directly in Plato's activates_on territory — the assertion that popular preference is the standard of the good — and the room's unanimous agreement that the pain is real, combined with its total silence on whether the demos's diagnosis of the cure might be wrong, opens the precise gap where Plato's reframing of the relationship between suffering and knowledge is most distinctive."
+}

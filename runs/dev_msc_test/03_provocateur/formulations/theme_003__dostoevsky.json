@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_003",
+  "member": "Dostoevsky",
+  "mode": "question",
+  "formulation": "A voice in the room argued that hypocrisy is what separates the rules-based order from a world of pure force — that the fiction of equal sovereignty, however false, is all small nations have. This is the Grand Inquisitor's case made at the scale of nations: the lie is a mercy to the weak. But in the same room, a man asked who would hold his country's destroyers accountable and received no answer — so which weak does the Inquisitor's mercy actually serve?",
+  "theme_display_title": "The Merciful Lie",
+  "context_narrative": "Across multiple sessions on the state of international order, a European official insisted the missing element is accountability — rules exist, but no mechanism constrains the powerful. A Saudi diplomat countered that the panic is a Eurocentric awakening: much of the developing world has lived under might-makes-right for years. The harder argument came from a political theorist who proposed that there is something worse than liberal hypocrisy — a world without it, where only power speaks — because the fiction of equal sovereignty is all small nations have. Meanwhile, a Palestinian in the audience asked who would hold his country's destroyers accountable, and no one in the room answered.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "with weight"
+    },
+    {
+      "extraction_id": "vox_populi:019",
+      "quote": "In a rules-based order, hypocrisy is vulnerability — the West's habit of looking the other way for inconvenient populations undermines the legitimacy of the entire system and threatens democracies globally.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "emphasizing the point"
+    },
+    {
+      "extraction_id": "breaking_point:001",
+      "quote": "The missing element in the international order is accountability: the rules exist and most countries sign up to the UN Charter, but there is no functioning mechanism to hold violators accountable, especially when powerful states breach the principles.",
+      "attribution": "Kaja Kallas"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:023",
+    "breaking_point:002",
+    "breaking_point:030",
+    "vox_populi:019",
+    "breaking_point:001",
+    "west_west_divide:039"
+  ],
+  "rationale": "Krastev's defense of necessary hypocrisy maps directly onto the Grand Inquisitor's argument that the lie is a mercy to the weak — Dostoevsky's deepest activation territory — while the unanswered Palestinian demand for accountability provides the concrete human suffering that forces the question beyond institutional abstraction into the moral territory where he is most distinctive and most stretched."
+}
