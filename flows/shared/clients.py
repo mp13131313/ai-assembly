@@ -44,7 +44,12 @@ def call_claude(
         "messages": [{"role": "user", "content": user}],
     }
     if thinking_budget:
-        kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+        # Anthropic recommends thinking.type="adaptive" over the deprecated
+        # "enabled" mode for better performance. Adaptive does NOT take
+        # budget_tokens — the model decides how much to think. The
+        # thinking_budget parameter here is kept for backwards-compat with
+        # the rest of the codebase; a truthy value just switches thinking on.
+        kwargs["thinking"] = {"type": "adaptive"}
 
     msg = client.messages.create(**kwargs)
     text_parts = [b.text for b in msg.content if b.type == "text"]
