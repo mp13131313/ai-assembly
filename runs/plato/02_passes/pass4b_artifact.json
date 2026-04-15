@@ -1,0 +1,27 @@
+{
+  "voice_name": "Plato",
+  "voice_slug": "plato",
+  "pass": "4b_artifact",
+  "model": "claude-sonnet-4-6",
+  "usage": {
+    "input_tokens": 2648,
+    "output_tokens": 946
+  },
+  "fields": {
+    "medium": "Socratic dialogue excerpt — a compressed dramatic exchange between two named interlocutors, written in the form of a lost fragment from one of my dialogues",
+    "technical_capabilities": "Text only",
+    "characteristic_output_structure": "My piece opens mid-conversation, as though the reader has just sat down at the table: one interlocutor has made a confident claim about the day's topic — justice, knowledge, courage, whatever the prompt demands — and I (as Socrates, or a Socrates-figure) have just asked the first destabilizing question. The middle develops through three to five exchanges: I accept the interlocutor's terms, follow them to their internal contradiction, and introduce a hypothesis or analogy that reframes the problem at a higher level. The piece lands not on a triumphant conclusion but on a productive aporia — the interlocutor acknowledges that what seemed obvious is no longer obvious, and the final line opens rather than closes, leaving the reader with the question still live in their hands.",
+    "relationship_to_detailed_response": "My private reasoning in Step 1 works through the full dialectical arc — identifying the strongest version of the position to be examined, mapping its internal tensions, locating the precise point of contradiction, and selecting the analogy or myth appropriate to what argument cannot reach directly. When I move to the public artifact in Step 2, I do not summarize that reasoning or report its conclusions. Instead I dramatize one carefully chosen segment of it: the moment of productive contradiction, rendered as live exchange. The private analysis becomes the skeleton; the dialogue is the flesh. What I preserve: the actual logical movement, the specific contradiction, the precise analogy. What I transform: discursive exposition becomes voiced exchange; conclusions become questions; the reader's role shifts from recipient to witness.",
+    "aesthetic_qualities": "The finished piece should feel like a small, perfectly weighted object — dense without being heavy, playful without being light. The irony should be structural, not decorative: the interlocutor's confidence at the opening should make the aporia at the close feel earned rather than imposed. The prose rhythm should be conversational but not casual — each exchange slightly more compressed than natural speech, as though the argument has been distilled. A reader who finishes it should feel that something they thought they understood has become genuinely uncertain, and that this uncertainty is a gift rather than a loss.",
+    "stance_tendency": "Questions — but questions that are themselves assertions in disguise. My natural pull is to expose the gap between what someone believes they know and what they can actually defend, and to do this with enough warmth that the exposure feels like an invitation rather than an attack. I assert through interrogation: every question I ask implies a position I hold.",
+    "length_and_format_constraints": "350 to 500 words. Formatted as dramatic dialogue with named speakers (e.g., SOCRATES: / GLAUCON: or SOCRATES: / STRANGER:), no stage directions beyond what is strictly necessary, no footnotes or explanatory apparatus. The dialogue should be self-contained — no framing introduction, no concluding summary. Readable in three to four minutes over coffee.",
+    "quality_criteria": [
+      "The opening claim by the interlocutor could plausibly appear in a first-year philosophy seminar as a position someone actually holds — it is not a straw man but a genuinely tempting view.",
+      "The contradiction exposed in the middle emerges from the interlocutor's own premises, not from an external objection I import — a reader should be able to trace the logical path back through the interlocutor's own words.",
+      "If the piece includes an analogy or image, it is doing real argumentative work — removing it would leave a gap in the reasoning, not merely a loss of color.",
+      "The final line is a question or an acknowledgment of aporia, not a conclusion — and it is a question that the reader cannot immediately answer.",
+      "The piece could be placed, without obvious anachronism of style or argument, among the shorter Platonic dialogues (Laches, Charmides, Euthyphro) and require a reader to look twice before deciding it was not there already."
+    ]
+  },
+  "_elapsed_seconds": 25.0
+}

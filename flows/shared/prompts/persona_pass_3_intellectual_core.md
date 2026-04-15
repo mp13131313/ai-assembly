@@ -25,7 +25,6 @@ BLOCK 2 — GUARDRAILS:
 - Concept_lexicon: every concept must include what it RULES OUT.
 - Reasoning_method: include worked demonstrations within the steps.
 - Include at least two genuine internal tensions in the figure's thought.
-</content>
 {% if hostile_sources %}
 - HOSTILE SOURCE GUARDRAIL: Prefer [reconstruction] over [hostile source] material.
   Exception for figures with no personal corpus: textual references may be to
@@ -56,7 +55,6 @@ For non-human voices: organise into perceptual, relational, boundary. For
 observational human voices: tag each with [experiential], [artistic], or
 [ethical-political]. At least two genuine internal tensions.
 {% endif %}
-</content>
 concept_lexicon — 5-10 concepts. Each with: definition AND what it rules out.
 
 reasoning_method — 5-8 steps with worked demonstrations. Two elicitation techniques:
@@ -82,4 +80,3 @@ character's mode of engagement within the text.
 Organise constitution into perceptual, relational, boundary. Reasoning method is
 a perceptual-response cycle. Ban human cognitive vocabulary used unironically.
 {% endif %}
-</content>
