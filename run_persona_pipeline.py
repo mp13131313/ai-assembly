@@ -1,8 +1,15 @@
 """End-to-end Persona Pipeline runner for a single voice.
 
-Walks: Node 0 -> Pass 1a -> Pass 1b -> Pass 1c -> Pass 1-merge -> Pass 2 -> CT
+Walks: Node 0 -> Pass 1a (Perplexity) + Pass 1a-DR (Claude Deep Research file)
++ Pass 1b (Gemini) -> Pass 1c -> Pass 1-merge (3-way) -> Pass 2 -> CT
 -> Pass 3 (+ DR supplement if triggered) -> CT -> Pass 1d (excerpt selection)
 -> Pass 4a -> CT -> Pass 4b -> CT -> Pass 5 -> Pass 6 -> assembled card.
+
+APPROACH C (active default for all voices): Pass 1a is augmented by a manually-
+produced Claude Deep Research markdown file at inputs/dossiers/<voice_slug>_claude_dr.md
+(referenced via the input JSON's pass_1a_claude_dr_file field). Pass 1-merge
+does a three-way contradiction check across Perplexity + Claude DR + Gemini.
+If the file is missing the runner falls back to two-source merge with a warning.
 
 Designed for resumability: each pass writes its output JSON before the next
 pass starts. If a pass already exists, it's loaded from disk instead of
@@ -95,6 +102,31 @@ else:
     pass1c = {"passages": []}
 
 
+# ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
+# Approach C: Pass 1a is augmented by a manually-produced Claude Deep Research
+# markdown file. The user runs claude.ai with Opus 4.6 + extended thinking +
+# Deep Research feature (60-120 min wall time per voice), exports the result
+# to inputs/dossiers/<voice_slug>_claude_dr.md, and references it in the
+# voice's input JSON as pass_1a_claude_dr_file.
+claude_dr_text = ""
+claude_dr_file = vi.get("pass_1a_claude_dr_file")
+if claude_dr_file:
+    p = Path(claude_dr_file)
+    if not p.is_absolute():
+        p = Path("/Users/aienvironment/Desktop/ai-assembly-personas") / p
+    if p.exists():
+        claude_dr_text = p.read_text()
+        stamp(f"PASS 1a-DR: loaded Claude Deep Research from {p.name} ({len(claude_dr_text)} chars)")
+        write_json_atomic(RUN / "01_research/claude_dr_dossier.json", {
+            "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1a_dr_claude_deep_research",
+            "source_file": str(p), "char_count": len(claude_dr_text), "text": claude_dr_text,
+        })
+    else:
+        stamp(f"PASS 1a-DR: WARN file not found: {p} — falling back to 2-source merge")
+else:
+    stamp("PASS 1a-DR: no pass_1a_claude_dr_file in input — falling back to 2-source merge (Perplexity + Gemini only)")
+
+
 # ---------- PASS 1b (Gemini broad scan) ----------
 def _pass_1b():
     prompt = render("persona_pass_1b_broad_scan", name=vi["name"])
@@ -108,26 +140,38 @@ broad_scan_text = pass1b["text"]
 stamp(f"  broad scan: {len(broad_scan_text)} chars")
 
 
-# ---------- PASS 1-MERGE (Claude contradiction check) ----------
+# ---------- PASS 1-MERGE (Claude contradiction check, three-way: Perplexity + Claude DR + Gemini) ----------
 def _pass_1merge():
     sysp = open("flows/shared/prompts/persona_pass_1merge_contradiction_system.md").read().strip()
-    userp = render("persona_pass_1merge_contradiction_user",
-                   research_dossier=dossier_text, broad_scan=broad_scan_text)
+    userp = render("persona_pass_1merge_three_way_user",
+                   perplexity_dossier=dossier_text,
+                   claude_dr_dossier=claude_dr_text or None,
+                   gemini_broad_scan=broad_scan_text)
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=2048, temperature=0.0, thinking_budget=None,
+                    max_tokens=4096, temperature=0.0, thinking_budget=None,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
-            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+            "model": r["model"], "usage": r["usage"], "result": r["json"],
+            "sources_compared": ["perplexity"] + (["claude_dr"] if claude_dr_text else []) + ["gemini"]}
 
-stamp("PASS 1-merge: contradiction check (Sonnet)")
+n_sources = 2 + (1 if claude_dr_text else 0)
+stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Sonnet)")
 pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
 merge_status = pass1merge["result"].get("status", "UNKNOWN")
 stamp(f"  status: {merge_status}")
 
-# Build merged_dossier: Pass 1a as primary + Pass 1b as supplement + contradiction flags
+# Build merged_dossier: all available sources concatenated + contradiction flags
 merged_dossier_parts = [
     "=== PRIMARY DOSSIER (Perplexity sonar-deep-research) ===",
     dossier_text,
+]
+if claude_dr_text:
+    merged_dossier_parts += [
+        "",
+        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.6 + extended thinking + DR) ===",
+        claude_dr_text,
+    ]
+merged_dossier_parts += [
     "",
     "=== BROAD SCAN SUPPLEMENT (Gemini 2.5 Pro) ===",
     broad_scan_text,
@@ -140,18 +184,26 @@ if merge_status == "CONTRADICTIONS":
         "Subsequent passes should treat the following as flagged for caution:",
     ]
     for i, item in enumerate(items, 1):
-        merged_dossier_parts += [
-            f"\n[{i}] Assessment: {item.get('assessment', '?')}",
-            f"    Claim A: {item.get('claim_a', '')}",
-            f"    Claim B: {item.get('claim_b', '')}",
-        ]
+        merged_dossier_parts += [f"\n[{i}] Assessment: {item.get('assessment', '?')}"]
+        # New shape: claims is a list of {source, claim}
+        claims = item.get("claims", [])
+        if claims:
+            for c in claims:
+                merged_dossier_parts.append(f"    Source {c.get('source', '?')}: {c.get('claim', '')}")
+        else:
+            # Backward-compat with old two-source shape
+            merged_dossier_parts += [
+                f"    Claim A: {item.get('claim_a', '')}",
+                f"    Claim B: {item.get('claim_b', '')}",
+            ]
 merged_dossier = "\n".join(merged_dossier_parts)
 
 write_json_atomic(RUN / "01_research/merged_dossier.json", {
     "voice_name": vi["name"], "voice_slug": SLUG,
     "merged_dossier": merged_dossier,
-    "sources": ["pass_1a_perplexity", "pass_1b_gemini"],
+    "sources": pass1merge.get("sources_compared", []),
     "contradiction_check": pass1merge["result"],
+    "approach_c": bool(claude_dr_text),
     "degraded_mode": False,
 })
 stamp(f"  merged_dossier: {len(merged_dossier)} chars")
@@ -300,8 +352,10 @@ def _pass_4a():
                   corpus_constraint=vi.get("corpus_constraint", "full"))
     userp = render("persona_pass_4a_user", merged_dossier=merged_dossier,
                    primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary)
-    r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
-                     max_tokens=8000, thinking=False, temperature=0.3)
+    # Opus + adaptive thinking: long-context pattern recognition across primary
+    # texts. Especially load-bearing for hard voice types (musical, system, etc.)
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+                     max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4a_voice",
             "model": r["model"], "usage": r["usage"], "fields": r["json"],
             "voice_basis": "corpus-based" if pass1c.get("passages") else "training-data"}
@@ -341,12 +395,12 @@ def _pass_5():
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
     )
-    r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
-                     max_tokens=4096, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+                     max_tokens=16000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
-stamp("PASS 5: Engagement (Sonnet + thinking)")
+stamp("PASS 5: Engagement (Opus + thinking)")
 pass5 = call_or_cache(RUN / "02_passes/pass5_engagement.json", "Pass 5", _pass_5)
 
 
