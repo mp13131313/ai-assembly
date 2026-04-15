@@ -576,6 +576,47 @@ stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_modes +{add_summary.get('modes_added', 0)}")
 
 
+# ---------- DERIVE (Provocateur Profile + Evaluation Rubric) ----------
+# Spec Node Derive: Sonnet 4.6, temp 0.1, max 4096. Single call producing
+# 8-field Provocateur Profile (becomes a council_config.json member entry)
+# + 9-test Evaluation Rubric (for ongoing testing of the runtime voice).
+def _derive():
+    # Build the card the Derive call sees (after Pass 7b/7c additions/refinements)
+    full_card_for_derive = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_derive.update(pass6["fields"])
+    if pass7b.get("fields"):
+        full_card_for_derive.update(pass7b["fields"])
+    if pass7c.get("result"):
+        if pass7c["result"].get("banned_language") is not None:
+            full_card_for_derive["banned_language"] = pass7c["result"]["banned_language"]
+        if pass7c["result"].get("banned_modes") is not None:
+            full_card_for_derive["banned_modes"] = pass7c["result"]["banned_modes"]
+    sysp = open("flows/shared/prompts/persona_derive.md").read()
+    userp = render("persona_derive_user",
+                   persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
+    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
+                    max_tokens=8192, temperature=0.1, thinking_budget=None,
+                    response_format_json=True)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
+            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Sonnet)")
+derive = call_or_cache(RUN / "02_passes/derive.json", "Derive", _derive)
+prov_profile = derive["result"].get("provocateur_profile", {})
+eval_rubric = derive["result"].get("evaluation_rubric", {})
+stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
+      f"evaluation_rubric: {len(eval_rubric.get('identity_tests', []))} identity, "
+      f"{len(eval_rubric.get('reasoning_tests', []))} reasoning, "
+      f"{len(eval_rubric.get('stress_tests', []))} stress")
+
+# Save Provocateur Profile as standalone artifact for the runtime ai-assembly
+# repo's council_config.json wiring (per spec — stored separately).
+write_json_atomic(RUN / "provocateur_profile.json", prov_profile)
+write_json_atomic(RUN / "evaluation_rubric.json", eval_rubric)
+stamp(f"  saved: {RUN}/provocateur_profile.json + evaluation_rubric.json")
+
+
 # ---------- FINAL SUMMARY ----------
 def _check_register(card_fields: dict, voice_last_name: str) -> int:
     """Count third-person leaks (voice_last_name + " was/is/believed/argued" patterns)."""
@@ -622,6 +663,7 @@ stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.
 stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('worked_provocations', []))} chains")
 stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
       f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
+stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
 stamp(f"  Total card fields:    {len(full_card)}")
 stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
 stamp(f"  Card saved to:        {RUN}/02_passes/")
@@ -658,6 +700,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "7a_cross_model_validation",
             "7b_worked_provocations",
             "7c_negative_constraints",
+            "derive_provocateur_profile_and_rubric",
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
         "revision_loops": 0,
@@ -695,6 +738,18 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "are the smoke test. They go stale the moment a real conference "
             "question arrives that's nothing like the test set."
         ),
+        "derived_outputs": {
+            "provocateur_profile_path": f"runs/{SLUG}/provocateur_profile.json",
+            "evaluation_rubric_path": f"runs/{SLUG}/evaluation_rubric.json",
+            "note": (
+                "Provocateur Profile is the 8-field council_config.json member "
+                "entry. Evaluation Rubric is 9 test prompts (3 identity + 3 "
+                "reasoning + 3 stress) for ongoing voice quality monitoring. "
+                "Per spec, these are stored separately from the assembled card "
+                "for clean handoff to the Provocateur Pipeline (profile) and "
+                "Voice Pipeline testing harness (rubric)."
+            ),
+        },
         # Diagnostic extras (not in spec but useful for our development)
         "field_counts": {
             "pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
