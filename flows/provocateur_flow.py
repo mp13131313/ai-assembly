@@ -63,7 +63,6 @@ _manifest.json (provocateur_v3_observations + post_audit_cleanup blocks).
 from __future__ import annotations
 
 import json
-import logging as _std_logging
 import os
 import re
 import sys
@@ -93,8 +92,10 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from flows.shared.io import (
-    load_council_config,
+    extract_json,
+    get_logger,
     get_member_by_name,
+    load_council_config,
     load_prompt,
 )
 
@@ -130,12 +131,12 @@ def _thinking_kwargs() -> dict[str, Any]:
 
 
 def _get_logger() -> Any:
-    """Return a logger that works inside or outside a Prefect task run."""
-    try:
-        from prefect import get_run_logger
-        return get_run_logger()
-    except Exception:
-        return _std_logging.getLogger("provocateur_flow")
+    """Return a logger that works inside or outside a Prefect task run.
+
+    Delegates to flows.shared.io.get_logger — same implementation used by
+    transcription_flow and researcher_flow.
+    """
+    return get_logger("provocateur_flow")
 
 
 # Load the v3 prompts at module level so syntax errors in the prompt
@@ -148,31 +149,6 @@ FORMULATION_SYSTEM = load_prompt("provocateur_formulation")
 
 
 # --- Helpers --------------------------------------------------------------
-
-def extract_json(text: str) -> dict:
-    """Extract the first JSON object from a model response.
-
-    Uses json.JSONDecoder().raw_decode to handle trailing commentary
-    after the closing brace, which Opus occasionally produces even
-    when instructed not to. Same defensive pattern as researcher_flow.
-    """
-    text = text.strip()
-    # Strip markdown code fences if present
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text)
-        text = re.sub(r"\s*```\s*$", "", text)
-    decoder = json.JSONDecoder()
-    try:
-        obj, _end = decoder.raw_decode(text)
-        return obj
-    except json.JSONDecodeError:
-        # Try to find the first { and parse from there
-        start = text.find("{")
-        if start == -1:
-            raise
-        obj, _end = decoder.raw_decode(text[start:])
-        return obj
-
 
 def _format_member_profiles(members: list[dict]) -> str:
     """Format council member profiles for inclusion in a system prompt.

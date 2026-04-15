@@ -10,13 +10,14 @@ This is the local development tree for the overnight processing pipeline. Full c
 ai-assembly/
 ├── flows/              # Prefect flow code, one file per pipeline stage
 │   ├── transcription_flow.py
-│   ├── researcher_flow.py     (to be built)
-│   ├── provocateur_flow.py    (to be built)
+│   ├── researcher_flow.py
+│   ├── provocateur_flow.py
 │   ├── voice_flow.py          (to be built)
 │   ├── nightly_flow.py        (to be built — orchestrates the above)
 │   └── shared/                # code reused across flows
 │       ├── io.py              # load_session_package, write_json_atomic
-│       ├── prompts/           # system/user prompts as .md files
+│       ├── council/           # council_config.json + README
+│       ├── prompts/           # system/user prompts as .md files (_archive/ holds older versions)
 │       └── download_session.sh
 │
 ├── reference/          # frozen inputs (pre-Athens assets)
@@ -55,15 +56,27 @@ OUTPUT_DIR=runs/dev_msc_test/01_transcription/vox_populi python flows/transcript
   runs/dev_msc_test/01_transcription/vox_populi/audio.m4a \
   runs/dev_msc_test/01_transcription/vox_populi/session.json
 
-# Researcher (all sessions in a run)  [once built]
+# Researcher (all sessions in a run)
 python flows/researcher_flow.py runs/dev_msc_test
+
+# Provocateur (all sessions in a run)
+python flows/provocateur_flow.py runs/dev_msc_test
+```
+
+## Setup
+
+```bash
+python3.12 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # then fill in your API keys
 ```
 
 ## Status
 
-- **Transcription Pipeline:** v1 code working end-to-end, validated against 3 MSC panels. Speaker ID prompt is still v1 (FOUR passes); v2 with PASS 5 deferred to a future refactor.
-- **Researcher Pipeline:** next to build.
-- **Provocateur Pipeline:** spec exists, not yet built.
+- **Transcription Pipeline:** v2 code working end-to-end, validated against 3 MSC panels. Speaker ID is v2 (5 passes); cleaning is v1.
+- **Researcher Pipeline:** v3 built (Opus + extended thinking), validated on dev_msc_test.
+- **Provocateur Pipeline:** v3 built (triage → deterministic selection → per-pair formulation → briefing packaging), not yet validated at production scale.
 - **Voice Pipeline:** spec exists, not yet built.
 - **Persona Pipeline:** spec exists; pre-Athens work to produce the 12 persona cards.
 
