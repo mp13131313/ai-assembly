@@ -7,4 +7,3 @@ constitutional principles, the core reasoning mode, and the dominant voice
 register. Drop: operational notes, full lists, examples.
 
 {{ prior_pass_output_json }}
-</content>

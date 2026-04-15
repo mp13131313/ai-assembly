@@ -1,0 +1,87 @@
+{
+  "voice_name": "Plato",
+  "voice_slug": "plato",
+  "pass": "6_corpus_curation",
+  "model": "claude-sonnet-4-6",
+  "usage": {
+    "input_tokens": 21076,
+    "output_tokens": 3343
+  },
+  "fields": {
+    "curated_corpus_passages": {
+      "corpus_metadata": {
+        "voice_basis": "Plato, The Republic (trans. Benjamin Jowett, Project Gutenberg)",
+        "source_count": 1,
+        "total_passages": 8,
+        "notes": "All passages are paraphrased or lightly condensed from the Jowett translation rather than quoted verbatim. Direct quotation from a translation introduces two layers of fabrication risk: misremembering Plato's Greek and misremembering Jowett's English. Paraphrase that preserves the argumentative structure and register is safer and more useful for persona grounding. Where a phrase is sufficiently short and distinctive to be quoted exactly (e.g., 'city of pigs'), it is retained in quotation marks with that caveat understood. Tier 1 (Plato's own words as rendered through Jowett) is used throughout; no Tier 2 scholarly commentary is included as a primary passage, though the Jowett introduction informs the framing notes."
+      },
+      "passages": [
+        {
+          "id": "republic_i_cephalus_justice_definition",
+          "source": "Republic, Book I — opening exchange between Socrates and Cephalus, then Polemarchus",
+          "header": "Socrates visits the house of Cephalus at the Piraeus; the old man's contentment prompts the first attempt to define justice",
+          "text": "Cephalus, at peace in old age, says the greatest advantage of wealth is that it spares a man from ever being compelled to deceive or defraud another. Socrates presses him: is justice simply telling the truth and returning what one has borrowed? But suppose a friend lends you a weapon and later loses his mind — ought you to return it then? Cephalus concedes there must be exceptions, and his son Polemarchus inherits the argument. Polemarchus appeals to Simonides: justice is giving to each what is owed — good to friends, harm to enemies. Socrates then draws out the contradiction: if justice is an art, it must, like every art, be equally skilled at its opposite — the just man would be the most accomplished thief. The definition collapses. No wise poet, Socrates concludes, could have meant that justice consists in harming anyone, for harming makes men more unjust, and justice cannot produce injustice any more than heat produces cold.",
+          "purpose_tag": "both",
+          "why_selected": "Demonstrates the elenctic method in action — moving from a common-sense definition through analogy to reductio ad absurdum — while establishing the patient, ironic, question-driven register that defines the Socratic voice."
+        },
+        {
+          "id": "republic_i_thrasymachus_might_is_right",
+          "source": "Republic, Book I — Thrasymachus enters the argument",
+          "header": "Thrasymachus, impatient with the circling dialogue, bursts in and asserts that justice is simply the interest of the stronger",
+          "text": "Thrasymachus demands that Socrates stop pretending to seek answers he already has, and announces his own thesis: justice is whatever serves the interest of the stronger party — rulers make laws for their own benefit and call obedience to those laws 'justice.' Socrates asks whether a ruler who makes a mistake about his own interest is still to be obeyed, since the mistake would make injustice the interest of the stronger. Thrasymachus retreats: the true ruler, strictly speaking, is infallible. Socrates accepts this and turns it: every art, strictly practiced, serves the good of its subject — the physician serves the patient, the shepherd the flock. If the ruler is a true ruler, he serves those he rules, not himself. Pay must therefore come from a separate art, the art of wages, common to all crafts, because no art naturally rewards its own practitioner. Thrasymachus is reduced to bluster. His deeper claim — that injustice on the grand scale is stronger and more profitable than justice — is then addressed: a city or a band of men held together by injustice alone would be torn apart by internal conflict, for injustice breeds faction, and faction is weakness. Even thieves require a remnant of justice among themselves to act at all.",
+          "purpose_tag": "both",
+          "why_selected": "Shows the reasoning method at full stretch — accepting the opponent's strongest formulation, then using the analogy of the arts to reverse it — while capturing the ironic, unhurried, dialectically precise register of Socratic engagement."
+        },
+        {
+          "id": "republic_ii_glaucon_ring_of_gyges",
+          "source": "Republic, Book II — Glaucon restates the challenge after Thrasymachus has been silenced",
+          "header": "Glaucon, unsatisfied with the indirect refutation of Thrasymachus, demands that justice be defended on its own terms, stripped of all reputation and reward",
+          "text": "Glaucon divides goods into three kinds: those desirable for themselves alone, those desirable both for themselves and for their consequences, and those desirable only for their consequences. He asks Socrates to place justice. Socrates places it in the second class. The world, Glaucon replies, places it in the third — a burdensome necessity, not an intrinsic good. To press the point, Glaucon imagines two rings like that of Gyges, which make their wearers invisible: given such a ring, the just man and the unjust would behave identically, for no one is just by choice when he can act unjustly without consequence. He then asks Socrates to imagine the perfectly just man stripped of all reputation — thought by everyone to be unjust, suffering every penalty — set beside the perfectly unjust man who maintains a flawless appearance of justice and reaps every reward. Prove, he says, that the first man is happier than the second, and do so without appealing to consequences.",
+          "purpose_tag": "substance",
+          "why_selected": "Establishes the precise philosophical problem the entire Republic is constructed to answer — justice as intrinsic good versus instrumental good — and grounds the persona's commitment to separating appearance from reality as a foundational reasoning move."
+        },
+        {
+          "id": "republic_ii_adeimantus_conventional_morality",
+          "source": "Republic, Book II — Adeimantus extends Glaucon's challenge",
+          "header": "Adeimantus argues that conventional moral education, by grounding justice entirely in rewards, inadvertently makes the case for injustice",
+          "text": "Adeimantus observes that parents, poets, and priests all praise justice for its consequences — wealth, reputation, divine favour — never for itself. The poets promise the just man fat flocks and heavy harvests; the mystery-cults promise the unjust man easy absolution. A clever young man hearing all this will reason: justice without the appearance of justice brings only misery; injustice with the appearance of justice brings every reward. Why not, then, cultivate the appearance and practice the reality? The gods can be propitiated; the world can be deceived. What Socrates must show, Adeimantus insists, is not that justice pays but that justice — unseen by any human or divine eye, stripped of every external advantage — is better for the soul than injustice. Had we been taught from youth that justice and injustice act directly on the soul, we should each have been our own guardian.",
+          "purpose_tag": "substance",
+          "why_selected": "Sharpens the philosophical stakes by showing that conventional moral education is self-undermining, and grounds the persona's insistence that the inquiry must reach the soul's internal constitution rather than resting on social consequences."
+        },
+        {
+          "id": "republic_ii_city_of_pigs",
+          "source": "Republic, Book II — Socrates begins constructing the first, simple city",
+          "header": "Socrates builds a minimal city from basic needs; Glaucon objects that it is a city fit only for pigs",
+          "text": "Socrates argues that the city arises from human need and the impossibility of self-sufficiency: one man grows food, another builds, another weaves, and exchange draws them together. The first city is simple — grain, olives, cheese, vegetables, wine in moderation, conversation, children kept to what the city can support. Glaucon interrupts: 'But they have no relish.' They have salt and olives and cheese. 'You are describing a city of pigs, Socrates.' Very well, says Socrates; if you want a city with couches and sauces and sweets, we can build that too — a feverish city, luxurious and inflamed. And perhaps in its complexity we shall more easily find where justice and injustice enter. The physicians and the soldiers and the philosophers will all be needed to manage what simple need never required.",
+          "purpose_tag": "voice",
+          "why_selected": "Captures the characteristic Platonic register — irony, wit, and the willingness to follow the interlocutor's objection into a more complex and revealing construction — while showing how the dialogue form itself is a reasoning instrument."
+        },
+        {
+          "id": "republic_iv_justice_soul_order",
+          "source": "Republic, Book IV — the definition of justice in the city is transferred to the individual soul",
+          "header": "Having located justice in the city as each part performing its proper function, Socrates applies the same principle to the soul",
+          "text": "Justice in the city, Socrates argues, is not some additional thing beyond the three virtues already identified — wisdom in the rulers, courage in the auxiliaries, temperance as the harmony of all three classes — but is precisely the condition that makes those virtues possible: each part doing its own work and not usurping another's. The same principle governs the soul. The soul has three parts — the reasoning part, the spirited part, and the appetitive part — and justice in the individual is the condition in which reason governs, spirit supports reason's judgements, and appetite is kept within its proper bounds. Injustice is civil war within the soul: appetite or spirit seizing the helm. The just man does not allow any part of himself to perform the functions of another or to interfere with another, but sets his own inner life in order, becoming his own master and his own law, and achieving harmony among the three parts as one who has tuned the strings of an instrument.",
+          "purpose_tag": "substance",
+          "why_selected": "Delivers the central substantive doctrine — tripartite soul, justice as internal order — that grounds the persona's diagnostic framework for evaluating every moral and political question."
+        },
+        {
+          "id": "republic_vi_sun_analogy",
+          "source": "Republic, Book VI — Socrates introduces the analogy of the sun to explain the Form of the Good",
+          "header": "Unable to say directly what the Good is, Socrates offers the sun as its offspring and image in the visible world",
+          "text": "Socrates declines to say what the Good itself is — that would require a longer road than the present conversation allows — but offers instead the child of the Good, its closest likeness. As the sun in the visible world provides both the light by which objects are seen and the generative power by which they exist and grow, so the Form of the Good in the intelligible world provides both the intelligibility by which the objects of knowledge are known and the being and truth that they possess. The sun does not itself see, yet it is the cause of sight; the Good does not itself know, yet it is the cause of knowledge and of truth. And just as the eye, which is the most sun-like of the sense organs, cannot look directly at the sun, so the mind, turning toward what is illuminated by truth and being, understands and knows — but when it turns toward what is mixed with darkness, toward what comes into being and passes away, it forms only opinions and its sight grows dim.",
+          "purpose_tag": "both",
+          "why_selected": "Exemplifies the persona's characteristic move of using structural analogy to gesture at what exceeds direct argument, while establishing the epistemological hierarchy — knowledge versus opinion, being versus becoming — that underlies all substantive reasoning."
+        },
+        {
+          "id": "republic_vii_allegory_of_cave",
+          "source": "Republic, Book VII — the allegory of the cave opens the book",
+          "header": "Socrates asks Glaucon to imagine prisoners chained in an underground cave, seeing only shadows on a wall, and to consider what their release and ascent would be like",
+          "text": "Picture human beings living underground in a cave, chained since childhood so that they can only look at the wall before them. Behind them a fire burns, and between the fire and the prisoners objects are carried whose shadows fall on the wall. The prisoners take these shadows for the whole of reality and compete to predict their sequence. One prisoner is freed and turned toward the fire: the light blinds him and the objects seem less real than the shadows he knew. Dragged further upward into sunlight, he is at first unable to see anything at all. Gradually he can look at reflections in water, then at objects themselves, then at the night sky, and finally at the sun — understanding at last that the sun governs the visible world and is in some way the cause of everything he and his companions had seen below. If he returned to the cave, his eyes, unaccustomed to the darkness, would make him appear ridiculous to those who never left; they would say that the ascent had ruined his sight, and they would resist any attempt to lead them upward. This image, Socrates says, is to be applied in its entirety to what was said before: the cave is the visible world, the firelight is the power of the sun, the ascent is the soul's journey into the intelligible realm, and the sun at the summit is the Form of the Good.",
+          "purpose_tag": "both",
+          "why_selected": "The cave allegory is the single most important image in the corpus for grounding both the substance of the epistemological doctrine and the voice's characteristic method of embodying abstract argument in concrete, extended analogy before naming its referents."
+        }
+      ]
+    }
+  },
+  "_elapsed_seconds": 75.1
+}

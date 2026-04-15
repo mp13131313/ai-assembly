@@ -51,25 +51,65 @@ def call_claude(
         # the rest of the codebase; a truthy value just switches thinking on.
         kwargs["thinking"] = {"type": "adaptive"}
 
-    msg = client.messages.create(**kwargs)
-    text_parts = [b.text for b in msg.content if b.type == "text"]
-    text = "".join(text_parts)
+    # Anthropic SDK refuses non-streaming for requests it estimates will take
+    # >10 min. With max_tokens >= 16384 + adaptive thinking, the estimate
+    # crosses that threshold. Use streaming and accumulate text + thinking.
+    use_streaming = max_tokens >= 16384 or thinking_budget
+    if use_streaming:
+        text_parts: list[str] = []
+        usage_in = 0
+        usage_out = 0
+        stop_reason = None
+        with client.messages.stream(**kwargs) as stream:
+            for event in stream:
+                etype = getattr(event, "type", None)
+                if etype == "content_block_delta":
+                    delta = getattr(event, "delta", None)
+                    if delta and getattr(delta, "type", None) == "text_delta":
+                        text_parts.append(delta.text)
+            final = stream.get_final_message()
+            text = "".join(text_parts)
+            usage_in = final.usage.input_tokens
+            usage_out = final.usage.output_tokens
+            stop_reason = final.stop_reason
 
-    out: dict[str, Any] = {
-        "text": text,
-        "usage": {
-            "input_tokens": msg.usage.input_tokens,
-            "output_tokens": msg.usage.output_tokens,
-        },
-        "model": model,
-        "stop_reason": msg.stop_reason,
-    }
+        out: dict[str, Any] = {
+            "text": text,
+            "usage": {"input_tokens": usage_in, "output_tokens": usage_out},
+            "model": model,
+            "stop_reason": stop_reason,
+        }
+    else:
+        msg = client.messages.create(**kwargs)
+        text_parts = [b.text for b in msg.content if b.type == "text"]
+        text = "".join(text_parts)
+        out = {
+            "text": text,
+            "usage": {
+                "input_tokens": msg.usage.input_tokens,
+                "output_tokens": msg.usage.output_tokens,
+            },
+            "model": model,
+            "stop_reason": msg.stop_reason,
+        }
     if response_format_json:
         # Trim ```json fences if present
         cleaned = text.strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-        out["json"] = json.loads(cleaned)
+        try:
+            out["json"] = json.loads(cleaned)
+        except json.JSONDecodeError as e:
+            out["json"] = None
+            out["json_parse_error"] = f"{type(e).__name__}: {e}"
+            out["raw_text"] = text
+            # If the model hit max_tokens, that's almost certainly why
+            if out.get("stop_reason") == "max_tokens":
+                raise RuntimeError(
+                    f"Claude hit max_tokens ({max_tokens}) before completing JSON. "
+                    f"Bump max_tokens and retry. Raw text len: {len(text)}"
+                ) from e
+            raise RuntimeError(f"Claude returned invalid JSON: {e}") from e
     return out
 
 
