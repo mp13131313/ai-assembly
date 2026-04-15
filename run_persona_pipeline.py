@@ -1,14 +1,12 @@
-"""End-to-end Persona Pipeline runner for a single voice (Plato test run).
+"""End-to-end Persona Pipeline runner for a single voice.
 
-Walks: Node 0 -> Pass 1a -> Pass 1c -> Pass 1-merge -> Pass 2 -> CT ->
-Pass 3 -> CT -> Pass 4a -> CT -> Pass 4b -> Pass 5 -> Pass 6.
+Walks: Node 0 -> Pass 1a -> Pass 1b -> Pass 1c -> Pass 1-merge -> Pass 2 -> CT
+-> Pass 3 (+ DR supplement if triggered) -> CT -> Pass 1d (excerpt selection)
+-> Pass 4a -> CT -> Pass 4b -> CT -> Pass 5 -> Pass 6 -> assembled card.
 
 Designed for resumability: each pass writes its output JSON before the next
 pass starts. If a pass already exists, it's loaded from disk instead of
 re-called. To force a re-run, delete the output JSON.
-
-Pass 1b (Gemini broad scan) is skipped — the project's Google API key has
-zero free-tier quota. Pass 1-merge therefore runs in degraded mode.
 """
 from __future__ import annotations
 import json
@@ -23,8 +21,9 @@ load_dotenv("/Users/aienvironment/Desktop/ai-assembly-personas/.env")
 from flows.shared.io import load_voice_input, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_perplexity
+from flows.shared.clients import call_claude, call_perplexity, call_openai, call_gemini
 from flows.shared.node1c_fetch import fetch_all
+from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 
 
 VOICE_NAME = sys.argv[1] if len(sys.argv) > 1 else "Plato"
@@ -96,19 +95,66 @@ else:
     pass1c = {"passages": []}
 
 
-# ---------- PASS 1-MERGE (degraded — only Pass 1a available) ----------
-merged_dossier = dossier_text
+# ---------- PASS 1b (Gemini broad scan) ----------
+def _pass_1b():
+    prompt = render("persona_pass_1b_broad_scan", name=vi["name"])
+    r = call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1b_broad_scan",
+            "model": r["model"], "usage": r["usage"], "text": r["text"]}
+
+stamp("PASS 1b: Gemini broad scan")
+pass1b = call_or_cache(RUN / "01_research/gemini_broad_scan.json", "Pass 1b", _pass_1b)
+broad_scan_text = pass1b["text"]
+stamp(f"  broad scan: {len(broad_scan_text)} chars")
+
+
+# ---------- PASS 1-MERGE (Claude contradiction check) ----------
+def _pass_1merge():
+    sysp = open("flows/shared/prompts/persona_pass_1merge_contradiction_system.md").read().strip()
+    userp = render("persona_pass_1merge_contradiction_user",
+                   research_dossier=dossier_text, broad_scan=broad_scan_text)
+    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
+                    max_tokens=2048, temperature=0.0, thinking_budget=None,
+                    response_format_json=True)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
+            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+stamp("PASS 1-merge: contradiction check (Sonnet)")
+pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
+merge_status = pass1merge["result"].get("status", "UNKNOWN")
+stamp(f"  status: {merge_status}")
+
+# Build merged_dossier: Pass 1a as primary + Pass 1b as supplement + contradiction flags
+merged_dossier_parts = [
+    "=== PRIMARY DOSSIER (Perplexity sonar-deep-research) ===",
+    dossier_text,
+    "",
+    "=== BROAD SCAN SUPPLEMENT (Gemini 2.5 Pro) ===",
+    broad_scan_text,
+]
+if merge_status == "CONTRADICTIONS":
+    items = pass1merge["result"].get("items", [])
+    merged_dossier_parts += [
+        "",
+        f"=== FLAGGED CONTRADICTIONS ({len(items)}) ===",
+        "Subsequent passes should treat the following as flagged for caution:",
+    ]
+    for i, item in enumerate(items, 1):
+        merged_dossier_parts += [
+            f"\n[{i}] Assessment: {item.get('assessment', '?')}",
+            f"    Claim A: {item.get('claim_a', '')}",
+            f"    Claim B: {item.get('claim_b', '')}",
+        ]
+merged_dossier = "\n".join(merged_dossier_parts)
+
 write_json_atomic(RUN / "01_research/merged_dossier.json", {
     "voice_name": vi["name"], "voice_slug": SLUG,
     "merged_dossier": merged_dossier,
-    "sources": ["pass_1a_perplexity"],
-    "skipped": ["pass_1b_gemini", "pass_1merge_contradiction_check"],
-    "skip_reasons": {
-        "pass_1b_gemini": "Google project has zero free-tier quota",
-        "pass_1merge": "trivially CLEAN with single source",
-    },
-    "degraded_mode": True,
+    "sources": ["pass_1a_perplexity", "pass_1b_gemini"],
+    "contradiction_check": pass1merge["result"],
+    "degraded_mode": False,
 })
+stamp(f"  merged_dossier: {len(merged_dossier)} chars")
 
 
 # ---------- HELPER: Claude call wrapper for generation passes ----------
@@ -154,12 +200,59 @@ pass_2_summary = _ct_compress(pass2["fields"], "pass2")
 
 
 # ---------- PASS 3 (Intellectual Core) ----------
+# Conditional ChatGPT DR supplement per v3.7 spec — fires when ANY of:
+#   (a) needs_dr_supplement is True
+#   (b) dossier INTELLECTUAL FRAMEWORK section < 500 words
+#   (c) voice_mode == "observational"
+def _should_dr_supplement() -> tuple[bool, str]:
+    if vi.get("needs_dr_supplement"):
+        return True, "needs_dr_supplement=True in input"
+    if vi["voice_mode"] == "observational":
+        return True, "voice_mode is observational"
+    # Word count of INTELLECTUAL FRAMEWORK section in dossier
+    import re
+    m = re.search(r"INTELLECTUAL FRAMEWORK(.*?)(?=\n#+\s|\Z)", merged_dossier, flags=re.DOTALL | re.IGNORECASE)
+    if m:
+        words = len(m.group(1).split())
+        if words < 500:
+            return True, f"INTELLECTUAL FRAMEWORK section is {words} words (<500)"
+    return False, "no trigger conditions met"
+
+def _pass_3_dr_supplement():
+    prompt = (
+        f"Analyse the intellectual framework of {vi['name']}, focusing specifically on:\n"
+        "1. Their characteristic reasoning method — how they move through a problem\n"
+        "2. Internal tensions or contradictions in their thought\n"
+        "3. Key concepts they use with distinctive precision\n"
+        "4. How their positions evolved over their lifetime\n"
+        "5. Minority scholarly readings beyond the standard interpretation\n\n"
+        "Draw on scholarly sources beyond the most commonly cited works. Include "
+        "specific textual references (work title, chapter/section) for each claim."
+    )
+    r = call_openai(system="You are a scholar of intellectual history conducting deep research.",
+                    user=prompt, model="gpt-4o", temperature=0.3, max_tokens=16000)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_dr_supplement",
+            "model": r["model"], "usage": r["usage"], "text": r["text"]}
+
+dr_should, dr_reason = _should_dr_supplement()
+chatgpt_supplement_text = None
+if dr_should:
+    stamp(f"PASS 3 DR supplement: triggered ({dr_reason})")
+    try:
+        dr_path = RUN / "01_research/chatgpt_dr_supplement.json"
+        dr_result = call_or_cache(dr_path, "Pass 3 DR supplement", _pass_3_dr_supplement)
+        chatgpt_supplement_text = dr_result["text"]
+    except Exception as e:
+        stamp(f"  WARN: DR supplement failed ({type(e).__name__}: {str(e)[:120]}); proceeding without")
+else:
+    stamp(f"PASS 3 DR supplement: skipped ({dr_reason})")
+
 def _pass_3():
     sysp = render("persona_pass_3_intellectual_core", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
-                   chatgpt_supplement=None, pass_2_summary=pass_2_summary)
+                   chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary)
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -171,24 +264,34 @@ pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
 
 
 # ---------- PASS 4a (Voice) — corpus-grounded ----------
-# Concatenate first ~80K chars of primary texts (avoid blowing context budget)
-def _build_primary_texts_block():
+# Pass 1d (Excerpt Selection): use Sonnet to curate ~30K chars of representative
+# passages from the fetched primary_texts, guided by the dossier's identification
+# of important works/scenes. Replaces the prior naive first-80K-character slice.
+def _pass_1d():
     if not pass1c.get("passages"):
-        return "[NO PRIMARY TEXTS — output will be from training data; flag voice_basis as 'training-data']"
-    parts = []
-    budget = 80000
-    for p in pass1c["passages"]:
-        if "error" in p or not p.get("text"):
-            continue
-        snippet = p["text"][:max(0, budget)]
-        parts.append(f"=== SOURCE: {p['url']} ({p['source']}, {p['char_count']} chars) ===\n{snippet}")
-        budget -= len(snippet)
-        if budget <= 0:
-            break
-    return "\n\n".join(parts) if parts else "[NO USABLE PASSAGES]"
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1d_excerpt_selection",
+                "status": "SKIPPED", "reason": "No primary_texts to select from",
+                "selections": [], "selected_text": "[NO PRIMARY TEXTS — output will be from training data; flag voice_basis as 'training-data']"}
+    structural_index = build_structural_index(pass1c["passages"])
+    user_prompt = render("persona_pass_1d_excerpt_selection",
+                         name=vi["name"], merged_dossier=merged_dossier,
+                         structural_index=structural_index)
+    r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
+                    user=user_prompt,
+                    model="claude-sonnet-4-6", max_tokens=4096,
+                    temperature=0.0, thinking_budget=None,
+                    response_format_json=True)
+    selections = r["json"].get("selections", [])
+    selected_text = apply_selections(pass1c["passages"], selections)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1d_excerpt_selection",
+            "model": r["model"], "usage": r["usage"],
+            "selection_count": len(selections), "selected_chars": len(selected_text),
+            "selections": selections, "selected_text": selected_text}
 
-primary_block = _build_primary_texts_block()
-stamp(f"  primary_texts block built: {len(primary_block)} chars (budget cap 80K)")
+stamp("PASS 1d: Excerpt Selection (Sonnet, curated subset)")
+pass1d = call_or_cache(RUN / "01_research/excerpt_selections.json", "Pass 1d", _pass_1d)
+primary_block = pass1d["selected_text"]
+stamp(f"  primary_texts block: {len(primary_block)} chars from {pass1d.get('selection_count', 0)} curated selections")
 
 def _pass_4a():
     sysp = render("persona_pass_4a_voice", name=vi["name"], type=vi["type"],
@@ -232,7 +335,12 @@ pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 def _pass_5():
     sysp = render("persona_pass_5_engagement", name=vi["name"], type=vi["type"],
                   voice_mode=vi["voice_mode"])
-    userp = render("persona_pass_5_user", pass_2_3_4_summary=pass_2_3_4_summary)
+    userp = render(
+        "persona_pass_5_user",
+        pass_2_3_4_summary=pass_2_3_4_summary,
+        constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
+        reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
+    )
     r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
                      max_tokens=4096, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
@@ -245,13 +353,26 @@ pass5 = call_or_cache(RUN / "02_passes/pass5_engagement.json", "Pass 5", _pass_5
 # ---------- PASS 6 (Corpus Curation) ----------
 def _pass_6():
     if not pass1c.get("passages"):
+        # Spec HALT pattern: mark the field BLOCKED so assembled card surfaces
+        # the issue, rather than missing the key entirely.
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "6_corpus_curation",
-                "status": "HALTED", "reason": "No primary_texts available — Pass 6 cannot run per spec.",
-                "fields": {}}
+                "status": "HALTED",
+                "reason": "No primary_texts available — Pass 6 cannot run per spec.",
+                "fields": {"curated_corpus_passages": "BLOCKED — awaiting Node 1c manual provision"}}
     sysp = render("persona_pass_6_corpus", name=vi["name"],
                   corpus_constraint=vi.get("corpus_constraint", "full"))
-    userp = render("persona_pass_6_user", primary_texts=primary_block,
-                   pass_2_3_4a_summary=pass_2_3_4a_summary)
+    userp = render(
+        "persona_pass_6_user",
+        primary_texts=primary_block,
+        merged_dossier=merged_dossier,
+        pass_2_3_4a_summary=pass_2_3_4a_summary,
+        constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
+        concept_lexicon=json.dumps(pass3["fields"].get("concept_lexicon", ""), ensure_ascii=False, indent=2),
+        reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
+        rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", ""), ensure_ascii=False),
+        characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", []), ensure_ascii=False, indent=2),
+        register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""), ensure_ascii=False),
+    )
     r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
                      max_tokens=8000, thinking=False, temperature=0.1)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "6_corpus_curation",
@@ -299,13 +420,46 @@ stamp(f"  Card saved to:        {RUN}/02_passes/")
 stamp("=" * 60)
 
 write_json_atomic(RUN / "persona_card_assembled.json", {
-    "voice_name": vi["name"], "voice_slug": SLUG,
-    "field_counts": {"pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
-                     "pass4a": len(pass4a["fields"]), "pass4b": len(pass4b["fields"]),
-                     "pass5": len(pass5["fields"]), "pass6": len(pass6.get("fields", {}))},
-    "total_fields": len(full_card),
-    "voice_basis": pass4a["voice_basis"],
-    "register_violations": register_violations,
-    "card": full_card,
+    # Spec wants 37 card fields flat at root + a metadata block.
+    "voice_name": vi["name"],
+    "voice_mode": vi["voice_mode"],
+    "pipeline_version": "3.7",
+    "generated_date": time.strftime("%Y-%m-%d"),
+
+    # All 35 generated card fields, flat at root level
+    **full_card,
+
+    # Runtime continuity fields (populated by Voice Pipeline at deployment, not
+    # by Persona Pipeline). Initialized null so consumers don't get KeyError.
+    "continuity_block_if_night_2": None,
+    "continuity_block_artifact_if_night_2": None,
+
+    "metadata": {
+        "passes_completed": [
+            "1a_perplexity", "1c_primary_text_fetch",
+            "2_identity_boundaries", "ct_pass2",
+            "3_intellectual_core", "ct_pass2_3",
+            "4a_voice", "ct_pass2_3_4a",
+            "4b_artifact", "ct_pass2_3_4",
+            "5_engagement",
+            "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
+        ],
+        "validation_status": "pending — Phase 3 not yet built",
+        "revision_loops": 0,
+        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "gutenberg:web_fetch"],
+        "voice_basis": pass4a["voice_basis"],
+        "hostile_sources": vi["hostile_sources"],
+        "corpus_constraint": vi.get("corpus_constraint", "full"),
+        "subtype": vi.get("subtype"),
+        "deployment_context": vi.get("conference_context", ""),
+        "human_review_status": "pending",
+        # Diagnostic extras (not in spec but useful for our development)
+        "field_counts": {
+            "pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
+            "pass4a": len(pass4a["fields"]), "pass4b": len(pass4b["fields"]),
+            "pass5": len(pass5["fields"]), "pass6": len(pass6.get("fields", {})),
+        },
+        "register_violations": register_violations,
+    },
 })
 stamp(f"Assembled card -> {RUN}/persona_card_assembled.json")
