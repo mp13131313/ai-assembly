@@ -184,14 +184,14 @@ def call_gemini(
     model: str | None = None,
     temperature: float = 0.2,
     max_output_tokens: int = 16384,
-    thinking_budget: int | None = 0,
+    thinking_budget: int | None = None,
 ) -> dict[str, Any]:
     """One Gemini call. Uses google-genai SDK (the supported library; the
     older google-generativeai package is deprecated as of late 2025).
 
-    `thinking_budget=0` disables thinking on 2.5-series models so the
-    output budget isn't consumed by hidden reasoning. Set to None to
-    leave the model default in place, or to a positive int for a budget.
+    `thinking_budget=None` (default) leaves the model's own default in place.
+    For gemini-2.5-pro this is required — the model only operates in thinking
+    mode and rejects budget=0. Set to a positive int to override.
     """
     from google import genai
     from google.genai import types
