@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_001",
+  "member": "Bob Marley",
+  "mode": "question",
+  "formulation": "Both sides of the debate claimed 'Western civilization' as their inheritance — one said it was fulfilled by expanding rights, the other said it was betrayed by going too far. But no one in the room spoke for those whose land and labor were the raw material the house was built from. When Babylon's children quarrel over which Babylon is the real Babylon, what does the sufferer's testimony say to the argument — or does it refuse the argument altogether?",
+  "theme_display_title": "Babylon's Inheritance",
+  "context_narrative": "At a Munich Security Conference panel on the meaning of Western civilization, the room split hard. One side — conservative voices from Washington and Prague — argued that progressive overreach had corroded the family, borders, and industrial strength that once defined the West. The other — led by Hillary Clinton — insisted that expanding freedom to Black people, women, and LGBTQ+ citizens was the fulfillment, not the betrayal, of the West's founding commitments. Ivan Krastev tried to dissolve the deadlock by noting there have always been too many Wests to stabilize the concept. No one in the room asked whose experience lay beneath the civilization both sides were claiming.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:004",
+      "quote": "The West is no longer a unified civilization but a contested territory of values, divided between a conservative vision rooted in national sovereignty and tradition, and a progressive vision of supranational social engineering, with the gap widening.",
+      "attribution": "Petr Macinka",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:011",
+      "quote": "The expansion of freedom to include Black people, women, and gay people — including same-sex marriage, which she characterized as creating a family — was a culmination of Western values, not a progressive distortion of them.",
+      "attribution": "Hillary R. Clinton",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "west_west_divide:012",
+      "quote": "The populist-nationalist movement is at its core about controlling people — who they are, how they look, who they love — and its nostalgia for 'making America great again' recalls a past that was open and welcoming only to white men and capitalist enterprise.",
+      "attribution": "Hillary R. Clinton",
+      "flavor": "contesting the framing"
+    },
+    {
+      "extraction_id": "west_west_divide:006",
+      "quote": "The problem is not that the West doesn't exist but that we have too many Wests — the Cold War West, the West as civilization — and the defining characteristic of the West since the mid-19th century has always been its pluralistic, self-questioning nature.",
+      "attribution": "Ivan Krastev",
+      "flavor": "extending the previous point"
+    },
+    {
+      "extraction_id": "west_west_divide:008",
+      "quote": "The post-Cold War progressive consensus wore down the family, borders, and industrial strength — fundamental sources of Western power — to the point of injuring the West's ability to maintain its own NATO commitments.",
+      "attribution": "Gladden J. Pappin"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:004",
+    "west_west_divide:006",
+    "west_west_divide:007",
+    "west_west_divide:008",
+    "west_west_divide:011",
+    "west_west_divide:012"
+  ],
+  "rationale": "The entire panel debated who rightfully inherits 'the West' but no voice spoke from outside the inheritance — this lands directly in Marley's activation on the language of the powerful describing the experience of the powerless and on colonial extraction's continuing forms, while the final clause ('refuse the argument altogether') gives his prophetic register room to reject the frame entirely rather than argue within it."
+}

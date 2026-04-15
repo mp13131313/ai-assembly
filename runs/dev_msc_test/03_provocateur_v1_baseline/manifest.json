@@ -1,0 +1,34 @@
+{
+  "pipeline": "provocateur",
+  "pipeline_version": "v1",
+  "council_config_version": "dev_stub_v1",
+  "council_members_count": 12,
+  "model": "claude-opus-4-6",
+  "thinking_enabled": true,
+  "inputs": {
+    "extractions": 106,
+    "themes": 6,
+    "clusters": 25
+  },
+  "outputs": {
+    "triaged_themes": 6,
+    "selected_themes": 5,
+    "dropped_themes": 1,
+    "formulations": 5,
+    "briefings_written": 12,
+    "coverage": {
+      "Plato": 2,
+      "Cleopatra": 3,
+      "Ibn Battuta": 3,
+      "Scheherazade": 3,
+      "Ada Lovelace": 2,
+      "Dostoevsky": 3,
+      "Hannah Arendt": 3,
+      "Bob Marley": 2,
+      "Audrey Tang": 2,
+      "Peter Thiel": 2,
+      "Whanganui River": 3,
+      "Octopus": 2
+    }
+  }
+}

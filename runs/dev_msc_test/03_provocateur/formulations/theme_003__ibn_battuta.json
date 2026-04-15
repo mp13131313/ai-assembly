@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_003",
+  "member": "Ibn Battuta",
+  "mode": "question",
+  "formulation": "You traveled for nearly thirty years through an order that opened doors from Tangier to Quanzhou — not a single institution but a web of Islamic law, hospitality codes, and trade networks that made extraordinary diversity navigable. Here, speakers debated whether the Western 'rules-based order' is universal principle corroded by hypocrisy or a particular civilization's framework disguised as nature. In your own rihla, how much of the diversity you moved through was genuine pluralism — and how much was legible to you only because the civilizational frame you carried was itself doing the ordering?",
+  "theme_display_title": "The Necessary Fiction",
+  "context_narrative": "At the Munich Security Conference, a panel titled 'The World on the Brink' fractured almost immediately over whether the rules-based international order is in crisis or has always been a fiction experienced differently depending on where you stand. Prince Faisal bin Farhan Al Saud argued the panic is a Eurocentric awakening — the developing world has long known might-makes-right. Ivan Krastev countered that the fiction of sovereign equality, however hypocritical, may be necessary: a world without it is a world where only power matters. The moderator herself noted the panel had reproduced the very imbalance it was analyzing — the conversation dominated by the US and EU while middle powers were squeezed to the margins.",
+  "selected_quotes": [
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:034",
+      "quote": "The rules-based international order was always underwritten by power, and recognizing that the US needs to restore its own strength does not mean rejecting all international norms — but rules won't enforce themselves without strong countries behind them.",
+      "attribution": "Gladden J. Pappin",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "breaking_point:028",
+      "quote": "I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs.",
+      "attribution": "Zanny Minton Beddoes"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "breaking_point:002",
+    "breaking_point:003",
+    "west_west_divide:023",
+    "west_west_divide:034",
+    "breaking_point:028",
+    "west_west_divide:039"
+  ],
+  "rationale": "The formulation activates Ibn Battuta's core territory — how authority travels across contexts, the assumption that one political form is universal — while pushing directly into his stretch by asking whether the Islamic civilizational frame that made his travels possible was itself doing the same ordering work that the Western 'rules-based order' is accused of disguising as nature."
+}

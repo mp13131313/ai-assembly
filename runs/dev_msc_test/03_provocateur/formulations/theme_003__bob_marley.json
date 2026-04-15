@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_003",
+  "member": "Bob Marley",
+  "mode": "question",
+  "formulation": "A voice in the room argued there is something worse than Babylon's hypocrisy: a world where the powerful stop pretending, where no one even claims the small are equal — because then the small have nothing left to appeal to. But another testified that the developing world has lived under might-makes-right all along; the lie never sheltered the sufferers. When Babylon drops its mask, is that a new danger for the downpressed, or is it the same captivity finally wearing its own face?",
+  "theme_display_title": "When Babylon Drops the Mask",
+  "context_narrative": "At the Munich Security Conference's main-stage panel, a European foreign-policy chief called the missing piece of international order 'accountability' — rules exist but no one enforces them against the powerful. Saudi Arabia's foreign minister cut through the alarm: the developing world has lived under might-makes-right for decades; the current panic is just a European awakening. Then, in a separate session on Western unity, a political analyst made the day's sharpest claim — that there is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all, because then small countries lose the only fiction that distinguished an American-led order from raw power. Meanwhile, the panel itself reproduced the very imbalance it was analyzing: the conversation was dominated by the US and EU while middle powers were squeezed to the margins.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "with weight"
+    },
+    {
+      "extraction_id": "vox_populi:019",
+      "quote": "In a rules-based order, hypocrisy is vulnerability — the West's habit of looking the other way for inconvenient populations undermines the legitimacy of the entire system and threatens democracies globally.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:042",
+      "quote": "The critique of the rules-based order is not only coming from the right; AOC's formulation that 'we called out exceptions to our values and our rules, and eventually our exceptions became our own rules' suggests a left-wing critique that may overlap with the right's.",
+      "attribution": "Audience Member 1"
+    },
+    {
+      "extraction_id": "breaking_point:028",
+      "quote": "I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs.",
+      "attribution": "Zanny Minton Beddoes"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:023",
+    "breaking_point:002",
+    "breaking_point:003",
+    "vox_populi:019",
+    "west_west_divide:042",
+    "breaking_point:028",
+    "west_west_divide:039"
+  ],
+  "rationale": "Krastev's uncontested claim that hypocrisy is a necessary shelter for the small directly collides with Marley's prophetic Rastafari tradition — where Babylon's lies ARE the system of oppression, not a shield against something worse — landing squarely in his activation territory of 'the language of the powerful being used to describe the experience of the powerless' and forcing him to reckon with a genuine tension: whether the mask is a different threat than the face beneath it."
+}

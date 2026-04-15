@@ -1,0 +1,49 @@
+{
+  "theme_id": "theme_002",
+  "member": "Ibn Battuta",
+  "mode": "question",
+  "formulation": "You crossed dozens of sovereignties — sultanates, khanates, trading ports, island kingdoms — all connected by a shared framework of Islamic law, scholarly networks, and hospitality customs that let you move between radically different arrangements of power. Here, one voice insisted only the bounded nation-state can guarantee accountable governance; another argued that elected institutions spanning many nations do the same. In all those crossings, was it the local sovereign or the shared civilizational frame that made each place governable — and what became of good rule at the edges where the frame thinned?",
+  "theme_display_title": "The Betrayal and the Border",
+  "context_narrative": "A day of panels at Munich wrestled with populism's roots and cures. Alexandria Ocasio-Cortez argued that governing parties of both left and right had betrayed their working-class voters — dismissing demands for living wages while corporate power swelled to rival that of nation-states. Then Radosław Sikorski and Petr Macinka clashed directly over a deeper question: whether the EU is a genuine democracy or a structural impossibility. Sikorski insisted its elected parliament and accountable commission make it democratic; Macinka countered that only the sovereign nation-state, with its cultural continuity and bounded institutions, can host real accountability — and that a parliament unable to initiate its own legislation proves his point.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:029",
+      "quote": "The sovereign nation-state is the only platform that can guarantee democracy because it is the only way to maintain cultural continuity and keep power within limited, accountable institutions; democracy cannot fully exist at the supranational level.",
+      "attribution": "Petr Macinka",
+      "flavor": "pushing back, speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:010",
+      "quote": "The EU is democratically governed — the European Parliament is elected, the Commission is nominated by elected governments — and the myth that Brussels bureaucrats impose directives on member states is complete nonsense that gave us Brexit.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "contesting the framing, speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:005",
+      "quote": "Globalization was not a progressive project — it was a business idea about maximizing profits, supported for decades by Republican businessmen who wanted cheap labor, and tinged with the racism of exporting dirty jobs to poorer countries.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "extending the previous point"
+    },
+    {
+      "extraction_id": "vox_populi:010",
+      "quote": "Populism should not automatically be labeled as something bad; listening to people's frustrations and translating them into policy is the very meaning of politics — the problem begins only when populism is turned against the institutions that protect democracy.",
+      "attribution": "Petr Pavel",
+      "flavor": "speaking with intensity, building on what came before"
+    },
+    {
+      "extraction_id": "west_west_divide:030",
+      "quote": "The European Parliament is the only parliament in the world that cannot initiate legislation, which fundamentally undermines the claim that the EU is democratically governed in the same way as a nation-state.",
+      "attribution": "Petr Macinka",
+      "flavor": "contesting the framing"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:029",
+    "west_west_divide:010",
+    "west_west_divide:030",
+    "west_west_divide:005",
+    "vox_populi:010",
+    "vox_populi:009"
+  ],
+  "rationale": "The Macinka–Sikorski clash over whether governance can exist beyond the bounded nation-state maps directly onto Ibn Battuta's stretch territory — whether the Islamic civilizational frame he traveled within was itself a form of supranational governance doing more structural work than the local sovereigns he credited — and activates his distinctive ground in comparing how authority travels or fails to travel across radically different political arrangements."
+}

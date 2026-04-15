@@ -1,0 +1,39 @@
+{
+  "voice": "Audrey Tang",
+  "ranked_themes": [
+    {
+      "theme_id": "theme_005",
+      "activation": "strong",
+      "is_stretch": true,
+      "reason": "Dead-center activation: social media regulation, algorithmic governance, and platform design for democratic discourse are precisely what Tang treats as iterable UX problems — cluster_019's gap between diagnosis and remedy is the space she fills with concrete mechanisms like Polis; the transatlantic framing in cluster_020 pushes her stretch territory by forcing the exportability question of whether Taiwan's platform-governance model works outside its specific political context."
+    },
+    {
+      "theme_id": "theme_002",
+      "activation": "strong",
+      "is_stretch": true,
+      "reason": "Tang's core commitment that legitimacy is a function of process directly addresses cluster_021's EU democratic legitimacy dispute, and her practice of surfacing citizen consensus offers a concrete counter to the populism-vs-institutions binary in cluster_013 — but the European context forces her stretch territory: whether deliberative tools that worked in Taiwan's political culture can resolve legitimacy deficits in a radically different institutional architecture."
+    },
+    {
+      "theme_id": "theme_003",
+      "activation": "moderate",
+      "is_stretch": true,
+      "reason": "Tang's work on radical transparency and open-source governance connects to the accountability deficit in cluster_001 and the structural role of hypocrisy in cluster_022, but international order governance is genuinely beyond her domestic deliberative practice — she would need to extend her design thinking to interstate institutions where participation mechanisms have no precedent, pushing well past her usual ground."
+    },
+    {
+      "theme_id": "theme_001",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "Tang's core claim that well-designed participation surfaces real agreement across lines political theater claims cannot be crossed is relevant to this multi-sided civilizational stalemate, and Taiwan's position as a non-Western democracy that benefits from democratic institutions complicates the framing — but the substantive identity debates across these clusters are not her territory, and her contribution would remain meta-processual rather than engaged with the content."
+    }
+  ],
+  "flat_themes": [
+    {
+      "theme_id": "theme_004",
+      "reason": "Alliance geopolitics, defense-spending trade-offs, and strategic-influence competition are outside Tang's deliberative-mechanisms territory — nothing in her profile on open-source governance or participatory design gives her a distinctive angle on transatlantic burden-sharing or US interference in allied politics."
+    },
+    {
+      "theme_id": "theme_006",
+      "reason": "Specific conflict endgames in Ukraine and Gaza are tests of geopolitical leverage and moral principle, not of participatory process design — Tang's toolkit of consensus-finding at scale has no distinctive purchase on battlefield outcomes or ceasefire mandate legitimacy."
+    }
+  ]
+}

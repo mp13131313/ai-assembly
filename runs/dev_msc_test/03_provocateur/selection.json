@@ -1,0 +1,247 @@
+{
+  "assignments_by_member": {
+    "Plato": [
+      "theme_003",
+      "theme_002",
+      "theme_001",
+      "theme_005"
+    ],
+    "Cleopatra": [
+      "theme_003",
+      "theme_006",
+      "theme_002",
+      "theme_001"
+    ],
+    "Ibn Battuta": [
+      "theme_003",
+      "theme_001",
+      "theme_002"
+    ],
+    "Scheherazade": [
+      "theme_005",
+      "theme_003",
+      "theme_006"
+    ],
+    "Ada Lovelace": [
+      "theme_005"
+    ],
+    "Dostoevsky": [
+      "theme_003",
+      "theme_006",
+      "theme_002",
+      "theme_001",
+      "theme_005"
+    ],
+    "Hannah Arendt": [
+      "theme_003",
+      "theme_002",
+      "theme_001",
+      "theme_005",
+      "theme_006"
+    ],
+    "Bob Marley": [
+      "theme_003",
+      "theme_001",
+      "theme_006",
+      "theme_002"
+    ],
+    "Audrey Tang": [
+      "theme_002",
+      "theme_005",
+      "theme_003",
+      "theme_001"
+    ],
+    "Peter Thiel": [
+      "theme_003",
+      "theme_001",
+      "theme_002",
+      "theme_005"
+    ],
+    "Whanganui River": [
+      "theme_003"
+    ],
+    "Octopus": [
+      "theme_002",
+      "theme_005"
+    ]
+  },
+  "kept_themes": [
+    {
+      "theme_id": "theme_003",
+      "title": "The rules-based order — legitimacy crisis and reform",
+      "theme_quality": 68.85,
+      "assigned_voices": [
+        "Plato",
+        "Cleopatra",
+        "Ibn Battuta",
+        "Scheherazade",
+        "Dostoevsky",
+        "Hannah Arendt",
+        "Bob Marley",
+        "Audrey Tang",
+        "Peter Thiel",
+        "Whanganui River"
+      ],
+      "audience_friction": "high",
+      "fault_line_present": true
+    },
+    {
+      "theme_id": "theme_002",
+      "title": "Populism — material roots, definitional disputes, and institutional responses",
+      "theme_quality": 40.95,
+      "assigned_voices": [
+        "Plato",
+        "Cleopatra",
+        "Ibn Battuta",
+        "Dostoevsky",
+        "Hannah Arendt",
+        "Bob Marley",
+        "Audrey Tang",
+        "Peter Thiel",
+        "Octopus"
+      ],
+      "audience_friction": "moderate",
+      "fault_line_present": true
+    },
+    {
+      "theme_id": "theme_005",
+      "title": "Democratic discourse — speech norms and information governance",
+      "theme_quality": 39.0,
+      "assigned_voices": [
+        "Plato",
+        "Scheherazade",
+        "Ada Lovelace",
+        "Dostoevsky",
+        "Hannah Arendt",
+        "Audrey Tang",
+        "Peter Thiel",
+        "Octopus"
+      ],
+      "audience_friction": "moderate",
+      "fault_line_present": true
+    },
+    {
+      "theme_id": "theme_001",
+      "title": "The contested meaning of Western civilization",
+      "theme_quality": 39.0,
+      "assigned_voices": [
+        "Plato",
+        "Cleopatra",
+        "Ibn Battuta",
+        "Dostoevsky",
+        "Hannah Arendt",
+        "Bob Marley",
+        "Audrey Tang",
+        "Peter Thiel"
+      ],
+      "audience_friction": "moderate",
+      "fault_line_present": true
+    },
+    {
+      "theme_id": "theme_006",
+      "title": "Active conflicts testing the order's principles in practice",
+      "theme_quality": 25.35,
+      "assigned_voices": [
+        "Cleopatra",
+        "Scheherazade",
+        "Dostoevsky",
+        "Hannah Arendt",
+        "Bob Marley"
+      ],
+      "audience_friction": "moderate",
+      "fault_line_present": true
+    }
+  ],
+  "dropped_themes": [
+    {
+      "theme_id": "theme_004",
+      "reason": "below quorum (min 3 voices required)",
+      "stage": "quorum"
+    }
+  ],
+  "coverage_per_member": {
+    "Plato": 4,
+    "Cleopatra": 4,
+    "Ibn Battuta": 3,
+    "Scheherazade": 3,
+    "Ada Lovelace": 1,
+    "Dostoevsky": 5,
+    "Hannah Arendt": 5,
+    "Bob Marley": 4,
+    "Audrey Tang": 4,
+    "Peter Thiel": 4,
+    "Whanganui River": 1,
+    "Octopus": 2
+  },
+  "forced_fits": [],
+  "stretch_swaps": [],
+  "below_target": [
+    {
+      "voice": "Plato",
+      "got": 4,
+      "target": 5
+    },
+    {
+      "voice": "Cleopatra",
+      "got": 4,
+      "target": 5
+    },
+    {
+      "voice": "Ibn Battuta",
+      "got": 3,
+      "target": 5
+    },
+    {
+      "voice": "Scheherazade",
+      "got": 3,
+      "target": 5
+    },
+    {
+      "voice": "Ada Lovelace",
+      "got": 1,
+      "target": 5
+    },
+    {
+      "voice": "Bob Marley",
+      "got": 4,
+      "target": 5
+    },
+    {
+      "voice": "Audrey Tang",
+      "got": 4,
+      "target": 5
+    },
+    {
+      "voice": "Peter Thiel",
+      "got": 4,
+      "target": 5
+    },
+    {
+      "voice": "Whanganui River",
+      "got": 1,
+      "target": 5
+    },
+    {
+      "voice": "Octopus",
+      "got": 2,
+      "target": 5
+    }
+  ],
+  "selection_parameters_used": {
+    "activation_threshold": 2,
+    "min_members_per_theme": 3,
+    "min_formulations_per_voice": 1,
+    "target_formulations_per_voice": 5,
+    "hard_cap_per_voice": 5,
+    "friction_multiplier": {
+      "low": 1.0,
+      "moderate": 1.3,
+      "high": 1.7
+    },
+    "fault_line_multiplier": {
+      "absent": 1.0,
+      "present": 1.5
+    },
+    "stretch_swap_enabled": true
+  }
+}

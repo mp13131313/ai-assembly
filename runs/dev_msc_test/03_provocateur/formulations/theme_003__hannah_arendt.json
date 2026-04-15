@@ -1,0 +1,48 @@
+{
+  "theme_id": "theme_003",
+  "member": "Hannah Arendt",
+  "mode": "proposition",
+  "formulation": "The fiction of sovereign equality, even when every party to it knows it is a fiction, is what prevents the international order from collapsing into pure force — and dismantling that fiction in the name of truthfulness would not restore genuine political life but destroy its last remaining shelter.",
+  "theme_display_title": "The Lie That Holds the World Together",
+  "context_narrative": "At the Munich Security Conference's central panel on the rules-based order, European and American officials argued over accountability and reform while the moderator admitted the conversation itself had reproduced the very power imbalance it was meant to address — the US and EU blocs dominating while middle powers were squeezed to the margins. The sharpest uncontested claim came from political scientist Ivan Krastev, who argued that there is something worse than liberal hypocrisy: a world with no hypocrisy at all, where only power matters and small states lose any reason to distinguish between great powers. An audience member noted that left-wing and right-wing critiques of the order were converging — AOC's formulation that 'our exceptions became our rules' — but the panel declined to engage. No one on stage resolved whether the order's foundational fiction is what preserves political space or what has been quietly hollowing it out.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:019",
+      "quote": "In a rules-based order, hypocrisy is vulnerability — the West's habit of looking the other way for inconvenient populations undermines the legitimacy of the entire system and threatens democracies globally.",
+      "attribution": "Alexandria Ocasio-Cortez",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:028",
+      "quote": "I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs.",
+      "attribution": "Zanny Minton Beddoes, moderator"
+    },
+    {
+      "extraction_id": "west_west_divide:042",
+      "quote": "The critique of the rules-based order is not only coming from the right; AOC's formulation that 'we called out exceptions to our values and our rules, and eventually our exceptions became our own rules' suggests a left-wing critique that may overlap with the right's, which the panel should engage.",
+      "attribution": "Audience Member 1"
+    },
+    {
+      "extraction_id": "west_west_divide:034",
+      "quote": "The rules-based international order was always underwritten by power, and recognizing that the US needs to restore its own strength does not mean rejecting all international norms — but rules won't enforce themselves without strong countries behind them.",
+      "attribution": "Gladden J. Pappin",
+      "flavor": "pushing back"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:023",
+    "vox_populi:019",
+    "breaking_point:028",
+    "west_west_divide:034",
+    "west_west_divide:039",
+    "west_west_divide:042",
+    "breaking_point:029"
+  ],
+  "rationale": "Krastev's uncontested claim that the fiction of sovereign equality is a necessary protection against pure force lands squarely in Arendt's 'Truth and Politics' territory — forcing her to adjudicate between her commitment to truthfulness as the condition of genuine public life and her understanding that the destruction of political frameworks leaves people rightless and exposed, which is the tension her work never fully resolved."
+}

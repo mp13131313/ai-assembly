@@ -1,0 +1,294 @@
+{
+  "triaged_themes": [
+    {
+      "theme_id": "theme_001",
+      "activated_members": [
+        {
+          "name": "Plato",
+          "strength": "strong",
+          "reason": "Whether 'the West' tracks something knowable or is mere competing opinion — the failure to distinguish the Good from preference."
+        },
+        {
+          "name": "Cleopatra",
+          "strength": "strong",
+          "reason": "Civilizational rhetoric as performed legitimacy and power projection — she governed at the Hellenistic-Roman hinge."
+        },
+        {
+          "name": "Ibn Battuta",
+          "strength": "strong",
+          "reason": "Claims of civilizational universality challenged by the observed variety of functioning human arrangements."
+        },
+        {
+          "name": "Peter Thiel",
+          "strength": "strong",
+          "reason": "Left-right contest over Western identity as mimetic rivalry masking stagnation — pure Girardian territory."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "moderate",
+          "reason": "Civilizational rhetoric substituting for genuine political speech and action among equals."
+        },
+        {
+          "name": "Dostoevsky",
+          "strength": "moderate",
+          "reason": "Whether civilization is a spiritual category or a political label — the interior dimension beneath the culture war."
+        },
+        {
+          "name": "Bob Marley",
+          "strength": "moderate",
+          "reason": "'The West' as Babylon — the powerful naming the world in terms that erase the colonized."
+        }
+      ],
+      "audience_friction": {
+        "strength": "moderate",
+        "point": "Their identity as Western reformers requires the concept to have coherence they cannot demonstrate — they need 'the West' to mean something worth reforming."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Plato insists the Good is knowable and civilization must track it; Ibn Battuta challenges civilizational universality from observed plurality; Thiel diagnoses the entire contest as mimetic rivalry; Cleopatra reduces it to power performance; Marley names it Babylon — genuinely irreconcilable positions on whether the concept refers to anything real."
+      },
+      "target_score": 3,
+      "target_score_reason": "Four strong activations with a five-way fault line on whether the concept refers to anything at all; the audience's own stake in the concept's coherence makes the instability personally uncomfortable."
+    },
+    {
+      "theme_id": "theme_002",
+      "activated_members": [
+        {
+          "name": "Plato",
+          "strength": "strong",
+          "reason": "Whether popular grievance has any relationship to the Good — democracy as self-justifying vs. requiring something beyond preference."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "strong",
+          "reason": "EU legitimacy deficit as administration replacing genuine politics — the regime that functions smoothly but has destroyed public speech."
+        },
+        {
+          "name": "Peter Thiel",
+          "strength": "strong",
+          "reason": "Institutional stagnation producing populist symptoms — the crowd responding to real decay that elites refuse to name."
+        },
+        {
+          "name": "Dostoevsky",
+          "strength": "strong",
+          "reason": "Grand Inquisitor territory — do people actually want political freedom or do they want bread, security, and someone to worship?"
+        },
+        {
+          "name": "Audrey Tang",
+          "strength": "moderate",
+          "reason": "Democratic legitimacy as a redesignable process — the EU deficit as a UX problem with possible solutions."
+        },
+        {
+          "name": "Cleopatra",
+          "strength": "moderate",
+          "reason": "Practical sovereignty under institutional pressure — what legitimacy costs and buys when the center cannot hold."
+        },
+        {
+          "name": "Bob Marley",
+          "strength": "moderate",
+          "reason": "Working-class betrayal by governing parties — the gap between what is said and what is lived."
+        }
+      ],
+      "audience_friction": {
+        "strength": "high",
+        "point": "They manage organizations that claim stakeholder legitimacy while making decisions their stakeholders cannot meaningfully contest — the EU's democratic deficit mirrors their own governance gap."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Dostoevsky's Grand Inquisitor (people may prefer bread to freedom) vs. Arendt's insistence that political action defines humanity vs. Tang's belief that better process design solves legitimacy vs. Thiel's claim that the institutions are fundamentally broken and the populist diagnosis is correct — four genuinely incompatible positions on whether the democratic crisis is spiritual, structural, designable, or terminal."
+      },
+      "target_score": 3,
+      "target_score_reason": "The structural paradox — institutions meant to answer populism cannot demonstrate the democratic credentials populism demands — generates a four-way council fault line and hits the audience's own undemocratic organizations directly."
+    },
+    {
+      "theme_id": "theme_003",
+      "activated_members": [
+        {
+          "name": "Cleopatra",
+          "strength": "strong",
+          "reason": "Sovereignty under rules set by powers that exempt themselves — her entire reign was navigating this exact asymmetry."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "strong",
+          "reason": "Managed hypocrisy as potential destruction of the public space where genuine political speech can appear."
+        },
+        {
+          "name": "Ibn Battuta",
+          "strength": "strong",
+          "reason": "Western-centrism of the crisis narrative — the developing world has always lived under might-makes-right; this 'crisis' is a European awakening."
+        },
+        {
+          "name": "Scheherazade",
+          "strength": "moderate",
+          "reason": "The structural role of necessary fiction — whether a useful lie that protects the vulnerable is still a lie that poisons."
+        },
+        {
+          "name": "Peter Thiel",
+          "strength": "moderate",
+          "reason": "Left-right convergence on critique as unexamined mimetic convergence; disruption of a stagnant order may be overdue."
+        },
+        {
+          "name": "Bob Marley",
+          "strength": "moderate",
+          "reason": "Rules-based order as continued colonial extraction wearing a legal costume."
+        },
+        {
+          "name": "Plato",
+          "strength": "moderate",
+          "reason": "Whether the order tracks justice or merely manages the appearance of justice — the cave allegory applied to international law."
+        }
+      ],
+      "audience_friction": {
+        "strength": "high",
+        "point": "They critique extractive systems while their organizations benefit from the rules-based order's structural hypocrisy — the suggestion that hypocrisy is a 'necessary fiction protecting small states' makes their own complicity load-bearing rather than incidental."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Cleopatra (hypocrisy is how power works; position yourself advantageously) vs. Arendt (hypocrisy that destroys genuine political speech is existentially dangerous regardless of utility) vs. Ibn Battuta (the crisis narrative itself is Western-centric and the real question is whose suffering counts as crisis) vs. Scheherazade (necessary fictions can protect the vulnerable if told with cunning) — a four-way split on whether managed hypocrisy is tolerable, toxic, provincial, or craftable."
+      },
+      "target_score": 3,
+      "target_score_reason": "The hypocrisy-as-structural-feature question produces sharp audience friction for people embedded in extractive systems they critique, strong activation across three traditions, and a genuine four-way fault line on whether necessary fictions are acceptable."
+    },
+    {
+      "theme_id": "theme_004",
+      "activated_members": [
+        {
+          "name": "Cleopatra",
+          "strength": "strong",
+          "reason": "Alliance management when the protector becomes the threat — navigating a shifting hegemon's demands is her biographical core."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "moderate",
+          "reason": "US interference in allied domestic politics as destruction of the norm architecture that makes genuine political action possible."
+        },
+        {
+          "name": "Audrey Tang",
+          "strength": "moderate",
+          "reason": "External interference threatening democratic process — Taiwan's existential experience with great-power pressure on democratic sovereignty."
+        },
+        {
+          "name": "Peter Thiel",
+          "strength": "moderate",
+          "reason": "Whether alliances have outlived their strategic utility or represent mimetic loyalty to a past configuration."
+        },
+        {
+          "name": "Plato",
+          "strength": "moderate",
+          "reason": "Defense vs. social spending as a question about what the city exists for — guns or souls."
+        }
+      ],
+      "audience_friction": {
+        "strength": "moderate",
+        "point": "Strategic disruption framed as reform mirrors their own organizational disruption rhetoric — the line between creative destruction and institutional betrayal is uncomfortably thin."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Cleopatra (alliances are purely instrumental survival tools) vs. Arendt (the normative architecture has intrinsic value beyond strategic calculus) vs. Thiel (the old alliance structure should be disrupted because it sustains stagnation) — but the positions are more predictable than genuinely generative."
+      },
+      "target_score": 2,
+      "target_score_reason": "Strong Cleopatra activation and a real fault line, but the content is policy-heavy enough that several members would go flat, and the audience friction is less distinctive than in themes that hit their organizational contradictions directly."
+    },
+    {
+      "theme_id": "theme_005",
+      "activated_members": [
+        {
+          "name": "Scheherazade",
+          "strength": "strong",
+          "reason": "Whether narrative can do its slow moral work when attention itself has been industrialized — her stretch territory, dead center."
+        },
+        {
+          "name": "Audrey Tang",
+          "strength": "strong",
+          "reason": "Algorithmic governance as a solvable design problem with concrete mechanisms — her core practice territory."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "strong",
+          "reason": "Algorithmic destruction of the shared factual reality that makes public speech meaningful — the precondition for politics dissolving."
+        },
+        {
+          "name": "Ada Lovelace",
+          "strength": "strong",
+          "reason": "What changes when discourse mediation becomes automatic — the scale question and the formalism-creativity relationship applied to speech governance."
+        },
+        {
+          "name": "Peter Thiel",
+          "strength": "moderate",
+          "reason": "Whether the 'shared fact base' was always manufactured consensus that regulation aims to restore — contrarian challenge to the premise."
+        },
+        {
+          "name": "Plato",
+          "strength": "moderate",
+          "reason": "Who determines truth in an age of algorithmic mediation — the knowledge-authority relationship recast in computational form."
+        },
+        {
+          "name": "Dostoevsky",
+          "strength": "moderate",
+          "reason": "What happens to the human interior when shared reality collapses — no algorithmic fix reaches the soul."
+        },
+        {
+          "name": "Octopus",
+          "strength": "moderate",
+          "reason": "Distributed cognition challenges the assumption that information ecosystems need centralized governance to function."
+        }
+      ],
+      "audience_friction": {
+        "strength": "high",
+        "point": "They design and fund the products and platforms whose algorithmic architecture is diagnosed as destroying democratic discourse — the complicity is not abstract but operational."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Tang (this is a solvable design problem with working prototypes) vs. Arendt (this is an existential threat to politics itself) vs. Scheherazade (industrialized attention has killed story's slow transformative work) vs. Dostoevsky (no external system fixes the interior crisis) vs. Thiel (the shared fact base was always an illusion of consensus) vs. Ada Lovelace (formalize the problem before claiming it's unsolvable) — a six-way split on whether the crisis is designable, existential, spiritual, illusory, or not yet properly modeled."
+      },
+      "target_score": 3,
+      "target_score_reason": "Four strong activations including rarely-activated members (Scheherazade, Ada Lovelace), a six-way fault line, and the highest audience friction in the set — these are the people building the systems being diagnosed."
+    },
+    {
+      "theme_id": "theme_006",
+      "activated_members": [
+        {
+          "name": "Cleopatra",
+          "strength": "strong",
+          "reason": "What peace costs and buys — realpolitik of conflict resolution when principles and survival diverge."
+        },
+        {
+          "name": "Hannah Arendt",
+          "strength": "moderate",
+          "reason": "Peace that brackets who started the war destroys the principle that makes political life distinguishable from mere force."
+        },
+        {
+          "name": "Dostoevsky",
+          "strength": "moderate",
+          "reason": "The moral weight of individual suffering against large abstract goods like territorial sovereignty."
+        },
+        {
+          "name": "Bob Marley",
+          "strength": "moderate",
+          "reason": "The powerless excluded from the peace process — Palestinians absent from the Board of Peace."
+        },
+        {
+          "name": "Scheherazade",
+          "strength": "moderate",
+          "reason": "Who is silenced in the official narrative of peace — speech under conditions where the speaker has no standing."
+        },
+        {
+          "name": "Plato",
+          "strength": "moderate",
+          "reason": "Whether a just peace is knowable or only negotiable — the gap between justice and settlement."
+        }
+      ],
+      "audience_friction": {
+        "strength": "moderate",
+        "point": "Their commitment to inclusive stakeholder processes confronts cases where the excluded party's absence makes the process illegitimate by their own standards."
+      },
+      "fault_line": {
+        "present": true,
+        "description": "Cleopatra (achievable outcome is what matters regardless of principle) vs. Arendt (principled process is constitutive of legitimate outcome) vs. Dostoevsky (a single person's suffering outweighs any geopolitical calculus) — but the positions are more complementary angles on tragedy than genuinely opposed claims."
+      },
+      "target_score": 2,
+      "target_score_reason": "Real activation from Cleopatra and moderate engagement from several others, but the fault line is more perspectival than oppositional, the audience friction is less personal than in other themes, and the current-events specificity limits the council's capacity for distinctive contribution."
+    }
+  ]
+}

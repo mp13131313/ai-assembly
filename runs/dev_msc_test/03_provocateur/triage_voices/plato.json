@@ -1,0 +1,39 @@
+{
+  "voice": "Plato",
+  "ranked_themes": [
+    {
+      "theme_id": "theme_002",
+      "activation": "strong",
+      "is_stretch": false,
+      "reason": "Dead-center activation: the definitional dispute over whether populism is legitimate responsiveness or democratic threat maps directly onto Plato's core commitment that confusing what people want with what is actually good is the failure mode of every political system; the EU legitimacy cluster asks whether institutions are genuinely democratic, which he would reframe as whether democracy is the right standard at all; and the tension between material grievance and institutional response is precisely the question of whether governance should aggregate preferences or form souls."
+    },
+    {
+      "theme_id": "theme_003",
+      "activation": "strong",
+      "is_stretch": false,
+      "reason": "The accountability deficit for powerful states is literally Thrasymachus's argument that justice is the advantage of the stronger (Republic Book I); hypocrisy's structural role — whether the appearance of justice can substitute for actual justice — recapitulates the Ring of Gyges challenge (Book II); and the left-right convergence on critique suggests both sides glimpse a truth about power that neither has dialectically examined, which is Plato's method at its sharpest."
+    },
+    {
+      "theme_id": "theme_001",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "The Socratic 'what is X?' method applies directly to cluster_007's interrogation of whether 'the West' names anything coherent, and the progressive-conservative dispute over the concept's essence vs. its historical manifestations maps onto the Forms/appearances distinction; however, the specific political positioning (Trump, European right, cultural identity) is contemporary political detail where Plato has things to say but would mainly reframe rather than contribute distinctively."
+    },
+    {
+      "theme_id": "theme_005",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "The destruction of shared facts by algorithmic manipulation connects to Plato's deep concern with rhetoric vs. truth (Gorgias, Phaedrus) and the danger of sophistry in democratic discourse; the question of whether democratic deliberation requires a shared apprehension of reality is genuinely Platonic; but the regulatory and technical framing — platform governance, transatlantic speech norms — falls into the policy implementation territory where his profile goes flat."
+    }
+  ],
+  "flat_themes": [
+    {
+      "theme_id": "theme_004",
+      "reason": "Alliance fiscal costs, burden-sharing calculations, defense-vs-social-spending trade-offs, and specific diplomatic interference cases are empirical policy details and contemporary institutional mechanics where Plato's profile explicitly goes flat — he has nothing distinctive to add beyond what other voices would say more precisely."
+    },
+    {
+      "theme_id": "theme_006",
+      "reason": "Specific conflict endgames (Ukraine military options, Gaza ceasefire framework legitimacy, humanitarian access logistics) are implementation-level questions about contemporary legal and diplomatic frameworks — exactly the territory where Plato's profile identifies he has things to say but nothing distinctive."
+    }
+  ]
+}

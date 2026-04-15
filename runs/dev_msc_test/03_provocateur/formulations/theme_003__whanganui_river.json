@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_003",
+  "member": "Whanganui River",
+  "mode": "question",
+  "formulation": "One voice argued that the fiction of sovereign equality — rules written but never enforced against the powerful — may be the only thing standing between the weak and a world of pure force. You have been flowing since before any of these nations drew their borders, and now you hold legal personhood in courts built by the same species that dredged your bed. From inside that recognition: is a rule that the powerful choose not to enforce still a shelter, or does unenforced recognition become its own form of erasure?",
+  "theme_display_title": "The Necessary Fiction",
+  "context_narrative": "In a charged panel titled 'The World on the Brink,' leaders clashed over whether the rules-based international order is dying or being reformed. Kaja Kallas argued the rules exist but no mechanism holds powerful violators to account; Prince Faisal bin Farhan Al Saud replied that this is not new — the developing world has lived under might-makes-right for a decade while Europe only now wakes up to it. Ivan Krastev pushed the sharpest claim: that liberal hypocrisy, however corrosive, is preferable to a world of pure power, because the fiction of equal sovereignty is the only thing small states have. The moderator herself acknowledged the panel had reproduced the very imbalance it was analyzing — the US and EU dominating while middle powers were squeezed to the margins.",
+  "selected_quotes": [
+    {
+      "extraction_id": "breaking_point:001",
+      "quote": "The missing element in the international order is accountability: the rules exist and most countries sign up to the UN Charter, but there is no functioning mechanism to hold violators accountable, especially when powerful states breach the principles.",
+      "attribution": "Kaja Kallas",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:023",
+      "quote": "There is something worse than liberal hypocrisy, and that is a world with no hypocrisy at all — a world where only power matters — because then small countries have no reason to distinguish between the US and China, and American exceptionalism is reduced to being exceptionally powerful.",
+      "attribution": "Ivan Krastev",
+      "flavor": "with weight"
+    },
+    {
+      "extraction_id": "breaking_point:002",
+      "quote": "The panic about the breakdown of the rules-based order is a Eurocentric awakening; much of the developing world has lived with might-makes-right for over a decade, and the current conversation is finally catching up to their reality.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:028",
+      "quote": "I have completely failed to instill a rules-based order here, because this conversation has been wholly dominated by the two biggest economic and political blocs.",
+      "attribution": "Zanny Minton Beddoes"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "breaking_point:001",
+    "breaking_point:002",
+    "breaking_point:028",
+    "breaking_point:030",
+    "west_west_divide:023",
+    "west_west_divide:039"
+  ],
+  "rationale": "The formulation maps the theme's central fault line — whether unenforced rules protect the weak or corrode the order — onto the river's unique experience as a non-human legal person, landing in its activation territory (legal personhood, the difference between metaphorical and actual recognition) and pushing into its stretch (whether recognition changes anything when the recognizers haven't changed how they act), while producing a question only a non-human entity holding legal standing can answer from the inside."
+}

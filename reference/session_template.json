@@ -1,0 +1,24 @@
+{
+  "session_id": "rehearsal_001",
+  "session_title": "FILL IN — the real session title from the original HoBB program",
+  "session_description": "FILL IN — one paragraph from the program describing what the session was about. The Speaker ID pass uses this as context, so keep it substantive.",
+  "session_format": "panel",
+  "track": "FILL IN if there was one, otherwise empty string",
+  "date_time": "YYYY-MM-DDTHH:MM:SS+TZ",
+  "venue": "FILL IN",
+  "expected_speaker_count": 6,
+  "roster": [
+    {
+      "name": "First Last",
+      "title": "Role / title from the program",
+      "affiliation": "Organization / book / project",
+      "bio": "Two to four sentences. Specificity matters — include the concepts and organizations they are associated with, because the Speaker ID pass uses the bio for expertise matching in Pass 3. A vague bio produces vague attributions."
+    },
+    {
+      "name": "Second Person",
+      "title": "",
+      "affiliation": "",
+      "bio": ""
+    }
+  ]
+}
