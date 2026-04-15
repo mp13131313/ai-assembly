@@ -243,15 +243,23 @@ def call_openai(
     client = OpenAI()
     model = model or os.environ.get("OPENAI_MODEL", "gpt-4o")
 
+    # OpenAI reasoning models (o1, o3, o4-mini, etc.) require:
+    #   - max_completion_tokens (not max_tokens)
+    #   - temperature must be omitted or = 1.0 (default)
+    is_reasoning_model = any(model.startswith(p) for p in ("o1", "o3", "o4"))
+
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "temperature": temperature,
-        "max_tokens": max_tokens,
     }
+    if is_reasoning_model:
+        kwargs["max_completion_tokens"] = max_tokens
+    else:
+        kwargs["temperature"] = temperature
+        kwargs["max_tokens"] = max_tokens
     if response_format_json:
         kwargs["response_format"] = {"type": "json_object"}
 
