@@ -267,3 +267,41 @@ Three untested branch sets exist (3 voice_modes × 3 types × 2 hostile flags ×
 
 **Phase 3 + Phase 4 are completely unbuilt.** This is the real outstanding work — without them no card is deployment-ready and no voice can join the runtime council.
 </content>
+
+---
+
+## Addendum 2026-04-15: worked_provocations role clarification
+
+After Phase 3 was built and validated on Plato, Matthias raised a fair
+question: in what sense can AI-generated worked provocations be "right"?
+The persona card itself is AI-generated; the worked provocations are
+Claude-generated responses to AI-generated test questions. It's Claude
+all the way down.
+
+The honest answer: worked_provocations are not predictions of "what Plato
+would have said." They are commitments — "if we deploy this voice, this
+is the kind of output we expect."
+
+But the spec was sloppy in framing them as "few-shot exemplars in the
+runtime Voice Pipeline's Step 1 prompt." That framing makes them
+load-bearing in a way they shouldn't be. Decision (2026-04-15):
+
+`worked_provocations` are explicitly NOT runtime exemplars. They are:
+
+1. **A smoke test of the assembled card** — does the 35-field spec
+   actually cohere into a voice when asked to do work?
+2. **A diagnostic surface for Pass 7c** — Pass 7c reads them to surface
+   failure patterns and refine `banned_language` and `banned_modes`.
+3. **A pre-runtime artifact for human review** — anyone evaluating the
+   completed card can read 4 example provocations to immediately know
+   what kind of voice they're approving.
+
+The persona card is the contract. The provocations are the smoke test.
+
+This decision is documented in:
+- `flows/shared/prompts/persona_pass_7b_provocations.md` (header comment)
+- `run_persona_pipeline.py` (assembled JSON `metadata.worked_provocations_role`)
+- `HANDOFF.md` (this repo)
+- `ai-assembly/flows/voice/README.md` (runtime repo, prevents accidental
+  few-shot wiring when the Voice Pipeline gets built)
+</content>
