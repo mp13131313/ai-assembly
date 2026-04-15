@@ -1,0 +1,188 @@
+"""Thin wrappers around the four model APIs used by the Persona Pipeline.
+
+Each function takes a fully-rendered prompt and returns plain text or parsed
+JSON. Retries, timeouts, and rate-limit handling live in the calling Prefect
+task — these wrappers do exactly one thing: make the call.
+"""
+from __future__ import annotations
+
+import json
+import os
+from typing import Any
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+# --- Anthropic / Claude --------------------------------------------------
+
+def call_claude(
+    *,
+    system: str,
+    user: str,
+    model: str | None = None,
+    max_tokens: int = 8192,
+    temperature: float = 0.2,
+    thinking_budget: int | None = None,
+    response_format_json: bool = False,
+) -> dict[str, Any]:
+    """One Claude call. Returns dict with `text` (str) and `usage` (dict).
+
+    If `response_format_json` is True, also returns parsed `json` field.
+    """
+    import anthropic  # lazy import so missing keys don\'t break import
+
+    model = model or os.environ.get("CLAUDE_MODEL", "claude-opus-4-6")
+    client = anthropic.Anthropic()
+
+    kwargs: dict[str, Any] = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "system": system,
+        "messages": [{"role": "user", "content": user}],
+    }
+    if thinking_budget:
+        kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+
+    msg = client.messages.create(**kwargs)
+    text_parts = [b.text for b in msg.content if b.type == "text"]
+    text = "".join(text_parts)
+
+    out: dict[str, Any] = {
+        "text": text,
+        "usage": {
+            "input_tokens": msg.usage.input_tokens,
+            "output_tokens": msg.usage.output_tokens,
+        },
+        "model": model,
+        "stop_reason": msg.stop_reason,
+    }
+    if response_format_json:
+        # Trim ```json fences if present
+        cleaned = text.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        out["json"] = json.loads(cleaned)
+    return out
+
+
+# --- Perplexity (sonar-deep-research) -----------------------------------
+
+def call_perplexity(
+    *,
+    user: str,
+    model: str | None = None,
+    temperature: float = 0.0,
+    return_citations: bool = True,
+) -> dict[str, Any]:
+    """One Perplexity call. Uses OpenAI-compatible REST endpoint.
+
+    sonar-deep-research can take 5-10 minutes for a single query — the
+    Prefect task wrapping this should set timeout >= 15 min.
+    """
+    import requests
+
+    model = model or os.environ.get("PERPLEXITY_MODEL", "sonar-deep-research")
+    api_key = os.environ["PERPLEXITY_API_KEY"]
+
+    resp = requests.post(
+        "https://api.perplexity.ai/chat/completions",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": model,
+            "messages": [{"role": "user", "content": user}],
+            "temperature": temperature,
+            "return_citations": return_citations,
+        },
+        timeout=900,  # 15 min
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    msg = data["choices"][0]["message"]
+    return {
+        "text": msg["content"],
+        "citations": data.get("citations", []),
+        "usage": data.get("usage", {}),
+        "model": model,
+    }
+
+
+# --- Gemini -------------------------------------------------------------
+
+def call_gemini(
+    *,
+    user: str,
+    model: str | None = None,
+    temperature: float = 0.2,
+    max_output_tokens: int = 8192,
+) -> dict[str, Any]:
+    """One Gemini call. Uses google-generativeai SDK."""
+    import google.generativeai as genai
+
+    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    model_name = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")
+    m = genai.GenerativeModel(model_name)
+    resp = m.generate_content(
+        user,
+        generation_config={
+            "temperature": temperature,
+            "max_output_tokens": max_output_tokens,
+        },
+    )
+    return {
+        "text": resp.text,
+        "model": model_name,
+        "usage": {
+            "input_tokens": getattr(resp.usage_metadata, "prompt_token_count", None),
+            "output_tokens": getattr(resp.usage_metadata, "candidates_token_count", None),
+        } if hasattr(resp, "usage_metadata") else {},
+    }
+
+
+# --- OpenAI (GPT-4o for cross-model validation) -------------------------
+
+def call_openai(
+    *,
+    system: str,
+    user: str,
+    model: str | None = None,
+    temperature: float = 0.0,
+    max_tokens: int = 8192,
+    response_format_json: bool = False,
+) -> dict[str, Any]:
+    """One OpenAI call. Uses openai SDK."""
+    from openai import OpenAI
+
+    client = OpenAI()
+    model = model or os.environ.get("OPENAI_MODEL", "gpt-4o")
+
+    kwargs: dict[str, Any] = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if response_format_json:
+        kwargs["response_format"] = {"type": "json_object"}
+
+    resp = client.chat.completions.create(**kwargs)
+    text = resp.choices[0].message.content or ""
+    out: dict[str, Any] = {
+        "text": text,
+        "usage": {
+            "input_tokens": resp.usage.prompt_tokens,
+            "output_tokens": resp.usage.completion_tokens,
+        },
+        "model": model,
+    }
+    if response_format_json:
+        out["json"] = json.loads(text)
+    return out
