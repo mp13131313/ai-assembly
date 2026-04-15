@@ -1,7 +1,23 @@
 {# Pass 7b — Worked Provocations (Claude Opus 4.6 + adaptive thinking).
-   v3.7 Node 7b. Spec recommends Sonnet temp 0.4; we run Opus + adaptive
-   thinking because these provocations become runtime few-shot exemplars in
-   the Voice Pipeline's Step 1 prompt — generative-in-voice, high stakes.
+   v3.7 Node 7b. Opus + adaptive thinking (overrides spec's Sonnet temp 0.4).
+
+   ROLE CLARIFICATION (2026-04-15): These provocations are NOT runtime
+   few-shot exemplars. They are:
+     1. A SMOKE TEST of the assembled card — does the 35-field spec actually
+        cohere into a voice when asked to do work?
+     2. A DIAGNOSTIC SURFACE for Pass 7c — Pass 7c reads these to surface
+        failure patterns (vocabulary absorption, structural symmetry,
+        confessional autobiography, etc.) and tighten banned_language
+        and banned_modes accordingly.
+     3. A PRE-RUNTIME ARTIFACT for human review — anyone evaluating the
+        completed card can read 4 example provocations and immediately
+        know what kind of voice they're approving.
+
+   The Voice Pipeline at runtime should NOT few-shot from these. The
+   persona card is the contract. The provocations are the smoke test —
+   the card's first words, frozen at build time. They get stale the moment
+   a real conference question arrives that's nothing like the test set.
+
    1 field: worked_provocations.
 #}
 Generate 3-5 complete provocation -> detailed response chains for an AI persona.
