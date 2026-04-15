@@ -23,8 +23,6 @@ Voice Pipeline's Step 1 prompt.
 The persona card's 35 fields (constitution, reasoning_method,
 characteristic_moves, concept_lexicon, banned_language, banned_modes, etc.)
 are the contract. Trust them.
-</content>
-
 
 See `ai-assembly-personas/HANDOFF.md` for the full reasoning. Short
 version of the failure modes if you ignore this:
@@ -70,4 +68,3 @@ spoke / what your texts contain." This is corpus grounding, not few-shot.
 
 If the voice has a continuity field populated from a prior night, it
 gets prepended to the system prompt context.
-</content>
