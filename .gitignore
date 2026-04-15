@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# macOS
+.DS_Store
+
+# Python
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Run logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Cached primary text fetches that contain large copyrighted material
+# (we'll selectively re-add specific fair-use excerpts later if needed)
+runs/*/01_research/primary_texts/raw/
