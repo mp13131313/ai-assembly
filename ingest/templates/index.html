@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Sessions · AI Assembly Ingest{% endblock %}
+{% block content %}
+<h1>Upload session audio</h1>
+
+{% if flagged_count == 0 %}
+<div class="empty">
+  <p>No sessions are currently flagged for overnight processing.</p>
+  <p class="muted">
+    An operator needs to flip <code>ai_assembly: true</code> on the relevant
+    sessions in <code>reference/sessions.json</code>.
+  </p>
+</div>
+{% else %}
+
+<div class="filters">
+  <div class="chips" id="day-chips">
+    <button class="chip chip-all active" data-day="">All days</button>
+    {% for day in days_ordered %}
+      <button class="chip" data-day="{{ day }}">{{ day }}</button>
+    {% endfor %}
+  </div>
+  <input type="search" id="search" placeholder="Search titles, venues, speakers…">
+</div>
+
+{% for day in days_ordered %}
+  <section class="day-section" data-day="{{ day }}">
+    <h2>{{ day }}</h2>
+    <ul class="session-grid">
+      {% for s in by_day[day] %}
+        {% set state = states.get(s.session_id) %}
+        <li class="session-card {{ s.track|track_css }}" data-search="{{ s.title|lower }} {{ s.venue|lower }} {{ s.speakers|join(' ')|lower }}">
+          <a href="/session/{{ s.session_id }}">
+            <div class="card-top">
+              <span class="dot dot-{{ state or 'none' }}" title="{{ state or 'not started' }}"></span>
+              <span class="time">{{ s.start_time }}</span>
+              <span class="venue">{{ s.venue }}{% if s.venue_sub %} · {{ s.venue_sub }}{% endif %}</span>
+            </div>
+            <div class="track">{{ s.track }}</div>
+            <div class="title">{{ s.title }}</div>
+            <div class="speakers">
+              {% if s.speakers %}
+                {{ s.speakers|join(', ') }}
+              {% else %}
+                <span class="muted">no speakers listed</span>
+              {% endif %}
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endfor %}
+
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') }}"></script>
+{% endblock %}
