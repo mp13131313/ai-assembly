@@ -122,10 +122,13 @@ def main(name: str) -> None:
     stamp(f"  DR prompt:     {dr_prompt_path.relative_to(REPO_ROOT)}")
     stamp("")
     stamp("Next steps:")
-    stamp(f"  1. Open claude.ai with Extended Thinking + Deep Research enabled")
-    stamp(f"  2. Paste the prompt from {dr_prompt_path.name}")
-    stamp(f"  3. Save the result as inputs/dossiers/{slug}_claude_dr.md")
-    stamp(f"  4. Run: python3 run_persona_pipeline.py \"{voice_config.get('name', name)}\"")
+    stamp(f"  1. Open claude.ai, select Claude Opus 4.6 in the model picker")
+    stamp(f"     (DR inherits the selected model; Opus is required for dossier depth)")
+    stamp(f"  2. Enable Extended Thinking + Deep Research")
+    stamp(f"  3. Paste the prompt from {dr_prompt_path.name}")
+    stamp(f"  4. Expect 60-120 min wait (sometimes closer to 2 hours)")
+    stamp(f"  5. Save the result as inputs/dossiers/{slug}_claude_dr.md")
+    stamp(f"  6. Run: python3 run_persona_pipeline.py \"{voice_config.get('name', name)}\"")
 
 
 if __name__ == "__main__":
