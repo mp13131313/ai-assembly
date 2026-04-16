@@ -203,9 +203,18 @@
     { id: "crumb-done",        activeOn: ["done"]                    },
   ];
 
+  // Maps crumb index → checkpoint key (null = no file to check)
+  const CRUMB_CHECKPOINT = [null, "normalized", "asr", "speaker_id", "cleaning", null, null];
+
+  function crumbDone(i, checkpoints) {
+    const key = CRUMB_CHECKPOINT[i];
+    return key ? (checkpoints && checkpoints[key]) : false;
+  }
+
   function renderCrumbs(st) {
     const state = st.state || "none";
     const display = (state === "transcribing" && st.substate) ? st.substate : state;
+    const cp = st.checkpoints || {};
     let activeIdx = -1;
     if (state === "done") {
       activeIdx = CRUMBS.length; // all done
@@ -216,13 +225,14 @@
     CRUMBS.forEach((c, i) => {
       const el = document.getElementById(c.id);
       if (!el) return;
+      const done = crumbDone(i, cp);
       el.className = "";
-      if (state === "error") {
-        el.className = i === activeIdx ? "crumb-error" : "crumb-pending";
-      } else if (i < activeIdx || state === "done") {
+      if (state === "done" || i < activeIdx || done) {
         el.className = c.norm ? "crumb-done-norm" : "crumb-done";
       } else if (i === activeIdx) {
         el.className = c.norm ? "crumb-active-norm" : "crumb-active";
+      } else if (state === "error") {
+        el.className = "crumb-pending";
       } else {
         el.className = "crumb-pending";
       }
