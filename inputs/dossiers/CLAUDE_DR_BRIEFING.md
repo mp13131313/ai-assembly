@@ -1,6 +1,6 @@
 # Claude Deep Research Briefing — AI Assembly Persona Dossiers
 
-**Purpose:** paste this into a fresh claude.ai conversation with **Extended Thinking** and **Deep Research** both enabled, substituting the voice name and voice-type flag per the per-voice table below. Save the output as `<voice_slug>_claude_dr.md` into `inputs/dossiers/` in the `ai-assembly-personas` repo. The Persona Pipeline's Pass 1a reads this file as a three-way merge partner alongside Perplexity's sonar-deep-research output and the Gemini broad-scan pass.
+**Purpose:** paste this into a fresh claude.ai conversation with **Claude Opus 4.6** selected in the model picker, and **Extended Thinking** + **Deep Research** both enabled, substituting the voice name and voice-type flag per the per-voice table below. DR inherits the selected chat model — if Sonnet is selected, DR runs on Sonnet; pick Opus 4.6 explicitly for highest-quality synthesis. Expect 60–120 minutes for the session to complete (sometimes closer to 2 hours for a 15–25K-word dossier). Save the output as `<voice_slug>_claude_dr.md` into `inputs/dossiers/` in the `ai-assembly-personas` repo. The Persona Pipeline's Pass 1a reads this file as a three-way merge partner alongside Perplexity's sonar-deep-research output and the Gemini broad-scan pass.
 
 ---
 
