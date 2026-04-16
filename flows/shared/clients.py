@@ -154,7 +154,13 @@ def call_perplexity(
     )
     resp.raise_for_status()
     data = resp.json()
-    raw_text = data["choices"][0]["message"]["content"]
+    try:
+        raw_text = data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError) as e:
+        raise RuntimeError(
+            f"Perplexity response missing expected structure: {e}. "
+            f"Response: {json.dumps(data)[:500]}"
+        ) from e
 
     # Split <think>...</think> block from deliverable
     m = re.search(r"<think>(.*?)</think>\s*", raw_text, flags=re.DOTALL)
@@ -264,6 +270,8 @@ def call_openai(
         kwargs["response_format"] = {"type": "json_object"}
 
     resp = client.chat.completions.create(**kwargs)
+    if not resp.choices:
+        raise RuntimeError(f"OpenAI returned no choices for model {model}")
     text = resp.choices[0].message.content or ""
     out: dict[str, Any] = {
         "text": text,
@@ -274,5 +282,8 @@ def call_openai(
         "model": model,
     }
     if response_format_json:
-        out["json"] = json.loads(text)
+        try:
+            out["json"] = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"OpenAI ({model}) returned invalid JSON: {e}") from e
     return out

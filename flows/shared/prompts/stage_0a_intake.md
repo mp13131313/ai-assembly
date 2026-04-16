@@ -50,12 +50,6 @@ Produce a JSON object with these fields. The schema has a CORE BLOCK (mandatory 
 
 - `corpus_constraint` (enum: "full" | "restricted" | "fragmentary" | "reconstructed"): How complete is the primary-text corpus? "full" = complete preserved body of work (Plato, Dostoevsky). "restricted" = significant body with attribution disputes. "fragmentary" = only fragments survive (Pre-Socratics). "reconstructed" = voice exists only through scholarly reconstruction of hostile records (Cleopatra). For non-humans: "reconstructed" or analog.
 
-- `needs_dr_supplement` (boolean): TRUE if the figure is under-documented and the standard 3-source merge is likely to be thin. Triggers Pass 3's o3/GPT-4o supplement.
-
-- `primary_text_sources` (array of strings): URLs or identifiers for primary texts. 3-6 sources, favoring public-domain machine-readable editions (Perseus, Project Gutenberg, archive.org, Wikisource, official archives for modern figures, LacusCurtius for classical). In review_doc, list ALTERNATIVES the human might prefer with tradeoffs.
-
-- `primary_text_notes` (string): One paragraph explaining your specific selections. Which texts/editions, why these vs. alternatives, what they collectively span (chronological, generic, thematic).
-
 - `pass_1a_claude_dr_file` (string): Set to `"inputs/dossiers/<slug>_claude_dr.md"`.
 
 - `conference_context` (string): The pipeline injects this server-side from the project config. Set it to the literal placeholder string `"INJECTED_BY_RUNNER"` — it will be overwritten before save.
@@ -95,7 +89,6 @@ Markdown document the human reads in 1-2 minutes to sanity-check your decisions.
 | impossible | ... | auto (computed from biographical data) |
 | hostile_sources | ... | proposed (rationale below) |
 | corpus_constraint | ... | proposed |
-| needs_dr_supplement | ... | proposed |
 
 (`auto` = mechanical decision; `proposed` = editorial judgment, please review)
 
@@ -124,17 +117,9 @@ A short summary of what's in the editorial-assets fields:
 
 These are encoded in the voice config so a human can edit them directly before running Stage 0b. If you disagree with any, edit them in the JSON and Stage 0b will use your edits.
 
-## Primary text sources — recommended + alternatives
+## On primary texts
 
-I recommend: [list].
-
-Why these: one paragraph.
-
-Alternatives:
-
-- **Option A**: [edition / archive] — [tradeoff]
-- **Option B**: [edition / archive] — [tradeoff]
-- (3-5 options total, including ones I considered and rejected)
+Primary text sources (URLs to digitized full texts) are NOT proposed by Stage 0a — Stage 0a has no internet access and would be guessing URLs from training data. Instead, primary texts are discovered by the three research sources (Perplexity, Claude DR, Gemini) in their Section 6 outputs, and extracted by the pipeline after Pass 1-merge. The human can override this by manually populating `primary_text_sources` in the voice config if they want specific editions.
 
 ## What I think a domain expert should look at
 
