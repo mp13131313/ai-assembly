@@ -702,6 +702,7 @@
       "pass6": 1,
       "pass7b_provocations": 5
     },
-    "register_violations": 2
+    "register_violations": 0,
+    "register_violation_details": []
   }
 }

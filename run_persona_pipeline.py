@@ -17,6 +17,7 @@ re-called. To force a re-run, delete the output JSON.
 """
 from __future__ import annotations
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -608,6 +609,26 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         if cache_path.exists():
             cache_path.unlink()
 
+    # Also invalidate everything computed AFTER Pass 7a. DOWNSTREAM_CHAIN
+    # only covers through 7a (the loop's last step); but 7b, 7c, Derive,
+    # and the assembled card / provocateur_profile / evaluation_rubric
+    # all read the revised card fields and must be re-computed on any
+    # revision. Without this step, a prior run's stale downstream outputs
+    # would cache-hit on the next invocation even though the card has
+    # changed. (Captured as a known bug in commit 0452a23 during the
+    # Plato revision-loop verification.)
+    post_7a_invalidation = [
+        (RUN / "02_passes" / "pass7b_provocations.json"),
+        (RUN / "02_passes" / "pass7c_negative.json"),
+        (RUN / "02_passes" / "derive.json"),
+        (RUN / "persona_card_assembled.json"),
+        (RUN / "provocateur_profile.json"),
+        (RUN / "evaluation_rubric.json"),
+    ]
+    for cache_path in post_7a_invalidation:
+        if cache_path.exists():
+            cache_path.unlink()
+
     # Re-run target passes + downstream + Pass 7a in sequence
     # We re-execute pass functions in order. Each function reads outer-scope
     # state (pass2["fields"], etc.) so we re-bind those globals as we go.
@@ -766,17 +787,71 @@ stamp(f"  saved: {RUN}/provocateur_profile.json + evaluation_rubric.json")
 
 
 # ---------- FINAL SUMMARY ----------
-def _check_register(card_fields: dict, voice_last_name: str) -> int:
-    """Count third-person leaks (voice_last_name + " was/is/believed/argued" patterns)."""
+# Register-check constants (see _check_register below)
+REGISTER_CHECK_SKIP_FIELDS = {
+    # Fields whose content is legitimately third-person scholarly annotation,
+    # not voice-field content. Third-person in these fields is NOT a register
+    # violation.
+    "curated_corpus_passages",   # primary text excerpts + scholarly annotations
+    "worked_provocations",        # diagnostic artifact with scholarly gloss
+    "metadata",                   # pipeline metadata
+}
+
+# Matches bracketed scholarly annotations that should be stripped from voice
+# fields before register checking. These markers explicitly signal
+# meta-commentary rather than voice content, e.g.:
+#   [inference: Plato's willingness to stage devastating criticism ...]
+#   [hostile source: Plutarch frames Cleopatra as ...]
+#   [reconstruction: Roller argues ...]
+BRACKET_ANNOTATION_RE = re.compile(
+    r"\[(?:inference|hostile source|reconstruction|scholarly note|"
+    r"editor note|meta|note|dossier|own voice): [^\]]*\]",
+    re.IGNORECASE,
+)
+
+
+def _check_register(card_fields: dict, voice_last_name: str):
+    """Detect third-person register leaks in voice fields.
+
+    Two corrections over the original string-match version:
+
+    1. Scholar-annotation fields are SKIPPED. Fields like curated_corpus_passages,
+       worked_provocations, and metadata legitimately contain third-person
+       scholarly commentary about the figure (e.g., "Plato's method of
+       steelmanning" as an annotation on a Republic excerpt). These are not
+       voice-field content and shouldn't be flagged.
+
+    2. Bracketed scholarly annotations within voice fields are STRIPPED before
+       checking. reasoning_method can contain inline [inference: Plato's
+       willingness ...] markers — meta-commentary distinguishing voice from
+       interpretive gloss. The brackets make these legitimate; strip them
+       from the text before looking for third-person patterns.
+
+    Returns (count, details) where details is a list of
+    {field, flag, context} dicts for each violation found.
+    """
     flags = [f"{voice_last_name}'s ", f"{voice_last_name} was", f"{voice_last_name} is",
              f"{voice_last_name} believed", f"{voice_last_name} argued"]
-    n = 0
-    for fv in card_fields.values():
+    details = []
+    for field_name, fv in card_fields.items():
+        if field_name in REGISTER_CHECK_SKIP_FIELDS:
+            continue
         t = json.dumps(fv) if not isinstance(fv, str) else fv
+        # Strip bracketed scholarly annotations — these are legitimate
+        # meta-commentary within otherwise first-person voice content
+        t_stripped = BRACKET_ANNOTATION_RE.sub("", t)
         for flag in flags:
-            if flag in t:
-                n += 1
-    return n
+            idx = t_stripped.find(flag)
+            while idx != -1:
+                start = max(0, idx - 40)
+                end = min(len(t_stripped), idx + len(flag) + 40)
+                details.append({
+                    "field": field_name,
+                    "flag": flag,
+                    "context": t_stripped[start:end],
+                })
+                idx = t_stripped.find(flag, idx + 1)
+    return len(details), details
 
 
 full_card = {**combined_2_3_4, **pass5["fields"]}
@@ -793,7 +868,7 @@ if pass7c.get("result"):
         full_card["banned_modes"] = pass7c["result"]["banned_modes"]
 
 last_name = vi["name"].split()[-1]
-register_violations = _check_register(full_card, last_name)
+register_violations, register_details = _check_register(full_card, last_name)
 
 print()
 stamp("=" * 60)
@@ -907,6 +982,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "pass7b_provocations": len(pass7b["fields"].get("worked_provocations", [])),
         },
         "register_violations": register_violations,
+        "register_violation_details": register_details,
     },
 })
 stamp(f"Assembled card -> {RUN}/persona_card_assembled.json")
