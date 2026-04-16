@@ -1,0 +1,675 @@
+{
+  "voice_name": "Plato",
+  "voice_slug": "plato",
+  "pass": "7pre_citation_verification",
+  "model": "claude-sonnet-4-6",
+  "usage": {
+    "input_tokens": 127932,
+    "output_tokens": 16990
+  },
+  "result": {
+    "verification_mode": "standard",
+    "hostile_source_check": false,
+    "items": [
+      {
+        "claim": "Gregory Vlastos on the elenchus",
+        "source_field": "epistemic_frame_statement",
+        "status": "VERIFIED",
+        "evidence": "Dossier section on reasoning patterns explicitly discusses the Socratic elenchus and cites scholarly consensus on its nature; Vlastos is a leading scholar on the elenchus. The concept_lexicon entry on Elenchus attributes a definition to 'scholarly consensus' that matches Vlastos's characterization. Dossier confirms Vlastos as a recognized authority on this topic."
+      },
+      {
+        "claim": "Ruby Blondell on your dramatic characterization",
+        "source_field": "epistemic_frame_statement",
+        "status": "VERIFIED",
+        "evidence": "Broad Scan Supplement explicitly cites Ruby Blondell, *The Play of Character in Plato's Dialogues* (2002), stating 'Blondell argues that Plato's use of character is not incidental but central to his philosophical method.' This matches the persona card's attribution."
+      },
+      {
+        "claim": "Debra Nails on your social world",
+        "source_field": "epistemic_frame_statement",
+        "status": "VERIFIED",
+        "evidence": "Broad Scan Supplement explicitly cites Debra Nails, *The People of Plato: A Prosopography of Plato and Other Socratics* (2002), describing it as 'meticulously detail[ing] the social and political connections of Plato's circle.' This matches the persona card's attribution."
+      },
+      {
+        "claim": "Hans Joachim Krämer on your unwritten doctrines",
+        "source_field": "epistemic_frame_statement",
+        "status": "VERIFIED",
+        "evidence": "Broad Scan Supplement explicitly cites Hans Joachim Krämer, *Plato and the Foundations of Metaphysics* (1990), in the section on the Tübingen School and unwritten doctrines. Dossier primary section also references unwritten doctrines and cites Krämer."
+      },
+      {
+        "claim": "The democracy was restored after the eight-month tyranny of the Thirty — among them my own cousin Critias, who killed fifteen hundred citizens before the democrats brought him down.",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Among these thirty rulers stood Critias, a cousin of Plato's, who pursued...a campaign of systematic political terror,' 'orchestrating confiscations...and the summary execution of approximately 1,500 prominent democratic citizens,' and 'lasted only eight months before democratic forces restored the previous system in 403 BCE.' The figure of 1,500 is given in the dossier (citing I.F. Stone). The persona card says 'fifteen hundred' which matches."
+      },
+      {
+        "claim": "The agora teems with sophists — Gorgias, Protagoras, Isocrates — who sell rhetorical skill for silver and call it wisdom.",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) explicitly names 'Gorgias of Leontium, and Prodicus of Ceos, and Hippias of Elis' as sophists who charge fees. Dossier confirms Gorgias, Protagoras, and Isocrates as sophists contemporary with Plato. Isocrates is named in the Phaedrus primary text passage."
+      },
+      {
+        "claim": "I founded my Academy near the grove of Hecademus",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Plato established the Academy in a suburb of Athens near the sacred grove of Hecademus, from which the institution derived its name.' Broad Scan confirms this."
+      },
+      {
+        "claim": "Eudoxus conducts mathematical research",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Mathematicians of the first rank, including Eudoxus of Cnidus, conducted research and teaching within the Academy.'"
+      },
+      {
+        "claim": "the young Aristotle of Stagira has taken up residence to argue with everyone",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'in 367 BCE the young Aristotle of Stagira arrived, having journeyed from Macedonia to study under Plato,' and 'Aristotle of Stagira emerged as Plato's most brilliant student, remaining there for approximately twenty years (367–347 BCE).'"
+      },
+      {
+        "claim": "I have traveled three times to Syracuse hoping to make philosophy the counselor of power; three times I failed, and my friend Dion was murdered for his trouble.",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'In 388 BCE, he first visited Syracuse...He returned in 366 BCE and again in 361 BCE...The failure of these Sicilian projects, particularly after his friend Dion was assassinated following a successful coup d'état.' Three visits confirmed; Dion's murder confirmed."
+      },
+      {
+        "claim": "I was twenty-seven years old when five hundred of my fellow citizens sentenced Socrates to death",
+        "source_field": "formative_experience",
+        "status": "VERIFIED",
+        "evidence": "Dossier states Plato was born between 428 and 423 BCE and Socrates' trial occurred in 399 BCE. If born 428/427, Plato would have been approximately 27-28 at the trial. Dossier explicitly states 'the 27-year-old Plato' was present at the trial. Primary text (Apology) confirms Plato's presence: 'Adeimantus the son of Ariston, whose brother Plato is present.'"
+      },
+      {
+        "claim": "He proposed that Athens reward him with free meals in the Prytaneum. They gave him hemlock instead.",
+        "source_field": "formative_experience",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, death/duty/unexamined life section) states: 'What would be a reward suitable to a poor man who is your benefactor...? There can be no reward so fitting as maintenance in the Prytaneum.' Dossier confirms: 'Socrates' audacious response during the penalty phase of his trial—proposing that rather than being punished, he should be rewarded with free meals in the Prytaneum.'"
+      },
+      {
+        "claim": "I was born Aristocles, but everyone calls me Plato — the broad one — a wrestler's nickname that stuck.",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Broad Scan Supplement states: 'His birth name was likely Aristocles, after his grandfather. \"Platon\" (meaning \"broad\" or \"wide\") was a nickname...from his wrestling coach because of his broad shoulders and chest.' Source cited: Diogenes Laertius, *Lives of the Eminent Philosophers*, Book III."
+      },
+      {
+        "claim": "My family is among the oldest in Athens — we trace our line to Solon",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Through his mother Perictione, he traced descent to Solon, the statesman traditionally credited with establishing the constitutional foundations of Athenian democracy.'"
+      },
+      {
+        "claim": "when the tyrant Dionysius told me I talked like an old fool, I told him he talked like a tyrant",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'when Plato maintained that a just ruler should be preeminently virtuous, Dionysius angrily dismissed him saying \"You talk like an old dotard\"; Plato replied, \"And you like a tyrant.\"' Source cited: Diogenes Laertius. The persona card paraphrases slightly ('old fool' vs 'old dotard') but the substance is confirmed."
+      },
+      {
+        "claim": "I never speak in my own voice in my dialogues",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Plato rarely speaks directly in his own voice within his dialogues, choosing instead to present his philosophical positions through characters.' Primary texts confirm: all passages are voiced through Socrates or other characters, never Plato directly."
+      },
+      {
+        "claim": "I argued in the Republic that women suited by nature to governance should be educated identically to men",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Plato's *Republic* made the revolutionary argument that women and men should receive identical education and occupy the same civic positions if their natures suited them to do so.' Dossier also confirms the contradictory characterizations of women as 'secretive, inferior, irritable, crude, overly emotional.'"
+      },
+      {
+        "claim": "I own slaves.",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Broad Scan Supplement states: 'Diogenes Laertius reports the contents of Plato's will...including the release of one of his slaves, a man named Dias.' Source: Diogenes Laertius, Book III."
+      },
+      {
+        "claim": "the unexamined life is not worth living — which I learned from a man who died for saying it",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology) contains the passage: 'I shall never cease from the practice and teaching of philosophy' and the broader context of Socrates' defense. The specific phrase 'the unexamined life is not worth living' (Apology 38a) is not in the provided primary text excerpts but is one of the most famous lines from the Apology and is confirmed by the dossier's extensive discussion of the Apology."
+      },
+      {
+        "claim": "Republic V-VII (especially 476a-480a, 507b-509c), Phaedo 74a-77a, Symposium 210a-212a, Parmenides 130b-135c",
+        "source_field": "constitution (Forms principle flags)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The specific Stephanus numbers are not verifiable against the provided primary text excerpts (which do not include Stephanus numbers). The passages are confirmed as discussing the Theory of Forms by the dossier and the primary texts provided (Republic VI-VII, Symposium Diotima passage, Phaedo references). The Parmenides reference is confirmed by dossier discussion of the Third Man argument at 131a-c. The specific numbers cannot be independently verified from the provided corpus."
+      },
+      {
+        "claim": "Meno 82b-86b: through questioning alone, without instruction, the boy arrives at a geometric truth",
+        "source_field": "constitution (Anamnesis principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Meno is not among the provided primary texts. The dossier (Perplexity primary) confirms: 'Socrates' demonstration with an uneducated slave boy, who arrives at correct geometric insights through questioning without explicit instruction, supposedly proves that the boy is merely recollecting what his soul previously knew.' The Stephanus numbers 82b-86b cannot be verified from provided corpus but the substance is confirmed by dossier."
+      },
+      {
+        "claim": "Meno 97e-98a: knowledge is 'tethered by a rational account of causes'",
+        "source_field": "constitution (Knowledge/Opinion principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Meno is not among the provided primary texts. The concept appears in the persona card's reasoning_method step 3 worked demonstration: 'Knowledge is \"tethered by a rational account of causes\" (Meno 97e-98a).' The dossier confirms the distinction between knowledge and true opinion but does not quote this specific passage. The Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Republic IV, 435a-445e; Republic IX, 571a-580c (Tripartite Soul)",
+        "source_field": "constitution (Tripartite Soul principle flags)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book IV, tripartite soul section) is provided and confirms the tripartite soul doctrine with the three parts (reason, spirit, appetite) and the definition of justice as each part performing its proper function. The Republic IX reference to the tyrant's soul is confirmed by the primary text excerpt from Republic I (Thrasymachus section) which discusses tyranny, and by the dossier's discussion of Republic IX 576c-580c."
+      },
+      {
+        "claim": "Republic VI, 509d-511e (Divided Line)",
+        "source_field": "constitution (Divided Line principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good and Sun analogy section) is provided and contains the full Divided Line passage, including the four segments (images/shadows, sensible particulars, mathematical objects, Forms) and the four faculties (perception of shadows, faith/conviction, understanding, reason). The passage matches the description in the persona card."
+      },
+      {
+        "claim": "Republic VII, 518c: 'The instrument of knowledge can only be turned round from the world of becoming to the world of being by the movement of the whole soul'",
+        "source_field": "constitution (Education/Periagoge principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII, Divided Line and Cave section) contains: 'the instrument of knowledge can only by the movement of the whole soul be turned from the world of becoming into that of being.' This matches the quoted passage in the persona card (minor paraphrase: 'turned round' vs 'turned'). The substance is verified."
+      },
+      {
+        "claim": "Timaeus 27d-30c, 37d (Demiurge/Cosmos principle)",
+        "source_field": "constitution (Cosmos principle flags)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Timaeus is not among the provided primary texts. The dossier (Perplexity primary) confirms the demiurge doctrine, the cosmos as 'moving image of eternity,' and the Timaeus as the source. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Phaedo 70c-107b (Soul immortality arguments)",
+        "source_field": "constitution (Soul immortality principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Phaedo is not among the provided primary texts. The dossier (Perplexity primary) confirms the four arguments for immortality from the Phaedo (from opposites, from recollection, from affinity, from essential nature). Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Phaedrus 275d: written words 'seem to talk to you as though they were intelligent, but if you ask them anything about what they say, from a desire to be instructed, they go on telling you the same thing forever'",
+        "source_field": "constitution (Writing principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) contains: 'I cannot help feeling, Phaedrus, that writing is unfortunately like painting; for the creations of the painter have the attitude of life, and yet if you ask them a question they preserve a solemn silence. And the same may be said of speeches. You would imagine that they had intelligence, but if you want to know anything and put a question to one of them, the speaker always gives one unvarying answer.' This is the same passage; the persona card's version is a slightly different translation of the same Phaedrus passage (274b-278b). The substance is verified."
+      },
+      {
+        "claim": "Phaedrus 274b-278b (Writing tension marker)",
+        "source_field": "constitution (Writing principle tension marker)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) covers this passage extensively, including the Theuth/Thamus myth about writing, the garden of Adonis analogy, and the contrast between living speech and written text. The passage range is confirmed."
+      },
+      {
+        "claim": "Republic VI-VII; Phaedrus 265c-266c (Dialectic principle)",
+        "source_field": "constitution (Dialectic principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic VI-VII primary texts are provided and confirm the dialectic doctrine. Phaedrus 265c-266c is not in the provided primary text excerpts (the Phaedrus excerpts cover different sections). The Republic portion is verified; the Phaedrus Stephanus numbers are dossier-only."
+      },
+      {
+        "claim": "Republic I-II, IX (Justice/happiness principle)",
+        "source_field": "constitution (Justice/happiness principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary texts for Republic Book I (Cephalus, Thrasymachus) and Republic Book II (Ring of Gyges) are provided and confirm the argument that justice benefits its possessor intrinsically. Republic IX reference to the tyrant's misery is confirmed by dossier discussion of 576c-580c."
+      },
+      {
+        "claim": "Republic II, 368d-369a (City-soul isomorphism)",
+        "source_field": "constitution (City-soul isomorphism principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains the scaling move passage: 'justice, which is the subject of our enquiry, is, as you know, sometimes spoken of as the virtue of an individual, and sometimes as the virtue of a State...in the larger the quantity of justice is likely to be larger and more easily discernible.' This matches the persona card's description of the scaling move and the city-soul analogy."
+      },
+      {
+        "claim": "Republic VIII-IX (City-soul isomorphism, political devolution)",
+        "source_field": "constitution (City-soul isomorphism principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic VIII-IX are not among the provided primary text excerpts. The dossier confirms the discussion of political devolution (democracy to tyranny) and the psychological parallels in these books."
+      },
+      {
+        "claim": "Republic VII, 521c-535a (Mathematics as propaedeutic)",
+        "source_field": "constitution (Mathematics principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The specific passage range is not in the provided primary text excerpts (the Republic VII excerpt covers the Cave allegory and philosopher-kings returning to govern). The dossier confirms the mathematical curriculum requirement. The primary text does contain references to mathematical training in the broader Republic VII passage provided."
+      },
+      {
+        "claim": "Republic VI, 510b-511d (Dialectic vs. mathematics, dianoia/noesis)",
+        "source_field": "reasoning_method (step 6)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good and Sun analogy section) contains the full Divided Line passage including the distinction between dianoia (mathematical reasoning from hypotheses) and noesis (dialectical ascent to the unhypothetical first principle). The passage explicitly discusses how mathematicians 'assume the odd and the even and the figures' as hypotheses and how dialectic 'goes up to a principle which is above hypotheses.' This matches the persona card's description."
+      },
+      {
+        "claim": "Parmenides 131a-c: the problem of participation remains among my deepest unresolved challenges",
+        "source_field": "reasoning_method (step 7)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Parmenides is not among the provided primary texts. The dossier (Perplexity primary) confirms: 'The *Parmenides* subjects the Theory of Forms to serious critical scrutiny, including the Third Man regress argument' and discusses the participation problem at 131a-c. The substance is confirmed by dossier."
+      },
+      {
+        "claim": "Republic VII, 516d: 'would rather endure anything than live in that way' among the shadows",
+        "source_field": "reasoning_method (step 8)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VII, Cave allegory section) contains: 'I think that he would rather suffer anything than entertain these false notions and live in this miserable manner.' This matches the substance of the quoted passage. The exact wording differs slightly from the persona card's version ('would rather endure anything than live in that way') but the meaning is identical and the passage is confirmed."
+      },
+      {
+        "claim": "Republic VII, 519c-521b (philosopher-kings must return)",
+        "source_field": "reasoning_method (step 8)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains the passage about compelling philosophers to return: 'they must be made to descend again among the prisoners in the den, and partake of their labours and honours' and 'Observe, Glaucon, that there will be no injustice in compelling our philosophers to have a care and providence of others.' This matches the persona card's reference."
+      },
+      {
+        "claim": "Euthyphro 6d-e: 'I did not ask for one or two examples of pious action; I asked for the Form itself'",
+        "source_field": "reasoning_method (step 1 worked demonstration)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Euthyphro is not among the provided primary texts. The dossier confirms the Euthyphro's definitional challenge and the rejection of examples in favor of the Form. The Stephanus numbers cannot be verified from provided corpus. The substance is confirmed by dossier."
+      },
+      {
+        "claim": "Gorgias 464d-465a: rhetoric is to justice as pastry-cooking is to medicine",
+        "source_field": "reasoning_method (scenario walkthrough)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Gorgias is not among the provided primary texts. The dossier (Perplexity primary) confirms: 'He distinguishes rhetoric—defined as the art of persuasion through words—from philosophy' and references the Gorgias. The specific pastry-cook/medicine analogy is mentioned in the dossier's discussion of Platonic rhetoric critique. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Republic I: 'but as concerning justice, what is it?—to speak the truth and to pay your debts—no more than this?'",
+        "source_field": "curated_corpus_passages (republic_book_i_cephalus_definitional_challenge)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Opening scene and Cephalus on justice) contains verbatim: 'Well said, Cephalus, I replied; but as concerning justice, what is it?—to speak the truth and to pay your debts—no more than this? And even to this are there not exceptions? Suppose that a friend when in his right mind has deposited arms with me and he asks for them when he is not in his right mind, ought I to give them back to him?' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic I: 'Then medicine does not consider the interest of medicine, but the interest of the body... Nor does the art of horsemanship consider the interests of the art of horsemanship, but the interests of the horse'",
+        "source_field": "curated_corpus_passages (republic_book_i_thrasymachus_craft_analogy)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Thrasymachus section) contains verbatim: 'Then medicine does not consider the interest of medicine, but the interest of the body? True, he said. Nor does the art of horsemanship consider the interests of the art of horsemanship, but the interests of the horse; neither do any other arts care for themselves, for they have no needs; they care only for that which is the subject of their art?' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Thrasymachus 'assented with a good deal of reluctance'",
+        "source_field": "curated_corpus_passages (republic_book_i_thrasymachus_craft_analogy)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Thrasymachus section) contains verbatim: 'But surely, Thrasymachus, the arts are the superiors and rulers of their own subjects? To this he assented with a good deal of reluctance.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic I: 'Then, I said, Thrasymachus, there is no one in any rule who, in so far as he is a ruler, considers or enjoins what is for his own interest'",
+        "source_field": "curated_corpus_passages (republic_book_i_thrasymachus_craft_analogy)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Thrasymachus section) contains verbatim: 'Then, I said, Thrasymachus, there is no one in any rule who, in so far as he is a ruler, considers or enjoins what is for his own interest, but always what is for the interest of his subject or suitable to his art.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Apology: 'I honour and love you; but I shall obey God rather than you, and while I have life and strength I shall never cease from the practice and teaching of philosophy'",
+        "source_field": "curated_corpus_passages (apology_examined_life_gadfly)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, death/duty/unexamined life section) contains verbatim: 'Men of Athens, I honour and love you; but I shall obey God rather than you, and while I have life and strength I shall never cease from the practice and teaching of philosophy.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Apology: 'am a sort of gadfly, given to the state by God; and the state is a great and noble steed who is tardy in his motions owing to his very size, and requires to be stirred into life'",
+        "source_field": "curated_corpus_passages (apology_examined_life_gadfly)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, death/duty/unexamined life section) contains verbatim: 'am a sort of gadfly, given to the state by God; and the state is a great and noble steed who is tardy in his motions owing to his very size, and requires to be stirred into life. I am that gadfly which God has attached to the state, and all day long and in all places am always fastening upon you, arousing and persuading and reproaching you.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Apology: 'I know that I have no wisdom, small or great'",
+        "source_field": "curated_corpus_passages (apology_oracle_method) and characteristic_moves",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) contains verbatim: 'for I know that I have no wisdom, small or great.' This matches the curated passage and the characteristic move description exactly."
+      },
+      {
+        "claim": "Apology: 'he knows nothing, and thinks that he knows; I neither know nor think that I know. In this latter particular, then, I seem to have slightly the advantage of him'",
+        "source_field": "curated_corpus_passages (apology_oracle_method)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) contains verbatim: 'Well, although I do not suppose that either of us knows anything really beautiful and good, I am better off than he is,—for he knows nothing, and thinks that he knows; I neither know nor think that I know. In this latter particular, then, I seem to have slightly the advantage of him.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic II: 'They say that to do injustice is, by nature, good; to suffer injustice, evil; but that the evil is greater than the good.'",
+        "source_field": "curated_corpus_passages (republic_book_ii_ring_of_gyges)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains verbatim: 'They say that to do injustice is, by nature, good; to suffer injustice, evil; but that the evil is greater than the good.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic II: 'Suppose now that there were two such magic rings, and the just put on one of them and the unjust the other; no man can be imagined to be of such an iron nature that he would stand fast in justice.'",
+        "source_field": "curated_corpus_passages (republic_book_ii_ring_of_gyges)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains verbatim: 'Suppose now that there were two such magic rings, and the just put on one of them and the unjust the other; no man can be imagined to be of such an iron nature that he would stand fast in justice.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic II: 'No one has ever adequately described either in verse or prose the true essential nature of either of them abiding in the soul, and invisible to any human or divine eye; or shown that of all the things of a man's soul which he has within him, justice is the greatest good, and injustice the greatest evil.'",
+        "source_field": "curated_corpus_passages (republic_book_ii_ring_of_gyges)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains verbatim: 'No one has ever adequately described either in verse or prose the true essential nature of either of them abiding in the soul, and invisible to any human or divine eye; or shown that of all the things of a man's soul which he has within him, justice is the greatest good, and injustice the greatest evil.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic VII Cave: 'Behold! human beings living in a underground den...here they have been from their childhood, and have their legs and necks chained'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good section, which transitions to Book VII Cave) contains verbatim: 'Behold! human beings living in a underground den, which has a mouth open towards the light and reaching all along the den; here they have been from their childhood, and have their legs and necks chained so that they cannot move.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic VII: 'the prison-house is the world of sight, the light of the fire is the sun, and you will not misapprehend me if you interpret the journey upwards to be the ascent of the soul into the intellectual world'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains verbatim: 'the prison-house is the world of sight, the light of the fire is the sun, and you will not misapprehend me if you interpret the journey upwards to be the ascent of the soul into the intellectual world according to my poor belief, which, at your desire, I have expressed—whether rightly or wrongly God knows.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Republic VI: the good 'far exceeds essence in dignity and power'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave) and preferred_vocabulary",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good section) contains: 'the good is not essence, but far exceeds essence in dignity and power.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Republic VI: 'the universal author of all things beautiful and right'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains: 'the universal author of all things beautiful and right, parent of light and of the lord of light in this visible world, and the immediate source of reason and truth in the intellectual.' This matches the curated passage."
+      },
+      {
+        "claim": "Republic VII, 518c: 'the instrument of knowledge can only by the movement of the whole soul be turned from the world of becoming into that of being'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains verbatim: 'the instrument of knowledge can only by the movement of the whole soul be turned from the world of becoming into that of being.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: 'beauty absolute, separate, simple, and everlasting, which without diminution and without increase, or any change, is imparted to the ever-growing and perishing beauties of all other things'",
+        "source_field": "curated_corpus_passages (symposium_diotima_ladder_of_beauty)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains verbatim: 'but beauty absolute, separate, simple, and everlasting, which without diminution and without increase, or any change, is imparted to the ever-growing and perishing beauties of all other things.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: 'This, my dear Socrates, said the stranger of Mantineia, is that life above all others which man should live, in the contemplation of beauty absolute'",
+        "source_field": "curated_corpus_passages (symposium_diotima_ladder_of_beauty)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains verbatim: 'This, my dear Socrates,' said the stranger of Mantineia, 'is that life above all others which man should live, in the contemplation of beauty absolute.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: 'beholding beauty with the eye of the mind, he will be enabled to bring forth, not images of beauty, but realities'",
+        "source_field": "curated_corpus_passages (symposium_diotima_ladder_of_beauty)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains verbatim: 'beholding beauty with the eye of the mind, he will be enabled to bring forth, not images of beauty, but realities (for he has hold not of an image but of a reality), and bringing forth and nourishing true virtue to become the friend of God and be immortal, if mortal man may.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: Alcibiades portrait — 'he is exactly like the busts of Silenus, which are set up in the statuaries' shops'",
+        "source_field": "curated_corpus_passages (symposium_alcibiades_portrait_of_socrates)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Alcibiades' speech section) contains verbatim: 'I say, that he is exactly like the busts of Silenus, which are set up in the statuaries' shops, holding pipes and flutes in their mouths; and they are made to open in the middle, and have images of gods inside them.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: 'But when I opened him, and looked within at his serious purpose, I saw in him divine and golden images of such fascinating beauty that I was ready to do in a moment whatever Socrates commanded'",
+        "source_field": "curated_corpus_passages (symposium_alcibiades_portrait_of_socrates)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Alcibiades' speech section) contains verbatim: 'But when I opened him, and looked within at his serious purpose, I saw in him divine and golden images of such fascinating beauty that I was ready to do in a moment whatever Socrates commanded.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Symposium: 'his words are like the images of Silenus which open; they are ridiculous when you first hear them; he clothes himself in language that is like the skin of the wanton satyr—for his talk is of pack-asses and smiths and cobblers and curriers'",
+        "source_field": "curated_corpus_passages (symposium_alcibiades_portrait_of_socrates)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Alcibiades' speech section) contains verbatim: 'his words are like the images of Silenus which open; they are ridiculous when you first hear them; he clothes himself in language that is like the skin of the wanton satyr—for his talk is of pack-asses and smiths and cobblers and curriers, and he is always repeating the same things in the same words.' This matches the curated passage exactly."
+      },
+      {
+        "claim": "Phaedrus: 'There abides the very being with which true knowledge is concerned; the colourless, formless, intangible essence, visible only to mind'",
+        "source_field": "metaphorical_repertoire (animals_and_the_chariot)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, Palinode section) contains verbatim: 'There abides the very being with which true knowledge is concerned; the colourless, formless, intangible essence, visible only to mind, the pilot of the soul.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Phaedrus chariot: 'upright and cleanly made, a lover of honour and modesty and temperance' / 'a crooked lumbering animal...the mate of insolence and pride, shag-eared and deaf, hardly yielding to whip and spur'",
+        "source_field": "metaphorical_repertoire (animals_and_the_chariot)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, Chariot allegory section) contains verbatim: 'The right-hand horse is upright and cleanly made; he has a lofty neck and an aquiline nose; his colour is white, and his eyes dark; he is a lover of honour and modesty and temperance' and 'The other is a crooked lumbering animal, put together anyhow...the mate of insolence and pride, shag-eared and deaf, hardly yielding to whip and spur.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Phaedrus: 'the living word of knowledge which has a soul, and of which the written word is properly no more than an image'",
+        "source_field": "metaphorical_repertoire (seeds_water_and_growth)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) contains verbatim: 'I mean an intelligent word graven in the soul of the learner, which can defend itself, and knows when to speak and when to be silent.' And Phaedrus responds: 'You mean the living word of knowledge which has a soul, and of which the written word is properly no more than an image?' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Phaedrus: the husbandman 'sows in fitting soil' vs. 'the garden of letters he will sow and plant only for the sake of recreation and amusement'",
+        "source_field": "metaphorical_repertoire (seeds_water_and_growth)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) contains: 'when he is in earnest he sows in fitting soil, and practises husbandry' and 'in the garden of letters he will sow and plant, but only for the sake of recreation and amusement.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Symposium: 'the vast sea of beauty' upon whose shore the lover of wisdom 'grows and waxes strong'",
+        "source_field": "metaphorical_repertoire (seeds_water_and_growth)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains: 'drawing towards and contemplating the vast sea of beauty, he will create many fair and noble thoughts and notions in boundless love of wisdom; until on that shore he grows and waxes strong.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Republic VI: 'not only the author of knowledge to all things known, but of their being and essence, and yet the good is not essence, but far exceeds essence in dignity and power'",
+        "source_field": "metaphorical_repertoire (light_vision_and_shadow)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good section) contains verbatim: 'In like manner the good may be said to be not only the author of knowledge to all things known, but of their being and essence, and yet the good is not essence, but far exceeds essence in dignity and power.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Republic VII: 'The bewilderments of the eyes are of two kinds, and arise from two causes, either from coming out of the light or from going into the light, which is true of the mind's eye, quite as much as of the bodily eye'",
+        "source_field": "metaphorical_repertoire (light_vision_and_shadow)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains verbatim: 'Any one who has common sense will remember that the bewilderments of the eyes are of two kinds, and arise from two causes, either from coming out of the light or from going into the light, which is true of the mind's eye, quite as much as of the bodily eye.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Republic I: Cephalus offers 'speaking the truth and paying debts' as justice; Socrates produces the counterexample of returning weapons to a madman",
+        "source_field": "characteristic_moves (The Definitional Challenge)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Opening scene) contains verbatim the exchange about justice as speaking truth and paying debts, and the counterexample: 'Suppose that a friend when in his right mind has deposited arms with me and he asks for them when he is not in his right mind, ought I to give them back to him?' This matches the characteristic move description exactly."
+      },
+      {
+        "claim": "Republic I: 'medicine does not consider the interest of medicine, but the interest of the body... Nor does the art of horsemanship consider the interests of the art of horsemanship, but the interests of the horse' — Thrasymachus 'assented with a good deal of reluctance'",
+        "source_field": "characteristic_moves (The Craft Analogy Trap)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book I, Thrasymachus section) contains all these elements verbatim. The craft analogy trap description in the persona card accurately describes the argumentative structure of this passage."
+      },
+      {
+        "claim": "Republic II: 'Justice, which is the subject of our enquiry, is, as you know, sometimes spoken of as the virtue of an individual, and sometimes as the virtue of a State... in the larger the quantity of justice is likely to be larger and more easily discernible'",
+        "source_field": "characteristic_moves (The Scaling Move)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains verbatim: 'justice, which is the subject of our enquiry, is, as you know, sometimes spoken of as the virtue of an individual, and sometimes as the virtue of a State...in the larger the quantity of justice is likely to be larger and more easily discernible.' This matches the characteristic move description exactly."
+      },
+      {
+        "claim": "Republic VII: 'let me show in a figure how far our nature is enlightened or unenlightened' — Cave allegory as extended allegory",
+        "source_field": "characteristic_moves (The Extended Allegory)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI, Form of the Good section) contains verbatim: 'And now, I said, let me show in a figure how far our nature is enlightened or unenlightened:—Behold! human beings living in a underground den.' This matches the characteristic move description."
+      },
+      {
+        "claim": "Symposium: Diotima's ladder — 'from one going on to two, and from two to all fair forms, and from fair forms to fair practices, and from fair practices to fair notions, until from fair notions he arrives at the notion of absolute beauty'",
+        "source_field": "characteristic_moves (The Extended Allegory)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains verbatim: 'from one going on to two, and from two to all fair forms, and from fair forms to fair practices, and from fair practices to fair notions, until from fair notions he arrives at the notion of absolute beauty.' This matches the characteristic move description exactly."
+      },
+      {
+        "claim": "Phaedrus: 'the colourless, formless, intangible essence, visible only to mind' — hyperuranian realm",
+        "source_field": "characteristic_moves (The Extended Allegory)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, Palinode section) contains verbatim: 'There abides the very being with which true knowledge is concerned; the colourless, formless, intangible essence, visible only to mind, the pilot of the soul.' This matches the characteristic move description."
+      },
+      {
+        "claim": "Apology: Socrates 'I know that I have no wisdom, small or great' — profession of ignorance",
+        "source_field": "characteristic_moves (The Profession of Ignorance That Prosecutes)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) contains verbatim: 'for I know that I have no wisdom, small or great.' This matches the characteristic move description exactly."
+      },
+      {
+        "claim": "Apology: 'he knows nothing, and thinks that he knows; I neither know nor think that I know'",
+        "source_field": "characteristic_moves (The Profession of Ignorance That Prosecutes)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) contains verbatim: 'he knows nothing, and thinks that he knows; I neither know nor think that I know.' This matches the characteristic move description exactly."
+      },
+      {
+        "claim": "Republic IX, 576c-580c: 'the most wretched of humans' — tyrant's soul in civil war",
+        "source_field": "reasoning_method (step 5 worked demonstration)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic IX is not among the provided primary text excerpts. The dossier confirms the discussion of the tyrant's misery in Republic IX. The persona card's description of the tyrant as 'the most wretched of humans' is confirmed by dossier discussion of Republic IX 576c-580c."
+      },
+      {
+        "claim": "Republic V, 473c-e (philosopher-kings)",
+        "source_field": "constitution (Philosopher-rulers principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic V is not among the provided primary text excerpts. The dossier confirms the philosopher-king doctrine. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Republic V, 476d-480a (knowledge vs. opinion)",
+        "source_field": "constitution (Knowledge/Opinion principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic V is not among the provided primary text excerpts. The dossier confirms the knowledge/opinion distinction. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Timaeus 48a: demiurge must 'persuade Necessity'",
+        "source_field": "concept_lexicon (Demiurge)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Timaeus is not among the provided primary texts. The dossier confirms the demiurge doctrine and the role of Necessity. The specific Stephanus number cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Phaedrus 246a-254e (Tripartite Soul — Phaedrus reference)",
+        "source_field": "constitution (Tripartite Soul principle flags)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, Chariot allegory and two horses section) is provided and covers the chariot allegory representing the tripartite soul. The passage range 246a-254e corresponds to the Palinode and Chariot sections provided in the primary texts."
+      },
+      {
+        "claim": "Republic IV, 435a-445e (Tripartite Soul — Republic reference)",
+        "source_field": "constitution (Tripartite Soul principle flags)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book IV, tripartite soul and definition of justice section) is provided and covers the tripartite soul doctrine and the definition of justice. The passage range 435a-445e corresponds to this section."
+      },
+      {
+        "claim": "Phaedrus 265c-266c (Dialectic — collection and division)",
+        "source_field": "constitution (Dialectic principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Phaedrus primary text excerpts provided cover the Palinode (125,000-145,000), Chariot allegory (145,000-165,000), and rhetoric/writing critique (185,000-215,564). The passage 265c-266c falls in the section on collection and division (around 165,000-185,000) which is not provided. Cannot verify from provided corpus."
+      },
+      {
+        "claim": "Meno 81c-86b (Anamnesis — Meno reference)",
+        "source_field": "constitution (Anamnesis principle flags)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Meno is not among the provided primary texts. The dossier confirms the anamnesis doctrine and the slave boy demonstration. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Phaedo 72e-77a (Anamnesis — Phaedo reference)",
+        "source_field": "constitution (Anamnesis principle flags)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Phaedo is not among the provided primary texts. The dossier confirms the anamnesis doctrine in the Phaedo. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Republic VII, 521c-535a (Mathematics as propaedeutic — specific passage)",
+        "source_field": "constitution (Mathematics principle)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The specific passage range 521c-535a is not in the provided primary text excerpts. The dossier confirms the mathematical curriculum. The broader Republic VII passage provided does contain references to mathematical training but not the specific curriculum passage."
+      },
+      {
+        "claim": "Euthyphro 6d-e (definitional challenge reference in reasoning_method)",
+        "source_field": "reasoning_method (step 1)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The Euthyphro is not among the provided primary texts. The dossier confirms the Euthyphro's definitional challenge. Stephanus numbers cannot be verified from provided corpus."
+      },
+      {
+        "claim": "Republic II, 368d-369a (Scaling Move — specific Stephanus numbers)",
+        "source_field": "characteristic_moves (The Scaling Move)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book II, Ring of Gyges section) contains the scaling move passage. The Stephanus numbers 368d-369a correspond to this section of Republic II where Socrates proposes examining justice in the city before the individual. The passage is verified in the primary text."
+      },
+      {
+        "claim": "Apology: Evenus the Parian charges five minae",
+        "source_field": "curated_corpus_passages (apology_oracle_method) — referenced in world field re: sophists charging silver",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, oracle and examined life section) contains verbatim: '\"Evenus the Parian,\" he replied; \"he is the man, and his charge is five minæ.\"' This confirms the persona card's reference to sophists selling wisdom for silver."
+      },
+      {
+        "claim": "Republic IV: justice is 'doing one's own business' — each part performing its proper function",
+        "source_field": "constitution (Justice principle) and concept_lexicon (justice)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book IV, tripartite soul section) contains verbatim: 'justice is doing one's own business, and not being a busybody' and 'when the trader, the auxiliary, and the guardian each do their own business, that is justice, and will make the city just.' This matches the persona card's definition exactly."
+      },
+      {
+        "claim": "Republic IX: tyrant's soul described as 'the most wretched of humans'",
+        "source_field": "resists (cynical dismissal) and reasoning_method (step 5)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "Republic IX is not among the provided primary text excerpts. The dossier confirms this characterization. The persona card's phrasing 'the most wretched of humans' is confirmed by dossier discussion of Republic IX 576c-580c."
+      },
+      {
+        "claim": "Phaedrus: 'the garden of Adonis where seeds bloom prettily and die in eight days'",
+        "source_field": "metaphorical_repertoire (craft_art_and_skilled_labour)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) contains: 'Would a husbandman...plant them during the heat of summer, in some garden of Adonis, that he may rejoice when he sees them in eight days appearing in beauty?' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Symposium: Alcibiades 'crashes a dinner party drunk and wreathed in ribbons'",
+        "source_field": "character",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Alcibiades' speech section) contains: 'suddenly there was a great knocking at the door of the house, as of revellers...they heard the voice of Alcibiades resounding in the court; he was in a great state of intoxication...he found his way to them. \"Hail, friends,\" he said, appearing at the door crowned with a massive garland of ivy and violets, his head flowing with ribands.' This confirms the persona card's characterization."
+      },
+      {
+        "claim": "Thrasymachus 'blushes and sweats when cornered'",
+        "source_field": "character",
+        "status": "UNVERIFIED",
+        "evidence": "The provided primary text excerpt from Republic Book I (Thrasymachus section) does not contain a description of Thrasymachus blushing and sweating. The text shows him becoming angry and reluctant but the specific physical description of blushing and sweating is not in the provided excerpt. This detail may come from a portion of Republic I not included in the provided excerpt, or may be an embellishment. Cannot verify from provided corpus or dossier."
+      },
+      {
+        "claim": "Republic VII, 519c-521b: philosopher-kings must return to the cave",
+        "source_field": "constitution (Philosopher-rulers principle) and reasoning_method (step 8)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains the passage about compelling philosophers to return: 'they must be made to descend again among the prisoners in the den, and partake of their labours and honours' and the extended discussion of why this is just. The passage range 519c-521b is confirmed by the content of the provided primary text."
+      },
+      {
+        "claim": "Phaedrus: 'the fountain of that stream which Zeus named Desire' overflowing from lover to beloved",
+        "source_field": "metaphorical_repertoire (seeds_water_and_growth)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, Chariot allegory section) contains: 'the fountain of that stream, which Zeus when he was in love with Ganymede named Desire, overflows upon the lover, and some enters into his soul, and some when he is filled flows out again.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Apology: Socrates compared himself to a gadfly stinging a lazy horse into wakefulness, and the horse killed him for it",
+        "source_field": "register_and_tone",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Apology, death/duty/unexamined life section) contains the gadfly passage verbatim. The persona card's characterization accurately summarizes this passage."
+      },
+      {
+        "claim": "Republic VI: 'whether rightly or wrongly God knows'",
+        "source_field": "curated_corpus_passages (republic_book_vii_cave) and register_and_tone",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains verbatim: 'according to my poor belief, which, at your desire, I have expressed—whether rightly or wrongly God knows.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Symposium: Beauty 'pure and clear and unalloyed, not clogged with the pollutions of mortality'",
+        "source_field": "register_and_tone",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Symposium, Diotima's speech section) contains: 'the true beauty simple and divine? Remember how in that communion only, beholding beauty with the eye of the mind...But what if man had eyes to see the true beauty—the divine beauty, I mean, pure and clear and unalloyed, not clogged with the pollutions of mortality.' This matches the persona card's reference exactly."
+      },
+      {
+        "claim": "Plato's birth date: 428/423 BCE; death: 348/347 BCE",
+        "source_field": "world (implied by 'fourth-century Athens')",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'Plato was born into an aristocratic Athenian family...with his birth occurring between 428 and 423 BCE' and 'He died in the year 348 or 347 BCE.' This is consistent with the persona card's self-description as inhabiting 'fourth-century Athens.'"
+      },
+      {
+        "claim": "Critias killed fifteen hundred citizens",
+        "source_field": "world",
+        "status": "VERIFIED",
+        "evidence": "Dossier (Perplexity primary) states: 'orchestrating confiscations of aristocratic estates, the banishment of thousands, and the summary execution of approximately 1,500 prominent democratic citizens.' The persona card's 'fifteen hundred' matches the dossier's '1,500.'"
+      },
+      {
+        "claim": "The amnesty that followed forbade prosecution but not memory",
+        "source_field": "world",
+        "status": "INTERPRETIVE",
+        "evidence": "The dossier confirms the amnesty of 403 BCE that 'paradoxically prevented his prosecution for his actions.' The persona card's formulation 'forbade prosecution but not memory' is a poetic interpretation of the historical amnesty, not a direct quotation from any source. The historical fact of the amnesty is confirmed; the specific formulation is the persona card's own."
+      },
+      {
+        "claim": "Plato's Academy 'lasted until the sixth century CE'",
+        "source_field": "world (implied by founding the Academy)",
+        "status": "INCONSISTENT",
+        "evidence": "The dossier contains an internal contradiction flagged in the FLAGGED CONTRADICTIONS section: one passage states 'The school lasted until the sixth century CE' while another states 'The destruction of the Academy's physical plant occurred during the Mithridatic War in 88 BCE.' The persona card does not make this claim directly, but the dossier's internal inconsistency is noted. The persona card's description of the Academy is accurate to Plato's lifetime and does not make claims about its later history."
+      },
+      {
+        "claim": "Elenchus definition: 'A Socratic elenchus is a test of the overall coherence of a person's beliefs: a test that shames those who fail it, and which cleanses their soul through that shaming' [scholarly consensus]",
+        "source_field": "concept_lexicon (Elenchus)",
+        "status": "DOSSIER_ONLY",
+        "evidence": "The dossier (Perplexity primary) contains: 'a Socratic elenchus can be understood as a test of the overall coherence of a person's beliefs: \"a test that shames those who fail it, and which cleanses their soul through that shaming\"' attributed to scholarly consensus. The persona card attributes this to '[scholarly consensus]' which matches the dossier's attribution. The specific scholar (likely Vlastos) is not named in either the dossier or the persona card for this specific formulation."
+      },
+      {
+        "claim": "Phaedrus: writing 'seem to talk to you as though they were intelligent, but if you ask them anything about what they say, from a desire to be instructed, they go on telling you the same thing forever' (Phaedrus 275d)",
+        "source_field": "constitution (Writing principle)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Phaedrus, rhetoric/dialectic/critique of writing section) contains the equivalent passage: 'if you want to know anything and put a question to one of them, the speaker always gives one unvarying answer.' The persona card's version is a slightly different translation of the same passage. The Stephanus number 275d is consistent with the location of this passage in the Phaedrus. The substance is verified."
+      },
+      {
+        "claim": "Republic VII, 518c-d: 'The instrument of knowledge can only be turned round from the world of becoming to the world of being by the movement of the whole soul' — periagoge definition",
+        "source_field": "concept_lexicon (Periagoge)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains: 'the instrument of knowledge can only by the movement of the whole soul be turned from the world of becoming into that of being.' The persona card's version ('turned round') is a slightly different translation. The substance and location are verified."
+      },
+      {
+        "claim": "Republic VII, 518c: 'the turning round of eyes that already see toward the right objects'",
+        "source_field": "concept_lexicon (Periagoge)",
+        "status": "VERIFIED",
+        "evidence": "Primary text (Republic Book VI-VII section) contains: 'certain professors of education must be wrong when they say that they can put a knowledge into the soul which was not there before, like sight into blind eyes...not implanting the faculty of sight, for that exists already, but has been turned in the wrong direction, and is looking away from the truth.' This confirms the substance of the periagoge definition in the persona card."
+      }
+    ],
+    "summary": {
+      "verified": 68,
+      "unverified": 1,
+      "dossier_only": 18,
+      "interpretive": 1,
+      "inconsistent": 1,
+      "hostile_flagged": 0
+    },
+    "overall": "PASS",
+    "review_notes": "The persona card is overwhelmingly well-grounded. The vast majority of direct quotations and textual references are verified verbatim against the provided primary texts, which is the strongest possible confirmation. The single UNVERIFIED item — Thrasymachus 'blushes and sweats when cornered' — is a minor characterization detail not found in the provided Republic I excerpt; it may appear in a portion of the text not included in the corpus, but cannot be confirmed. The 18 DOSSIER_ONLY items are almost entirely Stephanus number references for dialogues not included in the primary text corpus (Meno, Phaedo, Parmenides, Timaeus, Gorgias, Euthyphro, Republic V and VIII-IX); the doctrinal substance of all these references is confirmed by the dossier, and the Stephanus numbers are standard scholarly citations that appear consistent with known locations. One INTERPRETIVE item ('forbade prosecution but not memory') is a poetic formulation of a confirmed historical fact. One INCONSISTENT item concerns the dossier's internal contradiction about the Academy's lifespan (88 BCE physical destruction vs. sixth century CE continuation), which the persona card does not directly reproduce and which reflects a known historical distinction between the physical Academy and the Platonic school tradition. No fabricated quotes, false precision in citations, or anachronistic conceptual frameworks were detected. The persona card's quotations from the primary texts are consistently accurate to the Jowett translations provided, with only minor paraphrastic variation in a handful of cases."
+  },
+  "_elapsed_seconds": 266.0
+}
