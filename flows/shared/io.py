@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -52,12 +54,35 @@ def load_session_package(path: Path | str) -> dict[str, Any]:
 def write_json_atomic(path: Path | str, data: Any) -> None:
     """Write JSON to `path` via a temp file + rename, so partial writes
     can never leave a truncated file on disk. Indented, UTF-8, no ASCII
-    escaping (preserves accented names)."""
+    escaping (preserves accented names).
+
+    Uses mkstemp so concurrent writes to the same path don't race on a
+    shared .tmp filename. Cleans up the temp file on failure.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
-    tmp.replace(path)
+    fd, tmp = tempfile.mkstemp(
+        prefix=path.name + ".", suffix=".tmp", dir=str(path.parent)
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def member_slug(name: str) -> str:
+    """Convert a council member name to a filesystem-safe slug.
+
+    Lowercases, collapses any run of non-alphanumerics to a single
+    underscore, strips leading/trailing underscores.
+    """
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
 
 # Prompts live as standalone .md files under flows/shared/prompts/ so they

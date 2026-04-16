@@ -90,14 +90,20 @@ class Speaker:
 
 
 def load_sessions(path: Path = SESSIONS_PATH) -> list[Session]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Failed to load sessions from {path}: {e}") from e
     return [Session.from_dict(s) for s in data.get("sessions", [])]
 
 
 def load_speakers(path: Path = SPEAKERS_PATH) -> dict[str, Speaker]:
     if not path.exists():
         return {}
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Failed to load speakers from {path}: {e}") from e
     out: dict[str, Speaker] = {}
     for s in data.get("speakers", []):
         if s.get("_dropped_from_program"):

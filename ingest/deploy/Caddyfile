@@ -5,7 +5,11 @@
 # TLS is issued automatically via Let's Encrypt.
 
 ingest.example.com {
-    # HTTP Basic Auth is enforced by the app itself; Caddy just proxies.
+    # HTTP Basic Auth and IP-based failed-attempt rate limiting are enforced
+    # by the app itself (ingest/auth.py). Caddy's rate_limit directive requires
+    # the xcaddy plugin and is not used here; app-level limiting is sufficient
+    # for this internal tool.
+    #
     # Large bodies: audio can be up to ~500 MB per session.
     request_body {
         max_size 2GB

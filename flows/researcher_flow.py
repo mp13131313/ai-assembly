@@ -43,7 +43,7 @@ try:
     from prefect import flow, task, get_run_logger
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(_REPO_ROOT / ".env")
     from flows.shared.io import (
         extract_json,
         get_logger,
@@ -790,11 +790,15 @@ def run_researcher(run_root: str) -> dict:
 # --- CLI entry point ------------------------------------------------------
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(__doc__)
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(description="Researcher Pipeline")
+    parser.add_argument(
+        "run_root",
+        help="Path to the run directory (e.g. runs/dev_msc_test)",
+    )
+    args = parser.parse_args()
     for key in ("ANTHROPIC_API_KEY",):
         if not os.environ.get(key):
             sys.stderr.write(f"Missing environment variable: {key}\n")
             sys.exit(1)
-    run_researcher(sys.argv[1])
+    run_researcher(args.run_root)

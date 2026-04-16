@@ -193,7 +193,14 @@ def overview(request: Request, _: str = Depends(require_auth)):
         rows.append({"session": s, "status": st})
     # Sort: errors first, then active, then done, then not-started.
     order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
-    rows.sort(key=lambda r: (order.get(r["status"].get("state"), 9), r["session"].day_index, r["session"].start_time))
+    # Sort by state priority, then day, then time. Use date_time_start (ISO 8601)
+    # for time ordering — it sorts lexicographically correctly and is always
+    # zero-padded. Fall back to start_time only if date_time_start is absent.
+    rows.sort(key=lambda r: (
+        order.get(r["status"].get("state"), 9),
+        r["session"].day_index,
+        r["session"].date_time_start or r["session"].start_time,
+    ))
     return templates.TemplateResponse(request, "overview.html", {"rows": rows})
 
 
@@ -311,9 +318,11 @@ async def upload(
             raise
         except Exception as e:
             partial.unlink(missing_ok=True)
+            # Log internally, but don't leak exception details to the client.
+            print(f"ingest: upload error for {session_id}: {type(e).__name__}: {e}", flush=True)
             raise HTTPException(
                 http.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"upload failed: {e}",
+                detail="upload failed; check server logs",
             )
 
         if bytes_received == 0:
