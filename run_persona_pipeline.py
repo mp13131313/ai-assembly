@@ -1,7 +1,8 @@
 """End-to-end Persona Pipeline runner for a single voice.
 
 Walks: Node 0 -> Pass 1a (Perplexity) + Pass 1a-DR (Claude Deep Research file)
-+ Pass 1b (Gemini) -> Pass 1c -> Pass 1-merge (3-way) -> Pass 2 -> CT
++ Pass 1b (Gemini) -> Pass 1-merge (3-way) -> Pass 1c-extract (URL extraction
+from merged dossier) -> Pass 1c (fetch primary texts) -> Pass 2 -> CT
 -> Pass 3 (+ DR supplement if triggered) -> CT -> Pass 1d (excerpt selection)
 -> Pass 4a -> CT -> Pass 4b -> CT -> Pass 5 -> Pass 6 -> assembled card.
 
@@ -16,17 +17,20 @@ pass starts. If a pass already exists, it's loaded from disk instead of
 re-called. To force a re-run, delete the output JSON.
 """
 from __future__ import annotations
+import argparse
 import json
 import re
 import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, ".")
-from dotenv import load_dotenv
-load_dotenv("/Users/aienvironment/Desktop/ai-assembly-personas/.env")
+REPO_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(REPO_ROOT))
 
-from flows.shared.io import load_voice_input, write_json_atomic
+from dotenv import load_dotenv
+load_dotenv(REPO_ROOT / ".env")
+
+from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_perplexity, call_openai, call_gemini
@@ -34,9 +38,13 @@ from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 
 
-VOICE_NAME = sys.argv[1] if len(sys.argv) > 1 else "Plato"
-SLUG = VOICE_NAME.lower().replace(" ", "_").replace("-", "_")
-RUN = Path(f"runs/{SLUG}")
+_parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
+_parser.add_argument("name", help='Voice name, e.g. "Plato" or "Hannah Arendt"')
+_args = _parser.parse_args()
+
+VOICE_NAME = _args.name
+SLUG = voice_slug(VOICE_NAME)
+RUN = REPO_ROOT / "runs" / SLUG
 (RUN / "01_research").mkdir(parents=True, exist_ok=True)
 (RUN / "02_passes").mkdir(parents=True, exist_ok=True)
 
@@ -49,7 +57,8 @@ def cached(path: Path, label: str):
     """Return parsed JSON if path exists, else None and log."""
     if path.exists():
         stamp(f"  CACHE HIT: {label} -> {path.name}")
-        return json.load(open(path))
+        with path.open(encoding="utf-8") as f:
+            return json.load(f)
     return None
 
 
@@ -70,7 +79,7 @@ def call_or_cache(path: Path, label: str, runner):
 # ---------- NODE 0 ----------
 stamp(f"NODE 0: validating {VOICE_NAME}")
 vi = validate_input(load_voice_input(VOICE_NAME))
-stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_sources']} sources={len(vi['primary_text_sources'])}")
+stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_sources']}")
 
 
 # ---------- PASS 1a ----------
@@ -87,20 +96,10 @@ dossier_text = pass1a.get("text") or pass1a.get("text_clean")
 stamp(f"  dossier: {len(dossier_text)} chars")
 
 
-# ---------- PASS 1c ----------
-def _pass_1c():
-    fetched = fetch_all(vi["primary_text_sources"])
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_primary_text_fetch",
-            "source_count": len(fetched), "passages": fetched,
-            "total_chars": sum(p["char_count"] for p in fetched)}
-
-if vi["primary_text_sources"]:
-    stamp("PASS 1c: fetching primary texts")
-    pass1c = call_or_cache(RUN / "01_research/primary_texts.json", "Pass 1c", _pass_1c)
-    stamp(f"  fetched {pass1c['source_count']} sources, {pass1c['total_chars']} total chars")
-else:
-    stamp("PASS 1c: SKIPPED (no primary_text_sources)")
-    pass1c = {"passages": []}
+# ---------- PASS 1c is now AFTER Pass 1-merge (see below) ----------
+# Primary text URLs are extracted from the merged dossier rather than
+# hand-specified in the voice config. If vi["primary_text_sources"] is
+# populated (backward compat), those are used as override.
 
 
 # ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
@@ -114,7 +113,7 @@ claude_dr_file = vi.get("pass_1a_claude_dr_file")
 if claude_dr_file:
     p = Path(claude_dr_file)
     if not p.is_absolute():
-        p = Path("/Users/aienvironment/Desktop/ai-assembly-personas") / p
+        p = REPO_ROOT / p
     if p.exists():
         claude_dr_text = p.read_text()
         stamp(f"PASS 1a-DR: loaded Claude Deep Research from {p.name} ({len(claude_dr_text)} chars)")
@@ -143,7 +142,7 @@ stamp(f"  broad scan: {len(broad_scan_text)} chars")
 
 # ---------- PASS 1-MERGE (Claude contradiction check, three-way: Perplexity + Claude DR + Gemini) ----------
 def _pass_1merge():
-    sysp = open("flows/shared/prompts/persona_pass_1merge_contradiction_system.md").read().strip()
+    sysp = load_prompt("persona_pass_1merge_contradiction_system").strip()
     userp = render("persona_pass_1merge_three_way_user",
                    perplexity_dossier=dossier_text,
                    claude_dr_dossier=claude_dr_text or None,
@@ -208,6 +207,54 @@ write_json_atomic(RUN / "01_research/merged_dossier.json", {
     "degraded_mode": False,
 })
 stamp(f"  merged_dossier: {len(merged_dossier)} chars")
+
+
+# ---------- PASS 1c-extract: Extract primary text URLs from merged dossier ----------
+# Primary text URLs are discovered by the three research sources (Perplexity,
+# Claude DR, Gemini) in their Section 6 outputs, then extracted here by a
+# Sonnet call. If the voice config has primary_text_sources populated (backward
+# compat / manual override), those are used directly and extraction is skipped.
+
+if vi["primary_text_sources"]:
+    # Backward compat: manual override from voice config
+    primary_text_urls = vi["primary_text_sources"]
+    stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
+else:
+    def _pass_1c_extract():
+        sysp = "You extract primary text URLs from a merged research dossier. Return only valid JSON, no preamble."
+        userp = render("persona_pass_1c_extract_urls", name=vi["name"]) + \
+                f"\n\nMERGED DOSSIER:\n{merged_dossier}"
+        r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
+                        max_tokens=4096, temperature=0.0, thinking_budget=None,
+                        response_format_json=True)
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls",
+                "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+    stamp("PASS 1c-extract: extracting primary text URLs from merged dossier (Sonnet)")
+    pass1c_extract = call_or_cache(RUN / "01_research/primary_text_urls.json",
+                                   "Pass 1c-extract", _pass_1c_extract)
+    extracted = pass1c_extract.get("result", {}).get("primary_text_urls", [])
+    primary_text_urls = [item["url"] for item in extracted if item.get("url")]
+    stamp(f"  extracted {len(primary_text_urls)} URLs from dossier")
+    notes = pass1c_extract.get("result", {}).get("extraction_notes", "")
+    if notes:
+        stamp(f"  notes: {notes}")
+
+
+# ---------- PASS 1c: Fetch primary texts ----------
+def _pass_1c():
+    fetched = fetch_all(primary_text_urls)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_primary_text_fetch",
+            "source_count": len(fetched), "passages": fetched,
+            "total_chars": sum(p["char_count"] for p in fetched)}
+
+if primary_text_urls:
+    stamp("PASS 1c: fetching primary texts")
+    pass1c = call_or_cache(RUN / "01_research/primary_texts.json", "Pass 1c", _pass_1c)
+    stamp(f"  fetched {pass1c['source_count']} sources, {pass1c['total_chars']} total chars")
+else:
+    stamp("PASS 1c: SKIPPED (no primary text URLs found)")
+    pass1c = {"passages": []}
 
 
 # ---------- REVISION LOOP STATE ----------
@@ -284,7 +331,6 @@ def _should_dr_supplement() -> tuple[bool, str]:
     if vi["voice_mode"] == "observational":
         return True, "voice_mode is observational"
     # Word count of INTELLECTUAL FRAMEWORK section in dossier
-    import re
     m = re.search(r"INTELLECTUAL FRAMEWORK(.*?)(?=\n#+\s|\Z)", merged_dossier, flags=re.DOTALL | re.IGNORECASE)
     if m:
         words = len(m.group(1).split())
@@ -497,7 +543,7 @@ def _pass_7a():
     full_card_for_validate = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):
         full_card_for_validate.update(pass6["fields"])
-    sysp = open("flows/shared/prompts/persona_pass_7a_cross_model.md").read()
+    sysp = load_prompt("persona_pass_7a_cross_model")
     userp = render("persona_pass_7a_cross_model_user",
                    persona_card_json=json.dumps(full_card_for_validate, ensure_ascii=False, indent=2))
     # Try o3 first (reasoning-mode for multi-criterion evaluation), then gpt-4o, then Gemini
@@ -761,7 +807,7 @@ def _derive():
             full_card_for_derive["banned_language"] = pass7c["result"]["banned_language"]
         if pass7c["result"].get("banned_modes") is not None:
             full_card_for_derive["banned_modes"] = pass7c["result"]["banned_modes"]
-    sysp = open("flows/shared/prompts/persona_derive.md").read()
+    sysp = load_prompt("persona_derive")
     userp = render("persona_derive_user",
                    persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",

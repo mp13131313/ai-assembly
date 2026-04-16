@@ -20,29 +20,24 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, ".")
+REPO_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(REPO_ROOT))
+
 from dotenv import load_dotenv
-load_dotenv("/Users/aienvironment/Desktop/ai-assembly-personas/.env")
+load_dotenv(REPO_ROOT / ".env")
 
 from flows.shared.clients import call_claude
+from flows.shared.io import voice_slug
 
 
-REPO_ROOT = Path(__file__).resolve().parent
 PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
 SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/stage_0b_dr_prompt.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
 DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
-
-
-def slugify(name: str) -> str:
-    s = name.lower()
-    s = re.sub(r"[^a-z0-9]+", "_", s)
-    return s.strip("_")
 
 
 def stamp(msg: str) -> None:
@@ -57,7 +52,7 @@ def main(name: str) -> None:
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
 
-    slug = slugify(name)
+    slug = voice_slug(name)
     voice_path = VOICES_DIR / f"{slug}.json"
     if not voice_path.exists():
         sys.exit(

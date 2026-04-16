@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -20,30 +21,35 @@ _INPUTS_DIR = _REPO_ROOT / "inputs" / "voices"
 
 
 VALID_TYPES = {"human", "non-human", "fictional"}
-VALID_VOICE_MODES = {"philosophical", "observational", "narratival"}
-VALID_SUBTYPES = {None, "organism", "system"}
+# voice_mode is a freeform string — Stage 0a proposes creative per-voice modes
+# like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic".
+# Validation just checks it's a non-empty string, not membership in a fixed set.
+VALID_SUBTYPES = {None, "organism", "system", "legal_entity", "literary_character", "river_personhood"}
 VALID_CORPUS_CONSTRAINTS = {
     "full",
-    "lyrics — describe patterns only",
-    "hostile — read against grain",
+    "restricted",
+    "fragmentary",
+    "reconstructed",
 }
 
 
-def _slugify(name: str) -> str:
-    """Convert a voice name to a filename-safe slug."""
-    return (
-        name.lower()
-        .replace(" ", "_")
-        .replace(".", "")
-        .replace(",", "")
-        .replace("'", "")
-        .replace("/", "_")
-    )
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
 
 
 def voice_slug(name: str) -> str:
-    """Public alias — voice name to slug."""
-    return _slugify(name)
+    """Convert a voice name to a filename-safe slug.
+
+    Canonical implementation — use this everywhere. Regex-based: lowercases,
+    collapses any run of non-alphanumerics to a single underscore, strips
+    leading/trailing underscores. Stable for the existing voice set (plato,
+    hannah_arendt, cleopatra, octopus) and handles edge cases (apostrophes,
+    periods, dashes) consistently.
+    """
+    return _SLUG_RE.sub("_", name.lower()).strip("_")
+
+
+# Backward-compat alias — remove once no callers remain.
+_slugify = voice_slug
 
 
 def write_json_atomic(path: Path | str, data: Any) -> None:

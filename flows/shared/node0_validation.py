@@ -19,7 +19,6 @@ from .io import (
     VALID_CORPUS_CONSTRAINTS,
     VALID_SUBTYPES,
     VALID_TYPES,
-    VALID_VOICE_MODES,
 )
 
 
@@ -68,25 +67,25 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
             ),
         )
 
-    # voice_mode
+    # voice_mode — freeform string, just must be non-empty
     vmode = voice_input.get("voice_mode")
-    if vmode not in VALID_VOICE_MODES:
+    if not vmode or not isinstance(vmode, str):
         raise InputRejected(
             status="REJECTED",
             reason=(
-                f"Invalid voice_mode {vmode!r}. Must be one of: "
-                f"{sorted(VALID_VOICE_MODES)}."
+                f"voice_mode must be a non-empty string. Got {vmode!r}."
             ),
         )
 
-    # subtype — required for non-human, ignored otherwise
+    # subtype — required for non-human, optional otherwise
     subtype = voice_input.get("subtype")
     if vtype == "non-human":
-        if subtype not in {"organism", "system"}:
+        non_human_subtypes = {"organism", "system", "legal_entity", "river_personhood"}
+        if subtype not in non_human_subtypes:
             raise InputRejected(
                 status="REJECTED",
                 reason=(
-                    f"non-human voices require subtype 'organism' or 'system'. "
+                    f"non-human voices require a subtype from {sorted(non_human_subtypes)}. "
                     f"Got {subtype!r}."
                 ),
             )
@@ -122,7 +121,7 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
     # Defaults for optional flags
     normalized = dict(voice_input)
     normalized.setdefault("hostile_sources", False)
-    normalized.setdefault("needs_dr_supplement", False)
+    normalized.setdefault("needs_dr_supplement", True)  # always trigger; cheap and adds depth
     normalized.setdefault("primary_text_sources", [])
     normalized.setdefault("subtype", None)
     normalized.setdefault("corpus_constraint", "full")

@@ -24,30 +24,23 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, ".")
+REPO_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(REPO_ROOT))
+
 from dotenv import load_dotenv
-load_dotenv("/Users/aienvironment/Desktop/ai-assembly-personas/.env")
+load_dotenv(REPO_ROOT / ".env")
 
 from flows.shared.clients import call_claude
-from flows.shared.io import write_json_atomic
+from flows.shared.io import voice_slug, write_json_atomic
 
 
-REPO_ROOT = Path(__file__).resolve().parent
 PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
 SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/stage_0a_intake.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
-
-
-def slugify(name: str) -> str:
-    """Filesystem-safe lowercase snake_case slug."""
-    s = name.lower()
-    s = re.sub(r"[^a-z0-9]+", "_", s)
-    return s.strip("_")
 
 
 def stamp(msg: str) -> None:
@@ -98,7 +91,7 @@ def main(name: str, hint: str | None) -> None:
     review_doc = out["review_doc"]
 
     display_name = voice_config.get("name", name)
-    slug = slugify(display_name)
+    slug = voice_slug(display_name)
 
     # Inject the project-level conference context paragraph (don't trust the
     # model to copy it verbatim — substitute it server-side)
