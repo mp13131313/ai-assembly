@@ -153,12 +153,14 @@ def index(request: Request, _: str = Depends(require_auth)):
         if sdir:
             states[s.session_id] = pipeline.infer_state(sdir).get("state")
     days_ordered = [d for d in ["Day One", "Day Two", "Day Three"] if d in by_day]
+    venues_ordered = sorted({s.venue for s in flagged if s.venue})
     return templates.TemplateResponse(
         request,
         "index.html",
         {
             "by_day": by_day,
             "days_ordered": days_ordered,
+            "venues_ordered": venues_ordered,
             "states": states,
             "flagged_count": len(flagged),
         },

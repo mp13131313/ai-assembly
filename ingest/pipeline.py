@@ -46,6 +46,13 @@ STATE_ERROR = "error"
 
 TERMINAL_STATES = {STATE_DONE, STATE_ERROR}
 
+# Sub-states derived from pipeline.log (returned by infer_state, never written
+# to status.json — they'd be stale within seconds anyway).
+SUBSTATE_ASR = "transcribing_asr"
+SUBSTATE_SPEAKER_ID = "transcribing_speaker_id"
+SUBSTATE_CLEANING = "transcribing_cleaning"
+SUBSTATE_FINALIZING = "transcribing_finalizing"
+
 # --- Serialization gate ------------------------------------------------------
 
 # One in-flight normalize+transcribe at a time per app process. We run
@@ -123,11 +130,65 @@ def _is_pid_alive(pid: int | None) -> bool:
     return True
 
 
+def _substate_from_log(session_dir: Path) -> str:
+    """Scan pipeline.log for the most-advanced Stage 0 sub-phase marker.
+
+    Returns one of the SUBSTATE_* constants, or STATE_TRANSCRIBING if the log
+    is absent or has no recognisable markers. Does not mutate any file.
+
+    Markers (in sequence emitted by transcription_flow.py):
+      "Transcribing audio"   — AssemblyAI ASR started
+      "AssemblyAI done in"   — ASR done; speaker-ID task starting
+      "Speaker ID pass"      — speaker-ID task start header (no state change)
+      "  done in" (first)    — speaker-ID done; cleaning task starting
+      "Cleaning pass"        — cleaning task start header (confirms cleaning)
+      "  done in" (second)   — cleaning done; writing output files (finalizing)
+    """
+    log = log_path(session_dir)
+    if not log.exists():
+        return STATE_TRANSCRIBING
+
+    substate = STATE_TRANSCRIBING
+    last_phase: str | None = None  # "asr", "speaker_id", "cleaning"
+
+    try:
+        text = log.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return substate
+
+    for line in text.splitlines():
+        if "Transcribing audio" in line:
+            substate = SUBSTATE_ASR
+            last_phase = "asr"
+        elif "AssemblyAI done in" in line:
+            substate = SUBSTATE_SPEAKER_ID
+            last_phase = "speaker_id"
+        elif "Cleaning pass" in line:
+            # Cleaning pass header — may arrive before we've seen the speaker_id
+            # "done in" line (ordering guarantee from the flow), but set state anyway.
+            substate = SUBSTATE_CLEANING
+            last_phase = "cleaning"
+        elif "done in" in line:
+            # "  done in X.Xs" is the per-task completion marker.
+            if last_phase == "speaker_id":
+                substate = SUBSTATE_CLEANING
+                # don't advance last_phase — "Cleaning pass" will follow
+            elif last_phase == "cleaning":
+                substate = SUBSTATE_FINALIZING
+                last_phase = "finalizing"
+
+    return substate
+
+
 def infer_state(session_dir: Path) -> dict[str, Any]:
     """Return the current authoritative status, reconciling with disk state.
 
     This is safe to call from any worker/process — it does not mutate state
     unless the stored state is provably stale (non-terminal + dead PID).
+
+    When state is ``transcribing`` and the subprocess is still running, the
+    returned dict gets a ``substate`` key with a more granular phase name
+    derived from pipeline.log (never written to status.json to avoid churn).
     """
     status = read_status(session_dir)
     if not status:
@@ -151,6 +212,13 @@ def infer_state(session_dir: Path) -> dict[str, Any]:
             pid=None,
             error="transcription process died without producing session_package.json",
         )
+        return status
+
+    # Still running: enrich with sub-state from log parsing.
+    if state == STATE_TRANSCRIBING:
+        status = dict(status)  # copy — don't mutate the cached read
+        status["substate"] = _substate_from_log(session_dir)
+
     return status
 
 

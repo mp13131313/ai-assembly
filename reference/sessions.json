@@ -348,7 +348,7 @@
     },
     {
       "session_id": "day_one_demos_bureau_of_care_athenian_artists_tour_1000",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -472,7 +472,7 @@
     },
     {
       "session_id": "day_one_mikro_pallas_community_leading_under_fire_1115",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -550,7 +550,7 @@
     },
     {
       "session_id": "day_one_library_community_the_unedited_library_vernissage_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -599,7 +599,7 @@
     },
     {
       "session_id": "day_one_mini_stoa_bureau_of_care_1_1_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -623,7 +623,7 @@
     },
     {
       "session_id": "day_one_theatre_beauty_salon_making_worlds_from_theater_to_cinema_to_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -1180,7 +1180,7 @@
     },
     {
       "session_id": "day_one_demos_theatre_community_special_activations_800",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -1226,7 +1226,7 @@
     },
     {
       "session_id": "day_one_museum_home_of_belonging_surrender_without_defeat_900",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day One",
       "day_index": 1,
       "date": "2026-05-07",
@@ -1274,7 +1274,7 @@
     },
     {
       "session_id": "day_two_online_ai_democracy_marathon_the_aissembly_0000",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1296,7 +1296,7 @@
     },
     {
       "session_id": "day_two_theatre_community_coffee_break_1015",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1350,7 +1350,7 @@
     },
     {
       "session_id": "day_two_restaurant_beauty_salon_can_beauty_in_business_save_the_world_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1426,7 +1426,7 @@
     },
     {
       "session_id": "day_two_demos_bureau_of_care_the_beauty_bilaterals_2nd_installment_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1473,7 +1473,7 @@
     },
     {
       "session_id": "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1502,7 +1502,7 @@
     },
     {
       "session_id": "day_two_mini_stoa_bureau_of_care_1_1_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1554,7 +1554,7 @@
     },
     {
       "session_id": "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -1654,7 +1654,7 @@
     },
     {
       "session_id": "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -2044,7 +2044,7 @@
     },
     {
       "session_id": "day_two_the_ilisian_beauty_salon_beauty_fracture_2000",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -2295,7 +2295,7 @@
     },
     {
       "session_id": "day_two_demos_theatre_community_special_activations_800",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Two",
       "day_index": 2,
       "date": "2026-05-08",
@@ -2347,7 +2347,7 @@
     },
     {
       "session_id": "day_three_online_ai_democracy_marathon_the_aissembly_0000",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2369,7 +2369,7 @@
     },
     {
       "session_id": "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2403,7 +2403,7 @@
     },
     {
       "session_id": "day_three_outdoors_bureau_of_care_beyond_the_boys_club_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2451,7 +2451,7 @@
     },
     {
       "session_id": "day_three_restaurant_home_of_belonging_impact_inside_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2479,7 +2479,7 @@
     },
     {
       "session_id": "day_three_library_beauty_salon_lunch_with_aphrodite_d_sir_e_navab_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2504,7 +2504,7 @@
     },
     {
       "session_id": "day_three_national_garden_ministry_of_regeneration_nourishment_and_re_wilding_1230",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2556,7 +2556,7 @@
     },
     {
       "session_id": "day_three_mini_stoa_bureau_of_care_1_1_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2580,7 +2580,7 @@
     },
     {
       "session_id": "day_three_demos_ai_democracy_marathon_citizen_assembly_with_ai_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2677,7 +2677,7 @@
     },
     {
       "session_id": "day_three_mikro_pallas_ministry_of_regeneration_signalism_1400",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2804,7 +2804,7 @@
     },
     {
       "session_id": "day_three_museum_bureau_of_care_beauty_diplomacy_1500",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -2926,7 +2926,7 @@
     },
     {
       "session_id": "day_three_angel_house_psychiko_longevity_lab_family_business_1600",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -3154,7 +3154,7 @@
     },
     {
       "session_id": "day_three_studio_of_nikomachi_beauty_salon_cocktail_reception_with_nikomachi_karako_1800",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -3220,7 +3220,7 @@
     },
     {
       "session_id": "day_three_gazarte_community_the_party_2200",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",
@@ -3270,7 +3270,7 @@
     },
     {
       "session_id": "day_three_demos_theatre_community_special_activations_800",
-      "ai_assembly": false,
+      "ai_assembly": true,
       "day": "Day Three",
       "day_index": 3,
       "date": "2026-05-09",

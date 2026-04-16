@@ -10,22 +10,28 @@
 
   // --- (1) Index filters ----------------------------------------------------
 
-  const chipRow = document.getElementById("day-chips");
+  const dayChips = document.getElementById("day-chips");
+  const venueChips = document.getElementById("venue-chips");
   const search = document.getElementById("search");
-  const cards = document.querySelectorAll(".session-card");
+
+  function activeValue(row, attr) {
+    if (!row) return "";
+    const chip = row.querySelector(".chip.active");
+    return chip ? chip.dataset[attr] || "" : "";
+  }
 
   function applyFilters() {
-    if (!chipRow) return;
-    const active = chipRow.querySelector(".chip.active");
-    const day = active ? active.dataset.day : "";
+    const day = activeValue(dayChips, "day");
+    const venue = activeValue(venueChips, "venue");
     const q = search ? search.value.trim().toLowerCase() : "";
 
     document.querySelectorAll(".day-section").forEach((sec) => {
       const matchDay = !day || sec.dataset.day === day;
       let anyVisible = false;
       sec.querySelectorAll(".session-card").forEach((card) => {
+        const matchVenue = !venue || card.dataset.venue === venue;
         const matchQ = !q || (card.dataset.search || "").includes(q);
-        const show = matchDay && matchQ;
+        const show = matchDay && matchVenue && matchQ;
         card.classList.toggle("hidden", !show);
         if (show) anyVisible = true;
       });
@@ -33,18 +39,19 @@
     });
   }
 
-  if (chipRow) {
-    chipRow.addEventListener("click", (e) => {
+  function wireChipRow(row) {
+    if (!row) return;
+    row.addEventListener("click", (e) => {
       const chip = e.target.closest(".chip");
       if (!chip) return;
-      chipRow.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+      row.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
       chip.classList.add("active");
       applyFilters();
     });
   }
-  if (search) {
-    search.addEventListener("input", applyFilters);
-  }
+  wireChipRow(dayChips);
+  wireChipRow(venueChips);
+  if (search) search.addEventListener("input", applyFilters);
 
   // --- (2) Upload form ------------------------------------------------------
 
@@ -175,10 +182,25 @@
       }
     }
 
+    const STATE_LABELS = {
+      "none":                   "not started",
+      "received":               "received",
+      "normalizing":            "normalizing audio",
+      "transcribing":           "transcribing",
+      "transcribing_asr":       "transcribing · ASR",
+      "transcribing_speaker_id":"transcribing · speaker ID",
+      "transcribing_cleaning":  "transcribing · cleaning",
+      "transcribing_finalizing":"transcribing · finalizing",
+      "done":                   "done",
+      "error":                  "error",
+    };
+
     function render(st) {
       const state = st.state || "none";
-      badge.className = "state-" + state;
-      badge.textContent = state === "none" ? "not started" : state;
+      // Use substate for badge display when the subprocess reports one.
+      const displayState = (state === "transcribing" && st.substate) ? st.substate : state;
+      badge.className = "state-" + displayState;
+      badge.textContent = STATE_LABELS[displayState] || displayState;
 
       if (st.started_at && !startedAt) {
         startedAt = new Date(st.started_at);

@@ -25,7 +25,9 @@
 
 <p class="footer-hint">
   This page polls every 3 seconds. Status transitions:
-  <code>received</code> → <code>normalizing</code> → <code>transcribing</code> → <code>done</code>.
+  <code>received</code> → <code>normalizing</code> → <code>transcribing · ASR</code>
+  → <code>· speaker ID</code> → <code>· cleaning</code> → <code>· finalizing</code>
+  → <code>done</code>.
 </p>
 {% endblock %}
 {% block scripts %}
