@@ -53,7 +53,7 @@ try:
     from prefect import flow, task, get_run_logger
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(_REPO_ROOT / ".env")
     from flows.shared.io import load_prompt, get_logger, extract_json
 except ImportError as e:
     sys.stderr.write(
@@ -285,9 +285,10 @@ if os.environ.get("TRANSCRIPTION_CACHE") == "1":
         "cache_key_fn": task_input_hash,
         "cache_expiration": timedelta(days=30),
     }
-    _STDLIB_LOGGER.info(
+    print(
         "TRANSCRIPTION_CACHE=1 — AssemblyAI task caching enabled. "
-        "Disable before Athens production runs."
+        "Disable before Athens production runs.",
+        file=sys.stderr,
     )
 
 
