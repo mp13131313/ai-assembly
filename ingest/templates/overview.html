@@ -7,12 +7,17 @@
   pipeline state. Sorted: errors and active runs first.
 </p>
 
+{% set has_active = namespace(v=false) %}
+{% for r in rows %}
+  {% if r.status.get('state') not in (none, 'done', 'error') %}{% set has_active.v = true %}{% endif %}
+{% endfor %}
+
 {% if not rows %}
   <div class="empty">
     <p>No sessions are flagged for overnight processing.</p>
   </div>
 {% else %}
-<table class="overview">
+<table class="overview" id="overview-table" data-has-active="{{ 'true' if has_active.v else 'false' }}">
   <thead>
     <tr>
       <th>State</th>
@@ -26,10 +31,11 @@
   <tbody>
     {% for r in rows %}
     {% set st = r.status.get('state') %}
-    <tr>
+    {% set sub = r.status.get('substate') %}
+    <tr data-session-id="{{ r.session.session_id }}">
       <td>
         <span class="dot dot-{{ st or 'none' }}"></span>
-        <span class="state-label">{{ st or 'not started' }}</span>
+        <span class="state-label">{{ (sub or st) | state_label }}</span>
       </td>
       <td>{{ r.session.day }}</td>
       <td>{{ r.session.start_time }}</td>
@@ -47,4 +53,7 @@
   </tbody>
 </table>
 {% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=5" }}"></script>
 {% endblock %}

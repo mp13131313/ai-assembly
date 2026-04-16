@@ -59,6 +59,19 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # Make track_css_class available as a filter in every template.
 templates.env.filters["track_css"] = track_css_class
 
+_STATE_DISPLAY = {
+    "received":               "received",
+    "normalizing":            "normalizing",
+    "transcribing":           "transcribing",
+    "transcribing_asr":       "transcribing · ASR",
+    "transcribing_speaker_id":"transcribing · speaker ID",
+    "transcribing_cleaning":  "transcribing · cleaning",
+    "transcribing_finalizing":"transcribing · finalizing",
+    "done":                   "done",
+    "error":                  "error",
+}
+templates.env.filters["state_label"] = lambda s: _STATE_DISPLAY.get(s, s or "not started")
+
 
 # --- Lifespan ----------------------------------------------------------------
 
@@ -182,6 +195,21 @@ def overview(request: Request, _: str = Depends(require_auth)):
     order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
     rows.sort(key=lambda r: (order.get(r["status"].get("state"), 9), r["session"].day_index, r["session"].start_time))
     return templates.TemplateResponse(request, "overview.html", {"rows": rows})
+
+
+@app.get("/status.json")
+def overview_json(_: str = Depends(require_auth)):
+    """Polled by the overview page to update state cells without a full reload."""
+    sessions = load_sessions()
+    flagged = [s for s in sessions if s.ai_assembly]
+    result = []
+    for s in flagged:
+        sdir = session_dir(s)
+        if not sdir:
+            continue
+        st = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
+        result.append({"session_id": s.session_id, "state": st.get("state"), "substate": st.get("substate")})
+    return JSONResponse(result)
 
 
 @app.get("/session/{session_id}", response_class=HTMLResponse)

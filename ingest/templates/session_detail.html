@@ -77,11 +77,12 @@
   <div id="upload-error" class="error hidden"></div>
 </div>
 
+
 <p class="footer-hint">
   Output will be written to
   <code>runs/{{ run_id }}/01_transcription/{{ session.session_id }}/</code>.
 </p>
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', path='app.js') }}"></script>
+<script src="{{ url_for('static', path='app.js') ~ "?v=5" }}"></script>
 {% endblock %}
