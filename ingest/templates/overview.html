@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}All statuses · AI Assembly Ingest{% endblock %}
+{% block content %}
+<h1>All flagged sessions</h1>
+<p class="muted">
+  Shows every session with <code>ai_assembly: true</code> and its current
+  pipeline state. Sorted: errors and active runs first.
+</p>
+
+{% if not rows %}
+  <div class="empty">
+    <p>No sessions are flagged for overnight processing.</p>
+  </div>
+{% else %}
+<table class="overview">
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Day</th>
+      <th>Time</th>
+      <th>Title</th>
+      <th>Venue</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    {% set st = r.status.get('state') %}
+    <tr>
+      <td>
+        <span class="dot dot-{{ st or 'none' }}"></span>
+        <span class="state-label">{{ st or 'not started' }}</span>
+      </td>
+      <td>{{ r.session.day }}</td>
+      <td>{{ r.session.start_time }}</td>
+      <td>
+        <a href="/session/{{ r.session.session_id }}">{{ r.session.title }}</a>
+      </td>
+      <td>{{ r.session.venue }}</td>
+      <td>
+        {% if st %}
+          <a href="/session/{{ r.session.session_id }}/status">details →</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

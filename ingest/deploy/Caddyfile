@@ -1,0 +1,42 @@
+# Caddy reverse proxy config for the AI Assembly ingest app.
+#
+# Place at /etc/caddy/Caddyfile (or include into your existing Caddyfile).
+# Replace `ingest.example.com` with your real hostname before enabling.
+# TLS is issued automatically via Let's Encrypt.
+
+ingest.example.com {
+    # HTTP Basic Auth is enforced by the app itself; Caddy just proxies.
+    # Large bodies: audio can be up to ~500 MB per session.
+    request_body {
+        max_size 2GB
+    }
+
+    reverse_proxy 127.0.0.1:8000 {
+        # Long timeouts tolerate slow conference-venue wifi during big uploads.
+        transport http {
+            read_timeout    30m
+            write_timeout   30m
+            response_header_timeout 30m
+        }
+
+        # Pass the real client IP through to the app.
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+
+    log {
+        output file /var/log/caddy/ingest-access.log {
+            roll_size   100mb
+            roll_keep   5
+        }
+        format json
+    }
+
+    # Security headers. Nothing fancy; mostly HSTS + no-framing.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "same-origin"
+    }
+}
