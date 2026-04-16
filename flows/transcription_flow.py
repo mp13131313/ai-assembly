@@ -557,6 +557,7 @@ def process_session(audio_path, session_path):
     logger.info(f"Processing session: {session['session_title']}")
 
     out = OUTPUT_DIR  # shorthand
+    out.mkdir(parents=True, exist_ok=True)
 
     # Step 2: AssemblyAI — skip if output already on disk (e.g. retry after later failure)
     p1 = out / "out_01_diarized.json"
@@ -565,6 +566,7 @@ def process_session(audio_path, session_path):
         logger.info(f"Resuming: loaded {p1.name} from disk (skipping AssemblyAI)")
     else:
         turns = transcribe_with_assemblyai(audio, session)
+        p1.write_text(json.dumps(turns, indent=2, ensure_ascii=False))
 
     # Step 3: Speaker ID
     p2 = out / "out_02_speaker_id.json"
@@ -573,6 +575,7 @@ def process_session(audio_path, session_path):
         logger.info(f"Resuming: loaded {p2.name} from disk (skipping Speaker ID)")
     else:
         id_output = identify_speakers(turns, session)
+        p2.write_text(json.dumps(id_output, indent=2, ensure_ascii=False))
     named_turns = merge_speaker_ids(turns, id_output)
 
     # Step 4: Cleaning
@@ -583,6 +586,19 @@ def process_session(audio_path, session_path):
     else:
         vocab = build_vocabulary(session)
         cleaned_turns = clean_transcript(named_turns, session, vocab)
+        # Validate shape — Claude occasionally wraps the array in an object.
+        if isinstance(cleaned_turns, dict):
+            for key in ("turns", "transcript", "cleaned_turns", "items"):
+                if isinstance(cleaned_turns.get(key), list):
+                    logger.warning(f"clean_transcript: unwrapping dict key '{key}'")
+                    cleaned_turns = cleaned_turns[key]
+                    break
+        if not isinstance(cleaned_turns, list):
+            raise RuntimeError(
+                f"clean_transcript returned unexpected type {type(cleaned_turns).__name__}; "
+                f"first 300 chars: {json.dumps(cleaned_turns)[:300]}"
+            )
+        p3.write_text(json.dumps(cleaned_turns, indent=2, ensure_ascii=False))
 
     # Step 5: Package + write
     package = assemble_session_package(session, id_output, cleaned_turns)
