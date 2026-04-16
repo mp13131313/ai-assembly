@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}All statuses · AI Assembly Ingest{% endblock %}
+{% block content %}
+<h1>All flagged sessions</h1>
+<p class="muted">
+  Shows every session with <code>ai_assembly: true</code> and its current
+  pipeline state. Sorted: errors and active runs first.
+</p>
+
+{% set has_active = namespace(v=false) %}
+{% for r in rows %}
+  {% if r.status.get('state') not in (none, 'done', 'error') %}{% set has_active.v = true %}{% endif %}
+{% endfor %}
+
+{% if not rows %}
+  <div class="empty">
+    <p>No sessions are flagged for overnight processing.</p>
+  </div>
+{% else %}
+<table class="overview" id="overview-table" data-has-active="{{ 'true' if has_active.v else 'false' }}">
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Day</th>
+      <th>Time</th>
+      <th>Title</th>
+      <th>Venue</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    {% set st = r.status.get('state') %}
+    {% set sub = r.status.get('substate') %}
+    <tr data-session-id="{{ r.session.session_id }}">
+      <td>
+        <span class="dot dot-{{ st or 'none' }}"></span>
+        <span class="state-label">{{ (sub or st) | state_label }}</span>
+      </td>
+      <td>{{ r.session.day }}</td>
+      <td>{{ r.session.start_time }}</td>
+      <td>
+        <a href="/session/{{ r.session.session_id }}">{{ r.session.title }}</a>
+      </td>
+      <td>{{ r.session.venue }}</td>
+      <td>
+        {% if st %}
+          <a href="/session/{{ r.session.session_id }}/status">details →</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=10" }}"></script>
+{% endblock %}

@@ -1,0 +1,329 @@
+{
+  "themes": [
+    {
+      "theme_id": "theme_001",
+      "title": "The contested meaning of Western civilization",
+      "abstract": "These clusters form a multi-sided contest over Western identity that no participant can stabilize. cluster_007 exposes the concept's fundamental instability; cluster_008 and cluster_009 take directly opposing positions on whether progressive social change fulfilled or betrayed Western civilization's core commitments; cluster_010 challenges whether Trump even belongs in the conservative tradition being invoked; and cluster_024 demonstrates, via the Greenland case, that nationalist and civilizational rhetoric collapses under its own logic — together revealing that 'the West' cannot bear the argumentative weight any side places on it.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_007",
+          "cluster_title": "What is 'the West'?",
+          "cluster_abstract": "These items grapple with the instability of 'the West' as a concept — as a contested ideological territory (066), a self-questioning tradition with multiple definitions (068), a debate healthy in substance but corrupted in method (065), a universal civilizational idea that resists pluralization (094), or a terminological shift from 'values' to 'civilization' that needs interrogating (106) — revealing that the concept's incoherence undermines the arguments built on it.",
+          "extraction_ids": [
+            "west_west_divide:003",
+            "west_west_divide:004",
+            "west_west_divide:006",
+            "west_west_divide:032",
+            "west_west_divide:044"
+          ]
+        },
+        {
+          "cluster_id": "cluster_008",
+          "cluster_title": "Conservative diagnosis: progressive overreach caused decline",
+          "cluster_abstract": "These items converge on the claim that post-Cold War progressive overreach — social engineering, exclusion of conservative voices from elite institutions, erosion of family, borders, and industrial strength — is the primary cause of Western decline, positioning Trump and European right-wing movements as a corrective reaction rather than an attack on Western values.",
+          "extraction_ids": [
+            "west_west_divide:001",
+            "west_west_divide:007",
+            "west_west_divide:008",
+            "west_west_divide:015",
+            "west_west_divide:025"
+          ]
+        },
+        {
+          "cluster_id": "cluster_009",
+          "cluster_title": "Progressive rebuttal: rights expansion IS the West",
+          "cluster_abstract": "These three items directly counter the conservative-decline narrative by arguing that the expansion of freedom to Black people, women, and LGBTQ+ citizens — and the founding of America as a creed rather than an ethnicity — represents the fulfillment, not the betrayal, of Western civilization's core commitments.",
+          "extraction_ids": [
+            "west_west_divide:011",
+            "west_west_divide:012",
+            "west_west_divide:026"
+          ]
+        },
+        {
+          "cluster_id": "cluster_010",
+          "cluster_title": "Is Trump genuinely conservative?",
+          "cluster_abstract": "These items challenge the panel's conservative-vs-progressive framing by arguing that Trump is categorically different from genuine conservatism — a demagogue driven by self-enrichment (086), a betrayal of Burke, Churchill, and Thatcher (082) — while the question of what Trumpism actually is, if not conservatism, remains unresolved (102).",
+          "extraction_ids": [
+            "west_west_divide:020",
+            "west_west_divide:024",
+            "west_west_divide:040"
+          ]
+        },
+        {
+          "cluster_id": "cluster_024",
+          "cluster_title": "Nationalism's self-undermining contradictions",
+          "cluster_abstract": "Both items use the Greenland case as a reductio ad absurdum of nationalist and civilizational rhetoric — European far-right parties opposed Trump precisely because nationalism triggers counter-nationalism (081), and Denmark, a model nation by conservative criteria, would be the last country a consistent civilizational framework would target (095).",
+          "extraction_ids": [
+            "west_west_divide:019",
+            "west_west_divide:033"
+          ]
+        }
+      ]
+    },
+    {
+      "theme_id": "theme_002",
+      "title": "Populism — material roots, definitional disputes, and institutional responses",
+      "abstract": "cluster_014 and cluster_011 converge on material causes of populism — economic inequality, business-driven migration and offshoring — while cluster_013 questions whether populism is inherently a democratic threat or legitimate responsiveness to these grievances. cluster_012 debates the European center's strategy for containing the far right, but cluster_021's direct challenge to the EU's democratic legitimacy undermines the center's institutional ground for resistance, leaving a cycle in which the institutions meant to answer populism cannot demonstrate the democratic credentials populism demands.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_011",
+          "cluster_title": "Migration and globalization as business projects",
+          "cluster_abstract": "All three items challenge the conservative-populist narrative that migration and globalization were progressive impositions, reattributing their causes to bipartisan business interests — Republican demand for cheap labor, profit-driven offshoring — with the conservative panelist explicitly conceding the point, while insisting that acknowledging migration as a problem does not validate far-right solutions.",
+          "extraction_ids": [
+            "west_west_divide:005",
+            "west_west_divide:009",
+            "west_west_divide:037"
+          ]
+        },
+        {
+          "cluster_id": "cluster_012",
+          "cluster_title": "European center's strategy against the far right",
+          "cluster_abstract": "These items debate the European center's strategy for containing the far right — maintaining the EPP firewall and expelling violators (036), delivering concrete results on migration and trade (037, 038), and exercising bold, visionary leadership (046) — while questioning whether these measures can hold as the far right's vote share grows and the distinction between mainstream and radical positions blurs (061).",
+          "extraction_ids": [
+            "vox_populi:004",
+            "vox_populi:005",
+            "vox_populi:006",
+            "vox_populi:014",
+            "vox_populi:029"
+          ]
+        },
+        {
+          "cluster_id": "cluster_013",
+          "cluster_title": "Defining populism — where is the line?",
+          "cluster_abstract": "These items resist the reflexive equation of populism with democratic threat, arguing that populism can be benign responsiveness to grievance (042), a matter of style not substance (040), self-moderating under institutional constraints (043), or simply mislabeled in specific cases (039), while the question of where legitimate populism ends and democratic threat begins remains open (059).",
+          "extraction_ids": [
+            "vox_populi:007",
+            "vox_populi:008",
+            "vox_populi:010",
+            "vox_populi:011",
+            "vox_populi:027"
+          ]
+        },
+        {
+          "cluster_id": "cluster_014",
+          "cluster_title": "Economic inequality as root cause of populism",
+          "cluster_abstract": "These items converge on the claim that the democratic crisis stems from material causes — working-class betrayal by governing parties of both sides (033, 034), extreme income inequality and corporate consolidation rivaling state power (044, 045), unmet post-communist expectations (041) — and that the remedy must center working-class material conditions and marketplace reform (035, 062) rather than culture-war contestation.",
+          "extraction_ids": [
+            "vox_populi:001",
+            "vox_populi:002",
+            "vox_populi:003",
+            "vox_populi:009",
+            "vox_populi:012",
+            "vox_populi:013",
+            "vox_populi:030"
+          ]
+        },
+        {
+          "cluster_id": "cluster_021",
+          "cluster_title": "EU democratic legitimacy",
+          "cluster_abstract": "These three items form a direct exchange over whether the EU can be called democratically governed — one side insists it is (elected parliament, accountable commission, 072), while the other argues that the European Parliament's inability to initiate legislation (092) and the impossibility of citizens holding foreign commissioners accountable prove that only the sovereign nation-state can host genuine democracy (091).",
+          "extraction_ids": [
+            "west_west_divide:010",
+            "west_west_divide:029",
+            "west_west_divide:030"
+          ]
+        }
+      ]
+    },
+    {
+      "theme_id": "theme_003",
+      "title": "The rules-based order — legitimacy crisis and reform",
+      "abstract": "cluster_001 diagnoses the core structural deficit — unenforced accountability for powerful states — while cluster_022, cluster_002, and cluster_025 attack the order's self-understanding from different angles: hypocrisy as structural feature rather than aberration, the Western-centric framing of the crisis itself, and an unexamined left-right convergence on critique that neither conventional side has confronted. Against this backdrop, cluster_003 and cluster_006 debate whether US-driven disruption and ad hoc coalitions represent genuine institutional reform or entrench the very power asymmetries the critics identify.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_001",
+          "cluster_title": "Accountability deficit for powerful states",
+          "cluster_abstract": "All four items diagnose the central structural deficit of the international order as the absence of enforceable accountability for powerful states — the rules exist but no mechanism constrains violators — while the open question of whether any reformed system can create constraints the strongest actors will actually accept remains unresolved.",
+          "extraction_ids": [
+            "breaking_point:001",
+            "breaking_point:014",
+            "breaking_point:029",
+            "breaking_point:030"
+          ]
+        },
+        {
+          "cluster_id": "cluster_002",
+          "cluster_title": "Western-centrism of the order-crisis narrative",
+          "cluster_abstract": "These items expose the Western-centrism of the crisis narrative — the developing world has long lived under might-makes-right and the current panic is merely a European awakening (002, 003) — while the panel debating the crisis performatively reproduced the very power imbalance it was analyzing (028).",
+          "extraction_ids": [
+            "breaking_point:002",
+            "breaking_point:003",
+            "breaking_point:028"
+          ]
+        },
+        {
+          "cluster_id": "cluster_003",
+          "cluster_title": "US pressure as catalyst for institutional reform",
+          "cluster_abstract": "These items argue that US financial and diplomatic pressure is productively forcing overdue reforms to multilateral institutions, reframing the current disruption not as destruction but as a long-needed catalyst for a system that even its defenders now admit has been deteriorating for a decade.",
+          "extraction_ids": [
+            "breaking_point:004",
+            "breaking_point:009",
+            "breaking_point:010",
+            "breaking_point:012",
+            "breaking_point:015",
+            "breaking_point:019"
+          ]
+        },
+        {
+          "cluster_id": "cluster_006",
+          "cluster_title": "Focused vs universal multilateralism",
+          "cluster_abstract": "These items debate whether ad hoc, results-oriented coalitions assembled by a dominant power can replace or complement traditional universal institutions, with concrete cases (Venezuela, the Caucasus) testing whether focused multilateralism delivers genuine outcomes or merely entrenches great-power prerogative.",
+          "extraction_ids": [
+            "breaking_point:011",
+            "breaking_point:024",
+            "breaking_point:031",
+            "vox_populi:018"
+          ]
+        },
+        {
+          "cluster_id": "cluster_022",
+          "cluster_title": "Hypocrisy's structural role in international order",
+          "cluster_abstract": "These items wrestle with whether Western hypocrisy is a corrosive vulnerability that undermines the entire system (051), a necessary fiction that protects small states from a world of pure power (085), an acknowledgment that rules always required power behind them (096), or a coherence-destroying double standard exposed by Gaza versus Ukraine (101) — debating not whether the West is hypocritical but whether hypocrisy can be structurally managed.",
+          "extraction_ids": [
+            "vox_populi:019",
+            "west_west_divide:023",
+            "west_west_divide:034",
+            "west_west_divide:039"
+          ]
+        },
+        {
+          "cluster_id": "cluster_025",
+          "cluster_title": "Left-right convergence on rules-based order critique",
+          "cluster_abstract": "Both items point to an unexamined convergence between left-wing and right-wing critiques of the rules-based order — specifically AOC's formulation that 'our exceptions became our rules' — and challenge the panel to engage a critique that neither side of the conventional debate has confronted, a challenge the panel declined.",
+          "extraction_ids": [
+            "west_west_divide:038",
+            "west_west_divide:042"
+          ]
+        }
+      ]
+    },
+    {
+      "theme_id": "theme_004",
+      "title": "US alliance relationships — strategic value, fiscal costs, and active disruption",
+      "abstract": "cluster_004 and cluster_017 establish the strategic value of US partnerships in both the transatlantic and hemispheric contexts, while cluster_018 reveals the domestic fiscal tension as defense obligations compete with social spending that sustains democratic legitimacy. cluster_016 and cluster_023 show the current administration actively undermining these relationships — betraying the normative architecture and interfering in allied domestic politics — exposing a widening gap between the alliances' demonstrated strategic value and US behavior toward them.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_004",
+          "cluster_title": "Transatlantic alliance as mutual strategic interest",
+          "cluster_abstract": "These items argue from complementary angles — allies as America's core strategic differentiator, Europe's substantial development-aid contributions, and small states' existential need for a rules-based order — that the transatlantic relationship is mutually beneficial and the free-riding narrative obscures European contributions, while the structural question of how burden-sharing should work remains unresolved.",
+          "extraction_ids": [
+            "breaking_point:016",
+            "breaking_point:017",
+            "breaking_point:018",
+            "breaking_point:032"
+          ]
+        },
+        {
+          "cluster_id": "cluster_016",
+          "cluster_title": "Trump as betrayal of the Western order",
+          "cluster_abstract": "These three items characterize Trump's foreign policy not as reform or legitimate disruption but as deliberate betrayal of the postwar Western normative architecture — forcing Ukraine into surrender (075), modeling Putin's unaccountable exercise of power (076), and withdrawing the US so that authoritarians can carve out geographic domains (052).",
+          "extraction_ids": [
+            "vox_populi:020",
+            "west_west_divide:013",
+            "west_west_divide:014"
+          ]
+        },
+        {
+          "cluster_id": "cluster_017",
+          "cluster_title": "US engagement in the Western Hemisphere",
+          "cluster_abstract": "Multiple Latin American perspectives welcome increased US strategic attention to the Western Hemisphere — as an overdue correction (008), a competitive spur for European trade deals (049), a fantastic opportunity for Colombia (005) — while differing on whether it should be framed as American dominance or continental partnership rebranded from 'America First' to 'Americas First' (007).",
+          "extraction_ids": [
+            "breaking_point:005",
+            "breaking_point:007",
+            "breaking_point:008",
+            "vox_populi:017"
+          ]
+        },
+        {
+          "cluster_id": "cluster_018",
+          "cluster_title": "Defense spending versus social spending",
+          "cluster_abstract": "These items debate whether rising defense budgets necessarily come at the expense of social services that sustain democratic legitimacy, with answers ranging from 'yes, it's an inescapable trade-off' (057) to 'defense industry revenues fund social benefits' (054) to 'the quality of spending matters more than the amount' (053, 056), leaving the fundamental tension unresolved (058).",
+          "extraction_ids": [
+            "vox_populi:021",
+            "vox_populi:022",
+            "vox_populi:024",
+            "vox_populi:025",
+            "vox_populi:026"
+          ]
+        },
+        {
+          "cluster_id": "cluster_023",
+          "cluster_title": "US interference in allied democracies",
+          "cluster_abstract": "Both items identify the same emerging norm violation — the US administration funding MAGA-aligned think tanks and receiving allied countries' opposition candidates — and warn that once the US picks sides in allied domestic politics, the pro-American consensus that sustained the transatlantic alliance will be irreversibly destroyed.",
+          "extraction_ids": [
+            "west_west_divide:028",
+            "west_west_divide:043"
+          ]
+        }
+      ]
+    },
+    {
+      "theme_id": "theme_005",
+      "title": "Democratic discourse — speech norms and information governance",
+      "abstract": "cluster_020 reveals that the transatlantic free-speech controversy conceals deeper disagreements about what the debate is really about — civilizational difference, corporate interests, or political exclusion — while cluster_019 diagnoses the algorithmic destruction of shared facts essential for democratic compromise but finds no agreed remedy, leaving both the normative framework and the regulatory architecture of democratic discourse unsettled.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_019",
+          "cluster_title": "Social media regulation and democratic discourse",
+          "cluster_abstract": "These items agree that social media algorithms threaten democratic discourse by destroying the shared fact base required for compromise, but split on the remedy — aggressive European regulation that hasn't gone far enough (048), warnings that premature regulation can backfire (055), and an unresolved question about how to design algorithmic governance at all (060) — leaving a gap between the diagnosis's urgency and the remedy's uncertainty.",
+          "extraction_ids": [
+            "vox_populi:015",
+            "vox_populi:016",
+            "vox_populi:023",
+            "vox_populi:028"
+          ]
+        },
+        {
+          "cluster_id": "cluster_020",
+          "cluster_title": "Free speech in the transatlantic context",
+          "cluster_abstract": "Each item reframes the transatlantic free-speech controversy differently — as a legitimate civilizational difference between US and European norms (064), a cover for American tech-company interests (079), a labeling practice that destroys constructive dialogue (097), or conservative exclusion from European media (098) — exposing that the disagreement is not just about speech rules but about what the free-speech debate is really about.",
+          "extraction_ids": [
+            "west_west_divide:002",
+            "west_west_divide:017",
+            "west_west_divide:035",
+            "west_west_divide:036"
+          ]
+        }
+      ]
+    },
+    {
+      "theme_id": "theme_006",
+      "title": "Active conflicts testing the order's principles in practice",
+      "abstract": "Both clusters examine ongoing conflicts where the rules-based order's principles are tested against achievable outcomes. cluster_015 maps three unreconciled dimensions of the Ukraine endgame — military, pragmatic, and moral — while cluster_005 contests whether the Board of Peace for Gaza constitutes a credible framework, with defenders and critics splitting on mandate legitimacy, humanitarian access, and Palestinian self-determination. In both cases the gap between stated principles and any proposed path to resolution remains unresolved.",
+      "clusters": [
+        {
+          "cluster_id": "cluster_005",
+          "cluster_title": "Board of Peace and Gaza process legitimacy",
+          "cluster_abstract": "These items contest whether the Board of Peace and its associated ceasefire constitute a credible framework for Gaza — defenders cite unprecedented diplomatic results and practical funding mechanisms, while critics challenge the Board's divergence from its UNSC mandate, its exclusion of Palestinians, its failure to deliver humanitarian access, and its silence on Palestinian self-determination.",
+          "extraction_ids": [
+            "breaking_point:013",
+            "breaking_point:020",
+            "breaking_point:021",
+            "breaking_point:022",
+            "breaking_point:023",
+            "breaking_point:026",
+            "breaking_point:027"
+          ]
+        },
+        {
+          "cluster_id": "cluster_015",
+          "cluster_title": "Ukraine: paths to peace and moral responsibility",
+          "cluster_abstract": "These items debate the Ukraine war's endgame across three unreconciled dimensions — military (more weapons to force a better deal vs. no battlefield plan), pragmatic (only US leverage matters, and Ukraine fights for itself), and moral (peace that brackets who started the war destroys the principle of territorial sovereignty) — without converging on whether a just and durable peace is achievable through any proposed path.",
+          "extraction_ids": [
+            "west_west_divide:016",
+            "west_west_divide:018",
+            "west_west_divide:021",
+            "west_west_divide:022",
+            "west_west_divide:041"
+          ]
+        }
+      ]
+    }
+  ],
+  "isolates": [
+    "breaking_point:006",
+    "breaking_point:025",
+    "west_west_divide:027",
+    "west_west_divide:031"
+  ]
+}

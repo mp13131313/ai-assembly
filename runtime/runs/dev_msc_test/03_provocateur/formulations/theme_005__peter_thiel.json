@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_005",
+  "member": "Peter Thiel",
+  "mode": "proposition",
+  "formulation": "The 'shared fact base' Weber mourns was manufactured consensus maintained by legacy-media gatekeepers, and its algorithmic destruction is a reveal, not a loss. But if manufactured consensus was the only operating system democratic politics ever had, then the contrarian who cheers its collapse is an accelerationist for something he has no replacement for.",
+  "theme_display_title": "The Ruins of Common Ground",
+  "context_narrative": "Across two panels — one on social media regulation, another on transatlantic free-speech norms — speakers diagnosed the same wound from different angles: the shared factual ground on which democratic argument once stood has fractured. Manfred Weber called it the biggest threat to future democracies; Katrin Bennhold pressed that Europe's landmark regulations haven't gone far enough; Daiana Fernández Molero warned that premature regulation could make things worse. Meanwhile, the free-speech panel couldn't agree on what the free-speech debate was even about — Ivan Krastev called it a cover for American tech-company interests, while Gladden Pappin insisted the real crisis was conservative exclusion from European public discourse.",
+  "selected_quotes": [
+    {
+      "extraction_id": "vox_populi:015",
+      "quote": "The biggest threat to future democracies is that social media has destroyed the shared fact base required for democratic discourse and has made compromise — the core principle of democracy — unrewarded and invisible.",
+      "attribution": "Manfred Weber",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:017",
+      "quote": "The way the current US administration defines freedom of speech is really about the rights of American technology companies, not about conservative values; a genuine conservative or nationalist should not accept foreign tech platforms addressing their citizens with AI-driven content.",
+      "attribution": "Ivan Krastev"
+    },
+    {
+      "extraction_id": "west_west_divide:002",
+      "quote": "There is a genuine civilizational difference between the US and Europe on freedom of speech: Europe believes in freedom of speech with responsibility, and the US telling Europeans their conception of free speech is censorship is unacceptable imposition of values.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:036",
+      "quote": "Conservative political parties have been systematically excluded from public debate in Europe, including by legacy media networks, and this exclusion — not just American tech platforms — is the real freedom-of-speech crisis.",
+      "attribution": "Gladden J. Pappin",
+      "flavor": "in reply to Sikorski"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "vox_populi:015",
+    "vox_populi:016",
+    "vox_populi:023",
+    "west_west_divide:002",
+    "west_west_divide:017",
+    "west_west_divide:036"
+  ],
+  "rationale": "The proposition starts from Thiel's own ground — consensus is manufactured, the crowd is wrong — and turns it into an inescapable dilemma: if the only operational substrate for democratic politics was manufactured consensus, celebrating its destruction without offering a replacement makes the contrarian an accelerationist by default, pushing directly into his stretch territory (whether contempt for consensus blinds him to what consensus enables) while activating his core Girardian and zero-to-one instincts."
+}

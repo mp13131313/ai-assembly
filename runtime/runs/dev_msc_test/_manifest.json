@@ -1,0 +1,320 @@
+{
+  "run_id": "dev_msc_test",
+  "purpose": "Level 2 validation of the Transcription Pipeline AND Researcher Pipeline against three MSC 2026 panels. End-to-end test of the overnight chain on real conference audio, run on laptop before Athens infrastructure exists.",
+  "created": "2026-04-13",
+  "last_updated": "2026-04-15",
+  "environment": "local laptop (Mac, venv)",
+  "sessions": [
+    {
+      "id": "vox_populi",
+      "title": "Vox Populi — Whose Voice, Whose Power?",
+      "source": "MSC 2026",
+      "duration_min": 44,
+      "panelists_named": 5,
+      "transcription_result": "100% high-confidence Speaker ID; v2.1 Pass 5 reassigned 2 turns to distinct Audience Members.",
+      "researcher_extractions_v2_2": 29
+    },
+    {
+      "id": "breaking_point",
+      "title": "Breaking Point — The International Order Between Reform and Destruction",
+      "source": "MSC 2026",
+      "duration_min": 46,
+      "panelists_named": 5,
+      "transcription_result": "100% high-confidence Speaker ID, 5 [verify] markers; v2.1 Pass 5 reassigned Mustafa Barghouti self-introduction and three short Sánchez interjections.",
+      "researcher_extractions_v2_2": 19
+    },
+    {
+      "id": "west_west_divide",
+      "title": "The West-West Divide: What Remains of Common Values",
+      "source": "MSC 2026",
+      "duration_min": 69,
+      "panelists_named": 6,
+      "transcription_result": "100% high-confidence Speaker ID, 4 [verify] markers; v2.1 Pass 5 reassigned 15 turns across 8 flags to 7 distinct audience members. Hillary Clinton's label is clean.",
+      "researcher_extractions_v2_2": 37
+    }
+  ],
+  "canonical_researcher_output": "02_researcher/ is the Opus + adaptive-thinking + minimal-input + KJ-belonging-together run (v2.4). Two earlier baselines preserved: 02_researcher_v2_2_sonnet_baseline/ (Sonnet, old prompts), 02_researcher_v2_3_opus_baseline/ (Opus+thinking, old prompts).",
+  "canonical_provocateur_output": "03_provocateur/ is the Provocateur v3 run (Opus + adaptive-thinking, dev_stub_v2_with_selection_params council config, four-stage pipeline: Triage Voice [parallel ×12] + Triage Flags [parallel ×1] -> Python Selection [deterministic, no LLM] -> Formulation [parallel ×40 in batches of 4 to respect Opus rate limits] -> Packaging [pure Python]). Per-voice incremental write checkpointing in triage_voices/ AND per-pair in formulations/ make runs crash-resilient — restart picks up exactly where the previous run left off. No consolidated triage_voices.json or formulations.json files; the per-checkpoint directories ARE the source of truth. Two earlier baselines preserved on disk: 03_provocateur_v1_baseline/ (per-theme committee Formulation, narrow-voice problem visible) and 03_provocateur_v2_aborted/ (per-pair Formulation but LLM-driven Selection, partial run, never completed).",
+  "stages_run": {
+    "01_transcription": {
+      "completed": true,
+      "first_run_date": "2026-04-13",
+      "rerun_dates": [
+        "2026-04-14 (v2 prompt)",
+        "2026-04-14 (v2.1 prompt)"
+      ],
+      "flow": "flows/transcription_flow.py",
+      "speaker_id_prompt_version": "v2.1 (FIVE PASSES; refined Pass 5)",
+      "cleaning_prompt_version": "v1",
+      "caching": "TRANSCRIPTION_CACHE=1 env var gates Prefect task_input_hash caching on transcribe_with_assemblyai"
+    },
+    "02_researcher": {
+      "completed": true,
+      "completed_date": "2026-04-14",
+      "prompt_version": "v2.4 (KJ belonging-together reframe + minimal input + deterministic shuffle)",
+      "pipeline_version": "v2.4",
+      "flow": "flows/researcher_flow.py",
+      "model": "claude-opus-4-6 with thinking.type=adaptive (enabled via RESEARCHER_THINKING=1)",
+      "baseline_comparison": "Three on-disk baselines for comparison: (1) 02_researcher_v2_2_sonnet_baseline/ — Sonnet 4.6 with old prompts and full metadata input, (2) 02_researcher_v2_3_opus_baseline/ — Opus 4.6 + thinking with old prompts and full metadata input, (3) 02_researcher/ — the current canonical Opus 4.6 + thinking + v2.4 prompts + minimal clustering input + deterministic shuffle. The minimal-input change is the biggest architectural shift: clustering Round 1 no longer sees session, speaker, lens, responds_to, engagement, energy, or namespaced id — only a temp ref, the extraction text, and the context. This prevents the model from using provenance metadata as a grouping shortcut.",
+      "v2_4_changes_from_v2_3": [
+        "Clustering Round 1 receives a minimal model-facing input: only {ref, extraction, context}. All other fields (session, speaker, lens, responds_to, engagement, energy, real namespaced id) are stripped at the API boundary. A ref_to_real_id lookup table is built in Python and used to translate the model's output back to real namespaced ids after the call. This eliminates the namespace prefix as a grouping shortcut.",
+        "Round 1 extraction input is deterministically shuffled with fixed seed 42 before being sent, breaking the session-grouped top-to-bottom reading bias.",
+        "Round 2 cluster input is also deterministically shuffled with seed 42 to prevent cluster-id adjacency from correlating with session origin.",
+        "Clustering prompt rewritten around 'why these items belong together' (matching the Researcher Pipeline spec verbatim) rather than 'state a declarative finding'. Seven patterns of binding taught by example (convergence, shared question with split answers, shared target with different tools, sequential elaboration, principle-and-instances, shared blind spot, common redirect) — explicitly framed as the range, not categories to pick from.",
+        "Asymmetric self-check added: for any cluster with fewer than four items, the model is instructed to actively search the input for absorbable items. No ceiling check — the abstract honesty rule serves as the implicit ceiling (if you need 'and also' the cluster is too wide).",
+        "No numeric size targets. The sizing rule is whether the model can write a clean single-sentence abstract stating the binding.",
+        "Theming prompt rewritten at the same framing level, preserving the inline cluster_id citation pattern that Opus v2.3 had learned to do spontaneously.",
+        "extract_json defensive fix from v2.2 retained (raw_decode to handle trailing commentary).",
+        "Config-level: max_tokens ceilings bumped to accommodate thinking (extraction 40K, clustering 40K, theming 24K); thinking.type=adaptive (Opus 4.6's recommended mode); all three tasks stream to avoid SDK 10-minute non-streaming timeout."
+      ],
+      "prompts": {
+        "extraction": "flows/shared/prompts/researcher_extraction.md",
+        "clustering": "flows/shared/prompts/researcher_clustering.md",
+        "theming": "flows/shared/prompts/researcher_theming.md"
+      },
+      "outputs": {
+        "per_session_extractions": "02_researcher/{session_id}_extractions.json",
+        "combined_table": "02_researcher/all_extractions.json",
+        "intermediate_clusters": "02_researcher/clusters.json",
+        "final_grouping": "02_researcher/grouping.json"
+      },
+      "totals": {
+        "extractions": 106,
+        "clusters_round1": 25,
+        "themes_round2": 6,
+        "isolates": 4,
+        "cross_session_themes": 5,
+        "cross_session_themes_pct": 83,
+        "avg_extractions_per_cluster": 4.08,
+        "avg_extractions_per_theme": 17.0,
+        "avg_clusters_per_theme": 4.17,
+        "cluster_size_distribution": "3 clusters of 2, 6 of 3, 7 of 4, 6 of 5, 1 of 6, 2 of 7"
+      },
+      "totals_opus_v2_3_baseline_for_comparison": {
+        "extractions": 102,
+        "clusters_round1": 49,
+        "themes_round2": 16,
+        "isolates": 0,
+        "cross_session_themes": 4,
+        "cross_session_themes_pct": 25,
+        "avg_extractions_per_cluster": 2.08,
+        "avg_extractions_per_theme": 6.4
+      },
+      "totals_sonnet_v2_2_baseline_for_comparison": {
+        "extractions": 85,
+        "clusters_round1": 34,
+        "themes_round2": 13,
+        "isolates": 3,
+        "cross_session_themes": 7,
+        "cross_session_themes_pct": 54,
+        "avg_extractions_per_cluster": 2.41,
+        "avg_extractions_per_theme": 6.3
+      },
+      "token_budgets": {
+        "EXTRACTION_MAX_TOKENS": 32000,
+        "CLUSTERING_MAX_TOKENS": 16000,
+        "THEMING_MAX_TOKENS": 8000
+      },
+      "streaming": {
+        "extract_session": true,
+        "cluster_extractions": true,
+        "group_clusters_into_themes": false
+      },
+      "notes": "Three architectural changes landed in v2.2 relative to v2.1: (1) session-namespaced extraction IDs in the format {session_id}:NNN — per-session and combined files carry identical IDs, no renumbering, no cross-session collisions possible. validate_and_concat replaces renumber_globally as a pure sanity check. (2) Node 2 split into two genuine API calls: cluster_extractions (Round 1) writes intermediate clusters.json, then group_clusters_into_themes (Round 2) receives only cluster_id + cluster_title + cluster_abstract — NOT raw extractions — and returns themes referencing clusters. merge_clusters_and_themes reassembles the final themes→clusters→extractions nesting. (3) Both prompts rewritten for KJ-method labels: every cluster_title, cluster_abstract, theme_title, theme_abstract must state a declarative finding, not describe a topic. Bad/good examples and a pre-return self-check included in both prompts. Additional robustness fixes: extract_json now uses json.JSONDecoder.raw_decode() to tolerate trailing commentary after valid JSON; CLUSTERING_MAX_TOKENS bumped from 8K to 16K after first run hit the ceiling; cluster_extractions switched to streaming. Validator split into _validate_clusters (Round 1) and _validate_themes (Round 2) with theme orphan promotion per spec."
+    },
+    "03_provocateur": {
+      "completed": true,
+      "completed_date": "2026-04-15",
+      "pipeline_version": "v3",
+      "flow": "flows/provocateur_flow.py",
+      "model": "claude-opus-4-6 with thinking.type=adaptive",
+      "council_config": "flows/shared/council/council_config.json (version dev_stub_v2_with_selection_params, 12 members, selection_parameters block holds all editorial knobs: activation_threshold, min_members_per_theme, friction & fault-line multipliers, hard_cap_per_voice, stretch_swap_enabled)",
+      "architecture_v3": "Stage 1 Triage SPLIT into two parallel calls per voice + 1 flags pass: (A) triage_voice ×12 — Provocateur reasons ABOUT each voice using profile data only and ranks themes (strong/moderate activation + is_stretch flag + reason); (B) triage_flags ×1 — theme-level editorial signals (worth_surfacing, audience_friction, fault_line_present + description). Stage 2 Selection: PURE PYTHON, deterministic algorithm. Drops worth_surfacing=false themes, scores per voice from activations (strong=3, moderate=2), computes theme_quality = sum(scores) × friction_mult × fault_line_mult, builds per-voice candidate list capped at hard_cap, enforces quorum (min 3 voices), iteratively cascades when themes drop below quorum, force-fits voices with zero assignments, applies soft stretch swap. Outputs assignments_by_member. Stage 3 Formulation ×N: one call per (theme, voice) pair; each call loads ONE voice's profile and produces formulation + theme_display_title + context_narrative + selected_quotes (with strict-flavor metadata-only rules) + grounding_extraction_ids + rationale. Five-condition proposition test replaces 'default to question'. Submitted in batches of 4 with 20s wait between batches to respect Opus rate limits (8K output tokens/min). Stage 4 Packaging: pure Python, builds per-voice briefings with both narrative_briefing markdown (for Voice Node Step 1 prompt) and structured JSON (for voice agent introspection).",
+      "incremental_checkpointing": "Per-voice triage results write to triage_voices/{voice_slug}.json before task return. Per-pair formulation results write to formulations/{theme_id}__{voice_slug}.json before task return. On startup, the orchestrator scans these directories and skips already-completed tasks. A run that dies at pair 67/100 resumes by re-running and only computing the missing 33 pairs — no API spend wasted on completed work.",
+      "rate_limit_handling": "Anthropic Opus 4.6 enforces 30K input tokens/min AND 8K output tokens/min. All-parallel submission of 13 Triage + 40 Formulation calls hits both limits hard. Solution combines (1) Prefect retries=5 with exponential_backoff(15) [delays: 15→30→60→120→240s] on every task decorator, AND (2) orchestrator-level batching: Formulation submits in batches of 4 with 20s wait between batches. Configurable via env vars PROVOCATEUR_FORMULATION_BATCH (default 4) and PROVOCATEUR_BATCH_WAIT_S (default 20). With these settings the validation run completed 40 pairs with zero rate-limit failures.",
+      "totals": {
+        "triage_voices": 12,
+        "triage_flags": 6,
+        "selected_themes": 5,
+        "dropped_themes": 1,
+        "formulations": 40,
+        "briefings_written": 12,
+        "propositions": 9,
+        "questions": 31,
+        "proposition_rate_pct": 22.5,
+        "coverage_per_member": {
+          "Plato": 4,
+          "Cleopatra": 4,
+          "Ibn Battuta": 3,
+          "Scheherazade": 3,
+          "Ada Lovelace": 1,
+          "Dostoevsky": 5,
+          "Hannah Arendt": 5,
+          "Bob Marley": 4,
+          "Audrey Tang": 4,
+          "Peter Thiel": 4,
+          "Whanganui River": 1,
+          "Octopus": 2
+        },
+        "forced_fits": 0,
+        "stretch_swaps": 0
+      },
+      "integrity_checks": {
+        "hallucinated_member_names": 0,
+        "hallucinated_grounding_extraction_ids": 0,
+        "hallucinated_quote_extraction_ids": 0,
+        "strict_flavor_violations": 0,
+        "all_briefings_have_narrative_and_structured": true
+      },
+      "wall_time_minutes_approx": 25,
+      "cost_estimate_usd_approx": 12,
+      "v1_baseline_preserved_at": "03_provocateur_v1_baseline/",
+      "v2_aborted_preserved_at": "03_provocateur_v2_aborted/",
+      "briefing_schema_v3_post_cleanup": "Each briefing file is just {\"formulations\": [...]}. Per formulation: theme_id, theme_display_title, mode, plus TWO complementary views — (1) `narrative_briefing`: markdown PROMPT for Voice Node Step 1, paste-and-go, contains the formulation, context_narrative, and selected_quotes — the Provocateur's curated framing. (2) `full_theme_record`: wider REASONING SURFACE for Step 1 thinking, the voice reasons over the full record while answering the curated prompt. Contains: clusters with all extractions sorted by lens, theme_title_from_researcher, theme_abstract_from_researcher, co_assigned_voices, theme_flags, grounding_extraction_ids. INTENTIONALLY OMITTED: voice profile (voice agent IS persona via Persona Card), council_config_version (in manifest), formulations_count (derive from len), Provocateur's rationale (would prime voice toward expected answer; in per-pair checkpoint only).",
+      "output_files": {
+        "triage_voices/{voice_slug}.json": "12 files — per-voice ranking checkpoints, source of truth",
+        "triage_flags.json": "1 file — single LLM call, no per-checkpoint backup needed",
+        "selection.json": "1 file — Python output, always recomputed (never cached)",
+        "formulations/{theme_id}__{voice_slug}.json": "40 files — per-pair Formulation checkpoints, source of truth",
+        "briefings/{voice_slug}.json": "12 files — voice-facing artifacts (Step 1 paste-and-go format)",
+        "manifest.json": "1 file — run-level metadata: counts, version, knobs used"
+      },
+      "files_dropped_in_post_audit_cleanup": "triage_voices.json (consolidated) and formulations.json (consolidated) were dropped on 2026-04-15 after the post-validation audit. They were redundant with the per-checkpoint directories and created silent-drift risk if a per-pair file got hand-edited. For a flat view: cat formulations/*.json | jq -s '{formulations: .}'"
+    }
+  },
+  "researcher_v2_2_observations": [
+    "KJ labels work as intended. Every one of the 13 theme titles and 34 cluster titles reads as a declarative finding, not topic metadata. Example: 'The rules-based order is structurally illegitimate because accountability has always been selective — and the current crisis is merely the West catching up to what the Global South knew all along.' Zero topic-style phrases by heuristic check ('Extractions arguing...', 'Discussions about...', etc).",
+    "Forced abstraction via two-call split produces genuine synthesis. Round 2 sees only cluster_id + cluster_title + cluster_abstract (no raw extractions) and still does sophisticated cross-cluster synthesis, explicitly citing cluster_ids inline in theme abstracts. Example from theme 1: 'Clusters 001, 002, and 022 jointly establish that the multilateral order's legitimacy deficit is not a recent failure but a foundational condition ... The crisis is real, but it is a crisis of honesty, not of novelty.' That last sentence is an insight the model generated by synthesizing across clusters — not present in any single extraction.",
+    "Cross-session themes jumped from 50% (v2.1) to 54% (v2.2). 7 of 13 themes in v2.2 pull from multiple sessions, confirming that the tighter grouping and KJ-style abstracts do not reduce cross-session synthesis.",
+    "Namespaced IDs work cleanly under parallel-ready conditions. All 85 extractions carry {session_id}:NNN prefixes with zero collisions. Per-session and combined files have identical IDs. The 24 responds_to references all resolve correctly within their respective sessions — none cross session boundaries (as expected, since Round 1 extraction only sees one session at a time).",
+    "extract_json now tolerates trailing commentary after valid JSON. The dev_msc_test run hit this failure mode twice during v2.2 testing — Claude occasionally writes explanatory notes after the JSON object despite being instructed not to. The fix uses json.JSONDecoder.raw_decode() to extract the first complete JSON value and discard anything after it. Unit-tested against five cases including trailing commentary, trailing JSON fragments, code fence wrapping, non-JSON input, and JSON arrays with trailing content.",
+    "Clustering ran clean on the final run — no duplicate memberships, no orphans, no empty clusters. Previous v2.2 run had 2 duplicates + 1 orphan caught by _validate_clusters. Model variance is real but the validator keeps outputs clean either way.",
+    "Cluster-to-extraction ratio is roughly 2.5:1 at v2.2 (85 extractions → 34 clusters), theme-to-cluster ratio is roughly 2.6:1 (34 → 13). Those ratios feel right: fine-grained clusters preserve distinct findings while themes provide genuine second-level abstraction."
+  ],
+  "researcher_v2_3_observations": [
+    "Opus 4.6 + adaptive extended thinking produces noticeably richer output than Sonnet 4.6 on the same pipeline. Extractions rose 85 → 102 (+20%), with the biggest gain on the hardest session (Breaking Point 19 → 30, +58%). Clusters 34 → 49 (+44%), themes 13 → 16 (+23%). File sizes grew 24–44% across all three output artifacts.",
+    "Integrity is perfect on the Opus run: 102/102 extractions reachable in the final grouping, 0 duplicates, 0 orphans, 0 hallucinated ids, 0 isolates (vs 3 in the Sonnet baseline). The validators caught nothing — Opus + thinking follows the closure and uniqueness rules cleanly on first output.",
+    "Cross-session ratio dropped from 54% to 25%. Counter-intuitive at first — more extractions should produce more cross-session overlap, not less. What actually happens: Opus creates more themes (16 vs 13) and finer-grained clusters (49 vs 34), so single-session niches get their own themes rather than being absorbed into cross-session ones. This is a real tradeoff: Opus gives sharper granularity but loses some of the bridges Sonnet was finding. Both have merit for different downstream uses.",
+    "Qualitative label style differs systematically between the two models. Sonnet writes themes in a more accusatory/diagnostic voice — naming contradictions and attributing fault (e.g. 'The Trump administration's multilateral posture is self-contradictory'). Opus writes themes in a more taxonomic/architectural voice — structuring the disagreement without taking sides (e.g. 'Populism is not one phenomenon but at least three — an economic response to elite failure, a political weapon against institutional checks, and a legitimate democratic impulse — and confusing them produces the wrong counter-strategy'). Opus labels are closer to what a trained KJ facilitator would produce — they let each side's claim stand next to the other's.",
+    "Opus generated one remarkable meta-observation that Sonnet didn't: theme 16 is 'The panel's own dynamics reproduced the power asymmetry it was analyzing, demonstrating that even self-aware elite forums replicate the exclusion patterns they critique.' Opus noticed an extraction that was commentary on the panel dynamics and gave it its own theme — evidence that thinking enables the model to reason about the discussion itself, not just its content.",
+    "Opus themes 5, 7, and 12 are particularly strong Provocateur inputs. Theme 5 structures populism as three distinct phenomena with different counter-strategies. Theme 7 identifies 'incompatible political projects with mutually contradictory causal narratives' — a clean diagnostic for question design. Theme 12 articulates the sovereigntist/federalist dispute as 'answers the other side rejects as category errors' — exactly the kind of deadlocked structure a Provocateur can design questions around.",
+    "Wall time: ~33 min total (vs ~10 min Sonnet). Adaptive thinking adds significant latency — node 1 extractions ran 100-145s each vs 55-93s for Sonnet. Cost estimate ~$7-10 (Opus ~5× Sonnet on input/output plus thinking tokens billed as output).",
+    "API quirk caught mid-run: thinking.type='enabled' is deprecated for Opus 4.6 in the current SDK. Use thinking.type='adaptive' instead, which per Anthropic's own testing outperforms fixed-budget mode. The _thinking_kwargs helper uses adaptive mode; the per-task budget constants (EXTRACTION_THINKING_BUDGET etc.) are retained in the file as documentation but are unused by adaptive mode.",
+    "Theming (Round 2) required conversion from non-streaming to streaming when thinking is enabled. The SDK refuses non-streaming messages.create() calls whose combined (max_tokens + thinking) budget might exceed its internal 10-minute timeout heuristic. Streaming also auto-handles ThinkingBlock filtering for free since stream.text_stream yields only text deltas. This change is backward-compatible with non-thinking mode."
+  ],
+  "researcher_v2_4_observations": [
+    "v2.4 beats both prior baselines on every structural axis. Versus Opus v2.3: cluster count halved (49 → 25), avg cluster size nearly doubled (2.08 → 4.08), theme count dropped 63% (16 → 6), cross-session theme ratio jumped from 25% to 83%. Versus Sonnet v2.2: higher cross-session ratio (83% vs 54%), much higher avg extractions/theme (17.0 vs 6.3), same clean integrity.",
+    "The biggest single fix was the minimal-input change to clustering Round 1. Stripping the model's view to {ref, extraction, context} eliminated the namespace prefix and session metadata as grouping shortcuts. The model had to judge affinity from content alone, which is what the KJ method actually asks for. The deterministic shuffle (seed 42) removed the remaining top-to-bottom reading bias.",
+    "The 'why they belong together' framing was the second-biggest fix. Under the v2.3 'declarative finding' instruction, Opus produced narrow clusters because a declarative finding can only honestly describe a tight set. Under 'why these items belong together', the model can write broader bindings ('these items contest the same assumption from incompatible premises', 'these items trace a conversational arc') that honestly cover 5-7 items. The range-of-bindings list (seven patterns taught by example, explicitly framed as the range rather than categories) successfully widened the model's repertoire.",
+    "Cluster-level integrity is perfect. 106/106 extractions reachable, 0 duplicates, 0 orphans, 0 hallucinated ids, 0 unknown refs from the translation step. 4 isolates (allowed by spec).",
+    "Cross-session pattern is structurally healthy. Only 16% of clusters are cross-session (84% are local to one session — which is honest because individual exchanges happened within panels), but 83% of themes are cross-session (the themes do genuine second-level synthesis across sessions). This is the right shape: clusters capture local bindings, themes elevate to day-wide patterns.",
+    "Qualitative abstract quality is dramatically improved. Every theme abstract names its binding explicitly and cites cluster_ids inline (e.g. 'These clusters form a multi-sided contest over Western identity that no participant can stabilize. cluster_007 exposes the concept's fundamental instability; cluster_008 and cluster_009 take directly opposing positions...'). Every cluster abstract uses the 'why they belong together' framing. Zero topic-metadata phrases, zero declarative-finding drift.",
+    "One particularly sharp integration: the meta-observation that the panel's own dynamics reproduced the power imbalance it was analyzing got absorbed into cluster_002 'Western-centrism of the order-crisis narrative' — the model correctly identified the panel dynamics as an instance of Western-centrism rather than isolating the observation as a standalone singleton theme (which is what Opus v2.3 did).",
+    "Athens scale projection is clean. At v2.4 ratios (~4 extractions/cluster, ~17/theme), realistic Athens nights project to: 6 sessions → ~12 themes, 8 sessions → ~16 themes, 10 sessions → ~20 themes, 12 sessions → ~24 themes. All comfortably triageable by the Provocateur against 12 council members × ~3 formulations each.",
+    "Wall time ~21.5 min (Node 1 ~9 min, Round 1 ~10 min, Round 2 ~2.5 min). Faster than Opus v2.3's ~33 min despite being on the same model — the minimal input is smaller and Round 1 converges faster without metadata to reason about.",
+    "The asymmetric self-check (actively search for absorbable items in clusters under 4) and the implicit abstract-honesty ceiling both worked as designed. No mega-clusters (max cluster size = 7), no pathologically narrow clusters (min = 2, and the three 2-item clusters all survived the self-check with honest-binding abstracts). Cluster size distribution is 3/6/7/6/1/2 at sizes 2-7 — a healthy center-weighted distribution."
+  ],
+  "provocateur_v1_observations": [
+    "First end-to-end Provocateur run against v2.4 Researcher output. Four tasks ran cleanly: Triage (6 themes tagged, ~3 min), Selection (5 selected + 1 dropped, 8.5 min), Formulation (5 themes x ~50s each, all end_turn stops), Packaging (pure Python, <5s, 12 briefings written). Total wall time ~14 min, cost ~$2.50 at Opus + adaptive thinking pricing. Well inside the overnight window and under the original $5-8 estimate because thinking consumed less than its budget allowed.",
+    "Integrity is perfect. 0 hallucinated member names, 0 hallucinated extraction IDs across all briefings. Every grounding_extraction_id in the 5 formulations resolves cleanly in all_extractions_by_id. The lens sort in Packaging works: assertions appear first, reframings second, open_question (with underscore) last. The JOIN from cluster.extraction_ids -> all_extractions.json works without adapter code, confirming the Researcher v2.4 -> Provocateur interface contract (§J of the v3 Researcher spec) in practice.",
+    "Hot-swap design validated. council_config.json version flows cleanly from file -> load_council_config() -> flow -> manifest -> per-briefing metadata. The dev_stub_v1 version string is recorded in 03_provocateur/manifest.json and in every briefing's council_config_version field. An Athens operator editing council_config.json and re-running the flow would get a new run with the new version string recorded, no code changes needed. Hot-swap architectural promise holds.",
+    "Selection's editorial work produced a real rationale: theme_004 was dropped because of 'Score 2 with predictable fault line; policy-heavy content where multiple members go flat; sovereignty-under-pressure territory substantially covered by theme_003's sharper treatment of power asymmetry and structural hypocrisy.' That is a genuine editorial judgment, not a filler rationale. Selection kept 5 of 6 themes and distributed 30 formulations across 12 members (range 2-3 per member, target 3), coverage dict balanced and complete. This is the shape we want.",
+    "Formulation quality is substantively good for wide-territory voices. Hannah Arendt's three formulations land dead-center in her activation territory: authority-vs-power (theme_002), the hypocrisy paradox (theme_003), and shared-facts-as-precondition-vs-product of political speech (theme_005). Each is specifically about something Arendt would defend or contest rather than a generic question; each has a genuine provocation ('when grievances are admitted as legitimate yet the popular remedies are judged destructive, whose judgment should prevail?') rather than a summary. Whanganui River's three formulations similarly land via the legal-personhood / deep-time / principles-that-can't-be-delivered angles.",
+    "The narrow-territory voice problem. Selection hits the 3-per-member coverage target by assigning narrow-territory voices to themes where there is a loose fit, rather than letting them receive fewer-but-sharper formulations. The pattern correlates cleanly with activation-territory width: wide-territory historical voices (Arendt, Plato, Dostoevsky, Ibn Battuta, Scheherazade, Cleopatra) get well-aimed formulations; narrow structurally-specific voices (Ada Lovelace partially, Octopus entirely) get stretched to fit. Ada's theme_005 (algorithms, machines doing symbolic work) lands in her territory but theme_006 (Gaza/Ukraine peace process) is explicitly her 'goes_flat_on' territory. Octopus's two formulations are the same text assigned to Arendt and Dostoevsky, aimed at Arendt's ground, with no nod to 'what counts as a mind' or distributed cognition.",
+    "The fix for the narrow-territory voice problem is a prompt-level change to Selection: explicitly telling it that coverage is a soft target subordinate to distinctiveness, and that a narrow-territory member receiving 1 strong formulation beats 3 mediocre ones. Not architectural. Scheduled for Provocateur v2 but not blocking v1 acceptance.",
+    "Every selected theme got exactly 6 assigned members. That is the upper bound of the 2-6 range I allowed in the Selection prompt, and it is Selection's way of hitting the coverage target. Not wrong per se (the formulations were grounded enough that they read well even aimed at 6 voices), but it limits per-member distinctiveness. Worth watching whether a v2 prompt that pushes toward narrower assignments (2-4 members, optimize for distinctive activation per member) improves the formulations visibly.",
+    "One tuning concern logged: Selection wall time was 8.5 min for a single LLM call on 6 triaged themes. At Athens scale with 12-24 themes this may stretch to 15-20 min. Selection runs once per night and we have hours, so it's not blocking. Three options if we want to trim: (a) turn off thinking for Selection since the work is structural balancing rather than deep reasoning, (b) split Selection into two cheaper calls (coverage balancing, then member assignment), (c) accept the wall time. Defer the decision until we see Selection behavior on Athens-scale input.",
+    "One failure mode debugged during the run. First attempt hit JSONDecodeError('Expecting value: line 1 column 1 (char 0)') in Selection — empty text stream from the model. Root cause: SELECTION_MAX_TOKENS=24000 was insufficient for adaptive thinking, and thinking consumed the entire budget before any visible text was emitted. Fix: bumped Selection and Formulation max_tokens to 40000 (matching Triage and the Researcher's clustering task). Added _stream_and_parse() helper that centralizes empty-stream detection, JSON parse fallback with 500-char preview, stop_reason logging, and 80% budget warnings across all three tasks. This defensive pattern surfaces future similar failures with actionable error messages rather than silent retries.",
+    "PROVOCATEUR_CACHE=1 env var added to skip cached Triage and Selection outputs if they exist on disk. Enables fast iteration on Selection prompt changes without re-paying for Triage, or on Formulation changes without re-paying for either upstream step. Same intent as the RESEARCHER_CACHE env var would if we had one."
+  ],
+  "known_gaps_resolved": [
+    "RESOLVED Apr 14: Transcription Speaker ID v2.1 with refined Pass 5",
+    "RESOLVED Apr 14: turn_index field on each turn in session_package.json",
+    "RESOLVED Apr 14: Transcription Pass 5 over-merging and over-reach",
+    "RESOLVED Apr 14: TRANSCRIPTION_CACHE env-var caching",
+    "RESOLVED Apr 14: Researcher Pipeline Node 1 + Node 2 implemented, validated end-to-end",
+    "RESOLVED Apr 14: Researcher ID type mismatch (int vs string)",
+    "RESOLVED Apr 14: Researcher grouping orphans + duplicates via prompt closure rule + defensive validator",
+    "RESOLVED Apr 14: Researcher empty clusters left behind by dedup — post-dedup pruning in validator",
+    "RESOLVED Apr 14 (v2.2): Namespaced IDs {session_id}:NNN — per-session and combined files consistent, parallelism-safe",
+    "RESOLVED Apr 14 (v2.2): Node 2 split into two real API calls with intermediate clusters.json artifact — Round 2 sees only cluster titles/abstracts, forces genuine second-level abstraction",
+    "RESOLVED Apr 14 (v2.2): KJ-method labels — every cluster_title, cluster_abstract, theme_title, theme_abstract is a declarative finding, not topic metadata",
+    "RESOLVED Apr 14 (v2.2): CLUSTERING_MAX_TOKENS bumped from 8K to 16K + switched to streaming to prevent truncation at Athens scale",
+    "RESOLVED Apr 14 (v2.2): extract_json robust to trailing commentary after valid JSON via json.JSONDecoder.raw_decode()",
+    "RESOLVED Apr 14 (v2.3): Opus 4.6 + adaptive extended thinking wired through all three Researcher tasks. RESEARCHER_THINKING=1 env var toggle, _thinking_kwargs helper using thinking.type=adaptive, bumped max_tokens ceilings for thinking headroom, Round 2 theming converted to streaming (required when thinking enabled). Validated end-to-end on dev_msc_test with clean integrity and qualitatively stronger output than the Sonnet baseline.",
+    "RESOLVED Apr 14 (v2.4): Cluster granularity fixed. v2.3 Opus was producing ~2.1 extractions/cluster (too narrow for Athens scale). v2.4 gets 4.08 avg cluster size via three changes: (1) minimal model-facing input for Round 1 (only ref/extraction/context, all metadata stripped including namespace id, session, speaker, lens, responds_to, engagement, energy); (2) 'why these belong together' framing replacing 'declarative finding', with seven patterns of binding taught by example; (3) asymmetric self-check on clusters under 4 items requiring the model to actively search for absorbable items.",
+    "RESOLVED Apr 14 (v2.4): Cross-session theme ratio collapse fixed. v2.3 Opus was at 25% cross-session; v2.4 reaches 83%. Root cause was the namespace prefix ('breaking_point:014') giving the model a grouping shortcut, and the 'responds_to' edges forming within-session attractors. Fix was data-level (minimal input stripping both) rather than prompt-level exhortation.",
+    "RESOLVED Apr 14 (v2.4): Abstract drift fixed. The Researcher Pipeline spec says abstracts should describe 'why these extractions/clusters belong together'. v2.2/v2.3 prompts had drifted to 'state a declarative finding' which is a different operation (states an answer rather than articulating the affinity). v2.4 prompt reverts to the spec language with KJ-method grounding.",
+    "RESOLVED Apr 15 (Provocateur v1): End-to-end Provocateur pipeline built and validated against v2.4 Researcher output. Four Prefect tasks (triage, selection, formulation, packaging) all functional. Hot-swap council config design working. All editorial state (landscape, audience, axes, formulations-per-member target, 12 member profiles) loads from flows/shared/council/council_config.json at run time; to change the council before an Athens night, edit the file and re-run. Validated on dev_msc_test: 5 selected themes, 30 formulations distributed across 12 members, 12 briefings written, 0 hallucinated IDs, integrity clean. Stub council profiles produce adequate formulations for wide-territory voices (Arendt, Whanganui, Plato, etc.); narrow-territory voice problem identified for v2 iteration.",
+    "RESOLVED Apr 15 (Provocateur v1): Empty-text-stream failure mode diagnosed and fixed. First run hit JSONDecodeError in Selection because SELECTION_MAX_TOKENS=24000 was insufficient for adaptive thinking on the coverage-balancing task. Fix: bumped Selection and Formulation max_tokens to 40000. Added _stream_and_parse() helper centralizing empty-stream detection, JSON parse fallback with preview, stop_reason logging, and 80% budget warnings — all three Provocateur tasks share this pattern. Same defensive approach as the Researcher's clustering task."
+  ],
+  "known_gaps_open": [
+    "Turn-boundary contamination from ASR diarization (structurally not prompt-fixable, needs separate audience mic channel per PROPOSED §6)",
+    "scratch/rerun_speaker_id_and_cleaning.py is technically redundant with TRANSCRIPTION_CACHE=1 but kept as a utility for fast iteration outside Prefect",
+    "RESEARCHER_CACHE env var not yet implemented — can iterate on grouping by calling cluster_extractions.fn and group_clusters_into_themes.fn directly against existing all_extractions.json",
+    "AI_Assembly_Researcher_Pipeline.md spec doc has been updated to v3 via web session — not yet cross-checked by me against the delta spec, but user reports three checks passed during the web session. Cross-check deferred unless issues surface.",
+    "Transcription pipeline Opus/thinking upgrade: reasoned through and implemented as optional TRANSCRIPTION_SPEAKER_ID_MODEL env var override. Default stays Sonnet, operators can flip difficult sessions to Opus per-run. Cleaning and drift verification untouched.",
+    "Provocateur v1 narrow-territory voice problem: Selection hits the 3-per-member coverage target by assigning narrow-territory voices (Ada Lovelace, Octopus) to themes where there is only a loose fit rather than giving them fewer-but-sharper assignments. Fix is a prompt-level change to Selection explicitly stating that coverage is a soft target subordinate to distinctiveness. Scheduled for Provocateur v2, not blocking v1.",
+    "Provocateur v1 Selection wall time ~8.5 min is long for a single LLM call on 6 themes. At Athens scale with 12-24 themes this may stretch further. Not blocking since Selection runs once per night and we have hours, but worth tuning if the Athens dry run exceeds comfort. Three options: disable thinking for Selection (structural balancing doesn't need it), split into two cheaper calls, or accept.",
+    "Council config stubs (dev_stub_v1) are hand-written from project memory, not derived from real v3.7 Persona Cards. The Provocateur code doesn't care which are stubs and which are real, but the formulation quality for narrow-territory voices (especially Octopus) will likely improve once real derived profiles slot in. Content work, not code work."
+  ],
+  "provocateur_v3_observations": {
+    "narrow_voice_problem_solved": "v1's central failure was that narrow-territory voices (Octopus, Ada Lovelace, Whanganui River) got force-fit into themes outside their activation, producing formulations that read as Arendt-in-costume rather than uniquely-voiced provocations. v3 architecturally fixes this two ways: (1) per-voice Triage allows each voice's profile to drive its own ranking honestly (Octopus: 2 ranked, 4 flat; Ada Lovelace: 1 ranked, 5 flat; Whanganui River: 1 ranked, 5 flat — exactly what should happen given their narrow profiles); (2) Python Selection respects this with per-voice candidate lists rather than committee-style theme assignment. Result: Ada Lovelace gets 1 formulation that lands precisely on her formalism territory; Octopus gets 2 that land on distributed-cognition territory; Whanganui River gets 1 that lands on the river-as-legal-person territory. Each formulation could NOT be sent to a different voice with a word change.",
+    "cross_voice_variation_on_shared_themes": "Same theme assigned to 8 voices produced 8 substantively different formulations, each landing in the assigned voice's distinctive ground. Example — theme_005 (the destroyed shared fact base): Plato → epistocracy vs democratic equal voice; Scheherazade → her storytelling tradition's dependence on a single transformable listener; Ada Lovelace → formalism (the algorithm executed its instruction faithfully at inhuman scale); Dostoevsky → invokes the Grand Inquisitor and the Underground Man; Arendt → speech without a public; Audrey Tang → names Polis directly and bridging-statements; Peter Thiel (proposition) → manufactured consensus is not a loss; Octopus → distributed cognition as challenge to the unified-mind premise. Validates that per-pair Formulation produces individually-strong AND collectively-distinctive artifacts.",
+    "five_condition_proposition_test_works": "v1 produced near-zero propositions (defaults to question, model never found license to assert). v3 produced 9/40 propositions (22.5%), all to stance_tendency=asserts voices: Cleopatra ×4, Peter Thiel ×4, Hannah Arendt ×1. Reframer voices (Octopus, Whanganui River, Ibn Battuta) and asker voices (Audrey Tang, Scheherazade) correctly got questions. The five conditions (sharp debatable claim in material, strongly asserted, not adequately contested, member has clear ground, member would sharpen on proposition) are filtering correctly.",
+    "strict_flavor_compliance": "Zero violations across 40 formulations × ~3-5 quotes each = ~150 speaker attributions. Allowed flavors only: 'speaking with intensity' (when energy=high), 'pushing back' (when engagement=challenged), 'with weight' (when energy=high + lens=assertion), 'leaving the question open' (when lens=open_question). Disallowed visual/affective claims ('visibly emotional', 'leaning forward', 'frustrated', 'after a pause') never appeared in output. The allowed/disallowed lists in the Formulation prompt are working as a hard constraint.",
+    "narrative_briefing_format_validated": "Each formulation packaged with two views in the per-voice briefing JSON: (1) narrative_briefing markdown — THEME / CONTEXT FROM TODAY'S SESSIONS / EXTRACTION (with attributions) / FORMULATION sections, plus a hint at the structured field for deeper inspection. Matches the trial-run format used in earlier voice node tests and intended for direct paste into Voice Node Step 1 prompt. (2) structured JSON — full formulation_text, context_narrative, selected_quotes, grounding ids, rationale, theme abstract, cluster abstracts, lens-sorted raw extractions, co-assigned voices, theme flags. Voice agent receives both: narrative for inhabitation, structured for introspection.",
+    "selection_algorithm_audit_trail": "Selection output includes assignments_by_member, kept_themes (with theme_quality scores), dropped_themes (with reason and stage: triage_veto vs quorum), forced_fits, stretch_swaps, and selection_parameters_used. Every editorial knob that influenced the selection is recorded in the output, making post-hoc analysis trivial. On dev_msc_test: 5 themes kept, 1 dropped at quorum (theme_004 had fewer than 3 voices activate at threshold), 0 force-fits needed, 0 stretch swaps fired (all voices reached at least 1 assignment naturally; no voice missed its stretch territory). At Athens scale with more themes, force-fits and stretch swaps will likely fire — this validates the algorithm runs cleanly when those branches don't trigger.",
+    "rate_limit_lessons_for_athens_scale": "Opus 4.6 limits (30K input/min, 8K output/min) constrain the practical concurrency. With ~3K input + ~3-5K output per Formulation call, sustainable concurrency is ~3-4 calls. Athens scale projects to ~80-100 (theme, voice) pairs from ~14-19h of daily input (vs dev_msc_test's ~3.5h producing 40 pairs). At batch_size=4 + 20s wait, that's ~25-30 batches × ~140s/batch = ~60-70 minutes for Formulation alone. Plus ~5-7 min Triage + Selection (instant) + Packaging (~5s) = ~70-80 min total per night. Comfortable in midnight-to-8am window with 6+ hours buffer for downstream Voice Pipeline stage. The incremental checkpointing means a transient overnight failure costs minutes of re-run, not a full restart.",
+    "validation_run_metrics": {
+      "wall_time_total_minutes": 25,
+      "formulation_pairs": 40,
+      "rate_limit_failures": 0,
+      "retry_storms": 0,
+      "data_loss_incidents": 0,
+      "manifest_pipeline_version": "v3",
+      "validation_date": "2026-04-15"
+    }
+  },
+  "incremental_checkpointing_resume_test": {
+    "test_date": "2026-04-15",
+    "method": "Populated triage_voices/ and formulations/ directories from existing consolidated outputs (12 voices + 40 pairs), then re-ran the pipeline with no env vars.",
+    "result": "Pipeline completed in 3 seconds. Triage detected 12/12 voices already on disk in triage_voices/ and skipped all LLM calls. Selection ran (Python, always recomputed, instant). Formulation detected 40/40 pairs already on disk in formulations/ and skipped all LLM calls. Packaging rebuilt all 12 briefings from cached pairs. All briefing files regenerated byte-equivalent to the original run. Resume capability proven.",
+    "athens_implication": "If a Formulation batch dies after pair 67/100 due to rate limits or transient failure, restart re-runs only the missing 33 pairs. No API spend wasted on the 67 that completed. This was the user-flagged fragility from the prior session and is now resolved."
+  },
+  "provocateur_v3_post_audit_cleanup": {
+    "cleanup_date": "2026-04-15",
+    "purpose": "After validating v3 end-to-end, did a full audit of the pipeline for redundancy, dead code, fault lines, and architectural leftovers. Found and addressed 8 issues.",
+    "items_addressed": [
+      "Dead constant SELECTION_MAX_TOKENS removed (Selection became Python in v3)",
+      "Dead helper _format_conceptual_axes() removed",
+      "Dead config field conceptual_axes removed from council_config.json",
+      "Stale docstring in package_voice_briefings rewritten to accurately describe v3 briefing schema",
+      "Selection cache branch removed entirely (Python is instant; caching risked silent staleness against council_config edits)",
+      "Triage cache logic unified — per-voice checkpoint files ARE the cache, no PROVOCATEUR_CACHE env flag needed",
+      "Misleading 'wrote ...' log fixed to only mention files actually written",
+      "Consolidated triage_voices.json and formulations.json files dropped — per-checkpoint directories are sole source of truth"
+    ],
+    "briefing_cleanup_separately": "In a prior cleanup pass, briefing files were stripped of: voice profile block (voice IS the persona via Persona Card), council_config_version (now only in manifest), formulations_count (derive from len), and the duplicated formulation_text / context_narrative / selected_quotes fields from the structured view (they live only in narrative_briefing now). Provocateur's rationale field was moved out of the briefing entirely (kept in per-pair checkpoint for audit) so the voice agent is not primed toward Provocateur's expected answer.",
+    "code_size_after_cleanup": "1334 lines (was 1309 + comments + docstrings)",
+    "verification": "Pipeline re-ran cleanly with all per-checkpoint files intact. 12 voice checkpoints + 40 pair checkpoints + 12 briefings + manifest all consistent. No dead code references remaining. Council config has no unused fields. All prompt placeholders match flow substitutions.",
+    "follow_on_briefing_rename": "After the audit cleanup, recognized that calling the second view `structured` was descriptively weak. The field exists to give Step 1 private thinking access to the full theme record (all clusters, all extractions) so the voice can reason over the wider material while answering the Provocateur's curated formulation. Renamed to `full_theme_record` to make the purpose explicit. Re-ran packaging; 12 briefings rebuilt. The narrative_briefing markdown remains unchanged (still the Step 1 prompt); only the companion field was renamed and its docstring rewritten.",
+    "follow_on_audit_pass_2": "Second audit pass after the briefing-rename. Found two real issues: (1) the file-level module docstring was stale — said 'four Prefect tasks: Triage → Selection → Formulation loop → Packaging' (wrong: v3 has FIVE tasks and Selection is no longer a task), mentioned removed 'conceptual_axes' and unused 'formulations-per-member target' as editorial state, and pointed at a spec doc that doesn't exist on disk; (2) target_formulations_per_voice was defined in selection_parameters but never consumed by python_select, so changing it had no effect. Fixed both: rewrote the docstring to accurately describe the v3 five-stage architecture and current outputs, and wired target_formulations_per_voice into python_select as a soft warning (after all algorithm passes, voices below target are surfaced in the log AND in selection.below_target AND in manifest.outputs.voices_below_target). The target is not enforced — narrow-territory voices below target are usually the architecturally-correct outcome (Ada Lovelace 1/5, Whanganui 1/5, Octopus 2/5 on dev_msc_test) — but now visible for tuning."
+  },
+  "whole_pipeline_audit": {
+    "audit_date": "2026-04-15",
+    "scope": "Full audit Stage 0 (audio prep) → Stage 3 (briefings). Verified stage-to-stage contracts (Transcription→Researcher and Researcher→Provocateur both clean — every field one stage produces is consumed correctly by the next, and unused fields are intentional audit/review surface). Found 4 real drift items (none affecting pipeline behavior, all in code/docs that would mislead a future operator). Fixed all 4.",
+    "items_fixed": [
+      "transcription_flow.py docstring: said '4 passes' but speaker_id prompt has 5 explicit passes (PASS 1-5). Fixed.",
+      "transcription_flow.py docstring: 3 references to project-knowledge spec docs (AI_Assembly_Transcription_Pipeline.md, AI_Assembly_Infrastructure_Setup.md) that don't exist on disk. Removed.",
+      "researcher_flow.py docstring: reference to AI_Assembly_Researcher_Pipeline.md that doesn't exist on disk. Replaced with pointer to v2.4 manifest entry.",
+      "flows/shared/council/build_council_config.py: stale one-shot generator that would produce dev_stub_v1 schema (no selection_parameters, with conceptual_axes). Deleted as a loaded gun. flows/shared/io.py reference removed.",
+      "flows/shared/council/README.md: v1 documentation in front of v3 code (documented conceptual_axes, formulations_per_member_target as top-level, dev_stub_v1 version, no selection_parameters). Full v3 rewrite shipped — schema, per-knob explanation of each selection_parameters field, when-to-delete-checkpoints table, stub→real Persona Card workflow."
+    ],
+    "stage_handoffs_verified": {
+      "transcription_to_researcher": "Researcher's build_extraction_user_prompt reads metadata.{session_title,session_description,session_format,roster}, transcript.{speakers_present,turns}, review_queue.verify_markers — all produced by Transcription. Unused-by-Researcher fields (low_confidence_attributions, diarization_flags, track, date_time, venue, session_id) are intentional human/audit surface.",
+      "researcher_to_provocateur": "Provocateur reads grouping.json's themes→clusters→extraction_ids and resolves extractions via all_extractions.json. All required fields (theme.{theme_id,title,abstract,clusters}, cluster.{cluster_id,cluster_title,cluster_abstract,extraction_ids}, extraction.{id,speaker,lens,extraction,context,engagement,responds_to,energy}) present. extraction.session is used by Researcher's namespacing only; grouping.isolates intentionally not consumed by Provocateur."
+    },
+    "verification": "All flows syntax+import OK. load_council_config still works (build_council_config removed cleanly). Provocateur pipeline runs clean (~1s with all checkpoints intact)."
+  }
+}

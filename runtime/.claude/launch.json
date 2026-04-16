@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ingest-preview",
+      "runtimeExecutable": "venv/bin/uvicorn",
+      "runtimeArgs": ["ingest.app:app", "--host", "127.0.0.1", "--port", "8765", "--workers", "1"],
+      "port": 8765
+    }
+  ]
+}

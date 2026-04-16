@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ session.title }} · AI Assembly Ingest{% endblock %}
+{% block content %}
+<p class="breadcrumb"><a href="/">← all sessions</a></p>
+
+<div class="{{ session.track|track_css }}">
+  <p class="eyebrow"><span class="track-tag">{{ session.track }}</span></p>
+  <h1>{{ session.title }}</h1>
+  <p class="sub">
+    {{ session.day }} · {{ session.start_time }}–{{ session.end_time }} ·
+    {{ session.venue }}{% if session.venue_sub %} · {{ session.venue_sub }}{% endif %}
+  </p>
+</div>
+<p>{{ session.description }}</p>
+
+<h2>Roster</h2>
+<ul class="roster">
+  {% for m in roster %}
+    <li>
+      <strong>{{ m.name }}</strong>
+      {% if m.title %}<span class="muted"> — {{ m.title }}</span>{% endif %}
+      {% if m.affiliation %}<span class="muted"> · {{ m.affiliation }}</span>{% endif %}
+      {% if not m.bio %}
+        <span class="warn">⚠ no bio</span>
+      {% endif %}
+    </li>
+  {% endfor %}
+  {% if not roster %}
+    <li class="muted">no speakers listed in the program</li>
+  {% endif %}
+</ul>
+{% if missing_bios %}
+  <p class="warn">
+    {{ missing_bios|length }} speaker(s) have no bio. Speaker ID Pass 3 will
+    be weaker for this session. Bios live in
+    <code>reference/speakers.json</code>.
+  </p>
+{% endif %}
+
+<h2>Upload</h2>
+<div id="upload-box" data-session-id="{{ session.session_id }}" data-has-existing="{{ 'true' if existing else 'false' }}">
+  {% if existing %}
+    <div class="existing">
+      <p>
+        <strong>Audio already uploaded.</strong>
+        Normalized size: {{ '%.1f'|format(existing.size_bytes / 1024 / 1024) }} MB
+        · last modified {{ existing.mtime }}.
+      </p>
+      <p class="muted">
+        Current pipeline state: <code>{{ current_state or 'none' }}</code>.
+        Uploading again will <strong>overwrite</strong> the existing audio and
+        re-run Stage 0 transcription.
+      </p>
+    </div>
+  {% endif %}
+
+  <form id="upload-form">
+    <label class="file-picker">
+      <input type="file" id="file-input"
+             accept="{{ allowed_extensions|join(',') }}" required>
+      <span class="file-picker-label">Choose an audio file…</span>
+    </label>
+    <p class="hint">
+      Accepted: {{ allowed_extensions|join(', ') }}.
+      Max {{ max_upload_mb }} MB. Will be normalized to 96 kbps mono AAC.
+    </p>
+    <button type="submit" id="upload-submit" class="primary" disabled>
+      Upload and start transcription
+    </button>
+  </form>
+
+  <div id="upload-progress" class="hidden">
+    <progress id="progress-bar" value="0" max="100"></progress>
+    <p id="progress-text">Uploading…</p>
+  </div>
+
+  <div id="upload-error" class="error hidden"></div>
+</div>
+
+
+<p class="footer-hint">
+  Output will be written to
+  <code>runs/{{ run_id }}/01_transcription/{{ session.session_id }}/</code>.
+</p>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=10" }}"></script>
+{% endblock %}

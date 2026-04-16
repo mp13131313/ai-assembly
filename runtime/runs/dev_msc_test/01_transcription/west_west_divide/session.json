@@ -1,0 +1,48 @@
+{
+  "session_id": "msc2026_west_west_divide",
+  "session_title": "The West-West Divide: What Remains of Common Values",
+  "session_description": "A late-evening Night Cap session at the Munich Security Conference 2026 examining whether 'the West' still exists as a coherent political and civilizational concept. Panelists from across the ideological and geographic spectrum debate competing notions of the West, the values that supposedly underpin it, and whether the polarization between liberal and conservative-traditionalist visions is bridgeable or terminal. Battlegrounds discussed include migration, gender and family policy, Ukraine and Russia, the rule of law, and the role of religion in public life. The session is supported by the Rockefeller Foundation as part of the 'Build the Shared Future' initiative.",
+  "session_format": "panel",
+  "track": "Global Order",
+  "date_time": "2026-02-14T22:00:00+01:00/2026-02-14T23:00:00+01:00",
+  "venue": "Munich Security Conference 2026, Spotlight",
+  "expected_speaker_count": 6,
+  "roster": [
+    {
+      "name": "Bronwen Maddox",
+      "title": "Director and Chief Executive (Moderator)",
+      "affiliation": "Chatham House",
+      "bio": "British journalist and director of Chatham House (the Royal Institute of International Affairs) since 2022. Previously editor of Prospect magazine, foreign editor and chief leader writer at The Times of London, and Washington correspondent during the second Bush administration. Has written extensively on the unraveling of the post-Cold War liberal order and the rise of strongman politics in democracies. Known for moderating with sharp follow-ups and a willingness to push back on guests when their answers are evasive."
+    },
+    {
+      "name": "Petr Macinka",
+      "title": "Deputy Prime Minister, Minister of Foreign Affairs and Minister for the Environment",
+      "affiliation": "Czech Republic",
+      "bio": "Czech politician serving as Deputy Prime Minister and dual-portfolio minister covering foreign affairs and environment. Member of the Motorists for Themselves (Motoristé sobě) party, a populist-conservative outfit that entered government as part of a coalition formed after the late 2025 Czech parliamentary elections, when the previous SPOLU coalition led by Petr Fiala lost power to a bloc anchored by Andrej Babiš's ANO movement. Sits to the right of the European mainstream on migration, climate policy, and EU integration. Represents the conservative-Eurosceptic strand of Central European politics that defines itself in opposition to Brussels orthodoxy."
+    },
+    {
+      "name": "Radosław Sikorski",
+      "title": "Minister of Foreign Affairs",
+      "affiliation": "Republic of Poland",
+      "bio": "Polish Foreign Minister since December 2023, in his second stint in the role (previously 2007–2014 under PM Donald Tusk). Civic Platform politician, former Marshal of the Sejm, former Defence Minister, and one of the most prominent voices in Europe arguing for an uncompromising line against Russia. Educated at Pembroke College, Oxford. Husband of American historian Anne Applebaum. Outspokenly pro-Ukraine, pro-NATO, and pro-EU; a frequent critic of the previous PiS government's clashes with Brussels over rule of law. Member of the MSC Advisory Council. His worldview is squarely in the liberal Atlanticist tradition that the panel's other voices contest."
+    },
+    {
+      "name": "Hillary R. Clinton",
+      "title": "Professor of International and Public Affairs",
+      "affiliation": "School of International and Public Affairs, Columbia University; former U.S. Secretary of State",
+      "bio": "Former U.S. Secretary of State (2009–2013) under President Obama, former U.S. Senator from New York, former First Lady, and 2016 Democratic presidential nominee. Currently a professor at Columbia's School of International and Public Affairs. Long-standing voice for liberal internationalism and the maintenance of U.S. alliances; sharply critical of Trump and Trumpism, of Putin's Russia, and of the rise of authoritarian populism within Western democracies. Her presence on a panel about the West-West divide is itself a signal — she embodies the liberal establishment that the panel's conservative voices accuse of having betrayed Western values."
+    },
+    {
+      "name": "Ivan Krastev",
+      "title": "Founder and Chairman",
+      "affiliation": "Centre for Liberal Strategies",
+      "bio": "Bulgarian political scientist and one of Europe's most influential public intellectuals on democracy, populism, and the post-Cold War European condition. Founder of the Centre for Liberal Strategies in Sofia and permanent fellow at the Institute for Human Sciences in Vienna. Author of 'After Europe', 'The Light That Failed' (with Stephen Holmes), and many essays on the disillusionment of Eastern Europe with liberal democracy. Frequent contributor to The New York Times, Foreign Affairs, and the Financial Times. Known for a paradoxical, melancholic style that resists easy ideological categorization — neither a triumphalist liberal nor a defender of populism, but a diagnostician of why liberalism is in trouble."
+    },
+    {
+      "name": "Gladden J. Pappin",
+      "title": "President and Chair of the Board",
+      "affiliation": "Hungarian Institute of International Affairs",
+      "bio": "American conservative academic and political theorist serving as president of the Hungarian Institute of International Affairs (HIIA), the foreign-policy think tank of Viktor Orbán's government. Previously associate professor of politics at the University of Dallas. Co-founder of the journal American Affairs and a prominent voice in the post-liberal, integralist, and 'national conservative' movements in the United States. Closely associated with Hungarian-style conservatism and the broader project of building a transatlantic conservative alternative to liberal internationalism. His role on this panel is to articulate the position that the liberal 'West' is itself a betrayal of Western civilizational values, and that figures like Orbán represent its true defenders."
+    }
+  ]
+}

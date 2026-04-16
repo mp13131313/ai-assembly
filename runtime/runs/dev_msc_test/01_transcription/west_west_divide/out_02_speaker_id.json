@@ -1,0 +1,156 @@
+{
+  "mappings": [
+    {
+      "anonymous_label": "speaker_a",
+      "identified_name": "Bronwen Maddox",
+      "confidence": "high",
+      "role": "moderator",
+      "evidence": "Turn 0: explicit self-introduction 'I'm Bronwen Maddox from Chatham House. Welcome to this evening, highly charged post-dinner session on the West-West divide.' Consistent moderator behavior throughout: introducing panelists, managing time, asking questions, closing the session."
+    },
+    {
+      "anonymous_label": "speaker_b",
+      "identified_name": "Gladden J. Pappin",
+      "confidence": "high",
+      "role": "panelist",
+      "evidence": "Turn 5: moderator explicitly identifies 'he's Gladden Pappin, president and chair of the board, Hungarian Institute of International Affairs.' Content throughout is consistent with Pappin's bio: defending the Trump administration's direction, arguing conservative voices were excluded from elite institutions, praising Viktor Orbán, identifying as a citizen of the Osage Tribal Nation (turn 115), and arguing the family and borders were 'worn down' by progressive policies."
+    },
+    {
+      "anonymous_label": "speaker_c",
+      "identified_name": "Ivan Krastev",
+      "confidence": "high",
+      "role": "panelist",
+      "evidence": "Turn 16: opened with a Soviet joke, referenced 'Centre for Liberal Strategies' analytical style, mentioned 'After Europe'-style themes. Turn 82: 'we had this big project on hypocrisy... a group of academics' — consistent with Krastev's academic profile. Turn 140: referenced Gandhi quote on European civilization, discussed Bulgaria ('If you're Bulgarian'), and AI/national survival themes consistent with Krastev's published work. His paradoxical, diagnostic style matches the bio throughout. Turn 2 ('No, no, no, no, no') is a brief interjection consistent with his animated style."
+    },
+    {
+      "anonymous_label": "speaker_d",
+      "identified_name": "Radosław Sikorski",
+      "confidence": "high",
+      "role": "panelist",
+      "evidence": "Turn 5: moderator introduces 'Radosław Sikorski from Poland.' Turn 6: discusses working at a Washington think tank, gun ownership views, European vs. American free speech — consistent with Sikorski's Atlanticist Oxford-educated background. Turn 60: mentions writing for Bill Buckley's National Review, friendship with Roger Scruton — consistent with his biography. Turn 119: references Lavrov and Soviet-era jokes, Poland's pro-American stance — consistent with his role as Polish Foreign Minister."
+    },
+    {
+      "anonymous_label": "speaker_e",
+      "identified_name": "Petr Macinka",
+      "confidence": "high",
+      "role": "panelist",
+      "evidence": "Turn 11: moderator introduces 'Petr Macinka from the Czech Republic, Deputy Prime Minister.' Turn 12: articulates conservative-versus-progressive divide, national sovereignty, Eurosceptic positions — consistent with his bio. Turn 49: 'I think there are two genders' — consistent with his conservative stance. Turn 109 is a question directed to 'the Deputy Prime Minister of the Czech Republic,' flagged separately. Turn 127/133/135 etc.: argues for national sovereign states over EU supranationalism, consistent with his Motoristé sobě affiliation."
+    },
+    {
+      "anonymous_label": "speaker_f",
+      "identified_name": "Hillary R. Clinton",
+      "confidence": "high",
+      "role": "panelist",
+      "evidence": "Turn 9: moderator addresses 'Secretary Clinton.' Turn 36: 'as perhaps one of the few people who has actually been around since the end of the Second World War' — consistent with Clinton's age and experience. Turn 40: strong condemnation of Trump's Ukraine position. Turn 113: discusses signing New START Treaty with Lavrov in Prague — consistent with her role as Secretary of State 2009–2013. Turn 47: 'Which gender? Women having their rights?' — consistent with her bio as a champion of women's rights."
+    },
+    {
+      "anonymous_label": "speaker_g",
+      "identified_name": "Audience Member 1",
+      "confidence": "high",
+      "role": "audience",
+      "evidence": "Turn 84: self-introduction 'I'm Siggi Becklund from the Scandinavian weekly Day and Time.' Not on the roster. Turn 100: 'Lukasz Pawlowski, Polish MFA' — a different person; see Audience Member 2. Turn 102 continues Pawlowski's question."
+    },
+    {
+      "anonymous_label": "speaker_h",
+      "identified_name": "Audience Member 3",
+      "confidence": "high",
+      "role": "audience",
+      "evidence": "Turn 93: audience member speaking from the floor, no self-identification by name but clearly an audience questioner identified by moderator as 'Right here in the front.' Not on the roster. Critiques conflation of Trumpism with conservatism."
+    }
+  ],
+  "flags": [
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_g",
+      "original_attribution": "Audience Member 1",
+      "reassigned_turn_indices": [
+        100,
+        102
+      ],
+      "reassigned_to": "Audience Member 2",
+      "reason": "Turn 100 is a self-introduction as 'Lukasz Pawlowski, Polish MFA' — a different person from Siggi Becklund (Audience Member 1). Turn 102 continues Pawlowski's question about American identity directed at Secretary Clinton."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_a",
+      "original_attribution": "Bronwen Maddox",
+      "reassigned_turn_indices": [
+        105
+      ],
+      "reassigned_to": "Audience Member 4",
+      "reason": "Turn 105 contains 'Hi, I'm Melanie Ward' — a self-introduction as a named audience member, inconsistent with Bronwen Maddox's identity. The moderator's turn 103 ends with 'Let me just take two more' and then turn 105 is the next questioner introducing herself."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_f",
+      "original_attribution": "Hillary R. Clinton",
+      "reassigned_turn_indices": [
+        106
+      ],
+      "reassigned_to": "Audience Member 4",
+      "reason": "Turn 106 begins 'I'm not from the Polish Foreign Ministry, sorry. I'm a British MP.' This is Melanie Ward (introduced in turn 105) identifying herself as a British MP — inconsistent with Hillary Clinton's identity. The question about Trump's $200 million spending on far-right European think tanks is asked from the floor."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_f",
+      "original_attribution": "Hillary R. Clinton",
+      "reassigned_turn_indices": [
+        108
+      ],
+      "reassigned_to": "Audience Member 5",
+      "reason": "Turn 108 is 'Hi, my name is Catherine Achenberger' — a self-introduction as a different named audience member, not Hillary Clinton."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_e",
+      "original_attribution": "Petr Macinka",
+      "reassigned_turn_indices": [
+        86,
+        90,
+        109
+      ],
+      "reassigned_to": "Audience Member 6",
+      "reason": "Turns 86 and 90 appear during the audience question segment: turn 86 ('There's one here. Yeah, I got a microphone') and turn 90 ('Richard Wolff from Deutsche Welle') are audience interjections/self-introductions inconsistent with Petr Macinka being the speaker. Turn 109 is the continuation of Richard Wolff's question directed at 'the Deputy Prime Minister of the Czech Republic' — i.e., directed AT Petr Macinka, not spoken by him."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_c",
+      "original_attribution": "Ivan Krastev",
+      "reassigned_turn_indices": [
+        88,
+        91,
+        95,
+        99,
+        104
+      ],
+      "reassigned_to": "Audience Member 6",
+      "reason": "Turns 88 ('Hi.'), 91 (question about 'values' vs 'civilization' terminology, self-attributed to Richard Wolff from Deutsche Welle in turn 90), 95 (question to Secretary Clinton about New START Treaty signed with Lavrov — directed AT Clinton, not by Krastev), 99 ('Yeah.' — brief affirmation during audience section), and 104 ('Is there somebody from the Polish Foreign Ministry?') appear to be audience member speech misattributed to speaker_c. Turn 91 directly follows the Deutsche Welle self-introduction in turn 90, and turn 95 poses a question addressed to Clinton in second person. These are inconsistent with Ivan Krastev's panelist role."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_f",
+      "original_attribution": "Hillary R. Clinton",
+      "reassigned_turn_indices": [
+        111
+      ],
+      "reassigned_to": "Audience Member 7",
+      "reason": "Turn 111 begins 'I'm Anja Vilasek. I'm with the German Tagesspiegel' — a self-introduction as a journalist not on the roster. The question is directed at 'Madam Secretary,' meaning it is addressed TO Clinton, not spoken by her."
+    },
+    {
+      "type": "reassigned_turns",
+      "original_label": "speaker_d",
+      "original_attribution": "Radosław Sikorski",
+      "reassigned_turn_indices": [
+        97
+      ],
+      "reassigned_to": "Audience Member 2",
+      "reason": "Turn 97 'Here in the front.' appears during the audience question-taking sequence (between turns 96 and 98 where the moderator is directing audience members). This is likely Lukasz Pawlowski (Audience Member 2) indicating his position, consistent with turn 100 where he formally introduces himself and his question. It is inconsistent with Sikorski being called on by the moderator at this moment."
+    },
+    {
+      "type": "missing_introduction",
+      "labels": [
+        "speaker_c"
+      ],
+      "note": "Ivan Krastev was never formally introduced by name by the moderator in the transcript; his identity is established through content matching (Bulgarian identity, academic style, references to his Centre for Liberal Strategies work) and turn 15 where the moderator says 'Let me bring in, just to give everyone a first shot at this, Ivan Krastev from Bulgaria.'"
+    }
+  ]
+}

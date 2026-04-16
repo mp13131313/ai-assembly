@@ -1,0 +1,1991 @@
+{
+  "generated_from": "/Users/aienvironment/Desktop/ai-assembly/reference/sessions.json",
+  "generated_at_note": "regenerate by re-running scripts/generate_speakers_json.py; existing bios are preserved",
+  "speaker_count": 202,
+  "speakers": [
+    {
+      "name": "Abdulaziz AlJaziri",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Adar Zehavi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_the_hidden_code_behind_every_thing_1600"
+      ]
+    },
+    {
+      "name": "Aditi Khorana",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_department_of_depth_new_myths_why_we_need_them_how_to_create_1700",
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Alex Grots",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Alexandra Mitsotaki",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Alina Nastas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_national_garden_ministry_of_regeneration_nourishment_and_re_wilding_1230"
+      ]
+    },
+    {
+      "name": "Aljan de Boer",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000"
+      ]
+    },
+    {
+      "name": "Amy Daroukakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Amy Elizabeth Fox",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Anastasia Linn",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ministry_of_regeneration_pension_poker_1700",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_demos_ministry_of_regeneration_pension_poker_830"
+      ]
+    },
+    {
+      "name": "Anastasia Pappa",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mini_stoa_bureau_of_care_1_1_1400",
+        "day_one_mini_stoa_bureau_of_care_1_1_1430",
+        "day_one_mini_stoa_bureau_of_care_1_1_1500",
+        "day_one_mini_stoa_bureau_of_care_1_1_1530",
+        "day_two_mini_stoa_bureau_of_care_1_1_1400",
+        "day_two_mini_stoa_bureau_of_care_1_1_1430",
+        "day_two_mini_stoa_bureau_of_care_1_1_1500",
+        "day_two_mini_stoa_bureau_of_care_1_1_1530",
+        "day_three_mini_stoa_bureau_of_care_1_1_1400",
+        "day_three_mini_stoa_bureau_of_care_1_1_1430",
+        "day_three_mini_stoa_bureau_of_care_1_1_1500",
+        "day_three_mini_stoa_bureau_of_care_1_1_1530"
+      ]
+    },
+    {
+      "name": "Andrés Correa",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_museum_bureau_of_care_the_architecture_of_intimacy_1530",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Angeliki Kosmopolou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_department_of_depth_new_myths_why_we_need_them_how_to_create_1700",
+        "day_two_demos_agentic_agora_the_shitty_first_draft_1700"
+      ]
+    },
+    {
+      "name": "Anol Bhattacharya",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_agents_with_the_license_to_1630"
+      ]
+    },
+    {
+      "name": "Aphrodite Désirée Navab",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_library_beauty_salon_lunch_with_aphrodite_d_sir_e_navab_1230"
+      ]
+    },
+    {
+      "name": "Arathi Sethumadhavan",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_the_shitty_first_draft_1700",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Bayo Akomolafe",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Benjamin Dewilde",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_six_cases_of_beautiful_business_1200",
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000"
+      ]
+    },
+    {
+      "name": "Benoît Racle",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_bureau_of_care_hosting_and_guesting_1400"
+      ]
+    },
+    {
+      "name": "Borja Delgado",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_museum_home_of_belonging_surrender_without_defeat_900"
+      ]
+    },
+    {
+      "name": "Brandon Vaidyanathan",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_restaurant_beauty_salon_can_beauty_in_business_save_the_world_1230",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Brett Perry",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_agentic_agora_freedom_to_and_from_1600",
+        "day_two_demos_ai_democracy_marathon_dance_and_dissent_nightwalk_2230"
+      ]
+    },
+    {
+      "name": "Bruno Giussani",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Caitlin L. Chandler",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Carissa Véliz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Carmen Boronat",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Ceren Zeytinoğlu Atıcı",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_mikro_pallas_ministry_of_regeneration_climate_action_ai_1700"
+      ]
+    },
+    {
+      "name": "Chloé de Ruffray",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Chris Everett",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_museum_home_of_belonging_surrender_without_defeat_900",
+        "day_two_restaurant_beauty_salon_can_beauty_in_business_save_the_world_1230",
+        "day_three_demos_beauty_salon_the_mirror_gallery_the_business_of_being_1600"
+      ]
+    },
+    {
+      "name": "Chris Luebkeman",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Christian Tooley",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_demos_ministry_of_regeneration_sex_substances_and_systems_1700"
+      ]
+    },
+    {
+      "name": "Christine Choi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_restaurant_home_of_belonging_impact_inside_1230"
+      ]
+    },
+    {
+      "name": "Christoph Quarch",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ai_democracy_marathon_departme_birthplace_of_democracy_tour_1000",
+        "day_one_mikro_pallas_department_of_depth_new_myths_why_we_need_them_how_to_create_1700",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Christopher Moscardi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_mikro_pallas_ministry_of_regeneration_climate_action_ai_1700"
+      ]
+    },
+    {
+      "name": "Christos Floros",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600"
+      ]
+    },
+    {
+      "name": "Christos Rafalides",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Claudia Chwalisz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_three_demos_ai_democracy_marathon_citizen_assembly_with_ai_1400",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600"
+      ]
+    },
+    {
+      "name": "Cloud District",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_context_engineering_1630"
+      ]
+    },
+    {
+      "name": "Costas Voyatzis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_the_ilisian_beauty_salon_beauty_fracture_2000"
+      ]
+    },
+    {
+      "name": "Courtney Osterfelt",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230"
+      ]
+    },
+    {
+      "name": "Courtney Savie Lawrence",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_theatre_agentic_agora_reclaiming_collective_agency_in_the_worl_1630"
+      ]
+    },
+    {
+      "name": "Daniel Gomez Seidel",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "special_activations_library_community_the_unedited_library_800",
+        "day_one_library_community_the_unedited_library_vernissage_1230"
+      ]
+    },
+    {
+      "name": "Dave",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "David Gelles",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045"
+      ]
+    },
+    {
+      "name": "David Johnston",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_mikro_pallas_ministry_of_regeneration_signalism_1400"
+      ]
+    },
+    {
+      "name": "Dayo Olopade Lamolo",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_community_lunch_with_the_mozilla_foundation_1230"
+      ]
+    },
+    {
+      "name": "Despina Papadopoulos",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Dimitris Karampatakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_bureau_of_care_hosting_and_guesting_1400"
+      ]
+    },
+    {
+      "name": "Discotopian",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_gazarte_community_the_party_2200"
+      ]
+    },
+    {
+      "name": "Dr. Sozita Goudouna",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_library_beauty_salon_lunch_with_aphrodite_d_sir_e_navab_1230",
+        "day_three_studio_of_nikomachi_beauty_salon_cocktail_reception_with_nikomachi_karako_1800"
+      ]
+    },
+    {
+      "name": "Eda Çaça",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "special_activations_theatre_department_of_depth_the_meaning_of_life_800",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Eirini",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Elaine Kasket",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_two_demos_agentic_agora_agents_with_the_license_to_1630"
+      ]
+    },
+    {
+      "name": "Elisabeth Braw",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Emad Kiyaei",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_emad_and_sharon_1645"
+      ]
+    },
+    {
+      "name": "Esther Blazquez Blanco",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_museum_home_of_belonging_surrender_without_defeat_900"
+      ]
+    },
+    {
+      "name": "Eva Vaslamatzi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_bureau_of_care_athenian_artists_tour_1000"
+      ]
+    },
+    {
+      "name": "Ezgi Hamzaçebi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Fabiola Ojeda",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_department_of_depth_what_makes_us_human_1800"
+      ]
+    },
+    {
+      "name": "Felix Rundel",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_department_of_depth_new_myths_why_we_need_them_how_to_create_1700",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_museum_bureau_of_care_aura_farming_1700"
+      ]
+    },
+    {
+      "name": "Gabriela Néspoli",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000"
+      ]
+    },
+    {
+      "name": "Gabriella White",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_the_beautiful_business_school_five_archetypes_of_beautiful_business_1130",
+        "day_one_theatre_home_of_belonging_awe_and_awkwardness_1500",
+        "day_one_demos_community_beauty_shaken_and_stirred_800",
+        "day_two_restaurant_the_beautiful_business_school_the_kitchen_together_1230",
+        "day_two_demos_community_beauty_shaken_and_stirred_730",
+        "day_three_demos_community_beauty_shaken_and_stirred_800"
+      ]
+    },
+    {
+      "name": "Geoff Mulgan",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_mikro_pallas_agentic_agora_intelligence_after_intelligence_1800"
+      ]
+    },
+    {
+      "name": "George A. Papandreou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_home_of_belonging_at_the_table_with_george_a_papandreou_2000"
+      ]
+    },
+    {
+      "name": "Georgia Tsolaki",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Georgie Jones",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_longevity_lab_the_art_of_aging_well_an_evening_with_ge_2000"
+      ]
+    },
+    {
+      "name": "Gerhard Remlein",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ministry_of_regeneration_four_pillars_of_the_life_centered_econom_1100"
+      ]
+    },
+    {
+      "name": "Gianfranco Chicco",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_temple_of_reenchantment_cleaning_the_house_1700"
+      ]
+    },
+    {
+      "name": "Gianni Giacomelli",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_agentic_agora_intelligence_after_intelligence_1800"
+      ]
+    },
+    {
+      "name": "Gianpiero Petriglieri",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Giorgos Tsetis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045",
+        "day_three_restaurant_home_of_belonging_impact_inside_1230"
+      ]
+    },
+    {
+      "name": "Grant Toups",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045",
+        "day_two_restaurant_agentic_agora_the_agentic_organizations_lunch_1230",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Gustavo Nogueira de Menezes",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Hande Sadic",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_temple_of_reenchantment_the_sacred_business_dinner_2000"
+      ]
+    },
+    {
+      "name": "Hannah Critchlow",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Helen Edwards",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Helene Lundbye Petersen",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_beauty_salon_making_worlds_from_theater_to_cinema_to_1400"
+      ]
+    },
+    {
+      "name": "Ilektra Kouloumpi",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ministry_of_regeneration_four_pillars_of_the_life_centered_econom_1100",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Indy Johar",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_mikro_pallas_ministry_of_regeneration_signalism_1400",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Irina Panovich",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_agentic_agora_reclaiming_collective_agency_in_the_worl_1630"
+      ]
+    },
+    {
+      "name": "Isabella Martin",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "James Bridle",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Jeni Miles",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Jennifer Petriglieri",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000"
+      ]
+    },
+    {
+      "name": "Jessica Orkin",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045"
+      ]
+    },
+    {
+      "name": "Joanna Kamińska",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_demos_bureau_of_care_the_pressure_lab_dream_under_fire_1630"
+      ]
+    },
+    {
+      "name": "John E. Katsos",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_community_leading_under_fire_1115"
+      ]
+    },
+    {
+      "name": "John Michael Schert",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_agentic_agora_freedom_to_and_from_1600",
+        "day_two_demos_ai_democracy_marathon_dance_and_dissent_nightwalk_2230"
+      ]
+    },
+    {
+      "name": "Jolana Jamuna Amara",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045",
+        "day_three_restaurant_home_of_belonging_impact_inside_1230"
+      ]
+    },
+    {
+      "name": "Jon Alexander",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_three_demos_ai_democracy_marathon_citizen_assembly_with_ai_1400",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600"
+      ]
+    },
+    {
+      "name": "Joy Goff",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230"
+      ]
+    },
+    {
+      "name": "João Sevilhano",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Judit Teichert",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_ocean_in_every_drop_belonging_as_an_1400"
+      ]
+    },
+    {
+      "name": "Julia Pahina",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Karen Parker Thompson",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_six_cases_of_beautiful_business_1200"
+      ]
+    },
+    {
+      "name": "Kelly Kagan Law",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_one_demos_longevity_lab_snap_council_on_life_lightness_and_letti_830",
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000",
+        "day_three_demos_longevity_lab_snap_council_on_life_lightness_and_letti_830"
+      ]
+    },
+    {
+      "name": "Kenneth Mikkelsen",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_department_of_depth_what_makes_us_human_1800",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Kerem Alper",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Kevin Walker",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Kim Dabbs",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230",
+        "day_two_museum_home_of_belonging_the_ocean_in_every_drop_belonging_as_an_1400",
+        "day_three_restaurant_home_of_belonging_impact_inside_1230",
+        "day_three_demos_home_of_belonging_building_belonging_to_unite_us_all_1430",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Kostis Katsanevas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445"
+      ]
+    },
+    {
+      "name": "Kristoffer Tjalve",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400"
+      ]
+    },
+    {
+      "name": "Kyle Baptista",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_community_lunch_with_the_mozilla_foundation_1230"
+      ]
+    },
+    {
+      "name": "LJ Silverman",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_demos_longevity_lab_from_lifespan_to_joyspan_1630",
+        "day_two_restaurant_longevity_lab_the_art_of_aging_well_an_evening_with_ge_2000",
+        "day_three_mikro_pallas_longevity_lab_venturing_into_longevity_1530",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "LSE Generate Fellows",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_mikro_pallas_longevity_lab_venturing_into_longevity_1530"
+      ]
+    },
+    {
+      "name": "Larry Irving",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045"
+      ]
+    },
+    {
+      "name": "Lars Rasmussen",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_community_meet_the_greek_tech_pioneers_1800"
+      ]
+    },
+    {
+      "name": "Launch Pad Teens",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230"
+      ]
+    },
+    {
+      "name": "Laura François",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_home_of_belonging_awe_and_awkwardness_1500",
+        "day_three_national_garden_ministry_of_regeneration_nourishment_and_re_wilding_1230"
+      ]
+    },
+    {
+      "name": "Leen Sadder",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_beauty_salon_the_ugliest_dinner_party_in_the_world_2000"
+      ]
+    },
+    {
+      "name": "Leigh Biddlecome",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_beauty_salon_can_beauty_in_business_save_the_world_1230"
+      ]
+    },
+    {
+      "name": "Leon Schmit",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "special_activations_demos_agentic_agora_leon_monoserie_800"
+      ]
+    },
+    {
+      "name": "Leonardo Valettas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Lili Kovari",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_the_beautiful_business_school_five_archetypes_of_beautiful_business_1130"
+      ]
+    },
+    {
+      "name": "Lisa Witter",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600"
+      ]
+    },
+    {
+      "name": "Lori Baldwin",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_department_of_depth_new_myths_why_we_need_them_how_to_create_1700",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_museum_bureau_of_care_aura_farming_1700"
+      ]
+    },
+    {
+      "name": "Lubna Mobied",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_demos_agentic_agora_the_shitty_first_draft_1700",
+        "day_two_the_ilisian_beauty_salon_beauty_fracture_2000"
+      ]
+    },
+    {
+      "name": "Luke Kemp",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845"
+      ]
+    },
+    {
+      "name": "Lynn Lin",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Léa Steinacker",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_agentic_agora_intelligence_after_intelligence_1800"
+      ]
+    },
+    {
+      "name": "Maggie Jackson",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_home_of_belonging_awe_and_awkwardness_1500"
+      ]
+    },
+    {
+      "name": "Maia Mazurkiewicz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_demos_bureau_of_care_the_pressure_lab_dream_under_fire_1630"
+      ]
+    },
+    {
+      "name": "Manousos Klapakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Marc Cinanni",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Marc Mertens",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_zero_outdoors_temple_of_reenchantment_the_magic_mountain_immersion_1500",
+        "day_three_angel_house_psychiko_longevity_lab_family_business_1600"
+      ]
+    },
+    {
+      "name": "Mark Aanderud",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_zero_museum_community_music_with_mark_1800",
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_one_theatre_agentic_agora_freedom_to_and_from_1600",
+        "day_one_demos_department_of_depth_what_makes_us_human_1800",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000",
+        "day_three_gazarte_community_the_party_2200"
+      ]
+    },
+    {
+      "name": "Mark McCartney",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "special_activations_demos_department_of_depth_what_is_a_good_life_800",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Marko Djukic",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_six_cases_of_beautiful_business_1200"
+      ]
+    },
+    {
+      "name": "Martin Thörnkvist",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Mary Cardaras",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445"
+      ]
+    },
+    {
+      "name": "Massimo Portincaso",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Matyas Kovacs",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_museum_bureau_of_care_aura_farming_1700"
+      ]
+    },
+    {
+      "name": "Maxime Rovere",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Melina Dunham",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ministry_of_regeneration_four_pillars_of_the_life_centered_econom_1100",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_national_garden_ministry_of_regeneration_nourishment_and_re_wilding_1230",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Michael Koehler",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_ocean_in_every_drop_belonging_as_an_1400",
+        "day_two_restaurant_home_of_belonging_at_the_table_with_george_a_papandreou_2000"
+      ]
+    },
+    {
+      "name": "Michell Zappa",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_agentic_agora_reclaiming_collective_agency_in_the_worl_1630"
+      ]
+    },
+    {
+      "name": "Mike Peng",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_beauty_salon_design_in_the_age_of_ai_1000",
+        "day_two_demos_agentic_agora_the_shitty_first_draft_1700"
+      ]
+    },
+    {
+      "name": "Miriam Meckel",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Moe Carrick",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_library_bureau_of_care_in_and_out_1400"
+      ]
+    },
+    {
+      "name": "Monika Jiang",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000",
+        "day_three_outdoors_bureau_of_care_beyond_the_boys_club_1230",
+        "day_three_theatre_community_team_battle_830"
+      ]
+    },
+    {
+      "name": "Monique van Dusseldorp",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_one_theatre_ai_democracy_marathon_the_dark_side_of_democracy_a_nightwalk_2230",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400",
+        "day_two_demos_ai_democracy_marathon_dance_and_dissent_nightwalk_2230",
+        "day_two_theatre_main_stage_act_two_the_end_of_s_business_s_humanity_845",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Moulsari Jain",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_museum_bureau_of_care_beauty_diplomacy_1500"
+      ]
+    },
+    {
+      "name": "Nicole Miller",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400",
+        "day_three_mikro_pallas_ministry_of_regeneration_climate_action_ai_1700"
+      ]
+    },
+    {
+      "name": "Nikki Trott",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_restaurant_temple_of_reenchantment_the_sacred_business_dinner_2000",
+        "day_three_outdoors_temple_of_reenchantment_feminine_leadership_1230",
+        "day_three_library_temple_of_reenchantment_the_sacred_business_workshop_1700",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Niko Efstathiou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Nikomachi Karakostanoglou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_studio_of_nikomachi_beauty_salon_cocktail_reception_with_nikomachi_karako_1800"
+      ]
+    },
+    {
+      "name": "Nikos Erinakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Nikos Therapos",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_bureau_of_care_hosting_and_guesting_1400"
+      ]
+    },
+    {
+      "name": "Nina Patrick",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_outdoors_longevity_lab_psychedelics_after_the_high_1400"
+      ]
+    },
+    {
+      "name": "Olga Balomenou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Otti Vogt",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_beyond_corporate_bullshit_1430",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600"
+      ]
+    },
+    {
+      "name": "Paloma Strelitz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_bureau_of_care_hosting_and_guesting_1400"
+      ]
+    },
+    {
+      "name": "Pamela Pavliscak",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_beauty_salon_design_in_the_age_of_ai_1000",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Panagiotis Karampinis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_community_meet_the_greek_tech_pioneers_1800"
+      ]
+    },
+    {
+      "name": "Paola Mendizábal",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_museum_bureau_of_care_the_architecture_of_intimacy_1530"
+      ]
+    },
+    {
+      "name": "Paul Dolan",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_demos_longevity_lab_from_lifespan_to_joyspan_1630"
+      ]
+    },
+    {
+      "name": "Paula Schwarz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_three_angel_house_psychiko_longevity_lab_family_business_1600"
+      ]
+    },
+    {
+      "name": "Payal Arora",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Petros Apostolakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_three_demos_ai_democracy_marathon_make_politics_great_again_1600",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Pinar Akiskalioglu",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_six_cases_of_beautiful_business_1200",
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045"
+      ]
+    },
+    {
+      "name": "Puk Scharbau",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_museum_temple_of_reenchantment_soul_presence_1700"
+      ]
+    },
+    {
+      "name": "Rachel Goslins",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Rebecca Horniman",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230"
+      ]
+    },
+    {
+      "name": "Reeta Hafner",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_theatre_longevity_lab_the_long_game_1400"
+      ]
+    },
+    {
+      "name": "Roger Berkowitz",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400"
+      ]
+    },
+    {
+      "name": "Ryan Murphy",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_beauty_salon_the_ugliest_dinner_party_in_the_world_2000"
+      ]
+    },
+    {
+      "name": "Sam Glassenberg",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_beauty_salon_making_worlds_from_theater_to_cinema_to_1400",
+        "day_two_demos_longevity_lab_from_lifespan_to_joyspan_1630",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Sandra Bluehdorn",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_restaurant_temple_of_reenchantment_the_sacred_business_dinner_2000",
+        "day_three_restaurant_home_of_belonging_impact_inside_1230"
+      ]
+    },
+    {
+      "name": "Sandy Speicher",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_the_you_belong_here_lunch_1230"
+      ]
+    },
+    {
+      "name": "Sean White",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400"
+      ]
+    },
+    {
+      "name": "Sedef Sahin",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Sharon Dolev",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_emad_and_sharon_1645"
+      ]
+    },
+    {
+      "name": "Shoukei Matsumoto",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_temple_of_reenchantment_cleaning_the_house_1700",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_restaurant_temple_of_reenchantment_the_sacred_business_dinner_2000"
+      ]
+    },
+    {
+      "name": "Simon Berkler",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Smartphone Orchestra",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_longevity_lab_ancestors_let_s_make_babies_together_wit_1800",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_theatre_longevity_lab_ancestors_let_s_make_babies_together_wit_1630"
+      ]
+    },
+    {
+      "name": "Sonja Kresojevic",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_department_of_depth_what_makes_us_human_1800"
+      ]
+    },
+    {
+      "name": "Sophie Lamprou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_bureau_of_care_hosting_and_guesting_1400"
+      ]
+    },
+    {
+      "name": "Stavroula Tsinorema",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Stelios Papanastasis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Stephan Clambaneva",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_bureau_of_care_senses_of_athens_1000"
+      ]
+    },
+    {
+      "name": "Steve Vranakis",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000"
+      ]
+    },
+    {
+      "name": "Steven D'Souza",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_community_six_cases_of_beautiful_business_1200",
+        "day_two_restaurant_temple_of_reenchantment_the_sacred_business_dinner_2000"
+      ]
+    },
+    {
+      "name": "Svea von Hehn",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_museum_home_of_belonging_thriving_alone_and_together_2000"
+      ]
+    },
+    {
+      "name": "Tara DePorte",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Tara Isabella Burton",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_temple_of_reenchantment_the_history_and_future_of_magic_1515",
+        "day_two_restaurant_beauty_salon_can_beauty_in_business_save_the_world_1230"
+      ]
+    },
+    {
+      "name": "Ted Lappas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Tess Posner",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445",
+        "day_three_theatre_main_stage_act_four_how_i_learned_to_love_synthetic_1000"
+      ]
+    },
+    {
+      "name": "Tevis Rose Trower",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_the_beautiful_business_school_five_archetypes_of_beautiful_business_1130",
+        "day_one_demos_community_beauty_shaken_and_stirred_800",
+        "day_two_restaurant_the_beautiful_business_school_the_kitchen_together_1230",
+        "day_two_demos_community_beauty_shaken_and_stirred_730",
+        "day_three_demos_community_beauty_shaken_and_stirred_800"
+      ]
+    },
+    {
+      "name": "Thomas Meleteas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Thomas Schoeller",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_demos_bureau_of_care_crossing_your_growth_edge_1400"
+      ]
+    },
+    {
+      "name": "Thomas Winkelmann",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_zero_outdoors_temple_of_reenchantment_the_magic_mountain_immersion_1500",
+        "day_three_angel_house_psychiko_longevity_lab_family_business_1600"
+      ]
+    },
+    {
+      "name": "Till Grusche",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_restaurant_community_the_next_ten_years_of_hobb_1230",
+        "day_three_theatre_community_team_battle_830"
+      ]
+    },
+    {
+      "name": "Tim Leberecht",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_restaurant_community_the_next_ten_years_of_hobb_1230"
+      ]
+    },
+    {
+      "name": "Tony Martignetti",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_demos_bureau_of_care_illuminating_hidden_brilliance_1530"
+      ]
+    },
+    {
+      "name": "Vasiliki Giannakouli",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_community_late_night_concert_2230"
+      ]
+    },
+    {
+      "name": "Vassilis Koutsoumpas",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Vivi Letsou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_three_national_garden_ministry_of_regeneration_nourishment_and_re_wilding_1230"
+      ]
+    },
+    {
+      "name": "Xann Schwinn",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_three_theatre_main_stage_act_five_beastopia_2000"
+      ]
+    },
+    {
+      "name": "Yannis Sotirakos",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_demos_ministry_of_regeneration_four_pillars_of_the_life_centered_econom_1100",
+        "day_one_theatre_main_stage_act_one_the_story_of_us_2000",
+        "day_two_stock_exchange_ministry_of_regeneration_the_athens_regenerative_exchange_a_game_1400"
+      ]
+    },
+    {
+      "name": "Yolanda Markopoulou",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_one_theatre_beauty_salon_making_worlds_from_theater_to_cinema_to_1400"
+      ]
+    },
+    {
+      "name": "Zeynep Direk",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_mikro_pallas_department_of_depth_what_is_a_good_life_in_a_more_than_human_1400",
+        "day_two_mikro_pallas_agentic_agora_department_of_de_aegean_intelligence_the_future_of_ai_1630"
+      ]
+    },
+    {
+      "name": "Zoe Scaman",
+      "title": "",
+      "affiliation": "",
+      "bio": "",
+      "sessions": [
+        "day_two_theatre_main_stage_act_three_clash_of_the_titans_1045",
+        "day_two_demos_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400"
+      ]
+    }
+  ]
+}

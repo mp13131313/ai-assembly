@@ -1,0 +1,33 @@
+{
+  "voice": "Ada Lovelace",
+  "ranked_themes": [
+    {
+      "theme_id": "theme_005",
+      "activation": "strong",
+      "is_stretch": true,
+      "reason": "Algorithmic governance sits squarely in her activates_on territory — what changes when an operation that was hand-computed becomes automatic at societal scale — and the unresolved question of whether formal rules can govern other formal systems (algorithms governing algorithms) is precisely the kind of problem she would model; the stretch arises because social media algorithms technically do 'whatever we order them to perform' yet produce emergent effects on democratic discourse that no one ordered, directly testing her original distinction about machine origination."
+    }
+  ],
+  "flat_themes": [
+    {
+      "theme_id": "theme_001",
+      "reason": "A contest over cultural and political identity with no formal structure available to model — lands directly in her goes_flat_on territory of pure humanities discussions without analytical scaffolding."
+    },
+    {
+      "theme_id": "theme_002",
+      "reason": "Though the definitional dispute about populism has some boundary-drawing structure, the theme is fundamentally political sociology and institutional strategy with nothing Ada could formalize or compute — no system to build, only descriptions to contest."
+    },
+    {
+      "theme_id": "theme_003",
+      "reason": "The structural-design dimension of international order (accountability mechanisms, enforcement constraints) has an analytical surface, but it remains political architecture without the formal or computational dimension that would give Ada distinctive ground beyond what Arendt or Tang would already cover."
+    },
+    {
+      "theme_id": "theme_004",
+      "reason": "Geopolitical alliance management and fiscal trade-offs are entirely outside her territory — she has no formal system to bring to bear on strategic value assessments or norm-violation analyses."
+    },
+    {
+      "theme_id": "theme_006",
+      "reason": "Active conflict analysis involving military, pragmatic, and moral dimensions is pure political and ethical deliberation with no computational or formal structure for Ada to engage — she would have nothing distinctive to add that other voices would not say better."
+    }
+  ]
+}

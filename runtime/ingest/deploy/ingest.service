@@ -1,0 +1,52 @@
+# systemd unit for the AI Assembly ingest app.
+#
+# Install:
+#   sudo cp ingest.service /etc/systemd/system/ingest.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now ingest
+#
+# Notes:
+#   * Runs as non-root `ingest` user.
+#   * Single uvicorn worker: app uses an in-process asyncio.Semaphore to
+#     serialize normalize+transcribe. Multiple workers would break that.
+#   * KillMode=process is CRITICAL. On `systemctl stop` or `restart` we want
+#     the main uvicorn process killed, but in-flight transcription
+#     subprocesses (spawned with start_new_session=True) to keep running
+#     until completion. reconcile_on_startup() finds them again on restart.
+
+[Unit]
+Description=AI Assembly Ingest (audio upload + Stage 0 trigger)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ingest
+Group=ingest
+WorkingDirectory=/opt/ai-assembly
+EnvironmentFile=/opt/ai-assembly/.env
+ExecStart=/opt/ai-assembly/venv/bin/uvicorn ingest.app:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers
+
+KillMode=process
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+ReadWritePaths=/opt/ai-assembly/runs /opt/ai-assembly/reference
+
+[Install]
+WantedBy=multi-user.target

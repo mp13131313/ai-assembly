@@ -1,0 +1,41 @@
+{
+  "theme_id": "theme_002",
+  "member": "Octopus",
+  "mode": "question",
+  "formulation": "Both sides of the day's sharpest dispute — one insisting democracy lives only in the nation-state, the other defending supranational parliaments — shared an unexamined architecture: a single center that decides, a single voice that speaks for the whole body, grievances that must be 'translated into policy' through one representative channel. You are a body whose arms taste, grip, and problem-solve without waiting for your central brain to authorize them. When these speakers assume a people must be centralized to know what it wants, what are they telling you about which kinds of intelligence get to count as political?",
+  "theme_display_title": "The Body That Must Speak as One",
+  "context_narrative": "In overlapping panels on populism and the West's internal fractures, speakers clashed over where democratic legitimacy can live. A Polish foreign minister insisted the EU is democratically governed through elected parliaments and accountable commissions; a Czech commentator fired back that only the bounded nation-state can host genuine democracy, because only there can citizens hold power accountable. Meanwhile, a Czech president and an American congresswoman both framed populism as a system for translating citizens' material grievances into policy — differing on whether the translation was working, but agreeing on the architecture: one people, one center, one representative channel.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:029",
+      "quote": "The sovereign nation-state is the only platform that can guarantee democracy because it is the only way to maintain cultural continuity and keep power within limited, accountable institutions; democracy cannot fully exist at the supranational level.",
+      "attribution": "Petr Macinka",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "west_west_divide:010",
+      "quote": "The EU is democratically governed — the European Parliament is elected, the Commission is nominated by elected governments — and the myth that Brussels bureaucrats impose directives on member states is complete nonsense that gave us Brexit.",
+      "attribution": "Radosław Sikorski",
+      "flavor": "pushing back"
+    },
+    {
+      "extraction_id": "vox_populi:010",
+      "quote": "Populism should not automatically be labeled as something bad; listening to people's frustrations and translating them into policy is the very meaning of politics — the problem begins only when populism is turned against the institutions that protect democracy.",
+      "attribution": "Petr Pavel",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "vox_populi:027",
+      "quote": "Is there a meaningful distinction between responsive populism (listening to and translating citizens' frustrations into policy) and dangerous populism (turning grievances against democratic institutions), and if so, where is the line?",
+      "attribution": "Moderator question"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:029",
+    "west_west_divide:010",
+    "west_west_divide:030",
+    "vox_populi:010",
+    "vox_populi:027"
+  ],
+  "rationale": "The entire populism debate assumes centralized democratic subjectivity — one people, one voice, one representative channel — which lands directly in the Octopus's activates_on territory (hubris of centralized cognition models, democracy assuming a unified rational subject) and reaches toward its stretch (whether its own participation in deliberation is conceptually coherent when the very architecture of politics requires a single center)."
+}
