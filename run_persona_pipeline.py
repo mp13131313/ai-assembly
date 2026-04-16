@@ -382,7 +382,7 @@ def _pass_4a():
             "model": r["model"], "usage": r["usage"], "fields": r["json"],
             "voice_basis": "corpus-based" if pass1c.get("passages") else "training-data"}
 
-stamp("PASS 4a: Voice (Sonnet, corpus-grounded)")
+stamp("PASS 4a: Voice (Opus + thinking, corpus-grounded)")
 pass4a = call_or_cache(RUN / "02_passes/pass4a_voice.json", "Pass 4a", _pass_4a)
 combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
 pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
