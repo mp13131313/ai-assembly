@@ -302,7 +302,7 @@
         actions.innerHTML =
           `<button id="retry-btn">Retry transcription</button>`;
         document.getElementById("retry-btn").addEventListener("click", async () => {
-          const ok = confirm("Retry Stage 0 using the already-uploaded audio?");
+          const ok = confirm("Resume transcription from the last completed stage? (Completed steps will be skipped.)");
           if (!ok) return;
           await fetch(`/session/${encodeURIComponent(sid)}/retry`, { method: "POST" });
           poll();
