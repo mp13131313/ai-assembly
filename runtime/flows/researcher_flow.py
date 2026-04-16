@@ -43,7 +43,7 @@ try:
     from prefect import flow, task, get_run_logger
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
-    load_dotenv(_REPO_ROOT / ".env")
+    load_dotenv(_REPO_ROOT.parent / ".env")
     from flows.shared.io import (
         extract_json,
         get_logger,

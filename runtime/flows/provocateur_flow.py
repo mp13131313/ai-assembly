@@ -83,7 +83,7 @@ except ImportError as e:
 # Load .env from the repo root so ANTHROPIC_API_KEY is available when
 # the flow runs as a script. Same pattern as researcher_flow and
 # transcription_flow.
-load_dotenv(_REPO_ROOT / ".env")
+load_dotenv(_REPO_ROOT.parent / ".env")
 
 # Make flows.shared importable regardless of whether we're run as a
 # module or as a script from the repo root.

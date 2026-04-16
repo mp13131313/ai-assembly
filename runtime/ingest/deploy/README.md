@@ -27,9 +27,9 @@ sudo chown ingest:ingest /opt/ai-assembly
 sudo -u ingest -H bash -c '
   cd /opt/ai-assembly
   git clone <your-repo-url> .
-  python3.12 -m venv venv
-  venv/bin/pip install -U pip
-  venv/bin/pip install -r requirements.txt
+  python3.12 -m venv runtime/venv
+  runtime/venv/bin/pip install -U pip
+  runtime/venv/bin/pip install -r runtime/requirements.txt
 '
 ```
 
@@ -54,7 +54,7 @@ sudo chown ingest:ingest /opt/ai-assembly/.env
 ## 4. Install the systemd unit
 
 ```bash
-sudo cp /opt/ai-assembly/ingest/deploy/ingest.service /etc/systemd/system/
+sudo cp /opt/ai-assembly/runtime/ingest/deploy/ingest.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now ingest
 sudo systemctl status ingest
@@ -72,7 +72,7 @@ sudo systemctl restart systemd-journald
 ## 5. Configure Caddy
 
 ```bash
-sudo cp /opt/ai-assembly/ingest/deploy/Caddyfile /etc/caddy/Caddyfile
+sudo cp /opt/ai-assembly/runtime/ingest/deploy/Caddyfile /etc/caddy/Caddyfile
 # Edit the hostname:
 sudo sed -i 's/ingest\.example\.com/ingest.<your-domain>/g' /etc/caddy/Caddyfile
 sudo systemctl reload caddy
@@ -105,7 +105,7 @@ In order. Stop if any step fails.
    are flagged yet.
 
 3. **Flag a session**: SSH to VM, edit
-   `/opt/ai-assembly/reference/sessions.json`, flip one session's
+   `/opt/ai-assembly/runtime/reference/sessions.json`, flip one session's
    `ai_assembly` to `true`. Reload `/` — the session appears.
 
 4. **Tiny upload against fake flow** (no API spend):
@@ -122,9 +122,9 @@ In order. Stop if any step fails.
    sudo systemctl stop ingest
    sudo -u ingest bash -c '
      cd /opt/ai-assembly
-     INGEST_FLOW_CMD="./venv/bin/python ./ingest/tests/fake_transcription_flow.py" \
+     INGEST_FLOW_CMD="./runtime/venv/bin/python ./runtime/ingest/tests/fake_transcription_flow.py" \
      FAKE_DELAY_SECONDS=3 \
-     ./venv/bin/uvicorn ingest.app:app --host 127.0.0.1 --port 8000 &
+     ./runtime/venv/bin/uvicorn ingest.app:app --host 127.0.0.1 --port 8000 &
    '
    ```
    Upload `/tmp/smoke.m4a` via the browser UI, watch it go through
@@ -162,8 +162,8 @@ fresh on every request.
 ### Regenerate sessions.json from an updated HTML program
 
 ```bash
-sudo -u ingest /opt/ai-assembly/venv/bin/python \
-    /opt/ai-assembly/scripts/generate_sessions_json.py \
+sudo -u ingest /opt/ai-assembly/runtime/venv/bin/python \
+    /opt/ai-assembly/runtime/scripts/generate_sessions_json.py \
     --input /path/to/new/index.html
 ```
 The generator preserves existing `ai_assembly=true` flags across re-runs.

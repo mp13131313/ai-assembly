@@ -1,0 +1,35 @@
+# Secrets
+.env
+
+# macOS
+.DS_Store
+
+# Python
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Run logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Scratch — experiments, one-offs, anything disposable
+scratch/
+
+# Audio files (large, not version-controlled anywhere in the tree)
+*.m4a
+*.mp3
+*.wav
+*.mp4
+*.mov
+*.webm
+
+# Cached primary text fetches that contain large copyrighted material
+runs/*/01_research/primary_texts/raw/
+
+# personas/requirements.txt is gitignored (generated from pinned deps)
+personas/requirements.txt

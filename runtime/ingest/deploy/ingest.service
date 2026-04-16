@@ -23,9 +23,9 @@ Wants=network-online.target
 Type=simple
 User=ingest
 Group=ingest
-WorkingDirectory=/opt/ai-assembly
+WorkingDirectory=/opt/ai-assembly/runtime
 EnvironmentFile=/opt/ai-assembly/.env
-ExecStart=/opt/ai-assembly/venv/bin/uvicorn ingest.app:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers
+ExecStart=/opt/ai-assembly/runtime/venv/bin/uvicorn ingest.app:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers
 
 KillMode=process
 TimeoutStopSec=10
@@ -46,7 +46,7 @@ ProtectControlGroups=true
 LockPersonality=true
 RestrictRealtime=true
 RestrictSUIDSGID=true
-ReadWritePaths=/opt/ai-assembly/runs /opt/ai-assembly/reference
+ReadWritePaths=/opt/ai-assembly/runtime/runs /opt/ai-assembly/runtime/reference
 
 [Install]
 WantedBy=multi-user.target
