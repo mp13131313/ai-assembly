@@ -127,6 +127,18 @@ def _is_pid_alive(pid: int | None) -> bool:
     except PermissionError:
         # Process exists but is owned by another user — treat as alive.
         return True
+    # os.kill(pid, 0) succeeds for zombie (defunct) processes too — they still
+    # hold their PID slot. Check stat to distinguish zombie from running.
+    try:
+        result = subprocess.run(
+            ["ps", "-p", str(pid), "-o", "stat="],
+            capture_output=True, text=True, timeout=2,
+        )
+        stat = result.stdout.strip()
+        if "Z" in stat or not stat:  # Z = zombie, empty = gone
+            return False
+    except Exception:
+        pass
     return True
 
 
