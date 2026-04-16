@@ -556,16 +556,33 @@ def process_session(audio_path, session_path):
     session = load_session(session_json)
     logger.info(f"Processing session: {session['session_title']}")
 
-    # Step 2: AssemblyAI
-    turns = transcribe_with_assemblyai(audio, session)
+    out = OUTPUT_DIR  # shorthand
+
+    # Step 2: AssemblyAI — skip if output already on disk (e.g. retry after later failure)
+    p1 = out / "out_01_diarized.json"
+    if p1.exists():
+        turns = json.loads(p1.read_text(encoding="utf-8"))
+        logger.info(f"Resuming: loaded {p1.name} from disk (skipping AssemblyAI)")
+    else:
+        turns = transcribe_with_assemblyai(audio, session)
 
     # Step 3: Speaker ID
-    id_output = identify_speakers(turns, session)
+    p2 = out / "out_02_speaker_id.json"
+    if p2.exists():
+        id_output = json.loads(p2.read_text(encoding="utf-8"))
+        logger.info(f"Resuming: loaded {p2.name} from disk (skipping Speaker ID)")
+    else:
+        id_output = identify_speakers(turns, session)
     named_turns = merge_speaker_ids(turns, id_output)
 
     # Step 4: Cleaning
-    vocab = build_vocabulary(session)
-    cleaned_turns = clean_transcript(named_turns, session, vocab)
+    p3 = out / "out_03_cleaned.json"
+    if p3.exists():
+        cleaned_turns = json.loads(p3.read_text(encoding="utf-8"))
+        logger.info(f"Resuming: loaded {p3.name} from disk (skipping Cleaning)")
+    else:
+        vocab = build_vocabulary(session)
+        cleaned_turns = clean_transcript(named_turns, session, vocab)
 
     # Step 5: Package + write
     package = assemble_session_package(session, id_output, cleaned_turns)
