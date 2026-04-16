@@ -237,7 +237,7 @@
       const done = crumbDone(i, cp);
       el.className = "";
       if (state === "done" || i < activeIdx || done) {
-        el.className = c.norm ? "crumb-done-norm" : "crumb-done";
+        el.className = "crumb-done";
       } else if (i === activeIdx) {
         el.className = c.norm ? "crumb-active-norm" : "crumb-active";
       } else if (state === "error" && i === errorIdx) {
