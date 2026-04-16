@@ -215,9 +215,18 @@
     const state = st.state || "none";
     const display = (state === "transcribing" && st.substate) ? st.substate : state;
     const cp = st.checkpoints || {};
+
     let activeIdx = -1;
+    let errorIdx  = -1;
+
     if (state === "done") {
       activeIdx = CRUMBS.length; // all done
+    } else if (state === "error") {
+      // Derive which step failed from checkpoints: the first step whose
+      // output file doesn't exist is where it died.
+      const cpOrder = [null, "normalized", "asr", "speaker_id", "cleaning", null];
+      errorIdx = cpOrder.findIndex((key, i) => i > 0 && key && !cp[key]);
+      if (errorIdx === -1) errorIdx = 5; // all checkpoints present → died in finalizing
     } else {
       activeIdx = CRUMBS.findIndex(c => c.activeOn.includes(display));
     }
@@ -231,8 +240,8 @@
         el.className = c.norm ? "crumb-done-norm" : "crumb-done";
       } else if (i === activeIdx) {
         el.className = c.norm ? "crumb-active-norm" : "crumb-active";
-      } else if (state === "error") {
-        el.className = "crumb-pending";
+      } else if (state === "error" && i === errorIdx) {
+        el.className = "crumb-error";
       } else {
         el.className = "crumb-pending";
       }
