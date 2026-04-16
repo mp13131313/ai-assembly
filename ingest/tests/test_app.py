@@ -32,6 +32,11 @@ os.environ["FAKE_DELAY_SECONDS"] = "1"
 from ingest.app import app  # noqa: E402
 from ingest import pipeline  # noqa: E402
 
+# config.load_dotenv(override=True) may have overwritten our setdefault value
+# above with whatever is in .env. Force-set post-import — auth.py reads the
+# env at request time, so this takes effect immediately.
+os.environ["UPLOAD_APP_PASSWORD"] = "testpw"
+
 AUTH = ("producer", "testpw")
 
 

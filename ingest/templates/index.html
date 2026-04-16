@@ -14,13 +14,27 @@
 {% else %}
 
 <div class="filters">
-  <div class="chips" id="day-chips">
-    <button class="chip chip-all active" data-day="">All days</button>
-    {% for day in days_ordered %}
-      <button class="chip" data-day="{{ day }}">{{ day }}</button>
-    {% endfor %}
+  <div class="filter-row">
+    <span class="filter-label">Day</span>
+    <div class="chips" id="day-chips">
+      <button class="chip active" data-day="">All</button>
+      {% for day in days_ordered %}
+        <button class="chip" data-day="{{ day }}">{{ day }}</button>
+      {% endfor %}
+    </div>
   </div>
-  <input type="search" id="search" placeholder="Search titles, venues, speakers…">
+  <div class="filter-row">
+    <span class="filter-label">Venue</span>
+    <div class="chips" id="venue-chips">
+      <button class="chip active" data-venue="">All</button>
+      {% for venue in venues_ordered %}
+        <button class="chip" data-venue="{{ venue }}">{{ venue }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="filter-row">
+    <input type="search" id="search" placeholder="Search titles, venues, speakers…">
+  </div>
 </div>
 
 {% for day in days_ordered %}
@@ -29,7 +43,7 @@
     <ul class="session-grid">
       {% for s in by_day[day] %}
         {% set state = states.get(s.session_id) %}
-        <li class="session-card {{ s.track|track_css }}" data-search="{{ s.title|lower }} {{ s.venue|lower }} {{ s.speakers|join(' ')|lower }}">
+        <li class="session-card {{ s.track|track_css }}" data-venue="{{ s.venue }}" data-search="{{ s.title|lower }} {{ s.venue|lower }} {{ s.speakers|join(' ')|lower }}">
           <a href="/session/{{ s.session_id }}">
             <div class="card-top">
               <span class="dot dot-{{ state or 'none' }}" title="{{ state or 'not started' }}"></span>
