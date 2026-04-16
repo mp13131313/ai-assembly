@@ -38,7 +38,7 @@ if str(REPO_ROOT) not in sys.path:
 # has a .env at /opt/ai-assembly/.env (mode 0600, owned by ingest); load_dotenv
 # reads it the same way as in dev — no behavioural difference, just a
 # different repo root path resolved at runtime.
-load_dotenv(REPO_ROOT / ".env", override=True)
+load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 
 def _required(name: str) -> str:

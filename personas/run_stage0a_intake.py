@@ -32,7 +32,7 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(REPO_ROOT / ".env")
+load_dotenv(REPO_ROOT.parent / ".env")
 
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
