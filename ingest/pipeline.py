@@ -258,7 +258,8 @@ class NormalizeError(RuntimeError):
 
 
 def _append_log(session_dir: Path, line: str) -> None:
-    log_path(session_dir).open("a", encoding="utf-8").write(line.rstrip("\n") + "\n")
+    with log_path(session_dir).open("a", encoding="utf-8") as f:
+        f.write(line.rstrip("\n") + "\n")
 
 
 def normalize_audio(src: Path, session_dir: Path) -> Path:
@@ -299,6 +300,7 @@ def normalize_audio(src: Path, session_dir: Path) -> Path:
         ["ffprobe", "-v", "error", "-show_streams", "-select_streams", "a", str(tmp)],
         capture_output=True,
         text=True,
+        timeout=30,
     )
     if probe.returncode != 0 or "codec_type=audio" not in probe.stdout:
         tmp.unlink(missing_ok=True)
@@ -357,15 +359,19 @@ def spawn_transcription(
     _append_log(session_dir, f"\n--- transcribe: {' '.join(shlex.quote(c) for c in cmd)}")
 
     logf = log_path(session_dir).open("ab")
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(REPO_ROOT),  # so `flows.shared` imports + relative flow paths work
-        stdout=logf,
-        stderr=subprocess.STDOUT,
-        stdin=subprocess.DEVNULL,
-        env=env,
-        start_new_session=True,
-    )
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(REPO_ROOT),  # so `flows.shared` imports + relative flow paths work
+            stdout=logf,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.DEVNULL,
+            env=env,
+            start_new_session=True,
+        )
+    finally:
+        # The child has inherited the fd; close our copy in the parent.
+        logf.close()
     return proc.pid
 
 

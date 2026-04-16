@@ -39,6 +39,13 @@ StandardError=journal
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
 ReadWritePaths=/opt/ai-assembly/runs /opt/ai-assembly/reference
 
 [Install]

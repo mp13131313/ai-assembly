@@ -33,10 +33,11 @@ if str(REPO_ROOT) not in sys.path:
 # --- Env ---------------------------------------------------------------------
 
 # Load .env early so subsequent os.environ reads see it. override=True because
-# .env is our source of truth for dev — the Claude Code shell pre-sets some
-# ANTHROPIC_* env vars to empty strings which would otherwise shadow the real
-# values in .env. In production the VM has no .env (systemd EnvironmentFile
-# sets the real values into the process env), so load_dotenv is a no-op there.
+# the Claude Code shell pre-sets some ANTHROPIC_* env vars to empty strings,
+# which would otherwise shadow the real values in .env. In production the VM
+# has a .env at /opt/ai-assembly/.env (mode 0600, owned by ingest); load_dotenv
+# reads it the same way as in dev — no behavioural difference, just a
+# different repo root path resolved at runtime.
 load_dotenv(REPO_ROOT / ".env", override=True)
 
 

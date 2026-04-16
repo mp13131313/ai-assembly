@@ -83,7 +83,7 @@ except ImportError as e:
 # Load .env from the repo root so ANTHROPIC_API_KEY is available when
 # the flow runs as a script. Same pattern as researcher_flow and
 # transcription_flow.
-load_dotenv()
+load_dotenv(_REPO_ROOT / ".env")
 
 # Make flows.shared importable regardless of whether we're run as a
 # module or as a script from the repo root.
@@ -97,6 +97,8 @@ from flows.shared.io import (
     get_member_by_name,
     load_council_config,
     load_prompt,
+    member_slug,
+    write_json_atomic,
 )
 
 
@@ -172,11 +174,7 @@ def _format_member_profiles(members: list[dict]) -> str:
     return "\n".join(out).rstrip()
 
 
-def _member_slug(name: str) -> str:
-    """Convert a council member name to a filesystem-safe slug."""
-    slug = name.lower()
-    slug = re.sub(r"[^a-z0-9]+", "_", slug)
-    return slug.strip("_")
+_member_slug = member_slug  # canonical implementation lives in flows.shared.io
 
 
 def _fill_template(template: str, substitutions: dict[str, str]) -> str:
@@ -348,9 +346,7 @@ def triage_voice(
     if out_dir is not None:
         out_dir.mkdir(parents=True, exist_ok=True)
         slug = _member_slug(voice["name"])
-        out_path = out_dir / f"{slug}.json"
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(result, f, indent=2, ensure_ascii=False)
+        write_json_atomic(out_dir / f"{slug}.json", result)
 
     return result
 
@@ -820,9 +816,7 @@ def formulate_for_member(
     if out_dir is not None:
         out_dir.mkdir(parents=True, exist_ok=True)
         slug = _member_slug(member_name)
-        out_path = out_dir / f"{theme['theme_id']}__{slug}.json"
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(result, f, indent=2, ensure_ascii=False)
+        write_json_atomic(out_dir / f"{theme['theme_id']}__{slug}.json", result)
 
     return result
 
@@ -1052,9 +1046,7 @@ def package_voice_briefings(
             "formulations": my_formulations,
         }
 
-        out_path = out_dir / f"{slug}.json"
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(briefing, f, indent=2, ensure_ascii=False)
+        write_json_atomic(out_dir / f"{slug}.json", briefing)
 
         summary["members"][name] = {
             "slug": slug,
@@ -1112,10 +1104,8 @@ def run_provocateur(run_root: str | Path) -> dict:
 
     # Load Researcher output
     logger.info(f"Loading Researcher output from {researcher_dir}")
-    with open(researcher_dir / "grouping.json", encoding="utf-8") as f:
-        grouping = json.load(f)
-    with open(researcher_dir / "all_extractions.json", encoding="utf-8") as f:
-        all_extractions = json.load(f)
+    grouping = json.loads((researcher_dir / "grouping.json").read_text(encoding="utf-8"))
+    all_extractions = json.loads((researcher_dir / "all_extractions.json").read_text(encoding="utf-8"))
     all_extractions_by_id = {e["id"]: e for e in all_extractions}
     logger.info(
         f"  {len(all_extractions)} extractions, "
@@ -1150,7 +1140,7 @@ def run_provocateur(run_root: str | Path) -> dict:
         ckpt = triage_voices_dir / f"{_member_slug(v['name'])}.json"
         if ckpt.exists():
             try:
-                already_done[v["name"]] = json.load(open(ckpt, encoding="utf-8"))
+                already_done[v["name"]] = json.loads(ckpt.read_text(encoding="utf-8"))
             except Exception as e:
                 logger.warning(f"  failed to load {ckpt}: {e}, re-running")
                 to_run.append(v)
@@ -1160,7 +1150,7 @@ def run_provocateur(run_root: str | Path) -> dict:
     flags_already_cached = triage_flags_path.exists()
     if flags_already_cached:
         try:
-            triage_flags_result = json.load(open(triage_flags_path, encoding="utf-8"))
+            triage_flags_result = json.loads(triage_flags_path.read_text(encoding="utf-8"))
         except Exception as e:
             logger.warning(f"  failed to load {triage_flags_path}: {e}, re-running")
             flags_already_cached = False
@@ -1199,8 +1189,7 @@ def run_provocateur(run_root: str | Path) -> dict:
 
     if flags_future is not None:
         triage_flags_result = flags_future.result()
-        with open(triage_flags_path, "w", encoding="utf-8") as f:
-            json.dump(triage_flags_result, f, indent=2, ensure_ascii=False)
+        write_json_atomic(triage_flags_path, triage_flags_result)
         logger.info(f"  wrote {triage_flags_path}")
 
     # ---- Stage 2: Selection (pure Python, deterministic) ----
@@ -1215,8 +1204,7 @@ def run_provocateur(run_root: str | Path) -> dict:
         grouping=grouping,
         council=council,
     )
-    with open(selection_path, "w", encoding="utf-8") as f:
-        json.dump(selection_result, f, indent=2, ensure_ascii=False)
+    write_json_atomic(selection_path, selection_result)
     logger.info(f"  wrote {selection_path}")
 
     # ---- Stage 3: Formulation (N parallel LLM calls, one per pair) ----
@@ -1248,7 +1236,7 @@ def run_provocateur(run_root: str | Path) -> dict:
             if ckpt.exists():
                 try:
                     already_done_formulations.append(
-                        json.load(open(ckpt, encoding="utf-8"))
+                        json.loads(ckpt.read_text(encoding="utf-8"))
                     )
                     continue
                 except Exception as e:
@@ -1359,8 +1347,7 @@ def run_provocateur(run_root: str | Path) -> dict:
         },
         "selection_parameters_used": selection_result.get("selection_parameters_used", {}),
     }
-    with open(out_dir / "manifest.json", "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    write_json_atomic(out_dir / "manifest.json", manifest)
 
     logger.info("Provocateur v3 pipeline complete.")
     logger.info(f"  manifest: {out_dir / 'manifest.json'}")
