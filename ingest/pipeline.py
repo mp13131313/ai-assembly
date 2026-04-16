@@ -196,6 +196,13 @@ def infer_state(session_dir: Path) -> dict[str, Any]:
 
     state = status.get("state")
     if state in TERMINAL_STATES:
+        status = dict(status)
+        status["checkpoints"] = {
+            "normalized":  (session_dir / "audio.m4a").exists(),
+            "asr":         (session_dir / "out_01_diarized.json").exists(),
+            "speaker_id":  (session_dir / "out_02_speaker_id.json").exists(),
+            "cleaning":    (session_dir / "out_03_cleaned.json").exists(),
+        }
         return status
 
     # Non-terminal: check if transcription succeeded by looking for the
@@ -218,6 +225,15 @@ def infer_state(session_dir: Path) -> dict[str, Any]:
     if state == STATE_TRANSCRIBING:
         status = dict(status)  # copy — don't mutate the cached read
         status["substate"] = _substate_from_log(session_dir)
+
+    # Always attach checkpoint presence so the UI can show completed steps.
+    status = dict(status)
+    status["checkpoints"] = {
+        "normalized":  (session_dir / "audio.m4a").exists(),
+        "asr":         (session_dir / "out_01_diarized.json").exists(),
+        "speaker_id":  (session_dir / "out_02_speaker_id.json").exists(),
+        "cleaning":    (session_dir / "out_03_cleaned.json").exists(),
+    }
 
     return status
 
