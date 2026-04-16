@@ -146,7 +146,90 @@
     });
   }
 
-  // --- (3) Status polling ---------------------------------------------------
+  // --- (3) Overview live update --------------------------------------------
+
+  const overviewTable = document.getElementById("overview-table");
+  if (overviewTable) {
+    const STATE_LABEL_MAP = {
+      "received":               "received",
+      "normalizing":            "normalizing",
+      "transcribing":           "transcribing",
+      "transcribing_asr":       "transcribing · ASR",
+      "transcribing_speaker_id":"transcribing · speaker ID",
+      "transcribing_cleaning":  "transcribing · cleaning",
+      "transcribing_finalizing":"transcribing · finalizing",
+      "done":                   "done",
+      "error":                  "error",
+    };
+
+    async function pollOverview() {
+      try {
+        const r = await fetch("/status.json");
+        const rows = await r.json();
+        let anyActive = false;
+        rows.forEach(({ session_id, state, substate }) => {
+          const tr = overviewTable.querySelector(`tr[data-session-id="${session_id}"]`);
+          if (!tr) return;
+          const display = (state === "transcribing" && substate) ? substate : state;
+          const dot = tr.querySelector(".dot");
+          const label = tr.querySelector(".state-label");
+          if (dot) dot.className = "dot dot-" + (state || "none");
+          if (label) label.textContent = STATE_LABEL_MAP[display] || display || "not started";
+          if (state && !["done","error"].includes(state)) anyActive = true;
+        });
+        if (!anyActive && overviewTimer) {
+          clearInterval(overviewTimer);
+          overviewTimer = null;
+        }
+      } catch (_) {}
+    }
+
+    let overviewTimer = null;
+    if (overviewTable.dataset.hasActive === "true") {
+      overviewTimer = setInterval(pollOverview, 3000);
+    }
+  }
+
+  // --- (4) Pipeline crumbs (status page footer) ----------------------------
+
+  // crumb-id → index in the pipeline sequence
+  const CRUMBS = [
+    { id: "crumb-received",    activeOn: ["received"],                norm: true },
+    { id: "crumb-normalizing", activeOn: ["normalizing"],             norm: true },
+    { id: "crumb-asr",         activeOn: ["transcribing","transcribing_asr"] },
+    { id: "crumb-speaker-id",  activeOn: ["transcribing_speaker_id"] },
+    { id: "crumb-cleaning",    activeOn: ["transcribing_cleaning"]   },
+    { id: "crumb-finalizing",  activeOn: ["transcribing_finalizing"] },
+    { id: "crumb-done",        activeOn: ["done"]                    },
+  ];
+
+  function renderCrumbs(st) {
+    const state = st.state || "none";
+    const display = (state === "transcribing" && st.substate) ? st.substate : state;
+    let activeIdx = -1;
+    if (state === "done") {
+      activeIdx = CRUMBS.length; // all done
+    } else {
+      activeIdx = CRUMBS.findIndex(c => c.activeOn.includes(display));
+    }
+
+    CRUMBS.forEach((c, i) => {
+      const el = document.getElementById(c.id);
+      if (!el) return;
+      el.className = "";
+      if (state === "error") {
+        el.className = i === activeIdx ? "crumb-error" : "crumb-pending";
+      } else if (i < activeIdx || state === "done") {
+        el.className = c.norm ? "crumb-done-norm" : "crumb-done";
+      } else if (i === activeIdx) {
+        el.className = c.norm ? "crumb-active-norm" : "crumb-active";
+      } else {
+        el.className = "crumb-pending";
+      }
+    });
+  }
+
+  // --- (5) Status polling ---------------------------------------------------
 
   const statusBox = document.getElementById("status-box");
   if (statusBox) {
@@ -201,6 +284,7 @@
       const displayState = (state === "transcribing" && st.substate) ? st.substate : state;
       badge.className = "state-" + displayState;
       badge.textContent = STATE_LABELS[displayState] || displayState;
+      renderCrumbs(st);
 
       if (st.started_at && !startedAt) {
         startedAt = new Date(st.started_at);

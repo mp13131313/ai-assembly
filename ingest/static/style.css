@@ -531,6 +531,19 @@ progress {
 .state-done        { background: #d6ecd5 !important; border-color: var(--state-done) !important; color: var(--state-done) !important; }
 .state-error       { background: #fadcd5 !important; border-color: var(--state-error) !important; color: var(--state-error) !important; }
 
+/* --- Pipeline crumbs (status page footer) ---------------------------------- */
+
+.pipeline-crumbs { font-size: 12px; }
+
+.pipeline-crumbs code { font-size: 11px; transition: color 0.3s, font-weight 0.3s; }
+
+.pipeline-crumbs code.crumb-pending     { color: var(--warm-light); }
+.pipeline-crumbs code.crumb-active      { color: var(--state-transcribe); font-weight: 700; }
+.pipeline-crumbs code.crumb-active-norm { color: var(--state-active);     font-weight: 700; }
+.pipeline-crumbs code.crumb-done        { color: var(--state-done); }
+.pipeline-crumbs code.crumb-done-norm   { color: var(--state-active); opacity: 0.6; }
+.pipeline-crumbs code.crumb-error       { color: var(--state-error); font-weight: 700; }
+
 #error-detail {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-style: italic;
