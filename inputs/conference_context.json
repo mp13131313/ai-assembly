@@ -1,0 +1,34 @@
+{
+  "conference_name": "World Beautiful Business Forum",
+  "conference_short": "WBBF",
+  "host_organization": "House of Beautiful Business",
+  "host_founders": ["Tim Leberecht", "Till Grusche"],
+  "location": "Athens, Greece",
+  "dates": "May 7-10, 2026",
+  "anniversary": "10th annual gathering, 10-year anniversary of the House of Beautiful Business",
+  "participants_count_approx": 750,
+  "participant_profile": "Senior business professionals, founders, designers, and creatives; predominantly European, highly educated, philosophically literate. Self-selected at ~\u20ac1,895 entry. 40+ countries, skewing 35-55. Comfortable with foreign-language vocabulary, interdisciplinary thinking, and emotional openness unusual for a business audience. Embedded in the corporate system (SAP, Google, BCG, Porsche, Chanel represented) while critiquing it. Romantic reformists — business should be reimagined, not abolished.",
+  "tagline": "The most human gathering for the more-than-human world.",
+  "programming_tracks_representative": [
+    "AI Democracy Marathon",
+    "Agentic Agora",
+    "Ministry of Regeneration"
+  ],
+  "session_role_for_ai_assembly": "AIssembly night-shift deliberation within the AI Democracy Marathon. A cohort of AI agents embodying historical, philosophical, literary, and non-human figures takes over overnight while human participants rest or celebrate; by morning, a curated package of artifacts (songs, dialogues, shaders, river testimony, etc.) is delivered to participants as breakfast reading.",
+  "conference_context_paragraph": "World Beautiful Business Forum, Athens, May 2026. 12-voice AI Assembly deliberating overnight on conference sessions about more-than-human democracy, beautiful business, and the future of governance.",
+  "panel_members_final": [
+    "Plato",
+    "Cleopatra",
+    "Ibn Battuta",
+    "Scheherazade",
+    "Ada Lovelace",
+    "Fyodor Dostoevsky",
+    "Hannah Arendt",
+    "Bob Marley",
+    "Audrey Tang",
+    "Peter Thiel",
+    "Whanganui River",
+    "Octopus"
+  ],
+  "notes_for_stage_0": "Use conference_context_paragraph verbatim for the voice config's conference_context field. Use participant_profile and tagline for audience targeting when Stage 0 proposes voice_mode. Use panel_members_final to explicitly tell Stage 0 NOT to speculate about other Assembly members in its DR prompt — the DR output should be scholarship, not panel synthesis."
+}
