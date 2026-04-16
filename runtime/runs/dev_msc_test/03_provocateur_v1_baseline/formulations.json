@@ -1,0 +1,105 @@
+{
+  "formulations": [
+    {
+      "theme_id": "theme_001",
+      "mode": "question",
+      "formulation": "The panelists split sharply on whether progressive rights expansion fulfilled or betrayed Western civilization, yet none could stabilize what 'the West' actually refers to — the free world, a civilizational heritage, a creedal philosophy, or something else entirely. When every faction in a civilization insists it is the rightful heir but cannot agree on what has been inherited, is the concept still doing intellectual work or only political work — and who benefits from the confusion?",
+      "grounding_extraction_ids": [
+        "west_west_divide:006",
+        "west_west_divide:004",
+        "west_west_divide:011",
+        "west_west_divide:044"
+      ],
+      "assigned_members": [
+        "Plato",
+        "Cleopatra",
+        "Ibn Battuta",
+        "Peter Thiel",
+        "Whanganui River",
+        "Bob Marley"
+      ],
+      "rationale": "The question forces each member to answer from genuinely different ground: Plato must judge whether 'the West' names a knowable form or mere opinion; Cleopatra, who was absorbed by the West's imperial predecessor, reads civilizational rhetoric as sovereignty projection; Ibn Battuta, who witnessed dozens of functioning orders, can test the claim of uniqueness against observed variety; Thiel can deploy a Girardian reading of mimetic rivalry over a sacred object neither side can define; Whanganui's deep-time perspective challenges whether a concept unstable across a single generation deserves the weight placed on it; and Marley can testify from outside Babylon about who is excluded when the powerful argue over whose name goes on the gate."
+    },
+    {
+      "theme_id": "theme_002",
+      "mode": "question",
+      "formulation": "The panel's centrist voices argued that the remedy for populism is leadership bold enough to override public opinion — Kohl imposing the euro despite deep unpopularity, the EPP maintaining its firewall against parties millions vote for — while simultaneously conceding that the material grievances fueling populism are real. But this remedy is structurally identical to populism's own complaint: that those who claim to know better govern over the heads of those affected. When the grievances are admitted as legitimate yet the popular remedies are judged destructive, whose judgment should prevail — and what makes that authority legitimate rather than merely powerful?",
+      "grounding_extraction_ids": [
+        "vox_populi:014",
+        "vox_populi:010",
+        "vox_populi:027",
+        "vox_populi:012",
+        "west_west_divide:029"
+      ],
+      "assigned_members": [
+        "Plato",
+        "Hannah Arendt",
+        "Dostoevsky",
+        "Peter Thiel",
+        "Audrey Tang",
+        "Octopus"
+      ],
+      "rationale": "The paradox that the elite remedy for populism mirrors the elite behavior populism revolts against lands squarely in Plato's philosopher-king territory, Arendt's distinction between legitimate authority and domination, Dostoevsky's Grand Inquisitor question of freedom versus care, Thiel's suspicion that the 'center' is a mimetic consensus rather than a truth, Tang's conviction that process design can bridge the gap, and Octopus's challenge to the assumption that governance requires centralized judgment at all."
+    },
+    {
+      "theme_id": "theme_003",
+      "mode": "question",
+      "formulation": "One voice in the room argued that a world without liberal hypocrisy would be worse — a world of pure power where small states lose even the language of appeal — while another countered that this panic over the order's collapse is a Eurocentric awakening, since much of the world has always lived under might-makes-right regardless of the fiction. The council is asked: does a rule that has never been enforced against the powerful protect the powerless, or does it teach them to mistake the language of their dispossession for the architecture of their rescue?",
+      "grounding_extraction_ids": [
+        "west_west_divide:023",
+        "breaking_point:002",
+        "breaking_point:030",
+        "vox_populi:019"
+      ],
+      "assigned_members": [
+        "Cleopatra",
+        "Hannah Arendt",
+        "Ibn Battuta",
+        "Scheherazade",
+        "Whanganui River",
+        "Bob Marley"
+      ],
+      "rationale": "The tension between hypocrisy-as-protection and hypocrisy-as-pacification lands distinctly for each member — Scheherazade and Cleopatra know fiction as survival tool under asymmetric power, Arendt suspects necessary fictions of enabling the thoughtlessness that destroys genuine political speech, Bob Marley names the order as Babylon whose rules were never meant for the sufferer, Ibn Battuta questions the universality of any single arrangement claiming to be the order, and Whanganui asks what any human rule means on a timescale where empires are sediment."
+    },
+    {
+      "theme_id": "theme_005",
+      "mode": "question",
+      "formulation": "The panelists diagnosed algorithms as having destroyed the shared fact base that democratic compromise requires, yet four speakers in the same room debating free speech could not agree on whether their own disagreement concerned civilizational values, corporate interests, political exclusion, or the practice of labeling itself — each reframing the same controversy as being about something entirely different. The council is asked: does democratic discourse require a pre-existing shared fact base as its precondition, or is the construction of enough shared reality to go on with actually the work that democratic speech performs — and if the latter, what does it mean that we are building machines that reward speakers for never undertaking that work?",
+      "grounding_extraction_ids": [
+        "vox_populi:015",
+        "west_west_divide:002",
+        "west_west_divide:017",
+        "west_west_divide:035"
+      ],
+      "assigned_members": [
+        "Scheherazade",
+        "Audrey Tang",
+        "Ada Lovelace",
+        "Hannah Arendt",
+        "Dostoevsky",
+        "Octopus"
+      ],
+      "rationale": "The material's deepest tension is not the algorithm diagnosis itself but the gap between the claimed loss of shared facts and the demonstrated inability of live elites to share a frame — this formulation names that gap and asks whether shared reality is a precondition or an achievement of discourse, which activates Scheherazade on narrative as world-building, Tang on process design that surfaces latent agreement, Lovelace on what automation does to symbolic operations, Arendt on the public realm as constituted by action not given prior to it, Dostoevsky on the irreducible interiority that each reframing reveals, and Octopus on whether a single centralized fact base is even the right cognitive model."
+    },
+    {
+      "theme_id": "theme_006",
+      "mode": "question",
+      "formulation": "In both Gaza and Ukraine, the formal mechanisms proposed to deliver peace invoke the very principles they structurally fail to honor: a Board of Peace that excludes the people it claims to protect, a ceasefire under which 'killing has stopped but dying hasn't,' a negotiation that brackets who started the war. When a peace process names a principle — self-determination, sovereignty, ceasefire — that its own design cannot deliver, is the naming a failure of execution, or does it serve a purpose of its own?",
+      "grounding_extraction_ids": [
+        "breaking_point:022",
+        "breaking_point:027",
+        "breaking_point:013",
+        "west_west_divide:018"
+      ],
+      "assigned_members": [
+        "Cleopatra",
+        "Ibn Battuta",
+        "Scheherazade",
+        "Ada Lovelace",
+        "Dostoevsky",
+        "Whanganui River"
+      ],
+      "rationale": "The question targets the gap between formal invocation and structural delivery of principles, which activates Cleopatra on performed legitimacy and realpolitik, Ibn Battuta on how stated purposes diverge from actual functions across different arrangements, Scheherazade on who controls what a situation is called when the suffering cannot speak, Ada Lovelace on the formal divergence between specification and implementation, Dostoevsky on whether moral responsibility can be procedurally bracketed without spiritual cost, and Whanganui River on what legal naming means when the named party has no actual voice in the process."
+    }
+  ]
+}

@@ -1,0 +1,450 @@
+{
+  "clusters": [
+    {
+      "cluster_id": "cluster_001",
+      "cluster_title": "The rules-based international order has always been selectively enforced, and the current alarm reflects a Eurocentric awakening to a reality the developing world has long experienced.",
+      "cluster_abstract": "Multiple speakers converge on the claim that might-makes-right has been the operative principle for weaker states all along, and the perceived 'collapse' of the international order is only front-page news because its dysfunction now affects Europe and the transatlantic world — the rules existed but accountability for powerful violators never did.",
+      "extraction_ids": [
+        "breaking_point:001",
+        "breaking_point:002",
+        "breaking_point:003"
+      ]
+    },
+    {
+      "cluster_id": "cluster_002",
+      "cluster_title": "No functioning mechanism exists to hold powerful states accountable for violations of international law, and great powers actively resist creating one.",
+      "cluster_abstract": "The central structural failure of the international order is the absence of enforcement against powerful actors who breach the rules — a gap identified as the source of cascading failures — yet every proposal for accountability is blocked by the very states that would be constrained, leaving the question of who enforces the rules against the enforcers unresolved.",
+      "extraction_ids": [
+        "breaking_point:014",
+        "breaking_point:028",
+        "breaking_point:027"
+      ]
+    },
+    {
+      "cluster_id": "cluster_003",
+      "cluster_title": "The Board of Peace's charter diverges from its UNSC mandate by dropping Palestinian participation, time limits, and Gaza specificity, raising legitimacy concerns about 'focused multilateralism' that excludes affected parties.",
+      "cluster_abstract": "The Board of Peace is cited as a flagship of focused multilateralism, but its founding documents intentionally exceed the narrower UNSC Resolution 2803, and the exclusion of Palestinians from the body undermines the legitimacy and buy-in that universal institutions are meant to provide — a tension between results-oriented flexibility and partnership-based legitimacy that was surfaced but not resolved.",
+      "extraction_ids": [
+        "breaking_point:013",
+        "breaking_point:020",
+        "breaking_point:026",
+        "breaking_point:029"
+      ]
+    },
+    {
+      "cluster_id": "cluster_004",
+      "cluster_title": "'Focused multilateralism' through plurilateral groupings is producing results where traditional UN-centered institutions have failed, but its legitimacy depends on equal treatment of states.",
+      "cluster_abstract": "A sharp disagreement between the claim that ad hoc plurilateral coalitions are delivering concrete outcomes (ceasefire, critical minerals, regional normalization) and the counterclaim that any reformed multilateral system must preserve state equality and ensure no actor is above the law — with the US framing results as self-justifying and the EU insisting process and legitimacy are inseparable from outcomes.",
+      "extraction_ids": [
+        "breaking_point:010",
+        "breaking_point:011"
+      ]
+    },
+    {
+      "cluster_id": "cluster_005",
+      "cluster_title": "US demands for burden-sharing and UN fiscal reform are framed as justified by massive US contributions and taxpayer interests, but Europe counters that its total multilateral contribution is substantial when development aid is included.",
+      "cluster_abstract": "The US argues it has paid more than 180 countries combined into the UN system and that asking 450 million Europeans with a comparable economy to shoulder more defense costs is reasonable given $37 trillion in debt, while the EU responds that counting development aid alongside defense spending shows Europe is already a major contributor — a factual disagreement about what counts as 'paying your share.'",
+      "extraction_ids": [
+        "breaking_point:015",
+        "breaking_point:022",
+        "breaking_point:023"
+      ]
+    },
+    {
+      "cluster_id": "cluster_006",
+      "cluster_title": "America's alliances are its unique strategic asset that differentiates it from Russia and China, and treating allies as subordinates undermines US superpower status.",
+      "cluster_abstract": "The argument that no country joins Russia or China in war voluntarily but many join the US reframes the dependency narrative: allies are not free-riders but force multipliers, and the US needs partnership-based multilateralism precisely to sustain its advantage over rival powers, especially as China rises.",
+      "extraction_ids": [
+        "breaking_point:019"
+      ]
+    },
+    {
+      "cluster_id": "cluster_007",
+      "cluster_title": "The international system has been coming unglued for a decade, and the Trump administration's pressure approach — vindicated by NATO defense spending increases — is a corrective, not a rupture.",
+      "cluster_abstract": "The claim that crises predating the current administration (Ukraine, Gaza, Iran, Houthis, Venezuela) prove the old order was already failing, and that sustained US pressure for reform — as with NATO burden-sharing — produces better outcomes than the prior passivity, reframing Trump-era disruption as overdue reform rather than destruction.",
+      "extraction_ids": [
+        "breaking_point:012",
+        "breaking_point:021",
+        "breaking_point:009"
+      ]
+    },
+    {
+      "cluster_id": "cluster_008",
+      "cluster_title": "Palestinian self-determination and the unity of Gaza and the West Bank are non-negotiable for a lasting settlement, and humanitarian conditions remain dire despite ceasefire.",
+      "cluster_abstract": "Even with a ceasefire, aid access remains critically insufficient and people continue to die; stabilizing Gaza is a necessary step toward — not a substitute for — Palestinian self-determination and the territorial unity of Gaza and the West Bank, which Saudi Arabia treats as a non-negotiable condition for normalization.",
+      "extraction_ids": [
+        "breaking_point:016",
+        "breaking_point:017"
+      ]
+    },
+    {
+      "cluster_id": "cluster_009",
+      "cluster_title": "Colombia frames US hemispheric engagement as a counter-narcotics partnership opportunity, welcoming 'Americas First' as continental cooperation rather than unilateral dominance.",
+      "cluster_abstract": "Colombia reframes US strategic assertiveness in the Western Hemisphere as an opening for partnership on transnational organized crime — the demand-driven drug trade that kills more Americans than any conflict — with the 'Americas First' gesture symbolizing a continental rather than imperial relationship.",
+      "extraction_ids": [
+        "breaking_point:004",
+        "breaking_point:006",
+        "breaking_point:007"
+      ]
+    },
+    {
+      "cluster_id": "cluster_010",
+      "cluster_title": "Disinformation is a top-tier global security risk that can destabilize bilateral relations, as demonstrated by the near-derailment of US-Colombia ties.",
+      "cluster_abstract": "Misinformation and disinformation rank among the greatest global security risks and nearly destroyed US-Colombia relations when false narratives led President Trump to believe Colombia was doing nothing on counter-narcotics — a concrete case showing how information warfare can override factual reality in high-stakes diplomacy.",
+      "extraction_ids": [
+        "breaking_point:005"
+      ]
+    },
+    {
+      "cluster_id": "cluster_011",
+      "cluster_title": "US reassertion in the Western Hemisphere is welcomed both by the US as overdue leadership and by Latin American allies as filling a vacuum — despite different emphases on partnership versus dominance.",
+      "cluster_abstract": "Both US and Latin American voices frame renewed US engagement in the hemisphere as positive — the US citing Venezuela, Haiti, and regional summits as proof of leadership, and Argentina citing competitive pressure and investment opportunities — though the underlying framings differ between US dominance and multilateral partnership.",
+      "extraction_ids": [
+        "breaking_point:008",
+        "vox_populi:019"
+      ]
+    },
+    {
+      "cluster_id": "cluster_012",
+      "cluster_title": "The unprecedented honesty of current international conversations — where all sides openly state how the old system failed them — is genuine cause for optimism despite a dangerous transition.",
+      "cluster_abstract": "The removal of diplomatic pretense about the old order's effectiveness creates space for genuine reform, even as the transition period brings heightened danger from economic disparity, technological disruption, and geopolitical realignment.",
+      "extraction_ids": [
+        "breaking_point:024",
+        "breaking_point:025"
+      ]
+    },
+    {
+      "cluster_id": "cluster_013",
+      "cluster_title": "The panel's own dynamics reproduced the power asymmetry it was analyzing, with the two largest blocs dominating while middle powers were marginalized.",
+      "cluster_abstract": "The moderator acknowledged that the session on the international order was wholly dominated by US and EU voices, failing to give adequate floor time to the Saudi and Colombian representatives — enacting the very structural imbalance the discussion was supposed to interrogate.",
+      "extraction_ids": [
+        "breaking_point:030"
+      ]
+    },
+    {
+      "cluster_id": "cluster_014",
+      "cluster_title": "The Democratic Party's dismissal of populist economic demands like a $15 minimum wage and tuition-free college betrayed its working-class base and opened the door to right-wing populism.",
+      "cluster_abstract": "The party that claimed to listen to working people privately derided the economic demands of its grassroots as too extreme, and the resulting perception of betrayal fuels a pendulum of working-class frustration that swings between parties and is exploited by authoritarian movements offering scapegoats rather than solutions.",
+      "extraction_ids": [
+        "vox_populi:001",
+        "vox_populi:002",
+        "vox_populi:003"
+      ]
+    },
+    {
+      "cluster_id": "cluster_015",
+      "cluster_title": "Defeating populism requires delivering substantive policy answers to citizens' real concerns — not moralizing — combined with brave leadership that shapes rather than follows public opinion.",
+      "cluster_abstract": "The primary antidote to populism is concrete delivery on migration, growth, and bureaucracy (e.g., 80% reduction in Mediterranean crossings, Mercosur deal), paired with visionary leadership in the mold of Adenauer or Kohl that sets the agenda rather than ceding discursive space to populists.",
+      "extraction_ids": [
+        "vox_populi:006",
+        "vox_populi:014",
+        "vox_populi:025"
+      ]
+    },
+    {
+      "cluster_id": "cluster_016",
+      "cluster_title": "The EPP's firewall against far-right parties is defined by three criteria — pro-Europe, pro-Ukraine, pro-rule of law — and the center-left's refusal to support strict migration enforcement is feeding the extremism the firewall is meant to contain.",
+      "cluster_abstract": "The EPP maintains a firm exclusion of parties like the AfD that fail its pro-Europe, pro-Ukraine, pro-rule-of-law tests (enforced by expelling Orbán), while arguing that the socialists' failure to back mainstream migration enforcement measures like the safe third country concept is itself the driver of populist growth.",
+      "extraction_ids": [
+        "vox_populi:004",
+        "vox_populi:005"
+      ]
+    },
+    {
+      "cluster_id": "cluster_017",
+      "cluster_title": "Milei's Argentina is not populism but rules-based capitalism that replaces crony capitalism with free trade and competition, and its political success proves that tangible consumer benefits can sustain reform even under austerity.",
+      "cluster_abstract": "Argentina's reforms are distinguished from both economic populism (inflationary short-term spending) and political populism (denial of pluralism) by their emphasis on antitrust, competition, and free trade — and their continued electoral support despite austerity proves that visible consumer benefits like affordable cell phones can substitute for populist spending promises.",
+      "extraction_ids": [
+        "vox_populi:007",
+        "vox_populi:008"
+      ]
+    },
+    {
+      "cluster_id": "cluster_018",
+      "cluster_title": "Populism is not inherently negative — responsiveness to people's frustrations is the core of politics — and the real danger arises only when populism is weaponized to undermine democratic institutions.",
+      "cluster_abstract": "The distinction between listening to citizens' frustrations (legitimate populism) and using that frustration to attack courts, media, and institutional checks (anti-democratic populism) is essential, and governing responsibility tends to moderate populist leaders — though whether this moderation is sufficient without actively reinforced checks and balances remains unresolved.",
+      "extraction_ids": [
+        "vox_populi:010",
+        "vox_populi:011",
+        "vox_populi:028"
+      ]
+    },
+    {
+      "cluster_id": "cluster_019",
+      "cluster_title": "Unmet post-communist expectations — wanting capitalism's benefits with socialism's safety net — created the fertile ground for populism in Central and Eastern Europe.",
+      "cluster_abstract": "Citizens in former communist countries expected to gain all the benefits of capitalism while retaining socialist-era security and no personal responsibility, and the resulting frustration when that proved impossible became the raw material populists exploited by scapegoating governments, courts, and media.",
+      "extraction_ids": [
+        "vox_populi:009"
+      ]
+    },
+    {
+      "cluster_id": "cluster_020",
+      "cluster_title": "Extreme income inequality and unchecked corporate consolidation are underdiscussed security threats that drive authoritarianism and undermine democratic governance.",
+      "cluster_abstract": "Extreme inequality fuels social instability and authoritarian populism, while unchecked corporate consolidation produces entities rivaling nation-states in power — making antitrust enforcement and a wealth tax matters of democratic security, not just economic policy.",
+      "extraction_ids": [
+        "vox_populi:012",
+        "vox_populi:030"
+      ]
+    },
+    {
+      "cluster_id": "cluster_021",
+      "cluster_title": "Rising defense budgets may crowd out social spending unless democracies find ways to make defense investment serve dual economic and social purposes.",
+      "cluster_abstract": "A sharp tension between the claim that defense and social spending are inherently in competition (France's debt interest now exceeds its education budget) and the counterclaim that defense industrialization generates tax revenue and EU fiscal rule exemptions ease the trade-off — with the unresolved question of whether democratic resilience requires investing in public services as much as military capability.",
+      "extraction_ids": [
+        "vox_populi:013",
+        "vox_populi:023",
+        "vox_populi:026"
+      ]
+    },
+    {
+      "cluster_id": "cluster_022",
+      "cluster_title": "Social media's algorithmic destruction of shared facts and culture of compromise is the biggest structural threat to democratic discourse, yet democracies have failed to regulate it despite having the tools.",
+      "cluster_abstract": "Social media rewards only extreme positions and eliminates the factual common ground and culture of compromise essential to democracy, and governments' failure to aggressively enforce existing regulatory frameworks like the DMA and DSA — partly due to caution about fast-moving technology — is itself a democratic failure.",
+      "extraction_ids": [
+        "vox_populi:016",
+        "vox_populi:017",
+        "vox_populi:024",
+        "vox_populi:027"
+      ]
+    },
+    {
+      "cluster_id": "cluster_023",
+      "cluster_title": "Germany's social model is already maxed out at 40% of GDP, and the center-left cannot win votes by adding social benefits — structural and demographic reform is needed instead.",
+      "cluster_abstract": "The European welfare state has reached its fiscal ceiling, making the American prescription of expanded social benefits inapplicable to Europe; what is needed is structural reform that is hard to sell against populist promises but necessary for long-term sustainability.",
+      "extraction_ids": [
+        "vox_populi:018"
+      ]
+    },
+    {
+      "cluster_id": "cluster_024",
+      "cluster_title": "Venezuelan exiles welcomed US intervention because multilateral organizations had produced diagnosis but no concrete results, and the failure of conventional channels itself fuels populism.",
+      "cluster_abstract": "When affected populations exhaust all conventional channels — elections, multilateral appeals — without result, US unilateral intervention fills a vacuum that multilateral institutions created through inaction, and this institutional failure is itself a driver of populism.",
+      "extraction_ids": [
+        "vox_populi:020"
+      ]
+    },
+    {
+      "cluster_id": "cluster_025",
+      "cluster_title": "The rules-based order needs not restoration but reform that eliminates Western hypocrisies — treating exceptions to Western values as the rules undermines the order's legitimacy and creates vulnerabilities populists exploit.",
+      "cluster_abstract": "Both left-wing and right-wing critics converge on the claim that Western hypocrisy — selective application of international law, looking the other way on allied violations — corrodes the rules-based order from within, and the path forward requires not returning to the status quo ante but building a more consistently principled version that can withstand populist and authoritarian challenge.",
+      "extraction_ids": [
+        "vox_populi:031",
+        "vox_populi:021",
+        "west_west_divide:023",
+        "west_west_divide:041"
+      ]
+    },
+    {
+      "cluster_id": "cluster_026",
+      "cluster_title": "Trump's withdrawal from global compacts is designed to create an age of authoritarian geographic domains, and multilateral alliances are the hard stop against this fragmentation.",
+      "cluster_abstract": "The systematic US withdrawal from global compacts and alliances serves a strategy of authoritarian consolidation in which Trump controls the Western Hemisphere and Putin bullies Europe, and re-engagement with multilateral institutions — especially trade agreements like TPP — is essential to preventing this outcome.",
+      "extraction_ids": [
+        "vox_populi:022"
+      ]
+    },
+    {
+      "cluster_id": "cluster_027",
+      "cluster_title": "Whether left-wing and right-wing populism pose equivalent democratic risks remains unresolved, as the panel's shared emphasis on working-class grievances obscured the incompatibility of their prescriptions.",
+      "cluster_abstract": "A democratic socialist advocating wealth taxes and a Milei supporter advocating deregulation both claim to address the working-class frustrations driving populism, but the session never directly confronted how these competing prescriptions relate to the democratic risks each camp claims to counter — leaving the question of whether 'populism' is a unitary phenomenon unresolved.",
+      "extraction_ids": [
+        "vox_populi:029"
+      ]
+    },
+    {
+      "cluster_id": "cluster_028",
+      "cluster_title": "The West is not splitting between the US and Europe but fracturing internally within every country between competing definitions of Western identity — Cold War, civilizational, values-based — with the division running through each society.",
+      "cluster_abstract": "The proliferation of incompatible definitions of 'the West' — geopolitical alliance, Judeo-Christian civilization, universal-values community — means the divide is not transatlantic but intra-societal, running through every country, and self-questioning pluralism has been the West's defining characteristic since the mid-19th century rather than a sign of collapse.",
+      "extraction_ids": [
+        "west_west_divide:006",
+        "west_west_divide:031"
+      ]
+    },
+    {
+      "cluster_id": "cluster_029",
+      "cluster_title": "Post-Cold War progressive commitments were embedded in liberal institutions and transnational governance, eroding national sovereignty, family, borders, and industrial capacity — provoking the current populist-nationalist correction.",
+      "cluster_abstract": "A sharp disagreement between the claim that progressive social commitments were 'smuggled' into the post-Cold War order and transnational bodies — weakening the West's fundamental strengths and excluding conservative voices — and the counterclaim that expanding freedom to marginalized groups was a civilizational achievement, not an excess, and that framing it as the problem is revisionist nostalgia for white male privilege.",
+      "extraction_ids": [
+        "west_west_divide:007",
+        "west_west_divide:012",
+        "west_west_divide:014",
+        "west_west_divide:025"
+      ]
+    },
+    {
+      "cluster_id": "cluster_030",
+      "cluster_title": "There are genuine civilizational differences between the US and Europe — especially on free speech — and the current crisis is that one side is trying to impose its values on the other.",
+      "cluster_abstract": "European hate-speech laws banning advocacy of fascism and communism reflect a different historical experience from the US's near-absolute free speech tradition, and the attempt by either side to impose its norms on the other — whether through vice-presidential speeches or AI-driven corporate speech standards — is unacceptable and threatens genuine sovereignty on both sides of the Atlantic.",
+      "extraction_ids": [
+        "west_west_divide:002",
+        "west_west_divide:016",
+        "west_west_divide:037"
+      ]
+    },
+    {
+      "cluster_id": "cluster_031",
+      "cluster_title": "The intra-Western debate is almost healthy — the real threat is when it is conducted through intimidation, bullying, and cancellation rather than vigorous open argument.",
+      "cluster_abstract": "Disagreement within the West about values and institutions is not itself the problem; the danger arises when debate is suppressed through intimidation or rhetorical labeling — calling opponents fascists or public enemies — which divides society and prevents genuine engagement with opposing views.",
+      "extraction_ids": [
+        "west_west_divide:003",
+        "west_west_divide:021"
+      ]
+    },
+    {
+      "cluster_id": "cluster_032",
+      "cluster_title": "The conservative-vs-progressive framing of the West-West divide is misleading because Trump is not a conservative and the actual societal fracture was caused by bipartisan failures — job outsourcing on the right, cultural backlash on the left.",
+      "cluster_abstract": "The neat ideological divide between conservatism and progressivism misrepresents the crisis: Trump operates as a demagogue without principles rather than a genuine conservative, and the erosion of the social contract was jointly caused by free-market fundamentalism that outsourced jobs and social progressivism that generated cultural alienation — making the real divide about demagoguery versus a confused opposition.",
+      "extraction_ids": [
+        "west_west_divide:024",
+        "west_west_divide:022"
+      ]
+    },
+    {
+      "cluster_id": "cluster_033",
+      "cluster_title": "Globalization and mass migration were driven by business-class economic interests — cheap labor and profit maximization — not by progressive ideology, undermining the conservative narrative about who caused these disruptions.",
+      "cluster_abstract": "The claim that globalization and mass migration were progressive projects is historically false: both were supported by Republican businessmen seeking cheap labor and profit, and characterizing them as left-wing inventions serves a revisionist narrative that deflects responsibility from the economic right.",
+      "extraction_ids": [
+        "west_west_divide:005",
+        "west_west_divide:010"
+      ]
+    },
+    {
+      "cluster_id": "cluster_034",
+      "cluster_title": "The sovereign nation-state is contested as the sole guarantor of democracy: sovereigntists see supranational governance as a democratic deficit, while others argue the EU itself is democratically governed.",
+      "cluster_abstract": "A fundamental disagreement over whether democratic legitimacy can exist beyond the nation-state — with one side arguing only national sovereignty provides the cultural continuity and proximity to voters that democracy requires, and the other insisting the EU's directly elected parliament and council of elected leaders constitute genuine democratic governance, not bureaucratic imposition.",
+      "extraction_ids": [
+        "west_west_divide:004",
+        "west_west_divide:011",
+        "west_west_divide:029"
+      ]
+    },
+    {
+      "cluster_id": "cluster_035",
+      "cluster_title": "The rules-based order was always underwritten by power, and recognizing this does not mean rejecting norms — but abandoning even the fiction of sovereign equality leaves small states no reason to distinguish the US from China.",
+      "cluster_abstract": "A tension between the realist claim that rules don't enforce themselves and therefore strong states must underwrite the order, and the counterargument that the 'hypocritical fiction' of equality among nations is structurally essential — because without it, international relations reduces to raw power and small countries lose any reason to prefer American hegemony over Chinese.",
+      "extraction_ids": [
+        "west_west_divide:009",
+        "west_west_divide:018",
+        "west_west_divide:036"
+      ]
+    },
+    {
+      "cluster_id": "cluster_036",
+      "cluster_title": "Trump's territorial rhetoric on Greenland, the Panama Canal, and the Gulf of America reflects a strategic correction of 1990s overcommitment — but it contradicts the civilizational criteria the administration claims to value.",
+      "cluster_abstract": "The administration frames its hemispheric assertiveness as correcting catastrophic post-Cold War neglect of the US neighborhood, but the Greenland posture specifically undermines its own civilizational logic — Denmark meets every criterion the administration's conservatives claim to value — exposing aggressive nationalism as self-contradicting and capable of triggering rival nationalisms.",
+      "extraction_ids": [
+        "west_west_divide:008",
+        "west_west_divide:032"
+      ]
+    },
+    {
+      "cluster_id": "cluster_037",
+      "cluster_title": "The redefinition of American identity from a creed-based to a blood-and-soil nation is historically wrong and politically dangerous — though defenders deny the 'blood and soil' characterization.",
+      "cluster_abstract": "A sharp clash between the claim that America was founded on philosophy and liberal thought rather than ethnic belonging — making JD Vance's 'particular people' framing a dangerous departure — and the defense that the administration's view is more nuanced than the 'blood and soil' caricature and does not reduce to ethnic nationalism.",
+      "extraction_ids": [
+        "west_west_divide:026",
+        "west_west_divide:027"
+      ]
+    },
+    {
+      "cluster_id": "cluster_038",
+      "cluster_title": "No viable alternative to negotiations exists for ending the Russia-Ukraine war on the battlefield — but there is an alternative: arming Ukraine to strike inside Russia and escalating the military cost to Putin.",
+      "cluster_abstract": "A direct clash between the claim that critics of Trump's negotiation push offered no plan for ending the war militarily, and the counterproposal that providing Ukraine with Tomahawks, more Patriot missiles, and strike permission inside Russia would force Russia toward negotiations on better terms — with each side accusing the other of foreclosing the path to peace.",
+      "extraction_ids": [
+        "west_west_divide:019",
+        "west_west_divide:020"
+      ]
+    },
+    {
+      "cluster_id": "cluster_039",
+      "cluster_title": "Trump's approach to Ukraine is a disgraceful betrayal of Western values, attempting to force a surrender to Putin — and it constitutes a betrayal of the NATO Charter and Universal Declaration of Human Rights.",
+      "cluster_abstract": "The effort to push Ukraine into a deal that rewards Russian aggression is characterized as shameful and corrupt, driven by either ignorance or indifference to Ukrainian suffering, and it represents a fundamental break with the commitments encoded in the Atlantic Charter, the NATO preamble, and the Universal Declaration of Human Rights.",
+      "extraction_ids": [
+        "west_west_divide:013",
+        "west_west_divide:015"
+      ]
+    },
+    {
+      "cluster_id": "cluster_040",
+      "cluster_title": "Lasting peace in Ukraine requires acknowledging moral responsibility for who started the war — peace without moral principle destroys the normative foundations that make the West meaningful.",
+      "cluster_abstract": "You cannot achieve durable peace while destroying the moral integrity of the Ukrainian nation; any settlement that fails to assign responsibility for Russia's invasion undermines the normative framework the West depends on — echoing the Versailles Treaty lesson that historical clarity about aggression is non-negotiable for legitimacy.",
+      "extraction_ids": [
+        "west_west_divide:017",
+        "west_west_divide:035"
+      ]
+    },
+    {
+      "cluster_id": "cluster_041",
+      "cluster_title": "The old norm among allied democracies against interfering in each other's domestic politics has been broken by the Trump administration's support for populist candidates and MAGA-aligned think tanks in Europe.",
+      "cluster_abstract": "Trump receiving Poland's populist presidential candidate between election rounds and US funding of MAGA-aligned think tanks in Europe violate the longstanding norm that democracies interfere only in autocracies on behalf of democracy — a reversal that will backfire by ending bipartisan pro-Americanism in historically allied countries.",
+      "extraction_ids": [
+        "west_west_divide:028",
+        "west_west_divide:034"
+      ]
+    },
+    {
+      "cluster_id": "cluster_042",
+      "cluster_title": "Orbán was right 10 years ago on migration, family, and peace, and Europe's systematic exclusion of his voice from decision-making is a key conservative grievance.",
+      "cluster_abstract": "The claim that Orbán anticipated the current consensus on migration and family policy and was vindicated by events — while being excluded from European Commission decision-making — serves as a central conservative grievance about institutional gatekeeping against nationalist voices in elite European forums.",
+      "extraction_ids": [
+        "west_west_divide:040"
+      ]
+    },
+    {
+      "cluster_id": "cluster_043",
+      "cluster_title": "AI is 'the other great replacement' — it will displace more people than migrants ever could and force a redefinition of nation, civilization, and the West itself.",
+      "cluster_abstract": "The existential anxiety behind populist politics runs deeper than immigration alone: AI will replace jobs and identities on a scale that makes current migration debates look parochial, forcing a wholesale rethinking of what a nation and a civilization mean — rendering the West's current identity conflicts incomplete.",
+      "extraction_ids": [
+        "west_west_divide:030"
+      ]
+    },
+    {
+      "cluster_id": "cluster_044",
+      "cluster_title": "The West's double standard on Ukraine and Gaza is a potential fatal blow to its moral authority with the non-Western world, but Western panels consistently dodge the question.",
+      "cluster_abstract": "The question of whether treating Ukraine and Gaza by different principles fatally undermines Western moral authority was repeatedly raised but effectively evaded — with panelists deflecting to irony or pivoting back to Ukraine — leaving unresolved whether addressing the double standard is a prerequisite for credibility with the Global South.",
+      "extraction_ids": [
+        "west_west_divide:038"
+      ]
+    },
+    {
+      "cluster_id": "cluster_045",
+      "cluster_title": "Allowing the New START Treaty to expire and contemplating resumed nuclear testing are major strategic mistakes that demand urgent reinstatement of nuclear arms control.",
+      "cluster_abstract": "The expiration of the New START Treaty — after the Trump administration refused a Russian offer to extend it — and the suggestion of resuming underground nuclear testing represent dangerous reversals of decades of arms control progress that must be corrected, even if extending the framework to China remains aspirational.",
+      "extraction_ids": [
+        "west_west_divide:039"
+      ]
+    },
+    {
+      "cluster_id": "cluster_046",
+      "cluster_title": "The shift from 'Western values' to 'Western civilization' as a framing device signals fundamentally different political projects — the Biden administration spoke of values, while Rubio invoked civilization 12 times.",
+      "cluster_abstract": "The rhetorical shift from 'values' (universalist, creed-based) to 'civilization' (bounded, identity-based) marks a substantive change in the political project being pursued, not merely a linguistic variation — and tracking which term officials use reveals the underlying orientation of their foreign policy.",
+      "extraction_ids": [
+        "west_west_divide:033"
+      ]
+    },
+    {
+      "cluster_id": "cluster_047",
+      "cluster_title": "The West's current threat framing by the Trump administration invokes the NATO preamble's 'common heritage and civilization' but redirects the threat from external adversaries to internal progressive drift.",
+      "cluster_abstract": "The NATO preamble's language about safeguarding 'liberty, common heritage and civilization' is being repurposed to frame the primary threat to the West not as Russian or Chinese aggression but as the post-Cold War progressive drift of Western institutions — a reorientation that is fiercely contested by those who see it as inverting the alliance's purpose.",
+      "extraction_ids": [
+        "west_west_divide:001"
+      ]
+    },
+    {
+      "cluster_id": "cluster_048",
+      "cluster_title": "Only President Trump could have secured Israeli acceptance of language on no occupation, no annexation, and Palestinian self-determination in a Security Council resolution.",
+      "cluster_abstract": "The claim that Trump's unique negotiating position — unmatched by any other international actor — produced unprecedented Israeli concessions on Gaza in a UNSC resolution, including language on Palestinian self-determination, is offered as evidence that unconventional diplomacy delivers results no multilateral process could achieve.",
+      "extraction_ids": [
+        "breaking_point:018"
+      ]
+    },
+    {
+      "cluster_id": "cluster_049",
+      "cluster_title": "Europe should pursue deeper integration — a directly elected EU president and a unified European army — to spend its projected €6.5 trillion in defense more efficiently and match American capabilities.",
+      "cluster_abstract": "The long-term answer to both European security dependence on the US and the populist challenge is ambitious institutional deepening — a single elected EU president and a European army — framed as comparable in historical ambition to the euro or post-war Franco-German reconciliation.",
+      "extraction_ids": [
+        "vox_populi:015"
+      ]
+    }
+  ],
+  "isolates": []
+}

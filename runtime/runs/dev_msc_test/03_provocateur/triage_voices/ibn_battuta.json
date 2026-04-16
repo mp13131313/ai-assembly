@@ -1,0 +1,39 @@
+{
+  "voice": "Ibn Battuta",
+  "ranked_themes": [
+    {
+      "theme_id": "theme_001",
+      "activation": "strong",
+      "is_stretch": true,
+      "reason": "The contest over whether 'the West' is a coherent civilizational concept sits dead-center in his activates_on territory — claims that one cultural or political form is universal — and his core commitment that the variety of functioning human arrangements is larger than any one tradition recognizes; the stretch is triggered because asking whether 'the West' functions the way the Dar al-Islam did for him — providing a structural frame that enabled travel and legibility while obscuring its own organizing work — pushes directly into the question of whether his Islamic frame was doing more than he credited."
+    },
+    {
+      "theme_id": "theme_003",
+      "activation": "strong",
+      "is_stretch": true,
+      "reason": "Cluster_002's diagnosis that the crisis narrative is Western-centric, and that the developing world has long lived under might-makes-right, maps precisely onto his experience of observing many functioning orders that owed nothing to the current 'rules-based' architecture; the hypocrisy cluster and the question of whether any single order can claim universality activate his core commitment directly; stretch is triggered because the Islamic trading networks and legal frameworks he traveled through constituted their own rules-based order whose structural work he may not have fully examined."
+    },
+    {
+      "theme_id": "theme_002",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "The EU democratic legitimacy debate — whether only the nation-state can host genuine democracy — and the migration-as-business-project cluster touch his activates_on territory around how authority travels or fails to travel across contexts and how different societies manage movement of peoples, but the economic-inequality root-cause analysis and abstract definitional disputes about populism lack the concrete comparative material he reasons from."
+    },
+    {
+      "theme_id": "theme_004",
+      "activation": "moderate",
+      "is_stretch": false,
+      "reason": "The hemispheric engagement cluster — multiple smaller states negotiating the hospitality and dominance of a powerful patron, debating whether 'America First' can be rebranded as partnership — activates his sensitivity to the relationship between hospitality and power, and interference in allied politics touches how authority crosses borders; but the defense-spending and fiscal trade-off clusters are institutional-economic analysis without comparative material for him to anchor in."
+    }
+  ],
+  "flat_themes": [
+    {
+      "theme_id": "theme_005",
+      "reason": "Algorithmic governance, platform regulation, and the transatlantic free-speech dispute are primarily abstract institutional and technological questions without the concrete cross-civilizational cases Ibn Battuta requires to reason distinctively; even the 'civilizational difference' framing in cluster_020 is narrowly US-versus-Europe, not the broad variety of functioning arrangements he speaks from."
+    },
+    {
+      "theme_id": "theme_006",
+      "reason": "These clusters require engagement with the specifics of two contemporary military-diplomatic conflicts rather than comparative observation across contexts; the argumentation is principled and strategic rather than anchored in the kind of juxtaposed material cases that give Ibn Battuta distinctive purchase, placing this in his goes-flat-on territory of purely abstract argumentation about principles."
+    }
+  ]
+}

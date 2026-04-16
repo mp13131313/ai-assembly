@@ -1,0 +1,215 @@
+{
+  "session_id": "breaking_point",
+  "session_title": "Breaking Point: The International Order Between Reform and Destruction",
+  "extractions": [
+    {
+      "id": "breaking_point:001",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "The opposite of a rules-based order is tyranny and war, and that is where we are now; the current crisis is an opportunity to develop international law further, as has happened after previous global crises.",
+      "context": "Kallas drew a historical line from the League of Nations through the UN, arguing each breakdown generated reform; she cited the current proliferation of wars as evidence of failure.",
+      "engagement": "reinforced",
+      "responds_to": null,
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:002",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "The core failure of the current multilateral system is accountability: states sign up to the UN Charter but there is no functioning mechanism to hold even the most powerful actors to account when they breach its rules.",
+      "context": "Kallas pointed to the dysfunctional Security Council and argued that a single leader can order wars that kill thousands with no personal consequence.",
+      "engagement": "reinforced",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:003",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "reframing",
+      "extraction": "The breakdown of the rules-based order is not a new revelation for the West — it has long been the lived reality for countries in the developing world, making the current European alarm a belated recognition rather than a genuine turning point.",
+      "context": "Prompted by moderator's question about whether the order-change debate is a Eurocentric perspective; Faisal argued that 'might makes right' predated Ukraine for most of the world and cited conflicts in the Middle East handled outside UN mandates.",
+      "engagement": "picked up",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:004",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "assertion",
+      "extraction": "The fact that even European defenders of the old system are now admitting it was broken makes this moment more honest and, counterintuitively, more optimistic than previous years.",
+      "context": "Faisal said he is more optimistic than last year precisely because frank conversations are now happening across all blocs, including among former ardent supporters of the old system.",
+      "engagement": "reinforced",
+      "responds_to": "breaking_point:003",
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:005",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Pedro Arnulfo Sánchez Suárez",
+      "lens": "assertion",
+      "extraction": "Misinformation and disinformation is already the second-greatest global risk after interstate conflict and may soon become the greatest, as AI accelerates its reach — a claim Colombia's experience with the Trump administration over drug policy illustrates.",
+      "context": "Sánchez described how disinformation convinced President Trump that Colombia was doing nothing on drugs, and cited a global risk ranking for the broader claim. [word uncertain in source]",
+      "engagement": "unengaged",
+      "responds_to": null,
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:006",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Pedro Arnulfo Sánchez Suárez",
+      "lens": "assertion",
+      "extraction": "Colombia is the world's best ally in the fight against transnational organized crime, and the drug trade cannot be eliminated while global demand for drugs — currently involving 316 million consumers — remains unaddressed.",
+      "context": "Sánchez offered this after the moderator pressed him on whether the US asserting dominance in its hemisphere was acceptable; he reframed the US-Colombia relationship around shared counter-narcotics interest.",
+      "engagement": "reinforced",
+      "responds_to": null,
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:007",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "extraction": "The Trump administration is not abandoning multilateralism but reforming it: the UN has already agreed to its first-ever 15% budget cut, nearly 3,000 headquarters staff will be cut, and the goal is to return the institution to its core peacekeeping mandate.",
+      "context": "Waltz cited the December budget agreement and drew an analogy to NATO, arguing Trump's pressure on burden-sharing made NATO stronger and would do the same for the UN.",
+      "engagement": "challenged",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:008",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "extraction": "The world was already at the brink 18 months ago — multiple active wars, Iran racing for a nuclear weapon, the Houthis closing the Suez Canal, a massive South American refugee crisis — and US leadership has pulled it back from that edge.",
+      "context": "Waltz directly challenged the panel's framing ('The World on the Brink') by arguing the brink was the prior status quo, not the current moment.",
+      "engagement": "challenged",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:009",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "extraction": "The Board of Peace, established by unanimous UN Security Council resolution, represents 'focused multilateralism' — a legitimate new instrument backed by Muslim-majority nations and Gulf Arab states, with billions in funding and 8,000 troops pledged by Indonesia.",
+      "context": "Waltz responded to moderator and audience challenges that the Board of Peace's White House charter does not mention Gaza and exceeds its UN mandate; he cited Indonesia's troop pledge and the Sharm el-Sheikh meeting.",
+      "engagement": "challenged",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:010",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "The Board of Peace as constituted does not reflect the UN Security Council resolution that authorized it: the resolution limited the board's mandate to Gaza until 2027 and required Palestinian participation, neither of which appears in the White House charter.",
+      "context": "Kallas pushed back directly on Waltz's claim that the Board of Peace was an outgrowth of the UN resolution, citing specific omissions in the charter document.",
+      "engagement": "challenged",
+      "responds_to": "breaking_point:009",
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:011",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "Any reformed multilateral system must preserve equality of states and the principle that no country — including the most powerful — is above the law; without those two elements, reform is just the substitution of one form of domination for another.",
+      "context": "Kallas made this in response to Waltz's reform agenda, explicitly connecting it to Prince Faisal's earlier call for a system that reflects today's world.",
+      "engagement": "reinforced",
+      "responds_to": "breaking_point:007",
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:012",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "extraction": "It is fair for the United States to demand burden-sharing reform because the US has historically paid more than 180 countries combined into the UN system, and with $37 trillion in debt that level of subsidy is no longer sustainable.",
+      "context": "Waltz responded to the Polish audience member's question about whether the US is withdrawing from the rules-based order; he framed the demand for reform as accountability to American taxpayers.",
+      "engagement": "reinforced",
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:013",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "Europe is not a free-rider: when the US goes to war, European countries go alongside it and lose their own people, and European development aid constitutes the largest share of global contributions — making the narrative of one-sided American underwriting incomplete.",
+      "context": "Kallas pushed back on Waltz's burden-sharing argument by pointing to EU development aid volumes and noting that US military power is magnified precisely because it has allies, unlike Russia.",
+      "engagement": "challenged",
+      "responds_to": "breaking_point:012",
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:014",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "extraction": "The key differentiator between the United States and other great powers like China or Russia is the US alliance network; undermining those alliances therefore undermines the very source of American primacy.",
+      "context": "Kallas made this argument in response to the question of whether the US needs the rules-based order, framing allies as the structural reason US power exceeds that of comparable-sized rivals.",
+      "engagement": "unengaged",
+      "responds_to": "breaking_point:012",
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:015",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Audience Member 3",
+      "lens": "open question",
+      "extraction": "If the Board of Peace includes Israel's Prime Minister but no Palestinian representative, in what sense can it be called a peace process rather than a mechanism that exempts one party from accountability?",
+      "context": "Mustafa Barghouti from Palestine raised this from the floor; Kallas responded on accountability in general terms and Prince Faisal acknowledged the concern but neither directly answered whether Palestinian exclusion undermined the board's legitimacy.",
+      "engagement": null,
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:016",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "assertion",
+      "extraction": "A ceasefire that stops the killing but not the dying — because aid access remains blocked — is not a real ceasefire, and stabilizing Gaza, maintaining the unity of Gaza and the West Bank, and then advancing Palestinian self-determination must be treated as a sequential but linked process.",
+      "context": "Prince Faisal responded to the Palestinian audience member's question about accountability for ceasefire violations and to Waltz's claims of progress; he acknowledged ongoing aid access problems while defending continued Saudi engagement.",
+      "engagement": "reinforced",
+      "responds_to": null,
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:017",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": null,
+      "lens": "open question",
+      "extraction": "Does the Trump administration believe in a multilateral system whose rules would constrain the United States itself, or does it advocate only for selective, US-led coalitions that operate outside binding multilateral constraints?",
+      "context": "The moderator asked this directly (turn 26); Waltz responded by pointing to results — NATO, Gaza, Azerbaijan-Armenia — without affirming that the US accepts rules-based constraints on its own conduct. The tension was never resolved.",
+      "engagement": null,
+      "responds_to": null,
+      "energy": "high"
+    },
+    {
+      "id": "breaking_point:018",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": null,
+      "lens": "open question",
+      "extraction": "If the rules-based order has always been experienced as 'might makes right' by the Global South, what concrete difference would a reformed system make for developing countries compared to the current transition toward explicit great-power spheres of influence?",
+      "context": "Prince Faisal established that the developing world has long lived under the de facto breakdown of rules (turns 3 and 5), but neither he nor other panelists articulated what a reformed system would specifically change for those countries.",
+      "engagement": null,
+      "responds_to": null,
+      "energy": "normal"
+    },
+    {
+      "id": "breaking_point:019",
+      "session": "Breaking Point: The International Order Between Reform and Destruction",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "assertion",
+      "extraction": "The transition period between the old order and whatever replaces it is inherently dangerous, and economic inequality amplified by technological change is a major risk factor during that dislocation — though the technology may eventually deliver net benefits.",
+      "context": "Faisal answered the closing question about whether the world is becoming more dangerous; he situated current instability as transition-phase risk rather than permanent deterioration. [word uncertain in source]",
+      "engagement": "unengaged",
+      "responds_to": null,
+      "energy": "normal"
+    }
+  ]
+}

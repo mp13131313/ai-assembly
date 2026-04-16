@@ -1,0 +1,55 @@
+{
+  "pipeline": "provocateur",
+  "pipeline_version": "v3",
+  "council_config_version": "dev_stub_v2_with_selection_params",
+  "council_members_count": 12,
+  "model": "claude-opus-4-6",
+  "thinking_enabled": true,
+  "inputs": {
+    "extractions": 106,
+    "themes": 6,
+    "clusters": 25
+  },
+  "outputs": {
+    "triage_voices": 12,
+    "triage_flags": 6,
+    "selected_themes": 5,
+    "dropped_themes": 1,
+    "formulations": 40,
+    "briefings_written": 12,
+    "coverage_per_member": {
+      "Plato": 4,
+      "Cleopatra": 4,
+      "Ibn Battuta": 3,
+      "Scheherazade": 3,
+      "Ada Lovelace": 1,
+      "Dostoevsky": 5,
+      "Hannah Arendt": 5,
+      "Bob Marley": 4,
+      "Audrey Tang": 4,
+      "Peter Thiel": 4,
+      "Whanganui River": 1,
+      "Octopus": 2
+    },
+    "forced_fits": 0,
+    "stretch_swaps": 0,
+    "voices_below_target": 10
+  },
+  "selection_parameters_used": {
+    "activation_threshold": 2,
+    "min_members_per_theme": 3,
+    "min_formulations_per_voice": 1,
+    "target_formulations_per_voice": 5,
+    "hard_cap_per_voice": 5,
+    "friction_multiplier": {
+      "low": 1.0,
+      "moderate": 1.3,
+      "high": 1.7
+    },
+    "fault_line_multiplier": {
+      "absent": 1.0,
+      "present": 1.5
+    },
+    "stretch_swap_enabled": true
+  }
+}

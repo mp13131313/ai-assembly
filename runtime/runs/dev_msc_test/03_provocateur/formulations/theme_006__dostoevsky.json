@@ -1,0 +1,42 @@
+{
+  "theme_id": "theme_006",
+  "member": "Dostoevsky",
+  "mode": "question",
+  "formulation": "The pragmatists offered mechanisms — a Board of Peace, a ceasefire measured in aid trucks per week — and were told in reply that the killing may have stopped but the dying has not, and that those still dying have no seat at the board deciding their fate. You have always insisted the real questions are resolved inside specific suffering persons. But when the structure determines which persons are present at the table and which are absent from it, does the arrangement precede the soul — or is the exclusion itself already the spiritual fact?",
+  "theme_display_title": "Peace Without the Naming of Guilt",
+  "context_narrative": "Across two sessions, the room argued over whether peace in active wars could be brokered without settling the question of guilt. On Gaza, defenders of the Board of Peace cited unprecedented results — hostage releases, ceasefire, thousands of aid trucks — while critics countered that aid is not arriving, the ceasefire is violated daily, and Palestinians have no representation on the board deciding their future. On Ukraine, pragmatists insisted no battlefield victory is possible and a ceasefire must come however it can, while others held that any peace that brackets moral responsibility for the invasion would hollow out the principle of sovereignty the entire order claims to defend.",
+  "selected_quotes": [
+    {
+      "extraction_id": "west_west_divide:018",
+      "quote": "You cannot achieve peace in Ukraine by totally bracketing the question of moral responsibility — who started the war matters, and peace that destroys the moral integrity of a nation is not real peace.",
+      "attribution": "Ivan Krastev",
+      "flavor": "speaking with intensity"
+    },
+    {
+      "extraction_id": "breaking_point:022",
+      "quote": "It's not a ceasefire if the guns haven't ceased; even if killing has stopped, dying hasn't — aid access remains the critical unresolved issue in Gaza.",
+      "attribution": "Prince Faisal bin Farhan Al Saud",
+      "flavor": "building on what came before"
+    },
+    {
+      "extraction_id": "breaking_point:027",
+      "quote": "The Board of Peace cannot credibly claim to be a peace mechanism when it includes Israel's Prime Minister but excludes any Palestinian representation, and Israel is already violating the ceasefire 1,500 times while Palestinians are held accountable three times a day.",
+      "attribution": "Mustafa Barghouti, audience member"
+    },
+    {
+      "extraction_id": "west_west_divide:016",
+      "quote": "Ukraine fights first for Ukraine's own future, freedom, and sovereignty — not 'our' freedom — and only the United States currently has the geopolitical power to force Russia to stop the war, so the priority should be a ceasefire however achieved.",
+      "attribution": "Petr Macinka",
+      "flavor": "contesting the framing"
+    }
+  ],
+  "grounding_extraction_ids": [
+    "west_west_divide:018",
+    "breaking_point:022",
+    "breaking_point:027",
+    "west_west_divide:016",
+    "west_west_divide:041",
+    "breaking_point:023"
+  ],
+  "rationale": "This formulation lands in Dostoevsky's Grand Inquisitor territory — bread offered in exchange for moral truth, security mechanisms substituted for freedom — while stretching him toward the structural question of whether the arrangement that determines which persons are excluded from the table precedes and shapes the interior drama he insists is primary, forcing him to engage with scale and institutional power rather than retreating to the individual soul alone."
+}

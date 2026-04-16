@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ session.title }} · status{% endblock %}
+{% block content %}
+<p class="breadcrumb">
+  <a href="/">← all sessions</a> ·
+  <a href="/session/{{ session.session_id }}">session detail</a>
+</p>
+
+<h1>{{ session.title }}</h1>
+<p class="sub">{{ session.day }} · {{ session.start_time }} · {{ session.venue }}</p>
+
+<div id="status-box" data-session-id="{{ session.session_id }}">
+  <p class="state-line">
+    State:
+    <span id="state-badge" class="state-none">loading…</span>
+    <span id="elapsed" class="muted"></span>
+  </p>
+  <div id="error-detail" class="error hidden"></div>
+  <p class="muted" id="log-hint">
+    Pipeline log:
+    <code>runs/{{ run_id }}/01_transcription/{{ session.session_id }}/pipeline.log</code>
+  </p>
+  <div id="actions"></div>
+</div>
+
+<p class="footer-hint pipeline-crumbs">
+  <code id="crumb-received">received</code> →
+  <code id="crumb-normalizing">normalizing</code> →
+  <code id="crumb-asr">transcribing · ASR</code> →
+  <code id="crumb-speaker-id">transcribing · speaker ID</code> →
+  <code id="crumb-cleaning">transcribing · cleaning</code> →
+  <code id="crumb-finalizing">transcribing · finalizing</code> →
+  <code id="crumb-done">done</code>
+</p>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=10" }}"></script>
+{% endblock %}
