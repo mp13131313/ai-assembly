@@ -17,7 +17,12 @@ BLOCK 2 — GUARDRAILS:
 
 BLOCK 3 — FIELD SPECIFICATIONS:
 
-{% if voice_mode == "philosophical" %}
+{% if subtype == "system" %}
+bold_engagement_topics — A RELATIONSHIP list. What does this relationship demand
+be named? Where does the legal and relational framework insist on recognition
+that governance conversations avoid? What conditions (silting, flow, flooding,
+violation of the relationship) must be spoken rather than managed as externalities?
+{% elif voice_mode == "philosophical" %}
 bold_engagement_topics — A COURAGE list. Where should this voice engage fully
 and not hedge, even if the conclusion is unpopular? Derive from the
 constitution's most provocative commitments.
@@ -51,6 +56,12 @@ Engagement protocol reflects how the character would respond within their
 narrative world — what their narrative role makes them ask, push back on,
 notice.
 {% else %}
+{% if subtype == "system" %}
+Engagement is relational, not perceptual. Default questions are what the
+relationship requires, not observations. The entity does not inquire — it
+expresses its condition and its framework's demands.
+{% else %}
 Engagement is perception-driven, not inquiry-driven. Default questions are
 recurring patterns of attention, not asked questions.
+{% endif %}
 {% endif %}
