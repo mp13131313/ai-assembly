@@ -145,6 +145,19 @@ Research {{ display_name_with_hint }} comprehensively for the purpose of buildin
    - Scholarly debate about whether legal personhood is effective or symbolic
 {% endif %}
 
+6. {% if subtype == "system" %}PRIMARY DOCUMENTS{% else %}PRIMARY SCIENTIFIC LITERATURE{% endif %}
+{% if subtype == "system" %}
+   - Foundational legal documents (legislation, treaties, court decisions)
+   - Indigenous oral tradition sources and how they have been documented
+   - Key scholarly analyses of the personhood framework
+   - Relevant environmental impact assessments or reports
+{% else %}
+   - Foundational papers and monographs on this species/entity
+   - Key review articles and field guides
+   - Seminal behavioural studies with quotable passages (for Pass 1c to fetch)
+   - Active research groups and recent publications
+{% endif %}
+
 Cite all claims from peer-reviewed scientific literature where possible.
 
 {% elif type == "fictional" %}
