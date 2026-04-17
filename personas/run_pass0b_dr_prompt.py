@@ -86,6 +86,7 @@ def main(name: str) -> None:
         "corpus_constraint": voice_config.get("corpus_constraint", "full"),
         # D.1 scaffolding variables (empty until run_phase0_1_research.py provides them)
         "perplexity_findings": "",
+        "perplexity_sections": None,
         "gemini_findings": "",
     }
 

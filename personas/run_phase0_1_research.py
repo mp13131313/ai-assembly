@@ -38,6 +38,7 @@ import jinja2
 from flows.shared.clients import call_perplexity, call_gemini
 from flows.shared.io import voice_slug, write_json_atomic, load_voice_input
 from flows.shared.node0_validation import validate_input
+from flows.shared.perplexity_split import split_dossier
 from flows.shared.prompt_render import render
 
 VOICES_DIR = REPO_ROOT / "inputs/voices"
@@ -128,6 +129,12 @@ def main(voice_name: str) -> None:
     perplexity_text = pass1a.get("text") or pass1a.get("text_clean", "")
     gemini_text = pass1b["text"]
 
+    perplexity_sections = split_dossier(perplexity_text)
+    if perplexity_sections is None:
+        stamp("  WARN: Perplexity output could not be split by section — falling back to single-block scaffolding")
+    else:
+        stamp(f"  Perplexity split: {len(perplexity_sections)} sections recognized")
+
     # ---------- RENDER PASS 0b JINJA TEMPLATE ----------
     stamp("PASS 0b: rendering DR prompt (Jinja2, no API call)...")
 
@@ -153,6 +160,7 @@ def main(voice_name: str) -> None:
         "voice_mode": vi.get("voice_mode"),
         "corpus_constraint": vi.get("corpus_constraint", "full"),
         "perplexity_findings": perplexity_text,
+        "perplexity_sections": perplexity_sections,
         "gemini_findings": gemini_text,
     }
 
