@@ -1,8 +1,25 @@
 # AI ASSEMBLY — Persona Pipeline
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v3.9 — Option B reorder 2026-04-17
+**Status:** v3.10 — Phase 0.5 scaffolding refactor 2026-04-17
 **Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Designed to run as an n8n workflow, parallel across all voices, calling four model APIs in sequence.
+
+**Changelog from v3.9:**
+- PASS 0A UX HARDENING (fixes 24–28):
+  - `pass_0a_voice_config.md` review_doc now includes a "Wikipedia grounding" section showing the source page, description, and first 500 chars of extract (or explicit "no Wikipedia" note). Makes the grounding source auditable at a glance.
+  - "Why this voice is in the Assembly" section in review_doc now prefixed with a disclaimer: *⚠ Draft rationale — Opus's plausibility guess from training data, not research-verified. Confirm against the DR dossier when it arrives.*
+  - `run_pass0a_voice_config.py` now emits a warning before "Next steps" when Wikipedia grounding was skipped, alerting the human that Pass 0b scaffolding will be thinner.
+  - New `--choose N` CLI flag (1-indexed) for non-interactive Wikipedia picker. Mutually exclusive with `--wiki` and `--hint`. Falls back to interactive picker if N is out of range and TTY is available; exits with error otherwise. Enables batch automation and GUI wrappers.
+  - Validation retry handler now parses the `InputRejected.reason` string to extract and log the specific failed field name and value (`VALIDATION FAIL: field=X, value=Y`).
+- PHASE 0.5 SCAFFOLDING REFACTOR (fixes 29–33):
+  - NEW MODULE: `personas/flows/shared/perplexity_split.py` — splits a 6-section Perplexity dossier into a `{section_number: content}` dict using the same heading patterns as `validate_dr_dossier`. Returns `None` on parse failure (fallback to single-block mode).
+  - `run_phase0_1_research.py` now calls `split_dossier()` after Pass 1a completes and passes both `perplexity_sections` (dict or None) and `perplexity_findings` (full text fallback) to the Jinja template context.
+  - NON-HUMAN DR TEMPLATE: Added Section 6 to the non-human branch. Organisms → "PRIMARY SCIENTIFIC LITERATURE" (foundational papers, review articles, seminal behavioural studies). Systems → "PRIMARY DOCUMENTS" (legislation, treaties, court decisions, indigenous oral tradition). `dr_validation.py` section-6 regex updated to accept all four variants: PRIMARY TEXTS | PRIMARY SCIENTIFIC LITERATURE | PRIMARY DOCUMENTS | RECEPTION AND INFLUENCE.
+  - DR TEMPLATE: Added `corpus_constraint == "lyrics — describe patterns only"` conditional block after hostile-sources appendix. Instructs Claude DR not to reproduce lyrics, to quote non-lyric corpus instead, and to focus on speaking voice for downstream Voice Pipeline.
+  - DR TEMPLATE: Added "What this section feeds downstream" annotations before each section's task bullets in all three type branches (human, non-human organism, non-human system, fictional) — 6 sections × 3 type variants = 18 annotation blocks. Pulls field-level granularity bars from `AI_Assembly_Persona_Card_v2.md`.
+  - DR TEMPLATE RESTRUCTURE: Removed single "PRIOR RESEARCH FINDINGS" block from top. Perplexity scaffolding now interleaved per-section: each section shows `## Section N: HEADING` + annotation block + `Starting material from Perplexity's §N` + `Your task for Section N:` + [existing bullets]. Gemini stays as single "CROSS-DISCIPLINARY ADDITIONS" block after all 6 sections. Fallback block shown when `perplexity_sections` is None but `perplexity_findings` is present.
+- PENDING (Step 34 — follow-up commit): Collaborative Opus rewrite of the 6-section task bullets in the DR template. Current bullets ask for scholarly-research-shaped content; extraction passes need extraction-shaped content (operational notes per principle, rules-out per concept, worked demonstrations, characteristic moves). This rewrite is out of scope for this commit and will be drafted in a separate session.
+- PIPELINE VERSION: Bumped to 3.10.
 
 **Changelog from v3.8:**
 - ARCHITECTURE (Option B reorder): Pass 1a (Perplexity) and Pass 1b (Gemini) now run BEFORE the manual Claude DR session. New script `run_phase0_1_research.py` runs both in parallel, then renders Pass 0b Jinja template with their findings as scaffolding. Claude DR starts from grounded research rather than zero.
