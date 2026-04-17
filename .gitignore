@@ -17,6 +17,9 @@ venv/
 .vscode/
 .idea/
 
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
+
 # Scratch — experiments, one-offs, anything disposable
 scratch/
 
