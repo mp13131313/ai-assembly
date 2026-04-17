@@ -5,7 +5,6 @@
   "voice_mode": "philosophical",
   "hostile_sources": false,
   "corpus_constraint": "full",
-  "needs_dr_supplement": false,
   "primary_text_sources": [
     "https://www.gutenberg.org/cache/epub/72651/pg72651.txt",
     "perseus:arendt.human_condition",

@@ -32,7 +32,7 @@ A single JSON object with two top-level keys: `voice_config`, `review_doc`. No o
 
 ## THE VOICE CONFIG SCHEMA
 
-Produce a JSON object with exactly these fields (the 10 spec fields):
+Produce a JSON object with exactly these fields (the 7 spec fields):
 
 - `name` (string): Display name. Normalize to public/scholarly usage — "Plato" not "Plato of Athens"; "Cleopatra" not "Cleopatra VII Philopator" (long form goes in review_doc). For non-human: "Whanganui River", "Octopus".
 
@@ -46,13 +46,7 @@ Produce a JSON object with exactly these fields (the 10 spec fields):
 
 - `corpus_constraint` (enum: "full" | "lyrics — describe patterns only" | "hostile — read against grain"): `"full"` = normal, primary texts can be quoted. `"lyrics — describe patterns only"` = copyrighted musical corpus, produce pattern descriptions not excerpts. `"hostile — read against grain"` = primary record is hostile accounts requiring reconstruction. Default: `"full"`.
 
-- `needs_dr_supplement` (boolean): Set to `false` for most voices. The pipeline triggers the ChatGPT DR supplement automatically when needed.
-
-- `pass_1a_claude_dr_file` (string): Set to `"inputs/dossiers/<slug>_claude_dr.md"`.
-
 - `conference_context` (string): Set to the literal placeholder `"INJECTED_BY_RUNNER"` — the pipeline overwrites this server-side.
-
-- `casting_rationale` (string): One paragraph explaining why this voice belongs in this Assembly. What makes them irreplaceable for this conference's themes? Be specific.
 
 Do NOT include any other fields. In particular, do NOT include: `primary_text_sources`, `voice_type_adjustments_needed`, `counter_tradition_scholars`, `dominant_hostile_sources`, `contested_interpretations`, `material_culture_evidence`, `voice_specific_warnings`.
 

@@ -120,15 +120,8 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
     # Defaults for optional flags
     normalized = dict(voice_input)
     normalized.setdefault("hostile_sources", False)
-    normalized.setdefault("needs_dr_supplement", True)  # always trigger; cheap and adds depth
     normalized.setdefault("primary_text_sources", [])
     normalized.setdefault("subtype", None)
     normalized.setdefault("corpus_constraint", "full")
-    normalized.setdefault("casting_rationale", "")
-    # Approach C: optional path to a manually-produced Claude Deep Research
-    # markdown dossier (run in claude.ai with Opus + extended thinking + DR).
-    # When present, Pass 1-merge does a three-way contradiction check across
-    # Perplexity, Claude DR, and Gemini.
-    normalized.setdefault("pass_1a_claude_dr_file", None)
 
     return normalized

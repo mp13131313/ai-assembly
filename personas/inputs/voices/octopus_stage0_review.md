@@ -11,7 +11,6 @@
 | impossible | true | auto (non-human organism cannot consent) |
 | hostile_sources | false | auto (rationale below) |
 | corpus_constraint | reconstructed | auto (no authored corpus) |
-| needs_dr_supplement | true | proposed |
 
 (`auto` = mechanical decision; `proposed` = editorial judgment, please review)
 
