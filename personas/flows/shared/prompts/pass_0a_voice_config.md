@@ -44,8 +44,6 @@ Produce a JSON object with these fields. The schema has a CORE BLOCK (mandatory 
 
 - `voice_mode` (string): Propose the dominant mode this voice speaks in. Examples: "philosophical" (Plato), "navigational" (Ibn Battuta), "narrative" (Scheherazade), "analytical" (Ada Lovelace), "prophetic-musical" (Marley), "civic-technical" (Tang), "contrarian-strategic" (Thiel), "sovereign-diplomatic" (Cleopatra), "confessional-polyphonic" (Dostoevsky), "ritual-legal" (Whanganui River), "embodied-distributed" (Octopus). Justify in review_doc with alternatives considered.
 
-- `impossible` (boolean): TRUE if dead, fictional, or non-human-cannot-consent. FALSE if living human who could see and contest this. Plato/Cleopatra: true. Peter Thiel/Audrey Tang: false. Octopus: true. Whanganui River: true (legal personhood ≠ consent capacity).
-
 - `hostile_sources` (boolean): TRUE if the historical record is dominated by enemies, colonisers, rival powers, victors writing after defeat, or hostile press. Cleopatra: TRUE (Roman sources). Scheherazade: TRUE or borderline (Orientalist reception). Marley: lightly true (Western press vs. Rasta sources). Plato: FALSE (internal scholarly debate is not hostile witnesses). Living figures: usually FALSE unless heavily contested. Justify in review_doc.
 
 - `corpus_constraint` (enum: "full" | "restricted" | "fragmentary" | "reconstructed"): How complete is the primary-text corpus? "full" = complete preserved body of work (Plato, Dostoevsky). "restricted" = significant body with attribution disputes. "fragmentary" = only fragments survive (Pre-Socratics). "reconstructed" = voice exists only through scholarly reconstruction of hostile records (Cleopatra). For non-humans: "reconstructed" or analog.
@@ -86,7 +84,6 @@ Markdown document the human reads in 1-2 minutes to sanity-check your decisions.
 | name | ... | auto |
 | type | ... | auto |
 | voice_mode | ... | proposed |
-| impossible | ... | auto (computed from biographical data) |
 | hostile_sources | ... | proposed (rationale below) |
 | corpus_constraint | ... | proposed |
 

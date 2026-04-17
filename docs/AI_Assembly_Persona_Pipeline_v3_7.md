@@ -65,7 +65,6 @@
 - Added consistency verification mode for Pass 7-pre (fictional voices: verify internal consistency, not citations)
 - Added narratival disagreement_protocol guidance (counter-story, not counter-argument)
 - Added narratival response format note in Pass 7b (a tale IS a committed position)
-- Added `impossible` boolean to input schema with hard validation gate (Node 0) — enforces the Assembly's impossible-participants premise before any API calls
 - Added Node 0: Input Validation (type and voice_mode validation)
 
 **Changelog from v2.0:**
@@ -122,7 +121,6 @@ Each voice enters the pipeline with these fields:
   "name": "Example Voice Name",
   "type": "human",
   "subtype": null,
-  "impossible": true,
   "voice_mode": "philosophical",
   "hostile_sources": false,
   "corpus_constraint": "full",
@@ -133,7 +131,6 @@ Each voice enters the pipeline with these fields:
 ```
 
 - **name** — the voice. Perplexity and Gemini research from this alone.
-- **impossible** — boolean. `true` = dead, non-human, fictional, or otherwise unable to physically attend. `false` = living and reachable. **Hard validation: the pipeline REJECTS any voice with `impossible: false`.** The Assembly requires impossible participants — this is the conceptual premise, not a preference. If a previously living figure has died, update this field and re-run. This check runs as the first node in the n8n workflow, before any API calls.
 - **type** — "human", "non-human", or "fictional". Drives prompt branching: "human" gets historical grounding and biographical research. "Non-human" gets anti-anthropomorphisation guardrails. "Fictional" gets narrative-tradition grounding — the voice's world is a text, not a period; its beliefs are attributed by scholars and readers, not extracted from personal writings or inferred from behaviour.
 - **subtype** — null for human and fictional voices. For `type: "non-human"`: `"organism"` (has neurons, perceives, responds — e.g., an octopus, a whale) or `"system"` (no cognition, no perception — a geographical, legal, or cosmological entity whose "voice" comes from the relationship between the entity and its human/indigenous kin, e.g., a river with legal personhood, a mountain). Drives a sub-branch within the non-human Block 4: organism gets ecological/cognitive grounding; system gets relational/cosmological/legal grounding. Default: null.
 - **voice_mode** — "philosophical" (systematic thinker with explicit positions), "observational" (experiential/narrative voice whose principles must be inferred from practice, behaviour, or artistic output), or "narratival" (voice whose primary engagement is through storytelling rather than argument or observation — typically fictional characters or mythological figures). Drives field specification variants in Passes 2–5. Must be set explicitly by the builder for each voice. "Narratival" is typically paired with `type: "fictional"` but not necessarily — an oral storytelling tradition voice could be narratival and non-human.
@@ -618,18 +615,6 @@ Template fields marked with `{{double_braces}}` are populated from the input or 
 **Cost:** $0.00
 
 ```
-IF impossible === false THEN
-  STOP pipeline.
-  OUTPUT: {
-    "status": "REJECTED",
-    "reason": "{{name}} is not an impossible participant. The Assembly requires 
-    voices that cannot physically attend: the dead, the non-human, the fictional. 
-    Living, reachable figures violate the core premise.",
-    "action": "If this figure has recently died or become unreachable, update the 
-    impossible field to true and re-run."
-  }
-END
-
 IF type NOT IN ["human", "non-human", "fictional"] THEN
   STOP pipeline.
   OUTPUT: {"status": "REJECTED", "reason": "Invalid type. Must be human, non-human, or fictional."}
