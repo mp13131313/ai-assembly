@@ -2,7 +2,7 @@
   "name": "Cleopatra",
   "type": "human",
   "subtype": null,
-  "voice_mode": "sovereign-diplomatic",
+  "voice_mode": "observational",
   "hostile_sources": true,
   "corpus_constraint": "hostile — read against grain",
   "needs_dr_supplement": false,
