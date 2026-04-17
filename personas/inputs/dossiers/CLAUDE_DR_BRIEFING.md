@@ -247,7 +247,7 @@ Begin the dossier now. Use the six section headings exactly as given above. Prod
 
 2. **Verify** it has the six expected headings and no persona-card structure. If it drifted toward a persona card, regenerate with a reminder that the output must be a research dossier only.
 
-3. **Inputs/voices/\<voice\>.json** — the per-voice input already references `pass_1a_claude_dr_file: "inputs/dossiers/<voice_slug>_claude_dr.md"` for Plato and Arendt. For the other 10 voices, either the file doesn't exist yet (will be created when you build the per-voice input) or the field can be added to an existing input file.
+3. **No config needed** — the pipeline finds the dossier file automatically from the voice slug (`inputs/dossiers/<voice_slug>_claude_dr.md`). No extra field in the voice config is required.
 
 4. **Run the pipeline** for that voice: `python3 run_persona_pipeline.py <VoiceName>`. Pass 1-merge will do a three-way comparison (Perplexity + Claude DR + Gemini) and flag contradictions if it finds them — the Muhammad-not-in-the-panel hallucination that appeared in the first Plato DR run will be caught at this stage for future runs.
 
