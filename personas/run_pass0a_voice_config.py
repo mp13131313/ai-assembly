@@ -34,7 +34,13 @@ from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.node0_validation import InputRejected, validate_input
 
-_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
+
+class IncompleteResponse(ValueError):
+    """Raised when the model response is missing required keys."""
+
+
+_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError,
+              IncompleteResponse)
 
 
 def _call_with_retry(stamp_fn, **kwargs):
@@ -94,9 +100,9 @@ def main(name: str, hint: str) -> None:
         r = _call_with_retry(stamp, user=user_msg, **_call_kwargs)
         stamp(f"  tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
         out = r["json"]
-        for required in ("voice_config", "review_doc"):
-            if required not in out:
-                sys.exit(f"Pass 0a output missing required key: {required}")
+        missing = [k for k in ("voice_config", "review_doc") if k not in out]
+        if missing:
+            raise IncompleteResponse(f"Response missing required keys: {missing}")
         vc = out["voice_config"]
         vc.pop("primary_text_sources", None)
         # Temporarily inject real conference_context so validate_input() passes

@@ -31,7 +31,13 @@ import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug
 
-_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
+
+class IncompleteResponse(ValueError):
+    """Raised when the model response is missing required keys."""
+
+
+_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError,
+              IncompleteResponse)
 
 
 def _call_with_retry(stamp_fn, **kwargs):
@@ -87,25 +93,29 @@ def main(name: str) -> None:
         f"INPUT:\n{json.dumps(user_payload, ensure_ascii=False, indent=2)}"
     )
 
+    _call_kwargs = dict(system=system, model="claude-opus-4-7", max_tokens=24000,
+                       temperature=1.0, thinking_budget=None, response_format_json=True)
+
+    def _do_call(user_msg: str) -> str:
+        r = _call_with_retry(stamp, user=user_msg, **_call_kwargs)
+        stamp(f"  tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
+        out = r["json"]
+        if "dr_prompt" not in out:
+            raise IncompleteResponse("Response missing required key: dr_prompt")
+        return out["dr_prompt"]
+
     stamp("Calling Claude Opus 4.7 + adaptive thinking...")
     t0 = time.time()
-    r = _call_with_retry(
-        stamp,
-        system=system,
-        user=user,
-        model="claude-opus-4-7",
-        max_tokens=24000,
-        temperature=1.0,
-        thinking_budget=None,  # adaptive thinking
-        response_format_json=True,
-    )
+    try:
+        dr_prompt = _do_call(user)
+    except IncompleteResponse as exc:
+        stamp(f"  Incomplete response on attempt 1: {exc}; retrying…")
+        try:
+            dr_prompt = _do_call(user)
+        except IncompleteResponse as exc2:
+            sys.exit(f"Pass 0b failed after retry: {exc2}")
     wall = time.time() - t0
-    stamp(f"  done in {wall:.1f}s | tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
-
-    out = r["json"]
-    if "dr_prompt" not in out:
-        sys.exit("Pass 0b output missing required key: dr_prompt")
-    dr_prompt = out["dr_prompt"]
+    stamp(f"  done in {wall:.1f}s")
 
     DR_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
     dr_prompt_path = DR_PROMPTS_DIR / f"{slug}_dr_prompt.md"
