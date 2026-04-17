@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -196,7 +197,13 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None,
     try:
         voice_config, review_doc = _do_call(user)
     except InputRejected as exc:
-        stamp(f"  Validation failed on attempt 1: {exc}; retrying with critique…")
+        _field_match = re.search(
+            r"Invalid (voice_mode|corpus_constraint|subtype|type)\s+(\S+)", str(exc)
+        )
+        _field = _field_match.group(1) if _field_match else "unknown"
+        _value = _field_match.group(2).strip("'\".,") if _field_match else "unknown"
+        stamp(f"  VALIDATION FAIL: field={_field}, value={_value}")
+        stamp(f"  Retrying with critique…")
         critique_user = user + (
             f"\n\nYour previous response failed validation:\n{exc}\n"
             "Fix the invalid enum fields and return valid JSON."
