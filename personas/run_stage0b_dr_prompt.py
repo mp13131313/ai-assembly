@@ -113,7 +113,14 @@ def main(name: str) -> None:
     dr_prompt_path = DR_PROMPTS_DIR / f"{slug}_dr_prompt.md"
     dr_prompt_path.write_text(dr_prompt, encoding="utf-8")
 
-    stamp("Stage 0b complete.")
+    stamp(
+        f"Stage 0b complete. Wove in: "
+        f"{len(voice_config.get('counter_tradition_scholars') or [])} counter-tradition scholars, "
+        f"{len(voice_config.get('dominant_hostile_sources') or [])} hostile sources, "
+        f"{len(voice_config.get('contested_interpretations') or [])} contested interpretations, "
+        f"{len(voice_config.get('voice_specific_warnings') or [])} voice-specific warnings — "
+        f"review {dr_prompt_path.name} before pasting into claude.ai."
+    )
     stamp(f"  DR prompt:     {dr_prompt_path.relative_to(REPO_ROOT)}")
     stamp("")
     stamp("Next steps:")
