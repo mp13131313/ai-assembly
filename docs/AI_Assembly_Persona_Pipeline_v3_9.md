@@ -1,8 +1,19 @@
 # AI ASSEMBLY — Persona Pipeline
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v3.8 — walkthrough fixes 2026-04-17
+**Status:** v3.9 — Option B reorder 2026-04-17
 **Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Designed to run as an n8n workflow, parallel across all voices, calling four model APIs in sequence.
+
+**Changelog from v3.8:**
+- ARCHITECTURE (Option B reorder): Pass 1a (Perplexity) and Pass 1b (Gemini) now run BEFORE the manual Claude DR session. New script `run_phase0_1_research.py` runs both in parallel, then renders Pass 0b Jinja template with their findings as scaffolding. Claude DR starts from grounded research rather than zero.
+- NEW SCRIPT: `run_phase0_1_research.py` — Phase 0.5 runner. Runs Pass 1a + 1b in parallel, renders DR prompt, exits. No API call for prompt generation.
+- PIPELINE SPLIT: `run_persona_pipeline.py` now starts from Pass 1-merge. Validates that `runs/<slug>/01_research/perplexity_dossier.json` and `gemini_broad_scan.json` exist (produced by `run_phase0_1_research.py`). Exits with clear message if missing.
+- PASS 0b: Converted from Opus LLM call to deterministic Jinja2 template. Pass 0b template now accepts `perplexity_findings` and `gemini_findings` as scaffolding variables. Zero API cost, zero drift risk.
+- WIKIPEDIA: Pass 0a now queries Wikipedia Search API and presents an interactive picker. `--wiki URL` flag for direct URL provision. Fallback `--hint TEXT` for voices without a Wikipedia match. `wikipedia_url` stored in voice_config for downstream use.
+- FIELD DROPS: `needs_dr_supplement` removed (Claude DR replaces ChatGPT supplement). `pass_1a_claude_dr_file` removed (path derived from slug). `casting_rationale` moved from voice_config to review_doc.
+- VALIDATION: Pass 0a now validates enum fields client-side using `validate_input()` and retries once with critique on `InputRejected`. Retry wrapper extended to `IncompleteResponse` (missing required keys).
+- DR VALIDATION: `validate_dr_dossier()` refactored into `flows/shared/dr_validation.py`. New standalone script `personas/scripts/validate_dr_dossier.py` for human pre-filing check.
+- PIPELINE VERSION: Bumped to 3.9.
 
 **Changelog from v3.7:**
 - MODEL: Upgraded all Opus calls to claude-opus-4-7 (Pass 0a, 0b, 2, 3, 4a, 5, 7b; research flows). Pass 1-merge upgraded Sonnet → Opus 4.7 with max_tokens 4096 → 16000 (three-way contradiction detection at long context benefits from Opus).
@@ -169,24 +180,29 @@ Three principles from the persona construction research:
 
 ## The Pipeline at a Glance
 
-| Pass | Name | Tool | Fields | Depends On |
+| Pass | Name | Tool | Script | Depends On |
 |---|---|---|---|---|
-| 1a | Research Dossier | Perplexity API | — | Input |
-| 1b | Broad Scan | Gemini API | — | Input |
-| 1c | Primary Text Fetch | Web fetch + manual | — | 1a (identifies texts) |
-| 1-merge | Contradiction Check | Claude API | — | 1a + 1b |
-| CT | Coherence Threading | Claude API | — | After each generation pass |
-| 2 | Identity & Boundaries | Claude API | 9 | 1-merge |
-| 3 | Intellectual Core | Claude API (+ ChatGPT DR conditional) | 5 | 1-merge + 2 |
-| 4a | Voice | Claude API | 7 | 1-merge + 1c + 2 + 3 |
-| 4b | Artifact | Claude API | 8 | 1-merge + 2 + 3 + 4a |
-| 5 | Engagement | Claude API | 4 | 2 + 3 |
-| 6 | Corpus Curation | Claude API | 1 | 1c + 3 + 4a |
-| 7-pre | Citation Verification | Claude API | — | All passes |
-| 7a | Cross-Model Validation | ChatGPT or Gemini API | — | All passes |
-| 7b | Worked Provocations | Claude or ChatGPT DR | 1 | All passes |
-| 7c | Negative Constraints | Claude or Gemini API | 2 refined | 7b output |
-| Derive | Provocateur Profile + Evaluation Rubric | Claude API | — | Completed card |
+| 0a | Voice Config | Claude Opus 4.7 | run_pass0a_voice_config.py | — |
+| 1a | Research Dossier | Perplexity API | run_phase0_1_research.py | 0a |
+| 1b | Broad Scan | Gemini API | run_phase0_1_research.py | 0a |
+| 0b | DR Prompt | Jinja2 (no API) | run_phase0_1_research.py | 0a + 1a + 1b |
+| 1a-DR | Claude DR Session | Manual (claude.ai) | — | 0b |
+| 1-merge | Contradiction Check | Claude Opus 4.7 | run_persona_pipeline.py | 1a + 1b + 1a-DR |
+| 1c-extract | URL Extraction | Claude Sonnet 4.6 | run_persona_pipeline.py | 1-merge |
+| 1c | Primary Text Fetch | Web fetch + manual | run_persona_pipeline.py | 1c-extract |
+| 1d | Excerpt Selection | Claude Sonnet 4.6 | run_persona_pipeline.py | 1c |
+| CT | Coherence Threading | Claude Sonnet 4.6 | run_persona_pipeline.py | After each generation pass |
+| 2 | Identity & Boundaries | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge |
+| 3 | Intellectual Core | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge + 2 |
+| 4a | Voice | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge + 1c + 2 + 3 |
+| 4b | Artifact | Claude Sonnet 4.6 | run_persona_pipeline.py | 2 + 3 + 4a |
+| 5 | Engagement | Claude Opus 4.7 | run_persona_pipeline.py | 2 + 3 |
+| 6 | Corpus Curation | Claude Sonnet 4.6 | run_persona_pipeline.py | 1c + 3 + 4a |
+| 7-pre | Citation Verification | Claude Sonnet 4.6 | run_persona_pipeline.py | All passes |
+| 7a | Cross-Model Validation | GPT or Gemini | run_persona_pipeline.py | All passes |
+| 7b | Worked Provocations | Claude Opus 4.7 | run_persona_pipeline.py | All passes |
+| 7c | Negative Constraints | Gemini → Sonnet | run_persona_pipeline.py | 7b |
+| Derive | Provocateur Profile + Rubric | Claude Sonnet 4.6 | run_persona_pipeline.py | Completed card |
 
 **Total:** 35 pre-conference fields produced + 2 runtime continuity fields = 37.
 
@@ -194,10 +210,33 @@ Three principles from the persona construction research:
 
 ---
 
-# Phase 1: Research Dossier
+# Phase 0.5: Pre-DR Research
 
-**Tool:** Perplexity API (sonar-deep-research) + Gemini API, parallel
-**Time:** 5–10 minutes per voice
+**Script:** `run_phase0_1_research.py`
+**Tool:** Perplexity API (sonar-deep-research) + Gemini API, parallel + Jinja2 template render
+**Time:** 5–10 minutes per voice (Perplexity dominates; Gemini runs in parallel)
+**Output:** `runs/<slug>/01_research/perplexity_dossier.json`, `gemini_broad_scan.json`, `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md`
+
+## What This Phase Produces
+
+Pass 1a (Perplexity) and Pass 1b (Gemini) run in parallel before the manual Claude DR session. Their findings are woven into the Pass 0b DR prompt as scaffolding — Claude DR starts from grounded research rather than discovering from zero.
+
+**Sequence:**
+```
+Pass 0a → run_phase0_1_research.py:
+  ├── Pass 1a (Perplexity sonar-deep-research) ─┐
+  └── Pass 1b (Gemini broad scan)               ─┴─→ Pass 0b (Jinja render) → DR prompt
+```
+
+After this phase: human runs the DR session on claude.ai (60–180 min), saves dossier, then runs `run_persona_pipeline.py`.
+
+---
+
+# Phase 1: Research Merge
+
+**Script:** `run_persona_pipeline.py` (starts here — requires Phase 0.5 outputs)
+**Tool:** Claude Opus 4.7 (Pass 1-merge), Claude Sonnet 4.6 (Pass 1c-extract, 1d)
+**Time:** 10–20 minutes per voice
 **Output:** A comprehensive, cited research document
 
 ## What This Phase Produces

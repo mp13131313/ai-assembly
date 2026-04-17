@@ -1,6 +1,6 @@
 # AI Assembly — Current State
 
-**Last updated:** 2026-04-16
+**Last updated:** 2026-04-17
 **Purpose:** Gap analysis and project-state snapshot. What's built, what's specified-but-not-built, what's not-yet-specified, key decisions, known bugs, pre-Athens critical path. Complements the briefing docs (which describe the target state) and the pipeline specs (which describe individual components). This doc describes **what exists now** and **what's next**.
 
 > When something lands, update this doc in the same commit. When the system drifts from the briefing, update the briefing and this doc together.
@@ -18,7 +18,7 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   ├── AI_Assembly_Architecture_v1.md     # STALE — see README
 │   ├── AI_Assembly_Infrastructure_Setup.md# STALE — see README
 │   ├── AI_Assembly_Persona_Card_v2.md
-│   ├── AI_Assembly_Persona_Pipeline_v3_8.md
+│   ├── AI_Assembly_Persona_Pipeline_v3_9.md
 │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   ├── AI_Assembly_Researcher_Pipeline.md
 │   ├── AI_Assembly_Transcription_Pipeline.md
@@ -38,10 +38,11 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   ├── runs/                              # per-run outputs (gitignored)
 │   └── scripts/                           # sessions/speakers regeneration
 ├── personas/                               # pre-conference: voice card build
-│   ├── run_persona_pipeline.py            # 17 nodes orchestrated end-to-end
-│   ├── run_pass0a_voice_config.py              # voice config + review doc
-│   ├── run_pass0b_dr_prompt.py           # per-voice DR prompt generator
-│   ├── flows/shared/                      # io, clients, node0_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
+│   ├── run_pass0a_voice_config.py         # Pass 0a: voice config + review doc
+│   ├── run_phase0_1_research.py           # Phase 0.5: Perplexity + Gemini → DR prompt
+│   ├── run_pass0b_dr_prompt.py            # Pass 0b: DR prompt only (no research)
+│   ├── run_persona_pipeline.py            # main pipeline (Pass 1-merge → Derive)
+│   ├── flows/shared/                      # io, clients, node0_validation, wikipedia, dr_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
 │   ├── inputs/
 │   │   ├── conference_context.json
 │   │   ├── voices/                        # 4 voice configs: cleopatra, hannah_arendt, octopus, plato
@@ -67,10 +68,11 @@ Built and verified:
 |---|---|---|
 | Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (freeform), subtype, corpus_constraint |
 | Pass 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
-| Pass 0b DR Prompt | ✓ | Instantiates per-voice DR prompt from finalized config |
-| Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped |
+| Phase 0.5 Pre-DR Research | ✓ | `run_phase0_1_research.py`: Pass 1a (Perplexity) + Pass 1b (Gemini) in parallel, then renders DR prompt via Jinja2 |
+| Pass 0b DR Prompt | ✓ | Jinja2 template renderer (no API call); scaffolds DR prompt with research findings |
+| Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped; now runs in Phase 0.5 |
 | Pass 1a-DR Claude | ✓ | Manual paste; Approach C merge partner |
-| Pass 1b Gemini | ✓ | Broad scan |
+| Pass 1b Gemini | ✓ | Broad scan; now runs in Phase 0.5 |
 | Pass 1-merge | ✓ | 3-way contradiction check (Perplexity + Claude DR + Gemini) |
 | Pass 1c-extract | ✓ | NEW: extracts primary text URLs from merged dossier |
 | Pass 1c fetch | ✓ | SSRF-hardened (scheme restriction, RFC1918 block, 5MB cap) |
