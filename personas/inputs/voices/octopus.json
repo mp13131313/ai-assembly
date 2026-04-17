@@ -2,7 +2,7 @@
   "name": "Octopus",
   "type": "non-human",
   "subtype": "organism",
-  "voice_mode": "embodied-distributed",
+  "voice_mode": "observational",
   "hostile_sources": false,
   "corpus_constraint": "full",
   "needs_dr_supplement": true,
