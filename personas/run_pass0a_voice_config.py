@@ -1,7 +1,7 @@
 """Pass 0a — Voice Config.
 
-Takes a voice name and hint. Produces TWO artifacts a human reviews and signs
-off on before Pass 0b generates the per-voice DR prompt:
+Takes a voice name and optional Wikipedia URL. Produces TWO artifacts a human
+reviews and signs off on before Pass 0b generates the per-voice DR prompt:
 
   inputs/voices/<slug>.json                  — pipeline input
   inputs/voices/<slug>_pass0a_review.md      — human review doc
@@ -11,9 +11,9 @@ human sign-off, reads the (possibly-edited) voice config, and produces the
 customized DR prompt at inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
 
 Usage:
-    python3 run_pass0a_voice_config.py "Cleopatra" --hint "the Egyptian queen"
-    python3 run_pass0a_voice_config.py "Peter Thiel" --hint "the investor"
-    python3 run_pass0a_voice_config.py "Octopus" --hint "the cephalopod"
+    python3 run_pass0a_voice_config.py "Cleopatra"
+    python3 run_pass0a_voice_config.py "Cleopatra" --wiki https://en.wikipedia.org/wiki/Cleopatra
+    python3 run_pass0a_voice_config.py "Octopus" --hint "the cephalopod (no Wikipedia page needed)"
 """
 from __future__ import annotations
 
@@ -33,6 +33,7 @@ import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.node0_validation import InputRejected, validate_input
+from flows.shared import wikipedia as _wiki
 
 
 class IncompleteResponse(ValueError):
@@ -64,7 +65,60 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def main(name: str, hint: str) -> None:
+def _resolve_wikipedia(name: str, wiki_url: str | None, hint: str | None) -> dict | None:
+    """Return a Wikipedia summary dict, or None if no match found."""
+    if wiki_url:
+        stamp(f"Fetching Wikipedia summary from provided URL…")
+        try:
+            return _wiki.summary(wiki_url)
+        except Exception as exc:
+            stamp(f"  WARN: Wikipedia fetch failed ({exc}); proceeding without grounding")
+            return None
+
+    stamp(f"Searching Wikipedia for '{name}'…")
+    try:
+        results = _wiki.search(name, limit=5)
+    except Exception as exc:
+        stamp(f"  WARN: Wikipedia search failed ({exc}); use --wiki or --hint to provide grounding manually")
+        return None
+
+    if not results:
+        stamp("  No Wikipedia results found. Use --wiki or --hint for grounding.")
+        return None
+
+    print()
+    print("Wikipedia search results:")
+    for i, r in enumerate(results, 1):
+        desc = f" — {r['description']}" if r["description"] else ""
+        print(f"  {i}. {r['title']}{desc}")
+    print("  none — skip Wikipedia grounding (will use --hint if provided)")
+    print()
+
+    while True:
+        try:
+            raw = input("Select a result (1-5 or 'none'): ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            raw = "none"
+        if raw == "none" or raw == "0":
+            stamp("Wikipedia grounding skipped.")
+            return None
+        try:
+            idx = int(raw) - 1
+            if 0 <= idx < len(results):
+                chosen = results[idx]
+                stamp(f"  Fetching summary for '{chosen['title']}'…")
+                try:
+                    return _wiki.summary(chosen["url"])
+                except Exception as exc:
+                    stamp(f"  WARN: Summary fetch failed ({exc}); proceeding without grounding")
+                    return None
+            else:
+                print(f"  Please enter a number between 1 and {len(results)}, or 'none'.")
+        except ValueError:
+            print("  Please enter a number or 'none'.")
+
+
+def main(name: str, wiki_url: str | None = None, hint: str | None = None) -> None:
     stamp(f"Pass 0a voice config: '{name}'")
 
     if not PROJECT_CONTEXT_PATH.exists():
@@ -72,13 +126,19 @@ def main(name: str, hint: str) -> None:
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
 
+    wiki_summary = _resolve_wikipedia(name, wiki_url, hint)
+
     project_ctx = json.loads(PROJECT_CONTEXT_PATH.read_text())
     system = SYSTEM_PROMPT_PATH.read_text()
-    user_payload = {
-        "name": name,
-        "disambiguation_hint": hint,
-        "conference_context": project_ctx,
-    }
+    user_payload: dict = {"name": name, "conference_context": project_ctx}
+
+    if wiki_summary:
+        user_payload["wikipedia_extract"] = wiki_summary["extract"]
+        user_payload["wikipedia_description"] = wiki_summary["description"]
+        user_payload["wikipedia_url"] = wiki_summary["url"]
+    elif hint:
+        user_payload["disambiguation_hint"] = hint
+
     user = (
         "Produce the two Pass 0a artifacts for the voice below. "
         "Return ONLY the JSON object with keys voice_config, review_doc.\n\n"
@@ -134,6 +194,10 @@ def main(name: str, hint: str) -> None:
     # Inject the real conference context (overwrite model's placeholder)
     voice_config["conference_context"] = _real_ctx
 
+    # Add Wikipedia URL if we have it (becomes scaffolding for Pass 0b)
+    if wiki_summary:
+        voice_config["wikipedia_url"] = wiki_summary["url"]
+
     # Write artifacts
     VOICES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -156,6 +220,9 @@ def main(name: str, hint: str) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pass 0a — Voice Config")
     parser.add_argument("name", help='Voice name (e.g. "Cleopatra", "Octopus")')
-    parser.add_argument("--hint", required=True, help="Disambiguation hint (required)")
+    parser.add_argument("--wiki", metavar="URL",
+                        help="Wikipedia URL to use directly (skips interactive picker)")
+    parser.add_argument("--hint", metavar="TEXT",
+                        help="Fallback disambiguation hint when no Wikipedia match exists")
     args = parser.parse_args()
-    main(args.name, args.hint)
+    main(args.name, wiki_url=args.wiki, hint=args.hint)
