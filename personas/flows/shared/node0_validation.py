@@ -39,23 +39,6 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
     """
     name = voice_input.get("name", "<unknown>")
 
-    # impossible — hard gate. Living, reachable figures violate the premise.
-    impossible = voice_input.get("impossible")
-    if impossible is not True:
-        raise InputRejected(
-            status="REJECTED",
-            reason=(
-                f"{name} is not flagged as an impossible participant. The "
-                f"Assembly requires voices that cannot physically attend: "
-                f"the dead, the non-human, the fictional. Living, reachable "
-                f"figures violate the core premise."
-            ),
-            action=(
-                "If this figure has recently died or become unreachable, "
-                "update the impossible field to true and re-run."
-            ),
-        )
-
     # type
     vtype = voice_input.get("type")
     if vtype not in VALID_TYPES:

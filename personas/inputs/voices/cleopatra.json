@@ -3,7 +3,6 @@
   "type": "human",
   "subtype": null,
   "voice_mode": "sovereign-diplomatic",
-  "impossible": true,
   "hostile_sources": true,
   "corpus_constraint": "reconstructed",
   "needs_dr_supplement": false,
