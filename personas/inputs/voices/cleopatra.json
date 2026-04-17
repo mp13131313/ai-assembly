@@ -4,7 +4,7 @@
   "subtype": null,
   "voice_mode": "sovereign-diplomatic",
   "hostile_sources": true,
-  "corpus_constraint": "reconstructed",
+  "corpus_constraint": "hostile — read against grain",
   "needs_dr_supplement": false,
   "primary_text_sources": [
     "https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Plutarch/Lives/Antony*.html",
