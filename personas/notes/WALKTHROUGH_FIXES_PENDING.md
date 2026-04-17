@@ -327,6 +327,151 @@ Pass 0a → Pass 1a (Perplexity) + Pass 1b (Gemini) parallel → Pass 0b
 
 ---
 
+## Round 3 — Added during second mock walkthrough (2026-04-17)
+
+All items are Pass 0a hardening + UX improvements. No architectural changes.
+
+### 24. Show Wikipedia source in review_doc
+
+Currently `wikipedia_url` is stored in voice_config but not prominently shown in the review_doc. Human reviewing the voice_config can't easily see which Wikipedia page grounded the classification.
+
+**Fix:** Add a new section at the top of the review_doc structure in `pass_0a_voice_config.md`:
+```markdown
+## Wikipedia grounding
+
+- Source: [<page_title>](<wikipedia_url>)
+- Description: <wikipedia_description>
+- Extract (first 500 chars): <wikipedia_extract[:500]>...
+```
+
+Or, when no Wikipedia was used:
+```markdown
+## Wikipedia grounding
+
+No Wikipedia page was used — classification derives from Opus training data + `--hint` (if provided).
+```
+
+Makes the grounding source auditable at a glance.
+
+### 25. Explicit disclaimer on "Why this voice is in the Assembly"
+
+This section in review_doc is Opus's plausibility guess from training data, not research-verified. Currently reads as if it were grounded.
+
+**Fix:** Update `pass_0a_voice_config.md` to instruct the model to prefix the section with an italic disclaimer: *"⚠ Draft rationale — Opus's plausibility guess from training data, not research-verified. Confirm against the DR dossier when it arrives."*
+
+### 26. Warning at Pass 0a exit when Wikipedia was skipped
+
+When Wikipedia fails or human chooses `none`, downstream Pass 0b's DR prompt omits the "start from Wikipedia" instruction. Quality floor is lower. Human should be aware.
+
+**Fix:** In `run_pass0a_voice_config.py`, add a warning-colored stamp line before the "Next steps" block when `wiki_summary is None`:
+```
+⚠ Wikipedia grounding was skipped. Pass 0b's DR prompt will omit the Wikipedia starting-point instruction. Expect thinner scaffolding unless you hand-edit the DR prompt.
+```
+
+### 27. `--choose N` flag for non-interactive Wikipedia pick
+
+Currently the Wikipedia picker requires a TTY (stdin input). Batch automation and future GUI wrappers need a non-interactive path.
+
+**Fix:** Add `--choose N` CLI flag (1-indexed) to `run_pass0a_voice_config.py`. When provided, skips the interactive picker and selects result N from the search results. Mutually exclusive with `--wiki` and `--hint`. If N is out of range (e.g., only 3 results but `--choose 5`), fall back to the picker if TTY is available, else `sys.exit` with clear error.
+
+### 28. Log the specific failed field when validation fails
+
+Currently the validation-failure retry passes the full error string. For telemetry / debugging repeated patterns, log the specific field that failed.
+
+**Fix:** In `run_pass0a_voice_config.py`'s validation exception handler, parse the `InputRejected.reason` string for the field name and log it separately via `stamp(f"  VALIDATION FAIL: field={field}, value={value}")`. Tiny; makes patterns visible across runs.
+
+---
+
+## Round 4 — DR scaffolding refactor (2026-04-17)
+
+The biggest cluster. Goal: make the Claude DR prompt produce a dossier that closely matches what extraction passes 2–6 need, better than what the whole-spec feed achieves. Split into mechanical parts (Sonnet-executable) and a bullet-rewrite step (collaborative Opus drafting).
+
+### 29. Python split of Perplexity output by section
+
+Perplexity output is already 6-sectioned (uses the same prompt structure as the DR target). Add a helper that splits it into a `perplexity_sections` dict `{1: "bio content", 2: "intellectual content", 3: "reasoning content", 4: "voice content", 5: "boundaries content", 6: "primary texts content"}`. Use regex matching the same section-heading patterns `validate_dr_dossier` checks.
+
+**Files:**
+- New helper in `personas/flows/shared/perplexity_split.py` (or add to existing `dr_validation.py`)
+- `run_phase0_1_research.py` — call the helper after `pass1a` loads, pass `perplexity_sections` to template context instead of `perplexity_findings`
+
+**Fallback:** if regex split yields fewer than 6 sections (Perplexity drift), log a warning and fall back to the current single-block `perplexity_findings`. Don't hard-fail.
+
+### 30. Card-field annotations per section in the DR template
+
+For each of the 6 sections in `pass_0b_dr_prompt.md`, add a "What this section feeds downstream" block listing the card fields this section produces material for, with granularity bars from Card v2.
+
+**Example for Section 2:**
+```markdown
+## Section 2: INTELLECTUAL FRAMEWORK
+
+What this section feeds downstream:
+  - constitution — 10-20 principles with operational notes; ≥2 internal tensions; 3+ concepts unique to this figure with textual references
+  - concept_lexicon — 5-10 concepts, each with definition AND what it rules out
+  - bold_engagement_topics — derived from the constitution's most provocative commitments
+  - epistemic_frame_statement — draws on the scholars whose readings inform the construction
+```
+
+Write these annotations for all 6 sections. Pull field-level granularity bars verbatim from `docs/AI_Assembly_Persona_Card_v2.md` "Therefore" instructions.
+
+### 31. `corpus_constraint` conditional block in the DR template
+
+Currently the template has no `corpus_constraint` handling. Marley-class voices (`corpus_constraint: "lyrics — describe patterns only"`) would ask Claude DR to quote lyrics it can't reproduce.
+
+**Add after the hostile-sources conditional:**
+```jinja
+{% if corpus_constraint == "lyrics — describe patterns only" %}
+MUSICAL VOICE — LYRICS CONSTRAINT: This voice's primary corpus is copyrighted lyrics. Do NOT attempt to reproduce lyrics verbatim. Instead:
+- Describe lyrical patterns, thematic arcs, structural devices across the catalogue
+- Quote interviews, speeches, and non-lyric writings verbatim (these are the speaking-voice corpus)
+- In Section 6 PRIMARY TEXTS, list albums/songs by title + thematic description, not lyrical content
+- The downstream Voice Pipeline will produce text not song — research the speaking voice, not the singing voice
+{% endif %}
+```
+
+### 32. Non-human DR template has only 5 sections — validator expects 6
+
+Real bug. The `type == "non-human"` branch of `pass_0b_dr_prompt.md` produces 5 sections (ECOLOGICAL/SYSTEMIC FOUNDATION, PERCEPTUAL WORLD/SYSTEMIC PROPERTIES, RELATIONAL PATTERNS, SCIENTIFIC LITERATURE, PHILOSOPHICAL AND LEGAL FRAMEWORKS). But `validate_dr_dossier()` expects 6 sections including section 6 PRIMARY TEXTS. Any non-human DR dossier (Octopus, Whanganui) would fail validation at pipeline startup.
+
+**Fix:** add a Section 6 to the non-human branch. For organisms: "PRIMARY SCIENTIFIC LITERATURE" — key foundational papers, review articles, monographs, field guides. For systems: "PRIMARY DOCUMENTS" — foundational legal documents, treaties, court decisions, indigenous oral tradition sources.
+
+Also update `validate_dr_dossier.py` section-6 regex to match `PRIMARY TEXTS | PRIMARY SCIENTIFIC LITERATURE | PRIMARY DOCUMENTS`.
+
+### 33. Update scaffolding in template to use per-section inputs
+
+With fix #29 populating `perplexity_sections` as a dict, update `pass_0b_dr_prompt.md` to interleave scaffolding per-section instead of one big `perplexity_findings` block:
+
+```jinja
+{# old: single PRIOR RESEARCH FINDINGS block #}
+
+{# new: per-section scaffolding, interleaved with section bodies #}
+## Section 1: BIOGRAPHICAL FOUNDATION
+[card-field annotations — fix #30]
+
+Starting material from Perplexity's §1:
+{{ perplexity_sections[1] if perplexity_sections else "(Perplexity output unavailable)" }}
+
+Your task for Section 1: [existing bullets — to be rewritten in Step 34]
+```
+
+Gemini broad scan stays as a single "Cross-disciplinary additions" block AFTER all 6 sections (don't section Gemini — its value is unstructured breadth).
+
+### 34. [Opus collaborative drafting] — Rewrite 6-section bullets to produce extraction-shaped material
+
+**This step is drafted in Opus, not Sonnet.** Currently the 6-section bullets ask for scholarly-research-shaped content ("how the figure argued"). Extraction passes need research shaped for extraction ("principles WITH operational notes"; "concepts WITH what they rule out"; "worked demonstrations of reasoning").
+
+Specific gaps to fill (identified during walkthrough):
+- Section 2: add bullet for operational-note per principle + rules-out per concept + ≥2 internal tensions + 3+ unique concepts with textual refs
+- Section 3: add bullets for "how this figure characteristically encounters the unfamiliar" (→ translation_protocol) + "habitual questions this figure brings to any material" (→ default_questions) + "worked demonstration on a documented dilemma" (→ reasoning_method steps)
+- Section 4: add bullet for 3-5 named characteristic moves (→ characteristic_moves)
+- Section 5: add bullet for specific views conflicting with modern sensibilities + how the figure held them
+- Section 6: typical length, opening, development, closing patterns of works (→ characteristic_output_structure, length_and_format_constraints)
+
+Output of this step: a drafted set of new section bullets, inserted into `pass_0b_dr_prompt.md` as a follow-up commit after Round 3 Sonnet work completes.
+
+**Sonnet must NOT touch the existing section bullets.** Leave them as-is for the collaborative drafting step to replace.
+
+---
+
 ## Deferred (separate work)
 
 **conference_context_paragraph enrichment.** Current value is a one-liner. Embedded verbatim into Pass 7b. Discuss and rewrite separately.
