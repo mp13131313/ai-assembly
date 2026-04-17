@@ -12,7 +12,7 @@
 |---|---|---|
 | **Architecture** (this document) | `AI_Assembly_Architecture.md` | System map for the builder. |
 | **Persona Card** | `AI_Assembly_Persona_Card_v2.md` | 37 runtime fields per voice, 8 sections. Output of the Persona Pipeline, input to the Voice Pipeline. |
-| **Persona Pipeline** | `AI_Assembly_Persona_Pipeline_v3_8.md` | Automated agent pipeline for building each voice. 7 passes, 4 models, parallel across 12 voices. Runs pre-conference. |
+| **Persona Pipeline** | `AI_Assembly_Persona_Pipeline_v3_9.md` | Automated agent pipeline for building each voice. 7 passes, 4 models, parallel across 12 voices. Runs pre-conference. |
 | **Transcription Pipeline** | `AI_Assembly_Transcription_Pipeline.md` | Turns recorded sessions and participant reflections into clean, named transcripts. First stage of the overnight chain. Runs overnight. |
 | **Researcher Pipeline** | `AI_Assembly_Researcher_Pipeline.md` | Processes conference transcripts into extraction tables. Runs overnight. |
 | **Provocateur Pipeline** | `AI_Assembly_Provocateur_Pipeline.md` | Formulates provocations and packages per-voice briefings. Runs overnight. |
@@ -485,7 +485,7 @@ Budget **15–30 minutes of human review per night** for medium/low-confidence s
 ## What This Document Does NOT Cover
 
 - **Conceptual framing** (what the Assembly means, why it matters) → `AI_Assembly_Briefing.md`
-- **How to build a voice** (research, quality standards, prompt templates) → `AI_Assembly_Persona_Pipeline_v3_8.md`
+- **How to build a voice** (research, quality standards, prompt templates) → `AI_Assembly_Persona_Pipeline_v3_9.md`
 - **What fields a voice needs** (37-field spec with Fidelity / Intrigue / Therefore) → `AI_Assembly_Persona_Card_v2.md`
 - **Detailed overnight prompt templates** (system/user prompts with `{{fields}}`) → `AI_Assembly_Voice_Pipeline.md`
 - **Transcription pipeline logic and prompts** (stage-by-stage spec, speaker-ID and cleaning prompts, schemas) → `AI_Assembly_Transcription_Pipeline.md`

@@ -203,6 +203,130 @@ Counts (voice_mode): philosophical 6, observational 4, narratival 2, null (syste
 
 ---
 
+## Round 2 — Added during mock walkthrough (2026-04-17)
+
+### 15. Wikipedia-grounded disambiguation (replaces `--hint` flag)
+
+`--hint` is brittle (quality of hint determines quality of output) and puts disambiguation burden on the human. Replace with Wikipedia-grounded pickup.
+
+**Flow:**
+- `run_pass0a_voice_config.py "Name"` — no `--hint` required
+- Pass 0a queries Wikipedia Search API (free, unauth, ~1s), shows top 5 results with short descriptions
+- User picks a number (or passes `--wiki <url>` to skip the picker)
+- Pass 0a fetches the chosen page's lead paragraph + infobox via Wikipedia REST API
+- Opus call receives Wikipedia content as grounding alongside the name
+- Output voice_config adds `wikipedia_url` field (new — becomes scaffolding for Pass 0b)
+- Fall back to `--hint` text input when no Wikipedia match exists
+
+**Files:**
+- `run_pass0a_voice_config.py` — add Wikipedia search + picker + page fetch + `--wiki` flag as alternative
+- `pass_0a_voice_config.md` — add `wikipedia_url` to schema; tell model to use Wikipedia content as grounding for classification decisions
+- `node0_validation.py` + `io.py` — add `wikipedia_url` as optional schema field
+
+### 16. Drop `needs_dr_supplement`
+
+Claude DR bakes deep research into Phase 1. OpenAI Pass 3 supplement is redundant.
+
+- Remove field from voice_config schema (Pass 0a prompt)
+- Remove from `node0_validation.py` defaults
+- Remove Pass 3 DR supplement block from `run_persona_pipeline.py` (currently around lines 360-403)
+
+Saves ~$2/voice.
+
+### 17. Drop `pass_1a_claude_dr_file`
+
+Redundant — path always derivable from slug.
+
+- Remove field from voice_config schema
+- Remove injection at `run_pass0a_voice_config.py:116`
+- `run_persona_pipeline.py` constructs path `inputs/dossiers/<slug>_claude_dr.md` from voice name at load time
+
+### 18. Drop `casting_rationale` from voice_config
+
+Field isn't consumed downstream. Belongs in review_doc (human-readable), not voice_config (machine-consumed).
+
+- Remove field from voice_config schema
+- Update Pass 0a prompt to put rationale content inside the review_doc instead
+- Remove field from `node0_validation.py`
+
+### 19. Pass 0a client-side validation of enum fields
+
+Currently a malformed `voice_mode` / `corpus_constraint` / `subtype` passes Pass 0a silently and only fails at pipeline runtime (Node 0).
+
+- After `call_claude` returns, validate the 10 fields against their enums (reuse `node0_validation.validate_input`)
+- On failure: retry once with a critique block appended to the user prompt; if still invalid, `sys.exit`
+- Catches the issue at Pass 0a exit, not 20 minutes later
+
+### 20. Pass 0a retry wrapper extension
+
+Current wrapper catches `JSONDecodeError` / `APIError` / `RateLimitError`. Add: missing-required-key case (voice_config or review_doc absent, or 10-field schema incomplete).
+
+- Extend `_call_with_retry` to catch `KeyError` and a new `IncompleteResponse` exception
+- Same retry-once semantics
+
+### 21. Convert Pass 0b from Opus call → Jinja template
+
+Pass 0b is now pure template instantiation — type-variant selection + substitution + conditional hostile-sources appendix. No model judgment needed. Currently uses Opus at $0.50-1/voice and risks model drift (emitting editorial customization contrary to instructions).
+
+- Replace `run_pass0b_dr_prompt.py`'s LLM call with a pure Python + Jinja2 template renderer
+- `pass_0b_dr_prompt.md` converts from LLM-system-prompt to pure Jinja template
+- Deterministic, zero API cost, zero drift risk
+
+### 22. Standalone `validate_dr_dossier.py` script
+
+Human runs this BEFORE saving Claude DR output, to catch truncation/shape errors at file-save time instead of pipeline start-time.
+
+- New file `personas/scripts/validate_dr_dossier.py`
+- Reuses the `validate_dr_dossier()` function from `run_persona_pipeline.py` (refactor to shared module)
+- Takes a path argument: `python3 scripts/validate_dr_dossier.py inputs/dossiers/cleopatra_claude_dr.md`
+- Clear exit codes: 0 = valid, 1 = invalid with diagnostic message
+
+### 23. Option B reorder — Perplexity + Gemini before Claude DR
+
+**Biggest architectural change.** Pass 1a (Perplexity) and Pass 1b (Gemini) run BEFORE the manual Claude DR session. Their findings (hostile sources identified, counter-tradition scholars named, contested interpretations surfaced, material culture catalogued) feed into Pass 0b's DR prompt as scaffolding. Claude DR starts from a grounded position, verifies + expands instead of discovering from zero.
+
+**Script split (B-split-2 — recommended):**
+- `run_pass0a_voice_config.py` — unchanged (voice_config + review doc)
+- `run_phase0_1_research.py` — new: runs Pass 1a (Perplexity) + Pass 1b (Gemini) in parallel, then Pass 0b (now receives both outputs as scaffolding input), writes DR prompt to `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md`, exits
+- Human runs Claude DR on claude.ai, saves to `inputs/dossiers/<slug>_claude_dr.md`
+- `run_persona_pipeline.py` — runs from Pass 1-merge onward (detects DR file), with Pass 1c review gate
+
+**New total sequence:**
+```
+Pass 0a → Pass 1a (Perplexity) + Pass 1b (Gemini) parallel → Pass 0b
+  → manual Claude DR (60-180 min)
+  → Pass 1-merge (3-way: Perplexity + Claude DR + Gemini)
+  → Pass 1c-extract → Pass 1c fetch → primary-text review gate
+  → Pass 1d → Pass 2 → ... → Derive
+```
+
+**Pass 0b receives as scaffolding input:**
+- Perplexity dossier text (Section 2 Intellectual Framework + Section 6 Primary Texts + hostile-source tags if applicable)
+- Gemini broad scan text (lesser-known material, cross-disciplinary links)
+- Wikipedia URL + lead paragraph (from fix #15)
+
+**Pass 0b's DR prompt then tells Claude DR:**
+- "Here's what Perplexity already found: [...]"
+- "Here's what Gemini surfaced: [...]"
+- "Start from the Wikipedia page: [url]"
+- "Verify these, expand depth, find what they missed. Produce the six-section dossier."
+
+**Cost impact:** same Perplexity + Gemini calls as today, just reordered. Pass 0b Opus call replaced by Jinja template (fix #21) — net save ~$0.50-1/voice.
+
+**Wall time impact:** Phase 0 part 2 now takes ~5-10 min (Perplexity time) before human starts Claude DR. Total wall time per voice unchanged — it's the same work moved.
+
+**Human friction:** two invocations of pipeline scripts instead of one, plus the DR session. Matches the existing resumable pattern.
+
+**Quality win:** hostile-source and obscure voices (Cleopatra, Whanganui edge cases) get grounded scaffolding rather than relying on Claude DR's from-scratch web search. Makes the quality floor more consistent across the 12 voices.
+
+**Files:**
+- New: `personas/run_phase0_1_research.py`
+- Modify: `run_persona_pipeline.py` — split out Pass 1a, 1b, 0b; pipeline now starts at Pass 1-merge
+- Modify: `pass_0b_dr_prompt.md` — Jinja template that accepts `perplexity_dossier`, `gemini_broad_scan`, `wikipedia_summary` as context variables
+- Update spec doc `AI_Assembly_Persona_Pipeline_v3_8.md` — new Phase 0.5 section or fold into Phase 0
+
+---
+
 ## Deferred (separate work)
 
 **conference_context_paragraph enrichment.** Current value is a one-liner. Embedded verbatim into Pass 7b. Discuss and rewrite separately.
