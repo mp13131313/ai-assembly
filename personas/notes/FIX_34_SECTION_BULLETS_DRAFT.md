@@ -261,7 +261,7 @@ about this voice's style could be attributed to another figure with
 minimal edits, it is too generic. Specificity — a named move, a cited
 passage, a precise syntactic pattern, a distinctive word usage — is
 what makes voice material extractable into distinctive persona fields.
-If your description of Plato's voice could apply to Aristotle, it's too
+If your description of Hume's voice could apply to Locke, it's too
 shallow. Drive down to what ONLY this figure does.
 ```
 
@@ -277,15 +277,19 @@ shallow. Drive down to what ONLY this figure does.
   rather than build positive theory.") Cite the scholarly source.
 
 - CHARACTERISTIC MOVES — 3 to 5 specific, NAMED patterns documented in
-  secondary scholarship as distinctive to THIS figure. For each: a name
-  (the scholars' name for it if one exists, else a descriptive phrase);
-  a one-sentence description of what the move does; one textual example
-  with work and section reference.
+  secondary scholarship as distinctive to THIS figure. Distinct from
+  Section 3's reasoning moves — these are patterns of EXPRESSION (how
+  the figure writes), not patterns of REASONING (how the figure thinks).
+  Some moves are both; surface the expression dimension here and the
+  reasoning dimension in Section 3. For each: a name (the scholars'
+  name for it if one exists, else a descriptive phrase); a one-sentence
+  description of what the move does; one textual example with work and
+  section reference.
     Examples of what named moves look like (non-panel):
       - Socrates's elenchus: requesting a definition, testing against
         counterexamples, exposing contradiction
-      - Nietzsche's genealogical method: tracing the history of a value
-        to reveal its contingency
+      - Nietzsche's aphoristic reversal: inverting a conventional moral
+        claim through a single epigrammatic sentence
       - Wittgenstein's language-game move: naming the specific usage
         context rather than defining the concept
     NOT general style descriptors — specific, nameable, describable
@@ -478,9 +482,10 @@ translation notes. Vague lists fail downstream.
   intellectual grounding (the figure's argument visible) AND voice
   exemplar (how they actually write). Deliberately over-produce; Pass 1d
   curates down to the final 5-10 for the persona card. For each passage:
-    * Canonical reference (Stephanus pagination for Plato; Bekker numbers
-      for Aristotle; chapter:verse for scripture; page reference for
-      modern works)
+    * Canonical reference — use whichever citation system is standard for
+      this figure (Bekker numbers for Aristotle; line numbers for Homer;
+      chapter:verse for scripture; Stephanus pagination for ancient Greek
+      texts; page reference for modern works)
     * Work + section
     * Primary purpose: "substance" (intellectual content), "voice" (how
       the figure writes), or "both"
