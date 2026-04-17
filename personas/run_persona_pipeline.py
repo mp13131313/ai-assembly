@@ -219,6 +219,7 @@ stamp(f"  merged_dossier: {len(merged_dossier)} chars")
 if vi["primary_text_sources"]:
     # Backward compat: manual override from voice config
     primary_text_urls = vi["primary_text_sources"]
+    _extracted_url_items: list = []  # no extraction step, manual override
     stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
 else:
     def _pass_1c_extract():
@@ -235,6 +236,7 @@ else:
     pass1c_extract = call_or_cache(RUN / "01_research/primary_text_urls.json",
                                    "Pass 1c-extract", _pass_1c_extract)
     extracted = pass1c_extract.get("result", {}).get("primary_text_urls", [])
+    _extracted_url_items = extracted  # saved for review gate
     primary_text_urls = [item["url"] for item in extracted if item.get("url")]
     stamp(f"  extracted {len(primary_text_urls)} URLs from dossier")
     notes = pass1c_extract.get("result", {}).get("extraction_notes", "")
@@ -256,6 +258,85 @@ if primary_text_urls:
 else:
     stamp("PASS 1c: SKIPPED (no primary text URLs found)")
     pass1c = {"passages": []}
+
+
+# ---------- PASS 1c REVIEW GATE ----------
+# Spec Node 1c: manual review required before pipeline proceeds to Pass 1d.
+# Resumes on re-run when primary_texts_reviewed.flag is present.
+
+def _write_primary_texts_review(review_path: Path) -> None:
+    lines = [f"# Primary Text Review — {vi['name']}", ""]
+    corpus = vi.get("corpus_constraint", "")
+    subtype_v = vi.get("subtype", "")
+    if corpus == "lyrics — describe patterns only":
+        lines += [
+            "**CORPUS CONSTRAINT: lyrics — describe patterns only**",
+            "Lyrics are not fetchable by design. Supply an alternative corpus "
+            "(interview transcripts, speeches, scholarly analyses of catalogue "
+            "patterns) before Pass 4a and Pass 6 run.",
+            "",
+        ]
+    if subtype_v == "system":
+        lines += [
+            "**SYSTEM ENTITY (subtype=system)**",
+            "Legislation text, indigenous oral sources, and scholarly legal analyses "
+            "may not be web-fetchable or may need specific editions. Review carefully "
+            "and supplement manually as needed.",
+            "",
+        ]
+    lines += ["## Extracted URLs", ""]
+    if not _extracted_url_items:
+        lines.append("_URLs came from manual voice_config override (primary_text_sources field)._")
+    else:
+        for item in _extracted_url_items:
+            lines.append(f"- {item.get('url', '?')}")
+    lines.append("")
+    lines += ["## Fetch Results", ""]
+    passages = pass1c.get("passages", [])
+    if not passages:
+        lines.append("_No URLs fetched._")
+    else:
+        for p in passages:
+            url = p.get("url", "?")
+            if p.get("error"):
+                err = p["error"]
+                if "timeout" in err.lower():
+                    tag = "TIMEOUT"
+                elif "404" in err:
+                    tag = "404"
+                elif "private" in err.lower() or "ssrf" in err.lower():
+                    tag = "SSRF-BLOCKED"
+                else:
+                    tag = "ERROR"
+                lines.append(f"- FAIL [{tag}] {url}")
+                lines.append(f"  {err}")
+            else:
+                lines.append(f"- OK {url} — {p['char_count']:,} chars (source: {p['source']})")
+    lines += [
+        "",
+        "## Next Steps",
+        "",
+        "1. Review fetch results above.",
+        f"2. Optionally edit 01_research/primary_texts.json to add or replace passages.",
+        "3. Create the flag to continue: touch 01_research/primary_texts_reviewed.flag",
+        f"4. Re-run: python3 run_persona_pipeline.py \"{vi['name']}\"",
+    ]
+    review_path.write_text("\n".join(lines), encoding="utf-8")
+
+_review_flag = RUN / "01_research/primary_texts_reviewed.flag"
+if not _review_flag.exists():
+    _review_path = RUN / "01_research/primary_texts_review.md"
+    _write_primary_texts_review(_review_path)
+    sys.exit(
+        f"\n=== PASS 1c REVIEW GATE ===\n"
+        f"Primary text fetch complete. Human review required before pipeline continues.\n\n"
+        f"  1. Read:    {_review_path.relative_to(REPO_ROOT)}\n"
+        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(REPO_ROOT)} "
+        f"(add/replace passages if needed)\n"
+        f"  3. Create:  touch {_review_flag.relative_to(REPO_ROOT)}\n"
+        f"  4. Re-run:  python3 run_persona_pipeline.py \"{vi['name']}\"\n"
+    )
+stamp("PASS 1c gate: review flag present — continuing to Pass 1d")
 
 
 # ---------- REVISION LOOP STATE ----------
