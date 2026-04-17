@@ -32,6 +32,7 @@ load_dotenv(REPO_ROOT.parent / ".env")
 import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
+from flows.shared.node0_validation import InputRejected, validate_input
 
 _RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
 
@@ -78,39 +79,54 @@ def main(name: str, hint: str) -> None:
         f"VOICE_INPUT:\n{json.dumps(user_payload, ensure_ascii=False, indent=2)}"
     )
 
-    stamp("Calling Claude Opus 4.7 + adaptive thinking...")
-    t0 = time.time()
-    r = _call_with_retry(
-        stamp,
+    _call_kwargs = dict(
         system=system,
-        user=user,
         model="claude-opus-4-7",
         max_tokens=24000,
         temperature=1.0,
         thinking_budget=None,  # adaptive thinking
         response_format_json=True,
     )
+    _real_ctx = project_ctx["conference_context_paragraph"]
+
+    def _do_call(user_msg: str) -> tuple[dict, dict]:
+        """Call Claude, parse, validate enum fields. Returns (voice_config, review_doc)."""
+        r = _call_with_retry(stamp, user=user_msg, **_call_kwargs)
+        stamp(f"  tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
+        out = r["json"]
+        for required in ("voice_config", "review_doc"):
+            if required not in out:
+                sys.exit(f"Pass 0a output missing required key: {required}")
+        vc = out["voice_config"]
+        vc.pop("primary_text_sources", None)
+        # Temporarily inject real conference_context so validate_input() passes
+        # the required-field check (model emits placeholder "INJECTED_BY_RUNNER")
+        vc_for_validation = dict(vc, conference_context=_real_ctx)
+        validate_input(vc_for_validation)
+        return vc, out["review_doc"]
+
+    stamp("Calling Claude Opus 4.7 + adaptive thinking...")
+    t0 = time.time()
+    try:
+        voice_config, review_doc = _do_call(user)
+    except InputRejected as exc:
+        stamp(f"  Validation failed on attempt 1: {exc}; retrying with critique…")
+        critique_user = user + (
+            f"\n\nYour previous response failed validation:\n{exc}\n"
+            "Fix the invalid enum fields and return valid JSON."
+        )
+        try:
+            voice_config, review_doc = _do_call(critique_user)
+        except InputRejected as exc2:
+            sys.exit(f"Pass 0a validation failed after retry: {exc2}")
     wall = time.time() - t0
-    stamp(f"  done in {wall:.1f}s | tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
-
-    out = r["json"]
-    for required in ("voice_config", "review_doc"):
-        if required not in out:
-            sys.exit(f"Pass 0a output missing required key: {required}")
-
-    voice_config = out["voice_config"]
-    review_doc = out["review_doc"]
-
-    # Strip primary_text_sources if the model accidentally emitted it —
-    # this field is a manual-edit hook only, not Pass 0a output.
-    voice_config.pop("primary_text_sources", None)
+    stamp(f"  done in {wall:.1f}s")
 
     display_name = voice_config.get("name", name)
     slug = voice_slug(display_name)
 
-    # Inject the project-level conference context paragraph (don't trust the
-    # model to copy it verbatim — substitute it server-side)
-    voice_config["conference_context"] = project_ctx["conference_context_paragraph"]
+    # Inject the real conference context (overwrite model's placeholder)
+    voice_config["conference_context"] = _real_ctx
 
     # Write artifacts
     VOICES_DIR.mkdir(parents=True, exist_ok=True)
