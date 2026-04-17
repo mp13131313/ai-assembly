@@ -211,6 +211,11 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None) -> Non
     stamp(f"  Voice config:  {voice_path.relative_to(REPO_ROOT)}")
     stamp(f"  Review doc:    {review_path.relative_to(REPO_ROOT)}")
     stamp("")
+    if wiki_summary is None:
+        stamp("⚠ Wikipedia grounding was skipped. Pass 0b's DR prompt will omit the")
+        stamp("  'start from Wikipedia' instruction. Expect thinner scaffolding unless")
+        stamp("  you hand-edit the DR prompt.")
+        stamp("")
     stamp("Next steps:")
     stamp(f"  1. Read {review_path.name} and edit {voice_path.name} if needed")
     stamp(f"  2. Run Pass 0b: python3 run_pass0b_dr_prompt.py \"{display_name}\"")
