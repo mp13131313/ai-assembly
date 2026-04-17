@@ -2,14 +2,18 @@
 from __future__ import annotations
 import re
 
-# Section heading patterns — matches same alternatives validate_dr_dossier uses
+# Section heading patterns — matches same alternatives validate_dr_dossier uses.
+# Section-number prefix (e.g. "1.", "Section 1:") is optional: some research tools
+# emit "## BIOGRAPHICAL FOUNDATION", others "## 1. BIOGRAPHICAL FOUNDATION",
+# others "## Section 1: BIOGRAPHICAL FOUNDATION". All three should split cleanly.
+_NUM_PREFIX = r"(?:(?:Section\s+)?\d+[\.:)]\s*)?"
 _SECTION_PATTERNS = [
-    (1, re.compile(r"^#+\s*1\.\s*(BIOGRAPHICAL|BIOLOGICAL|TEXTUAL|ECOLOGICAL|SYSTEMIC) FOUNDATION\b", re.MULTILINE | re.IGNORECASE)),
-    (2, re.compile(r"^#+\s*2\.\s*(INTELLECTUAL FRAMEWORK|PERCEPTUAL WORLD|SYSTEMIC PROPERTIES|CHARACTER AS INTELLECTUAL CONSTRUCT)\b", re.MULTILINE | re.IGNORECASE)),
-    (3, re.compile(r"^#+\s*3\.\s*(REASONING PATTERNS|RELATIONAL PATTERNS|NARRATIVE STRATEGY)\b", re.MULTILINE | re.IGNORECASE)),
-    (4, re.compile(r"^#+\s*4\.\s*VOICE AND STYLE\b|^#+\s*4\.\s*SCIENTIFIC LITERATURE\b", re.MULTILINE | re.IGNORECASE)),
-    (5, re.compile(r"^#+\s*5\.\s*(HISTORICAL BOUNDARIES|ONTOLOGICAL BOUNDARIES|PHILOSOPHICAL AND LEGAL FRAMEWORKS)\b", re.MULTILINE | re.IGNORECASE)),
-    (6, re.compile(r"^#+\s*6\.\s*(PRIMARY TEXTS|PRIMARY SCIENTIFIC LITERATURE|PRIMARY DOCUMENTS|RECEPTION AND INFLUENCE)\b", re.MULTILINE | re.IGNORECASE)),
+    (1, re.compile(rf"^#+\s*{_NUM_PREFIX}(BIOGRAPHICAL|BIOLOGICAL|TEXTUAL|ECOLOGICAL|SYSTEMIC) FOUNDATION\b", re.MULTILINE | re.IGNORECASE)),
+    (2, re.compile(rf"^#+\s*{_NUM_PREFIX}(INTELLECTUAL FRAMEWORK|PERCEPTUAL WORLD|SYSTEMIC PROPERTIES|CHARACTER AS INTELLECTUAL CONSTRUCT)\b", re.MULTILINE | re.IGNORECASE)),
+    (3, re.compile(rf"^#+\s*{_NUM_PREFIX}(REASONING PATTERNS|RELATIONAL PATTERNS|NARRATIVE STRATEGY)\b", re.MULTILINE | re.IGNORECASE)),
+    (4, re.compile(rf"^#+\s*{_NUM_PREFIX}(VOICE AND STYLE|SCIENTIFIC LITERATURE)\b", re.MULTILINE | re.IGNORECASE)),
+    (5, re.compile(rf"^#+\s*{_NUM_PREFIX}(HISTORICAL BOUNDARIES|ONTOLOGICAL BOUNDARIES|PHILOSOPHICAL AND LEGAL FRAMEWORKS)\b", re.MULTILINE | re.IGNORECASE)),
+    (6, re.compile(rf"^#+\s*{_NUM_PREFIX}(PRIMARY TEXTS|PRIMARY SCIENTIFIC LITERATURE|PRIMARY DOCUMENTS|RECEPTION AND INFLUENCE)\b", re.MULTILINE | re.IGNORECASE)),
 ]
 
 
