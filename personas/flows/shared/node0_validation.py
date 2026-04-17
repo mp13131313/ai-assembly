@@ -79,7 +79,7 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
     # subtype — required for non-human, optional otherwise
     subtype = voice_input.get("subtype")
     if vtype == "non-human":
-        non_human_subtypes = {"organism", "system", "legal_entity", "river_personhood"}
+        non_human_subtypes = {"organism", "system"}
         if subtype not in non_human_subtypes:
             raise InputRejected(
                 status="REJECTED",
