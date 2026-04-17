@@ -87,6 +87,15 @@ HOSTILE SOURCE WARNING: The historical record for {{ display_name_with_hint }} i
 
 - EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
 {% endif %}
+{% if corpus_constraint == "lyrics — describe patterns only" %}
+
+MUSICAL VOICE — LYRICS CONSTRAINT: This voice's primary corpus is copyrighted lyrics. Do NOT attempt to reproduce lyrics verbatim. Instead:
+
+- Describe lyrical patterns, thematic arcs, structural devices across the catalogue
+- Quote interviews, speeches, and non-lyric writings verbatim (these are the speaking-voice corpus)
+- In Section 6 PRIMARY TEXTS, list albums/songs by title + thematic description, not lyrical content
+- The downstream Voice Pipeline will produce text not song — research the speaking voice, not the singing voice
+{% endif %}
 {% elif type == "non-human" %}
 Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this non-human entity. Organize findings under:
 
