@@ -65,7 +65,8 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def _resolve_wikipedia(name: str, wiki_url: str | None, hint: str | None) -> dict | None:
+def _resolve_wikipedia(name: str, wiki_url: str | None, hint: str | None,
+                        choose: int | None = None) -> dict | None:
     """Return a Wikipedia summary dict, or None if no match found."""
     if wiki_url:
         stamp(f"Fetching Wikipedia summary from provided URL…")
@@ -85,6 +86,24 @@ def _resolve_wikipedia(name: str, wiki_url: str | None, hint: str | None) -> dic
     if not results:
         stamp("  No Wikipedia results found. Use --wiki or --hint for grounding.")
         return None
+
+    # Non-interactive path: --choose N
+    if choose is not None:
+        idx = choose - 1
+        if 0 <= idx < len(results):
+            chosen = results[idx]
+            stamp(f"  --choose {choose}: selecting '{chosen['title']}'")
+            try:
+                return _wiki.summary(chosen["url"])
+            except Exception as exc:
+                stamp(f"  WARN: Summary fetch failed ({exc}); proceeding without grounding")
+                return None
+        else:
+            # Out of range: fall back to interactive if TTY, else exit
+            if sys.stdin.isatty():
+                stamp(f"  WARN: --choose {choose} out of range; only {len(results)} results found. Falling back to interactive picker.")
+            else:
+                sys.exit(f"--choose {choose} out of range; only {len(results)} results found")
 
     print()
     print("Wikipedia search results:")
@@ -118,7 +137,8 @@ def _resolve_wikipedia(name: str, wiki_url: str | None, hint: str | None) -> dic
             print("  Please enter a number or 'none'.")
 
 
-def main(name: str, wiki_url: str | None = None, hint: str | None = None) -> None:
+def main(name: str, wiki_url: str | None = None, hint: str | None = None,
+         choose: int | None = None) -> None:
     stamp(f"Pass 0a voice config: '{name}'")
 
     if not PROJECT_CONTEXT_PATH.exists():
@@ -126,7 +146,7 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None) -> Non
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
 
-    wiki_summary = _resolve_wikipedia(name, wiki_url, hint)
+    wiki_summary = _resolve_wikipedia(name, wiki_url, hint, choose=choose)
 
     project_ctx = json.loads(PROJECT_CONTEXT_PATH.read_text())
     system = SYSTEM_PROMPT_PATH.read_text()
@@ -225,9 +245,12 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None) -> Non
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pass 0a — Voice Config")
     parser.add_argument("name", help='Voice name (e.g. "Cleopatra", "Octopus")')
-    parser.add_argument("--wiki", metavar="URL",
-                        help="Wikipedia URL to use directly (skips interactive picker)")
-    parser.add_argument("--hint", metavar="TEXT",
-                        help="Fallback disambiguation hint when no Wikipedia match exists")
+    grp = parser.add_mutually_exclusive_group()
+    grp.add_argument("--wiki", metavar="URL",
+                     help="Wikipedia URL to use directly (skips interactive picker)")
+    grp.add_argument("--hint", metavar="TEXT",
+                     help="Fallback disambiguation hint when no Wikipedia match exists")
+    grp.add_argument("--choose", metavar="N", type=int,
+                     help="Non-interactive: select result N (1-indexed) from Wikipedia search")
     args = parser.parse_args()
-    main(args.name, wiki_url=args.wiki, hint=args.hint)
+    main(args.name, wiki_url=args.wiki, hint=args.hint, choose=args.choose)
