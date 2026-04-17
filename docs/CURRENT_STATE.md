@@ -215,7 +215,7 @@ runs/plato/
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
-**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_8.md` § Phase 5.
+**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_9.md` § Phase 5.
 
 **Status: not built.** The `IMPLEMENTATION_AUDIT_v3_7.md` flagged this in April 2026; since then Phase 3+4 were built but Phase 5 was not.
 
