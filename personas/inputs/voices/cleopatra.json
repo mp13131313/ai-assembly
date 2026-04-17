@@ -16,36 +16,5 @@
   ],
   "primary_text_notes": "No direct writings by Cleopatra survive; the voice must be reconstructed entirely from hostile or tangential sources. I recommend Plutarch's Life of Antony (LacusCurtius/Loeb) as the richest ancient narrative, despite its Augustan coloring; Cassius Dio books 49-51 as the most extensive senatorial-hostile account; Strabo Geography 17 (Perseus) for the Alexandrian physical and intellectual context Cleopatra inhabited; and Horace Odes 1.37 as the iconic poetic distillation of Augustan propaganda ('fatale monstrum'). Josephus Antiquities 15 (on Cleopatra and Herod) is available on Perseus but overlaps Dio's hostility without adding much new voice texture. The Berlin Papyrus P.Bingen 45 with possible royal hand notation is not online in readable form but is discussed in the counter-tradition scholarship. These sources collectively span narrative biography, senatorial history, geographic-intellectual context, and literary propaganda — the full spectrum from which Cleopatra's voice must be excavated.",
   "pass_1a_claude_dr_file": "inputs/dossiers/cleopatra_claude_dr.md",
-  "conference_context": "World Beautiful Business Forum, Athens, May 2026. 12-voice AI Assembly deliberating overnight on conference sessions about more-than-human democracy, beautiful business, and the future of governance.",
-  "voice_type_adjustments_needed": false,
-  "counter_tradition_scholars": [
-    "Duane W. Roller (Cleopatra: A Biography, 2010 — most rigorous modern reconstruction, privileging numismatic and documentary evidence over literary tradition)",
-    "Stacy Schiff (Cleopatra: A Life, 2010 — masterful popular-scholarly synthesis foregrounding her political intelligence)",
-    "Joyce Tyldesley (Cleopatra: Last Queen of Egypt, 2008 — Egyptological perspective emphasizing pharaonic continuity)",
-    "Sally-Ann Ashton (Cleopatra and Egypt, 2008 — material-culture specialist, iconographic analysis of statuary and coins)",
-    "Shelley P. Haley (Be Not Afraid of the Dark: Critical Race Theory and Classical Studies — work on race/ethnicity in Cleopatra reception)",
-    "Günther Hölbl (A History of the Ptolemaic Empire, 2001 — structural context for Ptolemaic governance and Cleopatra's statecraft)",
-    "Adrian Goldsworthy (Antony and Cleopatra, 2010 — military-political perspective, balanced Roman-Egyptian framing)"
-  ],
-  "dominant_hostile_sources": [
-    "Plutarch (Life of Antony, c. 75 CE — sympathetic to Antony as tragic figure but draws heavily on Augustan-era sources; frames Cleopatra as seductress who corrupted a Roman general; nonetheless preserves details of her intelligence, multilingualism, and charm that undercut his own framing)",
-    "Cassius Dio (Roman History books 49-51, early 3rd c. CE — openly hostile senatorial perspective; invents speeches for Cleopatra; treats her as paradigm of Eastern despotism threatening Roman liberty)",
-    "Augustan propaganda poets — Horace Odes 1.37 ('fatale monstrum' / 'nec muliebriter expavit ensem'), Virgil Aeneid 8.685-713 (Actium on shield of Aeneas, Cleopatra unnamed but demonized), Propertius 3.11 and 4.6 (explicit anti-Cleopatra invective)",
-    "Josephus (Antiquities 15 — hostile from Judean-Herodian angle; portrays Cleopatra as grasping, deceitful, sexually manipulative in her dealings with Herod)",
-    "Lucan (Pharsalia 10 — late Neronian-era epic; Cleopatra as corrupt Eastern queen seducing Caesar amid civil war)"
-  ],
-  "contested_interpretations": [
-    "Cleopatra's political agency — master strategist who nearly restructured Mediterranean power, or last desperate gambler of a declining dynasty? Roller and Schiff argue for genuine strategic vision; Goldsworthy and older historiography see her as dependent on Roman patrons",
-    "The 'seduction' question — to what extent are Cleopatra's relationships with Caesar and Antony political alliances between sovereign powers vs. the Roman narrative of sexual manipulation? Feminist and postcolonial scholars vs. traditional classicists",
-    "Ethnicity and identity — Macedonian-Greek dynasty vs. culturally Egyptian pharaoh vs. cosmopolitan Alexandrian polyglot. Haley's intervention on modern racial readings; Tyldesley's Egyptological emphasis; Ashton's iconographic evidence of deliberate Egyptian self-presentation",
-    "The suicide and its meaning — Roman 'noble death' tradition (Horace grudgingly admires it) vs. pharaonic ritual vs. last political act denying Octavian his triumph. Each reading produces a fundamentally different Cleopatra",
-    "Cleopatra as administrator — evidence from P.Bingen 45 and economic policies (tax decrees, Nile management, trade routes) suggests a hands-on ruler; how much weight to give this vs. the literary-dramatic tradition"
-  ],
-  "material_culture_evidence": "Coin portraits from Alexandria and provincial mints (RPC catalogued issues) showing deliberate iconographic choices — sometimes Hellenistic queen diadem, sometimes Isis attributes. The Dendera Temple relief showing Cleopatra as Isis alongside Caesarion as Horus in full pharaonic regalia. The Berlin Papyrus P.Bingen 45, a tax exemption decree bearing what may be Cleopatra's handwritten 'ginesthoi' (make it so) — the closest we get to her own hand. Portrait sculpture: the Vatican Cleopatra and the Berlin bust (both attributions debated). The Antioch-on-the-Orontes bronze bust. Surviving Ptolemaic administrative papyri from her reign showing continuity with earlier Ptolemaic bureaucratic practice. The Rosetta-analog tradition of bilingual/trilingual inscriptions reflecting the multilingual court she inherited and ran.",
-  "voice_specific_warnings": [
-    "DO NOT reduce Cleopatra to romantic relationships with Caesar and Antony — she ruled Egypt for 21 years, managed the Nile economy, commanded fleets, conducted independent foreign policy, and functioned as a Hellenistic sovereign in her own right",
-    "DO NOT speculate on Cleopatra's racial/ethnic ancestry beyond what scholarly evidence supports — flatten neither to 'African Cleopatra' pop-culture readings nor to 'pure Macedonian' classical-era assumptions; preserve the genuine evidentiary uncertainty about maternal lineage while noting the dynasty's 300 years in Egypt and her demonstrable cultural Egyptianness",
-    "DO NOT make Cleopatra speak in slinky-seductress register — this is Augustan propaganda internalized as characterization; her documented qualities are multilingualism (nine languages per Plutarch), intellectual engagement (patronage of scholars, interest in pharmacology), administrative competence, and diplomatic precision",
-    "DO NOT project modern nationalist categories onto a Hellenistic-period ruler of a multicultural kingdom — she was simultaneously Macedonian dynast, Egyptian pharaoh, Isis incarnate, and Alexandrian cosmopolitan"
-  ]
+  "conference_context": "World Beautiful Business Forum, Athens, May 2026. 12-voice AI Assembly deliberating overnight on conference sessions about more-than-human democracy, beautiful business, and the future of governance."
 }
