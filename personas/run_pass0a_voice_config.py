@@ -1,24 +1,19 @@
-"""Stage 0a — Voice Intake.
+"""Pass 0a — Voice Config.
 
-Takes a voice name. Produces TWO artifacts a human reviews and signs off on
-before Stage 0b generates the per-voice DR prompt:
+Takes a voice name and hint. Produces TWO artifacts a human reviews and signs
+off on before Pass 0b generates the per-voice DR prompt:
 
   inputs/voices/<slug>.json                  — pipeline input
-  inputs/voices/<slug>_stage0_review.md      — human review doc
+  inputs/voices/<slug>_pass0a_review.md      — human review doc
 
-Stage 0b (run_stage0b_dr_prompt.py) is a separate script that runs AFTER
+Pass 0b (run_pass0b_dr_prompt.py) is a separate script that runs AFTER
 human sign-off, reads the (possibly-edited) voice config, and produces the
 customized DR prompt at inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
 
-This split exists because the DR prompt depends on editorial decisions
-(hostile_sources, primary_text_sources, contested_interpretations,
-counter_tradition_scholars) that the human may want to edit between
-intake and DR-prompt generation.
-
 Usage:
-    python3 run_stage0a_intake.py "Cleopatra"
-    python3 run_stage0a_intake.py "Peter Thiel" --hint "the investor"
-    python3 run_stage0a_intake.py "Octopus"
+    python3 run_pass0a_voice_config.py "Cleopatra" --hint "the Egyptian queen"
+    python3 run_pass0a_voice_config.py "Peter Thiel" --hint "the investor"
+    python3 run_pass0a_voice_config.py "Octopus" --hint "the cephalopod"
 """
 from __future__ import annotations
 
@@ -39,7 +34,7 @@ from flows.shared.io import voice_slug, write_json_atomic
 
 
 PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
-SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/stage_0a_intake.md"
+SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/pass_0a_voice_config.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
 
 
@@ -47,8 +42,8 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def main(name: str, hint: str | None) -> None:
-    stamp(f"Stage 0a intake: '{name}'")
+def main(name: str, hint: str) -> None:
+    stamp(f"Pass 0a voice config: '{name}'")
 
     if not PROJECT_CONTEXT_PATH.exists():
         sys.exit(f"Missing project config: {PROJECT_CONTEXT_PATH}")
@@ -63,17 +58,17 @@ def main(name: str, hint: str | None) -> None:
         "conference_context": project_ctx,
     }
     user = (
-        "Produce the two Stage 0a artifacts for the voice below. "
+        "Produce the two Pass 0a artifacts for the voice below. "
         "Return ONLY the JSON object with keys voice_config, review_doc.\n\n"
         f"VOICE_INPUT:\n{json.dumps(user_payload, ensure_ascii=False, indent=2)}"
     )
 
-    stamp("Calling Claude Opus 4.6 + adaptive thinking...")
+    stamp("Calling Claude Opus 4.7 + adaptive thinking...")
     t0 = time.time()
     r = call_claude(
         system=system,
         user=user,
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=24000,
         temperature=1.0,
         thinking_budget=None,  # adaptive thinking
@@ -85,10 +80,14 @@ def main(name: str, hint: str | None) -> None:
     out = r["json"]
     for required in ("voice_config", "review_doc"):
         if required not in out:
-            sys.exit(f"Stage 0a output missing required key: {required}")
+            sys.exit(f"Pass 0a output missing required key: {required}")
 
     voice_config = out["voice_config"]
     review_doc = out["review_doc"]
+
+    # Strip primary_text_sources if the model accidentally emitted it —
+    # this field is a manual-edit hook only, not Pass 0a output.
+    voice_config.pop("primary_text_sources", None)
 
     display_name = voice_config.get("name", name)
     slug = voice_slug(display_name)
@@ -104,26 +103,24 @@ def main(name: str, hint: str | None) -> None:
     VOICES_DIR.mkdir(parents=True, exist_ok=True)
 
     voice_path = VOICES_DIR / f"{slug}.json"
-    review_path = VOICES_DIR / f"{slug}_stage0_review.md"
+    review_path = VOICES_DIR / f"{slug}_pass0a_review.md"
 
     write_json_atomic(voice_path, voice_config)
     review_path.write_text(review_doc, encoding="utf-8")
 
-    stamp("Stage 0a complete.")
+    stamp("Pass 0a complete.")
     stamp(f"  Voice config:  {voice_path.relative_to(REPO_ROOT)}")
     stamp(f"  Review doc:    {review_path.relative_to(REPO_ROOT)}")
     stamp("")
     stamp("Next steps:")
     stamp(f"  1. Read {review_path.name} and edit {voice_path.name} if needed")
-    stamp(f"     (especially the editorial-assets fields: counter_tradition_scholars,")
-    stamp(f"      contested_interpretations, material_culture_evidence, voice_specific_warnings)")
-    stamp(f"  2. Run Stage 0b: python3 run_stage0b_dr_prompt.py \"{display_name}\"")
+    stamp(f"  2. Run Pass 0b: python3 run_pass0b_dr_prompt.py \"{display_name}\"")
     stamp(f"  3. Then follow the DR prompt's instructions to produce the dossier.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Stage 0a — Voice Intake")
+    parser = argparse.ArgumentParser(description="Pass 0a — Voice Config")
     parser.add_argument("name", help='Voice name (e.g. "Cleopatra", "Octopus")')
-    parser.add_argument("--hint", default=None, help="Optional disambiguation hint")
+    parser.add_argument("--hint", required=True, help="Disambiguation hint (required)")
     args = parser.parse_args()
     main(args.name, args.hint)

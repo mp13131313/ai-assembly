@@ -1,9 +1,9 @@
 """Node 0 input validation — pure Python, no API call.
 
-Implements the v3.7 spec's Node 0:
-- impossible must be true (Assembly requires impossible participants)
+Implements the spec's Node 0:
 - type must be valid
-- voice_mode must be valid
+- voice_mode must be one of {philosophical, observational, narratival}
+  (null allowed for subtype=system voices)
 - subtype must be valid (and required if type is non-human)
 - corpus_constraint must be valid
 
@@ -67,15 +67,31 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
             ),
         )
 
-    # voice_mode — freeform string, just must be non-empty
+    # voice_mode — strict three-value enum; null allowed for subtype=system only
     vmode = voice_input.get("voice_mode")
-    if not vmode or not isinstance(vmode, str):
-        raise InputRejected(
-            status="REJECTED",
-            reason=(
-                f"voice_mode must be a non-empty string. Got {vmode!r}."
-            ),
-        )
+    _subtype_for_mode = voice_input.get("subtype")
+    _valid_voice_modes = {"philosophical", "observational", "narratival"}
+    if _subtype_for_mode == "system":
+        # system entities bypass voice_mode branching; null is the correct value
+        if vmode is not None:
+            raise InputRejected(
+                status="REJECTED",
+                reason=(
+                    f"subtype=system voices must have voice_mode=null (system "
+                    f"entities use subtype overrides, not voice_mode branching). "
+                    f"Got {vmode!r}."
+                ),
+            )
+    else:
+        if vmode not in _valid_voice_modes:
+            raise InputRejected(
+                status="REJECTED",
+                reason=(
+                    f"Invalid voice_mode {vmode!r}. Must be one of: "
+                    f"{sorted(_valid_voice_modes)}. "
+                    f"(subtype=system voices may use null.)"
+                ),
+            )
 
     # subtype — required for non-human, optional otherwise
     subtype = voice_input.get("subtype")

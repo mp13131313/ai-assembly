@@ -39,8 +39,8 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   └── scripts/                           # sessions/speakers regeneration
 ├── personas/                               # pre-conference: voice card build
 │   ├── run_persona_pipeline.py            # 17 nodes orchestrated end-to-end
-│   ├── run_stage0a_intake.py              # voice config + review doc
-│   ├── run_stage0b_dr_prompt.py           # per-voice DR prompt generator
+│   ├── run_pass0a_voice_config.py              # voice config + review doc
+│   ├── run_pass0b_dr_prompt.py           # per-voice DR prompt generator
 │   ├── flows/shared/                      # io, clients, node0_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
 │   ├── inputs/
 │   │   ├── conference_context.json
@@ -66,8 +66,8 @@ Built and verified:
 | Component | Status | Notes |
 |---|---|---|
 | Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (freeform), subtype, corpus_constraint |
-| Stage 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
-| Stage 0b DR Prompt | ✓ | Instantiates per-voice DR prompt from finalized config |
+| Pass 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
+| Pass 0b DR Prompt | ✓ | Instantiates per-voice DR prompt from finalized config |
 | Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped |
 | Pass 1a-DR Claude | ✓ | Manual paste; Approach C merge partner |
 | Pass 1b Gemini | ✓ | Broad scan |
@@ -416,17 +416,17 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 **Decision date:** 2026-04-15. Documented in 3 places: `personas/flows/shared/prompts/persona_pass_7b_provocations.md`, `personas/HANDOFF.md`, `runtime/flows/voice/README.md`. Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
-### 5.11 Pass 1a primary text URLs moved from Stage 0a to Pass 1c-extract (commit b1868da)
+### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
 
-**Why:** Stage 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
+**Why:** Pass 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
 
 ### 5.12 `voice_mode` is now freeform (commit b1868da)
 
-**Why:** Stage 0a proposes creative per-voice modes like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic". Old VALID_VOICE_MODES set `{philosophical, observational, narratival}` was too restrictive. Validation now just checks non-empty string. Prompt branching inside individual passes still uses specific mode values where relevant.
+**Why:** Pass 0a proposes creative per-voice modes like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic". Old VALID_VOICE_MODES set `{philosophical, observational, narratival}` was too restrictive. Validation now just checks non-empty string. Prompt branching inside individual passes still uses specific mode values where relevant.
 
 ### 5.13 `needs_dr_supplement` hardcoded to True (commit b1868da)
 
-**Why:** the DR supplement (GPT-4o call in Pass 3) is cheap ($0.10) and always adds depth. No reason to conditionally skip. Removed from Stage 0a schema.
+**Why:** the DR supplement (GPT-4o call in Pass 3) is cheap ($0.10) and always adds depth. No reason to conditionally skip. Removed from Pass 0a schema.
 
 ### 5.14 Prefect orchestration (not n8n)
 
@@ -447,7 +447,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v2`. Hand-written stubs for all 12 members. Must be replaced with real Derive output from persona pipeline before production.
 - **`personas/inputs/voices/`**: 4 voice configs exist (plato, hannah_arendt, cleopatra, octopus). 8 more needed.
 - **`personas/inputs/dossiers/`**: only Plato has a completed Claude DR dossier (`plato_claude_dr.md`). Other voices need their DR dossiers produced via claude.ai (60–120 min each).
-- **`personas/inputs/dossiers/_dr_prompts/`**: only 2 prompts exist (cleopatra, octopus). 9 more need generating via `run_stage0b_dr_prompt.py` (fast — seconds per voice after Stage 0a completes).
+- **`personas/inputs/dossiers/_dr_prompts/`**: only 2 prompts exist (cleopatra, octopus). 9 more need generating via `run_pass0b_dr_prompt.py` (fast — seconds per voice after Pass 0a completes).
 
 ### 6.2 Pipeline gaps
 
@@ -557,7 +557,7 @@ In the sequence the user intends to work:
 
 - [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of worked_provocations.
 - [ ] Re-read Arendt's 02_passes output; complete any passes that failed or didn't run; produce final assembled card + provocateur_profile.
-- [ ] Spot-check Cleopatra's Stage 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Stage 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
+- [ ] Spot-check Cleopatra's Pass 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Pass 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
 - [ ] Spot-check Octopus similarly.
 - [ ] Compare the 4 cards side-by-side: do they actually sound different? If Plato and Arendt read similarly, that's a Phase 5 Cross-Persona QC finding (currently caught manually).
 
@@ -569,7 +569,7 @@ Candidates, in likely order of tractability:
 3. Bob Marley (musical voice; tests `corpus_constraint: "lyrics — describe patterns only"`)
 4. Dostoevsky or Ada Lovelace (well-documented; baseline check)
 
-Each: Stage 0a (15 min + review) → Stage 0b (seconds) → DR session (60–120 min human-in-loop at claude.ai) → run_persona_pipeline (60–90 min automated) → human review (30–60 min).
+Each: Pass 0a (15 min + review) → Pass 0b (seconds) → DR session (60–120 min human-in-loop at claude.ai) → run_persona_pipeline (60–90 min automated) → human review (30–60 min).
 
 Total per voice: ~3–4 hours.
 
