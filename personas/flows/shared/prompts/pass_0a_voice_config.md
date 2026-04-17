@@ -77,6 +77,18 @@ Markdown document the human reads in 1-2 minutes to sanity-check your decisions.
 
 (`auto` = mechanical decision; `proposed` = editorial judgment, please review)
 
+## Wikipedia grounding
+
+If `wikipedia_url` was provided in the input, include:
+
+- Source: [<page_title>](<wikipedia_url>)
+- Description: <wikipedia_description>
+- Extract (first 500 chars): <wikipedia_extract[:500]>...
+
+If no Wikipedia page was used, write instead:
+
+No Wikipedia page was used — classification derives from Opus training data + `--hint` (if provided).
+
 ## Identity notes
 
 Two or three sentences on the figure: full name (if abbreviated above), birth/death dates if applicable, the one-sentence "who they are" framing.
