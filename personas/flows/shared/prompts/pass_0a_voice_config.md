@@ -90,6 +90,10 @@ If FALSE: one sentence on why the scholarly record doesn't trigger the protocol.
 
 Primary text sources (URLs) are NOT proposed by Pass 0a — Pass 0a has no internet access. Instead, primary texts are discovered by the three research sources (Perplexity, Claude DR, Gemini) in their Section 6 outputs, extracted after Pass 1-merge. To manually override, populate `primary_text_sources` in the voice config after reviewing the pipeline's URL extraction.
 
+## Why this voice is in the Assembly
+
+One paragraph explaining why this voice belongs in this specific Assembly. What makes them irreplaceable for this conference's themes? Be specific about what they contribute that no other panel member does.
+
 ## What I think a domain expert should look at
 
 Bulleted list of decisions where you're least confident or where a specialist might disagree.
