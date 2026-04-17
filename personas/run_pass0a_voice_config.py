@@ -112,9 +112,6 @@ def main(name: str, hint: str) -> None:
     # model to copy it verbatim — substitute it server-side)
     voice_config["conference_context"] = project_ctx["conference_context_paragraph"]
 
-    # Set pass_1a_claude_dr_file path (consistent with pipeline expectation)
-    voice_config["pass_1a_claude_dr_file"] = f"inputs/dossiers/{slug}_claude_dr.md"
-
     # Write artifacts
     VOICES_DIR.mkdir(parents=True, exist_ok=True)
 
