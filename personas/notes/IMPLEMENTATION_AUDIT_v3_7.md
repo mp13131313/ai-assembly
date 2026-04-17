@@ -94,7 +94,7 @@ System prompt is the spec's text, ported from Handlebars `{{#if}}` to Jinja2 `{%
 
 User prompt matches spec.
 
-Configuration: spec says Sonnet 4.6 (or Opus for complex figures), temperature 0.2, max_tokens 8192, Extended Thinking with budget 10000. My runner uses Opus 4.6, temperature 1.0, max_tokens 24000, adaptive thinking. **Deviations:**
+Configuration: spec says Sonnet 4.6 (or Opus for complex figures), temperature 0.2, max_tokens 8192, Extended Thinking with budget 10000. My runner uses Opus 4.7, temperature 1.0, max_tokens 24000, adaptive thinking. **Deviations:**
 - **Opus instead of Sonnet:** intentional — both Arendt and Plato are "complex figures" per spec's allowance.
 - **Temperature 1.0 instead of 0.2:** Anthropic requires temperature=1.0 when extended thinking is enabled. The spec's 0.2 was written before this constraint existed.
 - **max_tokens 24000 instead of 8192:** I bumped this when Pass 3 truncated mid-JSON at 16K. Pass 2 itself doesn't need it but the helper is shared.

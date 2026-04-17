@@ -2007,7 +2007,7 @@ TRIGGER: All per-voice workflows complete
 ## Claude API
 
 **Endpoint:** `https://api.anthropic.com/v1/messages`
-**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-6` (complex figures)
+**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-7` (complex figures)
 **Batch API:** 50% discount for non-urgent. Entire pipeline can run as batch.
 **Temperature per node:** 0.0 (verification), 0.1 (selection), 0.2 (analytical), 0.3 (creative), 0.4 (provocations)
 

@@ -104,10 +104,10 @@ from flows.shared.io import (
 
 # --- Config ---------------------------------------------------------------
 
-# Default to Opus 4.6 — canonical model for Provocateur Pipeline v1 per
+# Default to Opus 4.7 — canonical model for Provocateur Pipeline v1 per
 # the validation run on dev_msc_test. Override via CLAUDE_MODEL env var
 # for dev iteration on Sonnet.
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-6")
+CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
 
 # Adaptive thinking for all three LLM tasks — the Provocateur is
 # editorially heavy (activation scoring, coverage balancing, and
@@ -1246,7 +1246,7 @@ def run_provocateur(run_root: str | Path) -> dict:
     total_pairs = len(pairs)
     total_overall = total_pairs + len(already_done_formulations)
     # Batch the parallel submissions to stay within Anthropic's rate limits.
-    # Opus 4.6 is rate-limited at 8K output tokens/min and each Formulation
+    # Opus 4.7 is rate-limited at 8K output tokens/min and each Formulation
     # call produces ~3K output, so 4 concurrent calls per minute is the
     # sustainable steady-state. Configurable via env vars for tuning.
     batch_size = int(os.environ.get("PROVOCATEUR_FORMULATION_BATCH", "4"))

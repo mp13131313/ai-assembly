@@ -70,7 +70,7 @@ CLAUDE_MAX_TOKENS = 64000
 
 # Optional per-step model override for Speaker ID. Defaults to
 # CLAUDE_MODEL (Sonnet in the baseline config). Set to
-# "claude-opus-4-6" for difficult sessions where the extra reasoning
+# "claude-opus-4-7" for difficult sessions where the extra reasoning
 # capacity helps — non-native English speakers, complex multi-person
 # Q&A, incomplete roster metadata, or any session where Pass 5
 # re-attribution has to do non-trivial work. Cleaning and semantic

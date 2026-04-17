@@ -27,7 +27,7 @@ Changes from v2:
 
 - **§G** → Node 2 (Grouping) prompts are entirely rewritten around KJ-method "why these belong together" framing, replacing the v2.2 "declarative finding" framing. The rewrite adds: a taxonomy of binding patterns (convergence, shared question with split answers, shared target with different tools, sequential elaboration, principle-and-instances, shared blind spot, common redirect) taught by example; an asymmetric self-check on narrow clusters requiring active search for absorbable items; no numeric size targets; abstract-honesty as the implicit ceiling.
 
-- **§H** → Model recommendation updated from "Claude Sonnet 4.6" to "Claude Opus 4.6 with `thinking.type=adaptive`". The v2.4 validation run produced a ~4× improvement in cluster granularity and a 58-percentage-point improvement in cross-session theme ratio over v2.3 Opus without thinking changes, and exceeded the Sonnet v2.2 baseline on every axis.
+- **§H** → Model recommendation updated from "Claude Sonnet 4.6" to "Claude Opus 4.7 with `thinking.type=adaptive`". The v2.4 validation run produced a ~4× improvement in cluster granularity and a 58-percentage-point improvement in cross-session theme ratio over v2.3 Opus without thinking changes, and exceeded the Sonnet v2.2 baseline on every axis.
 
 - **§I** → Output schemas in Step 1 and Step 2 are updated with the actual v2.4 field names and JSON examples using namespaced IDs.
 
@@ -215,7 +215,7 @@ This is deliberate. Affinity grouping is "do these positions belong together?" �
 
 ### Why Round 1 sees a minimal input — design rationale
 
-The v2.3 iteration of this pipeline (Opus 4.6 + adaptive thinking, same prompts, full extraction records as input) produced clusters averaging 2.08 extractions and a cross-session theme ratio of only 25%. Diagnostic work identified two root causes:
+The v2.3 iteration of this pipeline (Opus 4.7 + adaptive thinking, same prompts, full extraction records as input) produced clusters averaging 2.08 extractions and a cross-session theme ratio of only 25%. Diagnostic work identified two root causes:
 
 **The namespace prefix was acting as a grouping shortcut.** With extractions labeled `breaking_point:014`, `vox_populi:007`, etc., the model could reason "items with the same prefix come from the same conversation and are likely to cluster together". This is correct at a structural level — within-session extractions do have tighter argumentative connections via `responds_to` edges and shared moderator framing — but it produces session-local clusters where the spec wants content-based affinity that spans sessions.
 
@@ -393,11 +393,11 @@ Review queue — turns containing words the cleaning pass flagged as uncertain (
 
 ---
 
-### Node 2a: Clustering (Claude Opus 4.6 — once, after all sessions extracted)
+### Node 2a: Clustering (Claude Opus 4.7 — once, after all sessions extracted)
 
 **Loaded from:** `flows/shared/prompts/researcher_clustering.md`
 
-**Runtime config:** `model="claude-opus-4-6"`, `thinking.type=adaptive`, `max_tokens=40000`, **streaming required**.
+**Runtime config:** `model="claude-opus-4-7"`, `thinking.type=adaptive`, `max_tokens=40000`, **streaming required**.
 
 **System prompt:**
 
@@ -515,11 +515,11 @@ Return only the JSON object, no preamble or commentary.
 
 ---
 
-### Node 2b: Theming (Claude Opus 4.6 — once, after clustering)
+### Node 2b: Theming (Claude Opus 4.7 — once, after clustering)
 
 **Loaded from:** `flows/shared/prompts/researcher_theming.md`
 
-**Runtime config:** `model="claude-opus-4-6"`, `thinking.type=adaptive`, `max_tokens=24000`, **streaming required**.
+**Runtime config:** `model="claude-opus-4-7"`, `thinking.type=adaptive`, `max_tokens=24000`, **streaming required**.
 
 **System prompt:**
 
@@ -619,12 +619,12 @@ Return only the JSON object, no preamble or commentary.
 
 *These are draft instructions. Test against sample transcripts and refine before Athens.*
 
-**Model and thinking configuration (as of v3, validated Apr 14 2026).** All three Researcher tasks (`extract_session`, `cluster_extractions`, `group_clusters_into_themes`) use **Claude Opus 4.6** with **`thinking.type=adaptive`** enabled. This is the canonical configuration and produced the cleanest output on dev_msc_test (106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio, perfect integrity).
+**Model and thinking configuration (as of v3, validated Apr 14 2026).** All three Researcher tasks (`extract_session`, `cluster_extractions`, `group_clusters_into_themes`) use **Claude Opus 4.7** with **`thinking.type=adaptive`** enabled. This is the canonical configuration and produced the cleanest output on dev_msc_test (106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio, perfect integrity).
 
 The model is selected via the `CLAUDE_MODEL` environment variable (default `claude-sonnet-4-6` for backward compatibility); adaptive thinking is enabled via `RESEARCHER_THINKING=1`. The canonical Athens run command is:
 
 ```bash
-RESEARCHER_THINKING=1 CLAUDE_MODEL=claude-opus-4-6 python flows/researcher_flow.py runs/<run_id>
+RESEARCHER_THINKING=1 CLAUDE_MODEL=claude-opus-4-7 python flows/researcher_flow.py runs/<run_id>
 ```
 
 **Why adaptive thinking.** Earlier testing used fixed-budget thinking (`thinking.type=enabled` with `budget_tokens=N`). The Anthropic SDK now deprecates this in favor of `thinking.type=adaptive`, where the model decides how much to think based on the task. Anthropic's own testing shows adaptive outperforms fixed-budget. The `_thinking_kwargs` helper in the flow returns the adaptive configuration when thinking is enabled, empty dict otherwise.
@@ -635,6 +635,6 @@ RESEARCHER_THINKING=1 CLAUDE_MODEL=claude-opus-4-6 python flows/researcher_flow.
 
 **Token budgets.** Max tokens are set well above what non-thinking output needs, to accommodate thinking tokens that count against `max_tokens` in the current API: `EXTRACTION_MAX_TOKENS=40000`, `CLUSTERING_MAX_TOKENS=40000`, `THEMING_MAX_TOKENS=24000`. These are ceilings; typical usage is 5-20% of budget.
 
-**Cost estimate.** Opus 4.6 with adaptive thinking on a 6-session Athens night: approximately $15-25 depending on thinking token consumption. Sonnet baseline on the same night: approximately $3-5. At Athens scale this is a defensible cost for a one-of-a-kind experimental artifact; at iterative development scale, consider running Sonnet with `RESEARCHER_THINKING=0` for quick validation passes.
+**Cost estimate.** Opus 4.7 with adaptive thinking on a 6-session Athens night: approximately $15-25 depending on thinking token consumption. Sonnet baseline on the same night: approximately $3-5. At Athens scale this is a defensible cost for a one-of-a-kind experimental artifact; at iterative development scale, consider running Sonnet with `RESEARCHER_THINKING=0` for quick validation passes.
 
 Step 1 (`extract_session`) runs in a per-session loop. Step 2 runs as two sequential API calls (`cluster_extractions` then `group_clusters_into_themes`) plus a Python merge step.
