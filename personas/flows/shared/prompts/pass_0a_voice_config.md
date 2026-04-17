@@ -109,6 +109,8 @@ Primary text sources (URLs) are NOT proposed by Pass 0a — Pass 0a has no inter
 
 ## Why this voice is in the Assembly
 
+*⚠ Draft rationale — Opus's plausibility guess from training data, not research-verified. Confirm against the DR dossier when it arrives.*
+
 One paragraph explaining why this voice belongs in this specific Assembly. What makes them irreplaceable for this conference's themes? Be specific about what they contribute that no other panel member does.
 
 ## What I think a domain expert should look at
