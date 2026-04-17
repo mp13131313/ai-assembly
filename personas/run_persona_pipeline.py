@@ -148,15 +148,15 @@ def _pass_1merge():
                    perplexity_dossier=dossier_text,
                    claude_dr_dossier=claude_dr_text or None,
                    gemini_broad_scan=broad_scan_text)
-    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=4096, temperature=0.0, thinking_budget=None,
+    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                    max_tokens=16000, temperature=0.0, thinking_budget=None,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
             "model": r["model"], "usage": r["usage"], "result": r["json"],
             "sources_compared": ["perplexity"] + (["claude_dr"] if claude_dr_text else []) + ["gemini"]}
 
 n_sources = 2 + (1 if claude_dr_text else 0)
-stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Sonnet)")
+stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Opus 4.7)")
 pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
 merge_status = pass1merge["result"].get("status", "UNKNOWN")
 stamp(f"  status: {merge_status}")
