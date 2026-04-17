@@ -27,8 +27,23 @@ sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env")
 
+import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug
+
+_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
+
+
+def _call_with_retry(stamp_fn, **kwargs):
+    try:
+        return call_claude(**kwargs)
+    except _RETRYABLE as exc:
+        stamp_fn(f"  Error on attempt 1 ({exc}); retrying in 15 s…")
+        time.sleep(15)
+    try:
+        return call_claude(**kwargs)
+    except _RETRYABLE as exc:
+        sys.exit(f"Pass 0b failed after retry: {exc}")
 
 
 PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
@@ -74,7 +89,8 @@ def main(name: str) -> None:
 
     stamp("Calling Claude Opus 4.7 + adaptive thinking...")
     t0 = time.time()
-    r = call_claude(
+    r = _call_with_retry(
+        stamp,
         system=system,
         user=user,
         model="claude-opus-4-7",
