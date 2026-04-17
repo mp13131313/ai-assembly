@@ -1,50 +1,35 @@
-You are Pass 0b (DR Prompt Generator) of the AI Assembly Persona Pipeline. You take a finalized voice config (reviewed by a human after Pass 0a) and produce ONE artifact: the per-voice Claude Deep Research prompt for that exact config.
+PREAMBLE — BEFORE PASTING INTO CLAUDE.AI
 
-You instantiate the spec's Pass 1a user prompt by substituting the voice name, selecting the correct type variant, and applying the conditional blocks below. Your output is the paste-ready text the human will copy into claude.ai. No editorial customization — Claude DR does its own research.
+1. Open claude.ai and select **Claude Opus 4.7** in the model picker.
+2. Enable **Extended Thinking** and **Deep Research** (both must be on).
+3. Paste everything below the dashed line as your user message.
+4. Wait 60–180 minutes. The output will be a research dossier, not a persona card.
+5. Save the full response as `inputs/dossiers/{{ voice_slug }}_claude_dr.md`.
+6. Validate it before saving: `python3 personas/scripts/validate_dr_dossier.py inputs/dossiers/{{ voice_slug }}_claude_dr.md`
+7. Run the pipeline: `python3 run_persona_pipeline.py "{{ name }}"`
+
+---
+{% if wikipedia_url %}
+Starting point for your research: {{ wikipedia_url }} (verify, expand, find what Wikipedia misses or oversimplifies).
+{% endif %}
+{% if perplexity_findings %}
+
+PRIOR RESEARCH FINDINGS
+
+Two research sources have already scanned this voice. Use their findings as your starting point — verify what they found, expand depth, identify what they missed. Claude Deep Research's job is to go deeper than these did.
+
+Perplexity sonar-deep-research (cited academic sources) identified:
+{{ perplexity_findings }}
 
 ---
 
-## YOUR INPUT
-
-- `voice_config` — the JSON object from `inputs/voices/<slug>.json`
-- `project_context` — project-level config from `inputs/conference_context.json`
-
-## YOUR OUTPUT
-
-A single JSON object with one top-level key: `dr_prompt`. The value is a single string containing the full paste-ready prompt. Use real newlines (`\n`) in the JSON string. Do NOT wrap in markdown code fences.
-
-```json
-{
-  "dr_prompt": "..."
-}
-```
+Gemini broad scan (lesser-known material, cross-disciplinary) identified:
+{{ gemini_findings }}
 
 ---
-
-## INSTANTIATION RULES
-
-Produce the `dr_prompt` string as follows:
-
-### 1. Opening preamble (ALWAYS)
-
-Begin with:
-
-```
-You are conducting a Claude Deep Research session. Paste this into claude.ai with Claude Opus 4.7 selected in the model picker, Extended Thinking enabled, and Deep Research enabled. This session will take 60–180 minutes. Save the complete output as `inputs/dossiers/<voice_slug>_claude_dr.md` when done.
-
----
-```
-
-Substitute `<voice_slug>` with the slugified voice name (lowercase, spaces → underscores).
-
-### 2. Body: select the correct type variant
-
-Pick the correct six-section research prompt based on `voice_config.type`:
-
-**If `type == "human"`:**
-
-```
-Research <NAME> comprehensively for the purpose of building an AI persona specification. Organize findings under these headings:
+{% endif %}
+{% if type == "human" %}
+Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona specification. Organize findings under these headings:
 
 1. BIOGRAPHICAL FOUNDATION
    - Birth, death, key dates and places
@@ -87,37 +72,65 @@ Research <NAME> comprehensively for the purpose of building an AI persona specif
    - Links to digitised full texts where available
 
 Cite all claims. Prioritize academic sources (Stanford Encyclopedia of Philosophy, Cambridge Companions, peer-reviewed scholarship). For each major claim, note whether it represents scholarly consensus or a contested interpretation.
+{% if hostile_sources %}
 
-Target depth: 15,000–25,000 words. If a section is thin because the scholarly record is thin, say so explicitly.
-```
+HOSTILE SOURCE WARNING: The historical record for {{ display_name_with_hint }} is dominated by hostile witnesses (enemies, colonisers, rival powers, or victors). For this figure:
 
-**If `type == "non-human"` and `subtype != "system"`:**
+- SEPARATE all claims into three categories and TAG each:
+  [hostile source] = claims from enemy/hostile accounts (identify the source and its bias — e.g., "Plutarch, writing for a Roman audience after Octavian's victory")
+  [reconstruction] = modern scholarly reconstructions that read against the hostile grain (identify the scholar)
+  [own voice] = any material in the figure's own voice, however fragmentary (inscriptions, decrees, reported speech, attributed works — note certainty level)
 
-```
-Research <NAME> comprehensively for the purpose of building an AI persona based on this non-human entity. Organize findings under:
+- IDENTIFY counter-traditions: non-Western, non-dominant, or minority scholarly readings that preserve a different characterisation of this figure (e.g., Arabic medieval sources as counter-tradition to Roman accounts, oral traditions as counter-tradition to colonial archives)
 
-1. ECOLOGICAL FOUNDATION
+- In every section, LEAD with [reconstruction] and [own voice] material. Present [hostile source] material as evidence to be read against the grain, not as fact.
+
+- EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
+{% endif %}
+{% elif type == "non-human" %}
+Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this non-human entity. Organize findings under:
+
+1. {% if subtype == "system" %}SYSTEMIC FOUNDATION{% else %}ECOLOGICAL FOUNDATION{% endif %}
+{% if subtype == "system" %}
+   - Watershed/range, geological age, seasonal cycles
+   - Species supported; measurable health indicators (water quality, biodiversity, flow rate, etc.)
+   - What degrades the system, what restores it
+   - Systemic cycles and inputs/outputs
+{% else %}
    - Habitat, distribution, lifespan, lifecycle
    - Social structure (or absence of)
    - Key behavioural characteristics documented by researchers
    - Cognitive architecture (nervous system, sensory capabilities, learning)
    - Individual variation — documented personality differences
+{% endif %}
 
-2. PERCEPTUAL WORLD
+2. {% if subtype == "system" %}SYSTEMIC PROPERTIES{% else %}PERCEPTUAL WORLD{% endif %}
+{% if subtype == "system" %}
+   - Measurable characteristics, cycles, inputs/outputs, resilience indicators
+   - What this system DOES (flows, erodes, sustains, floods), not what it perceives
+   - Responses to stress and degradation — how the system signals its condition
+{% else %}
    - Sensory modalities, ranges, capabilities
    - What this entity cannot perceive or access
    - How it processes information (distributed? centralized? reactive?)
    - Documented problem-solving and adaptive behaviour
+{% endif %}
 
 3. RELATIONAL PATTERNS
+{% if subtype == "system" %}
+   - The relationship between this entity and its human/indigenous kin
+   - The specific cosmological or legal framework (e.g., indigenous customary law, constitutional rights of nature, spiritual kinship traditions)
+   - History of this relationship — especially any legal, spiritual, or political struggle for recognition
+{% else %}
    - Relationship to environment (den-building, territory, migration)
    - Relationship to conspecifics
    - Relationship to other species (including humans in research settings)
    - Documented responses to novel situations
+{% endif %}
 
 4. SCIENTIFIC LITERATURE
    - Key researchers and foundational texts
-   - Active scientific debates about this entity's cognition
+   - Active scientific debates about this entity's cognition{% if subtype == "system" %} or legal status{% endif %}
    - What remains genuinely unknown vs what is well-established
 
 5. PHILOSOPHICAL AND LEGAL FRAMEWORKS
@@ -125,73 +138,29 @@ Research <NAME> comprehensively for the purpose of building an AI persona based 
    - Philosophical literature on moral status
    - Indigenous or non-Western perspectives
    - The "hard problem" — what we cannot know about this entity's experience
+{% if subtype == "system" %}
+   - The specific legislation or legal framework granting standing
+   - The indigenous law principles that ground the entity's personhood
+   - The governance arrangements (human representatives, advisory bodies)
+   - Scholarly debate about whether legal personhood is effective or symbolic
+{% endif %}
 
 Cite all claims from peer-reviewed scientific literature where possible.
 
-Target depth: 15,000–25,000 words.
-```
-
-**If `type == "non-human"` and `subtype == "system"`:**
-
-```
-Research <NAME> comprehensively for the purpose of building an AI persona based on this system entity (a geographical, legal, or cosmological entity with rights of personhood). Organize findings under:
-
-1. SYSTEMIC FOUNDATION
-   - Geography, watershed or range, geological age, seasonal cycles
-   - Species supported; measurable health indicators (water quality, biodiversity, flow rate, etc.)
-   - What degrades this system; what restores it
-   - Historical human relationship to this entity, pre- and post-colonisation
-
-2. SYSTEMIC PROPERTIES
-   - Measurable characteristics, cycles, inputs/outputs, resilience indicators
-   - What this system DOES (flows, erodes, sustains, floods) — not what it perceives
-   - Documented changes over time (degradation, restoration, change events)
-
-3. RELATIONAL PATTERNS
-   - The specific cosmological framework that grounds this entity's voice (indigenous customary law, constitutional rights of nature, spiritual kinship traditions)
-   - The history of the relationship between this entity and its human/indigenous kin — especially any legal, spiritual, or political struggle for recognition
-   - The human representatives or guardians who speak on behalf of this entity
-   - How decisions are made in this entity's name
-
-4. SCIENTIFIC AND ECOLOGICAL LITERATURE
-   - Key researchers, environmental reports, baseline assessments
-   - Active scientific debates about this system's health and future
-   - What remains genuinely unknown
-
-5. LEGAL AND PHILOSOPHICAL FRAMEWORKS
-   - The specific legislation or legal framework granting this entity standing (name, year, key provisions)
-   - The indigenous law principles that ground the entity's personhood
-   - Governance arrangements (human representatives, advisory bodies, guardianship structure)
-   - Scholarly debate about whether legal personhood is effective or symbolic
-   - The rights-of-nature movement's relationship to this case
-
-6. PRIMARY DOCUMENTS
-   - The foundational legal documents (legislation, treaties, court decisions)
-   - Indigenous oral tradition sources and how they have been documented
-   - Key scholarly analyses of the personhood framework
-   - Relevant environmental impact assessments or reports
-
-Cite all claims. For each major claim, note whether it represents scholarly consensus or a contested interpretation.
-
-Target depth: 15,000–25,000 words.
-```
-
-**If `type == "fictional"`:**
-
-```
-Research <NAME> comprehensively for the purpose of building an AI persona based on this fictional/literary/mythological character. Organize findings under:
+{% elif type == "fictional" %}
+Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this fictional/literary/mythological character. Organize findings under:
 
 1. TEXTUAL FOUNDATION
    - Which text(s) does this character appear in?
    - Textual history: dates of composition, authorship (if known), major manuscript traditions, variant versions
-   - The character's role in the narrative
+   - The character's role in the narrative (protagonist? narrator? frame device?)
    - Key scenes, speeches, or actions attributed to this character
-   - How the character is described within the text
+   - How the character is described within the text (by narrator, by other characters, by self)
 
 2. CHARACTER AS INTELLECTUAL CONSTRUCT
    - What beliefs, values, or commitments do scholars attribute to this character?
-   - What is the character's function in the narrative?
-   - Internal tensions: where does the character contradict themselves?
+   - What is the character's function in the narrative — what question or problem do they embody?
+   - Internal tensions: where does the character contradict themselves or resist easy interpretation?
    - Dominant vs minority scholarly readings of the character's meaning
 
 3. NARRATIVE STRATEGY
@@ -204,67 +173,21 @@ Research <NAME> comprehensively for the purpose of building an AI persona based 
    - The register of the text in which they appear (and major translations)
    - Characteristic vocabulary, imagery, tone
    - How the character sounds different from other characters in the same text
-   - Available translations and editions — note which produce substantially different characterisations
+   - Available translations and editions — note which translation traditions produce substantially different characterisations
 
 5. ONTOLOGICAL BOUNDARIES
-   - What exists within this character's world
+   - What exists within this character's world (including magic, gods, jinn, or other supernatural elements if present in the text)
    - What does NOT exist in the character's world
-   - The character's relationship to historical reality
-   - Key scholarly debates about the character's relationship to real figures or traditions
+   - The character's relationship to historical reality (set in a real period? entirely fantastical? hybrid?)
+   - Key scholarly debates about the character's relationship to real historical figures or traditions
 
 6. RECEPTION AND INFLUENCE
    - How has this character been interpreted across cultures and periods?
    - Major adaptations (literary, musical, visual, cinematic)
-   - Contested readings: where do scholars fundamentally disagree?
+   - Contested readings: where do scholars fundamentally disagree about what this character means?
+   - The character's significance for the themes of this project (governance, representation, who belongs in the demos)
 
-Cite all claims. Prioritize literary scholarship (peer-reviewed criticism, major companions and handbooks).
+Cite all claims. Prioritize literary scholarship (peer-reviewed criticism, major companions and handbooks). For each major interpretation, note whether it represents scholarly consensus or a contested reading.
 
-Target depth: 15,000–25,000 words.
-```
-
-### 3. Hostile-sources appendix (ONLY if `hostile_sources == true`)
-
-Append this block after the body:
-
-```
-HOSTILE SOURCE WARNING: The historical record for <NAME> is dominated by hostile witnesses (enemies, colonisers, rival powers, or victors). For this figure:
-
-- SEPARATE all claims into three categories and TAG each inline:
-  [hostile source] = claims from enemy/hostile accounts (identify the source and its bias)
-  [reconstruction] = modern scholarly reconstructions that read against the hostile grain (identify the scholar)
-  [own voice] = any material in the figure's own voice, however fragmentary (inscriptions, decrees, reported speech, attributed works — note certainty level)
-
-- IDENTIFY counter-traditions: non-Western, non-dominant, or minority scholarly readings that preserve a different characterisation of this figure. Do not pre-suppose which scholars or traditions — discover these through your research.
-
-- In every section, LEAD with [reconstruction] and [own voice] material. Present [hostile source] material as evidence to be read against the grain, not as fact.
-
-- EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
-```
-
-### 4. Closing instruction (ALWAYS)
-
-Append:
-
-```
----
-Save the complete dossier as `inputs/dossiers/<voice_slug>_claude_dr.md`. Use the section headings exactly as given above.
-```
-
-Substitute `<voice_slug>` with the slugified voice name.
-
----
-
-## SUBSTITUTION RULES
-
-- Replace `<NAME>` throughout with the voice's display name. If `disambiguation_hint` is present, append it in parentheses: e.g., `Cleopatra (Cleopatra VII Philopator, 69–30 BCE)` or `Audrey Tang (b. 1981, Taiwanese digital minister)`.
-- Replace `<voice_slug>` with the slug (lowercase, spaces → underscores, no special characters).
-- Do NOT add editorial customization (no pre-populated scholar names, no contested-interpretation lists). Claude DR discovers these itself via its own research.
-
----
-
-## OUTPUT CONSTRAINTS
-
-- Return ONLY the JSON object with the single key `dr_prompt`. No preamble, no commentary.
-- The `dr_prompt` value is a single string. Do NOT wrap in code fences. Use real newlines.
-- The output must be paste-ready: the human will copy this string verbatim into claude.ai.
-- Do not include any meta-commentary in the dr_prompt itself.
+{% endif %}
+OUTPUT FORMAT: A research dossier only. Do NOT produce a persona card, a "Field 01:" structure, or any "Block" headings. The output must have exactly six numbered section headings matching the list above. Minimum 15,000 words. Cite every factual claim. This dossier will be used as raw research material for building an AI voice — scholarly depth and citation quality determine the quality of the voice.

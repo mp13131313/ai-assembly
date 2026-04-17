@@ -1,13 +1,13 @@
-"""Pass 0b — DR Prompt Generator.
+"""Pass 0b — DR Prompt Generator (Jinja2 template renderer).
 
 Reads a finalized voice config (which a human has reviewed and possibly
-edited after Pass 0a) and produces ONE artifact: the per-voice Claude
-Deep Research prompt customized to that exact config.
+edited after Pass 0a) and renders ONE artifact: the per-voice Claude
+Deep Research prompt for that exact config.
 
   inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md   — paste-ready DR prompt
 
 Re-runnable: edit the voice config, re-run Pass 0b, get a fresh prompt
-reflecting your edits.
+reflecting your edits. No API call — deterministic, zero API cost.
 
 Usage:
     python3 run_pass0b_dr_prompt.py "Cleopatra"
@@ -27,33 +27,15 @@ sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env")
 
-import anthropic as _anthropic
-from flows.shared.clients import call_claude
+try:
+    import jinja2
+except ImportError:
+    sys.exit("Pass 0b requires jinja2. Install with: pip install jinja2")
+
 from flows.shared.io import voice_slug
 
-
-class IncompleteResponse(ValueError):
-    """Raised when the model response is missing required keys."""
-
-
-_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError,
-              IncompleteResponse)
-
-
-def _call_with_retry(stamp_fn, **kwargs):
-    try:
-        return call_claude(**kwargs)
-    except _RETRYABLE as exc:
-        stamp_fn(f"  Error on attempt 1 ({exc}); retrying in 15 s…")
-        time.sleep(15)
-    try:
-        return call_claude(**kwargs)
-    except _RETRYABLE as exc:
-        sys.exit(f"Pass 0b failed after retry: {exc}")
-
-
 PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
-SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
+TEMPLATE_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
 DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
 
@@ -65,57 +47,49 @@ def stamp(msg: str) -> None:
 def main(name: str) -> None:
     stamp(f"Pass 0b DR-prompt: '{name}'")
 
-    if not PROJECT_CONTEXT_PATH.exists():
-        sys.exit(f"Missing project config: {PROJECT_CONTEXT_PATH}")
-    if not SYSTEM_PROMPT_PATH.exists():
-        sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
+    if not TEMPLATE_PATH.exists():
+        sys.exit(f"Missing template: {TEMPLATE_PATH}")
 
     slug = voice_slug(name)
     voice_path = VOICES_DIR / f"{slug}.json"
     if not voice_path.exists():
         sys.exit(
             f"Missing voice config at {voice_path}. "
-            f"Run Pass 0a first: python3 run_pass0a_voice_config.py \"{name}\" --hint \"...\""
+            f"Run Pass 0a first: python3 run_pass0a_voice_config.py \"{name}\""
         )
 
     voice_config = json.loads(voice_path.read_text())
-    project_ctx = json.loads(PROJECT_CONTEXT_PATH.read_text())
 
-    system = SYSTEM_PROMPT_PATH.read_text()
-    user_payload = {
-        "voice_config": voice_config,
-        "project_context": project_ctx,
-    }
-    user = (
-        "Generate the DR prompt for the voice below by instantiating the "
-        "template per the system prompt. Return ONLY the JSON object with "
-        "the single key dr_prompt.\n\n"
-        f"INPUT:\n{json.dumps(user_payload, ensure_ascii=False, indent=2)}"
+    # Build display_name_with_hint: name + Wikipedia description if available
+    display_name = voice_config.get("name", name)
+    wiki_url = voice_config.get("wikipedia_url")
+    display_name_with_hint = display_name
+
+    # Render Jinja2 template
+    template_src = TEMPLATE_PATH.read_text(encoding="utf-8")
+    env = jinja2.Environment(
+        undefined=jinja2.Undefined,  # silently ignore unknown vars
+        trim_blocks=True,
+        lstrip_blocks=True,
     )
+    template = env.from_string(template_src)
 
-    _call_kwargs = dict(system=system, model="claude-opus-4-7", max_tokens=24000,
-                       temperature=1.0, thinking_budget=None, response_format_json=True)
+    context = {
+        "name": display_name,
+        "display_name_with_hint": display_name_with_hint,
+        "voice_slug": slug,
+        "type": voice_config.get("type", "human"),
+        "subtype": voice_config.get("subtype"),
+        "hostile_sources": bool(voice_config.get("hostile_sources", False)),
+        "wikipedia_url": wiki_url or "",
+        "voice_mode": voice_config.get("voice_mode"),
+        "corpus_constraint": voice_config.get("corpus_constraint", "full"),
+        # D.1 scaffolding variables (empty until run_phase0_1_research.py provides them)
+        "perplexity_findings": "",
+        "gemini_findings": "",
+    }
 
-    def _do_call(user_msg: str) -> str:
-        r = _call_with_retry(stamp, user=user_msg, **_call_kwargs)
-        stamp(f"  tokens in={r['usage']['input_tokens']} out={r['usage']['output_tokens']}")
-        out = r["json"]
-        if "dr_prompt" not in out:
-            raise IncompleteResponse("Response missing required key: dr_prompt")
-        return out["dr_prompt"]
-
-    stamp("Calling Claude Opus 4.7 + adaptive thinking...")
-    t0 = time.time()
-    try:
-        dr_prompt = _do_call(user)
-    except IncompleteResponse as exc:
-        stamp(f"  Incomplete response on attempt 1: {exc}; retrying…")
-        try:
-            dr_prompt = _do_call(user)
-        except IncompleteResponse as exc2:
-            sys.exit(f"Pass 0b failed after retry: {exc2}")
-    wall = time.time() - t0
-    stamp(f"  done in {wall:.1f}s")
+    dr_prompt = template.render(**context)
 
     DR_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
     dr_prompt_path = DR_PROMPTS_DIR / f"{slug}_dr_prompt.md"
@@ -126,12 +100,11 @@ def main(name: str) -> None:
     stamp("")
     stamp("Next steps:")
     stamp(f"  1. Open claude.ai, select Claude Opus 4.7 in the model picker")
-    stamp(f"     (DR inherits the selected model; Opus is required for dossier depth)")
     stamp(f"  2. Enable Extended Thinking + Deep Research")
     stamp(f"  3. Paste the prompt from {dr_prompt_path.name}")
     stamp(f"  4. Expect 60-180 min wait")
     stamp(f"  5. Save the result as inputs/dossiers/{slug}_claude_dr.md")
-    stamp(f"  6. Run: python3 run_persona_pipeline.py \"{voice_config.get('name', name)}\"")
+    stamp(f"  6. Run: python3 run_persona_pipeline.py \"{display_name}\"")
 
 
 if __name__ == "__main__":
