@@ -130,7 +130,7 @@ Bulleted list of decisions where you're least confident or where a specialist mi
 1. Read this doc, edit `inputs/voices/<slug>.json` if needed (especially the editorial-assets fields).
 2. Run Pass 0b: `python3 run_pass0b_dr_prompt.py "<Display Name>"`.
 3. That generates `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md` customized to whatever you signed off on.
-4. Open claude.ai with **Claude Opus 4.6** selected in the model picker (DR inherits the selected model; Opus is required for dossier-depth synthesis), with Extended Thinking + Deep Research both enabled.
+4. Open claude.ai with **Claude Opus 4.7** selected in the model picker (DR inherits the selected model; Opus is required for dossier-depth synthesis), with Extended Thinking + Deep Research both enabled.
 5. Paste the prompt from `<slug>_dr_prompt.md`.
 6. Save the result as `inputs/dossiers/<slug>_claude_dr.md`.
 7. Run: `python3 run_persona_pipeline.py "<Display Name>"`.

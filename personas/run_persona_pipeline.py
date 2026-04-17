@@ -104,7 +104,7 @@ stamp(f"  dossier: {len(dossier_text)} chars")
 
 # ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
 # Approach C: Pass 1a is augmented by a manually-produced Claude Deep Research
-# markdown file. The user runs claude.ai with Opus 4.6 + extended thinking +
+# markdown file. The user runs claude.ai with Opus 4.7 + extended thinking +
 # Deep Research feature (60-120 min wall time per voice), exports the result
 # to inputs/dossiers/<voice_slug>_claude_dr.md, and references it in the
 # voice's input JSON as pass_1a_claude_dr_file.
@@ -169,7 +169,7 @@ merged_dossier_parts = [
 if claude_dr_text:
     merged_dossier_parts += [
         "",
-        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.6 + extended thinking + DR) ===",
+        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.7 + extended thinking + DR) ===",
         claude_dr_text,
     ]
 merged_dossier_parts += [
@@ -346,7 +346,7 @@ def _pass_2():
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_2_user", merged_dossier=merged_dossier) + _critique_suffix("2")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -408,7 +408,7 @@ def _pass_3():
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
                    chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary) + _critique_suffix("3")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -457,7 +457,7 @@ def _pass_4a():
                    primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary) + _critique_suffix("4a")
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4a_voice",
             "model": r["model"], "usage": r["usage"], "fields": r["json"],
@@ -498,7 +498,7 @@ def _pass_5():
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
     ) + _critique_suffix("5")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=16000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -773,7 +773,7 @@ def _pass_7b():
                   voice_mode=vi["voice_mode"])
     userp = render("persona_pass_7b_provocations_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_worked_provocations",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -1009,7 +1009,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
         "revision_loops": revision_loops,
-        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
+        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),
