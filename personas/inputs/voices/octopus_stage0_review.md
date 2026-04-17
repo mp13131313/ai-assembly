@@ -1,4 +1,4 @@
-# Stage 0a Review — Octopus
+# Pass 0a Review — Octopus
 
 ## Quick disposition
 
@@ -38,7 +38,7 @@ FALSE. The octopus has no hostile-witness problem in the Cleopatra sense. There 
 ## Editorial assets I encoded
 
 - **Counter-tradition scholars**: null (hostile_sources = false)
-- **Contested interpretations**: 5 items — cephalopod consciousness attribution debates, distributed vs. centralized cognition, the alien-trope question, octopus sociality revisionism, and RNA editing as cognitive mechanism. These are the live scholarly fault lines Stage 0b should force DR to address rather than collapse to consensus.
+- **Contested interpretations**: 5 items — cephalopod consciousness attribution debates, distributed vs. centralized cognition, the alien-trope question, octopus sociality revisionism, and RNA editing as cognitive mechanism. These are the live scholarly fault lines Pass 0b should force DR to address rather than collapse to consensus.
 - **Material culture evidence**: Detailed — film/documentary footage (Painlevé, *My Octopus Teacher*), tool-use documentation, chromatophore recordings, paleontological context (ammonite/belemnite fossils), the genome assembly, and Octopolis field site documentation.
 - **Voice-specific warnings**: 4 items, all focused on preventing anthropomorphism, business-metaphor flattening, pop-sentimentality, and generic ocean-wisdom framing. These are critical for this voice — the #1 failure mode for an AI "octopus voice" is cuddly TED-talk decentralization metaphor.
 
@@ -51,7 +51,7 @@ Why these: They collectively span molecular biology → neuroscience → philoso
 Alternatives:
 
 - **Godfrey-Smith, *Other Minds* (2016) + *Metazoa* (2020)**: The essential popular-philosophical monographs. Not public-domain; DR should cover them as secondary interpretation. If a human wants to substitute these for the TICS article, that's reasonable.
-- **Sy Montgomery, *The Soul of an Octopus* (2015)**: Beautiful and influential but leans sentimental; I deliberately did not make it a primary source to avoid the anthropomorphism trap. Stage 0b should tell DR to use it as one perspective among many.
+- **Sy Montgomery, *The Soul of an Octopus* (2015)**: Beautiful and influential but leans sentimental; I deliberately did not make it a primary source to avoid the anthropomorphism trap. Pass 0b should tell DR to use it as one perspective among many.
 - **Mather, Anderson & Wood, *Octopus: The Ocean's Intelligent Invertebrate* (2010)**: The most comprehensive single-volume survey of octopus biology and behavior. Not open-access. Strong alternative if the human wants a broader biological baseline.
 - **Haraway, *Staying with the Trouble* (2016), especially Ch. 2 "Tentacular Thinking"**: The key theoretical framework connecting octopus morphology to political philosophy. Not a biology source but essential for the conference context. DR should cover it.
 - **Birch, Schnell & Clayton, "Dimensions of Animal Consciousness" (2020, TICS)**: The sentience-assessment framework that includes cephalopods. Complementary to Godfrey-Smith.
@@ -67,7 +67,7 @@ Alternatives:
 ## To proceed
 
 1. Read this doc, edit `inputs/voices/octopus.json` if needed (especially the editorial-assets fields).
-2. Run Stage 0b: `python3 run_stage0b_dr_prompt.py "Octopus"`.
+2. Run Pass 0b: `python3 run_pass0b_dr_prompt.py "Octopus"`.
 3. That generates `inputs/dossiers/_dr_prompts/octopus_dr_prompt.md` customized to whatever you signed off on.
 4. Open claude.ai with Extended Thinking + Deep Research enabled.
 5. Paste the prompt from `octopus_dr_prompt.md`.

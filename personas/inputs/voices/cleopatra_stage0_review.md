@@ -1,4 +1,4 @@
-# Stage 0a Review — Cleopatra
+# Pass 0a Review — Cleopatra
 
 ## Quick disposition
 
@@ -24,7 +24,7 @@ Cleopatra VII Thea Philopator (c. 69–30 BCE), last active ruler of the Ptolema
 
 **TRUE — this is one of the most extreme cases of hostile-source dominance in classical antiquity.** Every surviving ancient account of Cleopatra was written by subjects or sympathizers of the regime that destroyed her. The Augustan propaganda machine spent decades constructing Cleopatra as the anti-Roman Other: Eastern, female, sexually corrupting, despotic — the perfect foil for Octavian's restoration of Republican virtue. Plutarch, writing 100+ years later, is the most generous and still frames her through Antony's ruin. Cassius Dio and the Augustan poets are openly propagandistic.
 
-The counter-tradition scholars (Roller, Schiff, Tyldesley, Ashton, Haley, Goldsworthy, Hölbl — 7 names encoded) have collectively reconstructed a more evidence-based Cleopatra from numismatics, papyrology, Egyptological evidence, and critical reading of the hostile texts. Stage 0b will instruct DR to privilege these scholars and read the ancient sources as evidence requiring forensic extraction, not as transparent witnesses.
+The counter-tradition scholars (Roller, Schiff, Tyldesley, Ashton, Haley, Goldsworthy, Hölbl — 7 names encoded) have collectively reconstructed a more evidence-based Cleopatra from numismatics, papyrology, Egyptological evidence, and critical reading of the hostile texts. Pass 0b will instruct DR to privilege these scholars and read the ancient sources as evidence requiring forensic extraction, not as transparent witnesses.
 
 ## Editorial assets I encoded
 
@@ -34,7 +34,7 @@ The counter-tradition scholars (Roller, Schiff, Tyldesley, Ashton, Haley, Goldsw
 - **Material culture evidence**: Coin portraits (RPC issues), Dendera Temple relief, P.Bingen 45 papyrus, portrait sculpture (Vatican, Berlin), administrative papyri, multilingual inscriptions
 - **Voice-specific warnings**: 4 warnings — against romance-reduction, racial speculation, seductress register, and modern nationalist projection
 
-All of these are editable in the JSON. If you want to add or remove scholars, change contested-interpretation framing, or adjust the warnings, edit `inputs/voices/cleopatra.json` before running Stage 0b.
+All of these are editable in the JSON. If you want to add or remove scholars, change contested-interpretation framing, or adjust the warnings, edit `inputs/voices/cleopatra.json` before running Pass 0b.
 
 ## Primary text sources — recommended + alternatives
 
@@ -61,7 +61,7 @@ All of these are editable in the JSON. If you want to add or remove scholars, ch
 ## To proceed
 
 1. Read this doc, edit `inputs/voices/cleopatra.json` if needed (especially the editorial-assets fields).
-2. Run Stage 0b: `python3 run_stage0b_dr_prompt.py "Cleopatra"`.
+2. Run Pass 0b: `python3 run_pass0b_dr_prompt.py "Cleopatra"`.
 3. That generates `inputs/dossiers/_dr_prompts/cleopatra_dr_prompt.md` customized to whatever you signed off on.
 4. Open claude.ai with Extended Thinking + Deep Research enabled.
 5. Paste the prompt from `cleopatra_dr_prompt.md`.

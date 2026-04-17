@@ -104,7 +104,7 @@ stamp(f"  dossier: {len(dossier_text)} chars")
 
 # ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
 # Approach C: Pass 1a is augmented by a manually-produced Claude Deep Research
-# markdown file. The user runs claude.ai with Opus 4.6 + extended thinking +
+# markdown file. The user runs claude.ai with Opus 4.7 + extended thinking +
 # Deep Research feature (60-120 min wall time per voice), exports the result
 # to inputs/dossiers/<voice_slug>_claude_dr.md, and references it in the
 # voice's input JSON as pass_1a_claude_dr_file.
@@ -148,15 +148,15 @@ def _pass_1merge():
                    perplexity_dossier=dossier_text,
                    claude_dr_dossier=claude_dr_text or None,
                    gemini_broad_scan=broad_scan_text)
-    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=4096, temperature=0.0, thinking_budget=None,
+    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                    max_tokens=16000, temperature=0.0, thinking_budget=None,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
             "model": r["model"], "usage": r["usage"], "result": r["json"],
             "sources_compared": ["perplexity"] + (["claude_dr"] if claude_dr_text else []) + ["gemini"]}
 
 n_sources = 2 + (1 if claude_dr_text else 0)
-stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Sonnet)")
+stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Opus 4.7)")
 pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
 merge_status = pass1merge["result"].get("status", "UNKNOWN")
 stamp(f"  status: {merge_status}")
@@ -169,7 +169,7 @@ merged_dossier_parts = [
 if claude_dr_text:
     merged_dossier_parts += [
         "",
-        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.6 + extended thinking + DR) ===",
+        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.7 + extended thinking + DR) ===",
         claude_dr_text,
     ]
 merged_dossier_parts += [
@@ -219,6 +219,7 @@ stamp(f"  merged_dossier: {len(merged_dossier)} chars")
 if vi["primary_text_sources"]:
     # Backward compat: manual override from voice config
     primary_text_urls = vi["primary_text_sources"]
+    _extracted_url_items: list = []  # no extraction step, manual override
     stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
 else:
     def _pass_1c_extract():
@@ -235,6 +236,7 @@ else:
     pass1c_extract = call_or_cache(RUN / "01_research/primary_text_urls.json",
                                    "Pass 1c-extract", _pass_1c_extract)
     extracted = pass1c_extract.get("result", {}).get("primary_text_urls", [])
+    _extracted_url_items = extracted  # saved for review gate
     primary_text_urls = [item["url"] for item in extracted if item.get("url")]
     stamp(f"  extracted {len(primary_text_urls)} URLs from dossier")
     notes = pass1c_extract.get("result", {}).get("extraction_notes", "")
@@ -256,6 +258,85 @@ if primary_text_urls:
 else:
     stamp("PASS 1c: SKIPPED (no primary text URLs found)")
     pass1c = {"passages": []}
+
+
+# ---------- PASS 1c REVIEW GATE ----------
+# Spec Node 1c: manual review required before pipeline proceeds to Pass 1d.
+# Resumes on re-run when primary_texts_reviewed.flag is present.
+
+def _write_primary_texts_review(review_path: Path) -> None:
+    lines = [f"# Primary Text Review — {vi['name']}", ""]
+    corpus = vi.get("corpus_constraint", "")
+    subtype_v = vi.get("subtype", "")
+    if corpus == "lyrics — describe patterns only":
+        lines += [
+            "**CORPUS CONSTRAINT: lyrics — describe patterns only**",
+            "Lyrics are not fetchable by design. Supply an alternative corpus "
+            "(interview transcripts, speeches, scholarly analyses of catalogue "
+            "patterns) before Pass 4a and Pass 6 run.",
+            "",
+        ]
+    if subtype_v == "system":
+        lines += [
+            "**SYSTEM ENTITY (subtype=system)**",
+            "Legislation text, indigenous oral sources, and scholarly legal analyses "
+            "may not be web-fetchable or may need specific editions. Review carefully "
+            "and supplement manually as needed.",
+            "",
+        ]
+    lines += ["## Extracted URLs", ""]
+    if not _extracted_url_items:
+        lines.append("_URLs came from manual voice_config override (primary_text_sources field)._")
+    else:
+        for item in _extracted_url_items:
+            lines.append(f"- {item.get('url', '?')}")
+    lines.append("")
+    lines += ["## Fetch Results", ""]
+    passages = pass1c.get("passages", [])
+    if not passages:
+        lines.append("_No URLs fetched._")
+    else:
+        for p in passages:
+            url = p.get("url", "?")
+            if p.get("error"):
+                err = p["error"]
+                if "timeout" in err.lower():
+                    tag = "TIMEOUT"
+                elif "404" in err:
+                    tag = "404"
+                elif "private" in err.lower() or "ssrf" in err.lower():
+                    tag = "SSRF-BLOCKED"
+                else:
+                    tag = "ERROR"
+                lines.append(f"- FAIL [{tag}] {url}")
+                lines.append(f"  {err}")
+            else:
+                lines.append(f"- OK {url} — {p['char_count']:,} chars (source: {p['source']})")
+    lines += [
+        "",
+        "## Next Steps",
+        "",
+        "1. Review fetch results above.",
+        f"2. Optionally edit 01_research/primary_texts.json to add or replace passages.",
+        "3. Create the flag to continue: touch 01_research/primary_texts_reviewed.flag",
+        f"4. Re-run: python3 run_persona_pipeline.py \"{vi['name']}\"",
+    ]
+    review_path.write_text("\n".join(lines), encoding="utf-8")
+
+_review_flag = RUN / "01_research/primary_texts_reviewed.flag"
+if not _review_flag.exists():
+    _review_path = RUN / "01_research/primary_texts_review.md"
+    _write_primary_texts_review(_review_path)
+    sys.exit(
+        f"\n=== PASS 1c REVIEW GATE ===\n"
+        f"Primary text fetch complete. Human review required before pipeline continues.\n\n"
+        f"  1. Read:    {_review_path.relative_to(REPO_ROOT)}\n"
+        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(REPO_ROOT)} "
+        f"(add/replace passages if needed)\n"
+        f"  3. Create:  touch {_review_flag.relative_to(REPO_ROOT)}\n"
+        f"  4. Re-run:  python3 run_persona_pipeline.py \"{vi['name']}\"\n"
+    )
+stamp("PASS 1c gate: review flag present — continuing to Pass 1d")
 
 
 # ---------- REVISION LOOP STATE ----------
@@ -346,7 +427,7 @@ def _pass_2():
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_2_user", merged_dossier=merged_dossier) + _critique_suffix("2")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -408,7 +489,7 @@ def _pass_3():
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
                    chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary) + _critique_suffix("3")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6")
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -457,7 +538,7 @@ def _pass_4a():
                    primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary) + _critique_suffix("4a")
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4a_voice",
             "model": r["model"], "usage": r["usage"], "fields": r["json"],
@@ -498,7 +579,7 @@ def _pass_5():
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
     ) + _critique_suffix("5")
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=16000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -773,7 +854,7 @@ def _pass_7b():
                   voice_mode=vi["voice_mode"])
     userp = render("persona_pass_7b_provocations_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-6",
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_worked_provocations",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -1009,7 +1090,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
         "revision_loops": revision_loops,
-        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-6", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
+        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),

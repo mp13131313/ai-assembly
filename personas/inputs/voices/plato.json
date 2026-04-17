@@ -3,7 +3,6 @@
   "type": "human",
   "subtype": null,
   "voice_mode": "philosophical",
-  "impossible": true,
   "hostile_sources": false,
   "corpus_constraint": "full",
   "needs_dr_supplement": false,

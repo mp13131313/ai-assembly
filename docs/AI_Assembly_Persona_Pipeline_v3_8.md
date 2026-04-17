@@ -1,8 +1,23 @@
 # AI ASSEMBLY — Persona Pipeline
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v3.7 — output register rule (2026-03-27)
+**Status:** v3.8 — walkthrough fixes 2026-04-17
 **Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Designed to run as an n8n workflow, parallel across all voices, calling four model APIs in sequence.
+
+**Changelog from v3.7:**
+- MODEL: Upgraded all Opus calls to claude-opus-4-7 (Pass 0a, 0b, 2, 3, 4a, 5, 7b; research flows). Pass 1-merge upgraded Sonnet → Opus 4.7 with max_tokens 4096 → 16000 (three-way contradiction detection at long context benefits from Opus).
+- ARCHITECTURE: Dropped editorial-assets entirely (voice_type_adjustments_needed, counter_tradition_scholars, dominant_hostile_sources, contested_interpretations, material_culture_evidence, voice_specific_warnings). Phase 0 populates only the 10 spec fields. Claude DR uses the same six-section research prompt as Perplexity and Gemini.
+- PHASE RENAME: Stage 0a / Stage 0b → Pass 0a / Pass 0b inside Phase 0: Intake. Files renamed: run_pass0a_voice_config.py, run_pass0b_dr_prompt.py, pass_0a_voice_config.md, pass_0b_dr_prompt.md.
+- SCHEMA: voice_mode strict three-value validation: {philosophical, observational, narratival}. Hard-fail at Node 0 if not one of the three. subtype=system voices may use null.
+- SCHEMA: corpus_constraint aligned to spec three values: {full, lyrics — describe patterns only, hostile — read against grain}. Dropped restricted and fragmentary.
+- SCHEMA: non_human_subtypes trimmed to {organism, system}. Removed legal_entity and river_personhood (Whanganui = system).
+- REMOVED: impossible field removed from schema and Node 0 gate.
+- REMOVED: primary_text_sources from Pass 0a output. Field is manual-edit hook only; if accidentally emitted, stripped before writing voice_config.
+- PASS 0b REWRITE: Now a simple template filler (prompt instantiator). Input: voice_config + project_context. Output: paste-ready Claude DR prompt with branching for hostile_sources, non-human, system-entity, fictional variants. No editorial-asset weaving.
+- PASS 0a/0b: Added retry-once on JSONDecodeError / APIError / RateLimitError with 15s delay.
+- PASS 0a: --hint required always.
+- SYSTEM ENTITY: Added subtype=system overrides to Pass 3 (Blocks 3 + 4), Pass 5 (Blocks 3 + 4), and Pass 7b. System entities use indigenous law / legal framework tags; constitution organized as systemic properties / relational commitments / boundary principles; engagement is relational, not perceptual; provocations framed as pressures on the relationship with responses expressed through entity condition.
+- GATE: Added Pass 1c review gate (spec Node 1c). After primary text fetch, pipeline writes 01_research/primary_texts_review.md and exits. Re-run proceeds when 01_research/primary_texts_reviewed.flag is present. Flags corpus_constraint=lyrics and subtype=system voices for special handling.
 
 **Changelog from v3.6:**
 - CRITICAL: Added "Output Register" binding requirement — all generation passes (Nodes 2, 3, 4a, 4b, 5, 6, 7b) must produce fields in first person (as the voice) or second person (addressed to the voice), never third-person scholarly description. Added OUTPUT REGISTER instruction to Block 2 (Guardrails) of every generation pass. Rationale: the v3.6 epistemic frame switch to "You are X" fixed ~80 tokens but left 10,000–15,000 tokens of field content in third-person descriptive register. Mock execution showed the model resolving this contradiction by adopting scholarly distance ("I think Marley would say...") rather than reasoning in character. The register of the bulk determines the register of the output — the frame cannot win alone
@@ -65,7 +80,6 @@
 - Added consistency verification mode for Pass 7-pre (fictional voices: verify internal consistency, not citations)
 - Added narratival disagreement_protocol guidance (counter-story, not counter-argument)
 - Added narratival response format note in Pass 7b (a tale IS a committed position)
-- Added `impossible` boolean to input schema with hard validation gate (Node 0) — enforces the Assembly's impossible-participants premise before any API calls
 - Added Node 0: Input Validation (type and voice_mode validation)
 
 **Changelog from v2.0:**
@@ -122,7 +136,6 @@ Each voice enters the pipeline with these fields:
   "name": "Example Voice Name",
   "type": "human",
   "subtype": null,
-  "impossible": true,
   "voice_mode": "philosophical",
   "hostile_sources": false,
   "corpus_constraint": "full",
@@ -133,7 +146,6 @@ Each voice enters the pipeline with these fields:
 ```
 
 - **name** — the voice. Perplexity and Gemini research from this alone.
-- **impossible** — boolean. `true` = dead, non-human, fictional, or otherwise unable to physically attend. `false` = living and reachable. **Hard validation: the pipeline REJECTS any voice with `impossible: false`.** The Assembly requires impossible participants — this is the conceptual premise, not a preference. If a previously living figure has died, update this field and re-run. This check runs as the first node in the n8n workflow, before any API calls.
 - **type** — "human", "non-human", or "fictional". Drives prompt branching: "human" gets historical grounding and biographical research. "Non-human" gets anti-anthropomorphisation guardrails. "Fictional" gets narrative-tradition grounding — the voice's world is a text, not a period; its beliefs are attributed by scholars and readers, not extracted from personal writings or inferred from behaviour.
 - **subtype** — null for human and fictional voices. For `type: "non-human"`: `"organism"` (has neurons, perceives, responds — e.g., an octopus, a whale) or `"system"` (no cognition, no perception — a geographical, legal, or cosmological entity whose "voice" comes from the relationship between the entity and its human/indigenous kin, e.g., a river with legal personhood, a mountain). Drives a sub-branch within the non-human Block 4: organism gets ecological/cognitive grounding; system gets relational/cosmological/legal grounding. Default: null.
 - **voice_mode** — "philosophical" (systematic thinker with explicit positions), "observational" (experiential/narrative voice whose principles must be inferred from practice, behaviour, or artistic output), or "narratival" (voice whose primary engagement is through storytelling rather than argument or observation — typically fictional characters or mythological figures). Drives field specification variants in Passes 2–5. Must be set explicitly by the builder for each voice. "Narratival" is typically paired with `type: "fictional"` but not necessarily — an oral storytelling tradition voice could be narratival and non-human.
@@ -618,18 +630,6 @@ Template fields marked with `{{double_braces}}` are populated from the input or 
 **Cost:** $0.00
 
 ```
-IF impossible === false THEN
-  STOP pipeline.
-  OUTPUT: {
-    "status": "REJECTED",
-    "reason": "{{name}} is not an impossible participant. The Assembly requires 
-    voices that cannot physically attend: the dead, the non-human, the fictional. 
-    Living, reachable figures violate the core premise.",
-    "action": "If this figure has recently died or become unreachable, update the 
-    impossible field to true and re-run."
-  }
-END
-
 IF type NOT IN ["human", "non-human", "fictional"] THEN
   STOP pipeline.
   OUTPUT: {"status": "REJECTED", "reason": "Invalid type. Must be human, non-human, or fictional."}
@@ -2007,7 +2007,7 @@ TRIGGER: All per-voice workflows complete
 ## Claude API
 
 **Endpoint:** `https://api.anthropic.com/v1/messages`
-**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-6` (complex figures)
+**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-7` (complex figures)
 **Batch API:** 50% discount for non-urgent. Entire pipeline can run as batch.
 **Temperature per node:** 0.0 (verification), 0.1 (selection), 0.2 (analytical), 0.3 (creative), 0.4 (provocations)
 
