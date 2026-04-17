@@ -4,7 +4,7 @@
   "subtype": "organism",
   "voice_mode": "embodied-distributed",
   "hostile_sources": false,
-  "corpus_constraint": "reconstructed",
+  "corpus_constraint": "full",
   "needs_dr_supplement": true,
   "primary_text_sources": [
     "https://doi.org/10.1016/j.cub.2015.09.001",
