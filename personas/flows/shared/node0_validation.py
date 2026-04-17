@@ -13,6 +13,7 @@ spec's REJECTED message on failure.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .io import (
@@ -20,6 +21,9 @@ from .io import (
     VALID_SUBTYPES,
     VALID_TYPES,
 )
+
+_VALID_WIKIPEDIA_URL_RE = re.compile(r"^https?://en\.wikipedia\.org/wiki/.+")
+
 
 
 class InputRejected(ValueError):
@@ -116,6 +120,17 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
                 status="REJECTED",
                 reason=f"Missing required field: {field!r}",
             )
+
+    # Optional wikipedia_url — if present must be a valid English Wikipedia URL
+    wiki_url = voice_input.get("wikipedia_url")
+    if wiki_url is not None and not _VALID_WIKIPEDIA_URL_RE.match(wiki_url):
+        raise InputRejected(
+            status="REJECTED",
+            reason=(
+                f"Invalid wikipedia_url {wiki_url!r}. Must match "
+                f"https://en.wikipedia.org/wiki/<title> or be absent."
+            ),
+        )
 
     # Defaults for optional flags
     normalized = dict(voice_input)

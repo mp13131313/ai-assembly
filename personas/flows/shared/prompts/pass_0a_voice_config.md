@@ -15,7 +15,10 @@ You receive:
 
 - `name` — the voice name as given (e.g. "Plato of Athens", "Cleopatra", "The Whanganui River", "An octopus")
 - `conference_context` — the project-level config (conference name, participant profile, panel members, etc.)
-- `disambiguation_hint` — string for disambiguating the figure (always provided)
+- `wikipedia_extract` *(optional)* — the lead paragraph from the Wikipedia page for this figure. **Use this as your primary grounding for classification decisions**: birth/death dates → `type`; occupation/role → `voice_mode` candidates; language/origin → `hostile_sources` hint.
+- `wikipedia_description` *(optional)* — the short Wikipedia description (e.g. "Ancient Egyptian queen")
+- `wikipedia_url` *(optional)* — the Wikipedia page URL (will be stored in voice_config)
+- `disambiguation_hint` *(optional)* — fallback text hint when no Wikipedia match was found
 
 ## YOUR OUTPUT
 
@@ -47,6 +50,8 @@ Produce a JSON object with exactly these fields (the 7 spec fields):
 - `corpus_constraint` (enum: "full" | "lyrics — describe patterns only" | "hostile — read against grain"): `"full"` = normal, primary texts can be quoted. `"lyrics — describe patterns only"` = copyrighted musical corpus, produce pattern descriptions not excerpts. `"hostile — read against grain"` = primary record is hostile accounts requiring reconstruction. Default: `"full"`.
 
 - `conference_context` (string): Set to the literal placeholder `"INJECTED_BY_RUNNER"` — the pipeline overwrites this server-side.
+
+- `wikipedia_url` (string | null): Set to the `wikipedia_url` from your input if provided, otherwise omit this field entirely. Do not emit it as `null` — simply leave it out if not present.
 
 Do NOT include any other fields. In particular, do NOT include: `primary_text_sources`, `voice_type_adjustments_needed`, `counter_tradition_scholars`, `dominant_hostile_sources`, `contested_interpretations`, `material_culture_evidence`, `voice_specific_warnings`.
 
@@ -117,5 +122,5 @@ Keep the review doc TIGHT. Under 2 minutes to read.
 
 - Return ONLY the JSON object with the two top-level keys `voice_config` and `review_doc`. No preamble, no commentary, no explanation outside the JSON.
 - The `review_doc` field's value is a single markdown string. Do NOT wrap in code fences.
-- The `voice_config` field's value is a JSON object with exactly the 10 spec fields listed above.
+- The `voice_config` field's value is a JSON object with the spec fields listed above (7 always-present fields + `wikipedia_url` when provided).
 - Do NOT emit `primary_text_sources` or any editorial-assets fields.
