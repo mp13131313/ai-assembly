@@ -33,7 +33,7 @@ def call_claude(
     """
     import anthropic  # lazy import so missing keys don\'t break import
 
-    model = model or os.environ.get("CLAUDE_MODEL", "claude-opus-4-6")
+    model = model or os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
     client = anthropic.Anthropic()
 
     kwargs: dict[str, Any] = {

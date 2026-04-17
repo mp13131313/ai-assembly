@@ -15,7 +15,7 @@ This revision captures the architecture validated end-to-end against the MSC 202
 
 - **v2 draft** — Per-pair Formulation experiment: Step 3 was split so each (theme, voice) pair received its own LLM call, producing a formulation angled at that specific voice. Kept Triage and Selection as single LLM calls.
 
-- **v3** (current, canonical) — Validated architecture. Five stages. Triage is split into two parallel LLM tasks, Selection is deterministic Python with no LLM, Formulation is per-pair, Packaging is Python with two complementary views per briefing. Model upgraded to Claude Opus 4.6 with `thinking.type=adaptive` for all three LLM tasks.
+- **v3** (current, canonical) — Validated architecture. Five stages. Triage is split into two parallel LLM tasks, Selection is deterministic Python with no LLM, Formulation is per-pair, Packaging is Python with two complementary views per briefing. Model upgraded to Claude Opus 4.7 with `thinking.type=adaptive` for all three LLM tasks.
 
 Changes from v1:
 
@@ -34,7 +34,7 @@ Changes from v1:
 
 - **§G** → Packaging (§Step 4 in v1) now writes TWO views per formulation into each per-voice briefing file. `narrative_briefing` is the markdown PROMPT for the Voice Pipeline's Step 1 (paste-and-go) — formulation, `context_narrative`, and `selected_quotes`. `full_theme_record` is the wider REASONING SURFACE for Step 1 thinking — all clusters with full extractions sorted by lens, the Researcher's own title/abstract, co-assigned voices, theme flags, `grounding_extraction_ids`. The voice reasons over the full record while answering the curated prompt. This two-view shape supersedes v1's single-package-per-voice output.
 
-- **§H** → Model recommendation updated from "Claude Sonnet" to "Claude Opus 4.6 with `thinking.type=adaptive`" for all three LLM tasks (Triage Part A, Triage Part B, Formulation). Selection and Packaging are Python-only. The model upgrade mirrors the same change the Researcher Pipeline made in v2.4, validated on the same test corpus.
+- **§H** → Model recommendation updated from "Claude Sonnet" to "Claude Opus 4.7 with `thinking.type=adaptive`" for all three LLM tasks (Triage Part A, Triage Part B, Formulation). Selection and Packaging are Python-only. The model upgrade mirrors the same change the Researcher Pipeline made in v2.4, validated on the same test corpus.
 
 - **§I** → Runtime behavior section added: incremental per-voice checkpoints for Triage Part A (`triage_voices/{slug}.json`), incremental per-pair checkpoints for Formulation (`formulations/{theme_id}__{slug}.json`), and batched parallel submission of Formulation calls to respect Anthropic rate limits (default batch size 4, wait 20s between batches — configurable via `PROVOCATEUR_FORMULATION_BATCH` and `PROVOCATEUR_BATCH_WAIT_S`). Restart picks up automatically from existing checkpoints; no cache flag needed.
 
@@ -438,9 +438,9 @@ Voices with zero assignments still get a briefing file (empty `formulations[]` a
 
 ## Constraints
 
-**Time window.** The Provocateur runs after the Researcher completes. It must finish fast enough that the Voice Pipeline and all downstream processing can complete before breakfast. The five-stage architecture is the key enabler here — Triage's 13 parallel LLM calls collapse to ~1-2 minutes wall time, Selection is instant, and Formulation's parallel batches scale with (themes × voices) pairs up to the rate-limit ceiling. On `dev_msc_test` (20 themes, 12 voices, ~40 surviving pairs), total wall time was roughly 12-18 minutes on Opus 4.6 with adaptive thinking.
+**Time window.** The Provocateur runs after the Researcher completes. It must finish fast enough that the Voice Pipeline and all downstream processing can complete before breakfast. The five-stage architecture is the key enabler here — Triage's 13 parallel LLM calls collapse to ~1-2 minutes wall time, Selection is instant, and Formulation's parallel batches scale with (themes × voices) pairs up to the rate-limit ceiling. On `dev_msc_test` (20 themes, 12 voices, ~40 surviving pairs), total wall time was roughly 12-18 minutes on Opus 4.7 with adaptive thinking.
 
-**Rate limits.** Anthropic's Opus 4.6 tier caps output tokens per minute. Formulation generates ~3K output tokens per call, so the default batch size of 4 parallel calls with a 20-second wait between batches keeps the pipeline well inside the rate window. If Anthropic raises the tier or a future model lifts the cap, increasing `PROVOCATEUR_FORMULATION_BATCH` is the first place to recover time.
+**Rate limits.** Anthropic's Opus 4.7 tier caps output tokens per minute. Formulation generates ~3K output tokens per call, so the default batch size of 4 parallel calls with a 20-second wait between batches keeps the pipeline well inside the rate window. If Anthropic raises the tier or a future model lifts the cap, increasing `PROVOCATEUR_FORMULATION_BATCH` is the first place to recover time.
 
 **Reproducibility.** Given identical Triage inputs, Selection always produces identical assignments — pure deterministic Python. Triage and Formulation are not reproducible (LLM sampling), but their outputs are cached per-voice and per-pair, so a single pipeline run produces a single canonical set of briefings that downstream code can trust.
 
@@ -479,7 +479,7 @@ Selection and Packaging have no prompt files — they're pure Python functions (
 
 ### Model Configuration
 
-Default model: `claude-opus-4-6` with `thinking.type=adaptive`. Override via `CLAUDE_MODEL` env var for Sonnet dev iteration. Thinking can be disabled via `PROVOCATEUR_THINKING=0` (not recommended; validated quality relies on adaptive thinking).
+Default model: `claude-opus-4-7` with `thinking.type=adaptive`. Override via `CLAUDE_MODEL` env var for Sonnet dev iteration. Thinking can be disabled via `PROVOCATEUR_THINKING=0` (not recommended; validated quality relies on adaptive thinking).
 
 Token budgets: Triage and Formulation both set `max_tokens=40000`. This is a ceiling, not a target — thinking consumes budget before visible text is emitted, so generous ceilings prevent the "empty text stream" failure mode. Observed usage in validation: 15-25K output tokens per call, well inside the ceiling.
 
