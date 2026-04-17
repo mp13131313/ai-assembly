@@ -28,7 +28,7 @@ The personas pipeline produces a `provocateur_profile.json` per voice (37 fields
 All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Briefing_v3_1.md` — the authoritative project briefing (as of 2026-04-17)
 - `AI_Assembly_Persona_Card_v2.md` — the 37-field card template
-- `AI_Assembly_Persona_Pipeline_v3_8.md` — persona build pipeline
+- `AI_Assembly_Persona_Pipeline_v3_9.md` — persona build pipeline
 - `AI_Assembly_Researcher_Pipeline.md` — researcher extraction and grouping
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript pipeline

@@ -1,16 +1,15 @@
 """End-to-end Persona Pipeline runner for a single voice.
 
-Walks: Node 0 -> Pass 1a (Perplexity) + Pass 1a-DR (Claude Deep Research file)
-+ Pass 1b (Gemini) -> Pass 1-merge (3-way) -> Pass 1c-extract (URL extraction
-from merged dossier) -> Pass 1c (fetch primary texts) -> Pass 2 -> CT
--> Pass 3 (+ DR supplement if triggered) -> CT -> Pass 1d (excerpt selection)
--> Pass 4a -> CT -> Pass 4b -> CT -> Pass 5 -> Pass 6 -> assembled card.
+Starts from Pass 1-merge. Requires that Pass 1a (Perplexity) and Pass 1b
+(Gemini) have already been run by run_phase0_1_research.py, which also
+produces the Pass 0b Claude DR prompt. The manual Claude DR session
+(Pass 1a-DR) must also be complete before this runner starts.
 
-APPROACH C (active default for all voices): Pass 1a is augmented by a manually-
-produced Claude Deep Research markdown file at inputs/dossiers/<voice_slug>_claude_dr.md
-(path derived from voice slug at runtime). Pass 1-merge does a three-way
-contradiction check across Perplexity + Claude DR + Gemini.
-If the file is missing the runner falls back to two-source merge with a warning.
+Walks: Node 0 -> Pass 1a-DR load -> Pass 1-merge (3-way) -> Pass 1c-extract
+-> Pass 1c (fetch) -> primary-text review gate -> Pass 1d -> Pass 2 -> CT
+-> Pass 3 -> CT -> Pass 4a -> CT -> Pass 4b -> CT -> Pass 5 -> Pass 6
+-> Pass 7-pre -> Pass 7a -> revision loop -> Pass 7b -> Pass 7c -> Derive
+-> assembled card.
 
 Designed for resumability: each pass writes its output JSON before the next
 pass starts. If a pass already exists, it's loaded from disk instead of
@@ -33,7 +32,7 @@ load_dotenv(REPO_ROOT.parent / ".env")
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_perplexity, call_gemini
+from flows.shared.clients import call_claude, call_gemini
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 from flows.shared.dr_validation import validate_dr_dossier
@@ -83,24 +82,26 @@ vi = validate_input(load_voice_input(VOICE_NAME))
 stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_sources']}")
 
 
-# ---------- PASS 1a ----------
-def _pass_1a():
-    prompt = render("persona_pass_1a_research_human", name=vi["name"], hostile_sources=vi["hostile_sources"])
-    r = call_perplexity(user=prompt, temperature=0.0)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1a_research_dossier",
-            "model": r["model"], "usage": r["usage"], "citations": r.get("citations", []),
-            "search_results": r.get("search_results", []), "text": r["text"], "think": r["think"]}
+# ---------- VALIDATE PRE-COMPUTED PASS 1a + 1b OUTPUTS ----------
+# Pass 1a (Perplexity) and Pass 1b (Gemini) must be run BEFORE this script
+# via run_phase0_1_research.py. Check that both outputs exist.
+_pass1a_path = RUN / "01_research/perplexity_dossier.json"
+_pass1b_path = RUN / "01_research/gemini_broad_scan.json"
+_missing = [str(p.relative_to(REPO_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
+if _missing:
+    sys.exit(
+        "Pass 1a + 1b outputs missing. Run run_phase0_1_research.py first:\n"
+        f"  python3 run_phase0_1_research.py \"{VOICE_NAME}\"\n"
+        f"Missing: {', '.join(_missing)}"
+    )
 
-stamp("PASS 1a: Perplexity sonar-deep-research")
-pass1a = call_or_cache(RUN / "01_research/perplexity_dossier.json", "Pass 1a", _pass_1a)
-dossier_text = pass1a.get("text") or pass1a.get("text_clean")
-stamp(f"  dossier: {len(dossier_text)} chars")
+pass1a = cached(_pass1a_path, "Pass 1a (pre-computed)")
+dossier_text = pass1a.get("text") or pass1a.get("text_clean", "")
+stamp(f"PASS 1a: loaded Perplexity dossier ({len(dossier_text)} chars)")
 
-
-# ---------- PASS 1c is now AFTER Pass 1-merge (see below) ----------
-# Primary text URLs are extracted from the merged dossier rather than
-# hand-specified in the voice config. If vi["primary_text_sources"] is
-# populated (backward compat), those are used as override.
+pass1b = cached(_pass1b_path, "Pass 1b (pre-computed)")
+broad_scan_text = pass1b["text"]
+stamp(f"PASS 1b: loaded Gemini broad scan ({len(broad_scan_text)} chars)")
 
 
 # ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
@@ -119,19 +120,6 @@ if _claude_dr_path.exists():
     })
 else:
     stamp(f"PASS 1a-DR: no file at {_claude_dr_path.name} — falling back to 2-source merge (Perplexity + Gemini only)")
-
-
-# ---------- PASS 1b (Gemini broad scan) ----------
-def _pass_1b():
-    prompt = render("persona_pass_1b_broad_scan", name=vi["name"])
-    r = call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1b_broad_scan",
-            "model": r["model"], "usage": r["usage"], "text": r["text"]}
-
-stamp("PASS 1b: Gemini broad scan")
-pass1b = call_or_cache(RUN / "01_research/gemini_broad_scan.json", "Pass 1b", _pass_1b)
-broad_scan_text = pass1b["text"]
-stamp(f"  broad scan: {len(broad_scan_text)} chars")
 
 
 # ---------- PASS 1-MERGE (Claude contradiction check, three-way: Perplexity + Claude DR + Gemini) ----------
@@ -972,7 +960,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
     # Spec wants 37 card fields flat at root + a metadata block.
     "voice_name": vi["name"],
     "voice_mode": vi["voice_mode"],
-    "pipeline_version": "3.7",
+    "pipeline_version": "3.9",
     "generated_date": time.strftime("%Y-%m-%d"),
 
     # All 35 generated card fields, flat at root level
