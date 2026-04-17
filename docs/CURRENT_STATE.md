@@ -14,11 +14,11 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 ├── docs/                                  # canonical specs + this file
 │   ├── CURRENT_STATE.md                   # you are here
 │   ├── README.md                          # staleness banner for the other specs
-│   ├── AI_Assembly_Briefing_v2.md         # project briefing (current)
+│   ├── AI_Assembly_Briefing_v3_1.md         # project briefing (current)
 │   ├── AI_Assembly_Architecture_v1.md     # STALE — see README
 │   ├── AI_Assembly_Infrastructure_Setup.md# STALE — see README
 │   ├── AI_Assembly_Persona_Card_v2.md
-│   ├── AI_Assembly_Persona_Pipeline_v3_7.md
+│   ├── AI_Assembly_Persona_Pipeline_v3_8.md
 │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   ├── AI_Assembly_Researcher_Pipeline.md
 │   ├── AI_Assembly_Transcription_Pipeline.md
@@ -213,7 +213,7 @@ runs/plato/
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
-**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_7.md` § Phase 5.
+**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_8.md` § Phase 5.
 
 **Status: not built.** The `IMPLEMENTATION_AUDIT_v3_7.md` flagged this in April 2026; since then Phase 3+4 were built but Phase 5 was not.
 
@@ -234,7 +234,7 @@ These are in the briefing but have no detailed spec yet.
 
 ### 3.1 Voice Pipeline Step 3 — Amendment
 
-**Briefing v2 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice, implicitly or explicitly). If no amendment, Step 2 artifact publishes unchanged.
+**Briefing v3.1 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice, implicitly or explicitly). If no amendment, Step 2 artifact publishes unchanged.
 
 **What's needed:**
 - System prompt for Step 3 (framed by shared-theme portions of other voices' artifacts)
@@ -247,7 +247,7 @@ These are in the briefing but have no detailed spec yet.
 
 ### 3.2 Closing-show pipelines (Day 3 afternoon)
 
-Per Briefing v2, THREE pipeline passes run Day 3 afternoon before the closing show:
+Per Briefing v3.1, THREE pipeline passes run Day 3 afternoon before the closing show:
 
 1. **Theme identification pass** — reads across all 3 nights' Researcher themes, Provocateur formulations, and voice detailed responses. Identifies 3–5 throughline themes.
 2. **Per-theme mapping pass** — for each throughline, reads each voice's positions and plots on Matrix A (Power & Agency, human↔nonhuman / many↔one) and Matrix B (Change & Actor, rupture↔progression / individual↔collective). Generates read-through script segment per theme.
@@ -262,7 +262,7 @@ Per Briefing v2, THREE pipeline passes run Day 3 afternoon before the closing sh
 
 ### 3.3 Downstream pipeline (per-night, runs after Voice Pipeline completes)
 
-Per Briefing v2 + Architecture_v1 (Architecture_v1 is stale on orchestrator but the stage logic stands):
+Per Briefing v3.1 + Architecture_v1 (Architecture_v1 is stale on orchestrator but the stage logic stands):
 
 1. **Render** — text passes through; Marley's artifact → Suno API; Octopus's artifact → client-side shader params packaging. Retries + fallbacks.
 2. **Publish** — aggregate all 12 artifacts into `night-N.json`; commit+push to microsite content repo; Vercel rebuild.
@@ -273,7 +273,7 @@ Per Briefing v2 + Architecture_v1 (Architecture_v1 is stale on orchestrator but 
 
 ### 3.4 Microsite
 
-Per Briefing v2: Astro or Next.js static site, Vercel/Netlify hosting, content repo (GitHub), deep links per artifact (`/night-1/plato`, etc.).
+Per Briefing v3.1: Astro or Next.js static site, Vercel/Netlify hosting, content repo (GitHub), deep links per artifact (`/night-1/plato`, etc.).
 
 **Needs building:** design prototype (Lovable/v0), production codebase, content schema, chromatophore shader integration, navigation pattern.
 
@@ -478,7 +478,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 - **Google API quota**: personas project had zero free-tier quota at one point (causing Pass 1b to be skipped and Pass 1-merge to fall back to single-source). Verify before batch persona runs.
 - **Perplexity quota**: 500 queries/month on Pro plan; 12 voices = 12 queries, fine.
 
-### 6.6 Open design questions (per Briefing v2)
+### 6.6 Open design questions (per Briefing v3.1)
 
 - **Introduction location** for Day 1 (4 options; decision between Till and Matthias)
 - **Program copy revision** for the AIssembly entry
@@ -645,7 +645,7 @@ In decreasing order of "if this goes wrong, how bad is it?"
 
 | Risk | Mitigation | Notes |
 |---|---|---|
-| Voice Pipeline not built by Athens | Drop Step 3 Amendment, ship Steps 1+2 only; briefing is robust to this per Briefing v2's "Step 3 is new architecture" flag | Would reduce deliberative character but keep the experiment intact |
+| Voice Pipeline not built by Athens | Drop Step 3 Amendment, ship Steps 1+2 only; briefing is robust to this per Briefing v3.1's "Step 3 is new architecture" flag | Would reduce deliberative character but keep the experiment intact |
 | Persona cards not all complete | Ship with 8–10 cards; drop 2–4 voices; adjust council_config members array | Weakens the panel composition but better than no Assembly |
 | Closing show too ambitious | Ship mapped read-through only; drop video snippets | Video is nice-to-have; mapped read-through is the structural argument |
 | AssemblyAI diarization fails on key session | Speaker ID flags for human review; human 15–30 min pass catches it | Already validated on MSC test sessions |
@@ -653,8 +653,8 @@ In decreasing order of "if this goes wrong, how bad is it?"
 | VM dies mid-conference | Laptop fallback tested pre-Athens; `.env` in 1Password; repo cloned locally | Per Infrastructure_Setup §Failure fallback |
 | Audio recording quality bad | Normalized 96 kbps mono is forgiving; speaker-ID 5-pass catches most issues; human review queue catches the rest | 15–30 min human review per night |
 | Cleopatra persona produces sanitised output on ethnicity | Voice-specific warnings in her config (no flattening to pop culture readings); Pass 7a register + anachronism checks | Monitor during her card build |
-| Thiel persona carries legal risk | Needs review separate from architectural spec | Open question per Briefing v2 |
-| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 goodbye publishes regardless | "Indifference is failure" per Briefing v2; build the experiment anyway |
+| Thiel persona carries legal risk | Needs review separate from architectural spec | Open question per Briefing v3.1 |
+| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 goodbye publishes regardless | "Indifference is failure" per Briefing v3.1; build the experiment anyway |
 
 ---
 
@@ -676,7 +676,7 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 ### 10.3 Related docs
 
 - `docs/README.md` — staleness banner for the spec set
-- `docs/AI_Assembly_Briefing_v2.md` — the target-state document
+- `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
 - `personas/notes/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
 - `runtime/flows/voice/README.md` — voice-pipeline build notes (specific to the "don't few-shot from worked_provocations" rule)
@@ -684,4 +684,4 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 
 ---
 
-*End of CURRENT_STATE.md. This document should be read alongside the Briefing v2 as the most current picture of the system. When in doubt between them: Briefing describes what we're building; this describes where we are.*
+*End of CURRENT_STATE.md. This document should be read alongside the Briefing v3.1 as the most current picture of the system. When in doubt between them: Briefing describes what we're building; this describes where we are.*
