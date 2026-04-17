@@ -108,11 +108,7 @@ System prompt is faithful — all 4 blocks match the spec, all 3 voice_mode bran
 
 **Real deviations:**
 
-1. **ChatGPT DR conditional supplement is not implemented.** Spec specifies firing OpenAI DR when ANY of: `needs_dr_supplement=true`, dossier INTELLECTUAL FRAMEWORK <500 words, `voice_mode="observational"`. My runner passes `chatgpt_supplement=None` unconditionally. The user prompt template has `{% if chatgpt_supplement %}...{% endif %}` so the rendering is correct — just no supplement is ever generated.
-
-   **Reason:** OpenAI quota was exceeded during Plato run. Was unblocking, not architectural.
-
-   **Real consequence:** when we run Marley or Ibn Battuta (observational), this branch should fire automatically and the supplement matters. Until OpenAI is restored, those voices will run without DR depth — known weakness flagged.
+1. **ChatGPT DR conditional supplement removed (Round 2).** The `needs_dr_supplement` field and the Pass 3 ChatGPT DR supplement block were dropped in walkthrough-fixes-round2-2026-04-17. Claude DR in Phase 1 now provides the deep research depth this was compensating for. The OpenAI supplement was redundant given the three-way merge (Perplexity + Claude DR + Gemini). See WALKTHROUGH_FIXES_PENDING.md §16.
 
 2. **Same temperature/max_tokens/thinking deviations as Pass 2** (forced by API evolution).
 </content>

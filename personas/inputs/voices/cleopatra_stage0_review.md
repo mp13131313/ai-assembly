@@ -10,7 +10,6 @@
 | impossible | true | auto (died 30 BCE) |
 | hostile_sources | true | auto (Roman sources dominate) |
 | corpus_constraint | reconstructed | auto (zero surviving direct writings) |
-| needs_dr_supplement | false | proposed (rich secondary scholarship) |
 
 ## Identity notes
 

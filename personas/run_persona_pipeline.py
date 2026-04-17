@@ -33,7 +33,7 @@ load_dotenv(REPO_ROOT.parent / ".env")
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_perplexity, call_openai, call_gemini
+from flows.shared.clients import call_claude, call_perplexity, call_gemini
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 
@@ -437,58 +437,12 @@ pass_2_summary = _ct_compress(pass2["fields"], "pass2")
 
 
 # ---------- PASS 3 (Intellectual Core) ----------
-# Conditional ChatGPT DR supplement per v3.7 spec — fires when ANY of:
-#   (a) needs_dr_supplement is True
-#   (b) dossier INTELLECTUAL FRAMEWORK section < 500 words
-#   (c) voice_mode == "observational"
-def _should_dr_supplement() -> tuple[bool, str]:
-    if vi.get("needs_dr_supplement"):
-        return True, "needs_dr_supplement=True in input"
-    if vi["voice_mode"] == "observational":
-        return True, "voice_mode is observational"
-    # Word count of INTELLECTUAL FRAMEWORK section in dossier
-    m = re.search(r"INTELLECTUAL FRAMEWORK(.*?)(?=\n#+\s|\Z)", merged_dossier, flags=re.DOTALL | re.IGNORECASE)
-    if m:
-        words = len(m.group(1).split())
-        if words < 500:
-            return True, f"INTELLECTUAL FRAMEWORK section is {words} words (<500)"
-    return False, "no trigger conditions met"
-
-def _pass_3_dr_supplement():
-    prompt = (
-        f"Analyse the intellectual framework of {vi['name']}, focusing specifically on:\n"
-        "1. Their characteristic reasoning method — how they move through a problem\n"
-        "2. Internal tensions or contradictions in their thought\n"
-        "3. Key concepts they use with distinctive precision\n"
-        "4. How their positions evolved over their lifetime\n"
-        "5. Minority scholarly readings beyond the standard interpretation\n\n"
-        "Draw on scholarly sources beyond the most commonly cited works. Include "
-        "specific textual references (work title, chapter/section) for each claim."
-    )
-    r = call_openai(system="You are a scholar of intellectual history conducting deep research.",
-                    user=prompt, model="gpt-4o", temperature=0.3, max_tokens=16000)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_dr_supplement",
-            "model": r["model"], "usage": r["usage"], "text": r["text"]}
-
-dr_should, dr_reason = _should_dr_supplement()
-chatgpt_supplement_text = None
-if dr_should:
-    stamp(f"PASS 3 DR supplement: triggered ({dr_reason})")
-    try:
-        dr_path = RUN / "01_research/chatgpt_dr_supplement.json"
-        dr_result = call_or_cache(dr_path, "Pass 3 DR supplement", _pass_3_dr_supplement)
-        chatgpt_supplement_text = dr_result["text"]
-    except Exception as e:
-        stamp(f"  WARN: DR supplement failed ({type(e).__name__}: {str(e)[:120]}); proceeding without")
-else:
-    stamp(f"PASS 3 DR supplement: skipped ({dr_reason})")
-
 def _pass_3():
     sysp = render("persona_pass_3_intellectual_core", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
     userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
-                   chatgpt_supplement=chatgpt_supplement_text, pass_2_summary=pass_2_summary) + _critique_suffix("3")
+                   pass_2_summary=pass_2_summary) + _critique_suffix("3")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
