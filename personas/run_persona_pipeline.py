@@ -36,6 +36,7 @@ from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_perplexity, call_gemini
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
+from flows.shared.dr_validation import validate_dr_dossier
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
@@ -363,40 +364,6 @@ def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temper
 
 
 # ---------- HELPER: coherence threading compress ----------
-def validate_dr_dossier(path: Path) -> None:
-    text = path.read_text()
-    required_headings = [
-        r"^#+\s*1\.\s*(BIOGRAPHICAL|BIOLOGICAL|TEXTUAL) FOUNDATION\b",
-        r"^#+\s*2\.\s*(INTELLECTUAL FRAMEWORK|PERCEPTUAL WORLD|SYSTEMIC PROPERTIES)\b",
-        r"^#+\s*3\.\s*(REASONING PATTERNS|RELATIONAL PATTERNS)\b",
-        r"^#+\s*4\.\s*VOICE AND STYLE\b",
-        r"^#+\s*5\.\s*HISTORICAL BOUNDARIES\b",
-        r"^#+\s*6\.\s*PRIMARY TEXTS\b",
-    ]
-    missing = [h for h in required_headings
-               if not re.search(h, text, re.MULTILINE | re.IGNORECASE)]
-    if missing:
-        raise ValueError(
-            f"DR dossier at {path} is missing expected section headings — "
-            f"may be a persona card rather than a research dossier. "
-            f"See inputs/dossiers/_archive/plato_claude_dr_v1_finished_card.md "
-            f"for an example of the wrong shape, and CLAUDE_DR_BRIEFING.md "
-            f"for the correct six-section structure."
-        )
-    word_count = len(text.split())
-    if word_count < 5000:
-        raise ValueError(
-            f"DR dossier at {path} is only {word_count} words — expected "
-            f"15,000-25,000. Likely truncated or incomplete export."
-        )
-    if re.search(r"^#+\s*Field\s+\d+:", text, re.MULTILINE):
-        raise ValueError(
-            f"DR dossier at {path} contains 'Field NN:' headings — this is "
-            f"a persona card, not a research dossier. Regenerate using the "
-            f"dossier prompt from inputs/dossiers/_dr_prompts/."
-        )
-
-
 def _ct_compress(prior_pass_output: dict, label: str) -> str:
     ct_path = RUN / f"02_passes/_ct_{label}.json"
     cached_v = cached(ct_path, f"CT compress {label}")
