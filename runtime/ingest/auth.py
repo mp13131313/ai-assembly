@@ -31,7 +31,14 @@ _failures: dict[str, list[float]] = defaultdict(list)  # ip -> [timestamps]
 
 
 def _client_ip(request: Request) -> str:
-    """Real IP, accounting for Caddy's X-Real-IP header."""
+    """Real IP for rate-limiting.
+
+    SECURITY: assumes the app runs behind Caddy (or equivalent reverse
+    proxy) that sets X-Real-IP to the actual client IP. If the app is
+    ever exposed directly (without a proxy in front), these headers are
+    attacker-controlled and rate-limiting becomes trivially bypassable.
+    See runtime/ingest/deploy/Caddyfile:27-28 for the proxy config.
+    """
     return (
         request.headers.get("X-Real-IP")
         or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
@@ -48,6 +55,13 @@ def _check_and_record(ip: str, *, failed: bool) -> None:
     """
     now = time.monotonic()
     with _lock:
+        # Prune IPs with no recent failures. Cheap and bounds memory growth
+        # under sustained probing.
+        stale = [k for k, v in _failures.items()
+                 if not v or now - max(v) > _WINDOW_SECONDS]
+        for k in stale:
+            del _failures[k]
+
         recent = [t for t in _failures[ip] if now - t < _WINDOW_SECONDS]
         if len(recent) >= _MAX_FAILURES:
             raise HTTPException(

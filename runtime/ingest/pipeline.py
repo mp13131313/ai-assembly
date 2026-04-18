@@ -55,10 +55,9 @@ SUBSTATE_FINALIZING = "transcribing_finalizing"
 
 # --- Serialization gate ------------------------------------------------------
 
-# One in-flight normalize+transcribe at a time per app process. We run
-# uvicorn with --workers 1, so this is the whole story for our deployment.
-# The real serialization across restarts comes from the fact that reconcile
-# will find and adopt any detached subprocess that's still running.
+# One in-flight ffmpeg normalization at a time per app process. Transcription
+# subprocesses are detached and run concurrently — rate-limit pressure is on
+# AssemblyAI + Anthropic, not on this process.
 _gate = asyncio.Semaphore(1)
 
 
@@ -145,6 +144,13 @@ def _is_pid_alive(pid: int | None) -> bool:
 def _substate_from_log(session_dir: Path) -> str:
     """Scan pipeline.log for the most-advanced Stage 0 sub-phase marker.
 
+    TODO: This relies on transcription_flow.py's log message strings. If
+    those strings change, substate inference silently breaks. A better
+    design would have transcription_flow.py write a structured
+    substate.txt file at each phase, and this function would prefer that
+    over the log scan. Keep as fallback for when the structured file is
+    missing (crash mid-phase before write).
+
     Returns one of the SUBSTATE_* constants, or STATE_TRANSCRIBING if the log
     is absent or has no recognisable markers. Does not mutate any file.
 
@@ -221,6 +227,13 @@ def infer_state(session_dir: Path) -> dict[str, Any]:
     # canonical Stage 0 output file.
     if (session_dir / "session_package.json").exists():
         status = update_status(session_dir, state=STATE_DONE, pid=None, error=None)
+        status = dict(status)
+        status["checkpoints"] = {
+            "normalized":  (session_dir / "audio.m4a").exists(),
+            "asr":         (session_dir / "out_01_diarized.json").exists(),
+            "speaker_id":  (session_dir / "out_02_speaker_id.json").exists(),
+            "cleaning":    (session_dir / "out_03_cleaned.json").exists(),
+        }
         return status
 
     # Non-terminal + no session_package.json + dead PID → error.
