@@ -112,7 +112,7 @@ In order. Stop if any step fails.
    ```bash
    # As ingest user on the VM:
    cd /opt/ai-assembly
-   sudo -u ingest ./venv/bin/python -c '
+   sudo -u ingest ./runtime/venv/bin/python -c '
    import subprocess
    subprocess.run(["ffmpeg","-hide_banner","-y",
                    "-f","lavfi","-i","sine=frequency=440:duration=5",
