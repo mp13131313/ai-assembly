@@ -1,0 +1,17 @@
+# AI Assembly personas pipeline — Python dependencies
+# Bootstrap: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+#
+# Python 3.9+ required (tested on 3.9.6 via system python on macOS).
+# The runtime/ subtree has its own requirements.txt with different anthropic SDK version.
+
+# LLM clients
+anthropic==0.94.1            # pinned — personas pipeline uses 0.94.1 message API surface
+google-genai>=1.47.0         # new google-genai SDK; the older google-generativeai is deprecated
+
+# Prompt rendering + HTTP + env
+jinja2>=3.1                  # DR prompt + other templates
+python-dotenv>=1.0           # .env loading (from monorepo root)
+requests>=2.31               # Perplexity client, Wikipedia API, other HTTP
+
+# Standard scientific + JSON utilities (used by various flows/shared modules)
+# Add as needed; keep this file minimal until an import is added to code.

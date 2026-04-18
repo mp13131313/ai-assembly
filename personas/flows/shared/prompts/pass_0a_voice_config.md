@@ -120,8 +120,8 @@ Bulleted list of decisions where you're least confident or where a specialist mi
 ## To proceed
 
 1. Read this doc, edit `inputs/voices/<slug>.json` if needed.
-2. Run Pass 0b: `python3 run_pass0b_dr_prompt.py "<Display Name>"`.
-3. That generates `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md`.
+2. Run Phase 0.5 research + render: `python3 run_phase0_1_research.py "<Display Name>"`.
+3. That runs Perplexity + Gemini in parallel and generates `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md`.
 4. Open claude.ai with **Claude Opus 4.7** selected, with Extended Thinking + Deep Research both enabled.
 5. Paste the prompt from `<slug>_dr_prompt.md`.
 6. Save the result as `inputs/dossiers/<slug>_claude_dr.md`.
