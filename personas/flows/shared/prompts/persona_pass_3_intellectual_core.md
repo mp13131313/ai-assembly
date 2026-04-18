@@ -1,5 +1,5 @@
 {# Pass 3 — Intellectual Core (Claude)
-   v3.7 Node 3. 5 fields: constitution, concept_lexicon, reasoning_method,
+   v3.10 Node 3. 5 fields: constitution, concept_lexicon, reasoning_method,
    finds_compelling, resists. Uses coherence-threaded pass_2_summary. #}
 BLOCK 1 — EXPERT IDENTITY:
 You hold deep expertise in {{ name }}'s intellectual tradition and their reception

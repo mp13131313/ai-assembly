@@ -1,4 +1,4 @@
-{# Pass 4b — Artifact (Claude). v3.7 Node 4b.
+{# Pass 4b — Artifact (Claude). v3.10 Node 4b.
    8 fields: medium, technical_capabilities, characteristic_output_structure,
    relationship_to_detailed_response, aesthetic_qualities, stance_tendency,
    length_and_format_constraints, quality_criteria. #}

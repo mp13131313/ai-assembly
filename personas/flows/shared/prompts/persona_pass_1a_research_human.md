@@ -1,5 +1,5 @@
 {# Pass 1a — Research Dossier (Perplexity, human voices)
-   v3.7 Node 1a. Single comprehensive query, organised by 6 dossier headings
+   v3.10 Node 1a. Single comprehensive query, organised by 6 dossier headings
    that map onto the Persona Card's 8 sections. Hostile-sources branch fires
    when the input flags the figure's record is dominated by enemies/colonisers/
    rival powers (e.g., Cleopatra). #}

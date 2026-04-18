@@ -1,10 +1,10 @@
-{# Phase 4 — Derive (Claude Sonnet 4.6). v3.7 Node Derive.
+{# Phase 4 — Derive (Claude Sonnet 4.6). v3.10 Node Derive.
    Single call producing two JSON objects: Provocateur Profile (8 fields,
    becomes a member entry in council_config.json) + Evaluation Rubric
    (9 test prompts for ongoing testing).
    Pure compression task — Sonnet is correct here, no thinking needed.
 #}
-You are deriving two compressed outputs from a completed v3.7 Persona Card:
+You are deriving two compressed outputs from a completed v3.10 Persona Card:
 
 1. PROVOCATEUR PROFILE — an 8-field summary used by the Provocateur Pipeline
    for triage, formulation, and assignment. The Provocateur does NOT load

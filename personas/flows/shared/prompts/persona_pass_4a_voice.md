@@ -1,4 +1,4 @@
-{# Pass 4a — Voice (Claude). v3.7 Node 4a.
+{# Pass 4a — Voice (Claude). v3.10 Node 4a.
    7 fields: rhetorical_mode, characteristic_moves, register_and_tone,
    metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes.
    REQUIRES primary_texts from Node 1c for corpus-based voice. #}

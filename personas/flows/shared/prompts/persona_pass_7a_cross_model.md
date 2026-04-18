@@ -1,4 +1,4 @@
-{# Pass 7a — Cross-Model Validation. v3.7 Node 7a.
+{# Pass 7a — Cross-Model Validation. v3.10 Node 7a.
    API: OpenAI gpt-4o (preferred) -> Gemini 2.5-pro (fallback) -> skip with flag.
    Must NOT be Claude — research documents 10-25% self-preference bias when
    models evaluate their own output. Claude generated Passes 2-6; a different

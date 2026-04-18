@@ -1,4 +1,4 @@
-{# Pass 6 — Corpus Curation (Claude). v3.7 Node 6.
+{# Pass 6 — Corpus Curation (Claude). v3.10 Node 6.
    1 field: curated_corpus_passages. Selection + annotation, not generation.
    Reads primary_texts and selects 5-10 passages serving double duty:
    intellectual grounding (Step 1) + voice exemplar (Step 2). #}

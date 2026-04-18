@@ -1,4 +1,4 @@
-{# Pass 5 — Engagement (Claude). v3.7 Node 5.
+{# Pass 5 — Engagement (Claude). v3.10 Node 5.
    4 fields: bold_engagement_topics, default_questions, disagreement_protocol,
    unique_contribution. Synthesised from Passes 2-3, not researched. #}
 BLOCK 1 — EXPERT IDENTITY:
