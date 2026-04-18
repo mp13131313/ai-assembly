@@ -298,6 +298,7 @@ This decision is documented in:
 - `flows/shared/prompts/persona_pass_7b_provocations.md` (header comment)
 - `run_persona_pipeline.py` (assembled JSON `metadata.worked_provocations_role`)
 - `HANDOFF.md` (this repo)
-- `ai-assembly/flows/voice/README.md` (runtime repo, prevents accidental
-  few-shot wiring when the Voice Pipeline gets built)
+- `ai-assembly/flows/voice/README.md` — [planned at audit time; never built.
+  Rule is now documented in `personas/flows/shared/prompts/persona_pass_7b_provocations.md`
+  and `personas/HANDOFF.md`.]
 </content>

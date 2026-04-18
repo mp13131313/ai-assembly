@@ -1,5 +1,7 @@
 # Walkthrough Fixes — Pending
 
+> **Historical note:** This document describes the transition to Opus 4.6. The current pipeline runs on Opus 4.7 as of commit 35bc8fd (2026-04-17). Content preserved as-is for traceability.
+
 Captured during the 2026-04-17 end-to-end pipeline walkthrough. Execute as one coherent commit after the walkthrough finishes.
 
 ## Terminology (canonical, per spec)

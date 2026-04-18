@@ -336,7 +336,7 @@ A proposition is NOT a question, NOT a topic, and NOT a thesis that already cont
       "extraction_id": "session:NNN",
       "quote": "the quoted text",
       "attribution": "speaker name or role",
-      "flavor": "assertion|reframing|open_question"
+      "flavor": "speaking with intensity | pushing back | extending the previous point | ..."
     }
   ],
   "grounding_extraction_ids": ["session:NNN", "session:MMM"],
@@ -344,7 +344,7 @@ A proposition is NOT a question, NOT a topic, and NOT a thesis that already cont
 }
 ```
 
-**Strict-flavor rules on `selected_quotes`.** The quotes are a curated sample, not exhaustive. 2–4 quotes per formulation is the working range. Each quote's `flavor` must match the Researcher's `lens` for that extraction (underscore in `open_question`, not space). Quotes must be attributable — never composite, never paraphrased. The model is instructed to rewrite if a desired quote doesn't exist verbatim in the extractions.
+**Strict-flavor rules on `selected_quotes`.** The quotes are a curated sample, not exhaustive. 2–4 quotes per formulation is the working range. `flavor` is a stage-direction-style phrase derived **only** from Researcher metadata — `energy: high` maps to phrases like "speaking with intensity", "with weight"; `engagement: challenged` maps to "pushing back", "contesting the framing"; `engagement: reinforced` maps to "extending the previous point", "building on what came before"; `lens: open_question` maps to "asking aloud", "leaving the question open"; `responds_to: <id>` maps to "responding to the previous speaker". Omit `flavor` entirely when the metadata does not support it. Visual, tonal, or interior-state phrasings ("visibly emotional", "quietly", "after a pause") are **disallowed** — the pipeline has no audio or video data to justify them. See `provocateur_formulation.md` STRICT-FLAVOR RULES section for the authoritative rules. Quotes must be attributable — never composite, never paraphrased.
 
 **Why `rationale` is kept out of the voice's briefing.** Passing the Provocateur's rationale to the voice would prime the voice toward the Provocateur's expected answer. The voice should respond to the formulation on its own terms. The rationale stays in the per-pair checkpoint file (`formulations/{theme_id}__{slug}.json`) for audit — anyone reviewing a briefing can see what the Provocateur was aiming for, without the voice ever seeing it.
 

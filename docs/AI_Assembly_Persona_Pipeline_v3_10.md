@@ -778,7 +778,7 @@ Final assembly produces a flat JSON — all 37 card fields at root level, plus m
 {
   "voice_name": "{{council_member_name}}",
   "voice_mode": "{{voice_mode}}",
-  "pipeline_version": "3.7",
+  "pipeline_version": "3.10",
   "generated_date": "...",
 
   "council_member_name": "...",

@@ -1,5 +1,7 @@
 # PROVOCATEUR PIPELINE — v1 → v2 Delta
 
+> **Historical note:** This document describes the transition to Opus 4.6. The current pipeline runs on Opus 4.7 as of commit 35bc8fd (2026-04-17). Content preserved as-is for traceability.
+
 **Target document:** `AI_Assembly_Provocateur_Pipeline.md`
 **From:** v1 (initial conceptual spec — 4 steps, Claude Sonnet throughout)
 **To:** v2 (Apr 16 2026, post-dev_msc_test v3 validation)
