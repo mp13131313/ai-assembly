@@ -6,7 +6,10 @@ Design principles (see plan):
   * Transcription subprocesses are detached (start_new_session=True); if
     uvicorn restarts mid-run, reconcile_on_startup adopts them.
   * Upload body is streamed chunk-by-chunk, never buffered into RAM.
-  * Single worker + asyncio.Semaphore serializes normalize+transcribe.
+  * Single worker + asyncio.Semaphore serializes normalize (ffmpeg) only.
+    Transcription subprocesses run detached and can execute concurrently
+    across sessions; rate-limit exposure is bounded by AssemblyAI's and
+    Anthropic's per-key caps.
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ from .config import (
     MAX_UPLOAD_BYTES,
     MIN_FREE_BYTES,
     STATIC_DIR,
+    STATIC_VERSION,
     TEMPLATES_DIR,
     UPLOAD_CHUNK_BYTES,
     check_required_env,
@@ -58,6 +62,7 @@ from .sessions import (
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # Make track_css_class available as a filter in every template.
 templates.env.filters["track_css"] = track_css_class
+templates.env.globals["static_version"] = STATIC_VERSION
 
 _STATE_DISPLAY = {
     "received":               "received",
