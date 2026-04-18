@@ -17,7 +17,9 @@ _REQUIRED_HEADINGS = [
     r"^#+\s*6\.\s*(PRIMARY TEXTS|PRIMARY SCIENTIFIC LITERATURE|PRIMARY DOCUMENTS|RECEPTION AND INFLUENCE)\b",
 ]
 
-_WORD_COUNT_FLOOR = 5000
+# Matches the "Minimum 15,000 words" instruction at the bottom of
+# pass_0b_dr_prompt.md. A dossier below this is truncated or shallow.
+_WORD_COUNT_FLOOR = 15000
 _FIELD_HEADING_RE = re.compile(r"^#+\s*Field\s+\d+:", re.MULTILINE)
 
 
@@ -26,7 +28,7 @@ def validate_dr_dossier(path: Path) -> None:
 
     Raises ValueError with a diagnostic message on any violation:
     - Missing any of the six required section headings
-    - Word count below floor (5,000 words — indicates truncation)
+    - Word count below floor (15,000 words — indicates truncation)
     - Contains "Field NN:" headings (persona card shape, not a dossier)
 
     On success, returns None.
@@ -50,8 +52,9 @@ def validate_dr_dossier(path: Path) -> None:
     word_count = len(text.split())
     if word_count < _WORD_COUNT_FLOOR:
         raise ValueError(
-            f"DR dossier at {path} is only {word_count} words — expected "
-            f"15,000-25,000. Likely truncated or incomplete export."
+            f"DR dossier at {path} is only {word_count} words — minimum "
+            f"15,000 (prompt asks for 15,000-25,000). Likely truncated or "
+            f"incomplete export."
         )
 
     if _FIELD_HEADING_RE.search(text):

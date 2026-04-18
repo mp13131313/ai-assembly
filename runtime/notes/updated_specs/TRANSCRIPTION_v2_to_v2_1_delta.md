@@ -1,5 +1,7 @@
 # TRANSCRIPTION PIPELINE — v2 → v2.1 Delta
 
+> **Historical note:** This document describes the transition to Opus 4.6. The current pipeline runs on Opus 4.7 as of commit 35bc8fd (2026-04-17). Content preserved as-is for traceability.
+
 **Target document:** `AI_Assembly_Transcription_Pipeline.md`
 **From:** v2 (Apr 14 2026, post-Level-2 validation)
 **To:** v2.1 (Apr 14 2026, post-Researcher v2.4 cross-check)

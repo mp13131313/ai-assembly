@@ -1,5 +1,7 @@
 # RESEARCHER PIPELINE — v2 → v3 Delta
 
+> **Historical note:** This document describes the transition to Opus 4.6. The current pipeline runs on Opus 4.7 as of commit 35bc8fd (2026-04-17). Content preserved as-is for traceability.
+
 **Target document:** `AI_Assembly_Researcher_Pipeline.md`
 **From:** v2 (Apr 14 2026, §12 Part B verify_markers addition)
 **To:** v3 (Apr 14 2026, post-dev_msc_test v2.4 validation)

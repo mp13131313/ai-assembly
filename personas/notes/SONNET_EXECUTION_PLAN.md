@@ -1,5 +1,7 @@
 # Sonnet Execution Plan — Walkthrough Fixes
 
+> **Historical note:** This document describes the transition to Opus 4.6. The current pipeline runs on Opus 4.7 as of commit 35bc8fd (2026-04-17). Content preserved as-is for traceability.
+
 **Paste this into a fresh Claude Sonnet 4.6 session. The plan is self-contained.**
 
 ## Your task
