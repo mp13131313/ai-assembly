@@ -1,4 +1,4 @@
-{# Pass 7-pre — Citation Verification (Claude Sonnet). v3.7 Node 7-pre.
+{# Pass 7-pre — Citation Verification (Claude Sonnet). v3.10 Node 7-pre.
    Verifies every direct quote, textual reference, and attributed claim in the
    assembled persona card against:
      (a) the primary text passages fetched in Node 1c — strongest anchor

@@ -1,5 +1,5 @@
 {# Pass 1b — Broad Scan (Gemini, all voice types)
-   v3.7 Node 1b. Catches what Perplexity misses. Not relied on for factual
+   v3.10 Node 1b. Catches what Perplexity misses. Not relied on for factual
    accuracy — Pass 1-merge contradiction-checks against Pass 1a. #}
 Provide a broad research scan of {{ name }} covering:
 - Lesser-known biographical details, anecdotes, and personal characteristics

@@ -1,4 +1,4 @@
-{# Pass 7c — Negative Constraints. v3.7 Node 7c.
+{# Pass 7c — Negative Constraints. v3.10 Node 7c.
    API: Gemini 2.5-pro (preferred — avoids self-preference bias)
         OR Claude Sonnet 4.6 (fallback with bias-awareness instruction below).
    Reads worked provocations from Pass 7b and identifies persona failures —

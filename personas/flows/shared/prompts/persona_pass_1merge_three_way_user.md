@@ -1,5 +1,5 @@
 {# Pass 1-merge — Three-way contradiction check (Claude Sonnet).
-   v3.7 Node 1-merge, Approach C variant.
+   v3.10 Node 1-merge, Approach C variant.
    Inputs: Perplexity dossier + (optional) Claude Deep Research dossier + Gemini broad scan.
    Output: JSON list of factual contradictions across the available sources. #}
 === SOURCE A: Perplexity sonar-deep-research ===
