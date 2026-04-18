@@ -57,6 +57,32 @@ def test_infer_state_promotes_to_done_when_package_exists(session_dir: Path):
     assert st["state"] == pipeline.STATE_DONE
 
 
+def test_infer_state_done_includes_checkpoints(session_dir: Path):
+    """When the done-path triggers mid-poll (session_package.json appears),
+    the returned status must include the `checkpoints` dict — the UI crumb
+    renderer depends on it. Regression test for the fix to infer_state that
+    attached checkpoints to the newly-done branch."""
+    pipeline.initialize_status(
+        session_dir, session_id="s", run_id="r", audio_filename="a.m4a"
+    )
+    pipeline.update_status(session_dir, state=pipeline.STATE_TRANSCRIBING, pid=99999)
+    # Simulate upstream stages having produced their outputs too.
+    (session_dir / "audio.m4a").write_text("fake")
+    (session_dir / "out_01_diarized.json").write_text("[]")
+    (session_dir / "out_02_speaker_id.json").write_text("{}")
+    (session_dir / "out_03_cleaned.json").write_text("[]")
+    (session_dir / "session_package.json").write_text("{}")
+    st = pipeline.infer_state(session_dir)
+    assert st["state"] == pipeline.STATE_DONE
+    assert "checkpoints" in st
+    assert st["checkpoints"] == {
+        "normalized":  True,
+        "asr":         True,
+        "speaker_id":  True,
+        "cleaning":    True,
+    }
+
+
 def test_infer_state_marks_error_on_dead_pid_no_output(session_dir: Path):
     pipeline.initialize_status(
         session_dir, session_id="s", run_id="r", audio_filename="a.m4a"
