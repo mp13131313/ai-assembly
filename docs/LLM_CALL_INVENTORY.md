@@ -522,13 +522,23 @@ CLAUDE.md claims runtime=`0.95.0`, personas=`0.94.1`. CURRENT_STATE.md claims th
 
 `pass_0b_dr_prompt.md` L1086 asks for "Minimum 15,000 words". `personas/flows/shared/dr_validation.py` L20 floor is 5,000. Error message at L53 says "expected 15,000-25,000". A 5,001-word dossier passes `VALID`.
 
-### 7.6 Personas pipeline_version drift
+### 7.6 Personas pipeline_version drift *(resolved 2026-04-18)*
 
-- `docs/AI_Assembly_Persona_Pipeline_v3_9.md` header says **v3.10**
-- Same doc's example JSON (L781) writes `"pipeline_version": "3.7"`
-- `run_persona_pipeline.py` L963 writes `"3.9"`
-- Actual `persona_card_assembled.json` for Plato carries `"3.7"`
-- File is still named `AI_Assembly_Persona_Pipeline_v3_9.md`
+Previously four sources disagreed (doc header v3.10, example JSON v3.7, runner v3.9, Plato artifact v3.7). Fixed:
+- `docs/AI_Assembly_Persona_Pipeline_v3_9.md` renamed to `AI_Assembly_Persona_Pipeline_v3_10.md`
+- Example JSON at L781 updated to `"pipeline_version": "3.10"`
+- `run_persona_pipeline.py` L963 updated to `"3.10"`
+- Plato artifact left as-is (historical record of what actually ran)
+
+### 7.7 Transcription intentionally omits thinking even on Opus
+
+Speaker ID (§2.1.2) and Cleaning (§2.1.3) are exempted from the
+"thinking ON for every Opus 4.7 call" rule per
+`docs/AI_Assembly_Transcription_Pipeline.md` "Model selection" section:
+Speaker ID's output is too small (<2K tokens) for thinking's latency
+cost to be worth it; Cleaning's work is per-turn-local, not
+cross-turn synthesis. If someone sets `TRANSCRIPTION_SPEAKER_ID_MODEL`
+or `CLAUDE_MODEL` to Opus, thinking stays off intentionally.
 
 ---
 

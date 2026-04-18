@@ -116,7 +116,7 @@ Read in order to bootstrap:
 
 1. **This document** — architectural decisions binding for Phase B
 2. **`CLAUDE.md`** at repo root — repo layout, venv rules, load_dotenv pattern
-3. **`docs/AI_Assembly_Persona_Pipeline_v3_9.md`** — current pipeline spec (predates this rewrite; will be updated when Phase B lands)
+3. **`docs/AI_Assembly_Persona_Pipeline_v3_10.md`** — current pipeline spec (predates this rewrite; will be updated when Phase B lands)
 4. **`docs/AI_Assembly_Persona_Card_v2.md`** — 37-field persona card schema (target shape for Pass 2 output)
 5. **`personas/notes/FIX_34_SECTION_BULLETS_DRAFT.md`** — Fix #34 design rationale
 6. **`personas/notes/baseline_research/`** — three commissioned research docs that informed all architectural choices (especially File 2 on tool-to-section matching, File 3 on multi-pass + verification)

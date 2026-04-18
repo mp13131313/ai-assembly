@@ -93,5 +93,5 @@ cp .env.example .env
 ## Specs
 
 The canonical specs live in project knowledge:
-- `AI_Assembly_Persona_Pipeline_v3_9.md` — pipeline architecture
+- `AI_Assembly_Persona_Pipeline_v3_10.md` — pipeline architecture
 - `AI_Assembly_Persona_Card_v2.md` — 37-field schema
