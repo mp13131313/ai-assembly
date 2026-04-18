@@ -24,10 +24,14 @@ def call_claude(
     model: str | None = None,
     max_tokens: int = 8192,
     temperature: float = 0.2,
-    thinking_budget: int | None = None,
+    thinking: bool = False,
     response_format_json: bool = False,
 ) -> dict[str, Any]:
     """One Claude call. Returns dict with `text` (str) and `usage` (dict).
+
+    `thinking=True` enables Anthropic's adaptive thinking mode (the model
+    decides how much to think; no budget parameter is passed). Adaptive
+    thinking requires `temperature=1.0` per the SDK.
 
     If `response_format_json` is True, also returns parsed `json` field.
     """
@@ -43,18 +47,16 @@ def call_claude(
         "system": system,
         "messages": [{"role": "user", "content": user}],
     }
-    if thinking_budget:
+    if thinking:
         # Anthropic recommends thinking.type="adaptive" over the deprecated
-        # "enabled" mode for better performance. Adaptive does NOT take
-        # budget_tokens — the model decides how much to think. The
-        # thinking_budget parameter here is kept for backwards-compat with
-        # the rest of the codebase; a truthy value just switches thinking on.
+        # "enabled" mode. Adaptive does NOT take budget_tokens — the model
+        # decides how much to think based on the task.
         kwargs["thinking"] = {"type": "adaptive"}
 
     # Anthropic SDK refuses non-streaming for requests it estimates will take
     # >10 min. With max_tokens >= 16384 + adaptive thinking, the estimate
     # crosses that threshold. Use streaming and accumulate text + thinking.
-    use_streaming = max_tokens >= 16384 or thinking_budget
+    use_streaming = max_tokens >= 16384 or thinking
     if use_streaming:
         text_parts: list[str] = []
         usage_in = 0

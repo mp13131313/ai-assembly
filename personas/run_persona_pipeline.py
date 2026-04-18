@@ -130,7 +130,7 @@ def _pass_1merge():
                    claude_dr_dossier=claude_dr_text or None,
                    gemini_broad_scan=broad_scan_text)
     r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=16000, temperature=1.0, thinking_budget=10000,
+                    max_tokens=16000, temperature=1.0, thinking=True,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
             "model": r["model"], "usage": r["usage"], "result": r["json"],
@@ -208,7 +208,7 @@ else:
         userp = render("persona_pass_1c_extract_urls", name=vi["name"]) + \
                 f"\n\nMERGED DOSSIER:\n{merged_dossier}"
         r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                        max_tokens=4096, temperature=0.0, thinking_budget=None,
+                        max_tokens=4096, temperature=0.0, thinking=False,
                         response_format_json=True)
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls",
                 "model": r["model"], "usage": r["usage"], "result": r["json"]}
@@ -346,7 +346,7 @@ def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temper
     return call_claude(
         system=system, user=user, model=model,
         max_tokens=max_tokens, temperature=temperature,
-        thinking_budget=10000 if thinking else None,
+        thinking=thinking,
         response_format_json=True,
     )
 
@@ -362,7 +362,7 @@ def _ct_compress(prior_pass_output: dict, label: str) -> str:
                   prior_pass_output_json=json.dumps(prior_pass_output, ensure_ascii=False))
     r = call_claude(system="You compress persona fields into a tight summary.",
                     user=user, model="claude-sonnet-4-6", max_tokens=2048,
-                    temperature=0.0, thinking_budget=None)
+                    temperature=0.0, thinking=False)
     write_json_atomic(ct_path, {"label": label, "model": r["model"], "usage": r["usage"],
                                 "summary_text": r["text"]})
     return r["text"]
@@ -416,7 +416,7 @@ def _pass_1d():
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
                     user=user_prompt,
                     model="claude-sonnet-4-6", max_tokens=4096,
-                    temperature=0.0, thinking_budget=None,
+                    temperature=0.0, thinking=False,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
     selected_text = apply_selections(pass1c["passages"], selections)
@@ -537,7 +537,7 @@ def _pass_7pre():
                    primary_texts=primary_block,
                    merged_dossier=merged_dossier)
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=24000, temperature=0.0, thinking_budget=None,
+                    max_tokens=24000, temperature=0.0, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
@@ -794,7 +794,7 @@ def _pass_7c():
     # Sonnet fallback with bias-awareness
     sysp_claude = render("persona_pass_7c_negative", claude_fallback=True)
     r = call_claude(system=sysp_claude, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=8192, temperature=0.0, thinking_budget=None,
+                    max_tokens=8192, temperature=0.0, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7c_negative_constraints",
             "evaluator": "anthropic:claude-sonnet-4-6 (bias-aware fallback)",
@@ -828,7 +828,7 @@ def _derive():
     userp = render("persona_derive_user",
                    persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=8192, temperature=0.1, thinking_budget=None,
+                    max_tokens=8192, temperature=0.1, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
