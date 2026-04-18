@@ -337,7 +337,7 @@ This document is v3.1. It supersedes v3, v2, and the original `AI_Assembly_Brief
 **Related documents:**
 
 - `AI_Assembly_Architecture_v1.md` — end-to-end pipeline orchestration
-- `AI_Assembly_Persona_Pipeline_v3_9.md` — persona card construction
+- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona card construction
 - `AI_Assembly_Persona_Card_v2.md` — 37-field template
 - `AI_Assembly_Researcher_Pipeline.md` — extraction and grouping
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging

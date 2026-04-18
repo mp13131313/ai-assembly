@@ -18,7 +18,7 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   ├── AI_Assembly_Architecture_v1.md     # STALE — see README
 │   ├── AI_Assembly_Infrastructure_Setup.md# STALE — see README
 │   ├── AI_Assembly_Persona_Card_v2.md
-│   ├── AI_Assembly_Persona_Pipeline_v3_9.md
+│   ├── AI_Assembly_Persona_Pipeline_v3_10.md
 │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   ├── AI_Assembly_Researcher_Pipeline.md
 │   ├── AI_Assembly_Transcription_Pipeline.md
@@ -193,7 +193,7 @@ runs/plato/
 
 **Spec:** `docs/AI_Assembly_Voice_Pipeline.md` (covers Steps 1+2 only).
 
-**Status: not built.** Only `runtime/flows/voice/README.md` exists as a placeholder note.
+**Status: not built.** (`runtime/flows/voice/` directory does not exist.)
 
 **What Step 1 does:** Receive Provocateur briefing → load Persona Card as system prompt → produce one detailed response per formulation (~3 per voice).
 
@@ -215,7 +215,7 @@ runs/plato/
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
-**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_9.md` § Phase 5.
+**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_10.md` § Phase 5.
 
 **Status: not built.** The `IMPLEMENTATION_AUDIT_v3_7.md` flagged this in April 2026; since then Phase 3+4 were built but Phase 5 was not.
 
@@ -380,7 +380,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 ### 5.1 Separate venvs (runtime + personas)
 
-**Why:** dependency mismatch. `anthropic==0.94.1` in runtime vs `0.95.0` in personas. A shared venv would force alignment — risky. Admin console can subprocess into whichever venv it needs.
+**Why:** dependency isolation. Both currently pin `anthropic==0.94.1`, but separate venvs mean one pipeline can update a dependency without forcing the other to follow. Admin console can subprocess into whichever venv it needs.
 
 ### 5.2 Unified `.env` at monorepo root
 
@@ -416,7 +416,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 ### 5.10 `worked_provocations` is build-time only, NOT runtime few-shot
 
-**Decision date:** 2026-04-15. Documented in 3 places: `personas/flows/shared/prompts/persona_pass_7b_provocations.md`, `personas/HANDOFF.md`, `runtime/flows/voice/README.md`. Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
+**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_provocations.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
 ### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
 
@@ -517,7 +517,7 @@ Future keys (when components build): `SUNO_API_KEY` (Marley renders), `GITHUB_TO
 
 ### 7.3 Version pins
 
-- `anthropic==0.94.1` (runtime venv) vs `0.95.0` (personas venv) — **deliberate separate venvs**
+- `anthropic==0.94.1` (both venvs) — separate venvs for dependency isolation, same Anthropic version
 - `assemblyai==0.59.0` (runtime only)
 - `prefect==3.6.26` (both)
 - `google-genai==1.73.1` (personas only)
@@ -681,7 +681,7 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 - `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
 - `personas/notes/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
-- `runtime/flows/voice/README.md` — voice-pipeline build notes (specific to the "don't few-shot from worked_provocations" rule)
+- `personas/flows/shared/prompts/persona_pass_7b_provocations.md` — header comment documents the "worked_provocations are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
 - `runtime/notes/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes, informs spec updates
 
 ---

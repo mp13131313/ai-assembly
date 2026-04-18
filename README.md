@@ -41,7 +41,7 @@ venv/bin/pip install anthropic==0.94.1 google-generativeai openai perplexity-ai 
 venv/bin/python run_persona_pipeline.py
 ```
 
-**Note:** personas and runtime require separate venvs — they pin different Anthropic SDK versions (0.94.1 vs 0.95.0).
+**Note:** personas and runtime require separate venvs for dependency isolation (both currently pin `anthropic==0.94.1`).
 
 ## Cross-repo handoff
 

@@ -7,11 +7,17 @@
 - `docs/` — canonical specs, briefing documents, and pipeline references. See `docs/README.md` for staleness status of each file.
 - `.env` — shared secrets at repo root (not committed). Both sub-trees load from `../.env` (one directory above their own root).
 
-## Separate venvs required
+## Separate venvs
 
-Runtime and personas pin different Anthropic SDK versions:
-- `runtime/`: `anthropic==0.95.0` (or latest at install time)
-- `personas/`: `anthropic==0.94.1` (pinned — different message API surface)
+Runtime and personas each have their own venv:
+- `runtime/venv/` — runtime dependencies (FastAPI, Prefect, AssemblyAI, anthropic)
+- `personas/venv/` — personas dependencies (Perplexity SDK, google-genai, openai, anthropic)
+
+Both currently pin `anthropic==0.94.1`. The venvs are separate for
+dependency isolation, not because the Anthropic version differs. If
+at some point they need to diverge (e.g., to test a new SDK release
+against one pipeline without touching the other), the split is already
+in place.
 
 Always activate the correct venv for the sub-tree you're working in.
 
@@ -28,7 +34,7 @@ The personas pipeline produces a `provocateur_profile.json` per voice (37 fields
 All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Briefing_v3_1.md` — the authoritative project briefing (as of 2026-04-17)
 - `AI_Assembly_Persona_Card_v2.md` — the 37-field card template
-- `AI_Assembly_Persona_Pipeline_v3_9.md` — persona build pipeline
+- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona build pipeline
 - `AI_Assembly_Researcher_Pipeline.md` — researcher extraction and grouping
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript pipeline

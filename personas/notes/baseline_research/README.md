@@ -2,7 +2,7 @@
 
 Deep-research artifacts that ground downstream work in the repo.
 
-The **first three** (2025–early 2026) were commissioned before the Persona Pipeline was designed and shaped its architecture, the 3-tool research phase, the 4-block prompt pattern, the failure-mode mitigations, and the non-human voice methodology. Their target spec is `docs/AI_Assembly_Persona_Pipeline_v3_9.md`.
+The **first three** (2025–early 2026) were commissioned before the Persona Pipeline was designed and shaped its architecture, the 3-tool research phase, the 4-block prompt pattern, the failure-mode mitigations, and the non-human voice methodology. Their target spec is `docs/AI_Assembly_Persona_Pipeline_v3_10.md`.
 
 The **fourth** (2026-04) grounds the audience brief at `docs/AUDIENCE_BRIEF.md` — faction analysis and reception-condition modeling for the Athens 2026 audience. Its target is the `audience` paragraph in `runtime/flows/shared/council/council_config.json` and the audience section of the Briefing (`docs/AI_Assembly_Briefing_v3_1.md`).
 

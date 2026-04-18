@@ -8,7 +8,7 @@
 |------|--------|-------|
 | `AI_Assembly_Briefing_v3_1.md` | **Current** | Project source of truth. Supersedes Briefing v2 (deleted). Adds prosumer/infrastructure second-order provotype condition. |
 | `AI_Assembly_Persona_Card_v2.md` | **Current** | 37-field card template. |
-| `AI_Assembly_Persona_Pipeline_v3_9.md` | **Current** | Persona build pipeline v3.9 (walkthrough fixes round 2 2026-04-17). Supersedes v3.8 (deleted). |
+| `AI_Assembly_Persona_Pipeline_v3_10.md` | **Current** | Persona build pipeline v3.10 (walkthrough fixes round 2 2026-04-17). Supersedes v3.8 (deleted). |
 | `AI_Assembly_Researcher_Pipeline.md` | **Current** | Researcher extraction and grouping (v3). |
 | `AI_Assembly_Provocateur_Pipeline.md` | **Current** | Triage, selection, formulation, packaging (v2). |
 | `AI_Assembly_Transcription_Pipeline.md` | **Current** | Audio to clean transcript pipeline (v2.1). |
