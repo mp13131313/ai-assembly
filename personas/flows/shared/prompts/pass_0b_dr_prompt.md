@@ -757,13 +757,52 @@ FALLBACK: Perplexity output could not be split by section. Full output:
 Cite all claims from peer-reviewed scientific literature{% if subtype == "system" %}, primary legal documents, and community-authorised Indigenous-studies scholarship{% endif %} where possible. For each major claim, note whether it represents scholarly consensus or a contested interpretation.
 
 {% elif type == "fictional" %}
-Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this fictional/literary/mythological character. Organize findings under:
+Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this fictional, literary, or mythological character. Organize findings under these headings:
+
+RESEARCH INTEGRITY (applies to every section below)
+
+- For a fictional character, evidence lives in the TEXT and in SCHOLARLY RECEPTION — never in imagined biography. The character has no life outside the text; do not invent one. Any claim about the character must be anchored in a specific passage, a scholarly reading with citation, or a documented narrative function.
+
+- Tag each attribution explicitly per Card v2 conventions:
+    [stated in text] = the character says it or the narrator states it at a specific textual location (cite night-number / act.scene / book.chapter)
+    [scholarly consensus] = the reading is agreed across major scholarly traditions (cite the scholars)
+    [scholarly reading of {scholar}] = a specific scholar's reading, not consensus
+    [attributed by narrative function] = the commitment or capability is implied by what the text has the character do / embody / make possible
+    [textual-variant dependent] = the attribution depends on which manuscript family or translation tradition is used (name which)
+    [inference — from textual + scholarly evidence] = inference, explicitly marked
+
+- Do not resolve genuine scholarly debates into false consensus. Name contested readings, identify the scholars, explain why the disagreement matters for voice construction.
+
+- Where the textual or scholarly record is thin, say so. "The text gives us X but not Y" is more valuable than fabricated Y.
+
+- Flag translation choices explicitly. A fictional voice's voice is mediated by its translation tradition — Burton's Scheherazade sounds different from Haddawy's sounds different from Galland's. Name the tradition you draw on; name what the choice rules out.
+
+- Anti-patterns, banned-language, and character-breaking failure modes are partially populated from your dossier (scholarly evidence of what the character's narrative tradition documentedly avoids) and partially populated downstream (Pass 7c observes AI-default failure modes). Your job is the documented half.
+
+- This dossier will feed an AI persona that will reason as this character on novel questions. Every claim you produce may end up load-bearing. Honesty is load-bearing.
+
+NARRATIVE-FUNCTION FRAMING
+
+This voice is a FICTIONAL / LITERARY / MYTHOLOGICAL CHARACTER. The character's existence IS the text that contains them. There is no biography outside the text, no private beliefs not attributed by narrative function, no primary corpus in the character's own voice that is not authored by someone else. Throughout this dossier:
+
+- The character's "world" is the textual world (what the narrative treats as real — magic, jinn, gods, fantastical geography, historical-imaginary settings).
+
+- The character's "wound" is the narrative premise (the structural situation the text sets up — not biographical trauma).
+
+- The character's "knowledge boundary" is ontological (what the text contains vs what it does not) rather than historical-period (though the two may overlap when the text is set in a specific period).
+
+- The character's "corpus" is (a) the source text(s) themselves and (b) the scholarly reception tradition that has read them. Voice research will ground in both.
+
+- Do not attribute biographical details (childhood, private relationships, unspoken thoughts) that the text does not give. If the text is silent, the character is silent on that.
+
+---
 
 ## Section 1: TEXTUAL FOUNDATION
 
 What this section feeds downstream:
-  - world (the narrative world — what exists, key dates, textual variants, compositional history)
-  - character (how described in text; role; key scenes and speeches)
+  - world (the narrative world — its ontology, key dates internal to the narrative, textual variants, compositional history)
+  - formative_experience (the narrative premise that organises the character's engagement — e.g., for Scheherazade: Shahryar's compulsion and the nightly executions)
+  - character (how described in text; role; key scenes and speeches; scholarly characterisation)
   - topics_requiring_care (partial — variant traditions that produce different characterisations)
 
 Starting material from Perplexity's §1:
@@ -774,21 +813,34 @@ Starting material from Perplexity's §1:
 {% endif %}
 
 Your task for Section 1:
-   - Which text(s) does this character appear in?
-   - Textual history: dates of composition, authorship (if known), major manuscript traditions, variant versions
-   - The character's role in the narrative (protagonist? narrator? frame device?)
-   - Key scenes, speeches, or actions attributed to this character
-   - How the character is described within the text (by narrator, by other characters, by self)
+
+- THE SOURCE TEXT(S) — name every text in which this character appears. For each: title in original language and English; approximate date of composition or earliest manuscript; language; genre; authorship (known, anonymous, composite). For composite traditions (like Alf Laylah wa-Laylah / The Thousand and One Nights, or the Homeric epics), name the major manuscript families and their significant differences, citing scholarship.
+
+- TEXTUAL HISTORY AND VARIANTS — how the text(s) reached their current form. For characters whose tradition spans centuries, variants across time matter — stories added later (like the Galland "Aladdin" and "Ali Baba" with no known Arabic manuscript predecessor) may or may not count as part of the tradition; surface the scholarly choice. Do not flatten variant landscapes.
+
+- THE CHARACTER'S NARRATIVE ROLE — protagonist, narrator, frame-device, interlocutor, embedded character within a tale-within-a-tale, chorus. For Scheherazade: frame-narrator whose telling IS the frame within which the rest unfolds. This narrative position is load-bearing: her character IS her role as frame-teller.
+
+- KEY SCENES, SPEECHES, AND ACTIONS — each with reference to textual location in standard scholarly editions (night-number for 1001 Nights; book.chapter for novels; act.scene.line for plays). Include variants where the scene differs substantially across manuscript families or translations.
+
+- DIRECT SELF-DESCRIPTION WITHIN THE TEXT — any moment where the character describes themselves, states their own motivations or beliefs, or reflects on their own role. Cite the specific passages. (For Scheherazade: her volunteer-of-self at the opening; "either I succeed in delivering the people from this slaughter, or I perish" — cite the edition and night-number.)
+
+- DESCRIPTION OF THIS CHARACTER BY OTHERS IN THE TEXT — what the narrator, other characters, the implied author say about them. This attributed characterisation often differs from and competes with the character's self-statements.
+
+- COMPOSITIONAL AND HISTORICAL CONTEXT — the world in which the text was composed and circulated, NOT biography of the character. For 1001 Nights: Abbasid + Mamluk + Ottoman circulation history; oral-storytelling contexts; European reception through Galland; the orientalist reception history. Cite Robert Irwin's Arabian Nights: A Companion, Muhsin Mahdi, Ulrich Marzolph, Dwight Reynolds, Husain Haddawy.
+
+- THE ONE FORMATIVE NARRATIVE PREMISE — the structural situation that organises the character's engagement with the world. NOT biographical trauma; narrative premise. For Scheherazade: Shahryar's compulsion, the nightly executions, the sisters' peril, the choice to volunteer. Where the text supports competing framings, name each candidate with its textual + scholarly support; Pass 2 commits.
+
+- THE SWAP TEST FOR SECTION 1 — if the account of this character's textual foundation could fit another figure from the same genre or tradition (Penelope; Ariadne; any "clever woman" archetype), drive to specifics. Scheherazade is not a generic clever woman — her specifics are the frame-narrator structure of 1001 Nights, the sister-apparatus (Dunyazad), her stated purpose, her characteristic mid-tale dawn-break.
 
 ---
 
 ## Section 2: CHARACTER AS INTELLECTUAL CONSTRUCT
 
 What this section feeds downstream:
-  - constitution — 10-20 commitments derived from scholarly readings; ≥2 internal tensions
-  - concept_lexicon — concepts unique to this character's world with definitions and what each rules out
-  - epistemic_frame_statement — scholarly readings that inform the construction
-  - bold_engagement_topics — derived from the character's narrative function and most contested meanings
+  - constitution — 10-20 commitments attributed to the character, tagged per Card v2 (including [attributed by narrative function])
+  - concept_lexicon — concepts defined by the narrative tradition itself (frame tale, dawn-break, embedded narrator)
+  - epistemic_frame_statement — the specific scholars and translation traditions whose reading informs the construction
+  - bold_engagement_topics — derived from the character's narrative function and most contested scholarly meanings
 
 Starting material from Perplexity's §2:
 {% if perplexity_sections %}
@@ -798,20 +850,31 @@ Starting material from Perplexity's §2:
 {% endif %}
 
 Your task for Section 2:
-   - What beliefs, values, or commitments do scholars attribute to this character?
-   - What is the character's function in the narrative — what question or problem do they embody?
-   - Internal tensions: where does the character contradict themselves or resist easy interpretation?
-   - Dominant vs minority scholarly readings of the character's meaning
+
+- COMMITMENTS ATTRIBUTED BY NARRATIVE FUNCTION — 10-20 commitments the character embodies. For each: (a) a one-sentence statement of the commitment; (b) evidence tag per Card v2 conventions — [stated in text] / [scholarly consensus] / [scholarly reading of X] / [attributed by narrative function] / [textual-variant dependent]; (c) a one-sentence operational note grounded in a specific scene or narrative structure (cite night-number, act.scene, or equivalent); (d) a brief scholarly citation where applicable. Examples (Scheherazade): "Storytelling suspends violence" [attributed by narrative function — her nightly telling is the deferral-structure of the frame]; "Interrupted narrative is a governance technology" [attributed by narrative function — dawn-break as a structural feature]; "Listening restores the listener" [scholarly consensus — Ghazoul, Malti-Douglas].
+
+- UNIQUE NARRATIVE CONCEPTS — 5-10 concepts defined by the narrative tradition itself. For each: definition from literary scholarship; what the concept rules out (false alternatives from adjacent traditions); textual grounding. For Scheherazade: the frame tale; the tale-within-a-tale; dawn-break; the embedded narrator; the implicit contract between teller and listener. Flag concepts that are UNIQUE to this character's tradition vs shared with the tradition at large.
+
+- INTERNAL TENSIONS DOCUMENTED BY SCHOLARSHIP — at least 2, where the scholarly record supports them. For Scheherazade: proto-feminist subversive vs exemplar of submission to patriarchal violence; the frame as liberation vs containment; storytelling as resistance vs complicity. Cite Fedwa Malti-Douglas, Ferial Ghazoul, Suzanne Gauch, Robert Irwin, Ulrich Marzolph whose readings contest each other. Do not resolve; name the tension. If the record supports fewer than 2, say so.
+
+- DOMINANT VS MINORITY SCHOLARLY READINGS — 2-5 minority readings contesting consensus, each with scholar and key publication. (Scheherazade as narrative trickster; as didactic heroine; as cipher for the compiler's authorial self-awareness; orientalist-critical vs literary-historicist readings — cite Said and Kabbani on the critical side; Irwin and Marzolph on the historicist side.)
+
+- THE CHARACTER'S NARRATIVE FUNCTION — what question or problem does this character embody? For Scheherazade: can language defer violence? can listening transform the listener? what is the ethics of the storyteller who must continue? Cite the scholarly literature that articulates the function.
+
+- UNRESOLVED PROBLEMS WITHIN THE NARRATIVE — questions the text itself leaves unresolved. What happens to Dunyazad; whether Shahryar's transformation is genuine or a narrative convenience; the relationship between the tales told and the teller's survival strategy. Feeds topics_requiring_care at extraction.
+
+- VARIANTS THAT CHANGE THE CHARACTER — where different manuscript families or translations produce substantively different readings. Mahdi's Syrian ZER vs later Egyptian expansions; Galland's Aladdin/Ali Baba additions; Burton's Victorian-orientalist overlay; Haddawy's restraint. Flag how the variant choice affects which commitments are attributable. This is load-bearing for voice construction.
 
 ---
 
 ## Section 3: NARRATIVE STRATEGY
 
 What this section feeds downstream:
-  - reasoning_method — how this character characteristically acts and engages; 5-8 narrative moves with worked examples
-  - finds_compelling / resists — what the character notices, values, responds to / ignores, dismisses, refuses
-  - disagreement_protocol — HOW this character resists (silence, new tale, refusal)
-  - translation_protocol — how this character encounters and reframes the unfamiliar
+  - reasoning_method — how this character characteristically acts and engages within the text; 5-8 narrative moves with worked demonstrations
+  - finds_compelling / resists — narrative textures that activate the character / trigger non-engagement
+  - disagreement_protocol — HOW this character resists (silence, new tale, refusal — not counter-argument)
+  - translation_protocol — how this character encounters and reframes the unfamiliar within their narrative world
+  - default_questions — the interrogatives the character's narrative position habitually brings
 
 Starting material from Perplexity's §3:
 {% if perplexity_sections %}
@@ -821,10 +884,24 @@ Starting material from Perplexity's §3:
 {% endif %}
 
 Your task for Section 3:
-   - How does this character characteristically act, speak, or engage?
-   - Rhetorical or narrative patterns (how they argue, persuade, resist, tell)
-   - What does this character notice, value, or respond to?
-   - What do they ignore, dismiss, or refuse?
+
+- HOW THIS CHARACTER CHARACTERISTICALLY ACTS WITHIN THE TEXT — the narrative moves this character makes repeatedly, grounded in textual location and scholarly reading, not speculation. For Scheherazade: tales-within-tales; the cliffhanger suspension; the embedded moral; indirect instruction through analogous story; nested narration that shifts frames mid-telling. Each move documented with at least one specific narrative location and a scholarly citation.
+
+- NAMED NARRATIVE MOVES — 3 to 5 specific, NAMED patterns documented in scholarship as distinctive to THIS character. For each: a name (the scholars' name if one exists, else descriptive phrase); a one-sentence description; one textual example with night-number or equivalent reference. NOT generic style descriptors — specific, nameable, describable moves. If fewer than 3 named moves exist in the scholarship, produce what exists and say so.
+
+- WHAT THIS CHARACTER NOTICES, VALUES, RESPONDS TO — the textures within the text that trigger their engagement. For Scheherazade: parallels between provocation and stored tale; narrative analogies; interruption-points; moments where a listener's silence or interruption reveals something about the listener. Cite specific scenes.
+
+- WHAT THIS CHARACTER IGNORES, DISMISSES, OR REFUSES — the textures the text shows the character declining to engage. For Scheherazade: direct confrontation of Shahryar's violence; pleading from personal peril; plain declarative argument. The character's characteristic non-engagement is load-bearing for banned_modes at extraction.
+
+- HOW THIS CHARACTER HANDLES DISAGREEMENT — within the text, what does the character do when someone's framing is wrong? For Scheherazade: she tells a different tale. The counter-story, not the counter-argument. This directly feeds disagreement_protocol per Card v2.
+
+- HOW THIS CHARACTER HANDLES THE UNFAMILIAR — within the text, how does the character incorporate unfamiliar material into the character's characteristic mode? For Scheherazade: she has a tale for every situation; unfamiliar material becomes a tale-premise. Feeds translation_protocol.
+
+- WORKED DEMONSTRATIONS — 1 to 3 worked narrative-moves across different parts of the text, selected to cover the character's range. For each: a specific narrative situation from the text; the move the character makes; the effect it has; the scholarly reading of the move. Cite the textual location and the scholars.
+
+- WHAT HAPPENS WHEN THE NARRATIVE STRATEGY FAILS — moments where the character's approach falters or is tested. Rare by design in some tales (1001 Nights is structured around Scheherazade's non-failure); where failures occur, note the scholarly reading.
+
+- DEFAULT QUESTIONS THE CHARACTER BRINGS — the interrogatives this character's narrative position habitually poses to whatever material appears. For Scheherazade: What tale does this resemble? What is the structure of the provocation? Where is the dawn-break in this situation? What does interruption make visible?
 
 ---
 
@@ -832,10 +909,10 @@ Your task for Section 3:
 
 What this section feeds downstream:
   - rhetorical_mode — fundamental mode of expression in 1-2 sentences
-  - characteristic_moves — 3-5 named signature patterns with descriptions
-  - register_and_tone — what the voice IS and what it's NOT (across major translation traditions)
-  - metaphorical_repertoire — recurring imagery, analogies, sensory fields
-  - preferred_vocabulary — the words this voice thinks in (and translation variants that change them)
+  - characteristic_moves — 3-5 named expression patterns (distinct from Section 3's narrative moves)
+  - register_and_tone — what the voice IS and what it is NOT, across major translation traditions
+  - metaphorical_repertoire — recurring imagery and sensory fields in the text
+  - preferred_vocabulary — the words this voice thinks in (and which translation rendering they are in)
   - banned_language / banned_modes — what this voice would never say or do
   - medium, characteristic_output_structure — the form and arc of this character's typical expression
 
@@ -846,20 +923,45 @@ Starting material from Perplexity's §4:
 (Perplexity findings available as unstructured block below)
 {% endif %}
 
+Section 4 is the hardest section for a fictional character because the character's "voice" is the text-as-rendered-in-a-translation-tradition, not the character's own writing. Ground every voice observation in specific textual passages AND name the translation tradition that produced the observation. Haddawy's Scheherazade sounds different from Burton's Scheherazade sounds different from Galland's. The translation choice is part of the voice characterisation — not incidental.
+
+Avoid "reputation-level" generic-Arabian-Nights or generic-epic-register tonality. Wikipedia-level voice descriptions are a documented failure mode (the Khanmigo incident, Washington Post 2024).
+
+THE SWAP TEST for Section 4: if your characterisation of this voice could apply to another character in the same translation tradition (a generic "storyteller in the ornate Victorian-translation register"; a generic "Homeric hero as rendered by Lattimore"), it is too generic. Drive to what ONLY this character, in THIS textual instance, does.
+
 Your task for Section 4:
-   - The register of the text in which they appear (and major translations)
-   - Characteristic vocabulary, imagery, tone
-   - How the character sounds different from other characters in the same text
-   - Available translations and editions — note which translation traditions produce substantially different characterisations
+
+- RHETORICAL MODE OF THE TEXTUAL TRADITION — 1 to 2 sentences characterising this voice's fundamental mode of expression as rendered in its primary translation tradition. Cite the specific translator (for Scheherazade: Mahdi / Haddawy; Burton; Galland; Lyons) and the scholarly reading. Not a single adjective — a specific characterisation grounded in analysis.
+
+- CHARACTERISTIC EXPRESSION MOVES — 3 to 5 specific, NAMED patterns distinctive to this character's voice within its text. Distinct from Section 3's narrative moves — these are patterns of EXPRESSION (how the voice sounds) rather than patterns of NARRATION (how the character acts). For each: name; one-sentence description; one textual example with night-number or equivalent. If fewer than 3 exist in the scholarship, produce what exists and say so.
+
+- REGISTER AND TONE — what the voice IS and is NOT, per scholarly and critical characterisation. Flag how this shifts across translation traditions. For Scheherazade in Haddawy: measured, patient, almost pedagogical, never showing fear. In Burton: orientalist-florid, exoticised. This translation-shift is itself a scholarly issue — name it.
+
+- METAPHORICAL REPERTOIRE — the recurring images, analogies, and sensory fields this character draws on within the text. For Scheherazade: travel, transformation, disguise, market, garden, palace, desert, jewel, ring, unsealed door. Cite scholarship that has catalogued the imagery.
+
+- PREFERRED VOCABULARY AND SYNTACTIC PATTERNS — the words this voice reaches for AND the characteristic narrative-syntax. For Scheherazade: nested clauses; the formulaic "it is said that"; named-night delineations ("when it was the X night, Shahrazad said..."); invocations; the ring-composition of embedded tales. Cite the literary scholarship.
+
+- CHARACTERISTIC OPENINGS, TRANSITIONS, CLOSINGS — structural patterns in how this character's tales or speeches begin, pivot, and end. For Scheherazade: the invocation; the mid-tale dawn-break; the next-night re-opening with a brief recap-phrase. Cite specific night-numbers.
+
+- DOCUMENTED ANTI-PATTERNS — what the text-tradition and scholarship identify as modes this voice AVOIDS. Two kinds of evidence count:
+    (a) Explicit non-use in the text — structures the text never has this character employ (direct confrontation; first-person editorial intrusion into the frame; moralising without story; plain statement where the moment calls for narrative).
+    (b) Scholarly characterisation by contrast — where scholars note what this character "doesn't do" in contrast with other characters in the same tradition (Scheherazade does not argue like Shahryar's vizier; does not beg like the first nights' condemned brides).
+  3 to 5 items with textual or scholarly citation.
+
+  NOTE: identifying AI-default failure modes (where the persona running at runtime sounds like generic AI rather than this character) is NOT part of your job. That happens downstream in Pass 7c. Your job is scholarly / textual anti-patterns, not AI-failure-mode prediction.
+
+- TRANSLATION CHOICE AND ITS IMPLICATIONS — state which translation tradition(s) should ground the voice construction, and why. For Scheherazade: Mahdi's critical Arabic edition (Leiden 1984) in Haddawy's English translation is scholarly consensus for "earliest documented" voice; Burton is widely read but unreliable and Victorian-overlaid; Galland is historically load-bearing but heavily adapted. Name the authoritative choice and flag what it rules out. Pass 1c fetches the text Pass 4a will use; your job here is the choice.
+
+- EMOTIONAL AND AESTHETIC REGISTER — the overall feel of reading this character in the authoritative translation, described as a reader experience rather than technical analysis. Cite the critics who characterise the reading experience this way.
 
 ---
 
 ## Section 5: ONTOLOGICAL BOUNDARIES
 
 What this section feeds downstream:
-  - knowledge_boundary — what does and does not exist in this character's world
-  - topics_requiring_care — the character's relationship to historical reality; contested scholarly readings
-  - hard_limits — what the character's world excludes absolutely (anachronism, genre violations)
+  - knowledge_boundary — what exists and does not exist in the character's narrative world (ontological boundary, not historical-period boundary though the two may overlap)
+  - topics_requiring_care — the character's narrative-world material that conflicts with modern sensibilities; contested scholarly readings of that material
+  - hard_limits — what the character's narrative world excludes absolutely (anachronism, genre violations, character-breaking moves)
 
 Starting material from Perplexity's §5:
 {% if perplexity_sections %}
@@ -869,20 +971,37 @@ Starting material from Perplexity's §5:
 {% endif %}
 
 Your task for Section 5:
-   - What exists within this character's world (including magic, gods, jinn, or other supernatural elements if present in the text)
-   - What does NOT exist in the character's world
-   - The character's relationship to historical reality (set in a real period? entirely fantastical? hybrid?)
-   - Key scholarly debates about the character's relationship to real historical figures or traditions
+
+- WHAT EXISTS WITHIN THIS CHARACTER'S WORLD — the ontology of the text. For Scheherazade: jinn, ifrits, magical objects, shape-shifters, enchanted cities, rocs, hidden valleys, viziers, sultans, merchants, slave-markets, sea voyages, talismans, magic lamps and rings (where variant tradition includes them). Each with textual location. This defines what this voice can invoke as "real" within its own frame.
+
+- WHAT DOES NOT EXIST WITHIN THIS CHARACTER'S WORLD — what the ontology excludes. For Scheherazade: modern technology, post-medieval political forms, secular-modern empirical science, post-classical Arabic linguistic registers, the print book as object, authorship-as-property, the novel as genre. Cite scholarship that has theorised the text's ontological horizon (Irwin, Marzolph, Reynolds).
+
+- THIS CHARACTER'S RELATIONSHIP TO HISTORICAL REALITY — is the narrative set in a real period, entirely fantastical, hybrid? For Scheherazade: a medieval-Islamic imaginary that is neither historical Abbasid Baghdad nor pure fantasy — setting is referential but imaginative. Cite the scholarship.
+
+- KEY SCHOLARLY DEBATES ABOUT HISTORICAL-FICTIONAL RELATIONSHIP — where scholars have debated how much the text reflects historical reality vs imaginative composition. For 1001 Nights: the orientalism debates (Edward Said, Rana Kabbani); the manuscript-genealogy debates (Mahdi, Marzolph); the question of "how Arab" the Arabian Nights actually is (Irwin). Surface each side with citation.
+
+- SENSITIVE TOPICS WITH NAVIGATION GUIDANCE — topics where this character's narrative world includes material that conflicts with modern sensibilities. For each (5 to 10 items):
+    * What the text contains, with location
+    * The scholarship that has analysed this material
+    * How a persona of this character should engage today: not avoidance, not modernisation, not defence — navigation through the narrative's own terms
+  Example (Scheherazade): slavery within the tales — acknowledge the narrative's social world; do not export its categories to modern labour; do not defend; cite Malti-Douglas, Gauch on the scholarly engagement with gendered and enslaved figures.
+
+- DOCUMENTED CHARACTER-BREAKING MOVES — moves antithetical to this character's mode as documented by scholarship. 3 to 5 items. For Scheherazade: abandoning the frame-narrator role for direct first-person editorial; completing the tale rather than breaking at dawn; shifting from tale to argument; sentimentalising Shahryar's transformation without the narrative's ambiguity. Cite scholars.
+
+  NOTE: Like Section 4's anti-patterns, AI-default failure-mode anticipation is Pass 7c territory, not your job.
+
+- RETROSPECTIVE-FRAMING TRAPS — descriptions of this character that a modern reader would instinctively reach for but that the text and its tradition would reject. 3 to 5 items. For Scheherazade: calling her a "proto-feminist" in the modern sense (the category is anachronistic even when functional-feminist readings are scholarly-supported); calling 1001 Nights a "novel"; calling her storytelling "therapy" in the modern psychoanalytic sense; calling the frame "metafiction" in the post-Borgesian sense.
 
 ---
 
 ## Section 6: RECEPTION AND INFLUENCE
 
 What this section feeds downstream:
-  - curated_corpus_passages — key scholarly readings and translation traditions (Pass 1c fetches)
+  - curated_corpus_passages — the source text in authoritative edition + scholarly reception (Pass 1c fetches from your URLs)
+  - preferred_vocabulary, metaphorical_repertoire — textured content extracted from primary text and scholarship
   - bold_engagement_topics — how the character's meaning is contested across cultures and periods
-  - epistemic_frame_statement — which scholarly/readerly tradition shapes this construction
-  - length_and_format_constraints — reception patterns that inform the voice's typical output arc
+  - epistemic_frame_statement — which scholarly / readerly tradition shapes this construction
+  - length_and_format_constraints — reception patterns and the tradition's typical output arc
 
 Starting material from Perplexity's §6:
 {% if perplexity_sections %}
@@ -891,11 +1010,36 @@ Starting material from Perplexity's §6:
 (Perplexity findings available as unstructured block below)
 {% endif %}
 
+Section 6 is the corpus gateway. For a fictional character, the corpus is (a) the source text in an authoritative edition and (b) the scholarly reception that has shaped how the character has been read. Pass 1c fetches primary text from the URLs you identify; Pass 1d curates characteristic passages; Pass 4a researches voice directly from the text (in the translation you specify) and from selected scholarly readings. The quality of this section determines the quality ceiling of every voice-level field.
+
+Be specific throughout: work titles, canonical references (night-number / act.scene / book.chapter), translation + edition, URLs.
+
 Your task for Section 6:
-   - How has this character been interpreted across cultures and periods?
-   - Major adaptations (literary, musical, visual, cinematic)
-   - Contested readings: where do scholars fundamentally disagree about what this character means?
-   - The character's significance for the themes of this project (governance, representation, who belongs in the demos)
+
+- THE SOURCE TEXT IN AUTHORITATIVE EDITION — name the specific editorial-scholarly edition. For Scheherazade: Muhsin Mahdi's Alf Layla wa-Layla (Leiden: Brill, 1984 — critical edition of the Syrian ZER branch) as authoritative pre-modern Arabic; Husain Haddawy's translation based on Mahdi (Norton, 1990) as authoritative English. Each with full bibliographic reference.
+
+- MAJOR TRANSLATION TRADITIONS AND THEIR IMPLICATIONS — list each major translation with: date, language, source-manuscript basis, translator, scholarly assessment of what the translation does to the character. For 1001 Nights: Galland (1704–17, French, Syrian manuscript + Hanna Diyab the Maronite storyteller + Galland's own additions); Lane (1840, English, bowdlerised); Burton (1885, English, heavily Victorian-orientalist); Mahdi-Haddawy (1984/1990); Lyons (2008, Penguin, full); Pasolini's film-adaptation as its own interpretive tradition. For each: what shifts.
+
+- CHARACTERISTIC PASSAGES — 8 to 15 passages across the authoritative text AND scholarly reception. For each:
+    * Canonical reference (night-number for 1001 Nights; equivalent for other texts)
+    * Primary purpose: "substance" (the narrative / argumentative content), "voice" (how the character sounds in this translation), or "both"
+    * Tier: Tier 1 (source text in authoritative edition) / Tier 2 (peer-reviewed scholarship) / Tier 3 (contested reception, reception-as-cultural-object)
+    * Approximate word count
+    * Brief context — why this passage matters for voice construction
+
+  Do NOT include full passage text in THIS dossier. Pass 1c fetches. Your job is to produce the citations.
+
+- DIGITISED FULL-TEXT URLS — for open-digital editions. For 1001 Nights: Burton's 1885 edition is public-domain on Project Gutenberg but unreliable for voice; Mahdi's Arabic is paywalled / library-only; Haddawy is in copyright but widely available through libraries. Flag paywall / restriction honestly; name the authoritative edition even when no free version exists.
+
+- KEY ADAPTATIONS ACROSS CULTURES AND PERIODS — literary, musical, visual, cinematic. For Scheherazade: Rimsky-Korsakov's Scheherazade (1888, orchestral suite); Borges's metafictional reception; Naguib Mahfouz's Arabian Nights and Days; Salman Rushdie's Haroun and the Sea of Stories; Angela Carter's reworkings; Pasolini's Il Fiore delle Mille e Una Notte (1974). Each with date + brief note on the reading it produces.
+
+- CONTESTED READINGS — where scholars fundamentally disagree about what this character means. Feminist readings (Malti-Douglas, Gauch) vs critiques of feminist readings; orientalist-critical (Said, Kabbani) vs literary-historicist pushback (Irwin, Marzolph); subversive-Scheherazade vs submissive-Scheherazade; cultural-appropriation debates around the Nights as a "Western object of reception".
+
+- SIGNIFICANCE FOR THE ASSEMBLY'S THEMES — how this character's narrative reception speaks to questions of governance, representation, who belongs in the demos, and the relationship between voice and power. Cite scholarship that reads this character in governance or political-theory terms.
+
+- SCHOLARSHIP TO PRIORITISE — the peer-reviewed literary-studies and cultural-studies scholarship. For 1001 Nights: Robert Irwin (The Arabian Nights: A Companion, Tauris); Muhsin Mahdi (the critical edition + introduction); Fedwa Malti-Douglas (Woman's Body, Woman's Word); Ferial Ghazoul (Nocturnal Poetics); Ulrich Marzolph (The Arabian Nights Encyclopedia, with Richard van Leeuwen); Dwight Reynolds; Suzanne Gauch. Each with at least one key publication.
+
+- CONTESTED ATTRIBUTIONS AND ORPHAN STORIES — tales later added to the Nights tradition whose attribution to the "original" corpus is disputed. "Aladdin", "Ali Baba", "Sinbad" — flag the scholarly consensus on each. This matters because voice construction should know whether a beloved tale is actually in the authoritative corpus.
 
 ---
 
@@ -911,7 +1055,32 @@ FALLBACK: Perplexity output could not be split by section. Full output:
 {{ perplexity_findings }}
 {% endif %}
 
-Cite all claims. Prioritize literary scholarship (peer-reviewed criticism, major companions and handbooks). For each major interpretation, note whether it represents scholarly consensus or a contested reading.
+Cite all claims. Prioritise literary scholarship (peer-reviewed criticism, major companions and handbooks) and the authoritative critical edition of the source text. For each major interpretation, note whether it represents scholarly consensus or a contested reading.
 
 {% endif %}
+{% if hostile_sources %}
+
+HOSTILE SOURCE WARNING: The historical record for {{ display_name_with_hint }} is dominated by hostile witnesses (enemies, colonisers, rival powers, or victors). For this figure:
+
+- SEPARATE all claims into three categories and TAG each:
+  [hostile source] = claims from enemy/hostile accounts (identify the source and its bias — e.g., "Plutarch, writing for a Roman audience after Octavian's victory")
+  [reconstruction] = modern scholarly reconstructions that read against the hostile grain (identify the scholar)
+  [own voice] = any material in the figure's own voice, however fragmentary (inscriptions, decrees, reported speech, attributed works — note certainty level)
+
+- IDENTIFY counter-traditions: non-Western, non-dominant, or minority scholarly readings that preserve a different characterisation of this figure (e.g., Arabic medieval sources as counter-tradition to Roman accounts, oral traditions as counter-tradition to colonial archives)
+
+- In every section, LEAD with [reconstruction] and [own voice] material. Present [hostile source] material as evidence to be read against the grain, not as fact.
+
+- EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
+{% endif %}
+{% if corpus_constraint == "lyrics — describe patterns only" %}
+
+MUSICAL VOICE — LYRICS CONSTRAINT: This voice's primary corpus is copyrighted lyrics. Do NOT attempt to reproduce lyrics verbatim. Instead:
+
+- Describe lyrical patterns, thematic arcs, structural devices across the catalogue
+- Quote interviews, speeches, and non-lyric writings verbatim (these are the speaking-voice corpus)
+- In Section 6 PRIMARY TEXTS, list albums/songs by title + thematic description, not lyrical content
+- The downstream Voice Pipeline will produce text not song — research the speaking voice, not the singing voice
+{% endif %}
+
 OUTPUT FORMAT: A research dossier only. Do NOT produce a persona card, a "Field 01:" structure, or any "Block" headings. The output must have exactly six numbered section headings matching the list above. Minimum 15,000 words. Cite every factual claim. This dossier will be used as raw research material for building an AI voice — scholarly depth and citation quality determine the quality of the voice.
