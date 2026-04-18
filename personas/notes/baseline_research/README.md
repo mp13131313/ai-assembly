@@ -1,10 +1,14 @@
 # Baseline Research
 
-Three deep-research artifacts commissioned before the Persona Pipeline was designed. They shaped the spec's architecture, the 3-tool research phase, the 4-block prompt pattern, the failure-mode mitigations, and the non-human voice methodology.
+Deep-research artifacts that ground downstream work in the repo.
 
-**These are historical reference, not active spec.** When they conflict with `docs/AI_Assembly_Persona_Pipeline_v3_9.md`, trust the spec. The spec is the operationalized version; these are the source research.
+The **first three** (2025–early 2026) were commissioned before the Persona Pipeline was designed and shaped its architecture, the 3-tool research phase, the 4-block prompt pattern, the failure-mode mitigations, and the non-human voice methodology. Their target spec is `docs/AI_Assembly_Persona_Pipeline_v3_9.md`.
 
-## The three files
+The **fourth** (2026-04) grounds the audience brief at `docs/AUDIENCE_BRIEF.md` — faction analysis and reception-condition modeling for the Athens 2026 audience. Its target is the `audience` paragraph in `runtime/flows/shared/council/council_config.json` and the audience section of the Briefing (`docs/AI_Assembly_Briefing_v3_1.md`).
+
+**These are source reference, not active spec.** When they conflict with the canonical docs they ground, trust the doc. The specs are the operationalized version; these are what they were operationalized from.
+
+## The four files
 
 ### `compass_artifact_wf-cc778da2-1ac5-493e-b406-ab71d3b00234_text_markdown.md`
 **"Building faithful AI philosophers: a technical blueprint for The AI Assembly"**
@@ -27,12 +31,21 @@ Operational playbook. Tool-to-section matching table, multi-pass generation with
 
 Source for: section-by-section generation pattern, 4-block prompt architecture used in every generation pass, dialectical-process + scenario-based elicitation prompts, the ontological-construction-from-constraint methodology for non-humans.
 
+### `compass_artifact_wf-109ac10a-edff-47ea-8c60-cf7d8565d408_text_markdown.md`
+**"The intellectual terrain of Athens 2026"**
+
+Audience research grounding `docs/AUDIENCE_BRIEF.md`. Faction-by-faction reading of the 202 WBBF Athens contributors (seven factions with canons, positions, blind spots, and specific speakers per faction), the four engineered tensions the curators staged, the Aegean intellectual layer as substantive-but-precarious, the five-act dramaturgy as argument, ten hardest-to-please voices ranked by specificity of their published positions, and what AI-mediated deliberation formats face in this particular room.
+
+Source for: the audience paragraph in `runtime/flows/shared/council/council_config.json`, the audience + "seven factions" framing in `docs/AI_Assembly_Briefing_v3_1.md` §The audience, and any future refinement of Triage Part B's `audience_friction` judgment from monolithic to faction-aware.
+
 ## How to use these
 
-- Reading the spec and wondering "why this way?" → check here first
-- Designing a new pass or extension → check which existing pattern it extends
-- Encountering a failure mode → the mitigation is likely already here
-- Extending to a new voice type → the 4-block pattern + methodology sections are the template
+- Reading a spec and wondering "why this way?" → check here first
+- Designing a new pass or extension → check which existing pattern it extends (Files 1–3)
+- Encountering a failure mode → the mitigation is likely already here (Files 1–3)
+- Extending to a new voice type → the 4-block pattern + methodology sections are the template (Files 1–3)
+- Tuning Provocateur audience judgment or sharpening the `audience` paragraph → File 4
+- Designing the AIssembly's reception at Athens → File 4 §"What AI-mediated deliberation faces in this room"
 
 ## What's in the research but NOT in the current pipeline (potential future work)
 
