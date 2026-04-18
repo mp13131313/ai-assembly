@@ -1,7 +1,7 @@
 # Session handoff — AI Assembly
 
 **Written:** 2026-04-18 by a Claude Opus 4.7 session that had spent several turns doing a full line-by-line review of the repo.
-**Refreshed:** 2026-04-18 after Sonnet executed the fix plan (commits 2df11df, 18ed209) and after the audience-brief integration landed (commit 9010ab3). §3 findings marked FIXED, §5 forward plan trimmed, §7 subprompts reduced to what's still open.
+**Refreshed:** 2026-04-18 after Sonnet executed the fix plan (commits 2df11df, 18ed209), after the audience-brief integration landed (commit 9010ab3), and after the persona conference_context sync + canonical-source convention landed (commit 5b8b977). §3 findings marked FIXED, §5 forward plan trimmed, §7 subprompts reduced to what's still open.
 **Audience:** a fresh Claude session tasked with continuing this work.
 **Goal:** rebuild ~90% of the prior session's working knowledge in ~30–60 minutes instead of the 3+ hours it took the first time.
 
@@ -103,7 +103,7 @@ Full list in `docs/LLM_CALL_INVENTORY.md` §4.2. The big one is `pass_0b_dr_prom
 
 Read only if a specific task requires it:
 
-- **`docs/AUDIENCE_BRIEF.md`** (this session's artifact) — three-part audience brief for Athens 2026 (HoBB org → Forum program → 7-faction audience profile). Required reading if you're touching `council_config.json`'s audience paragraph or anything audience-modeling.
+- **`docs/AUDIENCE_BRIEF.md`** (this session's artifact) — three-part audience brief for Athens 2026 (HoBB org → Forum program → 7-faction audience profile). **Canonical source** for audience description. Two machine-readable configs carry compressed renderings: `runtime/flows/shared/council/council_config.json` → `audience` (for Provocateur friction-tagging) and `personas/inputs/conference_context.json` → `participant_profile` (for Pass 0a/0b classification + demographics). Convention: update the brief first, then re-render both configs; if they drift, the brief wins.
 - **`personas/notes/baseline_research/`** — 4 Deep Research artifacts that grounded the architecture. Read when you're wondering "why is the pipeline like this?". See `baseline_research/README.md` for the index.
 - **`runtime/notes/updated_specs/`** — 3 delta docs (Transcription v2→v2.1, Researcher v2→v3, Provocateur v1→v2). Redundant with the main specs; read only for archaeological purposes.
 - **`personas/notes/`** — operational plans (`SONNET_EXECUTION_PLAN*.md`, `WALKTHROUGH_FIXES_PENDING.md`, `IMPLEMENTATION_AUDIT_v3_7.md`, `ARCHITECTURE_NEXT_PHASE_HANDOFF.md`, `FIX_34_SECTION_BULLETS_DRAFT.md`). Mostly historical; `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` is the only forward-looking one — it sketches a planned Phase B rewrite (chunked Pass 1 merge, structured JSON) that is **not yet built**.
@@ -117,7 +117,7 @@ All committed and pushed to `origin/main`.
 
 - **`docs/LLM_CALL_INVENTORY.md`** (~280 lines) — every LLM call site, provider, model, parameters, thinking state, retry policy, prompt source, env-var overrides. **The canonical parameter reference.** Commit `2ee2dd7`.
 
-- **`docs/AUDIENCE_BRIEF.md`** (~256 lines) — canonical three-part audience brief (HoBB organisation, Forum program, 7-faction audience profile). Source for the `council_config.json` audience paragraph. Commit `e01bac3`.
+- **`docs/AUDIENCE_BRIEF.md`** (~265 lines) — canonical three-part audience brief (HoBB organisation, Forum program, 7-faction audience profile). Top-matter declares it the canonical source for audience description; two configs carry compressed renderings (`council_config.json` → `audience` for Provocateur, `conference_context.json` → `participant_profile` for persona pipeline). Update convention: brief first, then both configs. Created `e01bac3`; canonical-source declaration added `5b8b977`.
 
 - **`personas/notes/baseline_research/compass_artifact_wf-109ac10a-*.md`** (~127 lines) — the Deep Research grounding underneath `AUDIENCE_BRIEF.md`. Same location/pattern as the three prior Deep Research artifacts. Commit `e01bac3`.
 
@@ -360,7 +360,7 @@ ai-assembly/
 │   │   └── validate_dr_dossier.py
 │   │
 │   ├── inputs/
-│   │   ├── conference_context.json   project metadata
+│   │   ├── conference_context.json   project metadata + participant_profile (synced to AUDIENCE_BRIEF 5b8b977)
 │   │   ├── voices/                   5/12 voice configs present
 │   │   │   ├── plato.json
 │   │   │   ├── cleopatra.json
@@ -410,6 +410,7 @@ Symbols:
 - Fix plan (Categories 1–5 + K.0) executed across commits `2df11df`–`5b6005f` + `883a0a1` + `4666fa1`. See `personas/notes/SONNET_EXECUTION_PLAN_repo_audit.md` for the full list with commit attribution.
 - `FIX_PLAN_ADDITIONS.md` findings all landed; doc removed in `90cd71a`.
 - Audience brief integrated into `council_config.json` (v3_audience_sharpened) and Briefing v3.1 pointer added, commit `9010ab3`.
+- Persona `conference_context.json` → `participant_profile` synced to the same three framings, and `docs/AUDIENCE_BRIEF.md` declared canonical source with both rendering targets listed + update convention documented, commit `5b8b977`.
 
 ### Medium-term: Voice Pipeline Steps 1+2 build
 
