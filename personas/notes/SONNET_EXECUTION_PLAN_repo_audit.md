@@ -281,7 +281,7 @@ And in `runtime/ingest/pipeline.py` around line 59, update the `_gate` comment t
 _gate = asyncio.Semaphore(1)
 ```
 
-**Verify:** `grep -n "serializes normalize" runtime/ingest/` should return no matches; the new docstring text should appear.
+**Verify:** `grep -rn "serializes normalize+transcribe" runtime/ingest/` should return no matches (that's the stale phrase being removed — the correction flagged in Sonnet's execution report). The new phrasing `"serializes normalize (ffmpeg) only"` should appear in both `app.py` and `pipeline.py`.
 
 ---
 
