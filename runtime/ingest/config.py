@@ -105,6 +105,10 @@ UPLOAD_LOCK_FILENAME = "upload.lock"
 
 # Command used to invoke Stage 0. Overridable via INGEST_FLOW_CMD so tests
 # can swap in a fake flow that touches output files without burning credits.
+# Bumped whenever app.js or style.css changes materially. Include as
+# ?v={{ static_version }} in template <script> and <link> tags.
+STATIC_VERSION = "11"
+
 # The app always appends <audio_path> <session_json_path> as positional args.
 INGEST_FLOW_CMD = os.environ.get(
     "INGEST_FLOW_CMD",

@@ -144,7 +144,7 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
     is loaded at run time. Edit the file, re-run the flow, done.
 
     This loader enforces the schema: top-level required fields must be
-    present, every member must have all eight required profile fields,
+    present, every member must have all nine required profile fields,
     and the `members` array must be non-empty. Fails loudly on any
     missing field rather than silently degrading later.
 
@@ -192,6 +192,33 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
                 f"Council member '{name}' is missing required fields: "
                 f"{sorted(missing)}"
             )
+
+    # Warn if we're running against a stub council config. The notes field
+    # in council_config.json says to replace stubs before production; the
+    # pipeline runs fine on stubs but output quality will be lower.
+    version = str(cfg.get("version", ""))
+    if "stub" in version.lower():
+        import warnings
+        warnings.warn(
+            f"Loading council config with stub version '{version}'. "
+            f"Member profiles are hand-written placeholders, not derived "
+            f"from completed Persona Cards. Replace before production.",
+            stacklevel=2,
+        )
+
+    # Check that member_slug is unique across members — we use it as the
+    # filesystem key for per-voice checkpoints. Two members with the same
+    # slug would silently overwrite each other's triage_voices/ and
+    # formulations/ files.
+    slugs: dict[str, str] = {}
+    for m in members:
+        s = member_slug(m["name"])
+        if s in slugs:
+            raise ValueError(
+                f"Council member slug collision: '{m['name']}' and '{slugs[s]}' "
+                f"both produce slug '{s}'. Rename one in council_config.json."
+            )
+        slugs[s] = m["name"]
 
     return cfg
 
