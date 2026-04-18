@@ -1,8 +1,51 @@
 # AI ASSEMBLY — Persona Pipeline
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v3.7 — output register rule (2026-03-27)
+**Status:** v3.10 — Phase 0.5 scaffolding refactor 2026-04-17
 **Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Designed to run as an n8n workflow, parallel across all voices, calling four model APIs in sequence.
+
+**Changelog from v3.9:**
+- PASS 0A UX HARDENING (fixes 24–28):
+  - `pass_0a_voice_config.md` review_doc now includes a "Wikipedia grounding" section showing the source page, description, and first 500 chars of extract (or explicit "no Wikipedia" note). Makes the grounding source auditable at a glance.
+  - "Why this voice is in the Assembly" section in review_doc now prefixed with a disclaimer: *⚠ Draft rationale — Opus's plausibility guess from training data, not research-verified. Confirm against the DR dossier when it arrives.*
+  - `run_pass0a_voice_config.py` now emits a warning before "Next steps" when Wikipedia grounding was skipped, alerting the human that Pass 0b scaffolding will be thinner.
+  - New `--choose N` CLI flag (1-indexed) for non-interactive Wikipedia picker. Mutually exclusive with `--wiki` and `--hint`. Falls back to interactive picker if N is out of range and TTY is available; exits with error otherwise. Enables batch automation and GUI wrappers.
+  - Validation retry handler now parses the `InputRejected.reason` string to extract and log the specific failed field name and value (`VALIDATION FAIL: field=X, value=Y`).
+- PHASE 0.5 SCAFFOLDING REFACTOR (fixes 29–33):
+  - NEW MODULE: `personas/flows/shared/perplexity_split.py` — splits a 6-section Perplexity dossier into a `{section_number: content}` dict using the same heading patterns as `validate_dr_dossier`. Returns `None` on parse failure (fallback to single-block mode).
+  - `run_phase0_1_research.py` now calls `split_dossier()` after Pass 1a completes and passes both `perplexity_sections` (dict or None) and `perplexity_findings` (full text fallback) to the Jinja template context.
+  - NON-HUMAN DR TEMPLATE: Added Section 6 to the non-human branch. Organisms → "PRIMARY SCIENTIFIC LITERATURE" (foundational papers, review articles, seminal behavioural studies). Systems → "PRIMARY DOCUMENTS" (legislation, treaties, court decisions, indigenous oral tradition). `dr_validation.py` section-6 regex updated to accept all four variants: PRIMARY TEXTS | PRIMARY SCIENTIFIC LITERATURE | PRIMARY DOCUMENTS | RECEPTION AND INFLUENCE.
+  - DR TEMPLATE: Added `corpus_constraint == "lyrics — describe patterns only"` conditional block after hostile-sources appendix. Instructs Claude DR not to reproduce lyrics, to quote non-lyric corpus instead, and to focus on speaking voice for downstream Voice Pipeline.
+  - DR TEMPLATE: Added "What this section feeds downstream" annotations before each section's task bullets in all three type branches (human, non-human organism, non-human system, fictional) — 6 sections × 3 type variants = 18 annotation blocks. Pulls field-level granularity bars from `AI_Assembly_Persona_Card_v2.md`.
+  - DR TEMPLATE RESTRUCTURE: Removed single "PRIOR RESEARCH FINDINGS" block from top. Perplexity scaffolding now interleaved per-section: each section shows `## Section N: HEADING` + annotation block + `Starting material from Perplexity's §N` + `Your task for Section N:` + [existing bullets]. Gemini stays as single "CROSS-DISCIPLINARY ADDITIONS" block after all 6 sections. Fallback block shown when `perplexity_sections` is None but `perplexity_findings` is present.
+- PENDING (Step 34 — follow-up commit): Collaborative Opus rewrite of the 6-section task bullets in the DR template. Current bullets ask for scholarly-research-shaped content; extraction passes need extraction-shaped content (operational notes per principle, rules-out per concept, worked demonstrations, characteristic moves). This rewrite is out of scope for this commit and will be drafted in a separate session.
+- PIPELINE VERSION: Bumped to 3.10.
+
+**Changelog from v3.8:**
+- ARCHITECTURE (Option B reorder): Pass 1a (Perplexity) and Pass 1b (Gemini) now run BEFORE the manual Claude DR session. New script `run_phase0_1_research.py` runs both in parallel, then renders Pass 0b Jinja template with their findings as scaffolding. Claude DR starts from grounded research rather than zero.
+- NEW SCRIPT: `run_phase0_1_research.py` — Phase 0.5 runner. Runs Pass 1a + 1b in parallel, renders DR prompt, exits. No API call for prompt generation.
+- PIPELINE SPLIT: `run_persona_pipeline.py` now starts from Pass 1-merge. Validates that `runs/<slug>/01_research/perplexity_dossier.json` and `gemini_broad_scan.json` exist (produced by `run_phase0_1_research.py`). Exits with clear message if missing.
+- PASS 0b: Converted from Opus LLM call to deterministic Jinja2 template. Pass 0b template now accepts `perplexity_findings` and `gemini_findings` as scaffolding variables. Zero API cost, zero drift risk.
+- WIKIPEDIA: Pass 0a now queries Wikipedia Search API and presents an interactive picker. `--wiki URL` flag for direct URL provision. Fallback `--hint TEXT` for voices without a Wikipedia match. `wikipedia_url` stored in voice_config for downstream use.
+- FIELD DROPS: `needs_dr_supplement` removed (Claude DR replaces ChatGPT supplement). `pass_1a_claude_dr_file` removed (path derived from slug). `casting_rationale` moved from voice_config to review_doc.
+- VALIDATION: Pass 0a now validates enum fields client-side using `validate_input()` and retries once with critique on `InputRejected`. Retry wrapper extended to `IncompleteResponse` (missing required keys).
+- DR VALIDATION: `validate_dr_dossier()` refactored into `flows/shared/dr_validation.py`. New standalone script `personas/scripts/validate_dr_dossier.py` for human pre-filing check.
+- PIPELINE VERSION: Bumped to 3.9.
+
+**Changelog from v3.7:**
+- MODEL: Upgraded all Opus calls to claude-opus-4-7 (Pass 0a, 0b, 2, 3, 4a, 5, 7b; research flows). Pass 1-merge upgraded Sonnet → Opus 4.7 with max_tokens 4096 → 16000 (three-way contradiction detection at long context benefits from Opus).
+- ARCHITECTURE: Dropped editorial-assets entirely (voice_type_adjustments_needed, counter_tradition_scholars, dominant_hostile_sources, contested_interpretations, material_culture_evidence, voice_specific_warnings). Phase 0 populates only the 10 spec fields. Claude DR uses the same six-section research prompt as Perplexity and Gemini.
+- PHASE RENAME: Stage 0a / Stage 0b → Pass 0a / Pass 0b inside Phase 0: Intake. Files renamed: run_pass0a_voice_config.py, run_pass0b_dr_prompt.py, pass_0a_voice_config.md, pass_0b_dr_prompt.md.
+- SCHEMA: voice_mode strict three-value validation: {philosophical, observational, narratival}. Hard-fail at Node 0 if not one of the three. subtype=system voices may use null.
+- SCHEMA: corpus_constraint aligned to spec three values: {full, lyrics — describe patterns only, hostile — read against grain}. Dropped restricted and fragmentary.
+- SCHEMA: non_human_subtypes trimmed to {organism, system}. Removed legal_entity and river_personhood (Whanganui = system).
+- REMOVED: impossible field removed from schema and Node 0 gate.
+- REMOVED: primary_text_sources from Pass 0a output. Field is manual-edit hook only; if accidentally emitted, stripped before writing voice_config.
+- PASS 0b REWRITE: Now a simple template filler (prompt instantiator). Input: voice_config + project_context. Output: paste-ready Claude DR prompt with branching for hostile_sources, non-human, system-entity, fictional variants. No editorial-asset weaving.
+- PASS 0a/0b: Added retry-once on JSONDecodeError / APIError / RateLimitError with 15s delay.
+- PASS 0a: --hint required always.
+- SYSTEM ENTITY: Added subtype=system overrides to Pass 3 (Blocks 3 + 4), Pass 5 (Blocks 3 + 4), and Pass 7b. System entities use indigenous law / legal framework tags; constitution organized as systemic properties / relational commitments / boundary principles; engagement is relational, not perceptual; provocations framed as pressures on the relationship with responses expressed through entity condition.
+- GATE: Added Pass 1c review gate (spec Node 1c). After primary text fetch, pipeline writes 01_research/primary_texts_review.md and exits. Re-run proceeds when 01_research/primary_texts_reviewed.flag is present. Flags corpus_constraint=lyrics and subtype=system voices for special handling.
 
 **Changelog from v3.6:**
 - CRITICAL: Added "Output Register" binding requirement — all generation passes (Nodes 2, 3, 4a, 4b, 5, 6, 7b) must produce fields in first person (as the voice) or second person (addressed to the voice), never third-person scholarly description. Added OUTPUT REGISTER instruction to Block 2 (Guardrails) of every generation pass. Rationale: the v3.6 epistemic frame switch to "You are X" fixed ~80 tokens but left 10,000–15,000 tokens of field content in third-person descriptive register. Mock execution showed the model resolving this contradiction by adopting scholarly distance ("I think Marley would say...") rather than reasoning in character. The register of the bulk determines the register of the output — the frame cannot win alone
@@ -65,7 +108,6 @@
 - Added consistency verification mode for Pass 7-pre (fictional voices: verify internal consistency, not citations)
 - Added narratival disagreement_protocol guidance (counter-story, not counter-argument)
 - Added narratival response format note in Pass 7b (a tale IS a committed position)
-- Added `impossible` boolean to input schema with hard validation gate (Node 0) — enforces the Assembly's impossible-participants premise before any API calls
 - Added Node 0: Input Validation (type and voice_mode validation)
 
 **Changelog from v2.0:**
@@ -122,7 +164,6 @@ Each voice enters the pipeline with these fields:
   "name": "Example Voice Name",
   "type": "human",
   "subtype": null,
-  "impossible": true,
   "voice_mode": "philosophical",
   "hostile_sources": false,
   "corpus_constraint": "full",
@@ -133,7 +174,6 @@ Each voice enters the pipeline with these fields:
 ```
 
 - **name** — the voice. Perplexity and Gemini research from this alone.
-- **impossible** — boolean. `true` = dead, non-human, fictional, or otherwise unable to physically attend. `false` = living and reachable. **Hard validation: the pipeline REJECTS any voice with `impossible: false`.** The Assembly requires impossible participants — this is the conceptual premise, not a preference. If a previously living figure has died, update this field and re-run. This check runs as the first node in the n8n workflow, before any API calls.
 - **type** — "human", "non-human", or "fictional". Drives prompt branching: "human" gets historical grounding and biographical research. "Non-human" gets anti-anthropomorphisation guardrails. "Fictional" gets narrative-tradition grounding — the voice's world is a text, not a period; its beliefs are attributed by scholars and readers, not extracted from personal writings or inferred from behaviour.
 - **subtype** — null for human and fictional voices. For `type: "non-human"`: `"organism"` (has neurons, perceives, responds — e.g., an octopus, a whale) or `"system"` (no cognition, no perception — a geographical, legal, or cosmological entity whose "voice" comes from the relationship between the entity and its human/indigenous kin, e.g., a river with legal personhood, a mountain). Drives a sub-branch within the non-human Block 4: organism gets ecological/cognitive grounding; system gets relational/cosmological/legal grounding. Default: null.
 - **voice_mode** — "philosophical" (systematic thinker with explicit positions), "observational" (experiential/narrative voice whose principles must be inferred from practice, behaviour, or artistic output), or "narratival" (voice whose primary engagement is through storytelling rather than argument or observation — typically fictional characters or mythological figures). Drives field specification variants in Passes 2–5. Must be set explicitly by the builder for each voice. "Narratival" is typically paired with `type: "fictional"` but not necessarily — an oral storytelling tradition voice could be narratival and non-human.
@@ -157,24 +197,29 @@ Three principles from the persona construction research:
 
 ## The Pipeline at a Glance
 
-| Pass | Name | Tool | Fields | Depends On |
+| Pass | Name | Tool | Script | Depends On |
 |---|---|---|---|---|
-| 1a | Research Dossier | Perplexity API | — | Input |
-| 1b | Broad Scan | Gemini API | — | Input |
-| 1c | Primary Text Fetch | Web fetch + manual | — | 1a (identifies texts) |
-| 1-merge | Contradiction Check | Claude API | — | 1a + 1b |
-| CT | Coherence Threading | Claude API | — | After each generation pass |
-| 2 | Identity & Boundaries | Claude API | 9 | 1-merge |
-| 3 | Intellectual Core | Claude API (+ ChatGPT DR conditional) | 5 | 1-merge + 2 |
-| 4a | Voice | Claude API | 7 | 1-merge + 1c + 2 + 3 |
-| 4b | Artifact | Claude API | 8 | 1-merge + 2 + 3 + 4a |
-| 5 | Engagement | Claude API | 4 | 2 + 3 |
-| 6 | Corpus Curation | Claude API | 1 | 1c + 3 + 4a |
-| 7-pre | Citation Verification | Claude API | — | All passes |
-| 7a | Cross-Model Validation | ChatGPT or Gemini API | — | All passes |
-| 7b | Worked Provocations | Claude or ChatGPT DR | 1 | All passes |
-| 7c | Negative Constraints | Claude or Gemini API | 2 refined | 7b output |
-| Derive | Provocateur Profile + Evaluation Rubric | Claude API | — | Completed card |
+| 0a | Voice Config | Claude Opus 4.7 | run_pass0a_voice_config.py | — |
+| 1a | Research Dossier | Perplexity API | run_phase0_1_research.py | 0a |
+| 1b | Broad Scan | Gemini API | run_phase0_1_research.py | 0a |
+| 0b | DR Prompt | Jinja2 (no API) | run_phase0_1_research.py | 0a + 1a + 1b |
+| 1a-DR | Claude DR Session | Manual (claude.ai) | — | 0b |
+| 1-merge | Contradiction Check | Claude Opus 4.7 | run_persona_pipeline.py | 1a + 1b + 1a-DR |
+| 1c-extract | URL Extraction | Claude Sonnet 4.6 | run_persona_pipeline.py | 1-merge |
+| 1c | Primary Text Fetch | Web fetch + manual | run_persona_pipeline.py | 1c-extract |
+| 1d | Excerpt Selection | Claude Sonnet 4.6 | run_persona_pipeline.py | 1c |
+| CT | Coherence Threading | Claude Sonnet 4.6 | run_persona_pipeline.py | After each generation pass |
+| 2 | Identity & Boundaries | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge |
+| 3 | Intellectual Core | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge + 2 |
+| 4a | Voice | Claude Opus 4.7 | run_persona_pipeline.py | 1-merge + 1c + 2 + 3 |
+| 4b | Artifact | Claude Sonnet 4.6 | run_persona_pipeline.py | 2 + 3 + 4a |
+| 5 | Engagement | Claude Opus 4.7 | run_persona_pipeline.py | 2 + 3 |
+| 6 | Corpus Curation | Claude Sonnet 4.6 | run_persona_pipeline.py | 1c + 3 + 4a |
+| 7-pre | Citation Verification | Claude Sonnet 4.6 | run_persona_pipeline.py | All passes |
+| 7a | Cross-Model Validation | GPT or Gemini | run_persona_pipeline.py | All passes |
+| 7b | Worked Provocations | Claude Opus 4.7 | run_persona_pipeline.py | All passes |
+| 7c | Negative Constraints | Gemini → Sonnet | run_persona_pipeline.py | 7b |
+| Derive | Provocateur Profile + Rubric | Claude Sonnet 4.6 | run_persona_pipeline.py | Completed card |
 
 **Total:** 35 pre-conference fields produced + 2 runtime continuity fields = 37.
 
@@ -182,10 +227,33 @@ Three principles from the persona construction research:
 
 ---
 
-# Phase 1: Research Dossier
+# Phase 0.5: Pre-DR Research
 
-**Tool:** Perplexity API (sonar-deep-research) + Gemini API, parallel
-**Time:** 5–10 minutes per voice
+**Script:** `run_phase0_1_research.py`
+**Tool:** Perplexity API (sonar-deep-research) + Gemini API, parallel + Jinja2 template render
+**Time:** 5–10 minutes per voice (Perplexity dominates; Gemini runs in parallel)
+**Output:** `runs/<slug>/01_research/perplexity_dossier.json`, `gemini_broad_scan.json`, `inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md`
+
+## What This Phase Produces
+
+Pass 1a (Perplexity) and Pass 1b (Gemini) run in parallel before the manual Claude DR session. Their findings are woven into the Pass 0b DR prompt as scaffolding — Claude DR starts from grounded research rather than discovering from zero.
+
+**Sequence:**
+```
+Pass 0a → run_phase0_1_research.py:
+  ├── Pass 1a (Perplexity sonar-deep-research) ─┐
+  └── Pass 1b (Gemini broad scan)               ─┴─→ Pass 0b (Jinja render) → DR prompt
+```
+
+After this phase: human runs the DR session on claude.ai (60–180 min), saves dossier, then runs `run_persona_pipeline.py`.
+
+---
+
+# Phase 1: Research Merge
+
+**Script:** `run_persona_pipeline.py` (starts here — requires Phase 0.5 outputs)
+**Tool:** Claude Opus 4.7 (Pass 1-merge), Claude Sonnet 4.6 (Pass 1c-extract, 1d)
+**Time:** 10–20 minutes per voice
 **Output:** A comprehensive, cited research document
 
 ## What This Phase Produces
@@ -618,18 +686,6 @@ Template fields marked with `{{double_braces}}` are populated from the input or 
 **Cost:** $0.00
 
 ```
-IF impossible === false THEN
-  STOP pipeline.
-  OUTPUT: {
-    "status": "REJECTED",
-    "reason": "{{name}} is not an impossible participant. The Assembly requires 
-    voices that cannot physically attend: the dead, the non-human, the fictional. 
-    Living, reachable figures violate the core premise.",
-    "action": "If this figure has recently died or become unreachable, update the 
-    impossible field to true and re-run."
-  }
-END
-
 IF type NOT IN ["human", "non-human", "fictional"] THEN
   STOP pipeline.
   OUTPUT: {"status": "REJECTED", "reason": "Invalid type. Must be human, non-human, or fictional."}
@@ -2007,7 +2063,7 @@ TRIGGER: All per-voice workflows complete
 ## Claude API
 
 **Endpoint:** `https://api.anthropic.com/v1/messages`
-**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-6` (complex figures)
+**Model:** `claude-sonnet-4-6` (default) or `claude-opus-4-7` (complex figures)
 **Batch API:** 50% discount for non-urgent. Entire pipeline can run as batch.
 **Temperature per node:** 0.0 (verification), 0.1 (selection), 0.2 (analytical), 0.3 (creative), 0.4 (provocations)
 

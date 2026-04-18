@@ -21,15 +21,12 @@ _INPUTS_DIR = _REPO_ROOT / "inputs" / "voices"
 
 
 VALID_TYPES = {"human", "non-human", "fictional"}
-# voice_mode is a freeform string — Stage 0a proposes creative per-voice modes
-# like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic".
-# Validation just checks it's a non-empty string, not membership in a fixed set.
-VALID_SUBTYPES = {None, "organism", "system", "legal_entity", "literary_character", "river_personhood"}
+VALID_VOICE_MODES = {"philosophical", "observational", "narratival"}
+VALID_SUBTYPES = {None, "organism", "system"}
 VALID_CORPUS_CONSTRAINTS = {
     "full",
-    "restricted",
-    "fragmentary",
-    "reconstructed",
+    "lyrics — describe patterns only",
+    "hostile — read against grain",
 }
 
 

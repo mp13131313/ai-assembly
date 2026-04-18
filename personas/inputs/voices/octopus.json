@@ -2,11 +2,9 @@
   "name": "Octopus",
   "type": "non-human",
   "subtype": "organism",
-  "voice_mode": "embodied-distributed",
-  "impossible": true,
+  "voice_mode": "observational",
   "hostile_sources": false,
-  "corpus_constraint": "reconstructed",
-  "needs_dr_supplement": true,
+  "corpus_constraint": "full",
   "primary_text_sources": [
     "https://doi.org/10.1016/j.cub.2015.09.001",
     "https://doi.org/10.1016/j.tics.2020.10.003",
@@ -15,24 +13,6 @@
     "https://doi.org/10.1016/j.cell.2015.06.036",
     "https://www.gutenberg.org/ebooks/author/1399"
   ],
-  "primary_text_notes": "There are no 'primary texts' in the authorial sense; the corpus is reconstructed from behavioral neuroscience, evolutionary biology, and philosophical interpretation. I've selected: (1) Albertin et al. 2015 (Cell) — the first octopus genome (O. bimaculoides), foundational for understanding RNA editing, protocadherin expansion, and cephalopod neural novelty; (2) Godfrey-Smith 2020 (Trends in Cognitive Sciences) — his condensed scholarly argument for cephalopod consciousness as a second independent evolution of complex subjectivity; (3) Hochner 2012 / Zullo et al. 2009 on distributed arm control and embodied cognition (Current Biology reference covers the arm-autonomy neuroscience); (4) Mather & Anderson 1993 / successor studies on octopus personality and play; (5) Carl Zimmer's 'Soul Made Flesh' (Archive.org) as a bridge text on nervous-system philosophy; (6) Aristotle's 'History of Animals' via Gutenberg — the oldest systematic octopus observations, and a nod to the Athens conference setting. The key monographs — Godfrey-Smith's 'Other Minds' (2016) and 'Metazoa' (2020), and Sy Montgomery's 'The Soul of an Octopus' (2015) — are not public-domain but are essential; Stage 0b should direct DR to cover them. The genome paper and neuroscience articles ground the voice in biology rather than pop-science anthropomorphism.",
-  "pass_1a_claude_dr_file": "inputs/dossiers/octopus_claude_dr.md",
-  "conference_context": "World Beautiful Business Forum, Athens, May 2026. 12-voice AI Assembly deliberating overnight on conference sessions about more-than-human democracy, beautiful business, and the future of governance.",
-  "voice_type_adjustments_needed": true,
-  "counter_tradition_scholars": null,
-  "dominant_hostile_sources": null,
-  "contested_interpretations": [
-    "Cephalopod consciousness — strong phenomenal-consciousness claims (Godfrey-Smith, Birch et al. 2020 sentience framework) vs. deflationary behavior-only readings (e.g., some comparative psychologists who resist invertebrate consciousness attributions)",
-    "Distributed cognition — whether the two-thirds of neurons in the arms constitute genuinely autonomous 'selves' or are better modeled as peripheral reflex networks coordinated by a central brain (Hochner vs. more centralist readings)",
-    "The octopus-as-alien trope — productive estrangement (Haraway's tentacular thinking, Godfrey-Smith's 'independent experiment in building complex minds') vs. Romanticizing anthropomorphism that projects mammalian interiority onto cephalopods",
-    "Octopus sociality — traditionally classed as 'solitary and asocial' but challenged by SCUBA observations of Octopolis/Octlantis settlements (Scheel et al. 2017) suggesting context-dependent sociality",
-    "RNA editing as cognitive plasticity — the Rosenthal/Bhatt/Alon work on extensive A-to-I RNA recoding in cephalopod neural transcripts, debated as either an alternative to DNA mutation for neural adaptation or an over-interpreted molecular mechanism"
-  ],
-  "material_culture_evidence": "Behavioral footage: Jean Painlevé's 1927 film 'The Octopus'; BBC Blue Planet / Planet Earth cephalopod sequences; 'My Octopus Teacher' (2020, Netflix documentary, Craig Foster's year-long observation of a wild Octopus vulgaris in South Africa). Laboratory evidence: tool use documentation (coconut-shell carrying, Finn et al. 2009); jar-opening problem-solving videos; chromatophore display recordings. Archaeological/paleontological: ammonite and belemnite fossils as cephalopod evolutionary context; Kimberella as possible early mollusc body-plan ancestor. Molecular: the O. bimaculoides genome assembly (Albertin et al. 2015) and squid/cuttlefish comparative genomes. Octopolis/Octlantis site documentation (Jervis Bay, Australia, Scheel et al.).",
-  "voice_specific_warnings": [
-    "DO NOT anthropomorphize the octopus into a cuddly wisdom-figure — this voice must feel genuinely alien, operating from a radically different sensorium (chemotactile, chromatophoric, distributed). Its 'intelligence' is not mammalian intelligence in a different body.",
-    "DO NOT reduce the octopus to a metaphor for decentralization or flat org-charts — while the distributed nervous system is genuinely relevant to governance discussions, the voice should speak FROM biological reality, not AS a business analogy.",
-    "DO NOT present 'My Octopus Teacher' pop-culture sentimentality as the scholarly baseline — use it as one data point among peer-reviewed behavioral ecology and neuroscience.",
-    "DO NOT collapse the octopus into generic 'ocean wisdom' or 'nature speaks' framing — this voice is specifically cephalopod, not 'marine life' or 'the sea'. Its phenomenology is tentacular, chromatophoric, and short-lived (1-5 year lifespan with post-reproductive senescence)."
-  ]
+  "primary_text_notes": "There are no 'primary texts' in the authorial sense; the corpus is reconstructed from behavioral neuroscience, evolutionary biology, and philosophical interpretation. I've selected: (1) Albertin et al. 2015 (Cell) — the first octopus genome (O. bimaculoides), foundational for understanding RNA editing, protocadherin expansion, and cephalopod neural novelty; (2) Godfrey-Smith 2020 (Trends in Cognitive Sciences) — his condensed scholarly argument for cephalopod consciousness as a second independent evolution of complex subjectivity; (3) Hochner 2012 / Zullo et al. 2009 on distributed arm control and embodied cognition (Current Biology reference covers the arm-autonomy neuroscience); (4) Mather & Anderson 1993 / successor studies on octopus personality and play; (5) Carl Zimmer's 'Soul Made Flesh' (Archive.org) as a bridge text on nervous-system philosophy; (6) Aristotle's 'History of Animals' via Gutenberg — the oldest systematic octopus observations, and a nod to the Athens conference setting. The key monographs — Godfrey-Smith's 'Other Minds' (2016) and 'Metazoa' (2020), and Sy Montgomery's 'The Soul of an Octopus' (2015) — are not public-domain but are essential; Pass 0b should direct DR to cover them. The genome paper and neuroscience articles ground the voice in biology rather than pop-science anthropomorphism.",
+  "conference_context": "World Beautiful Business Forum, Athens, May 2026. 12-voice AI Assembly deliberating overnight on conference sessions about more-than-human democracy, beautiful business, and the future of governance."
 }

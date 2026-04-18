@@ -1,6 +1,6 @@
 # AI Assembly — Current State
 
-**Last updated:** 2026-04-16
+**Last updated:** 2026-04-17
 **Purpose:** Gap analysis and project-state snapshot. What's built, what's specified-but-not-built, what's not-yet-specified, key decisions, known bugs, pre-Athens critical path. Complements the briefing docs (which describe the target state) and the pipeline specs (which describe individual components). This doc describes **what exists now** and **what's next**.
 
 > When something lands, update this doc in the same commit. When the system drifts from the briefing, update the briefing and this doc together.
@@ -14,11 +14,11 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 ├── docs/                                  # canonical specs + this file
 │   ├── CURRENT_STATE.md                   # you are here
 │   ├── README.md                          # staleness banner for the other specs
-│   ├── AI_Assembly_Briefing_v2.md         # project briefing (current)
+│   ├── AI_Assembly_Briefing_v3_1.md         # project briefing (current)
 │   ├── AI_Assembly_Architecture_v1.md     # STALE — see README
 │   ├── AI_Assembly_Infrastructure_Setup.md# STALE — see README
 │   ├── AI_Assembly_Persona_Card_v2.md
-│   ├── AI_Assembly_Persona_Pipeline_v3_7.md
+│   ├── AI_Assembly_Persona_Pipeline_v3_9.md
 │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   ├── AI_Assembly_Researcher_Pipeline.md
 │   ├── AI_Assembly_Transcription_Pipeline.md
@@ -38,10 +38,11 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   ├── runs/                              # per-run outputs (gitignored)
 │   └── scripts/                           # sessions/speakers regeneration
 ├── personas/                               # pre-conference: voice card build
-│   ├── run_persona_pipeline.py            # 17 nodes orchestrated end-to-end
-│   ├── run_stage0a_intake.py              # voice config + review doc
-│   ├── run_stage0b_dr_prompt.py           # per-voice DR prompt generator
-│   ├── flows/shared/                      # io, clients, node0_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
+│   ├── run_pass0a_voice_config.py         # Pass 0a: voice config + review doc
+│   ├── run_phase0_1_research.py           # Phase 0.5: Perplexity + Gemini → DR prompt
+│   ├── run_pass0b_dr_prompt.py            # Pass 0b: DR prompt only (no research)
+│   ├── run_persona_pipeline.py            # main pipeline (Pass 1-merge → Derive)
+│   ├── flows/shared/                      # io, clients, node0_validation, wikipedia, dr_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
 │   ├── inputs/
 │   │   ├── conference_context.json
 │   │   ├── voices/                        # 4 voice configs: cleopatra, hannah_arendt, octopus, plato
@@ -66,11 +67,12 @@ Built and verified:
 | Component | Status | Notes |
 |---|---|---|
 | Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (freeform), subtype, corpus_constraint |
-| Stage 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
-| Stage 0b DR Prompt | ✓ | Instantiates per-voice DR prompt from finalized config |
-| Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped |
+| Pass 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
+| Phase 0.5 Pre-DR Research | ✓ | `run_phase0_1_research.py`: Pass 1a (Perplexity) + Pass 1b (Gemini) in parallel, then renders DR prompt via Jinja2 |
+| Pass 0b DR Prompt | ✓ | Jinja2 template renderer (no API call); scaffolds DR prompt with research findings |
+| Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped; now runs in Phase 0.5 |
 | Pass 1a-DR Claude | ✓ | Manual paste; Approach C merge partner |
-| Pass 1b Gemini | ✓ | Broad scan |
+| Pass 1b Gemini | ✓ | Broad scan; now runs in Phase 0.5 |
 | Pass 1-merge | ✓ | 3-way contradiction check (Perplexity + Claude DR + Gemini) |
 | Pass 1c-extract | ✓ | NEW: extracts primary text URLs from merged dossier |
 | Pass 1c fetch | ✓ | SSRF-hardened (scheme restriction, RFC1918 block, 5MB cap) |
@@ -213,7 +215,7 @@ runs/plato/
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
-**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_7.md` § Phase 5.
+**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_9.md` § Phase 5.
 
 **Status: not built.** The `IMPLEMENTATION_AUDIT_v3_7.md` flagged this in April 2026; since then Phase 3+4 were built but Phase 5 was not.
 
@@ -234,7 +236,7 @@ These are in the briefing but have no detailed spec yet.
 
 ### 3.1 Voice Pipeline Step 3 — Amendment
 
-**Briefing v2 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice, implicitly or explicitly). If no amendment, Step 2 artifact publishes unchanged.
+**Briefing v3.1 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice, implicitly or explicitly). If no amendment, Step 2 artifact publishes unchanged.
 
 **What's needed:**
 - System prompt for Step 3 (framed by shared-theme portions of other voices' artifacts)
@@ -247,7 +249,7 @@ These are in the briefing but have no detailed spec yet.
 
 ### 3.2 Closing-show pipelines (Day 3 afternoon)
 
-Per Briefing v2, THREE pipeline passes run Day 3 afternoon before the closing show:
+Per Briefing v3.1, THREE pipeline passes run Day 3 afternoon before the closing show:
 
 1. **Theme identification pass** — reads across all 3 nights' Researcher themes, Provocateur formulations, and voice detailed responses. Identifies 3–5 throughline themes.
 2. **Per-theme mapping pass** — for each throughline, reads each voice's positions and plots on Matrix A (Power & Agency, human↔nonhuman / many↔one) and Matrix B (Change & Actor, rupture↔progression / individual↔collective). Generates read-through script segment per theme.
@@ -262,7 +264,7 @@ Per Briefing v2, THREE pipeline passes run Day 3 afternoon before the closing sh
 
 ### 3.3 Downstream pipeline (per-night, runs after Voice Pipeline completes)
 
-Per Briefing v2 + Architecture_v1 (Architecture_v1 is stale on orchestrator but the stage logic stands):
+Per Briefing v3.1 + Architecture_v1 (Architecture_v1 is stale on orchestrator but the stage logic stands):
 
 1. **Render** — text passes through; Marley's artifact → Suno API; Octopus's artifact → client-side shader params packaging. Retries + fallbacks.
 2. **Publish** — aggregate all 12 artifacts into `night-N.json`; commit+push to microsite content repo; Vercel rebuild.
@@ -273,7 +275,7 @@ Per Briefing v2 + Architecture_v1 (Architecture_v1 is stale on orchestrator but 
 
 ### 3.4 Microsite
 
-Per Briefing v2: Astro or Next.js static site, Vercel/Netlify hosting, content repo (GitHub), deep links per artifact (`/night-1/plato`, etc.).
+Per Briefing v3.1: Astro or Next.js static site, Vercel/Netlify hosting, content repo (GitHub), deep links per artifact (`/night-1/plato`, etc.).
 
 **Needs building:** design prototype (Lovable/v0), production codebase, content schema, chromatophore shader integration, navigation pattern.
 
@@ -416,17 +418,17 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 **Decision date:** 2026-04-15. Documented in 3 places: `personas/flows/shared/prompts/persona_pass_7b_provocations.md`, `personas/HANDOFF.md`, `runtime/flows/voice/README.md`. Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
-### 5.11 Pass 1a primary text URLs moved from Stage 0a to Pass 1c-extract (commit b1868da)
+### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
 
-**Why:** Stage 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
+**Why:** Pass 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
 
 ### 5.12 `voice_mode` is now freeform (commit b1868da)
 
-**Why:** Stage 0a proposes creative per-voice modes like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic". Old VALID_VOICE_MODES set `{philosophical, observational, narratival}` was too restrictive. Validation now just checks non-empty string. Prompt branching inside individual passes still uses specific mode values where relevant.
+**Why:** Pass 0a proposes creative per-voice modes like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic". Old VALID_VOICE_MODES set `{philosophical, observational, narratival}` was too restrictive. Validation now just checks non-empty string. Prompt branching inside individual passes still uses specific mode values where relevant.
 
 ### 5.13 `needs_dr_supplement` hardcoded to True (commit b1868da)
 
-**Why:** the DR supplement (GPT-4o call in Pass 3) is cheap ($0.10) and always adds depth. No reason to conditionally skip. Removed from Stage 0a schema.
+**Why:** the DR supplement (GPT-4o call in Pass 3) is cheap ($0.10) and always adds depth. No reason to conditionally skip. Removed from Pass 0a schema.
 
 ### 5.14 Prefect orchestration (not n8n)
 
@@ -447,7 +449,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v2`. Hand-written stubs for all 12 members. Must be replaced with real Derive output from persona pipeline before production.
 - **`personas/inputs/voices/`**: 4 voice configs exist (plato, hannah_arendt, cleopatra, octopus). 8 more needed.
 - **`personas/inputs/dossiers/`**: only Plato has a completed Claude DR dossier (`plato_claude_dr.md`). Other voices need their DR dossiers produced via claude.ai (60–120 min each).
-- **`personas/inputs/dossiers/_dr_prompts/`**: only 2 prompts exist (cleopatra, octopus). 9 more need generating via `run_stage0b_dr_prompt.py` (fast — seconds per voice after Stage 0a completes).
+- **`personas/inputs/dossiers/_dr_prompts/`**: only 2 prompts exist (cleopatra, octopus). 9 more need generating via `run_pass0b_dr_prompt.py` (fast — seconds per voice after Pass 0a completes).
 
 ### 6.2 Pipeline gaps
 
@@ -478,7 +480,7 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 - **Google API quota**: personas project had zero free-tier quota at one point (causing Pass 1b to be skipped and Pass 1-merge to fall back to single-source). Verify before batch persona runs.
 - **Perplexity quota**: 500 queries/month on Pro plan; 12 voices = 12 queries, fine.
 
-### 6.6 Open design questions (per Briefing v2)
+### 6.6 Open design questions (per Briefing v3.1)
 
 - **Introduction location** for Day 1 (4 options; decision between Till and Matthias)
 - **Program copy revision** for the AIssembly entry
@@ -557,7 +559,7 @@ In the sequence the user intends to work:
 
 - [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of worked_provocations.
 - [ ] Re-read Arendt's 02_passes output; complete any passes that failed or didn't run; produce final assembled card + provocateur_profile.
-- [ ] Spot-check Cleopatra's Stage 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Stage 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
+- [ ] Spot-check Cleopatra's Pass 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Pass 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
 - [ ] Spot-check Octopus similarly.
 - [ ] Compare the 4 cards side-by-side: do they actually sound different? If Plato and Arendt read similarly, that's a Phase 5 Cross-Persona QC finding (currently caught manually).
 
@@ -569,7 +571,7 @@ Candidates, in likely order of tractability:
 3. Bob Marley (musical voice; tests `corpus_constraint: "lyrics — describe patterns only"`)
 4. Dostoevsky or Ada Lovelace (well-documented; baseline check)
 
-Each: Stage 0a (15 min + review) → Stage 0b (seconds) → DR session (60–120 min human-in-loop at claude.ai) → run_persona_pipeline (60–90 min automated) → human review (30–60 min).
+Each: Pass 0a (15 min + review) → Pass 0b (seconds) → DR session (60–120 min human-in-loop at claude.ai) → run_persona_pipeline (60–90 min automated) → human review (30–60 min).
 
 Total per voice: ~3–4 hours.
 
@@ -645,7 +647,7 @@ In decreasing order of "if this goes wrong, how bad is it?"
 
 | Risk | Mitigation | Notes |
 |---|---|---|
-| Voice Pipeline not built by Athens | Drop Step 3 Amendment, ship Steps 1+2 only; briefing is robust to this per Briefing v2's "Step 3 is new architecture" flag | Would reduce deliberative character but keep the experiment intact |
+| Voice Pipeline not built by Athens | Drop Step 3 Amendment, ship Steps 1+2 only; briefing is robust to this per Briefing v3.1's "Step 3 is new architecture" flag | Would reduce deliberative character but keep the experiment intact |
 | Persona cards not all complete | Ship with 8–10 cards; drop 2–4 voices; adjust council_config members array | Weakens the panel composition but better than no Assembly |
 | Closing show too ambitious | Ship mapped read-through only; drop video snippets | Video is nice-to-have; mapped read-through is the structural argument |
 | AssemblyAI diarization fails on key session | Speaker ID flags for human review; human 15–30 min pass catches it | Already validated on MSC test sessions |
@@ -653,8 +655,8 @@ In decreasing order of "if this goes wrong, how bad is it?"
 | VM dies mid-conference | Laptop fallback tested pre-Athens; `.env` in 1Password; repo cloned locally | Per Infrastructure_Setup §Failure fallback |
 | Audio recording quality bad | Normalized 96 kbps mono is forgiving; speaker-ID 5-pass catches most issues; human review queue catches the rest | 15–30 min human review per night |
 | Cleopatra persona produces sanitised output on ethnicity | Voice-specific warnings in her config (no flattening to pop culture readings); Pass 7a register + anachronism checks | Monitor during her card build |
-| Thiel persona carries legal risk | Needs review separate from architectural spec | Open question per Briefing v2 |
-| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 goodbye publishes regardless | "Indifference is failure" per Briefing v2; build the experiment anyway |
+| Thiel persona carries legal risk | Needs review separate from architectural spec | Open question per Briefing v3.1 |
+| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 goodbye publishes regardless | "Indifference is failure" per Briefing v3.1; build the experiment anyway |
 
 ---
 
@@ -676,7 +678,7 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 ### 10.3 Related docs
 
 - `docs/README.md` — staleness banner for the spec set
-- `docs/AI_Assembly_Briefing_v2.md` — the target-state document
+- `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
 - `personas/notes/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
 - `runtime/flows/voice/README.md` — voice-pipeline build notes (specific to the "don't few-shot from worked_provocations" rule)
@@ -684,4 +686,4 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 
 ---
 
-*End of CURRENT_STATE.md. This document should be read alongside the Briefing v2 as the most current picture of the system. When in doubt between them: Briefing describes what we're building; this describes where we are.*
+*End of CURRENT_STATE.md. This document should be read alongside the Briefing v3.1 as the most current picture of the system. When in doubt between them: Briefing describes what we're building; this describes where we are.*

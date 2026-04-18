@@ -298,7 +298,7 @@ Budget ~€500 total for comfort through build + both nights + re-runs + debuggi
 ## What This Document Does NOT Cover
 
 - **Pipeline logic** → `AI_Assembly_Architecture.md`
-- **Persona construction** → `AI_Assembly_Persona_Pipeline_v3_7.md`
+- **Persona construction** → `AI_Assembly_Persona_Pipeline_v3_9.md`
 - **Transcription pipeline logic and prompts** → `AI_Assembly_Transcription_Pipeline.md`
 - **Transcription stack research and benchmarks** → `Conference_Transcription_Pipelines_for_AI_Extraction_at_Scale__2025-2026_Strategic_Analysis.md` + "Overnight conference audio to clean named transcript" report
 - **Micro-site visual design** → Lovable/v0 prototyping work

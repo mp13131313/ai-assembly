@@ -6,7 +6,7 @@
 {{ perplexity_dossier }}
 
 {% if claude_dr_dossier %}
-=== SOURCE B: Claude Deep Research (Opus 4.6 + extended thinking) ===
+=== SOURCE B: Claude Deep Research (Opus 4.7 + extended thinking) ===
 {{ claude_dr_dossier }}
 {% endif %}
 
