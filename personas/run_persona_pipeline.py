@@ -130,7 +130,7 @@ def _pass_1merge():
                    claude_dr_dossier=claude_dr_text or None,
                    gemini_broad_scan=broad_scan_text)
     r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=16000, temperature=0.0, thinking_budget=None,
+                    max_tokens=16000, temperature=1.0, thinking_budget=10000,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
             "model": r["model"], "usage": r["usage"], "result": r["json"],
@@ -930,8 +930,20 @@ if pass7c.get("result"):
     if pass7c["result"].get("banned_modes") is not None:
         full_card["banned_modes"] = pass7c["result"]["banned_modes"]
 
-last_name = vi["name"].split()[-1]
-register_violations, register_details = _check_register(full_card, last_name)
+# For most human voices, last token of the name is the surname. For
+# non-human voices where the whole name is a noun (Octopus, River) or
+# includes generic nouns (Whanganui River), using the naive last token
+# would false-positive on content mentioning the noun in third person.
+# Override for known-edge-case voices.
+_LAST_NAME_OVERRIDES = {
+    "Octopus": None,                # skip register check entirely
+    "Whanganui River": "Whanganui", # match the unique part, not "River"
+}
+last_name = _LAST_NAME_OVERRIDES.get(vi["name"], vi["name"].split()[-1])
+if last_name is None:
+    register_violations, register_details = 0, []
+else:
+    register_violations, register_details = _check_register(full_card, last_name)
 
 print()
 stamp("=" * 60)
@@ -960,7 +972,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
     # Spec wants 37 card fields flat at root + a metadata block.
     "voice_name": vi["name"],
     "voice_mode": vi["voice_mode"],
-    "pipeline_version": "3.9",
+    "pipeline_version": "3.10",
     "generated_date": time.strftime("%Y-%m-%d"),
 
     # All 35 generated card fields, flat at root level

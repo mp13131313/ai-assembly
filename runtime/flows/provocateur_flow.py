@@ -80,16 +80,16 @@ except ImportError as e:
     print("Install with:  pip install anthropic prefect python-dotenv")
     sys.exit(1)
 
-# Load .env from the repo root so ANTHROPIC_API_KEY is available when
-# the flow runs as a script. Same pattern as researcher_flow and
-# transcription_flow.
-load_dotenv(_REPO_ROOT.parent / ".env")
-
 # Make flows.shared importable regardless of whether we're run as a
 # module or as a script from the repo root.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
+
+# Load .env from the repo root so ANTHROPIC_API_KEY is available when
+# the flow runs as a script. Same pattern as researcher_flow and
+# transcription_flow.
+load_dotenv(_REPO_ROOT.parent / ".env")
 
 from flows.shared.io import (
     extract_json,
@@ -107,7 +107,10 @@ from flows.shared.io import (
 # Default to Opus 4.7 — canonical model for Provocateur Pipeline v1 per
 # the validation run on dev_msc_test. Override via CLAUDE_MODEL env var
 # for dev iteration on Sonnet.
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
+CLAUDE_MODEL = os.environ.get(
+    "PROVOCATEUR_CLAUDE_MODEL",
+    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
+)
 
 # Adaptive thinking for all three LLM tasks — the Provocateur is
 # editorially heavy (activation scoring, coverage balancing, and
@@ -862,8 +865,8 @@ def _render_narrative_briefing(formulation: dict, theme_display_title: str) -> s
     lines.append(
         "[Full structured supporting material — theme abstract, cluster "
         "abstracts, all raw extractions sorted by lens, theme flags — is "
-        "available in the `structured` field of this briefing entry for "
-        "deeper inspection.]"
+        "available in the `full_theme_record` field of this briefing entry "
+        "for deeper inspection.]"
     )
     return "\n".join(lines)
 
@@ -1046,12 +1049,13 @@ def package_voice_briefings(
             "formulations": my_formulations,
         }
 
-        write_json_atomic(out_dir / f"{slug}.json", briefing)
+        briefing_path = out_dir / f"{slug}.json"
+        write_json_atomic(briefing_path, briefing)
 
         summary["members"][name] = {
             "slug": slug,
             "formulations_count": len(my_formulations),
-            "path": str(out_path.relative_to(out_dir.parent.parent)),
+            "path": str(briefing_path.relative_to(out_dir.parent.parent)),
         }
         summary["total_briefings_written"] += 1
         logger.info(f"  {name}: {len(my_formulations)} formulation(s) → {slug}.json")
