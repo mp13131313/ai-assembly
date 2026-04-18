@@ -1,6 +1,7 @@
 # Session handoff — AI Assembly
 
 **Written:** 2026-04-18 by a Claude Opus 4.7 session that had spent several turns doing a full line-by-line review of the repo.
+**Refreshed:** 2026-04-18 after Sonnet executed the fix plan (commits 2df11df, 18ed209) and after the audience-brief integration landed (commit 9010ab3). §3 findings marked FIXED, §5 forward plan trimmed, §7 subprompts reduced to what's still open.
 **Audience:** a fresh Claude session tasked with continuing this work.
 **Goal:** rebuild ~90% of the prior session's working knowledge in ~30–60 minutes instead of the 3+ hours it took the first time.
 
@@ -110,25 +111,25 @@ Read only if a specific task requires it:
 
 ---
 
-## 2. Artifacts this session produced (all in `docs/`)
+## 2. Artifacts this session produced
 
-Four new/updated documents. Three in the repo, one on Desktop.
+All committed and pushed to `origin/main`.
 
-### In repo (committed)
+- **`docs/LLM_CALL_INVENTORY.md`** (~280 lines) — every LLM call site, provider, model, parameters, thinking state, retry policy, prompt source, env-var overrides. **The canonical parameter reference.** Commit `2ee2dd7`.
 
-- **`docs/LLM_CALL_INVENTORY.md`** (~280 lines) — every LLM call site, provider, model, parameters, thinking state, retry policy, prompt source, env-var overrides. The §7 section lists known discrepancies between code and spec. **This is the canonical parameter reference.** Commit `2ee2dd7`.
+- **`docs/AUDIENCE_BRIEF.md`** (~256 lines) — canonical three-part audience brief (HoBB organisation, Forum program, 7-faction audience profile). Source for the `council_config.json` audience paragraph. Commit `e01bac3`.
 
-- **`docs/FIX_PLAN_ADDITIONS.md`** (~300 lines) — net-new findings that went into the fix plan Sonnet executed. Items §1 (Pass 0a thinking lie), §3 (Pass 1-merge + Transcription thinking audit), §2 (Opus 4.6 reference audit), §4 (optional `call_claude` refactor). **Probably gets removed after Sonnet's cleanup** — see §5 below. Commit `2ee2dd7`.
+- **`personas/notes/baseline_research/compass_artifact_wf-109ac10a-*.md`** (~127 lines) — the Deep Research grounding underneath `AUDIENCE_BRIEF.md`. Same location/pattern as the three prior Deep Research artifacts. Commit `e01bac3`.
 
-- **`docs/AUDIENCE_BRIEF.md`** (~256 lines) — canonical three-part audience brief (HoBB organisation, Forum program, 7-faction audience profile). Synthesised from Deep Research grounding. Commit `e01bac3`.
+- **`personas/notes/baseline_research/README.md`** (updated) — indexes all four research artifacts (3 persona-pipeline + 1 audience). Commit `e01bac3`.
 
-- **`personas/notes/baseline_research/compass_artifact_wf-109ac10a-*.md`** (~127 lines) — the Deep Research underlying AUDIENCE_BRIEF.md. Same location/pattern as the three existing Deep Research artifacts. Commit `e01bac3`.
+- **`personas/notes/SONNET_EXECUTION_PLAN_repo_audit.md`** (~1765 lines) — the fix plan Sonnet executed, migrated from the user's Desktop into the repo in commit `18ed209`. Dual role: (a) historical record of what landed 2026-04-18 across 8 commits, (b) template for future "AI writes plan → Claude executes" workflows — preamble at the top documents the structural features worth reusing.
 
-- **`personas/notes/baseline_research/README.md`** (updated) — now indexes all four artifacts. Commit `e01bac3`.
+- **`docs/SESSION_HANDOFF.md`** (this file) — reading plan + accumulated findings digest for future Claude sessions. Originally commit `a9842ee`; refreshed 2026-04-18 with post-fix-plan state (§3 findings marked FIXED with commit refs, §5 forward plan trimmed, §7 subprompts reduced to what's still open).
 
-### On Desktop (not in repo)
+### Previously in this list, now removed
 
-- **`/Users/aienvironment/Desktop/ai-assembly-fix-plan.md`** (~1736 lines) — the fix plan Sonnet executed. 5 categories of findings + verification steps + 7-commit grouping recommendation. References `FIX_PLAN_ADDITIONS.md` and `LLM_CALL_INVENTORY.md`. **May migrate into the repo as a historical record** after Sonnet's execution; the user was undecided.
+- **`docs/FIX_PLAN_ADDITIONS.md`** — net-new findings from this session that were folded into Sonnet's fix plan. Removed in commit `90cd71a` after all its findings landed (items §1, §3.1, §3.3, §3.4, §2, §4.13 landed in code; K.0 preserved in the migrated fix plan). Content recoverable via `git show 2ee2dd7:docs/FIX_PLAN_ADDITIONS.md` if ever needed.
 
 ---
 
@@ -136,28 +137,36 @@ Four new/updated documents. Three in the repo, one on Desktop.
 
 This is the dense knowledge that took the prior session hours to build up. A fresh read won't produce all of it.
 
-### 3.1 Spec ↔ code mismatches that aren't obvious
+### 3.1 Spec ↔ code mismatches — all resolved 2026-04-18
 
-- **`pipeline_version` drifts across 4 sources.** Doc header says v3.10, doc's example JSON says "3.7", `run_persona_pipeline.py:963` writes "3.9", Plato's assembled card on disk has "3.7", filename is still `AI_Assembly_Persona_Pipeline_v3_9.md`. Sonnet's plan item 4.2 standardises on v3.10.
-- **`flavor` field in Formulation output.** Spec doc (Provocateur_Pipeline.md L336-347) says `flavor` is the `lens` value (`assertion|reframing|open_question`). Actual prompt (`provocateur_formulation.md` L75-97) says it's a stage-direction phrase derived from Researcher metadata (`"speaking with intensity"`, `"pushing back"`, etc). Run artifacts agree with the prompt. Spec is wrong. Sonnet's plan item 4.3 fixes the spec.
-- **Briefing markdown footer references wrong JSON key.** `_render_narrative_briefing` emits markdown pointing at a `structured` field. Actual JSON key is `full_theme_record`. Voice Pipeline (when built) would look for the wrong field. Sonnet's plan item 4.4 fixes the markdown.
-- **DR word-count floor mismatch.** Prompt asks for 15,000 words minimum. Validator floor is 5,000. Error message says "expected 15,000-25,000". A 5,001-word truncated dossier passes `VALID`. Sonnet's plan item 4.5 raises the floor.
-- **Anthropic SDK version fiction.** Both `CLAUDE.md` and `CURRENT_STATE.md` claim a runtime ↔ personas version mismatch; they even claim it *in opposite directions*. Reality: both are `0.94.1`. Sonnet's plan item 4.1 aligns the docs.
-- **Stale pointer `runtime/flows/voice/README.md`** — referenced by CURRENT_STATE.md and IMPLEMENTATION_AUDIT_v3_7.md. File doesn't exist. The "don't few-shot from worked_provocations" rule those pointers target actually lives in `personas/HANDOFF.md` and the header comment of `persona_pass_7b_provocations.md`. Sonnet's plan item 4.6 redirects.
-- **Persona prompt internal version tags.** All 32 persona prompts have `{# ... v3.7 Node N #}` header comments even though spec is v3.10. Cosmetic. Sonnet's plan item 5.6 is optional fix.
+All mismatches the prior session flagged landed in Sonnet's fix plan execution. Kept here as historical diagnostic — a fresh session needs none of these fixed. If a grep below returns a different result than stated, flag it rather than silently re-fixing.
 
-### 3.2 Bugs that existed as of 2026-04-18 (status depends on whether Sonnet completed the fix plan)
+- ~~**`pipeline_version` drifts across 4 sources.**~~ → **FIXED** (commit `7550965`). Spec file renamed to `AI_Assembly_Persona_Pipeline_v3_10.md`; `run_persona_pipeline.py` writes `"3.10"`; historical card files on disk still show `"3.7"` (don't touch).
+- ~~**`flavor` field in Formulation output.**~~ → **FIXED** (commit `ac25bd7`). Spec doc updated to match prompt; prompt is the authoritative definition.
+- ~~**Briefing markdown footer references wrong JSON key (`structured` vs `full_theme_record`).**~~ → **FIXED** (commit `ac25bd7`).
+- ~~**DR word-count floor mismatch (5k vs 15k).**~~ → **FIXED** (commit `ac25bd7`). Floor raised to 15,000.
+- ~~**Anthropic SDK version fiction.**~~ → **FIXED** (commit `7550965`). Both docs now truthfully state both venvs are on `0.94.1`. See `CLAUDE.md` §"Separate venvs".
+- ~~**Stale pointer `runtime/flows/voice/README.md`.**~~ → **FIXED** (commit `ac25bd7`). Pointers redirected to `personas/HANDOFF.md` + the Pass 7b prompt header.
+- ~~**Persona prompt internal version tags (v3.7 → v3.10).**~~ → **FIXED** (commit `883a0a1`). All 32 prompts now carry v3.10 in their header comments.
 
-- **Critical (block next run):** `runtime/flows/provocateur_flow.py` — `_REPO_ROOT` used before assignment (L86 before L90); `out_path` undefined in `package_voice_briefings` (L1054). Both would NameError on next Provocateur run. Fix plan items 1.1 and 1.4.
-- **Silent quality degradation:** Pass 0a runs Opus 4.7 with thinking OFF despite code comment saying "adaptive thinking" — `thinking_budget=None` is falsy and doesn't enable thinking per `clients.py` L46-52. Fix plan item 1.2.
-- **Silent quality degradation:** Pass 1-merge runs Opus 4.7 with thinking OFF (same pattern). Fix plan item 1.3.
+### 3.2 Bugs that existed before 2026-04-18 — all fixed
 
-**Verify status by grepping after the fact:**
+All four bugs the prior session found landed in commit `2df11df`. Kept here so a fresh session doesn't mistake these for open issues.
+
+- ~~**Critical:** `runtime/flows/provocateur_flow.py` — `_REPO_ROOT` used before assignment; `out_path` undefined in `package_voice_briefings`.~~ → **FIXED**. Module imports cleanly.
+- ~~**Silent quality:** Pass 0a runs Opus 4.7 with thinking OFF despite the code comment.~~ → **FIXED**. Now uses `thinking=True` (see K.0 refactor below).
+- ~~**Silent quality:** Pass 1-merge runs Opus 4.7 with thinking OFF.~~ → **FIXED**. Now `thinking=True`, `temperature=1.0`.
+
+Plus one follow-up that eliminates the bug class:
+
+- ~~**K.0 root cause:** `call_claude`'s `thinking_budget: int | None = None` parameter was misleadingly named — adaptive mode ignores the budget; only truthy/falsy matters.~~ → **REFACTORED** (commit `4666fa1`). Parameter renamed to `thinking: bool = False`. All 9 call sites in personas/ updated. `call_gemini`'s unrelated `thinking_budget` parameter (Gemini SDK native) preserved.
+
+**Verification (should all return the post-fix state):**
 ```bash
-grep -n "thinking_budget=10000" personas/run_pass0a_voice_config.py  # 1.2 landed if hit
-grep -n "thinking_budget=10000" personas/run_persona_pipeline.py | head -3  # 1.3 landed if 1+ hits
-grep -n "_REPO_ROOT = Path" runtime/flows/provocateur_flow.py | head -1  # should be near top, before load_dotenv
-grep -c "out_path" runtime/flows/provocateur_flow.py  # should be 0 (if fixed)
+# All should be 0 or as noted
+grep -rn "thinking_budget" personas/ --include="*.py" | grep -v "call_gemini\|google-genai"  # 0 hits outside call_gemini
+grep -c "out_path" runtime/flows/provocateur_flow.py  # 0
+python3 -c "import sys; sys.path.insert(0, 'runtime'); import flows.provocateur_flow"  # should succeed
 ```
 
 ### 3.3 Design decisions that aren't obvious from specs
@@ -233,19 +242,18 @@ ai-assembly/
 │   ├── AI_Assembly_Provocateur_Pipeline.md      v2
 │   ├── AI_Assembly_Voice_Pipeline.md            v1, Steps 1+2 only
 │   ├── AI_Assembly_Persona_Card_v2.md           37-field schema
-│   ├── AI_Assembly_Persona_Pipeline_v3_9.md     v3.10 internally — rename pending
+│   ├── AI_Assembly_Persona_Pipeline_v3_10.md    v3.10
 │   ├── AI_Assembly_Architecture_v1.md           STALE — n8n era
 │   ├── AI_Assembly_Infrastructure_Setup.md      STALE — rclone/Drive era
-│   ├── AUDIENCE_BRIEF.md             ★ this session — Athens audience brief
-│   ├── LLM_CALL_INVENTORY.md         ★ this session — every LLM call parameterized
-│   ├── FIX_PLAN_ADDITIONS.md         this session — likely removed after Sonnet cleanup
+│   ├── AUDIENCE_BRIEF.md             ★ Athens audience brief (source for council_config audience)
+│   ├── LLM_CALL_INVENTORY.md         ★ every LLM call parameterized
 │   ├── SESSION_HANDOFF.md            ★ this file
 │   └── design/
 │       ├── AI_Assembly_DesignPrinciples.md  visual + aesthetic principles
 │       └── Nine_Modes_of_Implication.md     media-engagement taxonomy
 │
 ├── runtime/                          overnight pipeline
-│   ├── README.md                     ⚠ pre-monorepo stale; plan rewrites
+│   ├── README.md                     rewritten 2026-04-18 as pointer to top-level README
 │   ├── requirements.txt
 │   ├── .env.example
 │   ├── .gitignore
@@ -264,12 +272,12 @@ ai-assembly/
 │   │   │   ├── status.html
 │   │   │   └── overview.html
 │   │   ├── static/
-│   │   │   ├── app.js                ⚠ ?v=10 hardcoded in templates
+│   │   │   ├── app.js                cache-bust now via STATIC_VERSION (commit 1c30285)
 │   │   │   └── style.css
 │   │   ├── deploy/
-│   │   │   ├── Caddyfile             ⚠ ingest.example.com placeholder
+│   │   │   ├── Caddyfile             ⚠ ingest.example.com placeholder (warned in comment)
 │   │   │   ├── ingest.service        systemd, KillMode=process
-│   │   │   └── README.md             ⚠ step 4 has wrong venv path
+│   │   │   └── README.md             venv path corrected (commit 963f1b9)
 │   │   └── tests/
 │   │       ├── __init__.py
 │   │       ├── test_app.py
@@ -281,12 +289,12 @@ ai-assembly/
 │   │   ├── __init__.py
 │   │   ├── transcription_flow.py     Stage 0
 │   │   ├── researcher_flow.py        Stage 1
-│   │   ├── provocateur_flow.py       Stage 1b — ⚠ had 2 bugs; check fix status
+│   │   ├── provocateur_flow.py       Stage 1b — bugs fixed commit 2df11df
 │   │   └── shared/
 │   │       ├── __init__.py
 │   │       ├── io.py                 ★ read first
 │   │       ├── council/
-│   │       │   ├── council_config.json   ⚠ stubs; audience paragraph planned for sharpening
+│   │       │   ├── council_config.json   ⚠ still stubs for members[]; audience now sharpened (v3_audience_sharpened, commit 9010ab3)
 │   │       │   └── README.md             hot-swap semantics
 │   │       └── prompts/              8 active + 4 archived
 │   │           ├── transcription_speaker_id.md
@@ -312,9 +320,9 @@ ai-assembly/
 │   ├── notes/
 │   │   ├── PROPOSED_pipeline_doc_change.md       historical
 │   │   └── updated_specs/
-│   │       ├── TRANSCRIPTION_v2_to_v2_1_delta.md  historical — Opus 4.6 era
-│   │       ├── RESEARCHER_v2_to_v3_delta.md       historical
-│   │       └── PROVOCATEUR_v1_to_v2_delta.md      historical
+│   │       ├── TRANSCRIPTION_v2_to_v2_1_delta.md  historical — Opus 4.6 era (banner added ac25bd7)
+│   │       ├── RESEARCHER_v2_to_v3_delta.md       historical (banner added ac25bd7)
+│   │       └── PROVOCATEUR_v1_to_v2_delta.md      historical (banner added ac25bd7)
 │   │
 │   ├── runs/                         run artifacts — DO NOT EDIT
 │   │   └── dev_msc_test/             MSC 2026 test validation
@@ -327,25 +335,25 @@ ai-assembly/
 │   ├── HANDOFF.md                    ★ cross-repo handoff contract (worked_provocations rule)
 │   ├── .env.example
 │   │
-│   ├── run_pass0a_voice_config.py    ⚠ "adaptive thinking" comment lie; check fix status
+│   ├── run_pass0a_voice_config.py    thinking=True (fixed 2df11df; refactored param name 4666fa1)
 │   ├── run_phase0_1_research.py      Pass 1a + 1b + DR render
 │   ├── run_pass0b_dr_prompt.py       DR prompt re-render (no API)
-│   ├── run_persona_pipeline.py       ★ main pipeline (1052 lines)
+│   ├── run_persona_pipeline.py       ★ main pipeline (1052 lines); _pass_1merge now thinking=True
 │   │
 │   ├── flows/
 │   │   ├── __init__.py
 │   │   └── shared/
 │   │       ├── __init__.py
-│   │       ├── clients.py            ★ call_claude + wrappers — read first
+│   │       ├── clients.py            ★ call_claude(thinking: bool) + wrappers — read first
 │   │       ├── io.py
 │   │       ├── node0_validation.py
-│   │       ├── node1c_fetch.py       SSRF-hardened
+│   │       ├── node1c_fetch.py       SSRF-hardened (TOCTOU documented, commit 963f1b9)
 │   │       ├── node1d_excerpt_selection.py
 │   │       ├── prompt_render.py      Jinja2, StrictUndefined
-│   │       ├── dr_validation.py      ⚠ word-count floor mismatch
+│   │       ├── dr_validation.py      word-count floor raised to 15k (commit ac25bd7)
 │   │       ├── perplexity_split.py
 │   │       ├── wikipedia.py
-│   │       └── prompts/              32 files — see LLM_CALL_INVENTORY §4.2
+│   │       └── prompts/              32 files, all v3.10 headers (commit 883a0a1) — see LLM_CALL_INVENTORY §4.2
 │   │
 │   ├── scripts/
 │   │   ├── __init__.py
@@ -368,14 +376,15 @@ ai-assembly/
 │   │       └── _archive/
 │   │
 │   ├── notes/
-│   │   ├── ARCHITECTURE_NEXT_PHASE_HANDOFF.md  ★ planned Phase B rewrite — not built
-│   │   ├── IMPLEMENTATION_AUDIT_v3_7.md        historical
-│   │   ├── WALKTHROUGH_FIXES_PENDING.md        historical, partially executed
-│   │   ├── SONNET_EXECUTION_PLAN*.md           4 files, historical execution plans
-│   │   ├── FIX_34_SECTION_BULLETS_DRAFT.md     historical
+│   │   ├── ARCHITECTURE_NEXT_PHASE_HANDOFF.md            ★ planned Phase B rewrite — not built
+│   │   ├── IMPLEMENTATION_AUDIT_v3_7.md                  historical
+│   │   ├── WALKTHROUGH_FIXES_PENDING.md                  historical (banner added ac25bd7)
+│   │   ├── SONNET_EXECUTION_PLAN*.md                     4 older execution plans
+│   │   ├── SONNET_EXECUTION_PLAN_repo_audit.md           ★ 2026-04-18 fix plan + template for future AI-writes-plan workflows (commit 18ed209)
+│   │   ├── FIX_34_SECTION_BULLETS_DRAFT.md               historical
 │   │   └── baseline_research/
-│   │       ├── README.md                        ★ indexes 4 research artifacts
-│   │       └── compass_artifact_wf-*.md         4 Deep Research artifacts
+│   │       ├── README.md                                  ★ indexes 4 research artifacts
+│   │       └── compass_artifact_wf-*.md                   4 Deep Research artifacts
 │   │
 │   ├── runs/                         per-voice build outputs — DO NOT EDIT
 │   │   ├── plato/                    full pipeline completed
@@ -396,31 +405,11 @@ Symbols:
 
 ## 5. Forward plan — tasks queued up
 
-### Immediate: post-Sonnet cleanup (see `docs/FIX_PLAN_ADDITIONS.md` lifecycle)
+### Done 2026-04-18 — no action needed by fresh session
 
-After Sonnet's fix-plan execution lands:
-
-```bash
-# 1. Sync local
-cd /Users/aienvironment/Desktop/ai-assembly && git pull origin main
-
-# 2. Verify the 4 findings from FIX_PLAN_ADDITIONS.md landed
-grep -n "thinking_budget=10000" personas/run_pass0a_voice_config.py
-grep -n "thinking_budget=10000" personas/run_persona_pipeline.py | head -3
-grep -n "Intentional exception" runtime/flows/transcription_flow.py
-grep -n "PERSONA_THINKING_BUDGET\|PERSONA_VOICE_BATCH" .env.example personas/.env.example runtime/.env.example
-
-# 3. If all landed, remove the plan-additions doc (its job is done)
-git rm docs/FIX_PLAN_ADDITIONS.md
-git commit -m "chore: remove FIX_PLAN_ADDITIONS.md (findings landed via Sonnet fix-plan execution)"
-git push origin main
-```
-
-### Queued: audience brief integration into council_config + Briefing
-
-Single commit, ~20 minutes. Sharpens `council_config.json` audience paragraph with three findings (seven factions, agency center-of-gravity, performing-reception vulnerability) + adds in-repo pointer from Briefing v3.1 to `docs/AUDIENCE_BRIEF.md`. Proposed text is in the prior session's transcript.
-
-Bump council config version from `dev_stub_v2_with_selection_params` to `dev_stub_v3_audience_sharpened` + `last_updated: 2026-04-18`.
+- Fix plan (Categories 1–5 + K.0) executed across commits `2df11df`–`5b6005f` + `883a0a1` + `4666fa1`. See `personas/notes/SONNET_EXECUTION_PLAN_repo_audit.md` for the full list with commit attribution.
+- `FIX_PLAN_ADDITIONS.md` findings all landed; doc removed in `90cd71a`.
+- Audience brief integrated into `council_config.json` (v3_audience_sharpened) and Briefing v3.1 pointer added, commit `9010ab3`.
 
 ### Medium-term: Voice Pipeline Steps 1+2 build
 
@@ -478,13 +467,12 @@ before touching anything else. It contains:
 
 - One-minute orientation (what the project is, what state it's in)
 - A staged reading plan (stop when you have enough for the task)
-- An inventory of this-session artifacts (3 new docs in docs/)
-- Accumulated findings that aren't in any spec (spec/code mismatches,
-  design decisions, bugs)
+- An inventory of recent artifacts (LLM_CALL_INVENTORY, AUDIENCE_BRIEF,
+  this handoff itself, plus the Sonnet execution plan as a template)
+- Accumulated findings — most already FIXED, with commit refs (§3)
 - The full repo file tree, annotated, with ★ for critical and ⚠ for
   known issues
-- Forward plan (post-Sonnet cleanup, audience brief integration, Voice
-  Pipeline build, closing show)
+- Forward plan (Voice Pipeline build, Step 3 spec, closing show)
 - What NOT to touch (run artifacts, archives, historical notes)
 
 After reading SESSION_HANDOFF.md, skim:
@@ -508,33 +496,7 @@ Current working directory: /Users/aienvironment/Desktop/ai-assembly/
 Current branch: main
 ```
 
-Tune the prompt to the specific task. For a *continue-the-fix-plan* session you'd append:
-
-```
-Your specific task: finish items from the fix plan at
-/Users/aienvironment/Desktop/ai-assembly-fix-plan.md that haven't landed
-yet. After reading SESSION_HANDOFF.md §3.2, grep to see what's done:
-
-    grep -n "thinking_budget=10000" personas/run_pass0a_voice_config.py
-    grep -n "_REPO_ROOT = Path" runtime/flows/provocateur_flow.py | head -1
-    grep -c "out_path" runtime/flows/provocateur_flow.py
-    grep -n "Intentional exception" runtime/flows/transcription_flow.py
-
-Complete whatever's outstanding. Report what you did per item.
-```
-
-For an *audience-integration* session:
-
-```
-Your specific task: integrate docs/AUDIENCE_BRIEF.md findings into
-runtime/flows/shared/council/council_config.json (audience paragraph)
-and docs/AI_Assembly_Briefing_v3_1.md (add in-repo pointer to the
-brief). SESSION_HANDOFF.md §5 has the proposed edits. Bump
-council_config version from dev_stub_v2_with_selection_params to
-dev_stub_v3_audience_sharpened, last_updated to today. Single commit.
-```
-
-For a *Voice Pipeline build* session:
+Tune the prompt to the specific task. For a *Voice Pipeline build* session:
 
 ```
 Your specific task: begin building runtime/flows/voice_flow.py per
