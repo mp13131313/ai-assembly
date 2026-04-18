@@ -171,7 +171,7 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None,
         model="claude-opus-4-7",
         max_tokens=24000,
         temperature=1.0,
-        thinking_budget=None,  # adaptive thinking
+        thinking_budget=10000,  # truthy value enables adaptive thinking per clients.py L46-52
         response_format_json=True,
     )
     _real_ctx = project_ctx["conference_context_paragraph"]
