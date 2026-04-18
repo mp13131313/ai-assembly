@@ -267,7 +267,7 @@ The provotype's real test runs across accumulation. A single night can test enco
 
 ## The audience
 
-The audience profile, reception analysis, positioning principles, and introduction-location decision are specified in `Till_Briefing_The_AIssembly_Athens_2026_v3_1.md`. A close reading of the program and audience for Tim is in `Tim_Briefing_Athens_2026_Close_Reading.md`.
+The audience profile, reception analysis, positioning principles, and introduction-location decision are specified in `Till_Briefing_The_AIssembly_Athens_2026_v3_1.md`. A close reading of the program and audience for Tim is in `Tim_Briefing_Athens_2026_Close_Reading.md`. For in-repo reference: `docs/AUDIENCE_BRIEF.md` distills both into a three-part dossier — HoBB as organisation, the Forum's program (five-act dramaturgy + ten tracks + four engineered curator tensions + agency as the program's actual center of gravity), and the seven-faction audience profile with activation/flat/stretch and the performing-reception failure mode. It also names the ten hardest-to-please voices the Assembly's artifacts need to survive.
 
 The short version: ~750 senior professionals across seven distinct intellectual factions, trusting HoBB's curation, wanting their contradictions named rather than resolved, whose professional skill is intellectual hospitality — which is also the provotype's deepest receptivity failure mode. They are capable of producing Layer 3 expansion and equally capable of *performing* expansion without being changed by it. The provotype is designed to surface which is happening.
 
