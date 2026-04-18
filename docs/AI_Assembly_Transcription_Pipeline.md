@@ -9,9 +9,9 @@
 
 ## Changelog (v2.1 — Apr 14 2026)
 
-A single additive change from v2, in response to validating Opus 4.6 + adaptive thinking on the Researcher Pipeline (v2.4). The Researcher upgrade produced a large quality improvement for clustering and theming but did not generalize to the Transcription Pipeline's main LLM calls (Cleaning, drift verification). Speaker ID was the only Transcription step where Opus could plausibly help edge cases, so it gains a per-run model override.
+A single additive change from v2, in response to validating Opus 4.7 + adaptive thinking on the Researcher Pipeline (v2.4). The Researcher upgrade produced a large quality improvement for clustering and theming but did not generalize to the Transcription Pipeline's main LLM calls (Cleaning, drift verification). Speaker ID was the only Transcription step where Opus could plausibly help edge cases, so it gains a per-run model override.
 
-- **§14** → Step 3 "Speaker Identification" implementation gains an optional `TRANSCRIPTION_SPEAKER_ID_MODEL` environment variable. Defaults to `CLAUDE_MODEL` (i.e. Sonnet 4.6 in the baseline config). Can be set to `claude-opus-4-6` on a per-run basis for difficult sessions — non-native English speakers, complex multi-person Q&A, incomplete roster metadata. Cleaning and semantic drift verification remain on Sonnet; the cost/benefit does not favor Opus for those steps.
+- **§14** → Step 3 "Speaker Identification" implementation gains an optional `TRANSCRIPTION_SPEAKER_ID_MODEL` environment variable. Defaults to `CLAUDE_MODEL` (i.e. Sonnet 4.6 in the baseline config). Can be set to `claude-opus-4-7` on a per-run basis for difficult sessions — non-native English speakers, complex multi-person Q&A, incomplete roster metadata. Cleaning and semantic drift verification remain on Sonnet; the cost/benefit does not favor Opus for those steps.
 
 Model references throughout the document are unchanged — Sonnet 4.6 remains the default for every LLM call in Transcription.
 
@@ -344,7 +344,7 @@ The Speaker ID LLM call defaults to Claude Sonnet 4.6. Across the three MSC 2026
 For difficult sessions, operators can override the Speaker ID model per-run via the `TRANSCRIPTION_SPEAKER_ID_MODEL` environment variable:
 
 ```bash
-TRANSCRIPTION_SPEAKER_ID_MODEL=claude-opus-4-6 python flows/transcription_flow.py ...
+TRANSCRIPTION_SPEAKER_ID_MODEL=claude-opus-4-7 python flows/transcription_flow.py ...
 ```
 
 When to flip this toggle:
@@ -354,7 +354,7 @@ When to flip this toggle:
 - **Incomplete roster metadata** — when the program lists contributors but the bios are thin or the title/affiliation fields are missing, giving Pass 1 less signal to match against
 - **Mixed-language sessions** — where speakers switch between English and another language and the Speaker ID pass needs to reason across the language boundary
 
-Opus 4.6's extra reasoning capacity helps on these edge cases. It does NOT help on well-behaved sessions and costs ~5× more per call, so it should not be the default.
+Opus 4.7's extra reasoning capacity helps on these edge cases. It does NOT help on well-behaved sessions and costs ~5× more per call, so it should not be the default.
 
 **Thinking mode is NOT used in Transcription** even when Opus is selected. The Speaker ID output is small (mappings + flags, under 2K tokens), so the latency cost of adaptive thinking is large relative to its benefit. The Speaker ID call stays non-streaming with `max_tokens=4096` regardless of model choice.
 

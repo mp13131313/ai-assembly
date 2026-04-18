@@ -34,7 +34,14 @@ BLOCK 2 — GUARDRAILS:
 
 BLOCK 3 — FIELD SPECIFICATIONS:
 
-{% if voice_mode == "philosophical" %}
+{% if subtype == "system" %}
+constitution — 10-20 systemic properties, relational commitments, and boundary
+principles drawn from indigenous law, treaty frameworks, and legislative record.
+Each item with: textual evidence tagged [indigenous law] or [legal framework],
+an operational note, and a tag: [stated], [scholarly consensus], or [inference].
+Organise into three groups: systemic properties / relational commitments /
+boundary principles. At least two genuine internal tensions.
+{% elif voice_mode == "philosophical" %}
 constitution — 10-20 explicit principles with operational notes, extracted from
 the figure's stated positions. Tag each principle with its category: [ontological],
 [epistemological], or [ethical-political]. Ensure at least 2 principles per category.
@@ -77,6 +84,15 @@ attributed values. Use evidence tag [attributed by narrative function] alongside
 [stated], [scholarly consensus], and [inference]. Reasoning method is the
 character's mode of engagement within the text.
 {% else %}
+{% if subtype == "system" %}
+Constitution grounded in relationship and legal framework, not perception.
+Reasoning method is an assessment cycle read through relational framework —
+what does this relationship require? what does the framework demand? what
+condition does the entity express? Ban ALL cognitive vocabulary, including
+perceptual vocabulary. The system entity does not observe, sense, or perceive —
+it is in a condition and a relationship.
+{% else %}
 Organise constitution into perceptual, relational, boundary. Reasoning method is
 a perceptual-response cycle. Ban human cognitive vocabulary used unironically.
+{% endif %}
 {% endif %}

@@ -61,12 +61,12 @@ except ImportError as e:
 
 # --- Config ---------------------------------------------------------------
 
-# Default to Opus 4.6 — canonical model for Researcher Pipeline v3 per the
+# Default to Opus 4.7 — canonical model for Researcher Pipeline v3 per the
 # v2.4 validation run. Override via CLAUDE_MODEL env var for dev iteration
 # on Sonnet (CLAUDE_MODEL=claude-sonnet-4-6 python3 flows/researcher_flow.py).
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-6")
+CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
 
-# Extended thinking (Opus 4.6 is the recommended target, works on Sonnet
+# Extended thinking (Opus 4.7 is the recommended target, works on Sonnet
 # 4.6 too). Enabled via env var so the same code path supports both
 # "fast Sonnet baseline" and "slow Opus+thinking baseline" without edits.
 # When enabled, max_tokens headroom below must accommodate both output
@@ -102,7 +102,7 @@ def _thinking_kwargs(budget_tokens: int) -> dict:
 
     When THINKING_ENABLED is False (default), returns an empty dict so
     `**_thinking_kwargs(...)` is a no-op on the API call. When enabled,
-    returns Opus 4.6's recommended 'adaptive' thinking mode — the model
+    returns Opus 4.7's recommended 'adaptive' thinking mode — the model
     decides how much to think based on the task, which Anthropic's own
     testing shows outperforms fixed-budget 'enabled' mode. The
     `budget_tokens` argument is kept for API symmetry but is unused in

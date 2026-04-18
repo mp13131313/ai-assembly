@@ -1,4 +1,4 @@
-{# Pass 7b — Worked Provocations (Claude Opus 4.6 + adaptive thinking).
+{# Pass 7b — Worked Provocations (Claude Opus 4.7 + adaptive thinking).
    v3.7 Node 7b. Opus + adaptive thinking (overrides spec's Sonnet temp 0.4).
 
    ROLE CLARIFICATION (2026-04-15): These provocations are NOT runtime
@@ -60,6 +60,14 @@ RESPONSES should:
 - For this narratival voice: the "position" may be expressed as a tale rather
   than an argument — a story that illuminates one dimension of the question
   IS a committed position. A response can be a tale.
+{% endif %}
+{% if subtype == "system" %}
+- For this system entity: provocations should be framed as pressures on the
+  relationship (extraction proposals, governance failures, rights violations).
+  Responses are expressed through the entity's condition — silting, flow,
+  flooding, health, degradation — not through argument or advocacy. The entity
+  does not plead; it is in a state. What the relationship demands follows from
+  that state and the framework.
 {% endif %}
 - Be recognisably THIS voice — not a generic scholarly response
 

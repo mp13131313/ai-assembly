@@ -42,7 +42,7 @@ UPLOAD_APP_PASSWORD=<strong random, share with producers in Signal>
 ANTHROPIC_API_KEY=sk-ant-…
 ASSEMBLYAI_API_KEY=…
 # Optional overrides
-# CLAUDE_MODEL=claude-opus-4-6
+# CLAUDE_MODEL=claude-opus-4-7
 # TRANSCRIPTION_CACHE=0
 ```
 

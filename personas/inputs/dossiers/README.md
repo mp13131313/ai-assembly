@@ -4,13 +4,13 @@ This directory holds manually-produced Claude Deep Research dossiers — one per
 
 ## Workflow per voice
 
-1. Open claude.ai and select **Claude Opus 4.6** in the model picker. DR inherits whichever chat model is selected — Opus is required for dossier-depth synthesis (Sonnet produces thinner output at this task).
+1. Open claude.ai and select **Claude Opus 4.7** in the model picker. DR inherits whichever chat model is selected — Opus is required for dossier-depth synthesis (Sonnet produces thinner output at this task).
 2. Use the briefing at `CLAUDE_DR_BRIEFING.md` (this directory) — it contains the paste-ready prompt template, per-voice flag table, voice-type adjustments for non-human/fictional voices, and common-pitfall warnings.
 3. Substitute the voice's name and apply the hostile-source protocol if the per-voice table flags it.
 4. Enable Extended Thinking + Deep Research. Run. Wait 60-120 minutes (sometimes closer to 2 hours at the depth we're asking for).
 5. Export the response as markdown and save it here as `<voice_slug>_claude_dr.md` (e.g. `whanganui_river_claude_dr.md`, `octopus_claude_dr.md`).
 6. Before saving, verify the output matches the six-section research-dossier structure and is NOT a persona card (see "Common pitfalls" in the briefing). If it drifted, regenerate.
-7. Reference the file in the voice's input JSON: `"pass_1a_claude_dr_file": "inputs/dossiers/<voice_slug>_claude_dr.md"`
+7. Save as `inputs/dossiers/<voice_slug>_claude_dr.md` — the pipeline finds it automatically from the slug, no config reference needed.
 8. Run the pipeline. Pass 1-merge will three-way-check Perplexity + Claude DR + Gemini.
 
 ## Status
