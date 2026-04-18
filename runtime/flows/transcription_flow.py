@@ -54,7 +54,7 @@ try:
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
     load_dotenv(_REPO_ROOT.parent / ".env")
-    from flows.shared.io import load_prompt, get_logger, extract_json
+    from flows.shared.io import load_prompt, get_logger, extract_json, write_json_atomic
 except ImportError as e:
     sys.stderr.write(
         f"Missing dependency: {e.name}\n"
@@ -65,7 +65,14 @@ except ImportError as e:
 
 # --- Config ---------------------------------------------------------------
 
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
+# Per-flow override takes precedence over the shared CLAUDE_MODEL.
+# This prevents `export CLAUDE_MODEL=claude-opus-4-7` from silently
+# upgrading the cleaning pass (which doesn't benefit from Opus) along
+# with Researcher/Provocateur (which do).
+CLAUDE_MODEL = os.environ.get(
+    "TRANSCRIPTION_CLAUDE_MODEL",
+    os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6"),
+)
 CLAUDE_MAX_TOKENS = 64000
 
 # Optional per-step model override for Speaker ID. Defaults to
@@ -300,7 +307,7 @@ if os.environ.get("TRANSCRIPTION_CACHE") == "1":
     **_ASR_CACHE_KWARGS,
 )
 def transcribe_with_assemblyai(audio_path, session):
-    """Step 2: AssemblyAI Universal-3 Pro - ASR + diarization + language detection.
+    """Step 1: AssemblyAI Universal-3 Pro - ASR + diarization + language detection.
 
     Retries on transient network or API failures. Malformed audio surfaces
     as a RuntimeError and halts the flow.
@@ -366,7 +373,7 @@ def transcribe_with_assemblyai(audio_path, session):
     retry_delay_seconds=exponential_backoff(backoff_factor=5),
 )
 def identify_speakers(turns, session):
-    """Step 3: Claude - multi-pass speaker identification."""
+    """Step 2: Claude - multi-pass speaker identification."""
     logger = _get_logger()
     client = Anthropic()
 
@@ -403,6 +410,10 @@ def identify_speakers(turns, session):
 
     logger.info(f"Speaker ID pass (model={SPEAKER_ID_MODEL})")
     t0 = time.time()
+    # Intentional exception to the "thinking ON for every Opus 4.7 call" rule:
+    # Speaker ID output is small (mappings + flags, <2K tokens), so adaptive
+    # thinking's latency cost is large relative to benefit. Per
+    # docs/AI_Assembly_Transcription_Pipeline.md "Model selection" section.
     # Speaker ID output is small (mappings + flags, typically <2K tokens).
     # Use a tight per-call cap so we stay under the SDK's 21K non-streaming
     # threshold regardless of the global CLAUDE_MAX_TOKENS budget.
@@ -425,7 +436,7 @@ def identify_speakers(turns, session):
     retry_delay_seconds=exponential_backoff(backoff_factor=5),
 )
 def clean_transcript(named_turns, session, vocabulary):
-    """Step 4: Claude - constrained ASR cleaning."""
+    """Step 3: Claude - constrained ASR cleaning."""
     logger = _get_logger()
     client = Anthropic()
 
@@ -440,6 +451,10 @@ def clean_transcript(named_turns, session, vocabulary):
 
     logger.info(f"Cleaning pass (model={CLAUDE_MODEL}, streaming)")
     t0 = time.time()
+    # Intentional exception to the "thinking ON for every Opus 4.7 call" rule:
+    # Cleaning is the largest LLM call by output volume (~18K tokens on big
+    # panels) and the work is mostly local per turn, not cross-turn synthesis.
+    # Thinking adds little. Per docs/AI_Assembly_Transcription_Pipeline.md.
     # Streaming required for max_tokens > ~21K. The SDK's non-streaming path
     # has a 10-minute connection timeout that's incompatible with long
     # cleaning passes on larger transcripts. Streaming holds the connection
@@ -471,7 +486,7 @@ def clean_transcript(named_turns, session, vocabulary):
 
 @task(name="assemble-session-package")
 def assemble_session_package(session, id_output, cleaned_turns):
-    """Step 5: assemble the Researcher-ready session package."""
+    """Step 4: assemble the Researcher-ready session package."""
     speakers_present = sorted(set(t["speaker"] for t in cleaned_turns))
     return {
         "metadata": {
@@ -517,15 +532,21 @@ def write_outputs(output_dir, turns, id_output, cleaned_turns, package, session)
         "session_package.json": package,
     }
     for name, data in files.items():
-        (output_dir / name).write_text(
-            json.dumps(data, indent=2, ensure_ascii=False)
-        )
+        write_json_atomic(output_dir / name, data)
         logger.info(f"Wrote {output_dir / name}")
 
-    (output_dir / "review.md").write_text(
-        build_review_md(session, id_output, cleaned_turns)
-    )
-    logger.info(f"Wrote {output_dir / 'review.md'}")
+    # review.md is human-readable, not JSON — but still write atomically
+    # so a partial write doesn't leave a half-formed file on disk.
+    review_md = build_review_md(session, id_output, cleaned_turns)
+    review_path = output_dir / "review.md"
+    tmp = review_path.with_suffix(review_path.suffix + ".tmp")
+    try:
+        tmp.write_text(review_md, encoding="utf-8")
+        tmp.replace(review_path)
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        raise
+    logger.info(f"Wrote {review_path}")
 
 
 # --- Prefect flow ---------------------------------------------------------
@@ -601,7 +622,11 @@ def process_session(audio_path, session_path):
             )
         p3.write_text(json.dumps(cleaned_turns, indent=2, ensure_ascii=False))
 
-    # Step 5: Package + write
+    # Step 5: Package + write. `write_outputs` always re-writes all five files,
+    # even when Steps 2-4 were resumed from disk. This is intentional — the
+    # writes are idempotent and guarantee review.md + session_package.json
+    # are always consistent with whatever turns/id_output/cleaned_turns we
+    # have in memory (which may be loaded from older on-disk versions).
     package = assemble_session_package(session, id_output, cleaned_turns)
     write_outputs(OUTPUT_DIR, turns, id_output, cleaned_turns, package, session)
 

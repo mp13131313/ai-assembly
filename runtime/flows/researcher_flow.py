@@ -29,6 +29,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
@@ -64,7 +65,10 @@ except ImportError as e:
 # Default to Opus 4.7 — canonical model for Researcher Pipeline v3 per the
 # v2.4 validation run. Override via CLAUDE_MODEL env var for dev iteration
 # on Sonnet (CLAUDE_MODEL=claude-sonnet-4-6 python3 flows/researcher_flow.py).
-CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
+CLAUDE_MODEL = os.environ.get(
+    "RESEARCHER_CLAUDE_MODEL",
+    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
+)
 
 # Extended thinking (Opus 4.7 is the recommended target, works on Sonnet
 # 4.6 too). Enabled via env var so the same code path supports both
@@ -681,7 +685,16 @@ def _validate_themes(themes_result: dict, input_clusters: list, logger) -> dict:
             f"Theming: {len(orphans)} cluster(s) orphaned by Round 2; "
             f"promoting each to a single-cluster theme per spec"
         )
-        next_theme_num = len(surviving_themes) + 1
+        # Derive next number from the max existing id, not from count — the
+        # model may have produced non-sequential ids (gaps from pruning) and
+        # naive count-based naming can collide.
+        existing_nums = [
+            int(m.group(1))
+            for t in surviving_themes
+            for m in [re.match(r"theme_(\d+)", str(t.get("theme_id", "")))]
+            if m
+        ]
+        next_theme_num = (max(existing_nums) if existing_nums else 0) + 1
         for cid in sorted(orphans):
             themes_result["themes"].append({
                 "theme_id": f"theme_{next_theme_num:03d}",
@@ -761,20 +774,28 @@ def run_researcher(run_root: str) -> dict:
         f"Wrote {combined_path} — {len(all_extractions)} total extractions"
     )
 
-    # Node 2 Round 1: clustering
-    clusters_result = cluster_extractions(all_extractions)
+    # Node 2 Round 1: clustering (resume from disk if clusters.json exists)
     clusters_path = output_dir / "clusters.json"
-    write_json_atomic(clusters_path, clusters_result)
-    logger.info(f"Wrote {clusters_path}")
+    if clusters_path.exists():
+        logger.info(f"Resuming: loaded {clusters_path.name} from disk (skipping clustering)")
+        clusters_result = json.loads(clusters_path.read_text(encoding="utf-8"))
+    else:
+        clusters_result = cluster_extractions(all_extractions)
+        write_json_atomic(clusters_path, clusters_result)
+        logger.info(f"Wrote {clusters_path}")
 
-    # Node 2 Round 2: theming (sees only cluster titles + abstracts)
-    themes_result = group_clusters_into_themes(clusters_result)
-
-    # Merge Round 1 clusters and Round 2 themes into final grouping
-    grouping = merge_clusters_and_themes(clusters_result, themes_result)
+    # Node 2 Round 2: theming. We cache the merged grouping.json, not the
+    # raw themes output, because grouping is what downstream consumes. If
+    # grouping.json exists, assume theming+merge already happened.
     grouping_path = output_dir / "grouping.json"
-    write_json_atomic(grouping_path, grouping)
-    logger.info(f"Wrote {grouping_path}")
+    if grouping_path.exists():
+        logger.info(f"Resuming: loaded {grouping_path.name} from disk (skipping theming)")
+        grouping = json.loads(grouping_path.read_text(encoding="utf-8"))
+    else:
+        themes_result = group_clusters_into_themes(clusters_result)
+        grouping = merge_clusters_and_themes(clusters_result, themes_result)
+        write_json_atomic(grouping_path, grouping)
+        logger.info(f"Wrote {grouping_path}")
 
     logger.info(
         "Done. Start with grouping.json, then drill into clusters.json "
