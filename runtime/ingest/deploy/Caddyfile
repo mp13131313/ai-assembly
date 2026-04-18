@@ -4,6 +4,10 @@
 # Replace `ingest.example.com` with your real hostname before enabling.
 # TLS is issued automatically via Let's Encrypt.
 
+# REQUIRED: replace `ingest.example.com` below with your real hostname
+# before `systemctl reload caddy`. See deploy/README.md step 5 for the
+# sed command. If you leave the placeholder, Caddy will issue a cert
+# for example.com (which will fail) and the site will not be reachable.
 ingest.example.com {
     # HTTP Basic Auth and IP-based failed-attempt rate limiting are enforced
     # by the app itself (ingest/auth.py). Caddy's rate_limit directive requires

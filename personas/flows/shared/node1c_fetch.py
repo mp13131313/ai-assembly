@@ -5,6 +5,16 @@ plaintext, stripping Project Gutenberg headers/footers when present.
 
 Output: list of {url, source, text, char_count} saved to
 runs/<slug>/01_research/primary_texts.json
+
+SECURITY: _check_url uses gethostbyname for its SSRF check, which is
+TOCTOU-vulnerable — urlopen will resolve the hostname a second time,
+and DNS rebinding could return a private IP. Also, gethostbyname only
+returns one A record; multi-record DNS answers aren't fully checked.
+Acceptable for the pre-conference voice-config URL set (small, vetted,
+Wikipedia/Gutenberg/academic domains). Not acceptable if this is ever
+used on user-controlled URLs — swap to getaddrinfo + pin the resolved
+IP into a custom opener, or use requests with a hook that blocks the
+post-resolve connection.
 """
 from __future__ import annotations
 import ipaddress
