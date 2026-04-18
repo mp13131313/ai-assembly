@@ -6,9 +6,9 @@ reviews and signs off on before Pass 0b generates the per-voice DR prompt:
   inputs/voices/<slug>.json                  — pipeline input
   inputs/voices/<slug>_pass0a_review.md      — human review doc
 
-Pass 0b (run_pass0b_dr_prompt.py) is a separate script that runs AFTER
-human sign-off, reads the (possibly-edited) voice config, and produces the
-customized DR prompt at inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
+Phase 0.5 (run_phase0_1_research.py) runs AFTER human sign-off: it calls
+Perplexity + Gemini in parallel and produces the customized DR prompt at
+inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
 
 Usage:
     python3 run_pass0a_voice_config.py "Cleopatra"
@@ -245,7 +245,7 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None,
         stamp("")
     stamp("Next steps:")
     stamp(f"  1. Read {review_path.name} and edit {voice_path.name} if needed")
-    stamp(f"  2. Run Pass 0b: python3 run_pass0b_dr_prompt.py \"{display_name}\"")
+    stamp(f"  2. Run Phase 0.5 research: python3 run_phase0_1_research.py \"{display_name}\"")
     stamp(f"  3. Then follow the DR prompt's instructions to produce the dossier.")
 
 
