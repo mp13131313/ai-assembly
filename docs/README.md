@@ -18,7 +18,13 @@
 
 | File | What's stale |
 |------|-------------|
-| `AI_Assembly_Architecture_v1.md` | Describes n8n orchestration, but the actual implementation is pure Prefect flows. Describes a 2-step voice pipeline; Briefing v3.1 has 3 steps. Describes 2 conference nights; Briefing v3.1 has 3. Missing: closing-show pipelines, Governance Matrix A/B split, Day 4 goodbye sequence, and the changed newsletter delivery model (standalone HoBB newsletter → blurb + Substack read-through). |
-| `AI_Assembly_Infrastructure_Setup.md` | Describes rclone/Google Drive mount and n8n Docker, but the actual ingest is a FastAPI upload app writing to local disk with pure Prefect flows. Pre-flight checklist references n8n and Drive. |
+| `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` | Describes n8n orchestration, but the actual implementation is pure Prefect flows. Describes a 2-step voice pipeline; Briefing v3.1 has 3 steps. Describes 2 conference nights; Briefing v3.1 has 3. Missing: closing-show pipelines, Governance Matrix A/B split, Day 4 goodbye sequence, and the changed newsletter delivery model (standalone HoBB newsletter → blurb + Substack read-through). |
+| `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` | Describes rclone/Google Drive mount and n8n Docker, but the actual ingest is a FastAPI upload app writing to local disk with pure Prefect flows. Pre-flight checklist references n8n and Drive. |
 
 When these stale docs conflict with `AI_Assembly_Briefing_v3_1.md` or the code in `runtime/`, trust the briefing and the code.
+
+## What's NOT in `docs/`
+
+- **`research/`** — preserved grounding material (Deep Research compass artifacts). When you want to know *why* the pipeline is designed the way it is, look here. Not deletable.
+- **`_workspace/planning/`** — forward-looking design for unbuilt features (`REBUILD_PLAN.md`, `ARCHITECTURE_NEXT_PHASE_HANDOFF.md`). Promoted into `docs/` when the work lands.
+- **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts, run artifacts). Eligible for deletion once the current state has absorbed their content. Out of scope for code reviews by default.

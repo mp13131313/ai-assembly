@@ -3,7 +3,7 @@
 **Status:** Living draft. Grows per pass during the step-by-step review (started 2026-04-18).
 **Scope:** End-to-end rebuild of `personas/` from voice intake through Derive.
 **Out of scope:** Voice Pipeline (Steps 1+2+3), Researcher / Provocateur runtime, microsite, closing show, Athens deployment prep.
-**Binding spec:** [`personas/notes/ARCHITECTURE_NEXT_PHASE_HANDOFF.md`](ARCHITECTURE_NEXT_PHASE_HANDOFF.md) §"Architectural decisions" 1–9 (referred to as `PB#1`..`PB#9` below).
+**Binding spec:** [`_workspace/planning/ARCHITECTURE_NEXT_PHASE_HANDOFF.md`](ARCHITECTURE_NEXT_PHASE_HANDOFF.md) §"Architectural decisions" 1–9 (referred to as `PB#1`..`PB#9` below).
 
 This plan does **not** override Phase B decisions. Items here either implement them, fill gaps they don't cover, or flag follow-on work.
 
@@ -31,7 +31,7 @@ To revisit once all phases are walked.
 
 ## Cross-cutting · Boddice integration
 
-Treat Rob Boddice's biocultural critique of the persona card schema (5th baseline research artifact, [`personas/notes/baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md`](baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md)) as the **content payload that PB#2's hybrid Jinja+LLM tailoring carries**, plus PB#1 (voice-type-specific 1a/1b prompts) and PB#7 (`_conventions.schema.json` evidence tags). Boddice extends File 3's anti-projection program one ontological layer deeper: he interrogates not just whether a persona is generic but whether the categorical infrastructure used to organize it ("emotion," "personality," "wound") imports a 1820–2014 Anglo-American framework anachronistic to ~8 of 12 panel voices.
+Treat Rob Boddice's biocultural critique of the persona card schema (5th baseline research artifact, [`research/baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md`](../../research/baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md)) as the **content payload that PB#2's hybrid Jinja+LLM tailoring carries**, plus PB#1 (voice-type-specific 1a/1b prompts) and PB#7 (`_conventions.schema.json` evidence tags). Boddice extends File 3's anti-projection program one ontological layer deeper: he interrogates not just whether a persona is generic but whether the categorical infrastructure used to organize it ("emotion," "personality," "wound") imports a 1820–2014 Anglo-American framework anachronistic to ~8 of 12 panel voices.
 
 **Scope of items here is integration mapping, not content restatement.** The source doc's §13 (`world` 5-part rubric), §14 (`formative_experience` 4-part rubric), §15 (5-field audit), §12 (two new evidence tags), and §9 (historically-specific emotions catalogue) are the canonical text — read them there.
 

@@ -60,7 +60,7 @@ This step defines how recordings and metadata get into the pipeline. It is the o
 
 ### Storage
 
-The pipeline lives in a single Google Drive folder. Prefect runs on a VM that mounts the Drive folder locally via `rclone` (not the Google Drive desktop client — see `AI_Assembly_Infrastructure_Setup.md` for the rationale), watches it for new files, and writes its output back into the same mount. There is no separate input/output system.
+The pipeline lives in a single Google Drive folder. Prefect runs on a VM that mounts the Drive folder locally via `rclone` (not the Google Drive desktop client — see `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` for the rationale (archived — marked stale)), watches it for new files, and writes its output back into the same mount. There is no separate input/output system.
 
 ```
 /mnt/drive/

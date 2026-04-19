@@ -8,9 +8,11 @@ Twelve non-human voices (a river, an octopus, Plato, Hannah Arendt, and eight ot
 
 ```
 ai-assembly/
-├── runtime/        # FastAPI ingest app + Prefect flows (transcription, researcher, provocateur)
-├── personas/       # Persona Pipeline: builds the 37-field voice cards that feed the runtime
-├── docs/           # Canonical specs and briefing docs
+├── docs/           # PRODUCTION: canonical specs and briefing docs
+├── runtime/        # PRODUCTION: FastAPI ingest app + Prefect flows (transcription, researcher, provocateur)
+├── personas/       # PRODUCTION: Persona Pipeline — builds the 37-field voice cards that feed the runtime
+├── research/       # PRESERVED: grounding Deep Research artifacts (not deletable)
+├── _workspace/     # Out of scope for reviews/deploys: planning/ (active design) + archive/ (historical)
 └── .env            # Shared secrets (not committed — see .env.example)
 ```
 
