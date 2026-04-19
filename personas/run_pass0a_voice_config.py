@@ -57,9 +57,23 @@ def _call_with_retry(stamp_fn, **kwargs):
         sys.exit(f"Pass 0a failed after retry: {exc}")
 
 
-PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
+CONFERENCE_FACTS_PATH = REPO_ROOT / "inputs/conference_facts.json"
+PANEL_ROSTER_PATH = REPO_ROOT / "inputs/panel_roster.json"
 SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/pass_0a_voice_config.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
+
+
+def _load_pass0a_context() -> dict:
+    """Assemble the context dict Pass 0a's prompt expects.
+
+    Per REBUILD_PLAN decisions log #2 + A.3: Pass 0a only needs conference facts
+    + panel roster; audience profile is consumed only by Pass 7b. Full Pass 0a
+    redesign (editorial_rationale, manual_grounding, remove placeholder hack)
+    lands in Phase F.
+    """
+    facts = json.loads(CONFERENCE_FACTS_PATH.read_text())
+    roster = json.loads(PANEL_ROSTER_PATH.read_text())
+    return {**facts, **roster}
 
 
 def stamp(msg: str) -> None:
@@ -142,14 +156,15 @@ def main(name: str, wiki_url: str | None = None, hint: str | None = None,
          choose: int | None = None) -> None:
     stamp(f"Pass 0a voice config: '{name}'")
 
-    if not PROJECT_CONTEXT_PATH.exists():
-        sys.exit(f"Missing project config: {PROJECT_CONTEXT_PATH}")
+    for p in (CONFERENCE_FACTS_PATH, PANEL_ROSTER_PATH):
+        if not p.exists():
+            sys.exit(f"Missing project config: {p}")
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
 
     wiki_summary = _resolve_wikipedia(name, wiki_url, hint, choose=choose)
 
-    project_ctx = json.loads(PROJECT_CONTEXT_PATH.read_text())
+    project_ctx = _load_pass0a_context()
     system = SYSTEM_PROMPT_PATH.read_text()
     user_payload: dict = {"name": name, "conference_context": project_ctx}
 
