@@ -16,6 +16,6 @@ EXISTING banned_modes (preserve all of these in your output):
 {{ banned_modes }}
 
 WORKED PROVOCATIONS — how the voice ACTUALLY performed in the test:
-{{ worked_provocations }}
+{{ smoke_test_chains }}
 
 Identify persona failures and output the JSON object as specified.

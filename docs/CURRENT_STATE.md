@@ -121,7 +121,7 @@ runs/plato/
     ├── pass6_corpus.json
     ├── pass7pre_citation.json
     ├── pass7a_cross_model.json
-    ├── pass7b_provocations.json
+    ├── pass7b_smoke_test.json
     ├── pass7c_negative.json
     ├── derive.json
     └── _ct_pass2.json, _ct_pass2_3.json, _ct_pass2_3_4a.json, _ct_pass2_3_4.json
@@ -204,7 +204,7 @@ runs/plato/
 **What Step 2 does:** Read back all detailed responses → make focus + stance decisions → produce one artifact per voice in the voice's natural medium.
 
 **Key wiring decisions already made (documented in voice/README.md and personas/HANDOFF.md):**
-- Load persona card fields as system prompt; DROP `metadata` and `worked_provocations` (worked_provocations is a build-time smoke test, NOT a runtime few-shot — critical).
+- Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (smoke_test_chains is a build-time smoke test, NOT a runtime few-shot — critical).
 - Foundational fields (12) appear in both Step 1 and Step 2 system prompts.
 - Step 1 uses Reasoning + Engagement fields; Step 2 uses Voice + Artifact fields.
 - Runtime reads `personas/runs/<voice_slug>/persona_card_assembled.json` directly.
@@ -323,7 +323,7 @@ Documented precisely so nothing drifts.
 **Assembled Persona Card (37 fields):**
 - File: `personas/runs/<voice_slug>/persona_card_assembled.json`
 - Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt
-- Runtime MUST drop `metadata` block and `worked_provocations` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
+- Runtime MUST drop `metadata` block and `smoke_test_chains` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
 - 35 fields appear as system prompt content; 2 null continuity fields populated during runtime Night 2.
 
 ### 4.2 Transcription → Researcher
@@ -418,9 +418,9 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 **Why:** session-ordered concatenation produces session-grouped reading order bias. Fixed seed breaks the bias without losing reproducibility.
 
-### 5.10 `worked_provocations` is build-time only, NOT runtime few-shot
+### 5.10 `smoke_test_chains` is build-time only, NOT runtime few-shot
 
-**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_provocations.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
+**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
 ### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
 
@@ -577,7 +577,7 @@ In the sequence the user intends to work:
 
 ### Phase A — Persona Pipeline validation (now → +1 day)
 
-- [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of worked_provocations.
+- [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of smoke_test_chains.
 - [ ] Re-read Arendt's 02_passes output; complete any passes that failed or didn't run; produce final assembled card + provocateur_profile.
 - [ ] Spot-check Cleopatra's Pass 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Pass 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
 - [ ] Spot-check Octopus similarly.
@@ -701,7 +701,7 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 - `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
 - `_workspace/archive/fix-plans/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
-- `personas/flows/shared/prompts/persona_pass_7b_provocations.md` — header comment documents the "worked_provocations are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
+- `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` — header comment documents the "smoke_test_chains are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
 - `_workspace/archive/fix-plans/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes (archived; absorbed into current specs)
 
 ---

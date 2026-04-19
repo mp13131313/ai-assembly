@@ -371,8 +371,8 @@ If Pass 7a returns `overall: "REVISION_NEEDED"`, up to **2 loops** re-run flagge
 #### 3.6.4 Pass 7b Worked Provocations — `_pass_7b` L749-761
 - **Model:** `claude-opus-4-7`
 - `max_tokens=24000`, `thinking=True` (adaptive), `temperature=1.0`
-- System: `persona_pass_7b_provocations.md` (88 lines, Jinja-filled with `conference_context`, `voice_mode`)
-- User: `persona_pass_7b_provocations_user.md` + full assembled card
+- System: `persona_pass_7b_smoke_test.md` (88 lines, Jinja-filled with `conference_context`, `voice_mode`)
+- User: `persona_pass_7b_smoke_test_user.md` + full assembled card
 
 #### 3.6.5 Pass 7c Negative Constraints — `_pass_7c` L772-801
 **Primary: Gemini `gemini-2.5-pro`** (preferred — avoids self-preference bias)
@@ -433,7 +433,7 @@ If Pass 7a returns `overall: "REVISION_NEEDED"`, up to **2 loops** re-run flagge
 | Pass 6 | `persona_pass_6_corpus.md` | `persona_pass_6_user.md` |
 | Pass 7-pre | `persona_pass_7pre_citation.md` | `persona_pass_7pre_citation_user.md` |
 | Pass 7a | `persona_pass_7a_cross_model.md` | `persona_pass_7a_cross_model_user.md` |
-| Pass 7b | `persona_pass_7b_provocations.md` | `persona_pass_7b_provocations_user.md` |
+| Pass 7b | `persona_pass_7b_smoke_test.md` | `persona_pass_7b_smoke_test_user.md` |
 | Pass 7c | `persona_pass_7c_negative.md` | `persona_pass_7c_negative_user.md` |
 | Coherence Threading | (inline) | `persona_coherence_threading.md` |
 | Derive | `persona_derive.md` | `persona_derive_user.md` |

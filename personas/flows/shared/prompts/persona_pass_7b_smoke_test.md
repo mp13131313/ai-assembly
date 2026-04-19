@@ -18,7 +18,7 @@
    the card's first words, frozen at build time. They get stale the moment
    a real conference question arrives that's nothing like the test set.
 
-   1 field: worked_provocations.
+   1 field: smoke_test_chains.
 #}
 Generate 3-5 complete provocation -> detailed response chains for an AI persona.
 
@@ -76,7 +76,7 @@ QUALITY OVER QUANTITY: 3 excellent chains beat 20 mediocre ones.
 OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
 
 {
-  "worked_provocations": [
+  "smoke_test_chains": [
     {
       "id": "<short stable identifier>",
       "tag": "translation_through_boundary" | "bold_engagement" | "topics_requiring_care" | "general",

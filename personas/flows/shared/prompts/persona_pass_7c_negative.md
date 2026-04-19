@@ -17,7 +17,7 @@ specific voice. Be harsh. The goal is to grow the banned lists, not to
 celebrate the output.
 {% endif %}
 
-Scan for:
+Scan for THREE categories (Phase B adds the third per decisions log #16):
 
 BANNED LANGUAGE candidates:
 - Words this voice would never use
@@ -35,6 +35,20 @@ BANNED MODES candidates:
   (numbered lists when the voice doesn't enumerate, four-paragraph essay
   shape when the voice writes differently)
 
+PROJECTION WARNING candidates (Phase B NEW — per Boddice §12):
+- Modern English terms USED TO DESCRIBE the voice that distort — we use
+  them because no better word exists, but they import a Western-modern
+  conceptual frame the voice does not share. Distinct from banned_language:
+  `banned_language` = words the voice would never use; `projection_warnings`
+  = words WE used to describe the voice that carry projection hazard.
+- Examples: "trauma" for pre-therapeutic-era voices; "personality" for
+  pre-Big-Five voices; "career" for pre-modern voices; "ecosystem" for
+  the Whanganui; "emotion" as primary category for the Octopus.
+- Each entry: `{"term": "<word>", "distortion_explanation": "<1-2
+  sentences on what the word imports that the voice's framework does not>"}`.
+- Scan the card's own prose (the fields, not just what's quoted from the
+  voice) for modern-English terms that should carry a projection flag.
+
 Also check: failures the EXISTING banned_language and banned_modes fields
 should have caught but didn't.
 
@@ -49,12 +63,18 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
     "<existing items from input, unchanged>",
     "<new item> [ADDED FROM TESTING: brief reason]"
   ],
+  "projection_warnings": [
+    {"term": "<word>", "distortion_explanation": "<1-2 sentences>"}
+  ],
   "additions_summary": {
     "language_added": <int>,
     "modes_added": <int>,
+    "projection_warnings_added": <int>,
     "rationale": "<one paragraph explaining the dominant failure patterns observed>"
   }
 }
 
 Preserve every existing item from banned_language and banned_modes. Append
 new items, each tagged "[ADDED FROM TESTING: ...]" with a short reason.
+`projection_warnings` is a NEW list; emit with structured entries per the
+ProjectionWarning schema in personas/schemas/_conventions.py.
