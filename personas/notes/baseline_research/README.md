@@ -6,9 +6,11 @@ The **first three** (2025–early 2026) were commissioned before the Persona Pip
 
 The **fourth** (2026-04) grounds the audience brief at `docs/AUDIENCE_BRIEF.md` — faction analysis and reception-condition modeling for the Athens 2026 audience. Its target is the `audience` paragraph in `runtime/flows/shared/council/council_config.json` and the audience section of the Briefing (`docs/AI_Assembly_Briefing_v3_1.md`).
 
+The **fifth** (2026-04) extends File 3's anti-projection program one ontological layer deeper: Rob Boddice's history-of-emotions framework applied field-by-field to Persona Card v2's emotional-experiential vocabulary. Its target is the Phase B rebuild — primarily the new Pass 0b DR-prompt template (PB#2 hybrid Jinja+LLM tailoring) and the voice-type-specific Pass 1a/1b prompts (PB#1). See `personas/notes/REBUILD_PLAN.md` §"Cross-cutting · Boddice integration" for the integration mapping.
+
 **These are source reference, not active spec.** When they conflict with the canonical docs they ground, trust the doc. The specs are the operationalized version; these are what they were operationalized from.
 
-## The four files
+## The five files
 
 ### `compass_artifact_wf-cc778da2-1ac5-493e-b406-ab71d3b00234_text_markdown.md`
 **"Building faithful AI philosophers: a technical blueprint for The AI Assembly"**
@@ -38,6 +40,13 @@ Audience research grounding `docs/AUDIENCE_BRIEF.md`. Faction-by-faction reading
 
 Source for: the audience paragraph in `runtime/flows/shared/council/council_config.json`, the audience + "seven factions" framing in `docs/AI_Assembly_Briefing_v3_1.md` §The audience, and any future refinement of Triage Part B's `audience_friction` judgment from monolithic to faction-aware.
 
+### `compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md`
+**"Reconstructing the world, not the feeling: Boddice's history of emotions for the Athens Persona Pipeline"**
+
+Biocultural critique of the persona card schema. Rob Boddice's history-of-emotions framework (HEX Centre, Tampere; Rosenwein/Reddy/Stearns/Scheer in dialogue) applied field-by-field to Card v2. Argues `world` should be the voice's emotional-experiential ontology, not period-setting; `formative_experience` should drop the "core wound" framing (1980s–2014 Anglo therapeutic sediment per Fassin/Furedi/Illouz) and become a formative-emotional-community description usable for a river and an octopus as well as for Plato. Audits 5 more fields (`character`, `voice_signature`, `relationships`, `epistemic_frame_statement`, `dialogue_instincts`). Catalogue of historically-specific emotions (acedia, amae, saudade, toska, Sehnsucht, Zärtlichkeit, liget, fago, ghinnawa, philotimo). Worked field examples for Plato, Arendt, Octopus, Ibn Battuta, Marley, Whanganui, Cleopatra. Two new evidence tags proposed (`[experiential reconstruction]`, `[projection warning]`). Voice-by-voice severity table (8 of 12 panel voices in "severe" critique band).
+
+Source for: the Phase B rebuild's content payload — primarily the new Pass 0b DR-prompt template (PB#2 hybrid tailoring) and the voice-type-specific Pass 1a/1b prompts (PB#1); the two new evidence tags in `_conventions.schema.json` (PB#7); Pass 2 + Pass 4a synthesis-prompt revisions; and a flag for Briefing v3.1 (flagged projection, not non-projection). See `personas/notes/REBUILD_PLAN.md` §"Cross-cutting · Boddice integration" for the full mapping.
+
 ## How to use these
 
 - Reading a spec and wondering "why this way?" → check here first
@@ -46,6 +55,7 @@ Source for: the audience paragraph in `runtime/flows/shared/council/council_conf
 - Extending to a new voice type → the 4-block pattern + methodology sections are the template (Files 1–3)
 - Tuning Provocateur audience judgment or sharpening the `audience` paragraph → File 4
 - Designing the AIssembly's reception at Athens → File 4 §"What AI-mediated deliberation faces in this room"
+- Designing Pass 0b DR-prompt revisions, the schema's emotional-experiential vocabulary, or any pass producing voice/character/wound-shaped fields → File 5
 
 ## What's in the research but NOT in the current pipeline (potential future work)
 
@@ -53,3 +63,4 @@ Source for: the audience paragraph in `runtime/flows/shared/council/council_conf
 - **GraphRAG with Neo4j + Weaviate** (File 1). Knowledge-graph layer with entity/relationship extraction. Current pipeline does plain RAG (Pass 1c fetches, Pass 1d curates).
 - **Fine-tuning approaches** (File 1: Character-LLM, Neeko MoE, OpenCharacter). Current pipeline is pure prompt engineering — deliberately, per prosumer-infrastructure framing in Briefing v3.1.
 - **Benchmark-based automated eval** (CharacterBench / TimeChara / RoleKE-Bench). Current Pass 7a is a cross-model check but not benchmark-based.
+- **Boddice §15 field renames** (File 5). Deferred to a future Card v3 sweep — see `personas/notes/REBUILD_PLAN.md` §"Cross-cutting · Boddice integration · Deferred".
