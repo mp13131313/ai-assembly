@@ -1,0 +1,33 @@
+{
+  "description": "How Pass 1.7 resolved (or declined to resolve) a flag.",
+  "properties": {
+    "flag_id": {
+      "title": "Flag Id",
+      "type": "string"
+    },
+    "resolution": {
+      "description": "What was changed, or why the flag was accepted as-is (productive tension rather than inconsistency).",
+      "title": "Resolution",
+      "type": "string"
+    },
+    "revised_field_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "If a chunk output was revised, dotted path to the field (e.g. 'pass_1_2.commitments[3].operational_note').",
+      "title": "Revised Field Path"
+    }
+  },
+  "required": [
+    "flag_id",
+    "resolution"
+  ],
+  "title": "CoherenceResolution",
+  "type": "object"
+}
