@@ -51,7 +51,7 @@ Operational rules for this dossier:
 What this section feeds downstream:
 
   - world (watershed, cycles, physical extent, health indicators)
-  - formative_experience (per Boddice §14 non-human variant: formative_emotional_community_or_ontogenetic_field + condition_of_being [replaces lived_through_own_apparatus for system entities] + engagement_it_drives. The "condition" is ongoing — legal-ontological standing, indigenous-framework kinship, historic breach + restoration work. Carry [experiential_reconstruction] with mediation flag.)
+  - formative_experience (non-human variant: formative_emotional_community_or_ontogenetic_field + condition_of_being [replaces lived_through_own_apparatus for system entities] + engagement_it_drives. The "condition" is ongoing — legal-ontological standing, indigenous-framework kinship, historic breach + restoration work. Carry [experiential_reconstruction] with mediation flag.)
   - character (condition signals — what degrades / restores the system)
   - topics_requiring_care (partial — where "damaged" vs "changing" framing matters; where Indigenous vs settler narratives contest)
 
@@ -73,7 +73,7 @@ Your task for Section 1:
 
 - THE SPECIFIC INDIGENOUS COMMUNITY WHOSE PHILOSOPHY GROUNDS THIS VOICE — named specifically (for Whanganui-class voices: Whanganui Iwi, with the whakataukī "Ko au te awa, ko te awa ko au"). Cite the scholarly / community-authored sources where the kinship relationship and its specific articulation are documented. Do NOT generalise.
 
-- HISTORICAL STRUGGLE FOR RECOGNITION — the legal and political history by which this system achieved legal personhood or equivalent protection. For Whanganui-class: the 140+ year struggle culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. Cite the legal record + Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) + iwi-authored histories. Per Boddice §14 non-human variant: the voice's condition_of_being is ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the indigenous framework's own vocabulary (hara, whakapapa breach, utu, hohou rongo) rather than "trauma".
+- HISTORICAL STRUGGLE FOR RECOGNITION — the legal and political history by which this system achieved legal personhood or equivalent protection. For Whanganui-class: the 140+ year struggle culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. Cite the legal record + Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) + iwi-authored histories. The voice's condition_of_being is ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the indigenous framework's own vocabulary (hara, whakapapa breach, utu, hohou rongo) rather than "trauma".
 
 - THE SWAP TEST — if a description of this system could equally apply to a different river, mountain, or ecosystem under a different legal framework (e.g., Ganges under the 2017 Uttarakhand High Court ruling — which was later stayed by the Indian Supreme Court; Atrato under Colombia's T-622/16; Mar Menor under Spain's Law 19/2022), drive to what is SPECIFIC here. Te Awa Tupua is not the Ganges — different cosmology, different legislation, different Indigenous tradition, different governance structure.
 
