@@ -1,0 +1,4 @@
+
+# _workspace/ is historical material, out of scope for reviews by default.
+_workspace/** linguist-documentation
+_workspace/** -diff
