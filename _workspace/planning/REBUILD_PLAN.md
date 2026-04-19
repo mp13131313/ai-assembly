@@ -59,7 +59,31 @@ Treat Rob Boddice's biocultural critique of the persona card schema (5th baselin
 
 ### Why no v3.10 bridge patch
 
-All 12 persona cards (including the 5 with v3.10 partials — Plato, Cleopatra, Arendt, Octopus, Ibn Battuta) get rebuilt on the Phase B architecture per `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` §"Other voices to build later". Existing `personas/runs/*/` outputs are archaeology. There is no "ship pre-Athens on v3.10" path; the rebuild itself produces the Athens-ready cards. Bridge patches to v3.10 prompts for Boddice would be discarded. Captured here so a future session doesn't re-suggest it.
+All 12 persona cards (including the 5 with v3.10 partials — Plato, Cleopatra, Arendt, Octopus, Ibn Battuta) get rebuilt on the Phase B architecture per `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` §"Other voices to build later". Existing run outputs (now at `_workspace/archive/runs/personas/`) are archaeology. There is no "ship pre-Athens on v3.10" path; the rebuild itself produces the Athens-ready cards. Bridge patches to v3.10 prompts for Boddice would be discarded. Captured here so a future session doesn't re-suggest it.
+
+---
+
+## Cross-cutting · Pass 7a multi-family validation (locked decision)
+
+**Decision (2026-04-19):** Pass 7a Cross-Model Validation keeps the multi-family fallback chain (`o3 → gpt-4o → gemini-2.5-pro`) in the rebuild. **Do not drop OpenAI from Pass 7a.** PB#1's "drop ChatGPT DR" applies only to research-stage uses (Phase 0.5 / Pass 1a-DR); it does not cover Pass 7a.
+
+**Why locked:**
+
+- Baseline-research File 2 §4 ("Cross-model critique"): *"self-preference bias runs 10–25% — GPT-4o scores its own outputs ~10% higher; earlier Claude models showed ~25% self-preference."* If Claude both writes and judges the card, the swap test is gamed by the model's own bias toward its style.
+- Gemini alone is not a credible humanities critic — baseline-research File 3 cites "unusable for basic humanities research" reports.
+- OpenAI o3 specifically — reasoning-mode, different family, well-instrumented for structured JSON — fills the cross-family critic role no other model fills.
+- The Athens audience's hardest-to-please voices (Mattei, Akomolafe, Bridle, Pahina) will catch anything that survived only Claude self-critique.
+
+**Scope of "drop OpenAI" — bounded to research stage:**
+
+- ☑ PB#1 already drops ChatGPT DR from Phase 0.5 (3 sources only: Perplexity + Claude DR + Gemini broad-scan).
+- ☑ Pass 3 ChatGPT DR supplement was removed in commit `d137791` and verified gone via F-27 fix on `fix-review-findings`.
+- ☐ Any Phase B work that tries to extend "drop OpenAI" beyond research-stage gets flagged before landing — point at this section.
+
+**What remains using OpenAI in the rebuild:**
+
+- **Pass 7a Cross-Model Validation** primary: `o3` reasoning model (`max_completion_tokens=8192`, no temperature) → fallback `gpt-4o` (`max_tokens=8192`, `temperature=0.0`) → final fallback `gemini-2.5-pro`.
+- Nothing else.
 
 ---
 
@@ -161,4 +185,4 @@ To fill in. `→PB#6` may shrink its role since Pass 7 carries the quality burde
 
 ---
 
-*Last updated: 2026-04-19 — after Pass 0a + Phase 0.5 reviews + Boddice integration mapping.*
+*Last updated: 2026-04-19 — after Pass 0a + Phase 0.5 reviews + Boddice integration mapping + Pass 7a multi-family validation locked.*
