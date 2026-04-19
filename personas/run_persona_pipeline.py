@@ -27,7 +27,22 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(REPO_ROOT.parent / ".env")
+load_dotenv(REPO_ROOT.parent / ".env", override=True)
+
+
+def _load_conference_context_string() -> str:
+    """Assemble the short conference-context string for Pass 7b / metadata.
+
+    Phase B dropped the `conference_context` field from voice_config; runners
+    that still need the short context paragraph (Pass 7b; pipeline metadata)
+    read it directly from the split conference_facts.json.
+    """
+    facts_path = REPO_ROOT / "inputs/conference_facts.json"
+    if facts_path.exists():
+        facts = json.loads(facts_path.read_text())
+        return facts.get("conference_context_paragraph", "")
+    return ""
+
 
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
@@ -754,7 +769,7 @@ def _pass_7b():
     if pass6.get("fields"):
         full_card_for_provoke.update(pass6["fields"])
     sysp = render("persona_pass_7b_provocations",
-                  conference_context=vi["conference_context"],
+                  conference_context=_load_conference_context_string(),
                   voice_mode=vi["voice_mode"])
     userp = render("persona_pass_7b_provocations_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
@@ -1011,7 +1026,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),
         "subtype": vi.get("subtype"),
-        "deployment_context": vi.get("conference_context", ""),
+        "deployment_context": _load_conference_context_string(),
         "human_review_status": "pending",
         "approach_c": bool(claude_dr_text),
         "citation_verification": {
