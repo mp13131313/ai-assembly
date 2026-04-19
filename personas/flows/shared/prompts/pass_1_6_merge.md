@@ -10,13 +10,23 @@ fetch voice-exemplar material.
 
 **Corpus-variant rules (critical):**
 
-- **Musical voices** (`corpus_constraint=lyrics_patterns_only`): Works + URLs
-  collect the catalogue and interview/speech sources normally. Passages
-  become STRUCTURAL-THEMATIC DESCRIPTIONS only — NEVER direct lyric quotation
-  (copyright). Each passage's `content_or_description` describes a lyrical
-  pattern, thematic arc, or structural device across the catalogue, with
+- **Musical voices** (`corpus_constraint=lyrics_patterns_only`): Two-tier
+  output. (1) PUBLIC tier (`passages`): Works + URLs collect the catalogue
+  and interview/speech sources normally; passages become STRUCTURAL-THEMATIC
+  DESCRIPTIONS only — NEVER direct lyric quotation (copyright). Each
+  passage's `content_or_description` describes a lyrical pattern, thematic
+  arc, or structural device across the catalogue, with
   `is_direct_quotation=false`. Include 2+ entries describing the SPEAKING
-  voice (interviews, speeches) vs. the singing voice.
+  voice (interviews, speeches) vs. the singing voice. (2) PRIVATE
+  reference-only tier (`reference_only_passages`): 3–8 key lyrics or
+  passages quoted directly, each with full copyright attribution. These
+  load into Voice Pipeline Step 1 (Private Reasoning) ONLY — never into
+  Step 2 (Public Expression). They exist so the voice can reason fluently
+  from its own words; the audience-facing artifact never contains the
+  direct quotation. Enforcement is the runtime's responsibility (Voice
+  Pipeline Step 2 assembly code drops the field); your job here is to
+  populate it correctly with source_attribution strings tight enough for
+  fair-use reference.
 - **Hostile-source voices** (`hostile_sources=true`): distinguish
   primary-in-voice (Tier 1) from hostile-source (Tier 2). Hostile-source
   passages include a bias flag in the `contextual_header` ("This passage is
@@ -50,11 +60,16 @@ fetch voice-exemplar material.
 
 ```json
 {
-  "works":    { ... Works ... },
-  "passages": { ... Passages ... },
-  "urls":     { ... URLs ... }
+  "works":                    { ... Works ... },
+  "passages":                 { ... Passages ... },
+  "urls":                     { ... URLs ... },
+  "reference_only_passages":  { ... ReferenceOnlyPassages ... }
 }
 ```
+
+`reference_only_passages` is OPTIONAL and used primarily for musical /
+translation-copyright-sensitive voices. For public-domain-corpus voices
+(Plato, Ibn Battuta, Whanganui) emit `{"passages": [], "runtime_contract_note": "<default>"}`.
 
 ```json
 {{ works_schema }}
@@ -66,6 +81,10 @@ fetch voice-exemplar material.
 
 ```json
 {{ urls_schema }}
+```
+
+```json
+{{ reference_only_passages_schema }}
 ```
 
 # BLOCK 4 — WORKED EXAMPLES
@@ -166,6 +185,7 @@ fetch voice-exemplar material.
 # BLOCK 6 — YOUR TASK
 
 Extract works + passages + urls per the schemas and examples. Respect the
-corpus-variant rules (musical: lyric-descriptions only; hostile-source:
-bias-flagged; non-human: legal/scientific literature). Return JSON with
-keys `works` + `passages` + `urls`. JSON only.
+corpus-variant rules (musical: public-tier pattern descriptions + private
+reference-only-passages direct quotation; hostile-source: bias-flagged;
+non-human: legal/scientific literature). Return JSON with keys `works` +
+`passages` + `urls` + `reference_only_passages`. JSON only.

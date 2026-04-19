@@ -16,7 +16,7 @@ from .pass_1_2 import Commitment, Concept, Tension
 from .pass_1_3 import ReasoningMethod, Textures
 from .pass_1_4 import Moves, Register, Vocabulary
 from .pass_1_5 import HardLimits, KnowledgeBoundary, SensitiveTopics
-from .pass_1_6 import Passages, URLs, Works
+from .pass_1_6 import Passages, ReferenceOnlyPassages, URLs, Works
 
 
 CoherenceSeverity = Literal["minor", "moderate", "major"]
@@ -106,6 +106,11 @@ class MergedDossier(BaseModel):
     works: Works
     passages: Passages
     urls: URLs
+    reference_only_passages: ReferenceOnlyPassages = Field(
+        default_factory=ReferenceOnlyPassages,
+        description="Private-reasoning corpus; Step 1 loads, Step 2 drops. "
+        "Usually empty for public-domain voices.",
+    )
 
     # Pass 1.7 coherence metadata.
     coherence_flags: list[CoherenceFlag] = Field(default_factory=list)

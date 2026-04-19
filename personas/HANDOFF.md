@@ -37,6 +37,35 @@ The Voice Pipeline uses the assembled card directly as the system prompt
 for the voice's runtime LLM call. All 35 card fields together ARE the
 voice's instructions.
 
+## CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2
+
+The assembled card may contain a `reference_only_passages` field (Phase B
+two-tier corpus). This is populated for voices whose primary corpus is
+copyright-sensitive — musical voices like Marley, possibly Dostoevsky
+under a specific modern translation.
+
+**Runtime contract** (Voice Pipeline MUST enforce):
+
+- **Step 1 (Private Reasoning)** loads `reference_only_passages` into the
+  system prompt alongside the public `curated_corpus_passages`. The voice
+  reasons from its actual words.
+- **Step 2 (Public Expression)** DROPS the field before assembling the
+  system prompt. The artifact the audience reads must not contain direct
+  quotation of the copyrighted material. Paraphrase that's identifiably
+  sourced also counts as a violation.
+
+The runtime's Voice Pipeline Step 2 system-prompt assembly code MUST
+filter out `reference_only_passages` before rendering. Failing to do so is
+a copyright-exposure bug, not a quality bug.
+
+The `runtime_contract_note` field inside `reference_only_passages` carries
+this warning inline so any consumer reading the JSON sees it without
+reference to this document.
+
+If lift-phrases from `reference_only_passages` appear in Step 2 output
+during testing, that's a persona-card failure mode — add the lift-phrase
+to `banned_language` via Pass 7c.
+
 ## CRITICAL: do NOT few-shot from `smoke_test_chains`
 
 The `smoke_test_chains` field in the assembled card looks like a natural
