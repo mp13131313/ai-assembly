@@ -31,15 +31,48 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(REPO_ROOT.parent / ".env")
+load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 import jinja2
+import requests
 
 from flows.shared.clients import call_perplexity, call_gemini
 from flows.shared.io import voice_slug, write_json_atomic, load_voice_input
 from flows.shared.node0_validation import validate_input
 from flows.shared.perplexity_split import split_dossier
 from flows.shared.prompt_render import render
+from flows.shared.research_validation import (
+    print_warnings,
+    validate_gemini_scan,
+    validate_perplexity_dossier,
+)
+
+
+# Retryable errors for Perplexity + Gemini. Mirrors the Pass 0a retry pattern.
+# Transient network errors, API rate limits, and incomplete / malformed
+# responses trigger one retry after 15s. A second failure exits the pass.
+_RETRYABLE = (
+    RuntimeError,  # our own raise in call_perplexity on missing response structure
+    json.JSONDecodeError,
+    requests.exceptions.RequestException,  # network + timeout + HTTP errors
+)
+
+
+def _with_retry(fn, *, label: str):
+    """Call fn(); on retryable error, sleep 15s and try once more.
+
+    Saves a failed $5-10 Perplexity call from a single network blip. On
+    the second failure, raises — the pipeline loses the call, but at
+    least the curator knows to investigate rather than silently proceed
+    with an empty result.
+    """
+    try:
+        return fn()
+    except _RETRYABLE as exc:
+        stamp(f"  {label}: retryable error ({type(exc).__name__}: {str(exc)[:120]}); "
+              f"sleeping 15s then retrying once")
+        time.sleep(15)
+        return fn()  # second failure propagates
 
 VOICES_DIR = REPO_ROOT / "inputs/voices"
 DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
@@ -89,7 +122,10 @@ def main(voice_name: str) -> None:
     def _pass_1a():
         prompt = render(_pick_template("persona_pass_1a"),
                         name=vi["name"], hostile_sources=vi["hostile_sources"])
-        r = call_perplexity(user=prompt, temperature=0.0)
+        r = _with_retry(
+            lambda: call_perplexity(user=prompt, temperature=0.0),
+            label="Pass 1a (Perplexity)",
+        )
         return {
             "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1a_research_dossier",
             "model": r["model"], "usage": r["usage"],
@@ -101,7 +137,10 @@ def main(voice_name: str) -> None:
     # ---------- PASS 1b (Gemini) ----------
     def _pass_1b():
         prompt = render(_pick_template("persona_pass_1b"), name=vi["name"])
-        r = call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384)
+        r = _with_retry(
+            lambda: call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384),
+            label="Pass 1b (Gemini)",
+        )
         return {
             "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1b_broad_scan",
             "model": r["model"], "usage": r["usage"], "text": r["text"],
@@ -142,6 +181,23 @@ def main(voice_name: str) -> None:
 
     perplexity_text = pass1a.get("text") or pass1a.get("text_clean", "")
     gemini_text = pass1b["text"]
+
+    # ---------- SMOKE-TEST VALIDATORS (non-blocking) ----------
+    # Grep-check the research outputs against the Pass 1a/1b prompt's structural
+    # asks. Warnings only — Pass 1.1-1.6 merge will attempt synthesis regardless.
+    # Surfaces thinness (missing period-vocabulary, missing counter-tradition
+    # block, short dossier) early so the curator can re-run Phase 0.5 with a
+    # tighter --hint before committing to the manual Claude DR session.
+    stamp("Pass 1a smoke-test:")
+    perp_checks = validate_perplexity_dossier(
+        text=perplexity_text,
+        voice_type=vi["type"],
+        hostile_sources=vi["hostile_sources"],
+    )
+    print_warnings(perp_checks, "Pass 1a", stamp)
+    stamp("Pass 1b smoke-test:")
+    gem_checks = validate_gemini_scan(text=gemini_text, voice_type=vi["type"])
+    print_warnings(gem_checks, "Pass 1b", stamp)
 
     perplexity_sections = split_dossier(perplexity_text)
     if perplexity_sections is None:
