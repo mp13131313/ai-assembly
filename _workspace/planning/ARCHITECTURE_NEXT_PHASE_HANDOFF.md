@@ -87,11 +87,22 @@ The Battuta DR dossier (the actual claude.ai output) lives on the user's Desktop
 
 ---
 
-## Other voices to build later (post-architecture)
+## Voices to build (all 12 fresh under Phase B)
 
-12 voices total. Currently configured: Plato, Cleopatra, Arendt, Octopus, Battuta. Still to build voice configs (Pass 0a runs): Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace, Dostoevsky.
+12 voices total. **All are pending under Phase B** — there is no "5 done / 7 to build" split because Pass 0a itself is being redesigned (see `REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full `conference_context`, domain-specific non-human grounding, plus Boddice integration changes the editorial framing). The 5 existing v3.10 configs do not survive the redesigned Pass 0a — they get regenerated along with the other 7.
 
-After voice configs done, all 12 need their full DR cycles + Pass 1 chunked merges + Pass 2 card extraction on the new architecture.
+**v3.10 artifacts now in `_workspace/archive/`** are archaeology, not inputs to the rebuilt pipeline:
+- 5 voice configs (Pass 0a outputs): Plato, Cleopatra, Arendt, Octopus, Ibn Battuta
+- 3 DR prompts: cleopatra, ibn_battuta, octopus
+- 1 full pipeline run: Plato; 2 partial runs: Hannah Arendt, Ibn Battuta
+
+They serve as: (a) test fixtures for validating the new pipeline produces equivalent or better output, (b) reference for v3.10 framing, (c) reference for known failure modes the rebuild is meant to fix (especially Boddice's emotional-experiential vocabulary critique).
+
+**Build sequence under Phase B (per voice):** new Pass 0a → Phase 0.5 (Perplexity + Gemini) → new Pass 0b hybrid-tailored DR prompt (PB#2) → manual Claude DR session → chunked Pass 1 merge (1.1–1.7) → Phase 2 generation (Pass 2–6) → Phase 3 validation (Pass 7-pre / 7a multi-family per `REBUILD_PLAN.md` §"Pass 7a multi-family validation" / 7b / 7c) → Phase 4 Derive.
+
+The 5 voices with v3.10 artifacts are not "ahead" of the other 7 in any meaningful sense.
+
+Voice list: Plato, Cleopatra, Arendt, Octopus, Ibn Battuta, Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace, Dostoevsky.
 
 ---
 

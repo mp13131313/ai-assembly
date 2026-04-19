@@ -466,10 +466,10 @@ or expand?"`. Default for now: keep the 3-enum.
 
 - **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching. Expected accuracy degrades from 70–85% to 40–50% without bios. **Pre-Athens blocker** — bios must be populated before first production session.
 - **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC` (Philosophical Speed-Dating Rave, How to Meet an Idiot). Either firm up venues in program or leave them skipped.
-- **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v2`. Hand-written stubs for all 12 members. Must be replaced with real Derive output from persona pipeline before production.
-- **`personas/inputs/voices/`**: 5 voice configs exist (plato, hannah_arendt, cleopatra, octopus, ibn_battuta). 7 more needed.
-- **`personas/inputs/dossiers/`**: 0 of 12 Claude DR dossiers at present. Plato's run predates the three-source merge; its persona_card_assembled.json was produced via the 2-source fallback path.
-- **`personas/runs/_dr_prompts/`**: 3 prompts exist (cleopatra, ibn_battuta, octopus). 9 more to generate via `run_pass0b_dr_prompt.py` (fast — seconds per voice after Pass 0a completes).
+- **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs for all 12 members; not derived from real persona-pipeline Derive output. Will be replaced with real Derive output from the rebuilt Phase B persona pipeline.
+- **`personas/inputs/voices/`**: 5 v3.10 Pass 0a artifacts on disk (plato, hannah_arendt, cleopatra, octopus, ibn_battuta). **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The 5 existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace, Dostoevsky).
+- **`personas/inputs/dossiers/`**: 0 of 12 Claude DR dossiers in the current tree. All 12 will be generated under the new Pass 0b template (PB#2 hybrid Jinja+LLM tailoring) once Phase B lands.
+- **`_workspace/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer.
 
 ### 6.2 Pipeline gaps
 
