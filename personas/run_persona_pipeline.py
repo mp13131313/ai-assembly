@@ -47,7 +47,7 @@ def _load_conference_context_string() -> str:
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_gemini
+from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 from flows.shared.dr_validation import validate_dr_dossier
@@ -539,6 +539,66 @@ stamp(f"  verification: {verif.get('overall', '?')} | "
       f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
 
 
+# ---------- PASS 7-anachronism (TimeChara-style temporal check) ----------
+# Phase B NEW sub-pass (decisions log #14). Runs between 7-pre and 7a.
+# Cross-family evaluator (NOT Claude, per self-preference-bias argument);
+# o3 primary, Gemini fallback. Reads the assembled card; checks every
+# concept / framing / vocabulary term for period-access anachronism.
+# If REVISION_NEEDED, feeds into the same revision loop as Pass 7a.
+def _pass_7_anachronism():
+    full_card_for_anach = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_anach.update(pass6["fields"])
+    # Derive voice_world_period from the card's world field for the prompt.
+    _world = full_card_for_anach.get("world", "")
+    _world_period = _world.split("\n", 1)[0][:300] if isinstance(_world, str) else str(_world)[:300]
+    sysp = render("persona_pass_7_anachronism",
+                  voice_name=vi["name"], voice_type=vi["type"],
+                  voice_world_period=_world_period,
+                  persona_card_json=json.dumps(full_card_for_anach, ensure_ascii=False, indent=2))
+    userp = (
+        "Run the S²RD temporal-anachronism check across the card per the "
+        "system prompt. Emit anachronism_flags[] with severity + category + "
+        "field_path + problematic_text + reason + suggested_fix. Emit "
+        "overall verdict. JSON only."
+    )
+    for openai_model in ("o3", "gpt-4o"):
+        try:
+            r = call_openai(system=sysp, user=userp, model=openai_model,
+                            temperature=0.0, max_tokens=8192,
+                            response_format_json=True)
+            return {"voice_name": vi["name"], "voice_slug": SLUG,
+                    "pass": "7_anachronism_check",
+                    "validator": f"openai:{openai_model}", "model": r["model"],
+                    "usage": r["usage"], "result": r["json"]}
+        except Exception as e:
+            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    try:
+        r = call_gemini(user=sysp + "\n\n" + userp, temperature=0.0,
+                        max_output_tokens=16384)
+        cleaned = r["text"].strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7_anachronism_check",
+                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "usage": r["usage"], "result": json.loads(cleaned)}
+    except Exception as e:
+        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7_anachronism_check", "validator": "skipped",
+                "result": {"overall": "SKIPPED",
+                           "summary": "No cross-model evaluator available."}}
+
+stamp("PASS 7-anachronism: TimeChara temporal check (o3 → Gemini fallback)")
+pass7_anach = call_or_cache(RUN / "02_passes/pass7_anachronism.json",
+                            "Pass 7-anachronism", _pass_7_anachronism)
+_anach_flags = pass7_anach["result"].get("anachronism_flags", [])
+stamp(f"  validator: {pass7_anach.get('validator', '?')} | "
+      f"overall: {pass7_anach['result'].get('overall', '?')} | "
+      f"flags: {len(_anach_flags)}")
+
+
 # ---------- PASS 7a (Cross-Model Validation) ----------
 # Spec: must NOT be Claude (self-preference bias). gpt-4o preferred -> Gemini fallback -> skip.
 def _pass_7a():
@@ -613,6 +673,45 @@ PASS_RUNNERS = {
 
 revision_loops = 0
 MAX_REVISION_LOOPS = 2
+
+# Phase B: merge Pass 7-anachronism flags into Pass 7a's revision decision.
+# Anachronism flags are structured {category, field_path, problematic_text,
+# reason, suggested_fix, severity}; we translate them into field_issues the
+# revision loop already understands. Pass 2 + 4a + 5 are the usual targets
+# (world-field anachronisms → Pass 2; voice-vocabulary anachronisms → Pass 4a;
+# engagement-protocol anachronisms → Pass 5).
+if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
+    _anach_issues = []
+    for flag in pass7_anach["result"].get("anachronism_flags", []):
+        _path = flag.get("field_path", "")
+        _target = "2"  # default
+        if _path.startswith(("constitution", "concept_lexicon", "reasoning_method",
+                              "finds_compelling", "resists")):
+            _target = "3"
+        elif _path.startswith(("rhetorical_mode", "characteristic_moves",
+                                "register_and_tone", "metaphorical_repertoire",
+                                "preferred_vocabulary", "banned_language",
+                                "banned_modes")):
+            _target = "4a"
+        elif _path.startswith(("bold_engagement", "default_questions",
+                                "disagreement_protocol", "unique_contribution")):
+            _target = "5"
+        _anach_issues.append({
+            "flagged_pass": _target,
+            "field": _path,
+            "issue": f"[anachronism/{flag.get('category', 'vocabulary')}/{flag.get('severity', 'minor')}] {flag.get('reason', '')}",
+            "recommended_fix": flag.get("suggested_fix", ""),
+        })
+    # Merge into pass7a result so the existing loop picks them up.
+    pass7a["result"].setdefault("field_issues", []).extend(_anach_issues)
+    pass7a["result"].setdefault("revision_target_passes", [])
+    for issue in _anach_issues:
+        if issue["flagged_pass"] not in pass7a["result"]["revision_target_passes"]:
+            pass7a["result"]["revision_target_passes"].append(issue["flagged_pass"])
+    # If 7a said PASS but 7-anach said REVISION_NEEDED, escalate the overall.
+    if pass7a["result"].get("overall") != "REVISION_NEEDED":
+        pass7a["result"]["overall"] = "REVISION_NEEDED"
+        stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
 while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
     targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
