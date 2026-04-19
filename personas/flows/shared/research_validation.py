@@ -40,11 +40,20 @@ _SECTION_HINTS = [
     ("section 5", "boundaries"), ("section 6", "primary"),
 ]
 
-# Evidence-tag patterns (Pass 1a asks for every claim tagged).
+# Evidence-tag patterns. Pass 1a (post-2026-04 revision) asks Perplexity for
+# the lighter [primary]/[consensus]/[contested] set; the chunked merge prompts
+# (Opus reads) apply the full 5-Boddice-tag rigor. Validator accepts both so
+# either era of dossier passes the smoke test.
 _EVIDENCE_TAG_RE = re.compile(
-    r"\[(?:stated|scholarly[_ ]consensus|inference|"
-    r"experiential[_ ]reconstruction|projection[_ ]warning|"
-    r"hostile source|reconstruction|own voice)[:\]]",
+    r"\[(?:"
+    # Pass 1a lighter set (Perplexity-friendly):
+    r"primary|consensus|contested"
+    # Boddice 5-tag set (chunked-merge rigor):
+    r"|stated|scholarly[_ ]consensus|inference"
+    r"|experiential[_ ]reconstruction|projection[_ ]warning"
+    # Hostile-source addenda:
+    r"|hostile[_ ]source|hostile source|reconstruction|own[_ ]voice|own voice"
+    r")[:\]]",
     re.IGNORECASE,
 )
 
