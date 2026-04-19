@@ -66,7 +66,7 @@ Built and verified:
 
 | Component | Status | Notes |
 |---|---|---|
-| Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (freeform), subtype, corpus_constraint |
+| Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (strict 3-enum), subtype, corpus_constraint |
 | Pass 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
 | Phase 0.5 Pre-DR Research | ✓ | `run_phase0_1_research.py`: Pass 1a (Perplexity) + Pass 1b (Gemini) in parallel, then renders DR prompt via Jinja2 |
 | Pass 0b DR Prompt | ✓ | Jinja2 template renderer (no API call); scaffolds DR prompt with research findings |
@@ -422,9 +422,25 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 **Why:** Pass 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
 
-### 5.12 `voice_mode` is now freeform (commit b1868da)
+### 5.12 `voice_mode` validation — strict 3-value enum
 
-**Why:** Pass 0a proposes creative per-voice modes like "sovereign-diplomatic", "embodied-distributed", "confessional-polyphonic". Old VALID_VOICE_MODES set `{philosophical, observational, narratival}` was too restrictive. Validation now just checks non-empty string. Prompt branching inside individual passes still uses specific mode values where relevant.
+**Current:** {philosophical, observational, narratival}, with null
+allowed only for `subtype: "system"` voices (system entities bypass
+voice_mode branching entirely).
+
+**History:** commit `b1868da` (2026-04-16) briefly relaxed this to
+freeform string to accommodate Pass 0a proposing creative per-voice
+modes (`sovereign-diplomatic`, `embodied-distributed`, etc.). Commit
+`4c5c366` (restore strict voice_mode validation) reverted that —
+downstream prompt branching in Passes 2-5 depends on the fixed
+three-value enum; freeform modes broke prompt rendering for any voice
+Pass 0a proposed a novel mode for.
+
+**Enforcement:** `personas/flows/shared/node0_validation.py:60`.
+
+**Open question for Phase B:** whether to expand the enum is
+`REBUILD_PLAN.md §Cross-cutting §"Decision: keep \`voice_mode\` 3-enum
+or expand?"`. Default for now: keep the 3-enum.
 
 ### 5.13 `needs_dr_supplement` hardcoded to True (commit b1868da)
 

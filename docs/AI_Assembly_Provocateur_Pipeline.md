@@ -381,7 +381,7 @@ FORMULATION:
 
 [Full structured supporting material — theme abstract, cluster abstracts,
 all raw extractions sorted by lens, theme flags — is available in the
-`structured` field of this briefing entry for deeper inspection.]
+`full_theme_record` field of this briefing entry for deeper inspection.]
 ```
 
 This is what the voice's Step 1 LLM call sees as its user prompt. No parsing required — the voice agent reads it as prose and responds.
