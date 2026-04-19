@@ -16,26 +16,28 @@ cross-voice distinctiveness:
 
 3. SAME-QUESTION DISTINCTIVENESS (`_same_question_test`): pick one shared
    provocation (reuse a smoke_test_chain from Pass 7b). Run all 12 voices
-   through it. Evaluator reads 12 responses side-by-side; scores pairwise
-   similarity. Flag pairs scoring > 0.7 (too similar).
+   through it (each voice's full assembled card as system prompt; shared
+   provocation as user message). Evaluator reads 12 responses side-by-side;
+   scores pairwise similarity. Flag pairs scoring > 0.7 (too similar).
 
 Evaluator: OpenAI o3 (cross-family from Claude writer per self-preference-
 bias argument; baseline File 2 §4). Fallback to Gemini 2.5-pro if o3
 unavailable. NOT Claude — same-family biases the distinctiveness judgment.
 
+Voice invocation for same_question uses Claude (the voice's actual
+runtime model) — this is NOT evaluation, it is *producing the 12
+responses* that the evaluator then compares. Evaluator still crosses
+families.
+
 Output: `runs/cross_persona_qc.json` with per-pair similarity scores +
 flagged distinctiveness gaps + per-voice "needs rework" recommendations.
-
-Revision integration:
-- Constitution similarity → re-run Pass 3 with cross-card critique
-- Voice/register similarity → re-run Pass 4a with cross-card critique
-- Max 2 cross-card revision rounds per voice
 """
 from __future__ import annotations
 
 import argparse
 import json
 import random
+import re
 import sys
 import time
 from pathlib import Path
@@ -61,11 +63,7 @@ def stamp(msg: str) -> None:
 
 
 def _gate_check() -> list[dict]:
-    """Verify all 12 voices have assembled cards; return the loaded cards.
-
-    Returns list of (voice_slug, card_dict) tuples; raises SystemExit if
-    the panel isn't complete.
-    """
+    """Verify all 12 voices have assembled cards; return the loaded cards."""
     roster = json.loads(PANEL_ROSTER_PATH.read_text())
     expected = roster.get("panel_members_final", [])
     if len(expected) != EXPECTED_VOICE_COUNT:
@@ -91,72 +89,117 @@ def _gate_check() -> list[dict]:
     return cards
 
 
-def _call_evaluator(*, system: str, user: str, model: str = "o3") -> dict:
-    """Thin wrapper around OpenAI o3; falls back to Gemini on error.
+def _parse_json_from_text(text: str) -> dict | None:
+    """Extract a JSON object from an evaluator's text response.
 
-    Uses the personas.flows.shared.clients OpenAI client if available.
-    Returns {'text': str, 'json': dict|None, 'model': str, 'usage': dict}.
+    Evaluators sometimes wrap JSON in markdown fences or add preamble.
+    Tries response_format_json result first, then strips fences, then
+    greedy-matches the outermost {…} block.
     """
-    # Lazy import — the OpenAI + Gemini clients live in personas.flows.shared.
-    from flows.shared import clients
+    if not text:
+        return None
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0].strip()
     try:
-        # o3 requires max_completion_tokens, no temperature per clients.py conventions.
-        if hasattr(clients, "call_openai"):
-            return clients.call_openai(
-                system=system, user=user, model=model,
-                max_completion_tokens=8192, response_format_json=True,
-            )
-    except Exception as exc:  # pragma: no cover — o3 unavailable
-        stamp(f"  o3 call failed ({exc}); falling back to Gemini")
-    # Gemini fallback.
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        pass
+    m = re.search(r"\{.*\}", cleaned, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(0))
+        except json.JSONDecodeError:
+            return None
+    return None
+
+
+def _call_evaluator(*, system: str, user: str, model: str = "o3") -> dict:
+    """Cross-family evaluator call. Tries OpenAI o3 → gpt-4o → Gemini."""
     from flows.shared.clients import call_gemini
+    # o3 / gpt-4o.
+    try:
+        from flows.shared.clients import call_openai
+        for m in (model, "gpt-4o"):
+            try:
+                r = call_openai(
+                    system=system, user=user, model=m,
+                    temperature=0.0, max_tokens=8192,
+                    response_format_json=True,
+                )
+                return {
+                    "text": r.get("text", ""),
+                    "json": r.get("json") or _parse_json_from_text(r.get("text", "")),
+                    "model": m, "usage": r.get("usage", {}),
+                }
+            except Exception as exc:
+                stamp(f"  WARN: {m} failed ({type(exc).__name__}: {str(exc)[:120]}); trying next")
+    except ImportError:
+        pass
+    # Gemini fallback.
     r = call_gemini(user=system + "\n\n" + user, temperature=0.0, max_output_tokens=8192)
     return {
-        "text": r["text"], "json": None, "model": r["model"], "usage": r["usage"],
+        "text": r["text"],
+        "json": _parse_json_from_text(r["text"]),
+        "model": r["model"], "usage": r["usage"],
     }
 
 
 # ---------------------------------------------------------------------------
-# Sub-test 1: SWAP TEST
+# Sub-test 1: SWAP TEST (strict JSON parsing)
 # ---------------------------------------------------------------------------
 
 
 def _swap_test(cards: list[dict]) -> dict:
-    """For each (A, B) pair, plant A's constitution principle in B's set.
-
-    Evaluator must identify the interloper. Aggregated score = % correct.
+    """For each ordered pair (A, B), plant A's first constitution principle
+    into B's set. Evaluator identifies the interloper position. Scores %
+    correct (interloper always at position 1 in our construction).
     """
     results: list[dict] = []
     rng = random.Random(SHUFFLE_SEED)
     pairs = [(a, b) for a in cards for b in cards if a["slug"] != b["slug"]]
     rng.shuffle(pairs)
 
+    def _principle_from(card: dict) -> str:
+        constitution = card.get("constitution", "")
+        if isinstance(constitution, list):
+            return (constitution[0] if constitution else "")[:500]
+        if isinstance(constitution, str):
+            parts = [p.strip() for p in constitution.split("\n\n") if p.strip()]
+            return (parts[0] if parts else constitution[:500])[:500]
+        return str(constitution)[:500]
+
     for a, b in pairs:
-        a_constitution = a["card"].get("constitution", "")
-        b_constitution = b["card"].get("constitution", "")
-        if not a_constitution or not b_constitution:
+        a_principle = _principle_from(a["card"])
+        b_principle = _principle_from(b["card"])
+        if not a_principle or not b_principle:
             continue
-        # Pick one principle from A (naive: first line / first entry).
-        a_first = a_constitution.split("\n", 1)[0].strip() if isinstance(a_constitution, str) else str(a_constitution)[:400]
-        b_shuffled = b_constitution if isinstance(b_constitution, str) else json.dumps(b_constitution, ensure_ascii=False)
         system = (
-            "You are a cross-voice distinctiveness evaluator. ONE of the "
-            "principles below is an interloper from a different voice. "
-            "Identify which — return JSON: {\"interloper_index\": <int>, "
-            "\"reason\": \"...\"}."
+            "You are a cross-voice distinctiveness evaluator. Exactly ONE of "
+            "the two principles below is an interloper planted from a "
+            "DIFFERENT voice's constitution. The other is genuinely from the "
+            "named voice. Identify the interloper index.\n\n"
+            "Return JSON only: {\"interloper_index\": <1 or 2>, "
+            "\"confidence\": <float 0-1>, \"reason\": \"<one sentence>\"}."
         )
         user = (
-            f"VOICE: {b['name']}\n\n"
-            f"PRINCIPLES (one is the interloper):\n\n"
-            f"1. {a_first}\n\n"
-            f"2. {b_shuffled[:600]}\n\n"
-            "Return JSON only."
+            f"VOICE UNDER TEST: {b['name']}\n\n"
+            f"PRINCIPLE 1: {a_principle}\n\n"
+            f"PRINCIPLE 2: {b_principle}\n\n"
+            "Which principle is the interloper — 1 or 2?"
         )
         r = _call_evaluator(system=system, user=user)
+        parsed = r.get("json") or {}
+        idx = parsed.get("interloper_index")
+        # We always plant A's principle at position 1; correct answer = 1.
+        correct = (idx == 1)
         results.append({
             "voice_a": a["slug"], "voice_b": b["slug"],
-            "evaluator_response": r.get("text", ""),
-            "correct": "1" in r.get("text", "") or "interloper_index\": 1" in r.get("text", ""),
+            "evaluator_model": r.get("model"),
+            "parsed_interloper_index": idx,
+            "confidence": parsed.get("confidence"),
+            "reason": parsed.get("reason"),
+            "correct": correct,
         })
     correct = sum(1 for r in results if r["correct"])
     return {
@@ -166,104 +209,183 @@ def _swap_test(cards: list[dict]) -> dict:
         "accuracy": correct / len(results) if results else 0.0,
         "per_pair": results,
         "interpretation": (
-            "Accuracy < 0.75 suggests constitution principles too generic; "
-            "re-run Pass 3 for low-scoring voices with cross-card critique."
+            "Accuracy < 0.75 suggests constitution principles too generic. "
+            "Re-run Pass 3 for low-scoring voices with cross-card critique."
         ),
     }
 
 
 # ---------------------------------------------------------------------------
-# Sub-test 2: BLIND IDENTIFICATION
+# Sub-test 2: BLIND IDENTIFICATION (strict JSON parsing)
 # ---------------------------------------------------------------------------
 
 
-def _blind_id_test(cards: list[dict], excerpts_per_voice: int = 3) -> dict:
-    """Shuffle unnamed `character` + `register_and_tone` excerpts; evaluator identifies."""
+def _blind_id_test(cards: list[dict]) -> dict:
+    """Shuffle unnamed character + register_and_tone excerpts; evaluator
+    attributes each. Strict per-excerpt scoring via parsed JSON attributions.
+    """
     rng = random.Random(SHUFFLE_SEED + 1)
     excerpts: list[dict] = []
     for c in cards:
         character = c["card"].get("character", "")
         register = c["card"].get("register_and_tone", "")
-        text = (character if isinstance(character, str) else json.dumps(character))[:600]
-        excerpts.append({"slug": c["slug"], "name": c["name"], "excerpt": text, "field": "character"})
-        excerpts.append({"slug": c["slug"], "name": c["name"],
-                         "excerpt": (register if isinstance(register, str) else json.dumps(register))[:400],
-                         "field": "register_and_tone"})
+        c_text = character if isinstance(character, str) else json.dumps(character)
+        r_text = register if isinstance(register, str) else json.dumps(register)
+        excerpts.append({
+            "slug": c["slug"], "name": c["name"], "field": "character",
+            "excerpt": c_text[:600],
+        })
+        excerpts.append({
+            "slug": c["slug"], "name": c["name"], "field": "register_and_tone",
+            "excerpt": r_text[:400],
+        })
     rng.shuffle(excerpts)
     choices = [c["name"] for c in cards]
 
     system = (
         "You are reading unlabeled excerpts from persona specifications for "
-        "12 distinct AI voices. For each excerpt, identify which voice it "
-        "comes from. Return JSON: {\"attributions\": [{\"excerpt_id\": <int>, "
-        "\"voice_name\": <one of the panel names>}]}."
+        "12 distinct voices. For each excerpt, identify which voice it comes "
+        "from. Each voice may appear in 0 or more excerpts.\n\n"
+        f"PANEL (choose FROM THIS LIST ONLY): {', '.join(choices)}\n\n"
+        "Return JSON only:\n"
+        "{\"attributions\": [{\"excerpt_id\": <int>, \"voice_name\": <str>, "
+        "\"confidence\": <float 0-1>}]}."
     )
-    user = (
-        "PANEL: " + ", ".join(choices) + "\n\n"
-        "EXCERPTS:\n"
-        + "\n\n".join(f"[{i}] {e['excerpt']}" for i, e in enumerate(excerpts))
-        + "\n\nReturn JSON only."
+    user = "EXCERPTS:\n" + "\n\n".join(
+        f"[{i}] {e['excerpt']}" for i, e in enumerate(excerpts)
     )
     r = _call_evaluator(system=system, user=user)
-    # Lenient scoring: parse the evaluator text for name mentions.
-    text = r.get("text", "")
+    parsed = r.get("json") or {}
+    attributions = parsed.get("attributions", [])
+
     correct = 0
+    details: list[dict] = []
+    by_id = {a.get("excerpt_id"): a for a in attributions if isinstance(a, dict)}
     for i, e in enumerate(excerpts):
-        # Heuristic: evaluator said e['name'] near the excerpt index. Strict
-        # parsing is deferred to real integration.
-        if e["name"] in text:
+        attr = by_id.get(i) or {}
+        predicted = attr.get("voice_name")
+        is_correct = (predicted == e["name"])
+        if is_correct:
             correct += 1
+        details.append({
+            "excerpt_id": i, "field": e["field"],
+            "actual_name": e["name"], "predicted_name": predicted,
+            "confidence": attr.get("confidence"),
+            "correct": is_correct,
+        })
     return {
         "sub_test": "blind_id",
         "excerpts_count": len(excerpts),
-        "attributions_correct_heuristic": correct,
-        "accuracy_heuristic": correct / len(excerpts) if excerpts else 0.0,
-        "evaluator_raw": text,
+        "correct_attributions": correct,
+        "accuracy": correct / len(excerpts) if excerpts else 0.0,
+        "evaluator_model": r.get("model"),
+        "per_excerpt": details,
         "interpretation": (
-            "Heuristic < 0.6 → voices indistinguishable at character / "
-            "register_and_tone level; re-run Pass 4a with cross-card critique."
+            "Accuracy < 0.6 → character + register_and_tone not distinctive "
+            "enough across the panel. Re-run Pass 4a with cross-card critique."
         ),
     }
 
 
 # ---------------------------------------------------------------------------
-# Sub-test 3: SAME-QUESTION DISTINCTIVENESS
+# Sub-test 3: SAME-QUESTION DISTINCTIVENESS (live 12-voice invocation)
 # ---------------------------------------------------------------------------
 
 
+def _invoke_voice(card_path: Path, provocation: str, max_tokens: int = 4096) -> str:
+    """Invoke a voice at Step-1-like register: full card as system prompt,
+    provocation as user message, Claude Sonnet (cheaper than Opus for this).
+    Returns the voice's text response.
+    """
+    from flows.shared.clients import call_claude
+    card = json.loads(card_path.read_text())
+    # Drop runtime metadata and smoke_test_chains (NOT few-shot material per
+    # HANDOFF.md). The rest of the card becomes the system prompt.
+    card_for_system = {k: v for k, v in card.items()
+                        if k not in ("metadata", "smoke_test_chains",
+                                     "continuity_block_if_night_2",
+                                     "continuity_block_artifact_if_night_2")}
+    system = json.dumps(card_for_system, ensure_ascii=False, indent=2)
+    r = call_claude(
+        system=system, user=provocation, model="claude-sonnet-4-6",
+        max_tokens=max_tokens, temperature=0.7, thinking=False,
+        response_format_json=False,
+    )
+    return r.get("text", "")
+
+
 def _same_question_test(cards: list[dict]) -> dict:
-    """Run all 12 voices through one shared provocation; evaluator scores pairwise similarity."""
+    """Run all 12 voices through one shared provocation; evaluator scores
+    pairwise similarity across the 12 responses. Flag pairs > threshold.
+    """
     rng = random.Random(SHUFFLE_SEED + 2)
-    # Pick a shared provocation: reuse a smoke_test_chain from the first
-    # voice's card; fallback to a default if absent.
+    # Pick the shared provocation from the first voice's smoke_test_chains.
+    first_card = cards[0]["card"]
+    chains = first_card.get("smoke_test_chains", [])
     default_prompt = (
         "What happens to the idea of democracy when non-human participants "
         "enter deliberation overnight and the humans read their artifacts "
         "over morning coffee?"
     )
-    first = cards[0]["card"]
-    chains = first.get("smoke_test_chains", [])
     if chains and isinstance(chains, list):
-        shared = chains[rng.randrange(len(chains))]
-        prompt = shared.get("provocation") if isinstance(shared, dict) else default_prompt
+        pick = chains[rng.randrange(len(chains))]
+        prompt = (
+            pick.get("provocation") if isinstance(pick, dict) else None
+        ) or default_prompt
     else:
         prompt = default_prompt
 
-    # Runtime LLM invocation per voice is heavy; this scaffold records the
-    # intended structure but the live run of 12 voices against this prompt
-    # + side-by-side scoring is deferred to the real Phase L+ integration.
+    stamp(f"  invoking 12 voices on shared provocation ({len(prompt)} chars)…")
+    responses: list[dict] = []
+    for c in cards:
+        card_path = REPO_ROOT / "runs" / c["slug"] / "persona_card_assembled.json"
+        try:
+            t0 = time.time()
+            text = _invoke_voice(card_path, prompt)
+            stamp(f"    {c['name']}: {len(text)} chars in {time.time()-t0:.1f}s")
+        except Exception as exc:
+            stamp(f"    {c['name']}: FAILED ({exc})")
+            text = ""
+        responses.append({"slug": c["slug"], "name": c["name"], "response": text})
+
+    # Pairwise similarity scoring by evaluator.
+    stamp("  scoring pairwise similarity with cross-family evaluator…")
+    # Bundle all 12 labeled responses and ask the evaluator for a similarity
+    # matrix — one call, not 66.
+    system = (
+        "You are scoring response distinctiveness for a persona pipeline "
+        "quality gate. You will read 12 labeled responses to the same "
+        "provocation. Score each pair for semantic + rhetorical similarity "
+        "on a 0-1 scale, where 0 = entirely distinct voices and 1 = "
+        "indistinguishable. A distinctive panel should have most pairs "
+        "< 0.4. Flag any pair ≥ 0.7 as too similar.\n\n"
+        "Return JSON only:\n"
+        "{\"pairwise_similarity\": [{\"voice_a\": <slug>, \"voice_b\": <slug>, "
+        "\"similarity\": <float 0-1>, \"note\": \"<brief>\"}], "
+        "\"flagged_pairs\": [{\"voice_a\": <slug>, \"voice_b\": <slug>, "
+        "\"similarity\": <float>, \"reason\": \"<sentence>\"}]}."
+    )
+    rendered = "\n\n".join(
+        f"=== VOICE: {r['name']} (slug={r['slug']}) ===\n{r['response'][:1500]}"
+        for r in responses if r["response"]
+    )
+    user = f"PROVOCATION:\n{prompt}\n\nRESPONSES:\n\n{rendered}"
+    e = _call_evaluator(system=system, user=user)
+    parsed = e.get("json") or {}
+
     return {
         "sub_test": "same_question_distinctiveness",
         "shared_prompt": prompt,
-        "status": "scaffolded",
-        "note": (
-            "Per REBUILD_PLAN K.2: runs each of 12 voices against the shared "
-            "prompt at their Voice Pipeline Step 1 register, then evaluator "
-            "scores pairwise similarity. Pairs > "
-            f"{SIMILARITY_FLAG_THRESHOLD} are flagged. Live integration "
-            "lands after Phase L first-voice end-to-end."
-        ),
+        "responses": responses,
+        "evaluator_model": e.get("model"),
+        "pairwise_similarity": parsed.get("pairwise_similarity", []),
+        "flagged_pairs": parsed.get("flagged_pairs", []),
         "threshold": SIMILARITY_FLAG_THRESHOLD,
+        "interpretation": (
+            "Pairs scored > threshold indicate voices that converge on the "
+            "same provocation. Flagged pairs get Pass 4a re-run with "
+            "cross-card critique (distinct voice register)."
+        ),
     }
 
 
@@ -283,20 +405,21 @@ def run_cross_persona_qc(out_path: Path | None = None) -> dict:
 
     stamp("  Sub-test 2: BLIND IDENTIFICATION")
     blind_id = _blind_id_test(cards)
-    stamp(f"    heuristic accuracy={blind_id['accuracy_heuristic']:.2%}")
+    stamp(f"    accuracy={blind_id['accuracy']:.2%} across {blind_id['excerpts_count']} excerpts")
 
-    stamp("  Sub-test 3: SAME-QUESTION DISTINCTIVENESS")
+    stamp("  Sub-test 3: SAME-QUESTION DISTINCTIVENESS (live 12-voice)")
     same_q = _same_question_test(cards)
-    stamp(f"    status={same_q['status']}")
+    _flagged = len(same_q.get("flagged_pairs", []))
+    stamp(f"    {_flagged} pairs flagged above threshold {SIMILARITY_FLAG_THRESHOLD}")
 
     result: dict[str, Any] = {
         "run_date": time.strftime("%Y-%m-%d"),
         "voice_count": len(cards),
-        "evaluator_family": "openai_o3_or_gemini_cross_family",
+        "evaluator_family": "openai_o3_or_gpt4o_or_gemini_cross_family",
         "shuffle_seed": SHUFFLE_SEED,
         "similarity_flag_threshold": SIMILARITY_FLAG_THRESHOLD,
         "sub_tests": {"swap": swap, "blind_id": blind_id, "same_question": same_q},
-        "recommendations": _derive_recommendations(swap, blind_id, cards),
+        "recommendations": _derive_recommendations(swap, blind_id, same_q, cards),
     }
 
     out_path = out_path or (REPO_ROOT / "runs" / "cross_persona_qc.json")
@@ -306,33 +429,42 @@ def run_cross_persona_qc(out_path: Path | None = None) -> dict:
     return result
 
 
-def _derive_recommendations(swap: dict, blind_id: dict, cards: list[dict]) -> list[dict]:
+def _derive_recommendations(
+    swap: dict, blind_id: dict, same_q: dict, cards: list[dict]
+) -> list[dict]:
     """Per-voice 'needs rework' recommendations feeding the revision loop."""
     recs: list[dict] = []
-    # Aggregate swap-test per-voice failure count.
-    per_voice_fail = {c["slug"]: 0 for c in cards}
+    # Swap-test per-voice failure count.
+    per_voice_fail: dict[str, int] = {c["slug"]: 0 for c in cards}
     for pair in swap.get("per_pair", []):
         if not pair.get("correct", False):
-            per_voice_fail[pair["voice_a"]] = per_voice_fail.get(pair["voice_a"], 0) + 1
-            per_voice_fail[pair["voice_b"]] = per_voice_fail.get(pair["voice_b"], 0) + 1
+            for key in ("voice_a", "voice_b"):
+                per_voice_fail[pair[key]] = per_voice_fail.get(pair[key], 0) + 1
     for slug, fails in per_voice_fail.items():
         if fails > 4:
             recs.append({
-                "voice_slug": slug,
-                "flagged_by": "swap_test",
+                "voice_slug": slug, "flagged_by": "swap_test",
                 "failure_count": fails,
                 "recommended_rerun": "Pass 3 (with cross-card critique)",
                 "reason": "Constitution principles did not distinguish this voice in >4 swap-test pairs.",
             })
-    # Blind-ID heuristic — if overall accuracy low, recommend Pass 4a re-run for all.
-    if blind_id.get("accuracy_heuristic", 1.0) < 0.6:
+    # Blind-ID — overall accuracy low triggers panel-wide Pass 4a re-run.
+    if blind_id.get("accuracy", 1.0) < 0.6:
         recs.append({
-            "voice_slug": "__ALL__",
-            "flagged_by": "blind_id_test",
-            "accuracy": blind_id["accuracy_heuristic"],
+            "voice_slug": "__ALL__", "flagged_by": "blind_id_test",
+            "accuracy": blind_id["accuracy"],
             "recommended_rerun": "Pass 4a (with cross-card critique)",
             "reason": "character + register_and_tone not distinctive enough across the panel.",
         })
+    # Same-question — per-pair similarity flags trigger Pass 4a on both voices.
+    for flag in same_q.get("flagged_pairs", []):
+        for key in ("voice_a", "voice_b"):
+            recs.append({
+                "voice_slug": flag.get(key), "flagged_by": "same_question",
+                "pair_similarity": flag.get("similarity"),
+                "recommended_rerun": "Pass 4a (with cross-card critique)",
+                "reason": flag.get("reason", "Similarity above threshold."),
+            })
     return recs
 
 
