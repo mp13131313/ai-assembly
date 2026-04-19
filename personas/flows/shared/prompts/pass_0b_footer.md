@@ -3,14 +3,14 @@
 
 HOSTILE SOURCE WARNING: The historical record for {{ display_name_with_hint }} is dominated by hostile witnesses (enemies, colonisers, rival powers, or victors). For this figure:
 
-- SEPARATE all claims into three categories and TAG each:
-  [hostile source] = claims from enemy/hostile accounts (identify the source and its bias — e.g., "Plutarch, writing for a Roman audience after Octavian's victory")
-  [reconstruction] = modern scholarly reconstructions that read against the hostile grain (identify the scholar)
-  [own voice] = any material in the figure's own voice, however fragmentary (inscriptions, decrees, reported speech, attributed works — note certainty level)
+- TAG each claim with the hostile-source addenda from the EVIDENCE TAGGING block at the top:
+  [hostile_source: <bias>] = enemy / coloniser / rival account; identify the source and its bias (e.g., "Plutarch, writing for a Roman audience after Octavian's victory").
+  [reconstruction: <scholar>] = modern scholarly reconstruction reading against the hostile grain.
+  [own_voice] = material in the figure's own voice, however fragmentary (inscriptions, decrees, reported speech, attributed works — note certainty level).
 
 - IDENTIFY counter-traditions: non-Western, non-dominant, or minority scholarly readings that preserve a different characterisation of this figure (e.g., Arabic medieval sources as counter-tradition to Roman accounts, oral traditions as counter-tradition to colonial archives)
 
-- In every section, LEAD with [reconstruction] and [own voice] material. Present [hostile source] material as evidence to be read against the grain, not as fact.
+- In every section, LEAD with [reconstruction:] and [own_voice] material. Present [hostile_source:] material as evidence to be read against the grain, not as fact.
 
 - EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
 {% endif %}

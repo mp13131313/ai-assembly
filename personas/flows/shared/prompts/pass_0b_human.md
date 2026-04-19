@@ -3,9 +3,19 @@ Research {{ display_name_with_hint }} comprehensively for the purpose of buildin
 
 RESEARCH INTEGRITY (applies to every section below)
 
-- Only attribute direct quotes to verifiable primary sources, with work title and section/chapter/page reference. Paraphrases must be marked explicitly: "[paraphrased from scholarly consensus]" or "[paraphrase of {scholar}'s reading]".
+- Only attribute direct quotes to verifiable primary sources, with work title and section/chapter/page reference.
 
-- Flag inferences explicitly: "[inference — from documented actions + scholarly reconstruction]". Do not present inference as fact.
+- EVIDENCE TAGGING — every claim carries one of these five core tags. Downstream merge passes parse against this exact list. Do not invent new tag forms.
+    [stated] = direct quote or paraphrase from a primary source, with work title + section/page reference.
+    [scholarly_consensus] = uncontested modern-scholarly reading. Cite the scholar(s) inline.
+    [inference] = contextual inference from biography + period knowledge. Explicitly inferred, not factual.
+    [experiential_reconstruction] = claims about what the figure felt / meant / experienced as biocultural reconstruction. Required for any formative-context content (Section 1).
+    [projection_warning: <distortion>] = a modern English term used because no better exists. The bracket explains the distortion.
+
+  When the figure has hostile-source coverage, add one of these IN ADDITION to a core tag:
+    [hostile_source: <bias>] = claim from enemy / coloniser / rival account.
+    [reconstruction: <scholar>] = modern scholarly reconstruction reading against the hostile grain.
+    [own_voice] = material in the figure's own voice, however fragmentary.
 
 - Do not resolve genuine scholarly debates into false consensus. Name contested readings, identify the scholars behind them, explain why the disagreement matters — do not pick a side the scholarship hasn't picked.
 
@@ -34,7 +44,7 @@ Your task for Section 1:
 
 - INTELLECTUAL WORLD — the intellectual currents, traditions, and institutions this figure was embedded in. What was happening philosophically, politically, artistically, or scientifically in their period and place. What schools they studied at, what debates they entered, what movements they were in dialogue with (supporting, opposing, or independent of).
 
-- FORMATIVE CANDIDATES — 2-5 plausible shapes, each with all four sub-fields: formative_emotional_community (overlapping communities that shaped this figure's lexicon of feeling + norms of expression + what-could-be-felt); lived_through_own_apparatus (for human voices: describe the formative event AND the framework in which it was meaningful, in a single movement, using period-specific vocabulary; do NOT describe event without framework — that produces modern projection); engagement_it_drives (what does this voice enter the panel to *do*?); evidence_tag: experiential_reconstruction.
+- FORMATIVE CANDIDATES — 2-5 plausible shapes, each with 3 substantive sub-fields plus an evidence_tag metadata field: formative_emotional_community (overlapping communities that shaped this figure's lexicon of feeling + norms of expression + what-could-be-felt); lived_through_own_apparatus (for human voices: describe the formative event AND the framework in which it was meaningful, in a single movement, using period-specific vocabulary; do NOT describe event without framework — that produces modern projection); engagement_it_drives (what does this voice enter the panel to *do*?); evidence_tag: experiential_reconstruction.
 
   Use the voice's own framework — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture — not a generic template.
 
@@ -47,7 +57,7 @@ Your task for Section 1:
   - Rastafari: four Rasta virtues (livity, ini, overstanding, reasoning).
   - Buddhist: śīla; paramīs.
   - Confucian: ren, yi, li, zhi.
-  Include a [projected_categories] warning if any modern category is used for clarity, with the distortion flagged explicitly.
+  Include a [projection_warning] tag if any modern category is used for clarity, with the distortion flagged explicitly.
 
 - HOW THEY DESCRIBED THEMSELVES — this figure's self-understanding. How did they describe their own work? What did they think they were doing? What kind of thinker did they claim to be, and what did they refuse to be called? (Socrates refusing "wise"; Nietzsche refusing "systematic philosopher".) Feeds epistemic_frame_statement — a voice that sounds right claims itself the way the figure actually did.
 
@@ -56,6 +66,8 @@ Your task for Section 1:
 - INTERNAL CONTRADICTIONS AND DOCUMENTED PARADOXES — places where what this figure said and what they did diverge; where their early and late positions disagree; where their self-understanding differs from how others saw them. Not flaws to explain away — signal that the figure was complex enough to be worth reading.
 
 - SOCIAL AND IDENTITY POSITION — the social, cultural, political, and material position this figure occupied: class, gender, race, religion, nationality, colonial or imperial status, family obligations, institutional role. Not as identity politics, but as the lived position from which they thought and acted. Shapes what topics they had standing to address. (Kafka as Jewish Prague bureaucrat writing in German about bureaucracy; Beauvoir as French bourgeois intellectual writing against her class and her gender; Confucius as a minor-noble ritual specialist in a collapsing feudal order.)
+
+- UNIQUE CONTRIBUTION — what perspective this figure brings that no other figure brings. Not a list of their views, but the ONE thing the panel would lose if this voice weren't here. Cite the scholarly framing (e.g. "Hannah Arendt's distinction between labor / work / action as a contribution no other 20th-C political theorist made"). Feeds unique_contribution at extraction; helps Pass 5 ENGAGEMENT shape what this voice characteristically notices that others miss.
 
 ---
 
@@ -180,7 +192,9 @@ Your task for Section 4:
     (b) Scholarly characterization by contrast — where scholars note that this figure "doesn't do X" in contrast with a peer or tradition. ("Kant doesn't adopt Locke's empiricism"; "Hume doesn't produce systematic a priori argument as rationalists do".)
   3-5 items per figure with textual or scholarly citation.
 
-- EMOTIONAL AND AESTHETIC REGISTER — the overall feel of reading this figure, described as a reader experience rather than a technical analysis. (Kafka: "claustrophobic bureaucratic dread — familiar procedures become alien and threatening." Beauvoir: "intellectual intimacy — she thinks through a problem with the reader as companion, not teacher.") Cite the scholars or critics who characterize the reading experience this way.
+- CHARACTERISTIC STANCE — the figure's natural emotional-intellectual pull: irony, earnestness, obsession, withdrawal, lament, exuberance, didactic urgency, restraint, etc. Not a list of all stances they ever took — the one or two they characteristically gravitate to when no specific stance is forced. Cite scholars who characterize the figure's typical stance. (Kierkegaard: indirect-ironic with periodic earnest urgency. Wittgenstein: clarifying-corrective with self-doubt. Beauvoir: intimate-analytical with autobiographical anchoring.) Feeds stance_tendency at extraction.
+
+- EMOTIONAL AND AESTHETIC REGISTER + AESTHETIC QUALITIES — the overall feel of reading this figure, described as a reader experience rather than a technical analysis. The "what makes someone recommend this voice to someone else" gestalt. (Kafka: "claustrophobic bureaucratic dread — familiar procedures become alien and threatening." Beauvoir: "intellectual intimacy — she thinks through a problem with the reader as companion, not teacher." Plato: "elegant but accessible; conversation between intelligent people genuinely trying to work something out, with a moment of surprise.") Cite the scholars or critics who characterize the reading experience this way. Feeds both register_and_tone (sentence-level music) AND aesthetic_qualities (whole-work gestalt).
 
 ---
 
