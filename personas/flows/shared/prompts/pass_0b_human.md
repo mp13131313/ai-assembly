@@ -11,7 +11,7 @@ RESEARCH INTEGRITY (applies to every section below)
 
 - Where the record is thin, say so. "The scholarly record supports X but not Y" is more valuable than fabricated Y. Better to produce less honestly than more dishonestly.
 
-- Anti-patterns, banned-language, and character-breaking failure modes are partially populated from your dossier (scholarly evidence of what the figure documentedly avoided) and partially populated downstream (Pass 7c observes AI-default failure modes by running the voice on test material). Your job is the documented half. Do not attempt to anticipate AI-default failure modes — you don't have the baseline.
+- Your anti-patterns are scholarly ones — moves the figure documentedly avoided, rejected, or criticized in writing. Cite the textual or scholarly evidence. Not speculation about how an imitation might fail.
 
 - This dossier will feed an AI persona that will reason as this voice on novel questions. Every claim you produce may end up load-bearing. Invented material will either be caught in downstream verification passes (costing time) or slip through and degrade the voice (costing quality). Honesty is load-bearing.
 
@@ -22,7 +22,7 @@ RESEARCH INTEGRITY (applies to every section below)
 What this section feeds downstream:
   - world (time, place, institutions, intellectual currents)
   - formative_experience (4-part rubric: formative_emotional_community + lived_through_own_apparatus + engagement_it_drives; surface 2-5 candidates with scholarly_support_score; Pass 2 commits. Frame in the voice's own cosmology — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture, endocrine semelparity — not a generic template. Carry [experiential_reconstruction] evidence tag.)
-  - character (IN PERIOD / TRADITION VOCABULARY — not Big-Five personality adjectives. Use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
+  - character (IN PERIOD / TRADITION VOCABULARY — use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
   - topics_requiring_care (historical views conflicting with modern sensibilities — partial)
 
 
@@ -40,9 +40,7 @@ Your task for Section 1:
 
   Surface multiple candidates; do not pick one. Pass 2 commits. For each candidate: scholarly_support_score ∈ {strong, moderate, contested}.
 
-- CHARACTER IN PERIOD/TRADITION VOCABULARY — describe this figure's character USING THE CHARACTER-GRAMMAR NATIVE TO THEIR PERIOD OR CULTURE. Do NOT use Big-Five-adjacent adjectives as primary terms (curious, brave, warm, ambitious, introverted). These are 20th-C trait-theory categories that anachronise pre-modern voices.
-
-  Instead:
+- CHARACTER IN PERIOD/TRADITION VOCABULARY — describe this figure's character USING THE CHARACTER-GRAMMAR NATIVE TO THEIR PERIOD OR CULTURE. Use:
   - Medieval/early-modern European voices: four humours (sanguine/choleric/melancholic/phlegmatic); cardinal and theological virtues.
   - Greek: tripartite soul (logistikon/thumoeides/epithumētikon); sōphrosynē, andreia, dikaiosynē, phronēsis.
   - Islamic: nafs stations (ammāra / lawwāma / muṭmaʾinna); adab; ṣabr.
@@ -182,8 +180,6 @@ Your task for Section 4:
     (b) Scholarly characterization by contrast — where scholars note that this figure "doesn't do X" in contrast with a peer or tradition. ("Kant doesn't adopt Locke's empiricism"; "Hume doesn't produce systematic a priori argument as rationalists do".)
   3-5 items per figure with textual or scholarly citation.
 
-  NOTE: identifying AI-default failure modes (where a persona running at runtime sounds like generic AI rather than this figure) is NOT part of your job. That work happens downstream in Pass 7c, which runs the voice on test material and observes where it bleeds. Your job is scholarly anti-patterns, not AI-failure-mode prediction.
-
 - EMOTIONAL AND AESTHETIC REGISTER — the overall feel of reading this figure, described as a reader experience rather than a technical analysis. (Kafka: "claustrophobic bureaucratic dread — familiar procedures become alien and threatening." Beauvoir: "intellectual intimacy — she thinks through a problem with the reader as companion, not teacher.") Cite the scholars or critics who characterize the reading experience this way.
 
 ---
@@ -214,9 +210,7 @@ Your task for Section 5:
 
 - VIEWS THIS FIGURE HELD THAT WERE CONTESTED WITHIN THEIR OWN TRADITION — not modern anachronism, but internal disagreement in the figure's own intellectual context. Helps distinguish "everyone in the period thought this" from "this figure took a position that was controversial even then." (E.g., Augustine's positions on grace were controversial among contemporaries — Origen's followers disagreed sharply. Hume's skepticism about causation was contested by Scottish moderates as destructive.)
 
-- DOCUMENTED CHARACTER-BREAKING MOVES — moves that scholars identify as antithetical to this figure's characteristic mode of thinking. Not stylistic (that's Section 4) — character-level. Moves the figure CONSTITUTIVELY refused, such that adopting them would be self-negation. 3-5 items per figure with scholarly citation. (Examples: Augustine writing coolly about grace without personal-confessional urgency would negate his characteristic mode. Wittgenstein producing a systematic metaphysical treatise would negate his method. Kierkegaard publishing under his own name in direct assertion would negate his indirect communication.) Feeds hard_limits.
-
-  NOTE: Like Section 4 Bullet 7 (documented anti-patterns), AI-default failure mode anticipation is Pass 7c territory, not your job.
+- DOCUMENTED CHARACTER-BREAKING MOVES — moves that scholars identify as antithetical to this figure's characteristic mode of thinking. Not stylistic (that's Section 4) — character-level. Moves the figure CONSTITUTIVELY refused, such that adopting them would be self-negation. 3-5 items per figure with scholarly citation. (Examples: Augustine writing coolly about grace without personal-confessional urgency would negate his characteristic mode. Wittgenstein producing a systematic metaphysical treatise would negate his method. Kierkegaard publishing under his own name in direct assertion would negate his indirect communication.)
 
 - RETROSPECTIVE-FRAMING TRAPS — descriptions of this figure that a modern writer would instinctively reach for but that the figure themselves would reject. 3-5 items. (E.g., for Augustine: calling him "early existentialist" when that category postdates him by 1500 years. For Kant: describing him as "founding liberal democracy" when he explicitly rejected that political alignment. For Montaigne: calling him a "proto-postmodernist" when poststructuralism is a 20th-century construction.)
 
