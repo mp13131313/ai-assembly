@@ -15,7 +15,6 @@ A flat JSON file at `runs/<voice_slug>/persona_card_assembled.json` containing:
   runtime if the voice carries something forward into Night 2)
 - 1 `metadata` block with provenance, validation status, and field role
   clarifications
-</content>
 
 
 ## Two consumers, two roles
@@ -52,7 +51,6 @@ candidate for few-shot exemplars in the Voice Pipeline's Step 1 prompt.
   and `banned_modes`
 - Saved into the card as a pre-runtime artifact so human reviewers can see
   the card act before approving it
-</content>
 
 
 If the Voice Pipeline few-shots from `worked_provocations`:
@@ -101,4 +99,3 @@ The `metadata` block in each assembled card contains:
   `negative_constraints_refinement` — Phase 3 results
 - `worked_provocations_role` — the explicit "do not few-shot" notice
 - `field_counts`, `register_violations` — diagnostic extras
-</content>

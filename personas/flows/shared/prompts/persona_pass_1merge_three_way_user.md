@@ -1,4 +1,4 @@
-{# Pass 1-merge — Three-way contradiction check (Claude Sonnet).
+{# Pass 1-merge — Three-way contradiction check (Claude Opus 4.7 + adaptive thinking).
    v3.10 Node 1-merge, Approach C variant.
    Inputs: Perplexity dossier + (optional) Claude Deep Research dossier + Gemini broad scan.
    Output: JSON list of factual contradictions across the available sources. #}
