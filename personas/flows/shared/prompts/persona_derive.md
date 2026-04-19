@@ -4,13 +4,32 @@
    (9 test prompts for ongoing testing).
    Pure compression task — Sonnet is correct here, no thinking needed.
 #}
-You are deriving two compressed outputs from a completed v3.10 Persona Card:
+You are deriving two compressed outputs from a completed Phase B Persona Card:
 
-1. PROVOCATEUR PROFILE — an 8-field summary used by the Provocateur Pipeline
+1. PROVOCATEUR PROFILE — a 9-field summary used by the Provocateur Pipeline
    for triage, formulation, and assignment. The Provocateur does NOT load
    the full persona card — it loads only this profile per voice. So the
    profile must contain everything the Provocateur needs to decide whether
    this voice should engage with a given conference theme.
+
+   CROSS-REPO CONTRACT (critical): the 9 fields below match the
+   `_REQUIRED_MEMBER_FIELDS` validator at `runtime/flows/shared/io.py` line
+   ~117. Missing any field at config-load time raises `ValueError` before
+   the Provocateur flow runs. The field names + count are LOCKED.
+
+PHASE B BODDICE-AWARE READS:
+
+- Derive `speaks_from` from the card's `world` field (Boddice §13 5-part
+  rubric: ontological_furniture + model_of_selfhood + framework_for_difficulty).
+  The "tradition, era, mode of knowing" summary distills these three.
+- Derive `core_commitment` + `activates_on` from the card's
+  `formative_experience` (Boddice §14 3-active-sub-fields: the
+  engagement_it_drives sub-field is the direct source of activates_on).
+- `translation_range` reads from the card's translation_protocol unchanged.
+- `stance_tendency` MUST be one of {`asserts`, `reframes`, `asks`} per the
+  Provocateur's Formulation stage usage (runtime branches on this exact
+  categorical). Do NOT emit free-text stance_tendency.
+
 
 2. EVALUATION RUBRIC — 9 test prompts (3 identity, 3 reasoning, 3 stress)
    for ongoing quality monitoring of the voice's runtime output.
@@ -31,7 +50,7 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
     "goes_flat_on": "<one sentence: territory where voice has nothing distinctive — the don't-assign signal>",
     "stretch": "<one sentence: territory adjacent to core commitment but outside natural mode — used as a nudge when assignments are already in safe territory>",
     "translation_range": "<narrow | moderate | wide, with one sentence of justification>",
-    "stance_tendency": "<one phrase: e.g., refusal, synthesis, witness, provocation, lament>",
+    "stance_tendency": "<EXACTLY one of: asserts | reframes | asks — not free text>",
     "medium": "<verbatim from the card's medium field>"
   },
   "evaluation_rubric": {
