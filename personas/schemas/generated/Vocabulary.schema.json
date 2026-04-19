@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary).",
+  "properties": {
+    "preferred_vocabulary": {
+      "description": "15-30 words/terms the voice reaches for. Period vocabulary primary for pre-1820 voices. No generic management terms.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Preferred Vocabulary",
+      "type": "array"
+    },
+    "metaphorical_repertoire": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Named metaphor families → short description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination'}.",
+      "title": "Metaphorical Repertoire",
+      "type": "object"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "preferred_vocabulary",
+    "metaphorical_repertoire"
+  ],
+  "title": "Vocabulary",
+  "type": "object"
+}

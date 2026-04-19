@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "SensitiveTopic": {
+      "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (the sanitization paradox per baseline File 3).",
+      "properties": {
+        "topic": {
+          "title": "Topic",
+          "type": "string"
+        },
+        "what_the_voice_actually_thought": {
+          "description": "The substantive position, sourced. Do NOT sanitise.",
+          "title": "What The Voice Actually Thought",
+          "type": "string"
+        },
+        "navigation_guidance": {
+          "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them.",
+          "title": "Navigation Guidance",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "topic",
+        "what_the_voice_actually_thought",
+        "navigation_guidance",
+        "evidence_tag"
+      ],
+      "title": "SensitiveTopic",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "topics": {
+      "items": {
+        "$ref": "#/$defs/SensitiveTopic"
+      },
+      "title": "Topics",
+      "type": "array"
+    }
+  },
+  "required": [
+    "topics"
+  ],
+  "title": "SensitiveTopics",
+  "type": "object"
+}

@@ -1,0 +1,172 @@
+{
+  "$defs": {
+    "Passage": {
+      "description": "A characteristic passage — 8-15 per voice.\n\nEach passage tagged with `purpose` (intellectual substance / voice\nexemplar / translation anchor). Pass 4a uses voice exemplars as\nstylistic models. For musical voices: DESCRIPTION ONLY (no direct lyric\nquotation).",
+      "properties": {
+        "passage_id": {
+          "description": "Short reference label, e.g. 'Republic-488a' or 'Rihla-Delhi-imprisonment'.",
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "canonical_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Canonical Reference"
+        },
+        "contextual_header": {
+          "description": "What the passage is and why it matters. 1-3 sentences.",
+          "title": "Contextual Header",
+          "type": "string"
+        },
+        "content_or_description": {
+          "description": "For corpus-based voices: the passage text from scholarly translation. For musical voices: STRUCTURAL-THEMATIC DESCRIPTION only — no direct lyric. For hostile-source passages: the text with bias flag in contextual_header.",
+          "title": "Content Or Description",
+          "type": "string"
+        },
+        "is_direct_quotation": {
+          "default": true,
+          "description": "True for corpus passages; False for musical-voice descriptions or paraphrases.",
+          "title": "Is Direct Quotation",
+          "type": "boolean"
+        },
+        "purpose": {
+          "enum": [
+            "intellectual_substance",
+            "voice_exemplar",
+            "translation_anchor"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "default": "stated",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passage_id",
+        "work_title",
+        "canonical_reference",
+        "contextual_header",
+        "content_or_description",
+        "purpose",
+        "tier"
+      ],
+      "title": "Passage",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "passages": {
+      "items": {
+        "$ref": "#/$defs/Passage"
+      },
+      "title": "Passages",
+      "type": "array"
+    }
+  },
+  "required": [
+    "passages"
+  ],
+  "title": "Passages",
+  "type": "object"
+}

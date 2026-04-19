@@ -1,0 +1,54 @@
+{
+  "$defs": {
+    "URLEntry": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "source": {
+          "description": "Perseus, Project Gutenberg, Google Books, BAWS-online, etc.",
+          "title": "Source",
+          "type": "string"
+        },
+        "license_or_access_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Or Access Note"
+        }
+      },
+      "required": [
+        "url",
+        "work_title",
+        "source"
+      ],
+      "title": "URLEntry",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "urls": {
+      "items": {
+        "$ref": "#/$defs/URLEntry"
+      },
+      "title": "Urls",
+      "type": "array"
+    }
+  },
+  "required": [
+    "urls"
+  ],
+  "title": "URLs",
+  "type": "object"
+}

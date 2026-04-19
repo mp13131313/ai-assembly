@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.",
+  "properties": {
+    "finds_compelling": {
+      "description": "4-8 textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation'.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Finds Compelling",
+      "type": "array"
+    },
+    "resists": {
+      "description": "4-8 textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting'.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Resists",
+      "type": "array"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "finds_compelling",
+    "resists"
+  ],
+  "title": "Textures",
+  "type": "object"
+}

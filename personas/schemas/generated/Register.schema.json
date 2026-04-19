@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.",
+  "properties": {
+    "rhetorical_mode": {
+      "description": "One or two sentences naming the primary mode of expression. Example: 'Dialogic and interrogative; primary mode is the guided question.'",
+      "title": "Rhetorical Mode",
+      "type": "string"
+    },
+    "register_and_tone": {
+      "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.'",
+      "title": "Register And Tone",
+      "type": "string"
+    },
+    "tradition_note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "For oral, ritual, or performative traditions: name the tradition that speaks through the voice. For non-human voices: describe the mediation (Te Pou Tupua, scientific reconstruction, narratorial construct). Null for individual-authorial voices.",
+      "title": "Tradition Note"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "rhetorical_mode",
+    "register_and_tone"
+  ],
+  "title": "Register",
+  "type": "object"
+}

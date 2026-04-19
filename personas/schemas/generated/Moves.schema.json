@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "Move": {
+      "description": "One named rhetorical / characteristic move.\n\n3-6 per voice. These are the fingerprints — things that make a reader\nwho knows this voice say \"that's unmistakably X.\"",
+      "properties": {
+        "name": {
+          "description": "Short name, e.g. 'The definitional challenge'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the move does; when the voice deploys it.",
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One concrete example — short phrase or sentence illustrating the move in action.",
+          "title": "Example"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "Move",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "moves": {
+      "items": {
+        "$ref": "#/$defs/Move"
+      },
+      "title": "Moves",
+      "type": "array"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "moves"
+  ],
+  "title": "Moves",
+  "type": "object"
+}

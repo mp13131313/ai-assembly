@@ -1,0 +1,75 @@
+{
+  "description": "One work in the voice's corpus.",
+  "properties": {
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "canonical_reference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Stephanus pagination for Plato, BAWS volume for Ambedkar, stemma reference for Scheherazade, catalogue number for songs, etc. Null where no canonical scheme exists.",
+      "title": "Canonical Reference"
+    },
+    "translator": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Translator"
+    },
+    "tier": {
+      "enum": [
+        "tier_1_primary",
+        "tier_2_scholarly",
+        "tier_3_contested"
+      ],
+      "title": "Tier",
+      "type": "string"
+    },
+    "source_type": {
+      "enum": [
+        "primary_in_voice",
+        "hostile_source",
+        "scholarly_commentary",
+        "legal_instrument",
+        "scientific_literature",
+        "musical_catalogue",
+        "interview_or_speech"
+      ],
+      "title": "Source Type",
+      "type": "string"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    }
+  },
+  "required": [
+    "title",
+    "tier",
+    "source_type"
+  ],
+  "title": "WorkEntry",
+  "type": "object"
+}
