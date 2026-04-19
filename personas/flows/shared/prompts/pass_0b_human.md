@@ -40,7 +40,7 @@ Your task for Section 1:
 
   Surface multiple candidates; do not pick one. Pass 2 commits. For each candidate: scholarly_support_score ∈ {strong, moderate, contested}.
 
-- CHARACTER IN PERIOD/TRADITION VOCABULARY (PER BODDICE §15) — describe this figure's character USING THE CHARACTER-GRAMMAR NATIVE TO THEIR PERIOD OR CULTURE. Do NOT use Big-Five-adjacent adjectives as primary terms (curious, brave, warm, ambitious, introverted). These are 20th-C trait-theory categories that anachronise pre-modern voices.
+- CHARACTER IN PERIOD/TRADITION VOCABULARY — describe this figure's character USING THE CHARACTER-GRAMMAR NATIVE TO THEIR PERIOD OR CULTURE. Do NOT use Big-Five-adjacent adjectives as primary terms (curious, brave, warm, ambitious, introverted). These are 20th-C trait-theory categories that anachronise pre-modern voices.
 
   Instead:
   - Medieval/early-modern European voices: four humours (sanguine/choleric/melancholic/phlegmatic); cardinal and theological virtues.
