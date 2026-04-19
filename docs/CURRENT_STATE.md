@@ -10,20 +10,22 @@
 ## 0. Quick map
 
 ```
-ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
-├── docs/                                  # canonical specs + this file
+ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
+├── docs/                      # PRODUCTION: current specs + this file
 │   ├── CURRENT_STATE.md                   # you are here
 │   ├── README.md                          # staleness banner for the other specs
-│   ├── AI_Assembly_Briefing_v3_1.md         # project briefing (current)
-│   ├── AI_Assembly_Architecture_v1.md     # STALE — see README
-│   ├── AI_Assembly_Infrastructure_Setup.md# STALE — see README
+│   ├── references.md                      # pointer into research/ and _workspace/planning/
+│   ├── AI_Assembly_Briefing_v3_1.md       # project briefing (current)
 │   ├── AI_Assembly_Persona_Card_v2.md
 │   ├── AI_Assembly_Persona_Pipeline_v3_10.md
 │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   ├── AI_Assembly_Researcher_Pipeline.md
 │   ├── AI_Assembly_Transcription_Pipeline.md
-│   └── AI_Assembly_Voice_Pipeline.md      # Steps 1+2 only; Step 3 unspecified
-├── runtime/                                # overnight pipeline: ingest + flows
+│   ├── AI_Assembly_Voice_Pipeline.md      # Steps 1+2 only; Step 3 unspecified
+│   ├── AUDIENCE_BRIEF.md
+│   ├── LLM_CALL_INVENTORY.md
+│   └── design/
+├── runtime/                   # PRODUCTION code: FastAPI ingest + Prefect flows
 │   ├── ingest/                            # FastAPI upload app (built, tested)
 │   ├── flows/
 │   │   ├── transcription_flow.py          # built, 5-pass Speaker ID, 3 MSC test sessions
@@ -34,10 +36,8 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   │       ├── council/council_config.json# dev_stub_v2 (hand-written, not derived)
 │   │       └── prompts/                   # 8 active + 4 archived
 │   ├── reference/                         # runtime data: sessions.json, speakers.json
-│   ├── notes/                             # WIP: PROPOSED_pipeline_doc_change.md + deltas
-│   ├── runs/                              # per-run outputs (gitignored)
 │   └── scripts/                           # sessions/speakers regeneration
-├── personas/                               # pre-conference: voice card build
+├── personas/                  # PRODUCTION code: pre-conference voice card build
 │   ├── run_pass0a_voice_config.py         # Pass 0a: voice config + review doc
 │   ├── run_phase0_1_research.py           # Phase 0.5: Perplexity + Gemini → DR prompt
 │   ├── run_pass0b_dr_prompt.py            # Pass 0b: DR prompt only (no research)
@@ -47,8 +47,12 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 │   │   ├── conference_context.json
 │   │   ├── voices/                        # 4 voice configs: cleopatra, hannah_arendt, octopus, plato
 │   │   └── dossiers/                      # Claude DR dossiers (manually produced)
-│   ├── notes/                             # IMPLEMENTATION_AUDIT_v3_7.md (dated 2026-04-15)
-│   └── runs/                              # per-voice build outputs (gitignored)
+│   └── HANDOFF.md                         # cross-repo contract (production, active)
+├── research/                  # PRESERVED: grounding material, not deletable
+│   └── baseline_research/                 # 5 Deep Research compass artifacts
+├── _workspace/                # Out of scope for code reviews + VM deploys
+│   ├── planning/                          # forward-looking: REBUILD_PLAN, ARCHITECTURE_NEXT_PHASE_HANDOFF
+│   └── archive/                           # eligible for pruning: specs, fix-plans, session-artifacts, runs
 └── .env, .env.example, .gitignore, README.md, CLAUDE.md
 ```
 
@@ -60,7 +64,7 @@ ai-assembly/  (monorepo, pushed 2026-04-16, commit 65caf49)
 
 **Status: built, end-to-end. Phases 1, 2, 3, 4 complete. Phase 5 Cross-Persona QC not built.**
 
-Two full runs completed: **Plato** (full pipeline, all artifacts in `personas/runs/plato/`) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
+Two full runs completed: **Plato** (full pipeline, all artifacts in `_workspace/archive/runs/personas/plato/`) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
 
 Built and verified:
 
@@ -439,7 +443,7 @@ Pass 0a proposed a novel mode for.
 **Enforcement:** `personas/flows/shared/node0_validation.py:60`.
 
 **Open question for Phase B:** whether to expand the enum is
-`REBUILD_PLAN.md §Cross-cutting §"Decision: keep \`voice_mode\` 3-enum
+`_workspace/planning/REBUILD_PLAN.md §Cross-cutting §"Decision: keep \`voice_mode\` 3-enum
 or expand?"`. Default for now: keep the 3-enum.
 
 ### 5.13 `needs_dr_supplement` hardcoded to True (commit b1868da)
@@ -480,8 +484,8 @@ or expand?"`. Default for now: keep the 3-enum.
 
 ### 6.3 Documentation staleness
 
-- **`docs/AI_Assembly_Architecture_v1.md`** (stale): describes n8n orchestration (actual is Prefect); 2-step Voice Pipeline (briefing has 3); 2 nights (briefing has 3 + Day 4 goodbye); missing closing-show pipelines, Matrix A/B, newsletter delivery via Substack blurb.
-- **`docs/AI_Assembly_Infrastructure_Setup.md`** (stale): describes rclone/Drive mount + n8n Docker + file watcher (actual is FastAPI upload + pure Prefect + status.json state machine); pre-flight checklist references obsolete elements.
+- **`_workspace/archive/specs/AI_Assembly_Architecture_v1.md`** (archived — stale): describes n8n orchestration (actual is Prefect); 2-step Voice Pipeline (briefing has 3); 2 nights (briefing has 3 + Day 4 goodbye); missing closing-show pipelines, Matrix A/B, newsletter delivery via Substack blurb.
+- **`_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md`** (archived — stale): describes rclone/Drive mount + n8n Docker + file watcher (actual is FastAPI upload + pure Prefect + status.json state machine); pre-flight checklist references obsolete elements.
 
 ### 6.4 Code issues (minor)
 
@@ -695,10 +699,10 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 
 - `docs/README.md` — staleness banner for the spec set
 - `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
-- `personas/notes/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
+- `_workspace/archive/fix-plans/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
 - `personas/flows/shared/prompts/persona_pass_7b_provocations.md` — header comment documents the "worked_provocations are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
-- `runtime/notes/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes, informs spec updates
+- `_workspace/archive/fix-plans/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes (archived; absorbed into current specs)
 
 ---
 
