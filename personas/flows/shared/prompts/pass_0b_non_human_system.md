@@ -6,9 +6,19 @@ Research {{ display_name_with_hint }} comprehensively for the purpose of buildin
 
 RESEARCH INTEGRITY (applies to every section below)
 
-- Only attribute direct quotes to verifiable primary sources (peer-reviewed publication, legislation, or treaty text) with full citation and section/page reference. Paraphrases must be marked explicitly: "[paraphrased from scholarly consensus]" or "[paraphrase of {scholar}'s reading]".
+- Only attribute direct quotes to verifiable primary sources (peer-reviewed publication, legislation, or treaty text) with full citation and section/page reference.
 
-- Flag inferences explicitly: "[inference — from documented observation / documented legal-philosophical reading]". Do not present inference as fact.
+- EVIDENCE TAGGING — every claim carries one of these five core tags. Downstream merge passes parse against this exact list. Do not invent new tag forms.
+    [stated] = direct quote or paraphrase from a primary source, with work title + section/page reference.
+    [scholarly_consensus] = uncontested modern-scholarly reading. Cite the scholar(s) inline.
+    [inference] = contextual inference from biography + period knowledge. Explicitly inferred, not factual.
+    [experiential_reconstruction] = claims about what the figure felt / meant / experienced as biocultural reconstruction. Required for any formative-context content (Section 1).
+    [projection_warning: <distortion>] = a modern English term used because no better exists. The bracket explains the distortion.
+
+  When the figure has hostile-source coverage, add one of these IN ADDITION to a core tag:
+    [hostile_source: <bias>] = claim from enemy / coloniser / rival account.
+    [reconstruction: <scholar>] = modern scholarly reconstruction reading against the hostile grain.
+    [own_voice] = material in the figure's own voice, however fragmentary.
 
 - Do not resolve genuine scientific or scholarly debates into false consensus. Name contested readings, identify the scholars behind them, explain why the disagreement matters.
 
@@ -148,7 +158,7 @@ Your task for Section 3:
 
 ---
 
-## Section 4: SCIENTIFIC LITERATURE
+## Section 4: VOICE AND SCIENTIFIC REGISTER
 
 What this section feeds downstream:
   - epistemic_frame_statement — the specific scholars and debates that inform the voice construction
@@ -178,6 +188,8 @@ Your task for Section 4:
 - WHAT REMAINS GENUINELY UNKNOWN — the gaps in scientific understanding specific to this system. Climate-change trajectories, cumulative-impact thresholds, restoration-success metrics over decadal timescales. Directly feeds knowledge_boundary at extraction.
 
 
+
+- CHARACTERISTIC STANCE / AESTHETIC QUALITIES — the system's characteristic engagement-pull: how scientists describe its typical mode of encounter (curious, withdrawing, alert-then-still, oriented, oblivious, etc.). What makes the voice's output identifiable as that system rather than a generic "non-human voice"? (Whanganui via Te Pou Tupua: insistent-genealogical with deep-time patience; not pleading. Pachamama via Andean cabildos: cyclical-reciprocal; refuses linear-progress framings.) Feeds stance_tendency + aesthetic_qualities at extraction.
 ---
 
 ## Section 5: PHILOSOPHICAL AND LEGAL FRAMEWORKS

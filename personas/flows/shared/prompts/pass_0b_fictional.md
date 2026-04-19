@@ -5,13 +5,23 @@ RESEARCH INTEGRITY (applies to every section below)
 
 - For a fictional character, evidence lives in the TEXT and in SCHOLARLY RECEPTION — never in imagined biography. The character has no life outside the text; do not invent one. Any claim about the character must be anchored in a specific passage, a scholarly reading with citation, or a documented narrative function.
 
-- Tag each attribution explicitly per Card v2 conventions:
-    [stated in text] = the character says it or the narrator states it at a specific textual location (cite night-number / act.scene / book.chapter)
-    [scholarly consensus] = the reading is agreed across major scholarly traditions (cite the scholars)
-    [scholarly reading of {scholar}] = a specific scholar's reading, not consensus
-    [attributed by narrative function] = the commitment or capability is implied by what the text has the character do / embody / make possible
-    [textual-variant dependent] = the attribution depends on which manuscript family or translation tradition is used (name which)
-    [inference — from textual + scholarly evidence] = inference, explicitly marked
+- EVIDENCE TAGGING — every claim carries one of these five core tags. Downstream merge passes parse against this exact list. Do not invent new tag forms.
+    [stated] = direct quote or paraphrase from a primary source, with work title + section/page reference.
+    [scholarly_consensus] = uncontested modern-scholarly reading. Cite the scholar(s) inline.
+    [inference] = contextual inference from biography + period knowledge. Explicitly inferred, not factual.
+    [experiential_reconstruction] = claims about what the figure felt / meant / experienced as biocultural reconstruction. Required for any formative-context content (Section 1).
+    [projection_warning: <distortion>] = a modern English term used because no better exists. The bracket explains the distortion.
+
+  When the figure has hostile-source coverage, add one of these IN ADDITION to a core tag:
+    [hostile_source: <bias>] = claim from enemy / coloniser / rival account.
+    [reconstruction: <scholar>] = modern scholarly reconstruction reading against the hostile grain.
+    [own_voice] = material in the figure's own voice, however fragmentary.
+
+  Fictional-voice usage notes for the core tags:
+    - [stated] = at a specific textual location; cite night-number / act.scene / book.chapter.
+    - [scholarly_consensus] vs minority reading by single scholar = use [scholarly_consensus] with scholar named, or [inference] when the reading is contested.
+    - [inference] applies to "attributed by narrative function" cases (the commitment is implied by what the text has the character do / embody / make possible) — flag the narrative function in the inference's prose.
+    - When attribution depends on manuscript family or translation tradition, note which inline (e.g. "[stated] (Mahdi recension; Burton expands the passage)").
 
 - Do not resolve genuine scholarly debates into false consensus. Name contested readings, identify the scholars, explain why the disagreement matters for voice construction.
 
@@ -70,12 +80,14 @@ Your task for Section 1:
 
 - THE SWAP TEST FOR SECTION 1 — if the account of this character's textual foundation could fit another figure from the same genre or tradition (Penelope; Ariadne; any "clever woman" archetype), drive to specifics. Scheherazade is not a generic clever woman — her specifics are the frame-narrator structure of 1001 Nights, the sister-apparatus (Dunyazad), her stated purpose, her characteristic mid-tale dawn-break.
 
+- UNIQUE CONTRIBUTION — what perspective this character brings that no other panel voice brings. The ONE thing the panel would lose if this character were dropped. (Scheherazade: storytelling-as-survival — the only voice on the panel for whom continuing-to-tell-a-tale IS the political move. Hamlet would be: the inward-paralysis-as-reasoning move, no other panel voice does that.) Feeds unique_contribution at extraction.
+
 ---
 
 ## Section 2: CHARACTER AS INTELLECTUAL CONSTRUCT
 
 What this section feeds downstream:
-  - constitution — 10-20 commitments attributed to the character, tagged per Card v2 (including [attributed by narrative function])
+  - constitution — 10-20 commitments attributed to the character, tagged with the EVIDENCE TAGGING core values (mostly [inference] for commitments implied by narrative function; [stated] for explicit text)
   - concept_lexicon — concepts defined by the narrative tradition itself (frame tale, dawn-break, embedded narrator)
   - epistemic_frame_statement — the specific scholars and translation traditions whose reading informs the construction
   - bold_engagement_topics — derived from the character's narrative function and most contested scholarly meanings
@@ -85,7 +97,7 @@ What this section feeds downstream:
 
 Your task for Section 2:
 
-- COMMITMENTS ATTRIBUTED BY NARRATIVE FUNCTION — 10-20 commitments the character embodies. For each: (a) a one-sentence statement of the commitment; (b) evidence tag per Card v2 conventions — [stated in text] / [scholarly consensus] / [scholarly reading of X] / [attributed by narrative function] / [textual-variant dependent]; (c) a one-sentence operational note grounded in a specific scene or narrative structure (cite night-number, act.scene, or equivalent); (d) a brief scholarly citation where applicable. Examples (Scheherazade): "Storytelling suspends violence" [attributed by narrative function — her nightly telling is the deferral-structure of the frame]; "Interrupted narrative is a governance technology" [attributed by narrative function — dawn-break as a structural feature]; "Listening restores the listener" [scholarly consensus — Ghazoul, Malti-Douglas].
+- COMMITMENTS — 10-20 commitments the character embodies. For each: (a) a one-sentence statement of the commitment; (b) one of the core evidence tags from the EVIDENCE TAGGING block at top — typically [stated] for explicit textual claims, [inference] for narrative-function attribution (commitments implied by what the text has the character do or embody), [scholarly_consensus] for consensus readings; (c) a one-sentence operational note grounded in a specific scene or narrative structure (cite night-number, act.scene, or equivalent); (d) a brief scholarly citation where applicable. Examples (Scheherazade): "Storytelling suspends violence" [inference — narrative function: her nightly telling is the deferral-structure of the frame]; "Interrupted narrative is a governance technology" [inference — narrative function: dawn-break as a structural feature]; "Listening restores the listener" [scholarly_consensus — Ghazoul, Malti-Douglas].
 
 - UNIQUE NARRATIVE CONCEPTS — 5-10 concepts defined by the narrative tradition itself. For each: definition from literary scholarship; what the concept rules out (false alternatives from adjacent traditions); textual grounding. For Scheherazade: the frame tale; the tale-within-a-tale; dawn-break; the embedded narrator; the implicit contract between teller and listener. Flag concepts that are UNIQUE to this character's tradition vs shared with the tradition at large.
 
@@ -179,6 +191,8 @@ Your task for Section 4:
 
 - EMOTIONAL AND AESTHETIC REGISTER — the overall feel of reading this character in the authoritative translation, described as a reader experience rather than technical analysis. Cite the critics who characterise the reading experience this way.
 
+
+- CHARACTERISTIC STANCE / AESTHETIC QUALITIES — the character's characteristic emotional-narrative pull: how scholars describe the character's typical engagement mode (Scheherazade: deferring-with-tale; not pleading. Hamlet: ironic-deferring with sudden decisive action. Antigone: monumental-defiant; refuses negotiation.). What makes the character's output identifiable as THIS character rather than a generic clever-narrator / tragic-hero / etc.? Cite scholars. Feeds stance_tendency + aesthetic_qualities at extraction.
 ---
 
 ## Section 5: ONTOLOGICAL BOUNDARIES
