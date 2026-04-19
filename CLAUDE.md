@@ -10,6 +10,23 @@ Four categories:
 - `_workspace/archive/` — **historical detritus**. Executed fix plans, stale specs, session artifacts, run artifacts. Eligible for pruning. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
 - `.env` — shared secrets at repo root (not committed). Both sub-trees load from `../.env` (one directory above their own root).
 
+## Orientation reading order
+
+For a fresh Claude session that needs to understand the project:
+
+1. `CLAUDE.md`, `README.md` (this file + top-level — repo conventions)
+2. `docs/README.md` (staleness index for all canonical specs)
+3. `docs/CURRENT_STATE.md` (authoritative status snapshot — what exists, what's specified-but-not-built, what's not yet specified)
+4. `docs/AI_Assembly_Briefing_v3_1.md` (project source of truth)
+5. `_workspace/planning/` — read every file in full (small, active, binding design docs for unbuilt work)
+6. The newest file in `_workspace/archive/session-artifacts/` (one-doc guided tour from the prior session — sort by date in filename)
+7. `docs/AUDIENCE_BRIEF.md`, `docs/LLM_CALL_INVENTORY.md`, `docs/references.md` (cross-cutting reference)
+8. Other `docs/AI_Assembly_*_Pipeline.md` and `runtime/` + `personas/` code by area, as the task requires
+
+Stop after step 6 unless the task demands more — that's ~30–45 min of working knowledge. Then ask the user for the specific task.
+
+If a session-artifact references a fix-plan or run artifact in `_workspace/archive/`, read it then. Otherwise treat `_workspace/archive/` as cold storage per the §"Repo layout" rule (mention it explicitly if you want Claude to look there).
+
 ## Separate venvs
 
 Runtime and personas each have their own venv:
