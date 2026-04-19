@@ -25,12 +25,8 @@ What this section feeds downstream:
   - character (IN PERIOD / TRADITION VOCABULARY — not Big-Five personality adjectives. Per Boddice §15 use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
   - topics_requiring_care (historical views conflicting with modern sensibilities — partial)
 
-Starting material from Perplexity's §1:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(1, "(Perplexity §1 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
 
@@ -73,12 +69,8 @@ What this section feeds downstream:
   - bold_engagement_topics — derived from the constitution's most provocative commitments
   - epistemic_frame_statement — draws on scholars whose readings inform the construction
 
-Starting material from Perplexity's §2:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(2, "(Perplexity §2 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
 
@@ -107,12 +99,8 @@ What this section feeds downstream:
   - default_questions — 3-5 recurring interrogatives this voice habitually brings
   - translation_protocol — step-by-step process for how this voice encounters the unfamiliar
 
-Starting material from Perplexity's §3:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(3, "(Perplexity §3 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 3:
 
@@ -167,12 +155,8 @@ Avoid "reputation-level" characterization. Wikipedia-level voice descriptions ar
 
 The self-check for Section 4 is THE SWAP TEST: if a paragraph you write about this voice's style could be attributed to another figure with minimal edits, it is too generic. Specificity — a named move, a cited passage, a precise syntactic pattern, a distinctive word usage — is what makes voice material extractable into distinctive persona fields. If your description of Hume's voice could apply to Locke, it's too shallow. Drive down to what ONLY this figure does.
 
-Starting material from Perplexity's §4:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(4, "(Perplexity §4 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 4:
 
@@ -211,12 +195,8 @@ What this section feeds downstream:
   - topics_requiring_care — specific topics with navigation guidance per topic
   - hard_limits — 3-5 absolute prohibitions, character-breaking only
 
-Starting material from Perplexity's §5:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(5, "(Perplexity §5 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
 
@@ -253,12 +233,8 @@ Section 6 is the corpus gateway. Pass 1c will fetch primary texts from the URLs 
 
 Be specific throughout: work titles, canonical references, URLs, translation notes. Vague lists fail downstream.
 
-Starting material from Perplexity's §6:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(6, "(Perplexity §6 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 6:
 
@@ -302,16 +278,5 @@ Your task for Section 6:
 ---
 
 CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-
-{{ gemini_findings }}
-
-{% if not perplexity_sections and perplexity_findings %}
----
-
-FALLBACK: Perplexity output could not be split by section. Full output:
-
-{{ perplexity_findings }}
-{% endif %}
-
 Cite all claims. Prioritize academic sources (Stanford Encyclopedia of Philosophy, Cambridge Companions, peer-reviewed scholarship). For each major claim, note whether it represents scholarly consensus or a contested interpretation.
 

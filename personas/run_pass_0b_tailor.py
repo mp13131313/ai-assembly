@@ -48,12 +48,13 @@ def run_pass_0b_tailor(name: str) -> dict:
     # Paths.
     voice_config_path = REPO_ROOT / "inputs" / "voices" / f"{slug}.json"
     perp_path = REPO_ROOT / "runs" / slug / "01_research" / "perplexity_dossier.json"
+    gemini_path = REPO_ROOT / "runs" / slug / "01_research" / "gemini_broad_scan.json"
     base_prompt_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.md"
     base_preserved_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.base.md"
     tailored_prompt_path = base_prompt_path  # overwrite base
     notes_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_tailoring_notes.json"
 
-    for p in (voice_config_path, perp_path, base_prompt_path):
+    for p in (voice_config_path, perp_path, gemini_path, base_prompt_path):
         if not p.exists():
             sys.exit(f"Missing input: {p}")
 
@@ -61,6 +62,8 @@ def run_pass_0b_tailor(name: str) -> dict:
 
     perp = json.loads(perp_path.read_text())
     perp_text = perp.get("text") or perp.get("text_clean", "")
+    gem = json.loads(gemini_path.read_text())
+    gem_text = gem.get("text", "")
     base_prompt = base_prompt_path.read_text()
 
     # Preserve the base BEFORE we overwrite it.
@@ -81,6 +84,7 @@ def run_pass_0b_tailor(name: str) -> dict:
         voice_config_json=json.dumps(voice_config, ensure_ascii=False, indent=2),
         editorial_rationale=editorial_rationale,
         perplexity_dossier_text=perp_text,
+        gemini_broad_scan_text=gem_text,
         base_dr_prompt=base_prompt,
     )
     user = (

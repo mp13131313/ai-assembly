@@ -47,12 +47,8 @@ What this section feeds downstream:
   - character (how described in text; role; key scenes and speeches; scholarly characterisation)
   - topics_requiring_care (partial — variant traditions that produce different characterisations)
 
-Starting material from Perplexity's §1:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(1, "(Perplexity §1 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
 
@@ -84,12 +80,8 @@ What this section feeds downstream:
   - epistemic_frame_statement — the specific scholars and translation traditions whose reading informs the construction
   - bold_engagement_topics — derived from the character's narrative function and most contested scholarly meanings
 
-Starting material from Perplexity's §2:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(2, "(Perplexity §2 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
 
@@ -118,12 +110,8 @@ What this section feeds downstream:
   - translation_protocol — how this character encounters and reframes the unfamiliar within their narrative world
   - default_questions — the interrogatives the character's narrative position habitually brings
 
-Starting material from Perplexity's §3:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(3, "(Perplexity §3 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 3:
 
@@ -158,12 +146,8 @@ What this section feeds downstream:
   - banned_language / banned_modes — what this voice would never say or do
   - medium, characteristic_output_structure — the form and arc of this character's typical expression
 
-Starting material from Perplexity's §4:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(4, "(Perplexity §4 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Section 4 is the hardest section for a fictional character because the character's "voice" is the text-as-rendered-in-a-translation-tradition, not the character's own writing. Ground every voice observation in specific textual passages AND name the translation tradition that produced the observation. Haddawy's Scheherazade sounds different from Burton's Scheherazade sounds different from Galland's. The translation choice is part of the voice characterisation — not incidental.
 
@@ -205,12 +189,8 @@ What this section feeds downstream:
   - topics_requiring_care — the character's narrative-world material that conflicts with modern sensibilities; contested scholarly readings of that material
   - hard_limits — what the character's narrative world excludes absolutely (anachronism, genre violations, character-breaking moves)
 
-Starting material from Perplexity's §5:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(5, "(Perplexity §5 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
 
@@ -245,12 +225,8 @@ What this section feeds downstream:
   - epistemic_frame_statement — which scholarly / readerly tradition shapes this construction
   - length_and_format_constraints — reception patterns and the tradition's typical output arc
 
-Starting material from Perplexity's §6:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(6, "(Perplexity §6 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Section 6 is the corpus gateway. For a fictional character, the corpus is (a) the source text in an authoritative edition and (b) the scholarly reception that has shaped how the character has been read. Pass 1c fetches primary text from the URLs you identify; Pass 1d curates characteristic passages; Pass 4a researches voice directly from the text (in the translation you specify) and from selected scholarly readings. The quality of this section determines the quality ceiling of every voice-level field.
 
@@ -286,16 +262,5 @@ Your task for Section 6:
 ---
 
 CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-
-{{ gemini_findings }}
-
-{% if not perplexity_sections and perplexity_findings %}
----
-
-FALLBACK: Perplexity output could not be split by section. Full output:
-
-{{ perplexity_findings }}
-{% endif %}
-
 Cite all claims. Prioritise literary scholarship (peer-reviewed criticism, major companions and handbooks) and the authoritative critical edition of the source text. For each major interpretation, note whether it represents scholarly consensus or a contested reading.
 
