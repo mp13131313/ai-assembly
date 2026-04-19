@@ -336,7 +336,7 @@ Night 1 output:
 
 # Implementation: System Prompt Templates
 
-The default model is Claude Sonnet. Individual voices may use a different model if testing identified a stronger alternative — specified in the Persona Pipeline and read by the orchestration layer (n8n).
+The default model is Claude Sonnet. Individual voices may use a different model if testing identified a stronger alternative — specified in the Persona Pipeline and read by the orchestration layer (Prefect / Python runner — specific wiring TBD when Voice Pipeline is built).
 
 Template fields marked with `{{double_braces}}` are populated from the Persona Card.
 
@@ -618,7 +618,7 @@ Step 2:
 
 Budget $20–40 per night. Monitor after first test run.
 
-*Implementation details — n8n workflow design, API endpoint routing, parallelism configuration, error logging, continuity block scheduling — belong in the Technical Implementation document.*
+*Implementation details — Prefect flow design, API endpoint routing, parallelism configuration, error logging, continuity block scheduling — belong in the Technical Implementation document.*
 
 ---
 

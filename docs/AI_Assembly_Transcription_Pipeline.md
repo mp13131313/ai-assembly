@@ -153,7 +153,7 @@ Prefect's deployment is bound to a filesystem watcher (Python `watchdog`) on the
 4. The work package fans out to Steps 2–5 in parallel with any other sessions currently processing.
 5. The completed session package is written to `/transcripts/dayN/{session_id}.json` (or `{session_id}__reflection__{slug}.json`).
 6. Any review items are written to `/review/dayN/{session_id}_review.json`.
-7. The downstream n8n flow watches `/transcripts/` and picks up new packages for the Researcher.
+7. The Researcher flow picks them up via `researcher_flow.py`.
 
 If the same file is uploaded twice (e.g., a corrected version), the second upload triggers a re-run and overwrites the previous output. If a file lands with a `session_id` that does not appear in `sessions.json`, it is moved to `/review/` with a "no matching session" note — never silently dropped.
 
@@ -505,7 +505,7 @@ Its sole function is to turn recorded human conversation into a clean, named, ma
 
 # Implementation Draft
 
-The pipeline is orchestrated by **Prefect** (Python-native, parallel by default, robust async handling) rather than n8n — the audio stage's needs (large files, long-running async API polls, parallel fan-out) sit outside what n8n handles well. Prefect writes completed session packages to a watched location; the existing n8n flow picks them up from there for Researcher and downstream stages.
+The pipeline is orchestrated by **Prefect** (Python-native, parallel by default, robust async handling) and a FastAPI upload route (see `runtime/ingest/deploy/README.md`). Audio files arrive via web upload; a detached subprocess spawns the transcription flow per `runtime/ingest/pipeline.py`. Completed session packages are picked up by the Researcher flow via `researcher_flow.py`.
 
 **Development caching.** During prompt iteration, re-running the full flow to test a small change in the cleaning prompt is expensive: each run pays AssemblyAI ~$1.50 for the same transcript it already produced. The Prefect transcription task uses native task caching via `cache_key_fn` to skip the AssemblyAI call if the audio file hasn't changed:
 
