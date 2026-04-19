@@ -15,8 +15,9 @@ that the runtime overnight pipeline consumes.
 - `run_persona_pipeline.py` — main pipeline (Pass 1-merge → Derive)
 - `flows/shared/` — shared code: clients, io, node validation, prompts
 - `inputs/` — per-voice inputs:
-  - `conference_context.json`
-  - `voices/` — voice configs (5 of 12 built)
+  - `conference_facts.json` / `audience_profile.json` / `panel_roster.json` (Phase B 3-way split)
+  - `non_human_grounding/` — curated Octopus + Whanganui grounding for Pass 0a (Phase B)
+  - `voices/` — voice configs (v3.10 configs are archaeology; all 12 rebuild under Phase B)
   - `dossiers/` — Claude DR dossiers (manually produced via claude.ai)
 - `scripts/` — standalone utilities (DR dossier validator)
 - `runs/` — per-voice build outputs (gitignored)
