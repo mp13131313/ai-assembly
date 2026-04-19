@@ -389,7 +389,12 @@ Run the translation test: give this voice "algorithmic governance." Does the pro
 
 The most analytically demanding pass. These form a coherent intellectual system — beliefs, vocabulary, and process must be consistent. Research identifies reasoning templates as "the layer most implementations miss" and constitutional specificity as the single largest driver of persona fidelity.
 
-**ChatGPT DR supplement (conditional):** Fires automatically when ANY of these conditions are met: (a) `needs_dr_supplement` is `true` in the input; (b) the Phase 1 dossier's INTELLECTUAL FRAMEWORK section is below 500 words; (c) `voice_mode` is `"observational"` (these voices always benefit from deeper interpretive analysis since their "framework" must be inferred). ChatGPT DR tackles interpretive questions "without pre-existing synthesized answers online." Adds 5–30 minutes but significantly improves depth for under-represented figures.
+**No Pass 3 supplement:** earlier versions of this pipeline (pre-v3.10)
+fired a ChatGPT DR supplement on Pass 3 when the Phase 1 INTELLECTUAL
+FRAMEWORK section was thin. That pre-step was removed in commit
+`d137791` — the three-way merge (Perplexity + Claude DR + Gemini)
+from Phase 1 now supplies the depth this supplement was compensating
+for.
 
 ### Key Requirements from the Persona Card
 
@@ -1130,8 +1135,8 @@ or
 
 ## Node 2: Identity & Boundaries (Claude)
 
-**API:** Claude Sonnet 4.6 (or Opus for complex figures)
-**Config:** `temperature: 0.2`, `max_tokens: 8192`, Extended Thinking enabled (budget: 10000 tokens)
+**API:** Claude Opus 4.7 with `thinking.type=adaptive`
+**Config:** `temperature: 1.0`, `max_tokens: 24000`, adaptive thinking
 **Structured output:** JSON schema with 9 field keys
 **Runs:** Once per voice
 
@@ -1284,39 +1289,12 @@ Produce 9 Persona Card fields. Output as JSON with exact field names as keys.
 
 ---
 
-## Node 3: Intellectual Core (Claude + conditional ChatGPT DR)
+## Node 3: Intellectual Core (Claude)
 
-**API:** Claude Sonnet 4.6 (or Opus)
-**Config:** `temperature: 0.2`, `max_tokens: 8192`, Extended Thinking enabled
+**API:** Claude Opus 4.7 with `thinking.type=adaptive`
+**Config:** `temperature: 1.0`, `max_tokens: 24000`, adaptive thinking
 **Structured output:** JSON schema with 5 field keys
-**Conditional pre-step:** ChatGPT DR for less-documented figures
 **Runs:** Once per voice
-
-**Conditional: ChatGPT DR supplement**
-
-If `{{type}}` suggests a less-documented figure (configured per voice in the input, or triggered if the Phase 1 dossier's INTELLECTUAL FRAMEWORK section is below a word count threshold):
-
-**Trigger conditions (any one is sufficient):**
-1. `needs_dr_supplement` is `true` in the input
-2. The Phase 1 dossier's INTELLECTUAL FRAMEWORK section word count < 500
-3. `voice_mode` is `"observational"` (these voices benefit from deeper interpretive analysis)
-
-**API:** OpenAI (use latest available model — currently `gpt-4o` or `o3`; model strings are volatile, verify at runtime)
-**Config:** `temperature: 0.3`, `max_tokens: 16000`
-
-```
-Analyse the intellectual framework of {{name}}, focusing specifically on:
-1. Their characteristic reasoning method — how they move through a problem
-2. Internal tensions or contradictions in their thought
-3. Key concepts they use with distinctive precision
-4. How their positions evolved over their lifetime
-5. Minority scholarly readings beyond the standard interpretation
-
-Draw on scholarly sources beyond the most commonly cited works. Include specific 
-textual references (work title, chapter/section) for each claim.
-```
-
-Output stored as `{{chatgpt_supplement}}`.
 
 **System prompt (Claude):**
 
@@ -1426,11 +1404,6 @@ a perceptual-response cycle. Ban human cognitive vocabulary used unironically.
 Research Dossier:
 {{merged_dossier}}
 
-{{#if chatgpt_supplement}}
-Supplementary Analysis:
-{{chatgpt_supplement}}
-{{/if}}
-
 Previously completed fields (summary):
 {{pass_2_summary}}
 
@@ -1443,8 +1416,8 @@ Produce 5 Persona Card fields. Output as JSON with exact field names as keys.
 
 ## Node 4a: Voice (Claude)
 
-**API:** Claude Sonnet 4.6
-**Config:** `temperature: 0.3`, `max_tokens: 6144`
+**API:** Claude Opus 4.7 with `thinking.type=adaptive`
+**Config:** `temperature: 1.0`, `max_tokens: 24000`, adaptive thinking
 **Structured output:** JSON schema with 7 field keys
 **Runs:** Once per voice
 **Prerequisite:** `{{primary_texts}}` from Node 1c. If unavailable, log warning in metadata — output quality will degrade.
@@ -1644,8 +1617,8 @@ Produce 8 Persona Card artifact fields. Output as JSON with exact field names as
 
 ## Node 5: Engagement (Claude)
 
-**API:** Claude Sonnet 4.6
-**Config:** `temperature: 0.2`, `max_tokens: 4096`, Extended Thinking enabled (budget: 10000 tokens)
+**API:** Claude Opus 4.7 with `thinking.type=adaptive`
+**Config:** `temperature: 1.0`, `max_tokens: 16000`, adaptive thinking
 **Structured output:** JSON schema with 4 field keys
 **Runs:** Once per voice
 
@@ -1874,10 +1847,10 @@ Complete Persona Card:
 
 ---
 
-## Node 7b: Worked Provocations (Claude or ChatGPT DR)
+## Node 7b: Worked Provocations (Claude)
 
-**API:** Claude Sonnet 4.6 (`temperature: 0.4`) or ChatGPT DR for comprehensive chains
-**Config:** `max_tokens: 8192`
+**API:** Claude Opus 4.7 with `thinking.type=adaptive`
+**Config:** `temperature: 1.0`, `max_tokens: 24000`, adaptive thinking
 **Runs:** Once per voice
 
 **System prompt:**

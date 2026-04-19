@@ -4,7 +4,7 @@
 
 **Scope:** All LLM / AI API calls initiated by code in this repo — runtime flows (transcription, researcher, provocateur) and the persona pipeline. External-facing manual steps (the human Claude DR session at claude.ai) are noted for completeness but are not code-initiated.
 
-**Last read against the code:** 2026-04-18. Models and parameters update frequently; re-verify before quoting for budgeting.
+**Last read against the code:** 2026-04-19. Models and parameters update frequently; re-verify before quoting for budgeting.
 
 ---
 
@@ -188,7 +188,7 @@ All personas calls flow through `personas/flows/shared/clients.py`. See §6.1 fo
 - **Parameters:**
   - `max_tokens=24000` → triggers streaming in `call_claude` because ≥16384
   - `temperature=1.0`
-  - `thinking_budget=None` → **thinking is disabled** (see §6.1). Code comment says "adaptive thinking" but `None` does not enable it. Minor code-comment mismatch.
+  - `thinking=True` → adaptive thinking enabled (see §6.1)
   - `response_format_json=True`
 - **System prompt:** `personas/flows/shared/prompts/pass_0a_voice_config.md` (140 lines, hardcoded file read)
 - **User:** `VOICE_INPUT` JSON with `name`, `conference_context`, optional `wikipedia_extract`/`wikipedia_description`/`wikipedia_url` or `disambiguation_hint`
@@ -241,7 +241,7 @@ Human pastes the rendered DR prompt into claude.ai with **Claude Opus 4.7 + Exte
 - **Model:** `claude-opus-4-7`
 - `max_tokens=16000`
 - `temperature=0.0`
-- `thinking_budget=None` (thinking off)
+- `thinking=False`
 - `response_format_json=True`
 - **System:** `persona_pass_1merge_contradiction_system.md` (1 line)
 - **User:** `persona_pass_1merge_three_way_user.md` — renders Perplexity + optional Claude DR + Gemini sources for contradiction detection
@@ -249,7 +249,7 @@ Human pastes the rendered DR prompt into claude.ai with **Claude Opus 4.7 + Exte
 
 #### 3.4.2 Pass 1c-extract — L206-225
 - **Model:** `claude-sonnet-4-6`
-- `max_tokens=4096`, `temperature=0.0`, `thinking_budget=None`, `response_format_json=True`
+- `max_tokens=4096`, `temperature=0.0`, `thinking=False`, `response_format_json=True`
 - **System:** inline string "You extract primary text URLs from a merged research dossier. Return only valid JSON, no preamble."
 - **User:** renders `persona_pass_1c_extract_urls.md` + appends `MERGED DOSSIER: {merged_dossier}`
 - Skipped if `voice_input.primary_text_sources` is non-empty (backward compat manual override)
@@ -262,7 +262,7 @@ Human pastes the rendered DR prompt into claude.ai with **Claude Opus 4.7 + Exte
 
 #### 3.4.4 Pass 1d Excerpt Selection — L408-430
 - **Model:** `claude-sonnet-4-6`
-- `max_tokens=4096`, `temperature=0.0`, `thinking_budget=None`, `response_format_json=True`
+- `max_tokens=4096`, `temperature=0.0`, `thinking=False`, `response_format_json=True`
 - **System:** inline string "You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding."
 - **User:** renders `persona_pass_1d_excerpt_selection.md` — dossier + structural index of fetched sources
 - Skipped if no primary texts fetched
@@ -270,14 +270,14 @@ Human pastes the rendered DR prompt into claude.ai with **Claude Opus 4.7 + Exte
 ### 3.5 Phase 2 — Section-by-section Generation
 
 All Phase 2 generation passes go through `_claude_pass` (L345-351), which wraps `call_claude` with:
-- `thinking_budget=10000` when `thinking=True` → triggers adaptive thinking via `clients.py` L46-52
+- `thinking=True` enables adaptive thinking (no budget argument needed)
 - `max_tokens=24000` default
 - `temperature=1.0` default
 - `response_format_json=True`
 
 Coherence Threading (CT) compressions run through `_ct_compress` (L354-368):
 - **Model:** `claude-sonnet-4-6`
-- `max_tokens=2048`, `temperature=0.0`, `thinking_budget=None`
+- `max_tokens=2048`, `temperature=0.0`, `thinking=False`
 - System: inline "You compress persona fields into a tight summary."
 - User: `persona_coherence_threading.md` + prior-pass JSON
 
@@ -339,7 +339,7 @@ Coherence Threading (CT) compressions run through `_ct_compress` (L354-368):
 
 #### 3.6.1 Pass 7-pre Citation Verification — `_pass_7pre` L528-543
 - **Model:** `claude-sonnet-4-6`
-- `max_tokens=24000`, `temperature=0.0`, `thinking_budget=None`
+- `max_tokens=24000`, `temperature=0.0`, `thinking=False`
 - `response_format_json=True`
 - Streams because max_tokens ≥ 16384
 - System: `persona_pass_7pre_citation.md` (93 lines, Jinja-filled with `type`, `voice_mode`, `hostile_sources`)
@@ -380,14 +380,14 @@ If Pass 7a returns `overall: "REVISION_NEEDED"`, up to **2 loops** re-run flagge
 - System rendered with `claude_fallback=False`
 
 **Fallback: Claude `claude-sonnet-4-6`**
-- `max_tokens=8192`, `temperature=0.0`, `thinking_budget=None`, `response_format_json=True`
+- `max_tokens=8192`, `temperature=0.0`, `thinking=False`, `response_format_json=True`
 - System rendered with `claude_fallback=True` (prepends bias-awareness instruction)
 
 ### 3.7 Phase 4 — Derive
 
 #### 3.7.1 Derive — `_derive` L815-834
 - **Model:** `claude-sonnet-4-6`
-- `max_tokens=8192`, `temperature=0.1`, `thinking_budget=None`
+- `max_tokens=8192`, `temperature=0.1`, `thinking=False`
 - `response_format_json=True`
 - System: `persona_derive.md` (81 lines)
 - User: `persona_derive_user.md` + full assembled card
@@ -480,8 +480,8 @@ If Pass 7a returns `overall: "REVISION_NEEDED"`, up to **2 loops** re-run flagge
 
 The personas pipeline's only Claude wrapper. Behavior controlled by three parameters:
 
-- **`thinking_budget`** — truthy enables adaptive thinking (`{"type": "adaptive"}`), falsy disables. The numeric value is ignored under adaptive mode. Setting `thinking_budget=None` → **thinking off**. Setting `thinking_budget=10000` → **thinking on** (any truthy number works).
-- **Streaming heuristic** — automatic. `use_streaming = max_tokens >= 16384 or thinking_budget`. Threshold matches Anthropic SDK's non-streaming cutoff (SDK refuses non-streaming when `3600 * max_tokens / 128_000 > 600` sec, i.e. `max_tokens > 21333`). 16384 is conservative.
+- **`thinking: bool`** — `thinking=True` enables adaptive thinking (`{"type": "adaptive"}`); `thinking=False` (default) disables it. No budget argument needed — adaptive mode sets its own budget.
+- **Streaming heuristic** — automatic. `use_streaming = max_tokens >= 16384 or thinking`. Threshold matches Anthropic SDK's non-streaming cutoff (SDK refuses non-streaming when `3600 * max_tokens / 128_000 > 600` sec, i.e. `max_tokens > 21333`). 16384 is conservative.
 - **JSON extraction when `response_format_json=True`** — strips \`\`\`json fences and trailing content. On `json.JSONDecodeError`, if `stop_reason == "max_tokens"` raises `RuntimeError` blaming budget; otherwise re-raises with diagnostics.
 
 **Streaming collection:** iterates `content_block_delta` events with `delta.type == "text_delta"`. Thinking tokens are not collected (filtered out by the iteration). `stream.get_final_message()` provides usage totals.
@@ -500,25 +500,25 @@ REST POST to `https://api.perplexity.ai/chat/completions`. OpenAI-compatible req
 
 ---
 
-## 7. Parameter discrepancies worth knowing
+## 7. Historical parameter discrepancies (all resolved)
 
-### 7.1 Pass 0a "adaptive thinking" comment is misleading
+### 7.1 Pass 0a "adaptive thinking" comment is misleading *(resolved 2026-04-18)*
 
-`run_pass0a_voice_config.py` L174 sets `thinking_budget=None` with a comment `# adaptive thinking`. Per `clients.py` L46-52, thinking is **disabled** when `thinking_budget` is falsy. Pass 0a therefore runs with thinking off despite the comment. Either the comment is wrong or `thinking_budget=10000` (or any truthy value) was intended. Opus 4.7 without thinking at `max_tokens=24000, temperature=1.0` is a reasonable call, but it is not "adaptive thinking."
+K.0 refactor (`commit 4666fa1`) renamed the `call_claude` thinking parameter to `thinking: bool`. `run_pass0a_voice_config.py` L174 now correctly sets `thinking=True` with comment `# enables Anthropic adaptive thinking`. Parameter and comment are consistent.
 
-### 7.2 Formulation `flavor` field — spec ↔ code mismatch
+### 7.2 Formulation `flavor` field — spec ↔ code mismatch *(resolved 2026-04-18)*
 
 `docs/AI_Assembly_Provocateur_Pipeline.md` L334-347 documents `flavor` as the `lens` value (`assertion|reframing|open_question`). Actual prompt (`provocateur_formulation.md` L75-97) specifies stage-direction text (`"speaking with intensity"`, `"pushing back"`, `"with weight"`). Run artifacts match the prompt. Spec doc is wrong.
 
-### 7.3 `briefing_narrative` points at `structured` but JSON key is `full_theme_record`
+### 7.3 `briefing_narrative` points at `structured` but JSON key is `full_theme_record` *(resolved 2026-04-18)*
 
 `_render_narrative_briefing` in `provocateur_flow.py` L832-868 emits a markdown footer that reads `[Full structured supporting material ... is available in the 'structured' field of this briefing entry for deeper inspection.]` — but the actual JSON key is `full_theme_record`. Voice Pipeline consumers reading the markdown hint will look for the wrong field.
 
-### 7.4 Anthropic SDK version docs ≠ reality
+### 7.4 Anthropic SDK version docs ≠ reality *(resolved 2026-04-18)*
 
 CLAUDE.md claims runtime=`0.95.0`, personas=`0.94.1`. CURRENT_STATE.md claims the flipped version. Both `runtime/requirements.txt` and the personas venv are pinned to `0.94.1`. Separate venvs are real but their version-mismatch justification is fictional.
 
-### 7.5 DR validation floor vs prompt ask
+### 7.5 DR validation floor vs prompt ask *(resolved 2026-04-18)*
 
 `pass_0b_dr_prompt.md` L1086 asks for "Minimum 15,000 words". `personas/flows/shared/dr_validation.py` L20 floor is 5,000. Error message at L53 says "expected 15,000-25,000". A 5,001-word dossier passes `VALID`.
 

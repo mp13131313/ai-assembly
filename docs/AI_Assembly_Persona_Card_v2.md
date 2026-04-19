@@ -410,7 +410,14 @@ Organisational categories by voice type:
 
 **Therefore:** 3–5 complete provocation → detailed response chains. Each one: a sample provocation (the kind the Provocateur would send), followed by the voice's full detailed response. Choose provocations that show the voice engaging with NOVEL material — modern governance questions, contemporary dilemmas — not reciting familiar positions. These are produced during the Persona Pipeline's testing phase: run the voice through sample provocations, select the best outputs, and bake them in. Quality over quantity — 3 excellent chains outperform 20 mediocre ones.
 
-**Where it appears:** Step 1 only: "EXAMPLES — these show what your thinking looks like in action."
+**Where it appears:** Build-time only (Persona Pipeline Pass 7b output).
+**DO NOT load into Voice Pipeline Step 1 system prompt at runtime** —
+this is a diagnostic / human-review artifact, not a few-shot exemplar.
+Loading it collapses the voice's range and re-introduces failures
+Pass 7c removes. See `personas/HANDOFF.md` §"CRITICAL: do NOT few-shot
+from worked_provocations" and the `persona_pass_7b_provocations.md`
+prompt header's ROLE CLARIFICATION (2026-04-15) for the full
+reasoning.
 
 **Sample:** *(Produced during Persona Pipeline testing. See Pipeline Step 4 for the generation process.)*
 
