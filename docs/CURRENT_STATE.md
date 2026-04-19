@@ -44,8 +44,11 @@ ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
 │   ├── run_persona_pipeline.py            # main pipeline (Pass 1-merge → Derive)
 │   ├── flows/shared/                      # io, clients, node0_validation, wikipedia, dr_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
 │   ├── inputs/
-│   │   ├── conference_context.json
-│   │   ├── voices/                        # 4 voice configs: cleopatra, hannah_arendt, octopus, plato
+│   │   ├── conference_facts.json          # Phase B split — conference metadata (Pass 0a + Pass 7b)
+│   │   ├── audience_profile.json          # Phase B split — audience profile (Pass 7b only)
+│   │   ├── panel_roster.json              # Phase B split — 12-voice panel list (Pass 0a)
+│   │   ├── non_human_grounding/           # Phase B — curated Octopus + Whanganui grounding for Pass 0a
+│   │   ├── voices/                        # voice configs (v3.10 configs archaeology; rebuild under Phase B)
 │   │   └── dossiers/                      # Claude DR dossiers (manually produced)
 │   └── HANDOFF.md                         # cross-repo contract (production, active)
 ├── research/                  # PRESERVED: grounding material, not deletable
