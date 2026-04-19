@@ -1,5 +1,7 @@
 # Session report — 2026-04-19 persona pipeline review
 
+*Note: paths in this report reference the pre-reorganization layout (commit `d1b8a2c`).*
+
 **Lead:** Claude Opus 4.7 (1M context).
 **Scope:** Step-by-step review of the persona pipeline as preparation for the Phase B rebuild, paired with the integration analysis of a 5th baseline-research artifact (Boddice biocultural critique of Persona Card v2).
 **Mode:** Review and design only. No code edits, no prompt edits, no schema edits. Output is plan documents, an updated index, and a moved research artifact.
