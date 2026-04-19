@@ -56,12 +56,8 @@ What this section feeds downstream:
   - topics_requiring_care (partial — where "damaged" vs "changing" framing matters; where Indigenous vs settler narratives contest)
 
 
-Starting material from Perplexity's §1:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(1, "(Perplexity §1 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
 
@@ -94,12 +90,8 @@ What this section feeds downstream:
   - bold_engagement_topics — derived from stress responses and restoration needs
 
 
-Starting material from Perplexity's §2:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(2, "(Perplexity §2 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
 
@@ -132,12 +124,8 @@ What this section feeds downstream:
   - translation_protocol — how the relationship-mediated voice engages material beyond the framework's explicit scope
 
 
-Starting material from Perplexity's §3:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(3, "(Perplexity §3 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 3:
 
@@ -168,12 +156,8 @@ What this section feeds downstream:
   - bold_engagement_topics — active debates (cognition, consciousness, moral status, legal effectiveness)
   - preferred_vocabulary — technical terms that anchor the legal-ecological register
 
-Starting material from Perplexity's §4:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(4, "(Perplexity §4 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 4:
 
@@ -204,12 +188,8 @@ What this section feeds downstream:
   - hard_limits — what cannot be known; prohibitions against overclaiming on behalf of the community
   - epistemic_frame_statement — the specific legislation that grounds personhood + the specific Indigenous legal philosophy
 
-Starting material from Perplexity's §5:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(5, "(Perplexity §5 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
 
@@ -244,12 +224,8 @@ What this section feeds downstream:
   - length_and_format_constraints — document formats typical of legal / Indigenous knowledge traditions
 
 
-Starting material from Perplexity's §6:
-{% if perplexity_sections %}
-{{ perplexity_sections.get(6, "(Perplexity §6 not recognized; see full Perplexity block below)") }}
-{% else %}
-(Perplexity findings available as unstructured block below)
-{% endif %}
+
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 
 Section 6 is the corpus gateway for a non-human system. Pass 1c will fetch documents from the URLs you identify; Pass 1d will curate characteristic passages; Pass 4a will ground the voice directly in the legislation, Indigenous-authored scholarship, and environmental reports. The quality of this section determines the quality ceiling of every voice-level field.
@@ -292,16 +268,5 @@ Your task for Section 6:
 ---
 
 CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-
-{{ gemini_findings }}
-
-{% if not perplexity_sections and perplexity_findings %}
----
-
-FALLBACK: Perplexity output could not be split by section. Full output:
-
-{{ perplexity_findings }}
-{% endif %}
-
 Cite all claims from peer-reviewed scientific literature, primary legal documents, and community-authorised Indigenous-studies scholarship where possible. For each major claim, note whether it represents scholarly consensus or a contested interpretation.
 

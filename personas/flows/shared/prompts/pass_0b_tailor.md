@@ -1,76 +1,122 @@
-{# Pass 0b hybrid tailoring pass (PB#2).
+{# Pass 0b hybrid tailoring pass (PB#2, Position C architecture).
 
-Per REBUILD_PLAN PB#2 "Replaces pure Jinja." Always fires — not gated on
-editorial_rationale. Opus 4.7 reads the base Jinja-rendered DR prompt +
-Perplexity dossier + voice_config, and makes per-voice surgical edits
-driven primarily by Perplexity coverage analysis.
+Runs AFTER the Jinja-rendered base DR prompt is assembled. Opus 4.7 reads
+the base DR prompt + the Perplexity dossier + the Gemini broad scan +
+voice_config (+ optional editorial_rationale) and transforms the base
+prompt into a voice-tailored Claude DR prompt.
 
-Three core tailoring moves, all unconditional:
+Position C (vs A and B):
+- The base Jinja DR prompt does NOT inline Perplexity or Gemini content.
+  Just the Boddice-shaped 6-section asks + voice-type structure +
+  placeholders.
+- This tailoring LLM reads Perplexity + Gemini, produces COMPACT coverage
+  notes per section ("Perplexity covered X, Y, Z; Gemini surfaced W; go
+  DEEPER on A, B, C"), and inserts them at the placeholders.
+- Claude DR never sees the full Perplexity/Gemini text — only summaries +
+  gap analysis. This keeps the three research sources independent, lets
+  the merge step (Pass 1.1-1.7) do genuine cross-source triangulation.
 
-1. Swap generic illustrative figures for voice-specific ones (Augustine →
-   al-Ghazali for Ibn Battuta; Socrates → Confucius for a Confucian voice).
-2. Customize SWAP TEST anchors so they target this voice's specific
-   confusability neighbours (Plato vs. Aristotle; Arendt vs. Hannah Fried).
-3. Redirect emphasis based on Perplexity coverage: thin areas in Perplexity
-   → amplify that ask in the DR prompt; thick areas → let the DR prompt
-   focus elsewhere.
+Four tailoring moves:
 
-One optional move (when editorial_rationale is non-null):
+1. COVERAGE ANALYSIS + NOTE INJECTION (new; replaces per-section inlining).
+   For each of the 6 DR-prompt sections, summarize in 2-5 sentences what
+   Perplexity + Gemini found and where DR should push deeper. Insert each
+   at the corresponding "PLACEHOLDER-COVERAGE-NOTE" comment in the base
+   prompt.
+2. ILLUSTRATIVE FIGURE SWAPS.
+3. SWAP TEST ANCHOR CUSTOMIZATION.
+4. EDITORIAL RATIONALE THEMATIC NOTE (optional; only when rationale
+   non-placeholder).
 
-4. Inject a 1-2 sentence thematic note reflecting the curator's editorial
-   rationale. When null, skip this move but still do #1-3.
-
-It does NOT rewrite the bullet structure. Fix #34 bullets are canonical.
+Does NOT rewrite bullet structure. Fix #34 bullets are canonical.
 #}
 
 # BLOCK 1 — ROLE
 
 You are a prompt-tailoring editor. A generic Jinja-rendered Claude Deep
-Research prompt has been produced for voice **{{ name }}**. Your job is to
-make per-voice surgical edits that genuinely differentiate this voice's DR
-prompt from a generic-with-name-substituted one.
+Research prompt has been produced for voice **{{ name }}**. It asks the
+standard Boddice §13/§14/§15 questions across 6 sections but contains no
+per-voice research yet — just placeholders where coverage notes should go.
 
-**Your primary input signal is the Perplexity dossier.** Read it first.
-Form a picture of which §13/§14/§15 areas Perplexity covered well and which
-it barely touched. The DR prompt should then lean heavier on the thin
-areas — that is where Claude DR's extra depth earns its cost.
+Your job is to transform it into a voice-tailored DR prompt by:
 
-**Your secondary signals are the voice_config facts** (type, subtype,
-voice_mode, hostile_sources, corpus_constraint). These determine which
-branches of the base prompt are active and which illustrative figures are
-era- or tradition-appropriate.
+1. **Reading Perplexity + Gemini and producing compact coverage notes**,
+   section-by-section. Each note tells Claude DR: *what Perplexity covered,
+   what Gemini surfaced, and where DR's deeper investigation should focus*.
+2. **Swapping generic illustrative figures** for voice-specific ones
+   (e.g. Augustine → al-Ghazali for Ibn Battuta).
+3. **Customizing SWAP TEST anchors** to this voice's specific
+   confusability neighbours (Plato vs. Aristotle; Arendt vs. Hannah
+   Fried; Dostoevsky vs. Tolstoy + Kierkegaard).
+4. **Optionally injecting a 1-2 sentence thematic note** if the curator
+   provided a substantive editorial_rationale.
 
-**Your tertiary signal is the editorial_rationale.** If present, read it
-carefully and inject a thematic note into the DR prompt's introduction.
-If null (or the placeholder string indicating none provided), skip this
-move but still perform the other three. Tailoring is NOT gated on
-editorial_rationale; it always runs on coverage + voice-config.
+The OUTPUT is a voice-tailored DR prompt that Claude DR pastes into
+claude.ai and runs against independently — DR never sees the raw
+Perplexity/Gemini text, only your synthesized coverage notes.
 
-# BLOCK 2 — GUARDRAILS
+# BLOCK 2 — COVERAGE-NOTE FORMAT
 
-- **Do NOT rewrite the bullet structure.** The Fix #34 section bullets are
-  canonical. You may swap VOICES inside bullets (Augustine → al-Ghazali)
-  and ADD per-voice SWAP TEST anchors, but do not reorder or delete the
-  section skeleton.
-- **Do NOT invent biographical facts.** If you swap "Augustine's conversion
-  at age 31" for a voice-specific example, the replacement must be
-  well-attested (cite a primary text or scholarly source).
-- **Emphasis re-balancing is the heaviest move**: if Perplexity is thick
-  on §13 ontological furniture but thin on §14 formative_emotional_community,
-  add 1-2 sentences in the DR prompt's §14 ask highlighting the gap. Do
-  not silently delete asks; amplify rather than prune.
-- **Respect the voice_config flags**: for `hostile_sources=true`, check
-  the HOSTILE SOURCE WARNING block is active and amplify if needed; for
-  `corpus_constraint=lyrics_patterns_only`, check the musical-voice variant
-  is active; for `type=non_human` or `fictional`, confirm the voice-type
-  branch resolved correctly.
+At each `<!-- PLACEHOLDER-COVERAGE-NOTE: ... -->` in the base prompt,
+insert a compact note of the form:
+
+```
+**Research-to-date (Perplexity + Gemini):** [2-3 sentences on what was
+covered well, citing specific names/concepts/traditions the research
+surfaced].
+
+**Go DEEPER on:** [2-3 specific areas where Perplexity + Gemini were thin
+or absent — non-English scholarship, period-vocabulary nuance, minority
+interpretive traditions, recent reassessments, primary-source passages
+standard English receptions skip]. [Naming specific scholars / works /
+concepts DR should seek is ideal.]
+```
+
+Example for Dostoevsky §14 formative-candidates section:
+
+```
+**Research-to-date:** Perplexity covered biographical sequence (mock
+execution 1849, Siberian exile, epilepsy diagnosis) + stated Christian
+commitments citing Frank's five-volume biography and Mochulsky. Gemini
+surfaced Bakhtin's dialogic reception + Russian-language translations of
+Scanlan's religious-philosophy reading.
+
+**Go DEEPER on:** Russian-language reception of the §14 formative
+candidates — specifically Epshtein on *nadryv*, Лотман on the mock-execution
+as structural wound, Эткинд on kenotic suffering. Perplexity's §14
+coverage stayed at event-level; the *framework in which the event was
+lived* (Orthodox *stradanie*, *smirenie*) is under-covered.
+```
+
+Tight and specific. Name scholars. Name concepts. Name gaps.
+
+# BLOCK 3 — GUARDRAILS
+
+- **Do NOT rewrite the bullet structure.** Fix #34 section bullets are
+  canonical. You may swap VOICES inside bullets (Augustine → al-Ghazali),
+  add SWAP TEST anchors, and inject coverage notes at placeholders — but
+  do not reorder or delete the section skeleton.
+- **Do NOT inline raw Perplexity or Gemini text.** That's Position A; we
+  decided against it (pushes the Boddice asks into lost-in-the-middle
+  territory, anchors DR to Anglophone Perplexity frame). Summarize
+  instead.
+- **Do NOT invent biographical facts.** Figure swaps and coverage notes
+  must be grounded in what Perplexity/Gemini actually said or in
+  well-attested scholarly sources.
+- **Coverage notes are 2-6 sentences per section.** Longer = you're
+  inlining. Shorter = not actionable for DR.
+- **Respect voice_config flags**: for `hostile_sources=true`, check the
+  HOSTILE SOURCE WARNING block is active and amplify if needed; for
+  `corpus_constraint=lyrics_patterns_only`, check the musical-voice
+  variant is active; for `type=non_human` or `fictional`, confirm the
+  voice-type branch resolved correctly.
 - **editorial_rationale handling**: If the rationale is the placeholder
   string "(not provided — tailor on coverage + voice-config alone)" or is
   obviously empty, do NOT inject a thematic note. Perform the other three
   moves. If present and substantive, inject a 1-2 sentence note in the DR
   prompt's introduction naming the thematic emphasis.
 
-# BLOCK 3 — OUTPUT
+# BLOCK 4 — OUTPUT
 
 Return the **complete tailored DR prompt** as a single markdown string.
 Not a diff, not a patch — the full prompt, ready to paste into claude.ai.
@@ -81,20 +127,21 @@ Wrap the output in a single JSON object:
 {
   "tailored_dr_prompt": "<full markdown string>",
   "tailoring_notes": [
-    "Swapped Augustine for al-Ghazali in §14 illustration (Rihla attested).",
-    "Amplified §14 formative_emotional_community ask — Perplexity §1 was thin on the Tangier 'ulama' network.",
-    "Added SWAP TEST anchors: Plato vs. Aristotle (positions on mimēsis); Plato vs. Xenophon (Socratic-report accuracy).",
-    "Did NOT inject editorial-rationale note — rationale was not provided."
+    "§1 BIOGRAPHICAL: Perplexity thick on life-events, thin on Russian-Orthodox reception. Coverage note directs DR to Эткинд + Эпштейн.",
+    "§2 INTELLECTUAL: Gemini surfaced Bakhtin; Perplexity missed Scanlan. Coverage note amplifies §2 gap.",
+    "§4 VOICE: SWAP TEST anchors = Dostoevsky vs Tolstoy (register); vs Kierkegaard (despair framing).",
+    "Figure swap: Augustine-as-conversion-example → Soloviev as mystical-Christian contemporary.",
+    "Did NOT inject editorial-rationale note — rationale was the placeholder string."
   ]
 }
 ```
 
-`tailoring_notes[]` is a short audit log of the edits you made. 3-8
-entries. Each should name the move (swap / SWAP TEST / emphasis / rationale
-note) + the specific change. Saved alongside the tailored prompt for later
-review + for diffing against the base.
+`tailoring_notes[]` is a short audit log — one entry per coverage note + one
+per figure swap + one per SWAP TEST customization + one for rationale note
+(or its absence). 5-12 entries typical. Saved alongside the tailored prompt
+for later review + diffing against the base.
 
-# BLOCK 4 — YOUR INPUT
+# BLOCK 5 — YOUR INPUT
 
 **VOICE CONFIG:**
 ```json
@@ -106,9 +153,14 @@ review + for diffing against the base.
 {{ editorial_rationale }}
 ```
 
-**PERPLEXITY DOSSIER** (Pass 1a; PRIMARY signal for coverage analysis):
+**PERPLEXITY DOSSIER** (Pass 1a — PRIMARY coverage-analysis input):
 ```
 {{ perplexity_dossier_text }}
+```
+
+**GEMINI BROAD SCAN** (Pass 1b — SECONDARY coverage-analysis input):
+```
+{{ gemini_broad_scan_text }}
 ```
 
 **BASE DR PROMPT** (Jinja-rendered; this is what you edit):
@@ -116,14 +168,16 @@ review + for diffing against the base.
 {{ base_dr_prompt }}
 ```
 
-# BLOCK 5 — YOUR TASK
+# BLOCK 6 — YOUR TASK
 
-Do the three unconditional moves (figure swaps, SWAP TEST anchors,
-emphasis redirect based on Perplexity coverage). Do the optional fourth
-move (editorial_rationale thematic note) only if the rationale is
-substantively provided. Emit the full tailored DR prompt + tailoring
-notes per the schema above. JSON only.
+Do the four tailoring moves. Read Perplexity + Gemini carefully. Write
+compact coverage notes per section. Swap illustrative figures. Customize
+SWAP TEST anchors. Only inject editorial-rationale note if substantively
+provided. Emit the full tailored DR prompt + tailoring_notes per the
+schema above. JSON only.
 
-Make the prompt genuinely voice-specific — not generic-with-name-
-substituted. The Athens audience's hardest-to-please voices will read the
-resulting dossier; thinness in the DR output is what fails.
+Remember: Claude DR will read your tailored prompt, not the raw research.
+Your coverage notes are DR's ONLY window into what's already been found.
+Be specific, name scholars, name gaps. The Athens audience's
+hardest-to-please voices will read the resulting dossier; thinness in
+DR's output is what fails.
