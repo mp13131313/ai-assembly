@@ -25,5 +25,4 @@ wondering why the architecture looks the way it does:
 
 Active design work for unbuilt features:
 
-- **Phase B persona pipeline rewrite** → `_workspace/planning/REBUILD_PLAN.md`
-  + `_workspace/planning/ARCHITECTURE_NEXT_PHASE_HANDOFF.md`
+- **Phase B persona pipeline rewrite** → `_workspace/planning/REBUILD_PLAN.md` (single source of truth; the 9 binding architectural decisions PB#1–9 plus all phase-by-phase task lists. Original `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` merged into this doc 2026-04-19 and archived to `_workspace/archive/session-artifacts/ARCHITECTURE_NEXT_PHASE_HANDOFF_2026_04_18.md` for provenance.)
