@@ -1,0 +1,110 @@
+{
+  "description": "Pass 0a output — the classification gate that Phase 0.5 consumes.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "human",
+        "non_human",
+        "fictional"
+      ],
+      "title": "Type",
+      "type": "string"
+    },
+    "subtype": {
+      "anyOf": [
+        {
+          "enum": [
+            "organism",
+            "system"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subtype"
+    },
+    "voice_mode": {
+      "anyOf": [
+        {
+          "enum": [
+            "philosophical",
+            "observational",
+            "narratival"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Voice Mode"
+    },
+    "hostile_sources": {
+      "default": false,
+      "title": "Hostile Sources",
+      "type": "boolean"
+    },
+    "corpus_constraint": {
+      "default": "full",
+      "enum": [
+        "full",
+        "lyrics_patterns_only",
+        "hostile_read_against_grain"
+      ],
+      "title": "Corpus Constraint",
+      "type": "string"
+    },
+    "manual_grounding": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-curated grounding text the model can rely on for classification context. For human voices: Wikipedia lead paragraph or curator-written disambiguation note. For non-human voices: a Godfrey-Smith / Te Awa Tupua / similar domain-specific excerpt from personas/inputs/non_human_grounding/.",
+      "title": "Manual Grounding"
+    },
+    "wikipedia_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Wikipedia Url"
+    },
+    "editorial_rationale": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Curator-written answer to 'Why is this voice in the Assembly?' The model does NOT propose this; Pass 0a surfaces the need, Pass 0b's hybrid tailoring uses it. Fill in after reviewing the pass_0a_review.md or pass via --editorial-rationale.",
+      "title": "Editorial Rationale"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "title": "VoiceConfig",
+  "type": "object"
+}
