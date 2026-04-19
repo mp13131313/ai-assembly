@@ -26,5 +26,5 @@ When these stale docs conflict with `AI_Assembly_Briefing_v3_1.md` or the code i
 ## What's NOT in `docs/`
 
 - **`research/`** — preserved grounding material (Deep Research compass artifacts). When you want to know *why* the pipeline is designed the way it is, look here. Not deletable.
-- **`_workspace/planning/`** — forward-looking design for unbuilt features (`REBUILD_PLAN.md`, `ARCHITECTURE_NEXT_PHASE_HANDOFF.md`). Promoted into `docs/` when the work lands.
+- **`_workspace/planning/`** — forward-looking design for unbuilt features. Currently: `REBUILD_PLAN.md` (single source of truth for the Phase B persona pipeline rewrite, with the 9 locked architectural decisions PB#1–9 merged in 2026-04-19). Promoted into `docs/` when the work lands.
 - **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts, run artifacts). Eligible for deletion once the current state has absorbed their content. Out of scope for code reviews by default.

@@ -7,10 +7,14 @@ Out of scope for code reviews and VM deploys. Two subdirectories:
 Forward-looking design documents for work not yet built. Promoted into
 `docs/` when the work lands; deleted if abandoned.
 
-- `REBUILD_PLAN.md` — Phase B persona pipeline rewrite (chunked-JSON
-  architecture; not yet started)
-- `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` — binding design decisions for
-  Phase B (9 locked decisions, PB#1 through PB#9)
+- `REBUILD_PLAN.md` — single source of truth for the Phase B persona
+  pipeline rewrite. Contains the 9 locked architectural decisions
+  (PB#1–9), all phase-by-phase task lists, Boddice integration, Pass 7a
+  multi-family validation lock, test material, and bootstrap pointers.
+  The original `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` was merged in here
+  on 2026-04-19 and archived under
+  `archive/session-artifacts/ARCHITECTURE_NEXT_PHASE_HANDOFF_2026_04_18.md`
+  for provenance.
 
 ## archive/
 

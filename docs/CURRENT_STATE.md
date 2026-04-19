@@ -51,7 +51,7 @@ ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
 ├── research/                  # PRESERVED: grounding material, not deletable
 │   └── baseline_research/                 # 5 Deep Research compass artifacts
 ├── _workspace/                # Out of scope for code reviews + VM deploys
-│   ├── planning/                          # forward-looking: REBUILD_PLAN, ARCHITECTURE_NEXT_PHASE_HANDOFF
+│   ├── planning/                          # forward-looking: REBUILD_PLAN (single source of truth post-merge 2026-04-19)
 │   └── archive/                           # eligible for pruning: specs, fix-plans, session-artifacts, runs
 └── .env, .env.example, .gitignore, README.md, CLAUDE.md
 ```
