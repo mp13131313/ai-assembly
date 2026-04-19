@@ -168,7 +168,8 @@ JSON only. No preamble. No markdown fences.
 {
   "works": {{ works_json }},
   "passages": {{ passages_json }},
-  "urls": {{ urls_json }}
+  "urls": {{ urls_json }},
+  "reference_only_passages": {{ reference_only_passages_json }}
 }
 ```
 

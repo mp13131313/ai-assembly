@@ -12,10 +12,15 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.chunk_runner import run_chunk
-from schemas.pass_1_6 import Passages, URLs, Works
+from schemas.pass_1_6 import Passages, ReferenceOnlyPassages, URLs, Works
 
 
-OUTPUT_KEYS = {"works": Works, "passages": Passages, "urls": URLs}
+OUTPUT_KEYS = {
+    "works": Works,
+    "passages": Passages,
+    "urls": URLs,
+    "reference_only_passages": ReferenceOnlyPassages,
+}
 
 
 def run_pass_1_6(**kwargs) -> dict:

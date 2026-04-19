@@ -44,12 +44,18 @@ def _load_chunk_outputs(repo_root: Path, slug: str) -> dict:
         "pass_1_3": ["reasoning_method", "textures"],
         "pass_1_4": ["moves", "register", "vocabulary"],
         "pass_1_5": ["knowledge_boundary", "sensitive_topics", "hard_limits"],
-        "pass_1_6": ["works", "passages", "urls"],
+        "pass_1_6": ["works", "passages", "urls", "reference_only_passages"],
     }
+    # reference_only_passages is optional: default-empty for voices where
+    # Pass 1.6 didn't populate it (public-domain corpora).
+    optional_keys = {"reference_only_passages"}
     for chunk_dir, keys in layout.items():
         for key in keys:
             path = base / chunk_dir / f"{key}.json"
             if not path.exists():
+                if key in optional_keys:
+                    out[key] = {"passages": []}  # matches ReferenceOnlyPassages default
+                    continue
                 sys.exit(f"Missing chunk output {path}. Run Pass {chunk_dir.replace('pass_','').replace('_','.')} first.")
             out[key] = json.loads(path.read_text())
     return out

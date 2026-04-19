@@ -59,6 +59,12 @@ class Passage(BaseModel):
     exemplar / translation anchor). Pass 4a uses voice exemplars as
     stylistic models. For musical voices: DESCRIPTION ONLY (no direct lyric
     quotation).
+
+    Two-tier corpus note (Phase B): this is the PUBLIC-SAFE tier. Voices
+    with `corpus_constraint: lyrics_patterns_only` emit pattern descriptions
+    here (`is_direct_quotation=false`). The private-reasoning tier lives in
+    the sibling `ReferenceOnlyPassage` — loaded into Voice Pipeline Step 1
+    only, never Step 2. See the `ReferenceOnlyPassages` model.
     """
 
     passage_id: str = Field(..., description="Short reference label, e.g. 'Republic-488a' or 'Rihla-Delhi-imprisonment'.")
@@ -90,6 +96,82 @@ class Passage(BaseModel):
 
 class Passages(BaseModel):
     passages: list[Passage]
+
+
+class ReferenceOnlyPassage(BaseModel):
+    """Private-reasoning corpus — injected into Voice Pipeline Step 1 ONLY.
+
+    Two-tier corpus design (Phase B, cleanup deferrals): for voices whose
+    primary corpus is copyright-sensitive (musical voices: Marley; possibly
+    Dostoevsky if we pin specific modern-critical-edition translations),
+    pattern descriptions alone in `Passages` underfit the voice. The voice
+    can reason much more fluently if it has direct access to its own words
+    as REFERENCE MATERIAL inside private reasoning.
+
+    Critical runtime contract:
+      - Voice Pipeline Step 1 (Private Reasoning) loads these passages into
+        its system prompt alongside the public `curated_corpus_passages`.
+      - Voice Pipeline Step 2 (Public Expression) does NOT load these. The
+        artifact the audience reads must not contain direct lyric quotation
+        (copyright) or any material flagged here as reasoning-only.
+      - The PROHIBITION against quoting these is stronger than banned_language:
+        it applies to ANY output the audience sees, including paraphrase
+        that's identifiably sourced.
+
+    Leakage risk: the model could still lift phrases inadvertently in Step 2
+    even though the passages aren't loaded there. Pass 7c scans for this
+    and should add such lift-phrases to `banned_language` if observed.
+
+    Voices for which this field is populated:
+      - `corpus_constraint: lyrics_patterns_only` voices (Marley): YES
+      - Translation-sensitive corpora (Dostoevsky translations under
+        copyright, perhaps): optionally YES with scholarly-edition attribution
+      - Voices with fully public-domain corpora (Plato, Ibn Battuta):
+        usually empty — the regular `Passages` already carries the material
+    """
+
+    passage_id: str
+    work_title: str
+    canonical_reference: str | None = None
+    contextual_header: str = Field(
+        ..., description="What the passage is. Same shape as public Passage."
+    )
+    content: str = Field(
+        ..., description="The actual text — lyrics, copyrighted translation, "
+        "etc. Injected into Step 1 ONLY. Never reaches the audience-facing "
+        "artifact.",
+    )
+    source_attribution: str = Field(
+        ..., description="Full copyright attribution: 'Marley, Bob. \"Redemption Song.\" "
+        "Uprising (Island Records, 1980). Used as reference-only material under "
+        "private-use / fair-use reasoning; not redistributed.'",
+    )
+    purpose: Literal["voice_exemplar", "intellectual_substance"]
+    # No tier / no citations Pydantic model — this is internal reference,
+    # not scholarly corpus. Structure is deliberately thinner to discourage
+    # treating these as public primary sources.
+
+
+class ReferenceOnlyPassages(BaseModel):
+    """Container for the private-reasoning tier. Step 1 reads; Step 2 does not."""
+
+    passages: list[ReferenceOnlyPassage] = Field(
+        default_factory=list,
+        description="Usually empty; populated for musical + translation-"
+        "sensitive voices.",
+    )
+    runtime_contract_note: str = Field(
+        default=(
+            "RUNTIME CONTRACT: These passages are loaded into Voice Pipeline "
+            "Step 1 (Private Reasoning) ONLY. They are NEVER loaded into "
+            "Step 2 (Public Expression), and no direct quotation of them is "
+            "permitted in the artifact the audience reads. Enforcement: the "
+            "runtime's Voice Pipeline Step 2 system-prompt assembly code "
+            "MUST drop this field before rendering. See personas/HANDOFF.md "
+            "for the runtime contract."
+        ),
+        description="Inline reminder the runtime reads.",
+    )
 
 
 class URLEntry(BaseModel):

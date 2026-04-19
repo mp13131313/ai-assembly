@@ -1,7 +1,7 @@
 {
   "$defs": {
     "Passage": {
-      "description": "A characteristic passage — 8-15 per voice.\n\nEach passage tagged with `purpose` (intellectual substance / voice\nexemplar / translation anchor). Pass 4a uses voice exemplars as\nstylistic models. For musical voices: DESCRIPTION ONLY (no direct lyric\nquotation).",
+      "description": "A characteristic passage — 8-15 per voice.\n\nEach passage tagged with `purpose` (intellectual substance / voice\nexemplar / translation anchor). Pass 4a uses voice exemplars as\nstylistic models. For musical voices: DESCRIPTION ONLY (no direct lyric\nquotation).\n\nTwo-tier corpus note (Phase B): this is the PUBLIC-SAFE tier. Voices\nwith `corpus_constraint: lyrics_patterns_only` emit pattern descriptions\nhere (`is_direct_quotation=false`). The private-reasoning tier lives in\nthe sibling `ReferenceOnlyPassage` — loaded into Voice Pipeline Step 1\nonly, never Step 2. See the `ReferenceOnlyPassages` model.",
       "properties": {
         "passage_id": {
           "description": "Short reference label, e.g. 'Republic-488a' or 'Rihla-Delhi-imprisonment'.",

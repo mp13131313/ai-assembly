@@ -943,6 +943,7 @@ REGISTER_CHECK_SKIP_FIELDS = {
     # not voice-field content. Third-person in these fields is NOT a register
     # violation.
     "curated_corpus_passages",   # primary text excerpts + scholarly annotations
+    "reference_only_passages",   # two-tier corpus private tier (Step 1 only)
     "smoke_test_chains",        # diagnostic artifact with scholarly gloss
     "metadata",                   # pipeline metadata
 }
@@ -1064,6 +1065,12 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
 
     # All 35 generated card fields, flat at root level
     **full_card,
+
+    # Two-tier corpus (Phase B): reference_only_passages is loaded into
+    # Voice Pipeline Step 1 ONLY; Step 2 drops it before assembling its
+    # system prompt. See personas/HANDOFF.md §"reference_only_passages is
+    # Step 1 only" for the enforcement contract.
+    "reference_only_passages": merged_dossier_dict.get("reference_only_passages", {"passages": []}),
 
     # Runtime continuity fields (populated by Voice Pipeline at deployment, not
     # by Persona Pipeline). Initialized null so consumers don't get KeyError.
