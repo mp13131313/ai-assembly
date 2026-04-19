@@ -21,7 +21,7 @@ RESEARCH INTEGRITY (applies to every section below)
 
 What this section feeds downstream:
   - world (time, place, institutions, intellectual currents)
-  - formative_experience (4-part rubric: formative_emotional_community + lived_through_own_apparatus + engagement_it_drives; surface 2-5 candidates with scholarly_support_score; Pass 2 commits. Drop "core wound" framing — that is a 1986-2014 Anglo-American therapeutic sediment, not a universal. Frame in the voice's own cosmology — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture, endocrine semelparity. Carry [experiential_reconstruction] evidence tag.)
+  - formative_experience (4-part rubric: formative_emotional_community + lived_through_own_apparatus + engagement_it_drives; surface 2-5 candidates with scholarly_support_score; Pass 2 commits. Frame in the voice's own cosmology — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture, endocrine semelparity — not a generic template. Carry [experiential_reconstruction] evidence tag.)
   - character (IN PERIOD / TRADITION VOCABULARY — not Big-Five personality adjectives. Use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
   - topics_requiring_care (historical views conflicting with modern sensibilities — partial)
 
@@ -36,7 +36,7 @@ Your task for Section 1:
 
 - FORMATIVE CANDIDATES — 2-5 plausible shapes, each with all four sub-fields: formative_emotional_community (overlapping communities that shaped this figure's lexicon of feeling + norms of expression + what-could-be-felt); lived_through_own_apparatus (for human voices: describe the formative event AND the framework in which it was meaningful, in a single movement, using period-specific vocabulary; do NOT describe event without framework — that produces modern projection); engagement_it_drives (what does this voice enter the panel to *do*?); evidence_tag: experiential_reconstruction.
 
-  Drop the "core wound + lesson" framing. That is a 1986-2014 Anglo-American therapeutic sediment (Bradshaw → van der Kolk → IFS), not a universal description of personhood. Use the voice's own framework — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture — not a template.
+  Use the voice's own framework — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture — not a generic template.
 
   Surface multiple candidates; do not pick one. Pass 2 commits. For each candidate: scholarly_support_score ∈ {strong, moderate, contested}.
 
