@@ -1,7 +1,36 @@
 # Phase B Execution Plan — status + Phase L pickup
 
-**Branch:** `phase-b-rebuild` (13 commits, pushed). **Phases A–K landed.**
-**Phase L deferred — next session picks up here.**
+**Branch:** `phase-b-rebuild` (19 commits, pushed). **Phases A–K landed +
+pre-L cleanup landed.** **Phase L is the next action.**
+
+## Cleanup pass (2026-04-19, commits `fix(phase-b/cleanup-1..6)`)
+
+After an honest audit, 6 integration / scaffold items surfaced as gaps
+between "marked done" and "actually closed". All six closed before
+Phase L runs:
+
+- **cleanup-1**: `run_persona_pipeline.py` now calls `run_pass_1_all()`
+  (chunked Pass 1 orchestrator) instead of the v3.10 contradiction-check
+  merge. Pass 2–6 prompts get the Boddice-chunked JSON shape they asked
+  for; `merged_dossier.json` filename collision resolved. Pass 1c-extract
+  simplified to read URLs directly from the Pass 1.6 CORPUS chunk (no
+  Sonnet call needed).
+- **cleanup-2**: Pass 7-anachronism wired into the revision loop. `o3 →
+  gpt-4o → Gemini` fallback; anachronism flags translate to Pass 2 / 3 /
+  4a / 5 revision targets by `field_path` prefix. Escalates `pass7a.overall`
+  to REVISION_NEEDED if 7-anach flags fire and 7a alone said PASS.
+- **cleanup-3**: G.4 hybrid Jinja+LLM tailoring (PB#2) shipped.
+  `run_pass_0b_tailor.py` + `pass_0b_tailor.md` + wired into
+  `run_phase0_1_research.py` — auto-invokes if `editorial_rationale` is
+  populated; skips cleanly if null. `editorial_rationale` now has a real
+  consumer.
+- **cleanup-4**: G.3 `pass_0b_dr_prompt.md` decomposed into 5 sub-templates
+  + a 13-line wrapper. `FileSystemLoader` added to runner so `{% include %}`
+  resolves. Organism/system subtype split kept inline (risk > benefit).
+- **cleanup-5+6**: K Phase 5 QC now fully live. `_same_question_test`
+  invokes all 12 voices; swap + blind_id use strict JSON parsing; unified
+  `_parse_json_from_text()` handles fenced / preamble-wrapped evaluator
+  output; `_call_evaluator()` cascades o3 → gpt-4o → Gemini.
 
 This doc is the single source of truth for what's done vs. what's next on the
 persona-pipeline rebuild. When Phase L runs, it produces the first Boddice-
@@ -270,32 +299,23 @@ coherence_resolutions. Parallel; ~3-6 min wall.
 
 ### L.5 Phase 2–6 generation
 
-The current `run_persona_pipeline.py` expects the v3.10 2-source markdown
-merge at `contradiction_check.json`; it does not yet read
-`merged_dossier.json` as primary input. **Integration required at L.5**:
-either add a `--from-merged-dossier` flag to `run_persona_pipeline.py`
-that skips the contradiction check and feeds `merged_dossier.json` to
-Pass 2+, or extract a Phase-B-native orchestrator. This is a ~30-minute
-integration task; a stub is ready to fill in.
-
-Once integrated:
+Closed in cleanup-1: `run_persona_pipeline.py` already calls
+`run_pass_1_all()` and feeds the chunked `merged_dossier.json` to Pass
+2–6. Just run:
 
 ```bash
-cd personas && venv/bin/python run_persona_pipeline.py "Plato" --from-merged-dossier
+cd personas && venv/bin/python run_persona_pipeline.py "Plato"
 ```
 
 ### L.6 Phase 3 validation
 
-Runs inside `run_persona_pipeline.py`: Pass 7-pre (with Boddice tag
-check) → Pass 7-anachronism (NEW; also needs integration wiring) →
-Pass 7a → revision loop → Pass 7b (smoke_test_chains) → Pass 7c
-(banned_language + projection_warnings). If any REVISION_NEEDED, the
-pipeline re-runs affected passes with critique.
-
-**Pass 7-anachromism integration**: add a `_pass_7_anachromism()`
-function to `run_persona_pipeline.py` between the existing `_pass_7pre`
-and `_pass_7a`. Use o3 (cross-family); fallback to Gemini. Prompt at
-`personas/flows/shared/prompts/persona_pass_7_anachronism.md` is ready.
+Closed in cleanup-2: Pass 7-anachronism is wired between 7-pre and 7a
+with revision-loop integration (flags translate to Pass 2 / 3 / 4a / 5
+targets by `field_path` prefix). The full Phase 3 chain inside
+`run_persona_pipeline.py` is now: Pass 7-pre (+ Boddice tag check) →
+Pass 7-anachronism (o3 cross-family) → Pass 7a (multi-family) → revision
+loop (max 2 rounds) → Pass 7b (smoke_test_chains) → Pass 7c
+(banned_language + projection_warnings).
 
 ### L.7 Phase 4 Derive
 
