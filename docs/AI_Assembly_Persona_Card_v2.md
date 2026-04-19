@@ -871,7 +871,7 @@ These exist elsewhere and are not persona runtime data:
 | Voice type / subtype / voice_mode | Pipeline input | Persona Pipeline (branching) |
 | hostile_sources, corpus_constraint | Pipeline input | Persona Pipeline (branching) |
 | Known primary texts | Pipeline input (primary_text_sources) | Persona Pipeline (Node 1c) |
-| Model choice | Persona Pipeline (Appendix F) | Orchestration layer (n8n routing) |
+| Model choice | Persona Pipeline (Appendix F) | Orchestration layer |
 | Provocateur Profile (8 fields) | Persona Pipeline (Derive step) | Provocateur Pipeline |
 | Evaluation Rubric (test prompts) | Persona Pipeline (Pass 9 output) | Testing / calibration |
 | Pipeline metadata (voice_basis, validation_status, etc.) | Persona Pipeline (card metadata block) | Builder review, not runtime |

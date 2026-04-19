@@ -2,7 +2,7 @@
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
 **Status:** v3.10 — Phase 0.5 scaffolding refactor 2026-04-17
-**Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Designed to run as an n8n workflow, parallel across all voices, calling four model APIs in sequence.
+**Purpose:** This document specifies the automated pipeline that produces completed Persona Cards — one per voice. Implemented as a Python script (`run_persona_pipeline.py`), parallel across all voices, calling four model APIs in sequence.
 
 **Changelog from v3.9:**
 - PASS 0A UX HARDENING (fixes 24–28):
@@ -119,7 +119,7 @@
 - Added Gemini as fallback validator for Passes 7a and 7c (preserves multi-model principle)
 - Full node specification for Coherence Threading (was underspecified)
 - Structured JSON output requirement for all generation passes
-- Template syntax note (Handlebars notation → convert to n8n expressions)
+- Template syntax note (Handlebars notation for readability; actual prompts use Jinja2)
 - Updated cost estimate with CT calls, 4a/4b split, Gemini fallback
 - Citation verification caveat: dossier-sourced claims flagged separately from primary-text-verified claims
 - Voice-mode-specific field instructions: constitution, epistemic_frame_statement, bold_engagement_topics
@@ -341,7 +341,6 @@ After automated fetch, the builder reviews and supplements:
 
 **Error handling:** If automated fetch returns nothing, flag for manual provision. Pipeline can proceed to Pass 2 without primary texts (Pass 2 doesn't need them), but Passes 4a and 6 should not run until `{{primary_texts}}` has at least 2 passages.
 
-**n8n implementation:** HTTP Request node(s) → manual review (webhook pause or human-in-the-loop node) → store output.
 
 ---
 
@@ -355,9 +354,9 @@ Six sequential Claude API passes, each producing a subset of fields. Each pass r
 
 **Voice mode branching.** Several field specifications below include `{{#if voice_mode == "philosophical"}}` / `{{#if voice_mode == "observational"}}` / `{{#if voice_mode == "narratival"}}` variants. Philosophical voices have explicit positions to extract. Observational voices require the pipeline to *infer* principles from behaviour, narrative, or artistic practice. Narratival voices require the pipeline to *attribute* principles from the character's narrative function — what scholars and readers read into the character's role in the text. The field specs differ accordingly. The `voice_mode` field in the input controls which variant fires.
 
-**Structured JSON output.** All generation passes (2, 3, 4a, 4b, 5, 6, 7b) MUST use Claude's structured output capability to guarantee valid JSON. In the API call, use `tools` with a JSON schema matching the expected field names, or set `response_format: { type: "json_object" }` and include the field schema in the system prompt. Do NOT rely on "Output as JSON" as a prompt instruction alone — this is unreliable at scale. n8n's HTTP Request node should validate the response is parseable JSON and retry once if malformed.
+**Structured JSON output.** All generation passes (2, 3, 4a, 4b, 5, 6, 7b) MUST use Claude's structured output capability to guarantee valid JSON. In the API call, use `tools` with a JSON schema matching the expected field names, or set `response_format: { type: "json_object" }` and include the field schema in the system prompt. Do NOT rely on "Output as JSON" as a prompt instruction alone — this is unreliable at scale. The runner's `_claude_pass` wrapper validates JSON and retries once on parse failure.
 
-**Template syntax.** Prompts below use `{{double_braces}}` for variable substitution and `{{#if condition}}` for branching. n8n uses its own expression syntax (`{{ $json.field }}`). Convert at implementation time. The logic is what matters, not the Handlebars notation.
+**Template syntax.** Prompts below use `{{double_braces}}` for variable substitution and `{{#if condition}}` for branching. This is Handlebars notation used for readability in this spec; the actual prompt files in `personas/flows/shared/prompts/` use Jinja2 (`{% if %}`). The logic is what matters, not the Handlebars notation.
 
 ---
 
@@ -686,7 +685,7 @@ Template fields marked with `{{double_braces}}` are populated from the input or 
 
 ## Node 0: Input Validation (no API call)
 
-**Tool:** n8n IF node (or equivalent conditional)
+**Tool:** Python `validate_input()` at `personas/flows/shared/node0_validation.py`
 **Runs:** Once per voice, before any API calls
 **Cost:** $0.00
 
@@ -740,11 +739,11 @@ register. Drop: operational notes, full lists, examples.
 
 This compressed summary is inserted into the user prompt of each subsequent pass under the heading "Previously completed fields (summary)."
 
-**n8n implementation:** A reusable sub-workflow or Function node called after each generation pass. Input: accumulated `persona_card` JSON. Output: compressed summary string stored as `{{pass_summary}}`.
+`_ct_compress` helper in `run_persona_pipeline.py` — called after each generation pass. Input: accumulated `persona_card` JSON. Output: compressed summary string stored as `{{pass_summary}}`.
 
 ## Intermediate JSON
 
-The card builds up pass by pass. Each pass outputs a JSON object with its field names as keys. The n8n workflow merges these into an accumulating flat `persona_card` object — all fields at root level:
+The card builds up pass by pass. Each pass outputs a JSON object with its field names as keys. Each pass's output is merged into the accumulating dict via Python dict-spread (`{**old, **new}`) — all fields at root level:
 
 After Pass 2:
 ```json
@@ -775,7 +774,7 @@ After Pass 7b: adds `worked_provocations`
 
 After Pass 7c: updates `banned_language` and `banned_modes` with testing additions
 
-All passes merge into the same flat object. No nesting. The n8n Merge node uses `Object.assign()` / spread semantics — each pass's output keys are added directly to the accumulating card.
+All passes merge into the same flat object. No nesting. Dict-spread (`{**old, **new}`) — each pass's output keys are added directly to the accumulating card.
 
 Final assembly produces a flat JSON — all 37 card fields at root level, plus metadata:
 
@@ -1129,7 +1128,7 @@ or
 {"status": "CONTRADICTIONS", "items": [{"claim_a": "...", "claim_b": "...", "assessment": "factual error" or "scholarly disagreement"}]}
 ```
 
-**Output:** JSON object. Parsed by n8n: if `status === "CLEAN"`, proceed. If `status === "CONTRADICTIONS"`, append items to merged dossier as flags. Stored as `{{merged_dossier}}`.
+**Output:** JSON object. If `status === "CLEAN"`, proceed. If `status === "CONTRADICTIONS"`, append items to merged dossier as flags. Stored as `{{merged_dossier}}`.
 
 ---
 
@@ -1784,7 +1783,7 @@ List all UNVERIFIED items.
 **Config:** `temperature: 0.0`, `max_tokens: 8192`
 **Runs:** Once per voice
 
-**Fallback logic (n8n IF node):**
+**Fallback logic:**
 1. Try ChatGPT API call. If HTTP 200 → use response.
 2. If ChatGPT fails (429 rate limit, 5xx, timeout) → try Gemini API call.
 3. If Gemini fails → set `metadata.validation_status: "skipped — no cross-model validator available"`, proceed to 7b.
@@ -1843,7 +1842,7 @@ Complete Persona Card:
 
 **Output:** PASS or REVISION NEEDED with specifics.
 
-**If REVISION NEEDED:** n8n routes back to the flagged Node (2, 3, 4a, 4b, 5, or 6) with the critique appended to the user prompt. Max 2 revision loops.
+**If REVISION NEEDED:** the pipeline routes back to the flagged Node (2, 3, 4a, 4b, 5, or 6) with the critique appended to the user prompt. Max 2 revision loops.
 
 ---
 
@@ -1993,7 +1992,7 @@ Persona Card:
 
 ## Cross-Persona QC (Batch — after all voices)
 
-A separate n8n workflow:
+A separate batch pass (run after all per-voice pipelines complete):
 
 ```
 TRIGGER: All per-voice workflows complete
