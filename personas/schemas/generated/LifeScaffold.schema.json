@@ -1,0 +1,268 @@
+{
+  "$defs": {
+    "KeyRelationship": {
+      "description": "One formative relationship (teacher, student, rival, consort, enemy, etc.).",
+      "properties": {
+        "person": {
+          "title": "Person",
+          "type": "string"
+        },
+        "relation_type": {
+          "title": "Relation Type",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "person",
+        "relation_type",
+        "evidence_tag"
+      ],
+      "title": "KeyRelationship",
+      "type": "object"
+    },
+    "PeriodPathos": {
+      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: 5-10 terms per voice in original language,\nwith short glosses. No modern English emotion-words as primary vocabulary\nfor pre-1820 voices.",
+      "properties": {
+        "term_in_original_language": {
+          "title": "Term In Original Language",
+          "type": "string"
+        },
+        "gloss": {
+          "title": "Gloss",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term_in_original_language",
+        "gloss",
+        "evidence_tag"
+      ],
+      "title": "PeriodPathos",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "human",
+        "non_human",
+        "fictional"
+      ],
+      "title": "Type",
+      "type": "string"
+    },
+    "subtype": {
+      "anyOf": [
+        {
+          "enum": [
+            "organism",
+            "system"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subtype"
+    },
+    "birth_year": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Birth Year"
+    },
+    "death_year": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Death Year"
+    },
+    "primary_locations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Primary Locations",
+      "type": "array"
+    },
+    "institutions_founded_joined_opposed": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Institutions Founded Joined Opposed",
+      "type": "array"
+    },
+    "key_relationships": {
+      "items": {
+        "$ref": "#/$defs/KeyRelationship"
+      },
+      "title": "Key Relationships",
+      "type": "array"
+    },
+    "intellectual_world": {
+      "description": "Period intellectual currents in the voice's own framing.",
+      "title": "Intellectual World",
+      "type": "string"
+    },
+    "ontological_furniture": {
+      "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture.",
+      "title": "Ontological Furniture",
+      "type": "string"
+    },
+    "available_pathe": {
+      "description": "5-10 period-specific affects in original language with glosses. Flag any for which no modern equivalent exists. Pre-1820 voices: do not use 'emotions' as organizing category.",
+      "items": {
+        "$ref": "#/$defs/PeriodPathos"
+      },
+      "title": "Available Pathe",
+      "type": "array"
+    },
+    "framework_for_difficulty": {
+      "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework.",
+      "title": "Framework For Difficulty",
+      "type": "string"
+    },
+    "model_of_selfhood": {
+      "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly.",
+      "title": "Model Of Selfhood",
+      "type": "string"
+    },
+    "anachronisms_to_avoid": {
+      "description": "4-8 modern terms that would mis-render this voice (e.g. 'career', 'self-actualization', 'trauma', 'romance', 'identity'). Each entry: term + 1-line reason.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Anachronisms To Avoid",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "intellectual_world",
+    "ontological_furniture",
+    "framework_for_difficulty",
+    "model_of_selfhood"
+  ],
+  "title": "LifeScaffold",
+  "type": "object"
+}
