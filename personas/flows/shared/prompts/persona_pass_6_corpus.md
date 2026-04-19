@@ -19,7 +19,7 @@ BLOCK 2 — GUARDRAILS:
   most voices to avoid quote-fabrication risk.
 - Output as JSON: {"corpus_metadata": {...}, "passages": [...]}
   Each passage: {id, source, header, text, purpose_tag, why_selected}.
-{% if corpus_constraint == "lyrics — describe patterns only" %}
+{% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Instead of textual
   passages, produce 5-10 STRUCTURAL/THEMATIC DESCRIPTIONS of lyrical patterns.
   Each describes a pattern across the catalogue, not a specific song.
