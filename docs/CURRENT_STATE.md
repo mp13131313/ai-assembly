@@ -463,9 +463,9 @@ or expand?"`. Default for now: keep the 3-enum.
 - **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching. Expected accuracy degrades from 70–85% to 40–50% without bios. **Pre-Athens blocker** — bios must be populated before first production session.
 - **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC` (Philosophical Speed-Dating Rave, How to Meet an Idiot). Either firm up venues in program or leave them skipped.
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v2`. Hand-written stubs for all 12 members. Must be replaced with real Derive output from persona pipeline before production.
-- **`personas/inputs/voices/`**: 4 voice configs exist (plato, hannah_arendt, cleopatra, octopus). 8 more needed.
-- **`personas/inputs/dossiers/`**: only Plato has a completed Claude DR dossier (`plato_claude_dr.md`). Other voices need their DR dossiers produced via claude.ai (60–120 min each).
-- **`personas/inputs/dossiers/_dr_prompts/`**: only 2 prompts exist (cleopatra, octopus). 9 more need generating via `run_pass0b_dr_prompt.py` (fast — seconds per voice after Pass 0a completes).
+- **`personas/inputs/voices/`**: 5 voice configs exist (plato, hannah_arendt, cleopatra, octopus, ibn_battuta). 7 more needed.
+- **`personas/inputs/dossiers/`**: 0 of 12 Claude DR dossiers at present. Plato's run predates the three-source merge; its persona_card_assembled.json was produced via the 2-source fallback path.
+- **`personas/runs/_dr_prompts/`**: 3 prompts exist (cleopatra, ibn_battuta, octopus). 9 more to generate via `run_pass0b_dr_prompt.py` (fast — seconds per voice after Pass 0a completes).
 
 ### 6.2 Pipeline gaps
 
