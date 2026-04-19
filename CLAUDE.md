@@ -2,9 +2,12 @@
 
 ## Repo layout
 
-- `runtime/` — FastAPI ingest app (`runtime/ingest/`) + Prefect flows (`runtime/flows/`). Runs on a VM; also runnable locally as standalone scripts.
-- `personas/` — Persona Pipeline. Builds the 37-field voice cards (`provocateur_profile.json`) that the Provocateur flow consumes. Runs on a local machine before the event.
-- `docs/` — canonical specs, briefing documents, and pipeline references. See `docs/README.md` for staleness status of each file.
+Four categories:
+
+- `docs/`, `runtime/`, `personas/` — **production** slice. Current specs, running code, canonical pipeline. In scope for every code review and VM deploy.
+- `research/` — **preserved grounding**. Deep Research artifacts that ground architecture decisions. Not deletable.
+- `_workspace/planning/` — **forward-looking design**. Active docs for unbuilt work (Phase B rebuild plan, binding decisions). Promoted to `docs/` when the work lands.
+- `_workspace/archive/` — **historical detritus**. Executed fix plans, stale specs, session artifacts, run artifacts. Eligible for pruning. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
 - `.env` — shared secrets at repo root (not committed). Both sub-trees load from `../.env` (one directory above their own root).
 
 ## Separate venvs
@@ -39,7 +42,7 @@ All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript pipeline
 - `AI_Assembly_Voice_Pipeline.md` — voice pipeline Steps 1+2 (Step 3 unspecified)
-- `AI_Assembly_Architecture_v1.md` — STALE (see docs/README.md)
-- `AI_Assembly_Infrastructure_Setup.md` — STALE (see docs/README.md)
+- `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` — STALE (archived; moved out of docs/)
+- `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` — STALE (archived; moved out of docs/)
 
-Working/WIP documents are in `runtime/notes/` and `personas/notes/`.
+Forward-looking design docs are in `_workspace/planning/`. Executed fix plans and prior session artifacts are in `_workspace/archive/`.

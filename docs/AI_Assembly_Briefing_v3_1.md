@@ -145,7 +145,7 @@ The casting matrix is not audience-facing. It is a design artifact cited in any 
 
 ## The overnight pipeline
 
-Five stages: audio capture to clean transcripts, Researcher, Provocateur, Voice Pipeline (three steps), and Downstream. The original briefing's Interpreter and Synthesiser stages are compressed into the closing show on Day 3 evening. Full orchestration: `AI_Assembly_Architecture_v1.md`.
+Five stages: audio capture to clean transcripts, Researcher, Provocateur, Voice Pipeline (three steps), and Downstream. The original briefing's Interpreter and Synthesiser stages are compressed into the closing show on Day 3 evening. Full orchestration: `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` (archived — marked stale in `docs/README.md`).
 
 ### Stage 0 — Normalisation
 
@@ -285,7 +285,7 @@ The architectural consequence: the Assembly has to be designed against the audie
 - Provocateur pipeline. Specified in `AI_Assembly_Provocateur_Pipeline.md`. Audience and conference_context blurbs need updating against v2 audience profile.
 - Voice Pipeline Steps 1 and 2. Specified in `AI_Assembly_Voice_Pipeline.md`.
 - Transcription pipeline. Specified in `AI_Assembly_Transcription_Pipeline.md`.
-- End-to-end architecture. Specified in `AI_Assembly_Architecture_v1.md`.
+- End-to-end architecture. Specified in `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` (archived — marked stale in `docs/README.md`).
 
 **New work required before Athens:**
 
@@ -336,7 +336,7 @@ This document is v3.1. It supersedes v3, v2, and the original `AI_Assembly_Brief
 
 **Related documents:**
 
-- `AI_Assembly_Architecture_v1.md` — end-to-end pipeline orchestration
+- `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` — end-to-end pipeline orchestration (archived — marked stale)
 - `AI_Assembly_Persona_Pipeline_v3_10.md` — persona card construction
 - `AI_Assembly_Persona_Card_v2.md` — 37-field template
 - `AI_Assembly_Researcher_Pipeline.md` — extraction and grouping
