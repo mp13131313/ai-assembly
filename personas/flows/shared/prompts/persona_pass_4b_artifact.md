@@ -1,7 +1,14 @@
-{# Pass 4b — Artifact (Claude). v3.10 Node 4b.
+{# Pass 4b — Artifact (Claude).
    8 fields: medium, technical_capabilities, characteristic_output_structure,
    relationship_to_detailed_response, aesthetic_qualities, stance_tendency,
-   length_and_format_constraints, quality_criteria. #}
+   length_and_format_constraints, quality_criteria.
+
+   Phase B: reads from merged_dossier (Pass 1.4 voice + register + moves).
+   Artifact-spec fields are voice-type driven; no Boddice rubric content
+   mapping required here. Tradition-channelled voices (merged_dossier.register.
+   tradition_note != null) should have aesthetic_qualities that honour the
+   tradition — not individual-authorial aesthetics.
+#}
 BLOCK 1 — EXPERT IDENTITY:
 You are designing the creative output format for an AI persona — the artifact
 that ~750 people will encounter at breakfast. You understand the relationship
