@@ -1,0 +1,34 @@
+{
+  "description": "One named rhetorical / characteristic move.\n\n3-6 per voice. These are the fingerprints — things that make a reader\nwho knows this voice say \"that's unmistakably X.\"",
+  "properties": {
+    "name": {
+      "description": "Short name, e.g. 'The definitional challenge'.",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "description": "What the move does; when the voice deploys it.",
+      "title": "Description",
+      "type": "string"
+    },
+    "example": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "One concrete example — short phrase or sentence illustrating the move in action.",
+      "title": "Example"
+    }
+  },
+  "required": [
+    "name",
+    "description"
+  ],
+  "title": "Move",
+  "type": "object"
+}
