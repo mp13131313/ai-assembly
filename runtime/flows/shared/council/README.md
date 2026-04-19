@@ -92,7 +92,7 @@ To force a complete clean run: `rm -rf runs/{run}/03_provocateur/` (and re-run).
 
 The current `council_config.json` (version `dev_stub_v2_with_selection_params`) is a development stub. The 12 member profiles were hand-written from project memory for building and testing the Provocateur pipeline. They capture the right shape and fill the required fields, but they are not the real derived profiles the production pipeline will eventually use.
 
-The real workflow is: each council member has a v3.7 Persona Card produced by the Persona Pipeline; the Derive node reads the Persona Card and writes the nine-field profile (`name` through `medium`) back into the council config. To migrate from stubs to real profiles: run the Persona Pipeline Derive step for each member, drop the resulting profile entries into the `members` array, bump `version` to something like `athens_2026_night_1`, and update `last_updated`. The Provocateur code does not care which profiles are stubs and which are real — as long as the nine required fields are present and readable.
+The real workflow is: each council member has a v3.10 Persona Card produced by the Persona Pipeline; the Derive node reads the Persona Card and writes the nine-field profile (`name` through `medium`) back into the council config. To migrate from stubs to real profiles: run the Persona Pipeline Derive step for each member, drop the resulting profile entries into the `members` array, bump `version` to something like `athens_2026_night_1`, and update `last_updated`. The Provocateur code does not care which profiles are stubs and which are real — as long as the nine required fields are present and readable.
 
 ## What reads this file
 

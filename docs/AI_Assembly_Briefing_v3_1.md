@@ -280,7 +280,7 @@ The architectural consequence: the Assembly has to be designed against the audie
 **Completed and stable:**
 
 - Panel casting. 12 voices, final.
-- Persona cards. 37 fields per voice via Persona Pipeline v3.7. Test runs validated on several voices (Arendt, Ibn Battuta, Marley, Dostoevsky, Octopus). Remaining voices to complete before Athens.
+- Persona cards. 37 fields per voice via Persona Pipeline v3.10. Test runs validated on several voices (Arendt, Ibn Battuta, Marley, Dostoevsky, Octopus). Remaining voices to complete before Athens.
 - Researcher pipeline. Specified in `AI_Assembly_Researcher_Pipeline.md`.
 - Provocateur pipeline. Specified in `AI_Assembly_Provocateur_Pipeline.md`. Audience and conference_context blurbs need updating against v2 audience profile.
 - Voice Pipeline Steps 1 and 2. Specified in `AI_Assembly_Voice_Pipeline.md`.
