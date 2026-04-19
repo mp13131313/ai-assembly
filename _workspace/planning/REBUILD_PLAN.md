@@ -15,6 +15,58 @@
 
 ---
 
+## Decisions log (walkthrough 2026-04-19)
+
+A walkthrough of this doc on 2026-04-19 landed 16 decisions. Where items in the phase sections below are superseded by these, the decisions log wins.
+
+### Schema + infrastructure
+
+- **`personas/schemas/` layout: Pydantic SoT.** Python Pydantic models are the source of truth; JSON Schema files generated from them (for LLM prompt inclusion + non-Python validators). Flat prefix-grouped layout (`_conventions.py`, `_entry.py`, `pass_1_1.py`, `pass_1_2.py`, …, `merged_dossier.py`, `generated/*.schema.json`). Draft 2020-12 dialect when JSON Schema is generated. Validation via `Model.model_validate(data)`.
+- **`conference_context.json` split 3-way:** `conference_facts.json` (neutral metadata) + `audience_profile.json` (compressed rendering of `docs/AUDIENCE_BRIEF.md`) + `panel_roster.json` (12 voices). Drop the proposed 4th "scaffolding hints" file — those notes belong inline in per-pass prompts.
+- **Test fixtures** move out of archive into `personas/tests/fixtures/ibn_battuta/` with a README documenting regeneration cost, command, last refresh date, refresh triggers. Refresh only when Phase 0.5 prompts change non-trivially or tests fail for fixture-content reasons.
+- **No cost cap; quality-first.** Track per-pass cost in `_manifest.json` retrospectively but no alarms.
+
+### Boddice integration (content-layer)
+
+- **`formative_experience` field rubric = Boddice §14 4-part shape** for all voices, name preserved (v3.10 `formative_experience`; rename deferred to Card v3 sweep). Sub-fields:
+  - Human voices: `formative_emotional_community` + `lived_through_own_apparatus` (event + framework in single movement, period-vocabulary) + `engagement_it_drives`.
+  - Non-human / system / cosmic voices: `formative_emotional_community` (or ontogenetic-ecological field) + `condition_of_being` (replaces `lived_through_own_apparatus`) + `engagement_it_drives`.
+  - All sub-field content carries `[experiential reconstruction]` evidence tag.
+- **The rubric propagates through all three layers** — research prompts (Pass 1a Perplexity + Pass 1b Gemini + Pass 0b DR template) ASK for Boddice-shaped material; chunked merge (Pass 1.1) MERGES into Boddice-shaped schema; synthesis prompts (Pass 2 + Pass 4a) FILL Boddice-shaped fields. Skipping any layer breaks the chain (material re-collapses).
+- **B.4 testing uses v3.10 Battuta fixtures** for merge mechanics (schema + runner + retry). End-to-end Boddice-shape validation lands with the first real voice run (likely Plato).
+- **Chunk 1.1 few-shot exemplars: Plato + Octopus + Whanganui River** (covers human/organism/system branches). Cleopatra / Arendt / Battuta / Marley deferred to hybrid Jinja+LLM tailoring pass (PB#2) which adds per-voice exemplars at DR-prompt rendering time.
+
+### `voice_mode`
+
+- **Keep 3-enum** `{philosophical, observational, narratival}` (+ null for `subtype="system"`) for Phase B. Boddice-driven expansion (`ritual` / `channeled` / `ecological` / `narratival-frame`) deferred to Card v3 sweep alongside §15 field renames. Compensating mechanism: per-voice hardcoded guidance in Pass 4a / 4b prompts carries richer mode-of-knowing description without relying on the enum.
+
+### Pass 7 design under PB#6
+
+- **Pass 7-pre** (citation verification): inherit v3.10 Sonnet 4.6 + **extend** prompt to verify `[experiential reconstruction]` and `[projection warning]` Boddice tags are correctly applied.
+- **Pass 7-anachronism** (NEW sub-pass, runs between Pass 7-pre and Pass 7a): TimeChara-style anachronism check. Directly addresses Boddice's anachronism concern + Athens audience's hardest-to-please voices. CharacterBench + RoleKE-Bench deferred (revisit post first-voice run if gaps emerge).
+- **Pass 7a** (cross-model validation, multi-family): already locked. `o3 → gpt-4o → gemini-2.5-pro` fallback chain. Non-negotiable.
+- **Pass 7b** (card smoke test): **renamed** from "Worked Provocations" to **"Card Smoke Test"** at the pass level; assembled-card field renamed from `worked_provocations` to **`smoke_test_chains`** (build-time-only rename with no runtime cascade — safe). Same Opus 4.7 + adaptive thinking; revised prompt asks for provocations testing Boddice-rubric framing under pressure.
+- **Pass 7c** (negative constraints): inherit v3.10 Gemini + Sonnet fallback chain; **output schema expanded to two lists**: `banned_language[]` (unchanged — words the voice would never use) + `projection_warnings[]` (NEW — modern English terms used to describe the voice that distort, per Boddice §12; each entry `{term, distortion_explanation}`).
+
+### Phase 4 Derive + Cross-Persona QC
+
+- **Phase 4 Derive**: inherit v3.10 Sonnet 4.6 structure + 8-field Provocateur Profile + 9-test Evaluation Rubric; **minor prompt revision** so Derive correctly reads Boddice-shaped `world` + `formative_experience` fields. Provocateur Profile schema unchanged (preserves cross-repo contract).
+- **Cross-Persona QC (Phase 5) built for Phase B.** New flow `personas/phase_5_cross_persona_qc.py`. Runs once after all 12 cards complete. Three sub-tests: (1) swap test (shuffle constitution principles, can evaluator detect?), (2) blind identification (remove names from character + register_and_tone, can evaluator identify?), (3) same-question distinctiveness (run all 12 on one shared smoke-test-chain provocation, compare for similarity). Cross-model evaluator (OpenAI o3 or Gemini, different family from generator). Failed voices get Pass 2 / 4a re-run with cross-card critique.
+
+### Project-level flags
+
+- **Briefing v3.1 sentence on flagged-projection-not-non-projection**: FLAG only for Till/Matthias; Sonnet/Opus execution does NOT edit the briefing. Pipeline correctly enforces flagged projection via the two new evidence tags.
+- **Boddice §15 field renames**: stay deferred to Card v3 sweep. Phase B revises field *instructions*; names preserved. Exception already made: `worked_provocations → smoke_test_chains` (build-time-only, no cascade).
+- **Runtime council_config.json** synced iteratively as each voice's Phase B build completes. Wholesale refresh (version bump to `phase_b_derived_v1`) once all 12 done.
+
+### Card v3 sweep (future migration)
+
+"Card v3 sweep" = a future coordinated schema migration that touches all downstream consumers in one PR. Contents: Boddice §15 field renames (5 renames), potential `voice_mode` enum expansion, other accumulated schema changes. Triggers: after Phase B lands + after Voice Pipeline built + after Athens. Possibly never if Phase B's in-place revisions land enough of Boddice's intent that renames become cosmetic.
+
+---
+
+---
+
 ## Locked architectural decisions (PB#1–9)
 
 These were debated and committed in the 2026-04-17/18 design conversation. **Do not re-litigate without explicit reason.** This section is immutable — proposed changes go through an explicit decision review, not silent edits.
@@ -337,4 +389,4 @@ The orientation reading order in `CLAUDE.md` is the canonical bootstrap sequence
 
 ---
 
-*Last updated: 2026-04-19 — merged from `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` (2026-04-18); PB#1–9 hoisted to top, original handoff archived to `_workspace/archive/session-artifacts/ARCHITECTURE_NEXT_PHASE_HANDOFF_2026_04_18.md` for provenance.*
+*Last updated: 2026-04-19 — merged from `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` (2026-04-18) and extended with the 2026-04-19 walkthrough decisions log. PB#1–9 hoisted to top, Decisions log below Conventions, original handoff archived to `_workspace/archive/session-artifacts/ARCHITECTURE_NEXT_PHASE_HANDOFF_2026_04_18.md` for provenance.*
