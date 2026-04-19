@@ -1,10 +1,5 @@
 Research Dossier:
 {{ merged_dossier }}
-{% if chatgpt_supplement %}
-
-Supplementary Analysis:
-{{ chatgpt_supplement }}
-{% endif %}
 
 Previously completed fields (summary):
 {{ pass_2_summary }}
