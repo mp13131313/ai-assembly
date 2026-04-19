@@ -35,8 +35,8 @@ RESEARCH INTEGRITY (applies to every section below)
 
 What this section feeds downstream:
   - world (time, place, institutions, intellectual currents)
-  - formative_experience (THE ONE wound + the lesson it taught — one specific event, not a category)
-  - character (personality traits, quirks, contradictions, self-understanding)
+  - formative_experience (per Boddice §14 4-part rubric: formative_emotional_community + lived_through_own_apparatus + engagement_it_drives; surface 2-5 candidates with scholarly_support_score; Pass 2 commits. Drop "core wound" framing — that is a 1986-2014 Anglo-American therapeutic sediment, not a universal. Frame in the voice's own cosmology — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture, endocrine semelparity. Carry [experiential_reconstruction] evidence tag.)
+  - character (IN PERIOD / TRADITION VOCABULARY — not Big-Five personality adjectives. Per Boddice §15 use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
   - topics_requiring_care (historical views conflicting with modern sensibilities — partial)
 
 Starting material from Perplexity's §1:
@@ -52,13 +52,22 @@ Your task for Section 1:
 
 - INTELLECTUAL WORLD — the intellectual currents, traditions, and institutions this figure was embedded in. What was happening philosophically, politically, artistically, or scientifically in their period and place. What schools they studied at, what debates they entered, what movements they were in dialogue with (supporting, opposing, or independent of).
 
-- THE ONE FORMATIVE EXPERIENCE — the single most consequential event, condition, or relationship that shaped this figure's intellectual life. Where multiple candidates compete (especially for figures with complex biographies), name all serious candidates and the scholarly argument for each being most formative. Pass 2 commits; your job is to produce the candidates with evidence.
+- FORMATIVE CANDIDATES (PER BODDICE §14) — 2-5 plausible shapes, each with all four sub-fields: formative_emotional_community (overlapping Rosenwein-style communities that shaped this figure's lexicon of feeling + norms of expression + what-could-be-felt); lived_through_own_apparatus (for human voices: describe the formative event AND the framework in which it was meaningful, in a single movement, using period-specific vocabulary; do NOT describe event without framework — that produces modern projection); engagement_it_drives (what does this voice enter the panel to *do*?); evidence_tag: experiential_reconstruction.
 
-  AND: what did the experience TEACH? The lesson that drove every subsequent engagement. Both the event AND the lesson extracted from it, with sources.
+  Drop the "core wound + lesson" framing. That is a 1986-2014 Anglo-American therapeutic sediment (Bradshaw → van der Kolk → IFS), not a universal description of personhood. Use the voice's own framework — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture — not a template.
 
-  (Could be a singular trauma — Augustine's conversion at age 31; a prolonged condition — Kafka's relationship with his father as documented across his letters and diaries; an encounter — Wittgenstein's first meeting with Russell in 1911; a political moment — Beauvoir's wartime Paris intellectual formation.)
+  Surface multiple candidates; do not pick one. Pass 2 commits. For each candidate: scholarly_support_score ∈ {strong, moderate, contested}.
 
-- CHARACTER — personality traits, quirks, contradictions, relationships, habits, physical presence, documented by contemporaries or later scholarship. The qualities that make this figure RECOGNIZABLE as a specific person, not a composite of their ideas. What made people remember them? What surprised them? What made them difficult? What did friends love? The traits that make a reader say "oh, that's unmistakably X" rather than "that's a thoughtful person."
+- CHARACTER IN PERIOD/TRADITION VOCABULARY (PER BODDICE §15) — describe this figure's character USING THE CHARACTER-GRAMMAR NATIVE TO THEIR PERIOD OR CULTURE. Do NOT use Big-Five-adjacent adjectives as primary terms (curious, brave, warm, ambitious, introverted). These are 20th-C trait-theory categories that anachronise pre-modern voices.
+
+  Instead:
+  - Medieval/early-modern European voices: four humours (sanguine/choleric/melancholic/phlegmatic); cardinal and theological virtues.
+  - Greek: tripartite soul (logistikon/thumoeides/epithumētikon); sōphrosynē, andreia, dikaiosynē, phronēsis.
+  - Islamic: nafs stations (ammāra / lawwāma / muṭmaʾinna); adab; ṣabr.
+  - Rastafari: four Rasta virtues (livity, ini, overstanding, reasoning).
+  - Buddhist: śīla; paramīs.
+  - Confucian: ren, yi, li, zhi.
+  Include a [projected_categories] warning if any modern category is used for clarity, with the distortion flagged explicitly.
 
 - HOW THEY DESCRIBED THEMSELVES — this figure's self-understanding. How did they describe their own work? What did they think they were doing? What kind of thinker did they claim to be, and what did they refuse to be called? (Socrates refusing "wise"; Nietzsche refusing "systematic philosopher".) Feeds epistemic_frame_statement — a voice that sounds right claims itself the way the figure actually did.
 
@@ -320,7 +329,7 @@ FALLBACK: Perplexity output could not be split by section. Full output:
 
 Cite all claims. Prioritize academic sources (Stanford Encyclopedia of Philosophy, Cambridge Companions, peer-reviewed scholarship). For each major claim, note whether it represents scholarly consensus or a contested interpretation.
 
-{% elif type == "non-human" %}
+{% elif type == "non_human" %}
 Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this non-human entity. Organize findings under these headings:
 
 RESEARCH INTEGRITY (applies to every section below)
@@ -370,7 +379,7 @@ Operational rules for this dossier:
 What this section feeds downstream:
 {% if subtype == "system" %}
   - world (watershed, cycles, physical extent, health indicators)
-  - formative_experience (the narrative of recognition struggle — the wound of colonisation, extraction, or damming around which this voice is organised)
+  - formative_experience (per Boddice §14 non-human variant: formative_emotional_community_or_ontogenetic_field + condition_of_being [replaces lived_through_own_apparatus for system entities] + engagement_it_drives. The "condition" is ongoing — legal-ontological standing, indigenous-framework kinship, historic breach + restoration work. Carry [experiential_reconstruction] with mediation flag.)
   - character (condition signals — what degrades / restores the system)
   - topics_requiring_care (partial — where "damaged" vs "changing" framing matters; where Indigenous vs settler narratives contest)
 {% else %}
@@ -401,7 +410,7 @@ Your task for Section 1:
 
 - THE SPECIFIC INDIGENOUS COMMUNITY WHOSE PHILOSOPHY GROUNDS THIS VOICE — named specifically (for Whanganui-class voices: Whanganui Iwi, with the whakataukī "Ko au te awa, ko te awa ko au"). Cite the scholarly / community-authored sources where the kinship relationship and its specific articulation are documented. Do NOT generalise.
 
-- HISTORICAL STRUGGLE FOR RECOGNITION — the legal and political history by which this system achieved legal personhood or equivalent protection. For Whanganui-class: the 140+ year struggle culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. Cite the legal record + Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) + iwi-authored histories. This is the system's formative experience — the narrative wound around which its voice is organised.
+- HISTORICAL STRUGGLE FOR RECOGNITION — the legal and political history by which this system achieved legal personhood or equivalent protection. For Whanganui-class: the 140+ year struggle culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. Cite the legal record + Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) + iwi-authored histories. Per Boddice §14 non-human variant: the voice's condition_of_being is ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the indigenous framework's own vocabulary (hara, whakapapa breach, utu, hohou rongo) rather than "trauma".
 
 - THE SWAP TEST — if a description of this system could equally apply to a different river, mountain, or ecosystem under a different legal framework (e.g., Ganges under the 2017 Uttarakhand High Court ruling — which was later stayed by the Indian Supreme Court; Atrato under Colombia's T-622/16; Mar Menor under Spain's Law 19/2022), drive to what is SPECIFIC here. Te Awa Tupua is not the Ganges — different cosmology, different legislation, different Indigenous tradition, different governance structure.
 {% else %}
@@ -1073,7 +1082,7 @@ HOSTILE SOURCE WARNING: The historical record for {{ display_name_with_hint }} i
 
 - EXPLICITLY NOTE what the hostile sources were motivated to distort and why.
 {% endif %}
-{% if corpus_constraint == "lyrics — describe patterns only" %}
+{% if corpus_constraint == "lyrics_patterns_only" %}
 
 MUSICAL VOICE — LYRICS CONSTRAINT: This voice's primary corpus is copyrighted lyrics. Do NOT attempt to reproduce lyrics verbatim. Instead:
 

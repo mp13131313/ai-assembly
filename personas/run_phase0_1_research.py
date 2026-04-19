@@ -71,9 +71,23 @@ def main(voice_name: str) -> None:
     RUN = REPO_ROOT / "runs" / SLUG
     (RUN / "01_research").mkdir(parents=True, exist_ok=True)
 
+    # Phase B: voice-type-specific 1a + 1b prompts per decisions log #7.
+    def _pick_template(base: str) -> str:
+        t, sub = vi["type"], vi.get("subtype")
+        if t == "human":
+            return f"{base}_human"
+        if t == "fictional":
+            return f"{base}_fictional"
+        if t == "non_human":
+            if sub == "organism":
+                return f"{base}_non_human_organism"
+            if sub == "system":
+                return f"{base}_non_human_system"
+        sys.exit(f"Cannot resolve {base} template for type={t!r} subtype={sub!r}")
+
     # ---------- PASS 1a (Perplexity) ----------
     def _pass_1a():
-        prompt = render("persona_pass_1a_research_human",
+        prompt = render(_pick_template("persona_pass_1a"),
                         name=vi["name"], hostile_sources=vi["hostile_sources"])
         r = call_perplexity(user=prompt, temperature=0.0)
         return {
@@ -86,7 +100,7 @@ def main(voice_name: str) -> None:
 
     # ---------- PASS 1b (Gemini) ----------
     def _pass_1b():
-        prompt = render("persona_pass_1b_broad_scan", name=vi["name"])
+        prompt = render(_pick_template("persona_pass_1b"), name=vi["name"])
         r = call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384)
         return {
             "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1b_broad_scan",
