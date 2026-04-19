@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from .pass_1_1 import FormativeCandidate, LifeScaffold
 from .pass_1_2 import Commitment, Concept, Tension
@@ -58,7 +58,23 @@ class CoherenceResolution(BaseModel):
 
 
 class MergedDossier(BaseModel):
-    """Chunks 1.1-1.6 composed + Pass 1.7 coherence metadata."""
+    """Chunks 1.1-1.6 composed + Pass 1.7 coherence metadata.
+
+    Note on the `voice_register` / `register` aliasing:
+    Pydantic's BaseModel metaclass inherits a `register()` method from the
+    abstract-base-class machinery. Using `register` directly as a field name
+    triggers `UserWarning: Field name "register" in "MergedDossier" shadows
+    an attribute in parent "BaseModel"` plus a JSON-schema warning about the
+    inherited method being treated as a default. We rename the Python
+    attribute to `voice_register` but preserve the JSON key `register` via
+    alias + serialization_alias + `populate_by_name=True`, so callers that
+    read `merged_dossier["register"]` continue to work unchanged.
+
+    All `.model_dump()` calls in runners that serialize to JSON consumed by
+    the pipeline use `by_alias=True` — see run_pass_1_7.py.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     # Chunk 1.1
     life_scaffold: LifeScaffold
@@ -75,7 +91,10 @@ class MergedDossier(BaseModel):
 
     # Chunk 1.4
     moves: Moves
-    register: Register
+    voice_register: Register = Field(
+        ..., alias="register", serialization_alias="register",
+        description="Voice register/tone block — aliased to JSON key 'register'.",
+    )
     vocabulary: Vocabulary
 
     # Chunk 1.5

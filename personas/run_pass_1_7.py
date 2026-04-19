@@ -94,7 +94,10 @@ def run_pass_1_7(*, name: str) -> dict:
             f"model={r.get('model','?')}"
         )
         dossier = validate_chunk_output(MergedDossier, r["json"])
-        return dossier.model_dump()
+        # by_alias=True so the JSON key stays "register" (not "voice_register")
+        # per the MergedDossier aliasing note. Pass 2-6 prompts and
+        # downstream consumers all read the JSON by the "register" key.
+        return dossier.model_dump(by_alias=True)
 
     try:
         result = _call_and_validate(user)

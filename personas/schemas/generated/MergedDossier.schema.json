@@ -1325,7 +1325,7 @@
       "type": "object"
     }
   },
-  "description": "Chunks 1.1-1.6 composed + Pass 1.7 coherence metadata.",
+  "description": "Chunks 1.1-1.6 composed + Pass 1.7 coherence metadata.\n\nNote on the `voice_register` / `register` aliasing:\nPydantic's BaseModel metaclass inherits a `register()` method from the\nabstract-base-class machinery. Using `register` directly as a field name\ntriggers `UserWarning: Field name \"register\" in \"MergedDossier\" shadows\nan attribute in parent \"BaseModel\"` plus a JSON-schema warning about the\ninherited method being treated as a default. We rename the Python\nattribute to `voice_register` but preserve the JSON key `register` via\nalias + serialization_alias + `populate_by_name=True`, so callers that\nread `merged_dossier[\"register\"]` continue to work unchanged.\n\nAll `.model_dump()` calls in runners that serialize to JSON consumed by\nthe pipeline use `by_alias=True` — see run_pass_1_7.py.",
   "properties": {
     "life_scaffold": {
       "$ref": "#/$defs/LifeScaffold"
@@ -1368,7 +1368,8 @@
       "$ref": "#/$defs/Moves"
     },
     "register": {
-      "$ref": "#/$defs/Register"
+      "$ref": "#/$defs/Register",
+      "description": "Voice register/tone block — aliased to JSON key 'register'."
     },
     "vocabulary": {
       "$ref": "#/$defs/Vocabulary"
@@ -1415,6 +1416,7 @@
     "reasoning_method",
     "textures",
     "moves",
+    "register",
     "vocabulary",
     "knowledge_boundary",
     "sensitive_topics",
