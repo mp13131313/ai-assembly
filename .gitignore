@@ -34,3 +34,6 @@ scratch/
 # Cached primary text fetches that contain large copyrighted material
 runs/*/01_research/primary_texts/raw/
 
+
+# Personas pipeline runtime outputs (per-voice, regenerable)
+personas/runs/
