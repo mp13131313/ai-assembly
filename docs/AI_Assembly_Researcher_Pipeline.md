@@ -385,10 +385,10 @@ Roster (scheduled contributors with bios):
 Speakers present (who actually spoke):
 {{speakers_present}}
 
-Transcript (each turn has turn_index, speaker, role, confidence, text — confidence reflects how certain the upstream pipeline was about the speaker attribution; treat low-confidence speaker labels with appropriate caution):
+Transcript (each turn has index, speaker, role, confidence, text — confidence reflects how certain the upstream pipeline was about the speaker attribution; treat low-confidence speaker labels with appropriate caution):
 {{turns}}
 
-Review queue — turns containing words the cleaning pass flagged as uncertain (proper names, acronyms, policy terms). Each entry references a turn by its turn_index. When an extraction's substance hinges on one of these flagged words, mark the extraction's context with "[word uncertain in source]":
+Review queue — turns containing words the cleaning pass flagged as uncertain (proper names, acronyms, policy terms). Each entry references a turn by its `index` field. When an extraction's substance hinges on one of these flagged words, mark the extraction's context with "[word uncertain in source]":
 {{review_queue.verify_markers}}
 
 ---

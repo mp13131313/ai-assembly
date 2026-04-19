@@ -744,8 +744,11 @@ else:
 
 
 # ---------- PASS 7b (Worked Provocations) ----------
-# Spec: Sonnet temp 0.4. We use Opus + adaptive thinking — these provocations
-# become runtime few-shot exemplars in the Voice Pipeline; high stakes.
+# Spec: Sonnet temp 0.4. We use Opus + adaptive thinking — these
+# provocations are a build-time smoke test + Pass 7c diagnostic
+# surface + human-review artifact. They are NOT runtime few-shot
+# exemplars (see metadata.worked_provocations_role below, and
+# personas/HANDOFF.md). High stakes because Pass 7c reads them.
 def _pass_7b():
     full_card_for_provoke = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):

@@ -449,6 +449,9 @@ If Pass 7a returns `overall: "REVISION_NEEDED"`, up to **2 loops** re-run flagge
 | `ANTHROPIC_API_KEY` | — | Required. Read at task time from `os.environ`. |
 | `ASSEMBLYAI_API_KEY` | — | Required. Set at runtime: `aai.settings.api_key = os.environ["ASSEMBLYAI_API_KEY"]`. |
 | `CLAUDE_MODEL` | Sonnet in transcription, Opus elsewhere | Shared across flows. Transcription defaults to `claude-sonnet-4-6`; Researcher and Provocateur default to `claude-opus-4-7`. |
+| `TRANSCRIPTION_CLAUDE_MODEL` | `CLAUDE_MODEL` | Per-flow override for transcription (cleaning + drift verification). Falls through to CLAUDE_MODEL if unset. |
+| `RESEARCHER_CLAUDE_MODEL` | `CLAUDE_MODEL` | Per-flow override for researcher extraction/clustering/theming. |
+| `PROVOCATEUR_CLAUDE_MODEL` | `CLAUDE_MODEL` | Per-flow override for provocateur triage/formulation. |
 | `TRANSCRIPTION_SPEAKER_ID_MODEL` | `CLAUDE_MODEL` | Per-run override for Speaker ID only. Flip to `claude-opus-4-7` for hard sessions. |
 | `TRANSCRIPTION_CACHE` | unset | Set to `"1"` in dev to enable Prefect AssemblyAI cache (30-day). **Keep off in prod.** |
 | `RESEARCHER_THINKING` | `"1"` | Set to `"0"` to disable adaptive thinking across all 3 Researcher tasks. |

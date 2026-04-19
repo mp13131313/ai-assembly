@@ -527,7 +527,7 @@ or expand?"`. Default for now: keep the 3-enum.
 | `PERPLEXITY_API_KEY` | personas only | Pre-conference | ~$5/voice for Pass 1a |
 | `GOOGLE_API_KEY` | personas only | Pre-conference | Gemini broad scan + Pass 7a fallback |
 | `OPENAI_API_KEY` | personas only | Pre-conference | Pass 7a primary + Pass 3 DR supplement |
-| Optional overrides | — | — | CLAUDE_MODEL, PROVOCATEUR_THINKING, RESEARCHER_THINKING, PROVOCATEUR_FORMULATION_BATCH, TRANSCRIPTION_SPEAKER_ID_MODEL, TRANSCRIPTION_CACHE |
+| Optional overrides | — | — | CLAUDE_MODEL, TRANSCRIPTION_CLAUDE_MODEL, RESEARCHER_CLAUDE_MODEL, PROVOCATEUR_CLAUDE_MODEL, PROVOCATEUR_THINKING, RESEARCHER_THINKING, PROVOCATEUR_FORMULATION_BATCH, TRANSCRIPTION_SPEAKER_ID_MODEL, TRANSCRIPTION_CACHE |
 
 Future keys (when components build): `SUNO_API_KEY` (Marley renders), `GITHUB_TOKEN` (microsite commits), `VERCEL_TOKEN` (if auto-deploy), email tool credentials (Substack/HoBB newsletter).
 

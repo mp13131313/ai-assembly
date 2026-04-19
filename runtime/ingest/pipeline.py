@@ -344,6 +344,7 @@ def _subprocess_env() -> dict[str, str]:
         "ANTHROPIC_API_KEY",
         "ASSEMBLYAI_API_KEY",
         "CLAUDE_MODEL",
+        "TRANSCRIPTION_CLAUDE_MODEL",
         "TRANSCRIPTION_SPEAKER_ID_MODEL",
         "TRANSCRIPTION_CACHE",
         "PATH",
