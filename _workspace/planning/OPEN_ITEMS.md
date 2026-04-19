@@ -1,8 +1,8 @@
 # Open Items — post-Phase B aftermath (2026-04-19)
 
-**Branch**: `phase-b-rebuild` (31 commits, pushed). HEAD = `6ad03d1`.
+**Branch**: `phase-b-rebuild` (33 commits, pushed). HEAD = `062d47a`.
 
-**Phases A–K landed + cleanups + deferrals + Position C + bias scrub + 5 quality fixes + Pass 1a Perplexity prompt rewrite (post-Dostoevsky-thinness diagnosis).**
+**Phases A–K landed + cleanups + deferrals + Position C + bias scrub + 5 quality fixes + Pass 1a Perplexity prompt rewrite + Pass 1a validation (Dostoevsky 17K-word dossier) + two parser/validator catch-up fixes.**
 
 This doc is a fresh-session recovery point capturing every loose end from the long session that produced commits `7ce1e92` through `7458d9d`. Read top-to-bottom for full context, or jump by section.
 
@@ -140,12 +140,22 @@ Per `EXECUTION_PLAN_phase_b.md`. Final verification + GitHub PR. Already mostly 
 
 **Follow-up needed**: same fixes likely needed for `persona_pass_1a_non_human_organism.md`, `_non_human_system.md`, `_fictional.md`. Defer until human-template revision is validated by a clean Dostoevsky run. ~20 min per template if human-template fix proves out.
 
-**Validation test**: re-run Dostoevsky from clean state. Watch for:
-- Perplexity word count crossing the 8,000 floor (target 15K+)
-- `perplexity_split` succeeds (no "falling back to single-block" warning)
-- Russian-language scholarship cited (Бахтин, Касаткина, Volgin, Borisov, Эткинд, etc.) without needing tailoring LLM to compensate
+**Validation result (2026-04-19 23:20)**: ✅ ALL FOUR signals passed on the Dostoevsky re-run:
+- Perplexity word count: **15,325 words** (vs prior 1,258 / 3,265; floor 8,000; target 15-30K). 113K chars total.
+- `perplexity_split` succeeds: 6 sections cleanly split (30K / 17K / 15K / 12K / 12K / 22K chars).
+- Period vocabulary surfaced: 362 non-ASCII Cyrillic chars + 22 gloss markers.
+- Evidence tags: 17 tags emitted (lighter `[primary]/[consensus]/[contested]` set, as the new prompt asks for).
 
-If validated → apply same pattern to other 3 voice-type templates. If not → Perplexity-tier issue is real and we may need to switch tiers (sonar-pro) or rethink the Pass 1a/Pass 1a-DR division of labor.
+The fix is validated. **Apply the same pattern to the 3 other voice-type templates** (`persona_pass_1a_non_human_organism.md`, `_non_human_system.md`, `_fictional.md`) — should be ~20 min per template. Same five fixes: explicit length floor, exact `## N. SECTION_NAME` heading format, non-English scholarship load-bearing block, depth-not-breadth framing, softened tag set.
+
+## Two follow-up parser/validator fixes — commit `062d47a` (2026-04-19 23:25)
+
+The first successful Dostoevsky run (17K-word Perplexity dossier, post-prompt-fix) surfaced two downstream catch-up bugs:
+
+1. **`perplexity_split.py` §5 regex**: the new prompt ships `## 5. HISTORICAL + CONCEPTUAL BOUNDARIES` (more accurate than the legacy `HISTORICAL BOUNDARIES`). The "+ CONCEPTUAL" infix broke the regex's word-boundary anchor; §5 wasn't recognized; full split failed. Fixed by accepting optional `+ CONCEPTUAL` infix.
+2. **`research_validation.py` evidence-tag regex**: smoke-test was checking for the OLD 5-Boddice-tag set; new Pass 1a prompt asks Perplexity for `[primary]/[consensus]/[contested]` only. False-positive `evidence_tags: 0` warning. Updated regex to accept BOTH tag families.
+
+Both fixes verified against the actual Dostoevsky dossier — split now finds 6 sections cleanly, smoke-test now 4/4 pass.
 
 ---
 
@@ -255,29 +265,34 @@ Across 4 voice-type templates + footer, at least 5 different tag schemes existed
 ## Recommended next-session order
 
 1. **Tier 1** (5 min): gitignore the regenerable per-voice artifacts. Eliminates immediate pollution risk.
-2. **Run Dostoevsky** (~$12–20, ~10–20 min + 30–60 min claude.ai paste): validates the new Pass 1a Perplexity prompt (commit `6ad03d1`) AND tests the full Phase 0.5 + Position C tailoring. Compare DR output against the v3.7-spec-upload baseline. Watch for Perplexity word count crossing 8,000 floor + `perplexity_split` succeeding + Russian-language scholarship surfaced without tailoring-LLM compensation.
-3. **If Pass 1a validation passes**: apply same prompt-tightening pattern to `persona_pass_1a_non_human_organism.md`, `_non_human_system.md`, `_fictional.md` (~20 min per template).
-4. **Tier 3** (~2 hours): code/project separation. Right architecture for Phase L + multi-project + VM deployment.
-5. **Phase L** (~$50–70, ~2–4 hours including manual paste + L.8 quality review): first-voice Plato rebuild.
-6. **Phase M** (~30 min): verify + push + open PR.
+2. **Apply Pass 1a fix to the other 3 voice-type templates** (~20 min each = ~1 hr total). Pattern validated by Dostoevsky run; same five fixes (length floor + exact heading format + non-English scholarship + depth-not-breadth + softer tag set) needed for `_non_human_organism.md`, `_non_human_system.md`, `_fictional.md`.
+3. **Tier 3** (~2 hours): code/project separation. Right architecture for Phase L + multi-project + VM deployment.
+4. **Phase L** (~$50–70, ~2–4 hours including manual paste + L.8 quality review): first-voice Plato rebuild. Plato is human-type, so already benefits from the validated Pass 1a fix.
+5. **Phase M** (~30 min): verify + push + open PR.
 
 Optional in any order: walkthrough remaining steps (6–25), deferred items 6 + 8, smaller improvements.
+
+**Note**: the Dostoevsky test run is mid-flight as of HEAD `062d47a` — the tailoring Opus call started at 23:20:49. When it completes, the operator will compare the resulting Position C tailored DR prompt against the v3.7-spec-upload baseline. If the comparison shows Position C wins on the architectural axes (6-section structure, period-vocabulary, formative candidates, evidence tags, Russian scholarship), the Pass 1a + Position C combination is fully validated.
 
 ---
 
 ## Where this session ended
 
-- 31 commits on `phase-b-rebuild`, all pushed (HEAD `6ad03d1`)
+- 33 commits on `phase-b-rebuild`, all pushed (HEAD `062d47a`)
 - Tree clean (no uncommitted work)
-- Dostoevsky artifacts cleared (twice — once for the Position C re-test, once after the Pass 1a prompt revision)
+- Dostoevsky test run mid-flight: Pass 1a + 1b complete (15K-word Perplexity dossier ✓ all 4 smoke-tests pass after follow-up fixes); Pass 0b base render complete (34K chars); Pass 0b tailoring Opus call in progress
 - 29/29 runtime tests green
 - M.3 stale-ref greps clean
 - All Boddice / Rosenwein / negative-prompt / pipeline-leak / scholar-attribution patterns stripped from base DR prompts
-- Tag conventions unified
+- Tag conventions unified (5 Boddice tags in chunked merge; 3 lighter tags in Pass 1a Perplexity)
 - 3 missing field asks added (unique_contribution / stance_tendency / aesthetic_qualities)
-- Position C architecture in place
-- Pass 1a Perplexity prompt rewritten for depth + non-English scholarship + exact heading format + softer tag asks (commit `6ad03d1`); validation pending fresh Dostoevsky run
+- Position C architecture in place + tailoring fires unconditionally
+- **Pass 1a Perplexity prompt rewritten + VALIDATED on Dostoevsky** (commit `6ad03d1`); two parser/validator catch-up fixes shipped (commit `062d47a`)
 
-**Pass 1a prompt changes pending validation on other voice-types** (organism / system / fictional templates not yet tightened — fix only validated for human variant if Dostoevsky run shows improvement).
+**Pass 1a fix pattern proven; 3 other voice-type templates still need the same treatment** (organism / system / fictional). Estimated ~20 min per template.
 
-Next operator action: do Tier 1 + run Dostoevsky fresh + observe Perplexity word count + section-split success. If Pass 1a fix works, apply to other 3 templates. Then schedule focused session for Tier 3 + Phase L.
+Next operator action when this session resumes:
+1. Confirm tailoring completed and the tailored DR prompt is rich (compare to first-run-tailoring-notes.json)
+2. Paste tailored prompt into claude.ai for Position C vs v3.7 baseline comparison
+3. Apply Pass 1a pattern to the other 3 voice-type templates
+4. Tier 3 + Phase L
