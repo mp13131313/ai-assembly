@@ -137,73 +137,42 @@ else:
     stamp(f"PASS 1a-DR: no file at {_claude_dr_path.name} — falling back to 2-source merge (Perplexity + Gemini only)")
 
 
-# ---------- PASS 1-MERGE (Claude contradiction check, three-way: Perplexity + Claude DR + Gemini) ----------
-def _pass_1merge():
-    sysp = load_prompt("persona_pass_1merge_contradiction_system").strip()
-    userp = render("persona_pass_1merge_three_way_user",
-                   perplexity_dossier=dossier_text,
-                   claude_dr_dossier=claude_dr_text or None,
-                   gemini_broad_scan=broad_scan_text)
-    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=16000, temperature=1.0, thinking=True,
-                    response_format_json=True)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
-            "model": r["model"], "usage": r["usage"], "result": r["json"],
-            "sources_compared": ["perplexity"] + (["claude_dr"] if claude_dr_text else []) + ["gemini"]}
+# ---------- PHASE B CHUNKED PASS 1 MERGE ----------
+# Replaces v3.10's monolithic contradiction-check merge with the 6+1 chunked
+# merge (Pass 1.1-1.7). Run via the Phase B orchestrator which handles
+# parallel chunk execution + coherence pass + Pydantic validation + atomic
+# writes. Output shape is the MergedDossier Pydantic schema at
+# personas/schemas/merged_dossier.py (16 chunk keys + coherence_flags +
+# coherence_resolutions) rather than v3.10's concatenated-markdown blob.
+#
+# Pass 2-6 prompts (updated in Phase H) read from merged_dossier.<chunk_key>
+# paths into this JSON shape. We serialize the dossier dict and pass it as
+# the `merged_dossier` template variable — the same variable name Pass 2-6
+# user prompts already use, so no prompt changes needed here.
+stamp("PASS 1 (Phase B): chunked merge 1.1-1.7 (parallel + coherence)")
+_merged_dossier_path = RUN / "01_research/merged_dossier.json"
+if _merged_dossier_path.exists():
+    # Cached: load prior run's chunked merged_dossier as-is.
+    stamp(f"  CACHE HIT: loading {_merged_dossier_path.name}")
+    merged_dossier_dict = json.loads(_merged_dossier_path.read_text())
+else:
+    from run_pass_1_all import run_pass_1_all  # noqa: E402 — deferred to runtime
+    merged_dossier_dict = run_pass_1_all(
+        name=vi["name"],
+        voice_type=vi["type"],
+        subtype=vi.get("subtype"),
+        voice_mode=vi.get("voice_mode") or "philosophical",
+        use_test_fixtures=False,
+        max_parallel=3,
+    )
+    # run_pass_1_7 already writes merged_dossier.json to this path; the cache
+    # branch above picks it up on re-run.
 
-n_sources = 2 + (1 if claude_dr_text else 0)
-stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Opus 4.7)")
-pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
-merge_status = pass1merge["result"].get("status", "UNKNOWN")
-stamp(f"  status: {merge_status}")
-
-# Build merged_dossier: all available sources concatenated + contradiction flags
-merged_dossier_parts = [
-    "=== PRIMARY DOSSIER (Perplexity sonar-deep-research) ===",
-    dossier_text,
-]
-if claude_dr_text:
-    merged_dossier_parts += [
-        "",
-        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.7 + extended thinking + DR) ===",
-        claude_dr_text,
-    ]
-merged_dossier_parts += [
-    "",
-    "=== BROAD SCAN SUPPLEMENT (Gemini 2.5 Pro) ===",
-    broad_scan_text,
-]
-if merge_status == "CONTRADICTIONS":
-    items = pass1merge["result"].get("items", [])
-    merged_dossier_parts += [
-        "",
-        f"=== FLAGGED CONTRADICTIONS ({len(items)}) ===",
-        "Subsequent passes should treat the following as flagged for caution:",
-    ]
-    for i, item in enumerate(items, 1):
-        merged_dossier_parts += [f"\n[{i}] Assessment: {item.get('assessment', '?')}"]
-        # New shape: claims is a list of {source, claim}
-        claims = item.get("claims", [])
-        if claims:
-            for c in claims:
-                merged_dossier_parts.append(f"    Source {c.get('source', '?')}: {c.get('claim', '')}")
-        else:
-            # Backward-compat with old two-source shape
-            merged_dossier_parts += [
-                f"    Claim A: {item.get('claim_a', '')}",
-                f"    Claim B: {item.get('claim_b', '')}",
-            ]
-merged_dossier = "\n".join(merged_dossier_parts)
-
-write_json_atomic(RUN / "01_research/merged_dossier.json", {
-    "voice_name": vi["name"], "voice_slug": SLUG,
-    "merged_dossier": merged_dossier,
-    "sources": pass1merge.get("sources_compared", []),
-    "contradiction_check": pass1merge["result"],
-    "approach_c": bool(claude_dr_text),
-    "degraded_mode": False,
-})
-stamp(f"  merged_dossier: {len(merged_dossier)} chars")
+# The template variable Pass 2-6 see. JSON-serialized with indent for
+# readability; Claude parses structured input from this cleanly.
+merged_dossier = json.dumps(merged_dossier_dict, ensure_ascii=False, indent=2)
+_n_flags = len(merged_dossier_dict.get("coherence_flags", []))
+stamp(f"  merged_dossier: {len(merged_dossier)} chars; {_n_flags} coherence_flags")
 
 
 # ---------- PASS 1c-extract: Extract primary text URLs from merged dossier ----------
@@ -218,26 +187,27 @@ if vi["primary_text_sources"]:
     _extracted_url_items: list = []  # no extraction step, manual override
     stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
 else:
-    def _pass_1c_extract():
-        sysp = "You extract primary text URLs from a merged research dossier. Return only valid JSON, no preamble."
-        userp = render("persona_pass_1c_extract_urls", name=vi["name"]) + \
-                f"\n\nMERGED DOSSIER:\n{merged_dossier}"
-        r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                        max_tokens=4096, temperature=0.0, thinking=False,
-                        response_format_json=True)
-        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls",
-                "model": r["model"], "usage": r["usage"], "result": r["json"]}
-
-    stamp("PASS 1c-extract: extracting primary text URLs from merged dossier (Sonnet)")
-    pass1c_extract = call_or_cache(RUN / "01_research/primary_text_urls.json",
-                                   "Pass 1c-extract", _pass_1c_extract)
-    extracted = pass1c_extract.get("result", {}).get("primary_text_urls", [])
-    _extracted_url_items = extracted  # saved for review gate
-    primary_text_urls = [item["url"] for item in extracted if item.get("url")]
-    stamp(f"  extracted {len(primary_text_urls)} URLs from dossier")
-    notes = pass1c_extract.get("result", {}).get("extraction_notes", "")
-    if notes:
-        stamp(f"  notes: {notes}")
+    # Phase B: Pass 1.6 CORPUS chunk already produced structured URLs with
+    # work titles + source + license notes. Read them directly — no Sonnet
+    # call needed (v3.10's URL-extraction pass was necessary because the
+    # 6-section markdown buried URLs in prose; Phase B's chunked output
+    # surfaces them explicitly).
+    stamp("PASS 1c-extract: reading URLs from Phase B chunked dossier (no LLM)")
+    _urls_chunk = merged_dossier_dict.get("urls", {}).get("urls", [])
+    _extracted_url_items = [
+        {"url": u.get("url"), "work": u.get("work_title"), "source": u.get("source"),
+         "note": u.get("license_or_access_note", "")}
+        for u in _urls_chunk if u.get("url")
+    ]
+    primary_text_urls = [item["url"] for item in _extracted_url_items]
+    stamp(f"  {len(primary_text_urls)} URLs from merged_dossier.urls chunk")
+    notes = ""
+    # Satisfy the downstream pass1c_extract reference with a synthetic cache entry.
+    pass1c_extract = {
+        "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls_phase_b",
+        "result": {"primary_text_urls": _extracted_url_items, "extraction_notes": ""},
+    }
+    write_json_atomic(RUN / "01_research/primary_text_urls.json", pass1c_extract)
 
 
 # ---------- PASS 1c: Fetch primary texts ----------
