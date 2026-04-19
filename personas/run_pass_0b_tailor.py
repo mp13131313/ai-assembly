@@ -58,12 +58,6 @@ def run_pass_0b_tailor(name: str) -> dict:
             sys.exit(f"Missing input: {p}")
 
     voice_config = json.loads(voice_config_path.read_text())
-    if not voice_config.get("editorial_rationale"):
-        stamp(
-            "  editorial_rationale is null; skipping tailoring pass. "
-            "The base Jinja DR prompt remains in place."
-        )
-        return {"status": "skipped", "reason": "editorial_rationale null"}
 
     perp = json.loads(perp_path.read_text())
     perp_text = perp.get("text") or perp.get("text_clean", "")
@@ -74,11 +68,18 @@ def run_pass_0b_tailor(name: str) -> dict:
         base_preserved_path.write_text(base_prompt, encoding="utf-8")
         stamp(f"  preserved base prompt → {base_preserved_path.name}")
 
+    # editorial_rationale is OPTIONAL per PB#2: tailoring always runs on the
+    # basis of Perplexity-coverage analysis + voice-config specifics. If the
+    # curator provided a rationale, it's fed in as an ADDITIONAL signal for
+    # the LLM to weight thematic emphasis. Null rationale → the LLM still
+    # tailors on coverage + voice alone.
+    editorial_rationale = voice_config.get("editorial_rationale") or "(not provided — tailor on coverage + voice-config alone)"
+
     system = render(
         "pass_0b_tailor",
         name=name,
         voice_config_json=json.dumps(voice_config, ensure_ascii=False, indent=2),
-        editorial_rationale=voice_config["editorial_rationale"],
+        editorial_rationale=editorial_rationale,
         perplexity_dossier_text=perp_text,
         base_dr_prompt=base_prompt,
     )
@@ -114,6 +115,7 @@ def run_pass_0b_tailor(name: str) -> dict:
     for n in notes[:8]:
         stamp(f"    · {n}")
     return {"status": "tailored", "tailoring_notes": notes,
+            "tailoring_notes_count": len(notes),
             "prompt_size_chars": len(tailored)}
 
 

@@ -248,23 +248,23 @@ def main(voice_name: str) -> None:
     stamp(f"PASS 0b base render complete: {dr_prompt_path.relative_to(REPO_ROOT)}")
     stamp(f"  Base prompt size: {len(dr_prompt):,} chars")
 
-    # ---------- PASS 0b HYBRID TAILORING (PB#2) ----------
-    # Runs if voice_config.editorial_rationale is set; otherwise skipped.
-    # The tailoring pass swaps generic illustrative figures for voice-specific
-    # ones, customizes SWAP TEST anchors, and redirects emphasis based on
-    # Perplexity coverage. Overwrites the base prompt; preserves the base at
-    # <slug>_dr_prompt.base.md for comparison.
-    if vi_raw.get("editorial_rationale"):
-        stamp("PASS 0b tailor: hybrid Jinja+LLM tailoring (PB#2)…")
-        from run_pass_0b_tailor import run_pass_0b_tailor  # noqa: E402 — deferred
-        try:
-            tailor_result = run_pass_0b_tailor(vi["name"])
-            stamp(f"  tailoring: {tailor_result['status']}")
-        except Exception as exc:
-            stamp(f"  WARN: tailoring pass failed ({exc}); base prompt remains in place")
-    else:
-        stamp("PASS 0b tailor: SKIPPED (voice_config.editorial_rationale is null)")
-        stamp("  Fill in editorial_rationale and re-run run_pass_0b_tailor to tailor.")
+    # ---------- PASS 0b HYBRID TAILORING (PB#2, always runs) ----------
+    # Per REBUILD_PLAN PB#2 "replaces pure Jinja" — always fires, not gated.
+    # LLM reads Perplexity + Gemini + voice_config and tailors the DR prompt:
+    # swaps generic illustrative figures for voice-specific ones, customizes
+    # SWAP TEST anchors, redirects emphasis based on where Perplexity coverage
+    # is thin vs thick. editorial_rationale, if present, is an OPTIONAL
+    # amplification signal — not the trigger.
+    # Overwrites the base prompt; preserves the base at <slug>_dr_prompt.base.md.
+    stamp("PASS 0b tailor: hybrid Jinja+LLM tailoring (PB#2)…")
+    from run_pass_0b_tailor import run_pass_0b_tailor  # noqa: E402 — deferred
+    try:
+        tailor_result = run_pass_0b_tailor(vi["name"])
+        stamp(f"  tailoring: {tailor_result['status']} "
+              f"({tailor_result.get('tailoring_notes_count', '?')} edits)")
+    except Exception as exc:
+        stamp(f"  WARN: tailoring pass failed ({type(exc).__name__}: {str(exc)[:120]}); "
+              f"base prompt remains in place")
 
     stamp("")
     stamp("=" * 60)
