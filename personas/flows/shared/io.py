@@ -20,13 +20,13 @@ _PROMPTS_DIR = _REPO_ROOT / "flows" / "shared" / "prompts"
 _INPUTS_DIR = _REPO_ROOT / "inputs" / "voices"
 
 
-VALID_TYPES = {"human", "non-human", "fictional"}
+VALID_TYPES = {"human", "non_human", "fictional"}
 VALID_VOICE_MODES = {"philosophical", "observational", "narratival"}
 VALID_SUBTYPES = {None, "organism", "system"}
 VALID_CORPUS_CONSTRAINTS = {
     "full",
-    "lyrics — describe patterns only",
-    "hostile — read against grain",
+    "lyrics_patterns_only",
+    "hostile_read_against_grain",
 }
 
 
