@@ -1,0 +1,143 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon` field (5-10 concepts per voice).\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage.",
+  "properties": {
+    "term": {
+      "description": "The term as the voice uses it.",
+      "title": "Term",
+      "type": "string"
+    },
+    "term_in_original_language": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri.",
+      "title": "Term In Original Language"
+    },
+    "definition": {
+      "description": "The voice's definition, not the modern English one.",
+      "title": "Definition",
+      "type": "string"
+    },
+    "what_it_rules_out": {
+      "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense.",
+      "title": "What It Rules Out",
+      "type": "string"
+    },
+    "textual_source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Textual Source"
+    },
+    "unique_to_this_voice": {
+      "title": "Unique To This Voice",
+      "type": "boolean"
+    },
+    "evidence_tag": {
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "term",
+    "definition",
+    "what_it_rules_out",
+    "unique_to_this_voice",
+    "evidence_tag"
+  ],
+  "title": "Concept",
+  "type": "object"
+}

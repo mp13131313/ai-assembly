@@ -1,5 +1,12 @@
 """Shared schema conventions for the chunked Pass 1 merge.
 
+# FROZEN as of 2026-04-19 per PB#7, after chunks 1.1 and 1.2 landed cleanly
+# against Battuta fixtures. Changes require architectural decision review —
+# see REBUILD_PLAN §"Locked architectural decisions". Chunks 1.3-1.6 reuse
+# EvidenceTag / Tier / SourceCitation / ContestedReading / ProjectionWarning
+# unchanged. Domain-specific fields emerge per chunk; meta stays stable.
+
+
 These meta-types — evidence tagging, source citation, tier hierarchy, contested
 readings — are intended to be shared unchanged across chunks 1.1-1.6. Per PB#7
 (REBUILD_PLAN §"Locked architectural decisions"), these conventions are frozen

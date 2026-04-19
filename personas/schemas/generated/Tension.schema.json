@@ -1,0 +1,110 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are productive:\nthey mark where the voice's reasoning genuinely divides.",
+  "properties": {
+    "description": {
+      "description": "The tension, named explicitly. 1-2 sentences.",
+      "title": "Description",
+      "type": "string"
+    },
+    "conflicting_commitments": {
+      "description": "References to Commitment.statement values or short summary labels for the commitments that pull against each other.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Conflicting Commitments",
+      "type": "array"
+    },
+    "passage_citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Passage Citations",
+      "type": "array"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "description": "Usually scholarly_consensus (tensions are typically identified in the literature); occasionally inference.",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description"
+  ],
+  "title": "Tension",
+  "type": "object"
+}
