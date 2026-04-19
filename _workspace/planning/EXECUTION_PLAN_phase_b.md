@@ -8,12 +8,44 @@ Execute the Phase B persona-pipeline rebuild end-to-end per `_workspace/planning
 
 ## Preflight
 
-1. Read in order:
+1. **Read in order — ALL TIERS MANDATORY before any prompt writing.** This plan rewrites ~17 prompts across Phases B–K. Skipping reads silently degrades output quality (prompts written without project-frame context land technically-correct but tonally wrong; prompts written without AUDIENCE_BRIEF miss the hardest-to-please failure modes; prompts written without the current-prompt text lose good patterns worth preserving). All of Tier 1, Tier 2, and Tier 3 are required.
+
+   **Tier 1 — project + decision context:**
    - `CLAUDE.md` (repo layout, orientation reading order)
-   - `_workspace/planning/REBUILD_PLAN.md` in full — especially §"Locked architectural decisions (PB#1–9)" and §"Decisions log (walkthrough 2026-04-19)"
-   - `docs/AI_Assembly_Persona_Card_v2.md` (target shape for Pass 2 output)
-   - `research/baseline_research/README.md` + Boddice doc (`compass_artifact_wf-1e84f45b-…md`) §13 + §14 + §15 + §12 + §9
-   - `personas/flows/shared/prompts/pass_0b_dr_prompt.md` (current 1086-line DR template — input to PB#2 hybrid tailoring)
+   - `_workspace/planning/REBUILD_PLAN.md` in full — §"Locked architectural decisions (PB#1–9)" + §"Decisions log (walkthrough 2026-04-19)"
+   - `_workspace/planning/EXECUTION_PLAN_phase_b.md` — this doc
+   - `docs/AI_Assembly_Briefing_v3_1.md` — project frame (why the pipeline exists, what "success" looks like, the provotype logic). Essential for Phases H + I tonal awareness.
+   - `docs/AUDIENCE_BRIEF.md` — audience profile, 7 factions, ten hardest-to-please voices, the "performing reception" failure mode. Essential for Pass 4a "reference not display" guidance (H.2) + Pass 7b smoke-test provocations (I.4) + Pass 7c projection_warnings (I.5).
+   - `docs/AI_Assembly_Persona_Card_v2.md` (target 37-field schema Pass 2 produces)
+   - `personas/HANDOFF.md` — the "smoke_test_chains are build-time only, NOT runtime few-shot" rule. Critical for I.4 Pass 7b redesign; skipping this risks a prompt that silently invites runtime few-shotting.
+
+   **Tier 1 — Boddice content** (read in full, not just summary):
+   - `research/baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md` — §9, §12, §13, §14, §15 (emotions catalogue + evidence tags + `world` rubric + `formative_experience` rubric + field audit). Source material for all Boddice-shaped schemas + prompts.
+
+   **Tier 1 — methodology grounding:**
+   - `research/baseline_research/compass_artifact_wf-865974da-a7be-4b7b-b770-0ec4fb7b1221_text_markdown.md` (File 2) — 4-block prompt architecture (Expert Identity / Guardrails / Field Specs / Voice Type), multi-pass generation, distinctiveness testing, verification protocol. Every merge prompt + generation prompt must follow the 4-block pattern.
+   - `research/baseline_research/compass_artifact_wf-cc778da2-1ac5-493e-b406-ab71d3b00234_text_markdown.md` (File 3) — architecture layers, 6 failure modes + mitigations (sanitization paradox, flattening, anachronism, anthropomorphism, etc.), TimeChara citation + rationale. Essential for I.2 Pass 7-anachronism prompt.
+
+   **Tier 1 — existing prompts being replaced:**
+   - **All 19 files** in `personas/flows/shared/prompts/persona_pass_*.md` + `pass_0a_voice_config.md` + `pass_0b_dr_prompt.md`. Read to preserve the good patterns (streaming + retry + checkpoint conventions) and invert only the Boddice-problematic parts. Do not rewrite from scratch without reading the current version.
+
+   **Tier 2 — pipeline code patterns** (read to preserve idioms):
+   - `personas/flows/shared/clients.py` — `call_claude(thinking: bool)` signature + streaming + adaptive thinking pattern
+   - `personas/flows/shared/io.py` — atomic writes + voice_slug
+   - `personas/flows/shared/prompt_render.py` — `jinja2.StrictUndefined` pattern
+   - `personas/run_persona_pipeline.py` — `_call_with_retry` + revision-loop + cache-as-checkpoint disciplines
+
+   **Tier 2 — rebuild intel + session context:**
+   - `_workspace/archive/session-artifacts/FRESH_REVIEW_2026_04_19.md` §5 — what v3.10 patterns to preserve (checkpoint-as-cache, shuffle seed 42, voice_basis metadata), what to rethink
+   - `_workspace/archive/session-artifacts/SESSION_REPORT_2026-04-19.md` — context on the 16 decisions (why, not just what)
+
+   **Tier 2 — quality baseline for Phase L review:**
+   - `_workspace/archive/runs/personas/plato/persona_card_assembled.json` — the v3.10 Plato card. Reference during Phase H prompt writing (what good output looks like) + Phase L.8 review (does rebuild meet/beat this?)
+
+   **Tier 3 — cross-repo + tool context:**
+   - `research/baseline_research/compass_artifact_wf-45560dac-98db-4376-9002-5ee8e80bb4f5_text_markdown.md` (File 1) — tool comparison, relevant for PB#1 research-source rationale
+   - `runtime/flows/provocateur_flow.py` (skim — lines 100-200 + package_voice_briefings fn) — Provocateur Profile consumer, so Phase J Derive knows what shape to produce
+   - `runtime/flows/shared/council/council_config.json` + `README.md` — council config structure + hot-swap semantics + `_REQUIRED_MEMBER_FIELDS` validator at `runtime/flows/shared/io.py`
 
 2. Baseline must be green:
    ```bash
@@ -890,7 +922,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ## Model + effort
 
-**Opus 4.7 (1M context), medium effort.** Phase B is design-heavy (schemas + prompts) not mechanical edits; 1M context needed for chunk merge tests reading multiple source dossiers; medium effort balances depth with cost.
+**Opus 4.7 (1M context), medium effort.** Phase B is design-heavy (schemas + prompts) not mechanical edits; 1M context needed for the Tier 1+2+3 preflight reads (~18 files, ~500K tokens combined) plus chunk merge tests reading multiple source dossiers; medium effort is sufficient given the 16 decisions are pre-locked in REBUILD_PLAN's Decisions log + the enriched preflight closes the context gaps that would otherwise force higher-effort reasoning. No need to escalate to high effort — the decisions are made; Opus is executing them, not re-litigating.
 
 ---
 
