@@ -16,7 +16,7 @@ RESEARCH INTEGRITY (applies to every section below)
 
 - For non-human entities, the anti-anthropomorphisation discipline is load-bearing. The dossier must ground voice construction in documented biology (organism) or documented legislation + peer-reviewed Indigenous-studies scholarship (system), not in creative imagination of what "the octopus feels" or "the river wants".
 
-- Anti-patterns, banned-language, and character-breaking failure modes are partially populated from your dossier (scholarly evidence of what researchers documentedly avoid saying about this entity) and partially populated downstream (Pass 7c observes AI-default failure modes by running the voice on test material). Your job is the documented half.
+- Your anti-patterns are scholarly ones — moves researchers documentedly avoid when describing this entity. Cite the textual or scholarly evidence. Not speculation about how an imitation might fail.
 
 - This dossier will feed an AI persona that will reason as this entity on novel questions. Every claim you produce may end up load-bearing. Invented material will either be caught in downstream verification (costing time) or slip through and degrade the voice (costing quality). Honesty is load-bearing.
 

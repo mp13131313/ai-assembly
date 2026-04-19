@@ -19,7 +19,7 @@ RESEARCH INTEGRITY (applies to every section below)
 
 - Flag translation choices explicitly. A fictional voice's voice is mediated by its translation tradition — Burton's Scheherazade sounds different from Haddawy's sounds different from Galland's. Name the tradition you draw on; name what the choice rules out.
 
-- Anti-patterns, banned-language, and character-breaking failure modes are partially populated from your dossier (scholarly evidence of what the character's narrative tradition documentedly avoids) and partially populated downstream (Pass 7c observes AI-default failure modes). Your job is the documented half.
+- Your anti-patterns are scholarly ones — moves the character's narrative tradition documentedly avoids. Cite the textual or scholarly evidence. Not speculation about how an imitation might fail.
 
 - This dossier will feed an AI persona that will reason as this character on novel questions. Every claim you produce may end up load-bearing. Honesty is load-bearing.
 
@@ -174,7 +174,6 @@ Your task for Section 4:
     (b) Scholarly characterisation by contrast — where scholars note what this character "doesn't do" in contrast with other characters in the same tradition (Scheherazade does not argue like Shahryar's vizier; does not beg like the first nights' condemned brides).
   3 to 5 items with textual or scholarly citation.
 
-  NOTE: identifying AI-default failure modes (where the persona running at runtime sounds like generic AI rather than this character) is NOT part of your job. That happens downstream in Pass 7c. Your job is scholarly / textual anti-patterns, not AI-failure-mode prediction.
 
 - TRANSLATION CHOICE AND ITS IMPLICATIONS — state which translation tradition(s) should ground the voice construction, and why. For Scheherazade: Mahdi's critical Arabic edition (Leiden 1984) in Haddawy's English translation is scholarly consensus for "earliest documented" voice; Burton is widely read but unreliable and Victorian-overlaid; Galland is historically load-bearing but heavily adapted. Name the authoritative choice and flag what it rules out. Pass 1c fetches the text Pass 4a will use; your job here is the choice.
 
@@ -210,7 +209,6 @@ Your task for Section 5:
 
 - DOCUMENTED CHARACTER-BREAKING MOVES — moves antithetical to this character's mode as documented by scholarship. 3 to 5 items. For Scheherazade: abandoning the frame-narrator role for direct first-person editorial; completing the tale rather than breaking at dawn; shifting from tale to argument; sentimentalising Shahryar's transformation without the narrative's ambiguity. Cite scholars.
 
-  NOTE: Like Section 4's anti-patterns, AI-default failure-mode anticipation is Pass 7c territory, not your job.
 
 - RETROSPECTIVE-FRAMING TRAPS — descriptions of this character that a modern reader would instinctively reach for but that the text and its tradition would reject. 3 to 5 items. For Scheherazade: calling her a "proto-feminist" in the modern sense (the category is anachronistic even when functional-feminist readings are scholarly-supported); calling 1001 Nights a "novel"; calling her storytelling "therapy" in the modern psychoanalytic sense; calling the frame "metafiction" in the post-Borgesian sense.
 
