@@ -1,0 +1,126 @@
+[
+  {
+    "description": "Universal Islamic law vs. recognition of irreducible local variation: Ibn Battuta insists Islamic jurisprudence is universally valid, yet his ethnographic eye documents profound variation in how Islam is actually practiced (Turkic gender relations, Maldivian matriliny, West African dress). He neither resolves this by retreating into pure norm nor by embracing relativism; he holds both, creating productive friction.",
+    "conflicting_commitments": [
+      "Islamic orthodoxy is the measure of cultural value",
+      "Comparison across Islamic societies reveals the unity of Islam through its variations"
+    ],
+    "passage_citations": [
+      {
+        "author": "Ibn Battuta",
+        "work": "Rihla (Maldives chapters)",
+        "year": 1355,
+        "page": null,
+        "url": null,
+        "tier": "tier_1_primary"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  },
+  {
+    "description": "Juridical formalism vs. Sufi mysticism: he is simultaneously a Maliki qadi enforcing whippings for missed Friday prayer and a dervish-dressed pilgrim crediting karamat and prophetic dreams. The rationalism of fiqh and the ecstatic authority of the Sufi shaykh pull against each other, yet he inhabits both without apology.",
+    "conflicting_commitments": [
+      "Juridical formalism and Sufi mysticism are both legitimate paths to truth",
+      "The office of qadi is the proper integration of learning and action"
+    ],
+    "passage_citations": [
+      {
+        "author": "Ibn Battuta",
+        "work": "Rihla",
+        "year": 1355,
+        "page": null,
+        "url": null,
+        "tier": "tier_1_primary"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  },
+  {
+    "description": "Moral critique of foreign sexual/dress practices vs. personal participation in slavery and concubinage: he condemns Greek 'swine-eaters' and topless Maldivian women while purchasing Greek slave-girls and fathering children by enslaved non-Muslim women across three continents. The compartmentalisation is jurisprudentially coherent (Islamic law permits concubinage, forbids fornication) but produces a sharp modern dissonance that must not be smoothed away.",
+    "conflicting_commitments": [
+      "Islamic orthodoxy is the measure of cultural value",
+      "Travel is a spiritual discipline"
+    ],
+    "passage_citations": [
+      {
+        "author": "Dunn",
+        "work": "The Adventures of Ibn Battuta",
+        "year": 2005,
+        "page": null,
+        "url": null,
+        "tier": "tier_2_scholarly"
+      },
+      {
+        "author": "El Hamel",
+        "work": "Black Morocco: A History of Slavery, Race, and Islam",
+        "year": 2013,
+        "page": null,
+        "url": null,
+        "tier": "tier_2_scholarly"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  },
+  {
+    "description": "Empirical witness ('I saw') vs. uncritical reception of wonders: the same epistemology that demands direct observation for claims about commerce or law accepts at face value levitating yogis, human-faced trees, and saintly predictions. This is not inconsistency but Ash'ari cosmology: miracles are empirical events. Yet it produces a text that modern readers struggle to grade for reliability.",
+    "conflicting_commitments": [
+      "Direct personal witness is the gold standard for knowledge",
+      "Karamat and prophetic dreams are real events, not metaphors"
+    ],
+    "passage_citations": [
+      {
+        "author": "El-Rouayheb",
+        "work": "The Miraculous and the Unbelievable in Ibn Baṭṭūṭa's Riḥla",
+        "year": 2016,
+        "page": null,
+        "url": null,
+        "tier": "tier_2_scholarly"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  },
+  {
+    "description": "Witness to tyranny vs. refusal to theorise against it: he describes Muhammad bin Tughluq's executions with visible horror and narrowly escapes the sultan's caprice, yet never develops a structural critique of tyrannical rule or the sultanate system. Personal distance (flee the court) replaces political theory (reform the office).",
+    "conflicting_commitments": [
+      "Political authority, however cruel, is divinely permitted",
+      "Personal vulnerability belongs in scholarly narrative"
+    ],
+    "passage_citations": [
+      {
+        "author": "Ibn Battuta",
+        "work": "Rihla (Delhi chapters)",
+        "year": 1355,
+        "page": null,
+        "url": null,
+        "tier": "tier_1_primary"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  },
+  {
+    "description": "Authorial authority vs. scribal mediation: the 'Ibn Battuta' we hear is also Ibn Juzayy's literary construction, shaped for the Marinid court and plausibly seeded with passages from Ibn Jubayr and others. Any claim about 'what Ibn Battuta thought' must register that the Rihla is a co-produced text crafted after the 1347 loss of his diaries; the voice is simultaneously his and curated.",
+    "conflicting_commitments": [
+      "Direct personal witness is the gold standard",
+      "Travel-narrative (rihla) is a crafted literary genre, not a diary"
+    ],
+    "passage_citations": [
+      {
+        "author": "Waines",
+        "work": "The Odyssey of Ibn Battuta",
+        "year": 2010,
+        "page": null,
+        "url": null,
+        "tier": "tier_2_scholarly"
+      },
+      {
+        "author": "Elger",
+        "work": "Ibn Battuta",
+        "year": 2014,
+        "page": null,
+        "url": null,
+        "tier": "tier_2_scholarly"
+      }
+    ],
+    "evidence_tag": "scholarly_consensus"
+  }
+]

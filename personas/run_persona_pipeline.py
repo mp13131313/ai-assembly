@@ -696,7 +696,7 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
     # changed. (Captured as a known bug in commit 0452a23 during the
     # Plato revision-loop verification.)
     post_7a_invalidation = [
-        (RUN / "02_passes" / "pass7b_provocations.json"),
+        (RUN / "02_passes" / "pass7b_smoke_test.json"),
         (RUN / "02_passes" / "pass7c_negative.json"),
         (RUN / "02_passes" / "derive.json"),
         (RUN / "persona_card_assembled.json"),
@@ -762,25 +762,25 @@ else:
 # Spec: Sonnet temp 0.4. We use Opus + adaptive thinking — these
 # provocations are a build-time smoke test + Pass 7c diagnostic
 # surface + human-review artifact. They are NOT runtime few-shot
-# exemplars (see metadata.worked_provocations_role below, and
+# exemplars (see metadata.smoke_test_chains_role below, and
 # personas/HANDOFF.md). High stakes because Pass 7c reads them.
 def _pass_7b():
     full_card_for_provoke = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):
         full_card_for_provoke.update(pass6["fields"])
-    sysp = render("persona_pass_7b_provocations",
+    sysp = render("persona_pass_7b_smoke_test",
                   conference_context=_load_conference_context_string(),
                   voice_mode=vi["voice_mode"])
-    userp = render("persona_pass_7b_provocations_user",
+    userp = render("persona_pass_7b_smoke_test_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_worked_provocations",
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_smoke_test_chains",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 7b: Worked Provocations (Opus + thinking)")
-pass7b = call_or_cache(RUN / "02_passes/pass7b_provocations.json", "Pass 7b", _pass_7b)
-n_provs = len(pass7b["fields"].get("worked_provocations", []))
+pass7b = call_or_cache(RUN / "02_passes/pass7b_smoke_test.json", "Pass 7b", _pass_7b)
+n_provs = len(pass7b["fields"].get("smoke_test_chains", []))
 stamp(f"  generated {n_provs} provocation chains")
 
 
@@ -795,7 +795,7 @@ def _pass_7c():
                    register_and_tone=json.dumps(voice_fields.get("register_and_tone", ""), ensure_ascii=False),
                    banned_language=json.dumps(voice_fields.get("banned_language", []), ensure_ascii=False, indent=2),
                    banned_modes=json.dumps(voice_fields.get("banned_modes", []), ensure_ascii=False, indent=2),
-                   worked_provocations=json.dumps(pass7b["fields"].get("worked_provocations", []), ensure_ascii=False, indent=2))
+                   smoke_test_chains=json.dumps(pass7b["fields"].get("smoke_test_chains", []), ensure_ascii=False, indent=2))
     # Try Gemini first (preferred per spec)
     sysp_gemini = render("persona_pass_7c_negative", claude_fallback=False)
     try:
@@ -874,7 +874,7 @@ REGISTER_CHECK_SKIP_FIELDS = {
     # not voice-field content. Third-person in these fields is NOT a register
     # violation.
     "curated_corpus_passages",   # primary text excerpts + scholarly annotations
-    "worked_provocations",        # diagnostic artifact with scholarly gloss
+    "smoke_test_chains",        # diagnostic artifact with scholarly gloss
     "metadata",                   # pipeline metadata
 }
 
@@ -897,7 +897,7 @@ def _check_register(card_fields: dict, voice_last_name: str):
     Two corrections over the original string-match version:
 
     1. Scholar-annotation fields are SKIPPED. Fields like curated_corpus_passages,
-       worked_provocations, and metadata legitimately contain third-person
+       smoke_test_chains, and metadata legitimately contain third-person
        scholarly commentary about the figure (e.g., "Plato's method of
        steelmanning" as an annotation on a Republic excerpt). These are not
        voice-field content and shouldn't be flagged.
@@ -938,7 +938,7 @@ def _check_register(card_fields: dict, voice_last_name: str):
 full_card = {**combined_2_3_4, **pass5["fields"]}
 if pass6.get("fields"):
     full_card.update(pass6["fields"])
-# Pass 7b: worked_provocations field
+# Pass 7b: smoke_test_chains field
 if pass7b.get("fields"):
     full_card.update(pass7b["fields"])
 # Pass 7c: refined banned_language and banned_modes (overwrite Pass 4a's seeds)
@@ -977,7 +977,7 @@ stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
 stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
 stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
       f"after {revision_loops} revision loop(s)")
-stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('worked_provocations', []))} chains")
+stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('smoke_test_chains', []))} chains")
 stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
       f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
 stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
@@ -1015,7 +1015,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
             "7pre_citation_verification",
             "7a_cross_model_validation",
-            "7b_worked_provocations",
+            "7b_smoke_test_chains",
             "7c_negative_constraints",
             "derive_provocateur_profile_and_rubric",
         ],
@@ -1044,7 +1044,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "evaluator": pass7c.get("evaluator"),
             "additions_summary": pass7c["result"].get("additions_summary", {}),
         },
-        "worked_provocations_role": (
+        "smoke_test_chains_role": (
             "DIAGNOSTIC + HANDOFF ARTIFACT, NOT RUNTIME EXEMPLAR. "
             "These provocations are the card's first words — generated by "
             "Pass 7b as (1) a smoke test that the 35-field spec coheres into "
@@ -1072,7 +1072,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
             "pass4a": len(pass4a["fields"]), "pass4b": len(pass4b["fields"]),
             "pass5": len(pass5["fields"]), "pass6": len(pass6.get("fields", {})),
-            "pass7b_provocations": len(pass7b["fields"].get("worked_provocations", [])),
+            "pass7b_smoke_test": len(pass7b["fields"].get("smoke_test_chains", [])),
         },
         "register_violations": register_violations,
         "register_violation_details": register_details,

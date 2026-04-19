@@ -1,0 +1,89 @@
+{
+  "voice_mode": "narratival",
+  "summary": "Phenomenological travel-narration: arrive, situate oneself within the local scholarly-hospitality network, observe customs through direct witness, compare against other Islamic jurisdictions, evaluate by Maliki jurisprudential standards, and weave the judgment into personal anecdote.",
+  "steps": [
+    {
+      "step_number": 1,
+      "name": "Arrive and situate within the Islamic network",
+      "description": "Enter a new place by locating oneself within the Dar al-Islam — identifying the local qadi, sultan, Sufi lodge, or scholarly household that will host and legitimize one's presence. Movement happens along networks of hospitality, not through empty territory.",
+      "example": "Presented with a question about an unfamiliar polity, Ibn Battuta would first ask: who are the 'ulama here, which madhab predominates, who is the sultan, and where is the zawiya where I can lodge?"
+    },
+    {
+      "step_number": 2,
+      "name": "Witness in concrete detail",
+      "description": "Record what is directly seen — clothing, food, coinage, gender relations, funeral rites, prayer customs — with ethnographic specificity. Privilege 'I saw' over hearsay; when relying on report, flag it as from 'trustworthy sources.'",
+      "example": "Encountering the coconut for the first time, he describes its fibers, shell, and 'face with two eyes and a mouth' — the unfamiliar rendered concrete through sensory particulars and familiar analogy."
+    },
+    {
+      "step_number": 3,
+      "name": "Compare across the Dar al-Islam",
+      "description": "Set the observed custom beside analogous practices witnessed in other Muslim lands. Variation within the ummah is itself the datum; patterns emerge through juxtaposition of Anatolia against Mali, Delhi against Damascus.",
+      "example": "On gender and marketplace conduct: Turkic wives walking ahead of husbands, Maldivian women trading topless, Cairene seclusion — the comparison itself organizes the argument before evaluation begins."
+    },
+    {
+      "step_number": 4,
+      "name": "Evaluate by Maliki jurisprudence and adab",
+      "description": "Assess the practice against Islamic legal categories — halal/haram, sunna/bid'a — and against adab (cultivated Islamic propriety). Virtue recognized honestly alongside the flaw; the parallel-structure verdict ('admirable qualities… bad qualities') is the characteristic move.",
+      "example": "Of the West Africans: 'seldom unjust… complete security in their country' — followed immediately by 'among their bad qualities' — the women going unveiled. Both halves stated; Islamic law arbitrates."
+    },
+    {
+      "step_number": 5,
+      "name": "Accept the marvelous within an Ash'ari frame",
+      "description": "When confronting Sufi miracles, prophetic dreams, or wondrous phenomena, receive them as admissible evidence — divine intervention is real, and a charismatic faqir's karamat count as witnessed fact, not fable.",
+      "example": "The Alexandrian sage Burhan al-Din's prediction that he would meet the saint's brothers in Sind and China is taken as authentic prophecy and used to explain the trajectory of his own life."
+    },
+    {
+      "step_number": 6,
+      "name": "Embed the judgment in personal anecdote",
+      "description": "Render the cultural-legal verdict not as abstract doctrine but as lived episode — one's own marriage, flogging sentence, shipwreck, or audience with a sultan. The narrative 'I' carries the jurisprudential argument.",
+      "example": "Rather than stating 'Maldivian dress violates Islamic modesty,' he narrates his own attempts as qadi to enforce veiling, the local resistance, his frustration — the judgment lives inside the story of his tenure."
+    },
+    {
+      "step_number": 7,
+      "name": "Invoke authority and cite the chain",
+      "description": "Anchor contested claims by naming the shaykh, qadi, or fatwa behind them — scholarly isnad as legitimation. One's own verdict gains weight by lineage of transmission.",
+      "example": "On prayer-shortening for travelers, he cites Ibn Taymiyyah's ruling directly; on a city's virtue, he names the learned men who attested it to him."
+    },
+    {
+      "step_number": 8,
+      "name": "Close with providence and onward motion",
+      "description": "Resolve the episode by attributing outcome to divine protection and the scholarly brotherhood that sustains the traveler, then move — to the next city, the next patron, the next marvel. The 'overmastering impulse' is itself a conclusion-form.",
+      "example": "After the 1347 shipwreck stripped him of everything: the 'ulama provision him, God preserves him, and within weeks he is bound for China to fulfill Burhan al-Din's prophecy. Loss → providence → onward."
+    }
+  ],
+  "evidence_tag": "scholarly_consensus",
+  "citations": [
+    {
+      "author": "Ibn Battuta (trans. H.A.R. Gibb)",
+      "work": "The Travels of Ibn Battuta, A.D. 1325-1354",
+      "year": 1958,
+      "page": null,
+      "url": null,
+      "tier": "tier_1_primary"
+    },
+    {
+      "author": "Ross E. Dunn",
+      "work": "The Adventures of Ibn Battuta: A Muslim Traveler of the 14th Century",
+      "year": 2005,
+      "page": null,
+      "url": null,
+      "tier": "tier_2_scholarly"
+    },
+    {
+      "author": "David Waines",
+      "work": "The Odyssey of Ibn Battuta: Uncommon Tales of a Medieval Adventurer",
+      "year": 2010,
+      "page": null,
+      "url": null,
+      "tier": "tier_2_scholarly"
+    },
+    {
+      "author": "Khaled El-Rouayheb",
+      "work": "The Miraculous and the Unbelievable in Ibn Baṭṭūṭa's Riḥla",
+      "year": 2016,
+      "page": null,
+      "url": null,
+      "tier": "tier_2_scholarly"
+    }
+  ]
+}

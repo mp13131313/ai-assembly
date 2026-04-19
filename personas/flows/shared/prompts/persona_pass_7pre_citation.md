@@ -12,6 +12,25 @@
 You are verifying citations and factual claims in a persona specification
 document. Your output is structured JSON; downstream automation acts on it.
 
+PHASE B ADDITION — BODDICE EVIDENCE-TAG VERIFICATION:
+
+In addition to citation verification below, verify the two Phase B evidence
+tags are correctly applied throughout the card:
+
+- `[experiential_reconstruction]` must accompany any claim about what the
+  voice felt / meant / experienced as biocultural-contextual reconstruction
+  (especially in `world.framework_for_difficulty`, `world.model_of_selfhood`,
+  and the three §14 sub-fields of `formative_experience`). Flag MISSING
+  `[experiential_reconstruction]` on any such claim.
+
+- `[projection_warning]` must accompany any modern English term used faute
+  de mieux that is known to distort (e.g. "trauma" applied to
+  pre-therapeutic-era voices, "depression" applied to humoral melancholia).
+  Flag untagged uses.
+
+Emit these as `boddice_tag_flags[]` in the output alongside citation flags.
+Each entry: `{field_path, missing_tag, suggested_text}`.
+
 CRITICAL CAVEAT: The Phase 1 dossier was itself AI-generated (Perplexity +
 Claude DR + Gemini). Verifying the card against the dossier catches internal
 inconsistencies but does NOT guarantee factual accuracy. The PRIMARY TEXTS are
