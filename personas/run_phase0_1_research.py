@@ -155,13 +155,18 @@ def main(voice_name: str) -> None:
     display_name = vi["name"]
     wiki_url = vi_raw.get("wikipedia_url", "")
 
-    template_src = TEMPLATE_PATH.read_text(encoding="utf-8")
+    # Phase B G.3: pass_0b_dr_prompt.md is now a wrapper that `{% include %}`s
+    # per-type sub-templates. Need FileSystemLoader pointing at the prompts/
+    # directory so includes resolve. Still using jinja2.Undefined (not
+    # StrictUndefined) — pass_0b tolerates many conditional vars being absent.
+    prompts_dir = TEMPLATE_PATH.parent
     env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(str(prompts_dir)),
         undefined=jinja2.Undefined,
         trim_blocks=True,
         lstrip_blocks=True,
     )
-    template = env.from_string(template_src)
+    template = env.get_template(TEMPLATE_PATH.name)
 
     context = {
         "name": display_name,
