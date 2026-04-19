@@ -34,7 +34,6 @@ except ImportError:
 
 from flows.shared.io import voice_slug
 
-PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
 TEMPLATE_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
 VOICES_DIR = REPO_ROOT / "inputs/voices"
 DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
