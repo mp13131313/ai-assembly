@@ -72,7 +72,7 @@ The Provocateur knows the council at two levels.
 
 **Collective landscape** — a single paragraph describing the council as a whole: what traditions, eras, ontologies, and modes of knowing are represented, and where the major fault lines between them lie. Used in Triage Part B (fault-line detection) and in Formulation (angling for fault-line friction). Lives in `council_config.json`.
 
-**Individual profiles** — eight fields per council member, derived pre-conference by the Persona Pipeline's Derive node from the completed v3.7 Persona Card. Loaded into the Provocateur's system prompts as a roster.
+**Individual profiles** — eight fields per council member, derived pre-conference by the Persona Pipeline's Derive node from the completed v3.10 Persona Card. Loaded into the Provocateur's system prompts as a roster.
 
 | Field | What it tells the Provocateur |
 |---|---|
@@ -86,7 +86,7 @@ The Provocateur knows the council at two levels.
 | **medium** | Artifact format (dialogue, song, testimony, shader, etc.). Used only in Packaging for display; Voice Pipeline loads it from the Persona Card, not the Provocateur's briefing. |
 
 
-**Separation from the Persona Card.** The eight-field profile is a compressed view of the full v3.7 Persona Card, derived by the Persona Pipeline's Derive node. The Provocateur never loads the full card. The Voice Pipeline, downstream, loads the full card as the voice agent's own system prompt. The Provocateur and the voice agent are reading different surfaces of the same underlying persona.
+**Separation from the Persona Card.** The eight-field profile is a compressed view of the full v3.10 Persona Card, derived by the Persona Pipeline's Derive node. The Provocateur never loads the full card. The Voice Pipeline, downstream, loads the full card as the voice agent's own system prompt. The Provocateur and the voice agent are reading different surfaces of the same underlying persona.
 
 ### 2. The Audience
 
@@ -401,7 +401,7 @@ A voice with the full picture might notice positions the curated quotes left out
 
 ### What is NOT in the Briefing
 
-**The voice's own profile.** The Voice Pipeline agent IS the persona — it is loaded with its full v3.7 Persona Card as its system prompt. Re-shipping profile fragments in the briefing would be redundant and risks drift between what the Voice Pipeline loads and what the Provocateur describes.
+**The voice's own profile.** The Voice Pipeline agent IS the persona — it is loaded with its full v3.10 Persona Card as its system prompt. Re-shipping profile fragments in the briefing would be redundant and risks drift between what the Voice Pipeline loads and what the Provocateur describes.
 
 **`council_config_version`.** Lives in the run's `manifest.json`, not duplicated 12× across briefings.
 
@@ -452,7 +452,7 @@ Voices with zero assignments still get a briefing file (empty `formulations[]` a
 
 ## Scope
 
-The Provocateur does not extract or group — that's the Researcher. It does not process isolated extractions from the Researcher's output — only themed material. It does not produce what participants see — that's the council's artifacts and downstream roles. It does not interpret or map the council's responses — that's a downstream role. It does not load the full v3.7 Persona Card — only the 8-field profile derived from it.
+The Provocateur does not extract or group — that's the Researcher. It does not process isolated extractions from the Researcher's output — only themed material. It does not produce what participants see — that's the council's artifacts and downstream roles. It does not interpret or map the council's responses — that's a downstream role. It does not load the full v3.10 Persona Card — only the 8-field profile derived from it.
 
 The Provocateur's sole function is to take the Researcher's faithful map of the day's conversations and turn it into per-voice briefings that maximise the strength, distinctiveness, and interest of every artifact the council produces.
 

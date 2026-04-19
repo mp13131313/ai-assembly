@@ -9,7 +9,7 @@ A flat JSON file at `runs/<voice_slug>/persona_card_assembled.json` containing:
 
 - 4 identity fields at root: `voice_name`, `voice_mode`, `pipeline_version`,
   `generated_date`
-- 35 card fields at root (all the v3.7 spec's fields, flat)
+- 35 card fields at root (all the v3.10 spec's fields, flat)
 - 2 null continuity fields: `continuity_block_if_night_2`,
   `continuity_block_artifact_if_night_2` (populated by Voice Pipeline at
   runtime if the voice carries something forward into Night 2)
@@ -73,7 +73,7 @@ The persona card is the contract. Trust it. The 35 fields — constitution,
 reasoning_method, characteristic_moves, concept_lexicon, banned_language,
 banned_modes, etc. — are what tells the model how to behave. Few-shot
 examples are a hack used when system prompts aren't strong enough; a
-properly built v3.7 card doesn't need them.
+properly built v3.10 card doesn't need them.
 
 ## What to do with `worked_provocations` in the runtime
 
