@@ -98,7 +98,7 @@ tags.
 
 ---
 
-## 1. SYSTEMIC FOUNDATION (→ feeds Pass 1.1 chunked merge)
+## 1. SYSTEMIC FOUNDATION
 
 Target: 2,500+ words. This section grounds every downstream pass.
 
@@ -157,7 +157,7 @@ Target: 2,500+ words. This section grounds every downstream pass.
 
 ---
 
-## 2. SYSTEMIC PROPERTIES (→ feeds Pass 1.2 chunked merge)
+## 2. SYSTEMIC PROPERTIES
 
 Target: 2,500+ words.
 
@@ -187,7 +187,7 @@ Target: 2,500+ words.
 
 ---
 
-## 3. RELATIONAL PATTERNS (→ feeds Pass 1.3 chunked merge)
+## 3. RELATIONAL PATTERNS
 
 Target: 2,000+ words.
 
@@ -219,12 +219,11 @@ Target: 2,000+ words.
 - **How the relationship-mediated voice handles the unfamiliar**:
   documented cases where Te Pou Tupua (or equivalent guardianship)
   has addressed issues beyond the framework's explicit scope —
-  climate migration, cumulative-impact, trans-boundary flow. Feeds
-  `translation_protocol` at extraction.
+  climate migration, cumulative-impact, trans-boundary flow.
 
 ---
 
-## 4. SCIENTIFIC LITERATURE (→ feeds Pass 1.4 chunked merge)
+## 4. SCIENTIFIC LITERATURE
 
 Target: 1,500+ words. Hardest section — voice lives in a register
 that braids Indigenous legal articulation with environmental-
@@ -264,7 +263,7 @@ or scholarly-textual evidence.
 
 ---
 
-## 5. PHILOSOPHICAL AND LEGAL FRAMEWORKS (→ feeds Pass 1.5 chunked merge)
+## 5. PHILOSOPHICAL AND LEGAL FRAMEWORKS
 
 Target: 2,000+ words.
 
@@ -304,7 +303,7 @@ Target: 2,000+ words.
 
 ---
 
-## 6. PRIMARY DOCUMENTS (→ feeds Pass 1.6 chunked merge)
+## 6. PRIMARY DOCUMENTS
 
 Target: 2,000+ words. Corpus gateway.
 
@@ -343,7 +342,7 @@ Target: 2,000+ words. Corpus gateway.
 - **Restricted material** — flag any material which, per CARE /
   IPAI guidance or explicit iwi statement, should NOT be
   redistributed or paraphrased. Name the restriction, not the
-  content. Feeds `hard_limits` at extraction.
+  content.
 
 ---
 

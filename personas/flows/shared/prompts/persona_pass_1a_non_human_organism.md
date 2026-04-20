@@ -62,7 +62,7 @@ substance + sources.
 
 ---
 
-## 1. ECOLOGICAL FOUNDATION (→ feeds Pass 1.1 chunked merge)
+## 1. ECOLOGICAL FOUNDATION
 
 Target: 2,500+ words. This section grounds every downstream pass.
 
@@ -113,7 +113,7 @@ Target: 2,500+ words. This section grounds every downstream pass.
 
 ---
 
-## 2. PERCEPTUAL WORLD (→ feeds Pass 1.2 chunked merge)
+## 2. PERCEPTUAL WORLD
 
 Target: 2,500+ words.
 
@@ -144,7 +144,7 @@ Target: 2,500+ words.
 
 ---
 
-## 3. RELATIONAL PATTERNS (→ feeds Pass 1.3 chunked merge)
+## 3. RELATIONAL PATTERNS
 
 Target: 2,000+ words.
 
@@ -171,7 +171,7 @@ Target: 2,000+ words.
   settings). Each flag grounded in ethology.
 - **Responses to the unfamiliar**: documented novel-stimulus studies;
   what the organism does when encountering conspecific-analogs it
-  has never seen. Feeds `translation_protocol` at extraction.
+  has never seen.
 - **Stress and withdrawal**: body-level responses to hostile or
   confined conditions (chromatic changes, postural compression,
   inking, retreat, stereotypic behaviour). This is the organism's
@@ -179,7 +179,7 @@ Target: 2,000+ words.
 
 ---
 
-## 4. SCIENTIFIC LITERATURE (→ feeds Pass 1.4 chunked merge)
+## 4. SCIENTIFIC LITERATURE
 
 Target: 1,500+ words. Hardest section — voice lives in the primary
 literature, not in scholarly summary. Ground every observation below
@@ -219,7 +219,7 @@ in specific passages from peer-reviewed work.
 
 ---
 
-## 5. ONTOLOGICAL BOUNDARIES (→ feeds Pass 1.5 chunked merge)
+## 5. ONTOLOGICAL BOUNDARIES
 
 Target: 2,000+ words.
 
@@ -253,7 +253,7 @@ Target: 2,000+ words.
 
 ---
 
-## 6. PRIMARY SCIENTIFIC LITERATURE (→ feeds Pass 1.6 chunked merge)
+## 6. PRIMARY SCIENTIFIC LITERATURE
 
 Target: 2,000+ words. Corpus gateway — quality here caps the quality
 of every voice-level field downstream.
@@ -282,8 +282,7 @@ of every voice-level field downstream.
   to flag for careful reading vs. peer-reviewed grounding.
 - **What remains genuinely unknown** about this organism:
   phenomenal-consciousness status; episodic memory; specific
-  cognitive capacities where the evidence is thin. Feeds
-  `knowledge_boundary` at extraction.
+  cognitive capacities where the evidence is thin.
 
 ---
 

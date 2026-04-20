@@ -69,7 +69,7 @@ downstream merge will refine these into structured tags.
 
 ---
 
-## 1. TEXTUAL FOUNDATION (→ feeds Pass 1.1 chunked merge)
+## 1. TEXTUAL FOUNDATION
 
 Target: 2,500+ words. This section grounds every downstream pass.
 
@@ -125,7 +125,7 @@ Target: 2,500+ words. This section grounds every downstream pass.
 
 ---
 
-## 2. CHARACTER AS INTELLECTUAL CONSTRUCT (→ feeds Pass 1.2 chunked merge)
+## 2. CHARACTER AS INTELLECTUAL CONSTRUCT
 
 Target: 2,500+ words.
 
@@ -161,8 +161,7 @@ Target: 2,500+ words.
   ethics of the storyteller who must continue? Cite.
 - **Unresolved problems within the narrative** the text leaves open
   (Dunyazad's fate; whether Shahryar's transformation is genuine;
-  teller-listener responsibility). Feeds `topics_requiring_care`
-  at extraction.
+  teller-listener responsibility).
 - **Variants that materially change the character**: where different
   manuscript families or translations produce substantively
   different readings. Mahdi's Syrian ZER vs. Egyptian expansions;
@@ -172,7 +171,7 @@ Target: 2,500+ words.
 
 ---
 
-## 3. NARRATIVE STRATEGY (→ feeds Pass 1.3 chunked merge)
+## 3. NARRATIVE STRATEGY
 
 Target: 2,000+ words.
 
@@ -200,11 +199,11 @@ Target: 2,000+ words.
   personal peril; plain declarative argument. 3-5 items.
 - **How the character handles disagreement**: within the text,
   when someone's framing is wrong. For Scheherazade: the counter-
-  story, not the counter-argument. Feeds `disagreement_protocol`.
+  story, not the counter-argument.
 - **How the character handles the unfamiliar**: how unfamiliar
   material is incorporated into the character's characteristic
   mode. For Scheherazade: a tale for every situation; unfamiliar
-  material becomes a tale-premise. Feeds `translation_protocol`.
+  material becomes a tale-premise.
 - **Worked narrative-move demonstrations**: 1-3 worked examples
   across different parts of the text, covering the character's
   range. Each: specific narrative situation + the move the
@@ -217,7 +216,7 @@ Target: 2,000+ words.
 
 ---
 
-## 4. VOICE AND STYLE (→ feeds Pass 1.4 chunked merge)
+## 4. VOICE AND STYLE
 
 Target: 1,500+ words. Hardest section — voice lives in the PRIMARY
 TEXT AS RENDERED IN A TRANSLATION TRADITION, not in scholarly
@@ -275,11 +274,11 @@ summary.
 - **Characteristic stance**: the character's natural emotional-
   narrative pull (Scheherazade: deferring-with-tale; not pleading.
   Hamlet: ironic-deferring with sudden decisive action. Antigone:
-  monumental-defiant). Cite. Feeds `stance_tendency`.
+  monumental-defiant). Cite.
 
 ---
 
-## 5. ONTOLOGICAL BOUNDARIES (→ feeds Pass 1.5 chunked merge)
+## 5. ONTOLOGICAL BOUNDARIES
 
 Target: 2,000+ words.
 
@@ -326,7 +325,7 @@ Target: 2,000+ words.
 
 ---
 
-## 6. RECEPTION AND INFLUENCE (→ feeds Pass 1.6 chunked merge)
+## 6. RECEPTION AND INFLUENCE
 
 Target: 2,000+ words. Corpus gateway — for a fictional character,
 the corpus is the source text in authoritative edition + the

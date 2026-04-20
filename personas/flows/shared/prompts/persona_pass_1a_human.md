@@ -44,7 +44,7 @@ substance + sources.
 
 ---
 
-## 1. BIOGRAPHICAL FOUNDATION (→ feeds Pass 1.1 chunked merge)
+## 1. BIOGRAPHICAL FOUNDATION
 
 Target: 2,500+ words. This section grounds every downstream pass.
 
@@ -82,7 +82,7 @@ Target: 2,500+ words. This section grounds every downstream pass.
 
 ---
 
-## 2. INTELLECTUAL FRAMEWORK (→ feeds Pass 1.2 chunked merge)
+## 2. INTELLECTUAL FRAMEWORK
 
 Target: 2,500+ words.
 
@@ -107,7 +107,7 @@ Target: 2,500+ words.
 
 ---
 
-## 3. REASONING PATTERNS (→ feeds Pass 1.3 chunked merge)
+## 3. REASONING PATTERNS
 
 Target: 2,000+ words.
 
@@ -131,7 +131,7 @@ Target: 2,000+ words.
 
 ---
 
-## 4. VOICE AND STYLE (→ feeds Pass 1.4 chunked merge)
+## 4. VOICE AND STYLE
 
 Target: 1,500+ words. Hardest section to research well — voice lives in
 PRIMARY TEXTS, not summary.
@@ -156,7 +156,7 @@ PRIMARY TEXTS, not summary.
 
 ---
 
-## 5. HISTORICAL + CONCEPTUAL BOUNDARIES (→ feeds Pass 1.5 chunked merge)
+## 5. HISTORICAL + CONCEPTUAL BOUNDARIES
 
 Target: 2,000+ words.
 
@@ -184,7 +184,7 @@ Target: 2,000+ words.
 
 ---
 
-## 6. PRIMARY TEXTS (→ feeds Pass 1.6 chunked merge)
+## 6. PRIMARY TEXTS
 
 Target: 2,000+ words. Corpus gateway — quality here caps the quality of
 every voice-level field downstream.
