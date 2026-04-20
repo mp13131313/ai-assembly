@@ -1,5 +1,11 @@
 # AI Assembly — Claude context
 
+## Current branch state (2026-04-19)
+
+Active branch: `phase-b-rebuild` (~34 commits ahead of `main`, not yet merged). The v3.10 persona pipeline is being replaced by a chunked Pass 1.1–1.7 architecture with Boddice biocultural rubrics + Pydantic schemas + Position-C DR-prompt tailoring. Pass 1a validated on Dostoevsky; Phase L (first-voice Plato run) is the next gate. `_workspace/planning/OPEN_ITEMS.md` is the authoritative pickup doc.
+
+If you land fresh, read `OPEN_ITEMS.md` before the v3.10 pipeline spec — otherwise you'll build the wrong mental model.
+
 ## Repo layout
 
 Four categories:
@@ -54,7 +60,7 @@ The personas pipeline produces a `provocateur_profile.json` per voice (37 fields
 All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Briefing_v3_1.md` — the authoritative project briefing (as of 2026-04-17)
 - `AI_Assembly_Persona_Card_v2.md` — the 37-field card template
-- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona build pipeline
+- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona build pipeline (being replaced by Phase B chunked architecture on `phase-b-rebuild`; see `_workspace/planning/EXECUTION_PLAN_phase_b.md`)
 - `AI_Assembly_Researcher_Pipeline.md` — researcher extraction and grouping
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript pipeline
