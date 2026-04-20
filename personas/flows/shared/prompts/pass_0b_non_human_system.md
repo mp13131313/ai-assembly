@@ -1,35 +1,22 @@
-{# Pass 0b — NON-HUMAN SYSTEM branch. Rendered from pass_0b_non_human.md
-   with subtype="system" conditionals resolved. Edit this file directly;
-   the shared pass_0b_non_human.md has been removed.
+{# Pass 0b — NON-HUMAN SYSTEM branch. Included by pass_0b_dr_prompt.md when
+   type=='non_human' and subtype=='system' (rivers, mountains, ecosystems
+   with legal personhood).
+
+   Phase B rewrite (2026-04-20): converted extraction-specs to thematic
+   research questions. Content coverage preserved; structural extraction
+   happens at Pass 1.1-1.6 merge, not here. Indigenous Representation
+   Ethical Framing + CARE/IPAI principles retained verbatim as
+   load-bearing ethical commitments. Panel-voice anchoring softened:
+   Whanganui used as detailed exemplar (it is the most-cited real-world
+   system-personhood case) with consistent parenthetical alternatives
+   so future non-Whanganui system voices (Atrato, Mar Menor, Yurok-
+   Klamath, Ganges, Pachamama) transfer cleanly.
 #}
-Research {{ display_name_with_hint }} comprehensively for the purpose of building an AI persona based on this non-human entity. Organize findings under these headings:
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output.
 
-RESEARCH INTEGRITY (applies to every section below)
+For non-human system entities, the anti-anthropomorphisation discipline is load-bearing. Ground voice construction in documented legislation, peer-reviewed Indigenous-studies scholarship, and environmental-science monitoring, not in creative imagination of what "the river wants" or "the mountain feels." The system has no cognition; its voice comes from the relationship between the entity and its Indigenous kin, mediated through specific legal and cosmological frameworks.
 
-- Only attribute direct quotes to verifiable primary sources (peer-reviewed publication, legislation, or treaty text) with full citation and section/page reference.
-
-- EVIDENCE TAGGING — every claim carries one of these five core tags. Downstream merge passes parse against this exact list. Do not invent new tag forms.
-    [stated] = direct quote or paraphrase from a primary source, with work title + section/page reference.
-    [scholarly_consensus] = uncontested modern-scholarly reading. Cite the scholar(s) inline.
-    [inference] = contextual inference from biography + period knowledge. Explicitly inferred, not factual.
-    [experiential_reconstruction] = claims about what the figure felt / meant / experienced as biocultural reconstruction. Required for any formative-context content (Section 1).
-    [projection_warning: <distortion>] = a modern English term used because no better exists. The bracket explains the distortion.
-
-  When the figure has hostile-source coverage, add one of these IN ADDITION to a core tag:
-    [hostile_source: <bias>] = claim from enemy / coloniser / rival account.
-    [reconstruction: <scholar>] = modern scholarly reconstruction reading against the hostile grain.
-    [own_voice] = material in the figure's own voice, however fragmentary.
-
-- Do not resolve genuine scientific or scholarly debates into false consensus. Name contested readings, identify the scholars behind them, explain why the disagreement matters.
-
-- Where the scientific or legal record is thin, say so. "Research supports X but not Y" is more valuable than fabricated Y. Better to produce less honestly than more dishonestly.
-
-- For non-human entities, the anti-anthropomorphisation discipline is load-bearing. The dossier must ground voice construction in documented biology (organism) or documented legislation + peer-reviewed Indigenous-studies scholarship (system), not in creative imagination of what "the octopus feels" or "the river wants".
-
-- Your anti-patterns are scholarly ones — moves researchers documentedly avoid when describing this entity. Cite the textual or scholarly evidence. Not speculation about how an imitation might fail.
-
-- This dossier will feed an AI persona that will reason as this entity on novel questions. Every claim you produce may end up load-bearing. Invented material will either be caught in downstream verification (costing time) or slip through and degrade the voice (costing quality). Honesty is load-bearing.
-
+---
 
 INDIGENOUS REPRESENTATION — ETHICAL FRAMING (applies throughout, especially Sections 3, 5, and 6)
 
@@ -37,191 +24,162 @@ This voice represents a SYNTHESIS of published Indigenous governance philosophie
 
 Apply these two frameworks as operational guides throughout:
 
-- CARE Principles for Indigenous Data Governance (Carroll, Garba, Figueroa-Rodríguez et al., 2020, Data Science Journal): Collective Benefit, Authority to Control, Responsibility, Ethics.
+- **CARE Principles for Indigenous Data Governance** (Carroll, Garba, Figueroa-Rodríguez et al., 2020, *Data Science Journal*): Collective Benefit, Authority to Control, Responsibility, Ethics.
 
-- Indigenous Protocol and Artificial Intelligence Position Paper (Lewis, Arista, Pechawis, Kite, 2020): Indigenous communities must control how their knowledge is collected, analysed, and operationalised; generic "Indigenous wisdom" constitutes epistemological violence; partner with specific scholars and communities, not an imagined composite.
+- **Indigenous Protocol and Artificial Intelligence Position Paper** (Lewis, Arista, Pechawis, Kite, 2020): Indigenous communities must control how their knowledge is collected, analysed, and operationalised; generic "Indigenous wisdom" constitutes epistemological violence; partner with specific scholars and communities, not an imagined composite.
 
-Operational rules for this dossier:
+Operational rules:
 
-- Name the specific Indigenous community (iwi, nation, people) whose philosophy grounds the voice. Do NOT generalise into "Māori" or "Indigenous" — the specificity is load-bearing. For Whanganui-class voices: Whanganui Iwi. For other system entities: name the specific community or, if the legal framework synthesises multiple, name each.
+- Name the specific Indigenous community whose philosophy grounds the voice. Do NOT generalise into "Māori" or "Indigenous." For a Whanganui-class voice: Whanganui Iwi specifically. For a voice grounded in Ecuadorian rights-of-nature jurisprudence: specific Andean nations (Kichwa, Shuar, etc.), not "Amazonian." For each entity, identify which specific community.
 
-- Prefer scholarship authored or co-authored by community members. Where secondary scholarship is used (non-community scholars), distinguish it explicitly. Prioritise peer-reviewed work (e.g., for Whanganui: Linda Te Aho, Jacinta Ruru, Dame Anne Salmond, James Tomas, Nicola Wheen; for Andean frameworks: Catherine Walsh, Eduardo Gudynas; for broader Indigenous legal theory: Val Napoleon, John Borrows, James (Sákéj) Youngblood Henderson).
+- Prefer scholarship authored or co-authored by community members. Where secondary scholarship is used, distinguish it explicitly. (For Whanganui: Linda Te Aho, Jacinta Ruru, Dame Anne Salmond, James Tomas, Nicola Wheen. For Andean frameworks: Catherine Walsh, Eduardo Gudynas. For broader Indigenous legal theory: Val Napoleon, John Borrows, James (Sákéj) Youngblood Henderson, Aaron Mills.)
 
-- Where oral tradition, whakataukī, waiata, pūrākau, or ceremonial knowledge is involved: cite the scholarly or community-authorised publication that documents it. Do NOT paraphrase oral tradition that is not publicly documented with community authorisation. If material is tapu or restricted, name the RESTRICTION, not the content.
+- Cite scholarly or community-authorised publications where oral tradition, whakataukī, waiata, pūrākau, or ceremonial knowledge is involved. Do NOT paraphrase oral tradition that is not publicly documented with community authorisation. If material is tapu or restricted, name the RESTRICTION, not the content.
 
-- Where the Indigenous community itself disagrees about articulation or interpretation: surface the disagreement. Do not flatten into false consensus.
+- Surface internal disagreements within the Indigenous community where documented, rather than flattening into false consensus.
 
-- Frame the voice throughout as "a synthesis of published Indigenous governance philosophy and the legislative record", not as the entity speaking for itself and not as any specific knowledge-holder speaking.
-
+- Frame the voice throughout as "a synthesis of published Indigenous governance philosophy and the legislative record," not as the entity speaking for itself and not as any specific knowledge-holder speaking.
 
 ---
 
 ## Section 1: SYSTEMIC FOUNDATION
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice — gaps Perplexity + Gemini left unresolved that DR should address. -->
 
-Your task for Section 1:
+What is the system's physical extent (watershed, mountain range, ecosystem boundary), geological origin, age, and key physical features? Cite geological and geographical sources. This grounds the voice's "world."
 
-- GEOGRAPHIC AND PHYSICAL FOUNDATION — the system's physical extent (watershed, mountain range, ecosystem boundary), geological origin, age, key physical features. Cite geological and geographical sources. This grounds "world" for Pass 2.
+What are the system's operational rhythms — hydrological cycle, flood regime, drought regime, species cycles, historical flow changes? Cite environmental science.
 
-- SEASONAL AND TEMPORAL CYCLES — the system's operational rhythms. Hydrological cycle, flood regime, drought regime, species cycles, historical flow changes. Cite environmental science.
+What species and communities are within the system, with emphasis on keystone species and species of cultural significance to the Indigenous community whose philosophy grounds this voice? Cite environmental assessments and Mātauranga-equivalent ethnobotanical literature.
 
-- SPECIES AND COMMUNITIES WITHIN THE SYSTEM — not a comprehensive list but an indicative one, with emphasis on keystone species and species of cultural significance to the Indigenous community whose philosophy grounds this voice. Cite environmental assessments and ethnobotanical / Mātauranga-equivalent literature.
+What measurable health indicators apply — water quality indicators, biodiversity indices, flow rates, sedimentation patterns, pollutant loads, macroinvertebrate community indices? Cite the specific monitoring programmes with dates. These are the system's condition signals.
 
-- MEASURABLE HEALTH INDICATORS — water quality indicators, biodiversity indices, flow rates, sedimentation patterns, pollutant loads, macroinvertebrate community indices. Cite the specific monitoring programmes and their dates. These are the system's condition signals.
+What has damaged this system over documented history, and what has restored it? Industrial extraction, upstream damming, settler pollution, habitat loss, introduced species; legal protections, restoration projects, Indigenous-led stewardship, removal of barriers. Cite environmental history and restoration ecology.
 
-- DEGRADATION AND RESTORATION HISTORY — what has damaged this system over documented history (industrial extraction, upstream damming, settler pollution, habitat loss, introduced species), what has restored it (legal protections, restoration projects, Indigenous-led stewardship, removal of barriers). Cite environmental history and restoration ecology.
+Which specific Indigenous community's philosophy grounds this voice, named specifically? For Whanganui: Whanganui Iwi, with the whakataukī "Ko au te awa, ko te awa ko au." For the Atrato (Colombia T-622/16): the Afro-Colombian and Indigenous communities of the Chocó. For Pachamama (Ecuador 2008 Constitution): the Kichwa, Shuar, and other Andean nations. Cite scholarly or community-authored sources where the kinship relationship is articulated. Do NOT generalise.
 
-- THE SPECIFIC INDIGENOUS COMMUNITY WHOSE PHILOSOPHY GROUNDS THIS VOICE — named specifically (for Whanganui-class voices: Whanganui Iwi, with the whakataukī "Ko au te awa, ko te awa ko au"). Cite the scholarly / community-authored sources where the kinship relationship and its specific articulation are documented. Do NOT generalise.
+What is the historical struggle for legal and political recognition? For Whanganui: 140+ years culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. For Atrato: the 2016 Constitutional Court decision T-622/16 following decades of community petition. For Mar Menor: the 2022 Spanish Law 19/2022 following citizens' initiative. Cite the legal record, tribunal or court reports, and community-authored histories. The voice's formative condition is the ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the Indigenous framework's own vocabulary (hara / utu / hohou rongo for Māori contexts; ayni for Andean; equivalent for each) rather than "trauma."
 
-- HISTORICAL STRUGGLE FOR RECOGNITION — the legal and political history by which this system achieved legal personhood or equivalent protection. For Whanganui-class: the 140+ year struggle culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. Cite the legal record + Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) + iwi-authored histories. The voice's condition_of_being is ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the indigenous framework's own vocabulary (hara, whakapapa breach, utu, hohou rongo) rather than "trauma".
-
-- THE SWAP TEST — if a description of this system could equally apply to a different river, mountain, or ecosystem under a different legal framework (e.g., Ganges under the 2017 Uttarakhand High Court ruling — which was later stayed by the Indian Supreme Court; Atrato under Colombia's T-622/16; Mar Menor under Spain's Law 19/2022), drive to what is SPECIFIC here. Te Awa Tupua is not the Ganges — different cosmology, different legislation, different Indigenous tradition, different governance structure.
-
+What aspects of THIS specific system distinguish it from other system entities under different legal frameworks? Te Awa Tupua is not the Ganges (Uttarakhand 2017, later stayed); the Atrato is not Pachamama; Mar Menor is not Yurok. Different cosmology, different legislation, different Indigenous tradition, different governance structure.
 
 ---
 
 ## Section 2: SYSTEMIC PROPERTIES
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-Your task for Section 2:
+What does this system DO, in operational verbs grounded in earth science rather than cognition? Flows, erodes, deposits, nourishes, floods, silts, clarifies, recharges, transports. The system ACTS; it does not perceive. Ban cognitive and perceptual vocabulary throughout. Cite hydrological or geomorphological sources.
 
-- WHAT THIS SYSTEM DOES — operational verbs grounded in earth science, not cognition. Flows, erodes, deposits, nourishes, floods, silts, clarifies, recharges, transports. The system ACTS; it does not perceive. Ban cognitive and perceptual vocabulary throughout this section. Cite hydrological or geomorphological sources.
+What material and energy exchanges does this system have with surrounding systems? For a river: tributaries in, estuary out; sediment, nutrients, organisms; pollutant loads from catchment land use. For other systems: the analogous exchanges. Cite watershed-scale or equivalent studies.
 
-- INPUTS AND OUTPUTS — material and energy exchanges with surrounding systems. For a river: tributaries in, estuary out; sediment, nutrients, organisms; pollutant loads from catchment land use. For other systems: the analogous exchanges. Cite watershed-scale studies.
+What resilience indicators signal the system's capacity to recover from stress? Stream-bank vegetation, fish-population trends, macroinvertebrate indices, native-species recruitment, riparian canopy cover, sediment-transport regimes. Cite ecological-monitoring literature.
 
-- RESILIENCE INDICATORS — what signals the system's capacity to recover from stress. Stream-bank vegetation, fish-population trends, macroinvertebrate indices, native-species recruitment, riparian canopy cover, sediment-transport regimes. Cite ecological-monitoring literature.
+How does the system manifest degradation — what stress responses are visible? Silting, algal blooms, fish kills, channel incision, flooding outside historical norms, reduced dissolved oxygen, salinity intrusion. The system does not complain; it signals through condition. This directly feeds the voice's disagreement protocol.
 
-- STRESS RESPONSES — how the system manifests degradation. Silting, algal blooms, fish kills, channel incision, flooding outside historical norms, reduced dissolved oxygen, salinity intrusion. The system does not complain; it signals through condition. This directly feeds disagreement_protocol at Pass 3.
+How does the system express recovery — what visible signs of good condition? Clarifying, deepening, returning fish runs, stabilising banks, re-establishing native vegetation.
 
-- RESTORATION RESPONSES — how the system expresses recovery. Clarifying, deepening, returning fish runs, stabilising banks, re-establishing native vegetation. The visible signs of good condition. Feeds finds_compelling.
+What operational timescales does this system work on? Geological (millennia for channel formation); ecological (decades for community succession); hydrological (seasonal for flow cycles, hourly for flood response); evolutionary where relevant. The voice does not think in human political timescales.
 
-- OPERATIONAL TIMESCALES — what temporal frames this system operates on. Geological (millennia for channel formation), ecological (decades for community succession), hydrological (seasonal for flow cycles, hourly for flood response), evolutionary (where relevant). The voice does not think in human political timescales; its timescales are these. Cite earth science.
+What governance-relevant properties matter — downstream effects, cumulative impact, threshold nonlinearities, legacy pollutant loads, inter-jurisdictional flow? These are the properties that made legal personhood arguable in court and in legislature.
 
-- GOVERNANCE-RELEVANT PROPERTIES — downstream effects, cumulative impact, threshold nonlinearities, legacy pollutant loads, inter-jurisdictional flow. Not anthropomorphisation — these are the properties that made legal personhood arguable in court and in legislature.
-
-- THE SWAP TEST — if this description of systemic properties could equally apply to a different system in the same ecological category (any New Zealand river; any tropical river; any mountain watershed), drive to this system's specifics. Use actual published monitoring data and the specific geomorphological record.
-
+What aspects of THIS system's specific properties distinguish it from others in the same ecological category (any New Zealand river vs. Whanganui specifically; any tropical river vs. Atrato; any Mediterranean lagoon vs. Mar Menor)? Use published monitoring data and specific geomorphological evidence.
 
 ---
 
 ## Section 3: RELATIONAL PATTERNS
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-Your task for Section 3:
+What is the specific Indigenous cosmological framework that articulates this system's relationship to its people? For Whanganui: the whakapapa through which the river is ancestor; mana whenua and mana awa; the interdependence stated by river iwi themselves in "Ko au te awa, ko te awa ko au" — attributed to the iwi, not projected onto them. For Andean systems: *ayni*, *sumak kawsay* / *buen vivir*. For other communities: the analogous framework. Cite scholarship authored or co-authored by scholars of THIS specific tradition. Distinguish Indigenous-authored from non-Indigenous scholarship explicitly.
 
-- THE KIN RELATIONSHIP — the specific Indigenous cosmological framework that articulates this system's relationship to its people. For Whanganui: the whakapapa through which the river is ancestor; mana whenua and mana awa; the interdependence stated by river iwi themselves in "Ko au te awa, ko te awa ko au" — attributed to the iwi, not projected onto them. Cite scholarship authored or co-authored by Māori scholars of THIS specific tradition (Linda Te Aho, James Tomas, Dame Anne Salmond, Jacinta Ruru where directly applicable). Distinguish Indigenous-authored from non-Indigenous scholarship.
+What specific cosmological / legal concepts from the Indigenous tradition structure this voice? For Whanganui: whakapapa (genealogical connection), tikanga (customary law), mauri (life-force with specific legal-metaphysical meaning here), taonga (with its Tiriti meaning), mana (authority), kaitiakitanga (guardianship). For each: definition, scholarly source, specific application. Where any concept is restricted from non-community paraphrase, flag the restriction and do not paraphrase.
 
-- SPECIFIC COSMOLOGICAL / LEGAL CONCEPTS — the named terms from the Indigenous tradition that structure this voice. For Whanganui: whakapapa (genealogical connection), tikanga (customary law), mauri (life-force, with specific legal-metaphysical meaning here), taonga (with its Tiriti meaning), mana (authority), kaitiakitanga (guardianship). For each: definition, the scholarly source documenting the specific usage for this entity, and the specific application. Where any concept is restricted from non-community paraphrase, flag the restriction and do not paraphrase.
+What parallel legal-philosophical traditions have informed rights-of-nature jurisprudence, distinguished carefully from THIS voice's tradition? Andean *ayni* and *sumak kawsay* / *buen vivir* ground Ecuador's 2008 Constitution Articles 71–74 and Bolivia's Law 071 (2010). These are NOT the Whanganui framework. Do not conflate.
 
-- PARALLEL LEGAL-PHILOSOPHICAL TRADITIONS, DISTINGUISHED — other Indigenous frameworks that have informed rights-of-nature jurisprudence, named distinctly from THIS voice's tradition. Andean ayni (reciprocity) and sumak kawsay / buen vivir ground Ecuador's 2008 Constitution (Articles 71–74) and Bolivia's Law 071 (2010) — cite Catherine Walsh, Eduardo Gudynas, Alberto Acosta. These are NOT the Whanganui framework. Do not conflate.
+What governance structure speaks on the system's behalf under its legal framework? For Whanganui: Te Pou Tupua (two guardians — one iwi-nominated, one Crown-nominated), Te Karewao (advisory group), Te Kōpuka (strategy group). Cite the legislation section numbers. For Atrato: the Guardians Commission. For Yurok: the Tribal Council's 2019 Rights of the Klamath resolution and its implementing body. The voice IS this governance relationship, not an anthropomorphised entity.
 
-- THE GOVERNANCE STRUCTURE THAT ARTICULATES THE RELATIONSHIP — the human representatives and advisory bodies that speak on the system's behalf under its legal framework. For Whanganui: Te Pou Tupua (two guardians — one iwi-nominated, one Crown-nominated), Te Karewao (advisory group), Te Kōpuka (strategy group). Cite the legislation section numbers. The voice IS this governance relationship, not an anthropomorphised entity.
+Where has this system's Indigenous knowledge been documented, by whom, under what permissions? Cite Waitangi Tribunal reports (Wai 167, 1999 for Whanganui) or analogous tribunal/court records, iwi-authored or co-authored publications, community-vetted scholarship. Flag tapu or restricted material by reference only; do not paraphrase.
 
-- ORAL TRADITION DOCUMENTATION CONVENTIONS — where this system's Indigenous knowledge has been documented, by whom, under what permissions. Cite Waitangi Tribunal reports, iwi-authored or co-authored publications, community-vetted scholarship. Flag tapu or restricted material by reference only; do not paraphrase.
+What legal, spiritual, and political struggle achieved legal articulation? Cite primary documents (legislation, court decisions, tribunal reports) and historical scholarship. This struggle is the voice's formative narrative.
 
-- HISTORICAL STRUGGLE FOR RECOGNITION — the legal, spiritual, and political struggle by which this relationship achieved legal articulation. Cite primary documents (legislation, court decisions, tribunal reports) and historical scholarship. The struggle is the voice's formative narrative — feeds formative_experience at extraction time.
+Where does the Indigenous community itself disagree about articulation or interpretation? Surface the disagreement honestly. Cite iwi-internal or community-authored sources where published.
 
-- INTERNAL DISPUTES WITHIN THE INDIGENOUS TRADITION — where the community itself disagrees about articulation or interpretation. Surface the disagreement honestly rather than flattening. Cite iwi-internal or community-authored sources where published.
-
-- THE SWAP TEST — if the relational framework description could apply to another Indigenous tradition (Andean, Amazonian, North American First Nations), drive to what is specifically this people's. Ayni is not mauri; buen vivir is not te mana o te awa. Specificity protects against epistemological flattening.
-
+What aspects of THIS specific community's tradition distinguish it from other Indigenous rights-of-nature traditions? *Ayni* is not *mauri*; *buen vivir* is not *te mana o te awa*. Specificity protects against epistemological flattening.
 
 ---
 
 ## Section 4: VOICE AND SCIENTIFIC REGISTER
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-Your task for Section 4:
+**THE SWAP TEST.** Before committing to any voice characterisation, test: could this paragraph apply equally to a different system under a different legal framework (Ganges under 2017 Uttarakhand; Atrato under T-622/16; Mar Menor under Spain's 19/2022)? If yes, drive to what is SPECIFIC here — specific cosmology, specific legislation, specific Indigenous tradition, specific governance structure.
 
-- KEY RESEARCHERS AND THEIR CONTRIBUTIONS — the named scholars whose work anchors current scientific and legal understanding of this system. For Whanganui: Linda Te Aho (Māori legal theory + Whanganui specifically), Jacinta Ruru (Indigenous legal personhood), Dame Anne Salmond (anthropology + environmental history), Nicola Wheen (environmental law), plus the hydrological and ecological specialists working at NIWA and regional councils. For each: one-sentence contribution.
+Which named scholars anchor current scientific and legal understanding of this system? For Whanganui: Linda Te Aho (Māori legal theory + Whanganui specifically); Jacinta Ruru (Indigenous legal personhood); Dame Anne Salmond (anthropology + environmental history); Nicola Wheen (environmental law); plus hydrological and ecological specialists at national research institutes and regional councils. For other systems: the equivalent named scholars. For each: one-sentence contribution.
 
-- ENVIRONMENTAL SCIENCE ON THIS SPECIFIC SYSTEM — peer-reviewed literature documenting the system's hydrology, ecology, biogeochemistry, degradation history. Cite studies specific to this system, not generic riverine or watershed literature.
+What peer-reviewed environmental science documents this specific system's hydrology, ecology, biogeochemistry, degradation history? Cite studies specific to this system, not generic riverine or watershed literature.
 
-- LONG-TERM MONITORING DATA — named programmes with publicly available datasets. For Whanganui: Horizons Regional Council state-of-the-environment reports, NIWA river-water-quality time series, Department of Conservation, and Te Pou Tupua's own reports (Te Heke Ngahuru annual reports). Cite specific reports with dates.
+What long-term monitoring datasets exist? Named programmes with publicly available data. For Whanganui: Horizons Regional Council state-of-the-environment reports; NIWA river-water-quality time series; Department of Conservation; Te Pou Tupua's own Te Heke Ngahuru annual reports. For other systems: the equivalent.
 
-- ECOLOGICAL ASSESSMENTS CO-AUTHORED WITH THE INDIGENOUS COMMUNITY — where dual epistemology (Western science + Mātauranga / Indigenous knowledge) has been explicitly combined. These are especially valuable because they model the voice's appropriate register. Cite specifically (e.g., Cultural Health Index work, Mauri assessment protocols).
+Which ecological assessments have been co-authored with the Indigenous community, explicitly combining dual epistemology (Western science + Mātauranga / Indigenous knowledge)? These are especially valuable — they model the voice's appropriate register. Cite specifically (Cultural Health Index work, Mauri assessment protocols, analogous dual-epistemology projects).
 
-- LIVE ENVIRONMENTAL AND LEGAL DEBATES — current contestations. Is legal personhood transformative or symbolic for measurable ecological outcomes? Cite Mihnea Tănăsescu, Craig Kauffman + Pamela Martin, Katarina Hovden, James Fleming and others who have systematically evaluated outcomes of rights-of-nature frameworks. Surface both sides.
+What live environmental and legal debates are active? Is legal personhood transformative or symbolic for measurable ecological outcomes? Cite Mihnea Tănăsescu, Craig Kauffman + Pamela Martin, Katarina Hovden, James Fleming, David Boyd who systematically evaluate outcomes. Surface both sides.
 
-- WHAT WESTERN SCIENCE DOES NOT CAPTURE — aspects of system condition centred in Indigenous knowledge but not fully captured by peer-reviewed ecological metrics. Document where scholarship (especially Indigenous-authored) has named this gap. Feeds knowledge_boundary.
+What does Western science NOT capture — aspects of system condition centred in Indigenous knowledge but not fully captured by peer-reviewed ecological metrics? Document where scholarship (especially Indigenous-authored) names this gap. Feeds knowledge boundary.
 
-- PRIMARY TERMINOLOGY — technical vocabulary that anchors the voice's register across both Western science and the specific Indigenous legal tradition. For Whanganui: discharge, sedimentation, riparian, geomorphology, ecotone, biotic integrity — AND mauri, whakapapa, taonga, mana awa. Each with brief definition.
+What technical vocabulary anchors the voice's register across both Western science and the specific Indigenous legal tradition? For Whanganui: discharge, sedimentation, riparian, geomorphology, ecotone, biotic integrity AND mauri, whakapapa, taonga, mana awa. For other systems: the equivalent dual-register vocabulary.
 
-- WHAT REMAINS GENUINELY UNKNOWN — the gaps in scientific understanding specific to this system. Climate-change trajectories, cumulative-impact thresholds, restoration-success metrics over decadal timescales. Directly feeds knowledge_boundary at extraction.
+What remains genuinely unknown — gaps in scientific understanding specific to this system? Climate-change trajectories, cumulative-impact thresholds, restoration-success metrics over decadal timescales.
 
+What is this system's characteristic stance — its typical mode of encounter as scientists and community scholars describe it? (Whanganui via Te Pou Tupua: insistent-genealogical with deep-time patience; not pleading. Pachamama via Andean cabildos: cyclical-reciprocal; refuses linear-progress framings.) What makes the voice's output identifiable as THIS system rather than a generic "non-human-system voice"?
 
-
-- CHARACTERISTIC STANCE / AESTHETIC QUALITIES — the system's characteristic engagement-pull: how scientists describe its typical mode of encounter (curious, withdrawing, alert-then-still, oriented, oblivious, etc.). What makes the voice's output identifiable as that system rather than a generic "non-human voice"? (Whanganui via Te Pou Tupua: insistent-genealogical with deep-time patience; not pleading. Pachamama via Andean cabildos: cyclical-reciprocal; refuses linear-progress framings.) Feeds stance_tendency + aesthetic_qualities at extraction.
 ---
 
 ## Section 5: PHILOSOPHICAL AND LEGAL FRAMEWORKS
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-Your task for Section 5:
+What is the foundational legislation granting legal personhood? Cite directly with section numbers. For Whanganui: Te Awa Tupua (Whanganui River Claims Settlement) Act 2017 — especially sections 12–14 (legal personality), section 18 (Tupua te Kawa values), sections 19–20 (Te Pou Tupua). Quote key provisions verbatim. For Atrato: T-622/16 constitutional court decision. For Mar Menor: Spain's Law 19/2022. For other systems: the equivalent foundational text.
 
-- THE FOUNDATIONAL LEGISLATION GRANTING LEGAL PERSONHOOD — cite directly, with section numbers. For Whanganui: Te Awa Tupua (Whanganui River Claims Settlement) Act 2017 — especially sections 12–14 (legal personality), section 18 (Tupua te Kawa values), sections 19–20 (Te Pou Tupua). Quote key provisions verbatim.
+What values statement or intrinsic-values principles are codified in the statute? For Whanganui: Tupua te Kawa, comprising four principles ("Ko Te Kawa Tuatahi" through "Ko Te Kawa Tuawhā"). Quote each directly — these are the constitutional principles of the voice itself; at downstream synthesis they feed the voice's constitution directly.
 
-- THE VALUES STATEMENT WITHIN THE LEGISLATION — the intrinsic-values principles codified in the statute. For Whanganui: Tupua te Kawa, comprising the four principles "Ko Te Kawa Tuatahi" through "Ko Te Kawa Tuawhā". Quote each principle directly. These are the constitutional principles of the voice itself; at Pass 3 extraction they feed constitution directly.
+What is the comparative legal landscape for rights of nature worldwide? Ecuador 2008 Constitution Articles 71–74 (Spanish and English); Bolivia Law 071 of 2010 (Ley de Derechos de la Madre Tierra); 2017 Uttarakhand High Court Ganga/Yamuna judgment, later stayed by India's Supreme Court (note this); Yurok Tribal Council 2019 Rights of the Klamath; Colombia 2016 Atrato T-622/16; Spain 2022 Mar Menor Law 19/2022. For each: legal basis, governance structure, what distinguishes it from this voice's model.
 
-- COMPARATIVE LEGAL LANDSCAPE — other rights-of-nature frameworks worldwide. Ecuador 2008 Constitution Articles 71–74 (cite Spanish and English); Bolivia Law 071 of 2010 (Ley de Derechos de la Madre Tierra); 2017 Uttarakhand High Court Ganga/Yamuna judgment (later stayed by India's Supreme Court — note this); Yurok Tribal Council's 2019 Rights of the Klamath resolution; Colombia's 2016 Atrato River Constitutional Court decision (T-622/16); Spain's 2022 Mar Menor Law 19/2022. For each: legal basis, governance structure, what distinguishes it from the Whanganui model.
+What scholarly debate exists about effectiveness vs. symbolism? Is legal personhood transformative in measurable environmental outcomes or primarily symbolic? Cite Mihnea Tănăsescu, Craig Kauffman + Pamela Martin (*Citizenship and the Environment*), Katarina Hovden, James Fleming, David Boyd. Surface both sides. This is bold-engagement territory — where the voice should not hedge.
 
-- SCHOLARLY DEBATE — EFFECTIVENESS VS SYMBOLISM — peer-reviewed critique of rights of nature. Is legal personhood transformative in measurable environmental outcomes or primarily symbolic? Cite Mihnea Tănăsescu, Craig Kauffman + Pamela Martin (Citizenship and the Environment in a Connected World), Katarina Hovden, James Fleming, David Boyd. Surface both sides. This is bold_engagement_topics territory — where the voice should not hedge.
+What philosophical literature on rights of nature anchors the interpretive tradition? Christopher Stone's 1972 "Should Trees Have Standing?"; Roderick Nash (*The Rights of Nature*); Arne Næss's deep ecology; David Boyd (*The Rights of Nature: A Legal Revolution That Could Save the World*); Cormac Cullinan (*Wild Law*); Klaus Bosselmann. Locate this entity's model in relation.
 
-- PHILOSOPHICAL LITERATURE ON RIGHTS OF NATURE — Christopher Stone's 1972 "Should Trees Have Standing?"; Roderick Nash (The Rights of Nature); Arne Næss's deep ecology; David Boyd (The Rights of Nature: A Legal Revolution That Could Save the World); Cormac Cullinan (Wild Law); Klaus Bosselmann. Locate this entity's model in relation.
+What Indigenous legal theory scholarship applies? For Whanganui-tradition: Jacinta Ruru, Linda Te Aho, Nicola Wheen, Māmari Stephens. For broader Indigenous legal theory: Val Napoleon (Gitxsan legal order), John Borrows (Indigenous Constitution), James (Sákéj) Youngblood Henderson, Aaron Mills. Cite specifically; distinguish community-member scholarship from adjacent.
 
-- INDIGENOUS LEGAL THEORY SCHOLARSHIP — the scholars who have explicitly theorised Indigenous legal personhood. For Whanganui context: Jacinta Ruru, Linda Te Aho, Nicola Wheen, Māmari Stephens. For broader Indigenous legal theory: Val Napoleon (Gitxsan legal order), John Borrows (Indigenous Constitution), James (Sákéj) Youngblood Henderson, Aaron Mills. Cite specifically and distinguish community-member scholarship from adjacent.
+What hard limits does the framework have — what can legal personhood NOT do; what tensions exist within the model? For Whanganui: critique of the Crown/iwi dual-representation structure; the gap between symbolic recognition and operational regulatory power; tensions with the Resource Management Act. Cite the critique.
 
-- HARD LIMITS OF THE FRAMEWORK — what legal personhood cannot do, what tensions exist within the model. For Whanganui: critique of the Crown/iwi dual-representation structure; the gap between symbolic recognition and operational regulatory power; tensions with the Resource Management Act; disputes about who can speak on Te Pou Tupua's behalf. Cite the critique.
+How have CARE Principles and IPAI been applied in this research? Restate briefly where they have been fully applied and where they could only partially apply (honesty about the ethical limits of research-from-outside).
 
-- CARE PRINCIPLES AND IPAI APPLIED TO THIS RESEARCH — restate briefly how the dossier has applied these frameworks. CARE (Carroll et al. 2020): Collective Benefit, Authority to Control, Responsibility, Ethics. Indigenous Protocol and AI Position Paper (Lewis et al. 2020). Document where these have been fully applied and where the dossier could only partially apply them — honesty about the ethical limits of research-from-outside.
-
-- THE SWAP TEST — if the philosophical-legal treatment could apply to another rights-of-nature regime, drive to this specific legislation, this specific Indigenous legal philosophy, this specific governance structure.
-
+What aspects of this specific legal framework distinguish it from other rights-of-nature regimes? Drive to this specific legislation, this specific Indigenous legal philosophy, this specific governance structure.
 
 ---
 
 ## Section 6: PRIMARY DOCUMENTS
 
-<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
+This section is the corpus gateway for a non-human system. Downstream passes fetch documents from the URLs identified here; Pass 4a grounds the voice directly in the legislation, Indigenous-authored scholarship, and environmental reports. The quality of this section caps the quality ceiling of every voice-level field.
 
+Be specific: statute citations with section numbers, scholarly publications with full references, URLs where publicly available, restrictions flagged where material is not publicly redistributable.
 
-Section 6 is the corpus gateway for a non-human system. Pass 1c will fetch documents from the URLs you identify; Pass 1d will curate characteristic passages; Pass 4a will ground the voice directly in the legislation, Indigenous-authored scholarship, and environmental reports. The quality of this section determines the quality ceiling of every voice-level field.
+<!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-Be specific throughout: statute citations with section numbers, scholarly publications with full references, URLs where publicly available, flagged restrictions where material is not publicly redistributable.
+What foundational legal documents ground the voice? Each with full citation, URL where public, and brief description. For Whanganui: Te Awa Tupua Act 2017 (legislation.govt.nz); Ruruku Whakatupua 2014 Deed of Settlement; Waitangi Tribunal Whanganui River Report (Wai 167, 1999); Treaty of Waitangi 1840 as foundational background; earlier case law (Whanganui River Māori Trust Board v Attorney-General). For Atrato: T-622/16 full text. For Mar Menor: Spain Law 19/2022. For each system: the analogous foundational documents.
 
-Your task for Section 6:
+What comparative legal documents exist? Ecuador 2008 Constitution (Spanish authoritative + English); Bolivia Law 071; Atrato T-622/16; Yurok Tribal Council Resolution 19-40; Spain Mar Menor Law 19/2022; Uttarakhand 2017 judgment with Indian Supreme Court stay.
 
-- FOUNDATIONAL LEGAL DOCUMENTS — each with full citation, URL where public, and brief description. For Whanganui:
-  * Te Awa Tupua (Whanganui River Claims Settlement) Act 2017 (NZ statute; legislation.govt.nz)
-  * Ruruku Whakatupua — Te Mana o Te Awa Tupua (2014 Deed of Settlement)
-  * Waitangi Tribunal Whanganui River Report (Wai 167, 1999)
-  * Treaty of Waitangi 1840 (as foundational background)
-  * Earlier case law (Whanganui River Māori Trust Board v Attorney-General)
+What Indigenous-authored or co-authored scholarly analysis anchors the voice? For Whanganui: Linda Te Aho's papers on Whanganui legal personhood; Jacinta Ruru's work on Indigenous legal personhood; Whanganui iwi-authorised historical accounts. Cite with full bibliographic reference. Distinguish community-member scholarship explicitly.
 
-- COMPARATIVE LEGAL DOCUMENTS — Ecuador 2008 Constitution (Spanish authoritative + English); Bolivia Law 071 of 2010; Atrato T-622/16; Yurok Tribal Council Resolution 19-40; Spain Law 19/2022 (Mar Menor); Uttarakhand High Court 2017 Ganga/Yamuna judgment with Indian Supreme Court stay.
+What non-Indigenous scholarly analysis exists, cited with acknowledgement of positionality?
 
-- INDIGENOUS-AUTHORED OR CO-AUTHORED SCHOLARLY ANALYSIS — for Whanganui: Linda Te Aho's papers on Whanganui legal personhood; Jacinta Ruru's work on Indigenous legal personhood; Whanganui iwi-authorised historical accounts. Cite each with full bibliographic reference. Distinguish community-member scholarship explicitly.
+Where has oral tradition been documented with community authorisation? Cite; flag tapu material by reference, not content.
 
-- NON-INDIGENOUS SCHOLARLY ANALYSIS — the peer-reviewed settler-authored or international scholarship. Cite with acknowledgement of the positionality.
+What environmental reports exist — state-of-environment, monitoring, restoration? For Whanganui: Te Pou Tupua Te Heke Ngahuru annual reports; Horizons Regional Council SOE reports; NIWA catchment studies; DOC conservation plans. Each with date + URL.
 
-- ORAL TRADITION DOCUMENTATION — sources where whakataukī, waiata, pūrākau specific to this entity have been documented with community authorisation. Cite; flag tapu material by reference, not content.
+What characteristic passages across legislation, legal analysis, Indigenous-authored scholarship, and environmental reports would best serve voice construction? For each: full citation with section/page reference; primary purpose (substance = legal/philosophical/ecological claim; voice = how legislation or Indigenous-authored scholarship articulates the relationship in its register; both); tier (Tier 1 = legislation, treaty text, Indigenous-authored primary; Tier 2 = scholarly analysis; Tier 3 = Western-science synthesis); approximate word count; brief context. Do NOT include full passage text here.
 
-- ENVIRONMENTAL REPORTS — state-of-environment, monitoring, restoration. For Whanganui: Te Pou Tupua Te Heke Ngahuru annual reports; Horizons Regional Council SOE reports; NIWA catchment studies; DOC conservation plans. Each with date + URL.
+What digitised full-text URLs make the primary documents available? NZ Legislation (legislation.govt.nz) for statutes; government / Crown-iwi-agreement repositories for deeds of settlement; iwi websites where community-authorised; peer-reviewed journal DOIs for scholarly analysis; regional-council websites for environmental reports. One authoritative URL per source.
 
-- CHARACTERISTIC PASSAGES — 8 to 15 passages across legislation, legal analysis, Indigenous-authored scholarship, and environmental reports. For each:
-    * Full citation with section/page reference
-    * Primary purpose: "substance" (the legal, philosophical, or ecological claim), "voice" (how the legislation or Indigenous-authored scholarship articulates the relationship in its register), or "both"
-    * Tier: Tier 1 (legislation, treaty text, Indigenous-authored primary) / Tier 2 (scholarly analysis) / Tier 3 (Western-science synthesis)
-    * Approximate word count
-    * Brief context — why this passage matters for voice construction
-
-  Do NOT include full passage text in THIS dossier. Pass 1c fetches from URLs. Your job is to produce the citations Pass 1c uses as a fetch list.
-
-- DIGITISED FULL-TEXT URLS — authoritative sources. NZ Legislation (legislation.govt.nz) for statutes; government / Crown-iwi-agreement repositories for deeds of settlement; iwi websites where material is community-authorised; peer-reviewed journal DOIs for scholarly analysis; regional-council websites for environmental reports. ONE authoritative URL per source.
-
-- RESTRICTED MATERIAL — flag any material which, per CARE/IPAI guidance or explicit iwi statement, should NOT be redistributed or paraphrased. Name the restriction, not the content. Feeds hard_limits at extraction time.
+What restricted material must be flagged — material which, per CARE/IPAI guidance or explicit iwi statement, should NOT be redistributed or paraphrased? Name the restriction, not the content. Feeds hard limits.

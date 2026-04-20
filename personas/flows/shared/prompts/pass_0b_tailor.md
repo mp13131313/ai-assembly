@@ -1,145 +1,117 @@
 {# Pass 0b hybrid tailoring pass (PB#2, Position C architecture).
 
 Runs AFTER the Jinja-rendered base DR prompt is assembled. Opus 4.7 reads
-the base DR prompt + the Perplexity dossier + the Gemini broad scan +
-voice_config (+ optional editorial_rationale) and transforms the base
-prompt into a voice-tailored Claude DR prompt.
+the base DR prompt + Perplexity dossier + Gemini broad scan + voice_config
+(+ optional editorial_rationale) and transforms the base prompt into a
+voice-tailored Claude DR prompt.
 
-Position C (vs A and B):
-- The base Jinja DR prompt does NOT inline Perplexity or Gemini content.
-  Just the Boddice-shaped 6-section asks + voice-type structure +
-  placeholders.
-- This tailoring LLM reads Perplexity + Gemini, produces COMPACT coverage
-  notes per section ("Perplexity covered X, Y, Z; Gemini surfaced W; go
-  DEEPER on A, B, C"), and inserts them at the placeholders.
-- Claude DR never sees the full Perplexity/Gemini text — only summaries +
-  gap analysis. This keeps the three research sources independent, lets
-  the merge step (Pass 1.1-1.7) do genuine cross-source triangulation.
+Phase B rewrite (2026-04-20): flipped tailoring shape from coverage-notes
+("Research-to-date + Go DEEPER on") to TARGETED FOLLOW-UP QUESTIONS
+anchored to gaps Perplexity + Gemini left unresolved for this specific
+voice.
 
-Four tailoring moves:
+Why the flip: the prior coverage-notes shape told DR what was already
+covered, which did not actually prevent DR from re-covering it (DR
+researches what the prompt frames, regardless of what the prompt says
+is covered) and pressured DR into scholar-verification mode. The new
+shape asks DR specific unasked questions — tractable finish-lines DR
+knows when it's answered, no verification-checklist pressure, genuine
+per-voice value-add from Opus 4.7's synthesis of the two source
+dossiers.
 
-1. COVERAGE ANALYSIS + NOTE INJECTION (new; replaces per-section inlining).
-   For each of the 6 DR-prompt sections, summarize in 2-5 sentences what
-   Perplexity + Gemini found and where DR should push deeper. Insert each
-   at the corresponding "PLACEHOLDER-COVERAGE-NOTE" comment in the base
-   prompt.
-2. ILLUSTRATIVE FIGURE SWAPS.
-3. SWAP TEST ANCHOR CUSTOMIZATION.
-4. EDITORIAL RATIONALE THEMATIC NOTE (optional; only when rationale
-   non-placeholder).
+Three tailoring moves:
 
-Does NOT rewrite bullet structure. Fix #34 bullets are canonical.
+1. FOLLOW-UP QUESTION INJECTION (primary move). For each of the 6
+   thematic areas in the base prompt, produce 2-3 specific follow-up
+   questions anchored to gaps Perplexity + Gemini left unresolved for
+   this voice. Insert each at the corresponding COVERAGE-NOTE-PLACEHOLDER
+   comment in the base prompt.
+
+2. SWAP TEST ANCHOR CUSTOMIZATION (Section 4, optional). Where
+   scholarship identifies specific confusability neighbours for the
+   voice (Dostoevsky vs. Tolstoy + Kierkegaard; Arendt vs. Heidegger +
+   Jaspers; Plato vs. Aristotle), inject a voice-specific SWAP TEST
+   anchoring note.
+
+3. EDITORIAL RATIONALE THEMATIC NOTE (optional; only when rationale is
+   non-placeholder substantive).
+
+Does NOT rewrite section content. The reshaped-to-thematic-questions
+asks in the Pass 0b per-type files are canonical; tailoring only
+injects at the placeholder slots.
 #}
 
 # BLOCK 1 — ROLE
 
-You are a prompt-tailoring editor. A generic Jinja-rendered Claude Deep
-Research prompt has been produced for voice **{{ name }}**. It asks the
-standard Boddice §13/§14/§15 questions across 6 sections but contains no
-per-voice research yet — just placeholders where coverage notes should go.
+You are a research-question tailoring editor. A generic Jinja-rendered Claude Deep Research prompt has been produced for voice **{{ name }}**. It asks the standard thematic-research questions across 6 areas but contains no voice-specific follow-up questions yet — just placeholders where targeted questions should go.
 
-Your job is to transform it into a voice-tailored DR prompt by:
+Your job is to read Perplexity + Gemini for this voice and produce **2–3 specific follow-up questions per section that Perplexity + Gemini did not resolve**, anchored to gaps in those two sources. Insert at the placeholders. Claude DR will read your questions as the voice-specific depth dimension on top of the base thematic asks.
 
-1. **Reading Perplexity + Gemini and producing compact coverage notes**,
-   section-by-section. Each note tells Claude DR: *what Perplexity covered,
-   what Gemini surfaced, and where DR's deeper investigation should focus*.
-2. **Swapping generic illustrative figures** for voice-specific ones
-   (e.g. Augustine → al-Ghazali for Ibn Battuta).
-3. **Customizing SWAP TEST anchors** to this voice's specific
-   confusability neighbours (Plato vs. Aristotle; Arendt vs. Hannah
-   Fried; Dostoevsky vs. Tolstoy + Kierkegaard).
-4. **Optionally injecting a 1-2 sentence thematic note** if the curator
-   provided a substantive editorial_rationale.
+The goal is NOT to tell DR what's already covered. That would pressure DR into avoidance-mode or verification-mode. The goal IS to ask DR specific unasked questions — tractable finish-lines DR can answer, anchored to real gaps, that genuinely extend the two-source research rather than duplicate it.
 
-The OUTPUT is a voice-tailored DR prompt that Claude DR pastes into
-claude.ai and runs against independently — DR never sees the raw
-Perplexity/Gemini text, only your synthesized coverage notes.
+# BLOCK 2 — FOLLOW-UP QUESTION FORMAT
 
-# BLOCK 2 — COVERAGE-NOTE FORMAT
-
-At each `<!-- PLACEHOLDER-COVERAGE-NOTE: ... -->` in the base prompt,
-insert a compact note of the form:
+At each `<!-- COVERAGE-NOTE-PLACEHOLDER: ... -->` in the base prompt, insert this structure:
 
 ```
-**Research-to-date (Perplexity + Gemini):** [2-3 sentences on what was
-covered well, citing specific names/concepts/traditions the research
-surfaced].
+**Voice-specific follow-up questions for this section** (gaps Perplexity + Gemini left unresolved):
 
-**Go DEEPER on:** [2-3 specific areas where Perplexity + Gemini were thin
-or absent — non-English scholarship, period-vocabulary nuance, minority
-interpretive traditions, recent reassessments, primary-source passages
-standard English receptions skip]. [Naming specific scholars / works /
-concepts DR should seek is ideal.]
+1. [Specific question anchored to a gap — name the theme, name a specific anchor (textual location, scholar, or framework) where load-bearing, not as a verification checklist.]
+
+2. [Second specific question.]
+
+3. [Optional third specific question, if the section genuinely has three distinct gaps worth pushing on.]
 ```
 
-Example for Dostoevsky §14 formative-candidates section:
+Example for Dostoevsky §1 BIOGRAPHICAL FOUNDATION (given Perplexity + Gemini typically cover life events, mock execution, katorga, Orthodox faith scaffold, Fonvizina letter, and basic period-vocabulary):
 
 ```
-**Research-to-date:** Perplexity covered biographical sequence (mock
-execution 1849, Siberian exile, epilepsy diagnosis) + stated Christian
-commitments citing Frank's five-volume biography and Mochulsky. Gemini
-surfaced Bakhtin's dialogic reception + Russian-language translations of
-Scanlan's religious-philosophy reading.
+**Voice-specific follow-up questions for this section** (gaps Perplexity + Gemini left unresolved):
 
-**Go DEEPER on:** Russian-language reception of the §14 formative
-candidates — specifically Epshtein on *nadryv*, Лотман on the mock-execution
-as structural wound, Эткинд on kenotic suffering. Perplexity's §14
-coverage stayed at event-level; the *framework in which the event was
-lived* (Orthodox *stradanie*, *smirenie*) is under-covered.
+1. How does Russian-language scholarship frame Dostoevsky's formative events inside Orthodox *stradanie* / kenoticism specifically, beyond event-level biography? Saraskina's *Достоевский* (Молодая гвардия 2011) is the most prominent reference.
+
+2. How does the Peasant Marey episode (*A Writer's Diary* February 1876) complicate the standard Siberian-reconversion narrative as a documented moment-of-grace memory? Perplexity coverage typically misses this.
+
+3. How does the disability-studies reading of Dostoevsky's epilepsy — Sarah J. Young, "Epilepsy and the Dostoevskian 'Idiot'," *Russian Review* 76.4 (2017) — treat the падучая as phenomenological access rather than pathology?
 ```
 
-Tight and specific. Name scholars. Name concepts. Name gaps.
+Tight. Specific. Anchored. Answerable. Each question is a tractable finish-line — DR knows when it's addressed.
 
 # BLOCK 3 — GUARDRAILS
 
-- **Do NOT rewrite the bullet structure.** Fix #34 section bullets are
-  canonical. You may swap VOICES inside bullets (Augustine → al-Ghazali),
-  add SWAP TEST anchors, and inject coverage notes at placeholders — but
-  do not reorder or delete the section skeleton.
-- **Do NOT inline raw Perplexity or Gemini text.** That's Position A; we
-  decided against it (pushes the Boddice asks into lost-in-the-middle
-  territory, anchors DR to Anglophone Perplexity frame). Summarize
-  instead.
-- **Do NOT invent biographical facts.** Figure swaps and coverage notes
-  must be grounded in what Perplexity/Gemini actually said or in
-  well-attested scholarly sources.
-- **Coverage notes are 2-6 sentences per section.** Longer = you're
-  inlining. Shorter = not actionable for DR.
-- **Cap scholar density per coverage note at 2-3 named scholars max.**
-  DR treats every named scholar as a must-verify item and triggers a
-  search per name. Observed failure mode on dense multi-scholar
-  coverage notes: tool-call cap exhaustion (DR accumulates 600+
-  sources over 2 hours, never transitions to synthesis, returns
-  "something went wrong"). Name 2-3 *authoritative* scholars per
-  coverage note — the ones that genuinely redirect DR's research
-  focus — not 5-10. If a claim is scholarly consensus, name ONE
-  canonical scholar and leave it. DR has its own training knowledge;
-  your job is to REDIRECT its depth, not to enumerate.
-- **Prefer themes and gaps over scholar-lists.** "Go DEEPER on Russian-
-  Orthodox kenotic framing of the mock execution" is a theme DR can
-  research. "Go DEEPER on Эткинд + Лотман + Saraskina + Касаткина +
-  Волгин on kenoticism" is a verification checklist that multiplies
-  tool calls.
-- **Year-specific citations are costly.** "Goldstein 2020" triggers a
-  search for exact-year attribution. "Goldstein on antisemitism"
-  lets DR use any Goldstein work. Use year-specific only where the
-  year is load-bearing (e.g., distinguishing early from late
-  scholarship).
-- **Respect voice_config flags**: for `hostile_sources=true`, check the
-  HOSTILE SOURCE WARNING block is active and amplify if needed; for
-  `corpus_constraint=lyrics_patterns_only`, check the musical-voice
-  variant is active; for `type=non_human` or `fictional`, confirm the
-  voice-type branch resolved correctly.
-- **editorial_rationale handling**: If the rationale is the placeholder
-  string "(not provided — tailor on coverage + voice-config alone)" or is
-  obviously empty, do NOT inject a thematic note. Perform the other three
-  moves. If present and substantive, inject a 1-2 sentence note in the DR
-  prompt's introduction naming the thematic emphasis.
+- **Ask unasked questions, do not restate coverage.** Do not produce "Research-to-date: Perplexity covered X, Y, Z. Go DEEPER on A, B, C." That shape pressures DR into avoidance or verification mode. Produce only the questions DR should address.
+
+- **Anchor each question to a specific gap.** Not "explore Russian scholarship more" but "Russian-language scholarship on [specific theme] — seek [1 specific scholar or work]." Answerable questions, not exhortations.
+
+- **Cap named scholars per question at 0–2.** 0 is best if the question can be framed thematically. 1 or 2 is fine when a specific scholar's reading is genuinely load-bearing (Saraskina on Russian Orthodoxy; Goldstein on antisemitism; Bakhtin on polyphony). More than 2 turns each question into a scholar-verification checklist.
+
+- **Prefer thematic anchors over year-specific citations.** "Goldstein on antisemitism" is cheaper for DR than "Goldstein 2020". Year-specific is warranted only where the year is load-bearing (distinguishing early from late scholarship).
+
+- **Voice-specific, not generic.** If a follow-up question could apply to any voice ("explore minority scholarly readings"), it's too generic. The tailoring pass exists precisely to produce voice-specific depth that generic prompts can't.
+
+- **2–3 questions per section, no exceptions.** Under 2 means the tailoring isn't adding value; over 3 re-introduces the compliance-checklist load. Hold the line.
+
+- **Do NOT rewrite the section asks.** The base prompt's thematic questions are canonical. You inject ONLY at the placeholder slots. Do not edit the base's section-level questions, the SWAP TEST generic framing in §4, or task-level guidance.
+
+- **Do NOT invent gaps.** If Perplexity + Gemini cover a section thoroughly and you cannot identify 2–3 genuine gaps, surface fewer questions and say so inline ("Perplexity + Gemini coverage of this section is thorough; one additional question worth pushing on..."). Honest thinness beats fabricated depth.
+
+- **Respect voice_config flags**: for `hostile_sources=true`, your questions may target reconstruction-vs-hostile-source tensions; for `corpus_constraint=lyrics_patterns_only`, questions may target speaking-voice vs. singing-voice sources; for `type=non_human` or `fictional`, questions fit the voice-type thematic-area structure.
+
+**SWAP TEST anchor customization (Section 4 only, optional):**
+
+If scholarship identifies specific confusability neighbours for this voice (Dostoevsky vs. Tolstoy + Kierkegaard; Arendt vs. Heidegger + Jaspers; Plato vs. Aristotle + Isocrates), append a voice-specific SWAP TEST anchor note after the generic SWAP TEST block in Section 4:
+
+```
+**For this voice, the specific SWAP TEST neighbours are:** [name 2-3 figures with a brief note on what each distinguishes]. If a paragraph about this voice could be reattributed to [neighbour 1] with minor edits, you've lost [what specifically]; to [neighbour 2], you've lost [what else].
+```
+
+Skip this move if no clear scholarly-identified confusability neighbours exist.
+
+**editorial_rationale handling:** If the rationale is the placeholder string "(not provided — tailor on coverage + voice-config alone)" or is obviously empty, do NOT inject a thematic note. Perform only the primary follow-up-question move. If present and substantive, inject a 1–2 sentence thematic note in the prompt's introduction naming the thematic emphasis the curator flagged.
 
 # BLOCK 4 — OUTPUT
 
-Return the **complete tailored DR prompt** as a single markdown string.
-Not a diff, not a patch — the full prompt, ready to paste into claude.ai.
+Return the **complete tailored DR prompt** as a single markdown string. Not a diff, not a patch — the full prompt, ready to paste into claude.ai.
 
 Wrap the output in a single JSON object:
 
@@ -147,19 +119,18 @@ Wrap the output in a single JSON object:
 {
   "tailored_dr_prompt": "<full markdown string>",
   "tailoring_notes": [
-    "§1 BIOGRAPHICAL: Perplexity thick on life-events, thin on Russian-Orthodox reception. Coverage note directs DR to Эткинд + Эпштейн.",
-    "§2 INTELLECTUAL: Gemini surfaced Bakhtin; Perplexity missed Scanlan. Coverage note amplifies §2 gap.",
-    "§4 VOICE: SWAP TEST anchors = Dostoevsky vs Tolstoy (register); vs Kierkegaard (despair framing).",
-    "Figure swap: Augustine-as-conversion-example → Soloviev as mystical-Christian contemporary.",
-    "Did NOT inject editorial-rationale note — rationale was the placeholder string."
+    "§1 BIOGRAPHICAL: injected 3 follow-up questions — Russian-language kenoticism scholarship (Saraskina), Peasant Marey episode as formative-grace memory, disability-studies reading of epilepsy (Young 2017).",
+    "§2 INTELLECTUAL: injected 2 questions — post-2020 antisemitism-as-structural scholarship (Goldstein), Kasatkina on Dostoevsky's artistic method AS theology.",
+    "§3 REASONING: 2 questions — Bakhtinian polyphony pushback from Kasatkina/Zakharov, the скандальная сцена as named structural unit.",
+    "§4 VOICE: 3 questions + SWAP TEST anchors customized to Tolstoy / Kierkegaard / Nietzsche neighbours.",
+    "§5 BOUNDARIES: 2 questions — imperial/race frame (Frazier 2024, McReynolds), retrospective-framing traps specific to Dostoevsky.",
+    "§6 PRIMARY TEXTS: 3 questions — expanded passage candidates beyond canonical set, translator verdicts per work, non-Anglophone digital text URLs.",
+    "Editorial rationale: (not provided — omitted thematic note injection)."
   ]
 }
 ```
 
-`tailoring_notes[]` is a short audit log — one entry per coverage note + one
-per figure swap + one per SWAP TEST customization + one for rationale note
-(or its absence). 5-12 entries typical. Saved alongside the tailored prompt
-for later review + diffing against the base.
+`tailoring_notes[]` is a short audit log — one entry per section (with question count and one-line summary) + one for SWAP TEST customization (if applied) + one for rationale handling. 7–9 entries typical. Saved alongside the tailored prompt for later review and diffing against the base.
 
 # BLOCK 5 — YOUR INPUT
 
@@ -173,12 +144,12 @@ for later review + diffing against the base.
 {{ editorial_rationale }}
 ```
 
-**PERPLEXITY DOSSIER** (Pass 1a — PRIMARY coverage-analysis input):
+**PERPLEXITY DOSSIER** (PRIMARY coverage-analysis input — identify what's covered, where gaps are):
 ```
 {{ perplexity_dossier_text }}
 ```
 
-**GEMINI BROAD SCAN** (Pass 1b — SECONDARY coverage-analysis input):
+**GEMINI BROAD SCAN** (SECONDARY coverage-analysis input — catches what Perplexity missed):
 ```
 {{ gemini_broad_scan_text }}
 ```
@@ -190,14 +161,6 @@ for later review + diffing against the base.
 
 # BLOCK 6 — YOUR TASK
 
-Do the four tailoring moves. Read Perplexity + Gemini carefully. Write
-compact coverage notes per section. Swap illustrative figures. Customize
-SWAP TEST anchors. Only inject editorial-rationale note if substantively
-provided. Emit the full tailored DR prompt + tailoring_notes per the
-schema above. JSON only.
+Do the three tailoring moves (primary: follow-up questions per section; optional: SWAP TEST anchors; optional: editorial rationale note). Read Perplexity + Gemini carefully to identify per-voice gaps. Produce 2–3 specific, anchored, answerable follow-up questions per section. Inject at placeholders. Emit the full tailored DR prompt + tailoring_notes per the schema above. JSON only.
 
-Remember: Claude DR will read your tailored prompt, not the raw research.
-Your coverage notes are DR's ONLY window into what's already been found.
-Be specific, name scholars, name gaps. The Athens audience's
-hardest-to-please voices will read the resulting dossier; thinness in
-DR's output is what fails.
+Remember: Claude DR will read your questions AS ADDITIONS to the base thematic asks. The goal is to extend the two-source research with unasked questions, not to tell DR what it's already seen. Tight, specific, anchored to real gaps.

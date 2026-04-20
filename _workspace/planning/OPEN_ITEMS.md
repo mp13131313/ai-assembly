@@ -57,10 +57,67 @@ Plato as Phase L is still available if the Dostoevsky run falls through — the 
 
 ### Items still carrying forward (from pre-2026-04-20 review)
 
-- **Item 8** (clean panel-voice anchoring from non-human / fictional Pass 0b templates) — still pending (~1h per template). Not blocking Dostoevsky's run because Dostoevsky is a human voice.
+- **Item 8** (clean panel-voice anchoring from non-human / fictional Pass 0b templates) — ✅ **DONE** via the architectural rewrite (see Session 2026-04-20 evening below). Panel voices (Octopus, Whanganui, Scheherazade) now appear alongside parallel non-panel analogs (corvid/cetacean/primate alternatives for organism; Atrato/Mar Menor/Yurok/Pachamama alternatives for system; Hamlet/Antigone/Aeneas/Anansi alternatives for fictional).
 - **Apply the Pass 1a fix to 3 other voice-type templates** — ✅ **DONE** in `d073ad4` + parity closure `4dd58c8`.
 - **Tier 1 gitignore** — ✅ **DONE** in `d3e3647`. Dostoevsky voice config + review doc + `_dr_prompts/` no longer pollute git.
 - **Item 6** (reframe feeds-downstream lines) — ✅ **DONE** via strip in `e4d1bd7` + `a316081`; retrospective note above.
+
+---
+
+## Session 2026-04-20 (evening) — Pass 0b architectural rewrite
+
+After the morning session's mitigations (strip feeds-downstream, drop 15K floor, soften citation, etc.) still failed to unblock Dostoevsky DR — **including a fourth failed run on Opus 4.6 at 2h22min** — this session executed an architectural rewrite of all 7 pass_0b_*.md prompt files, converting extraction-specs to thematic research questions.
+
+### Diagnosis refined
+
+The prompt shape, not model choice, is the cause. Four Dostoevsky DR failures across both 4.7 and 4.6 isolated:
+
+| Run | Prompt | Model | Runway | Result |
+|---|---|---|---|---|
+| 1 | Tailored old (50 KB) | 4.7 | ~90 min | fail |
+| 2 | Same, retry | 4.7 | ~90 min | fail |
+| 3 | Tailored stripped + no floor (43 KB) | 4.7 | 2h 16min | fail |
+| 4 | Untailored base (31.8 KB) | 4.7 | 1h 30min | fail |
+| 5 | Base | 4.6 | 2h 22min | fail |
+| 6 | Tailored | 4.6 | (time missed) | fail |
+
+Meanwhile: my Desktop meta-research DR prompt (~3200 tokens, thematic questions, no quotas, 3-tag) succeeded on Opus 4.7 at 37 min / 640 sources. And user's v3.5 mock runs on 4.6 succeeded across Ibn Battuta / Marley / Octopus / Fyodor (15–87 min / 538–1046 sources). Source count is not the failure signature; task framing is. Extraction-specs with quotas create unbounded-satisfiability criteria; thematic research questions have tractable finish-lines.
+
+### Rewrite landed (all 7 files)
+
+| File | Before | After | Change |
+|---|---|---|---|
+| `pass_0b_header.md` | 50 lines | 33 lines | Added synthesis-trigger + gap-permission + empirical runtime expectation (20–90 min, cancel at 2h); dropped tool-call-budget anchor; 2-tag in-prose citation discipline |
+| `pass_0b_footer.md` | 27 lines | 39 lines | Softened OUTPUT FORMAT; hostile-source block reshaped to prose-level guidance (scholars named in prose; merge applies tags); musical-voice block reconciled with ReferenceOnlyPassages two-tier corpus design |
+| `pass_0b_human.md` | 242 lines | 148 lines | 6 thematic-area questions; no quotas; no embedded framework lexicons as bulleted output demands; SWAP TEST once in §4 |
+| `pass_0b_non_human_organism.md` | 227 lines | 147 lines | Same transformation + panel-voice analogs (corvid / cetacean / primate alongside cephalopod exemplars) |
+| `pass_0b_non_human_system.md` | 227 lines | 185 lines | Same transformation + parallel analogs (Atrato / Mar Menor / Yurok / Pachamama alongside Whanganui); **Indigenous Representation Ethical Framing preserved verbatim as load-bearing ethical commitment** |
+| `pass_0b_fictional.md` | 226 lines | 180 lines | Same transformation + parallel analogs (Hamlet / Antigone / Aeneas / Anansi / Sun Wukong alongside Scheherazade); **Narrative-Function Framing preserved verbatim** |
+| `pass_0b_tailor.md` | 203 lines | 166 lines | Structural shape flip: coverage-notes ("Research-to-date + Go DEEPER on") → targeted-follow-up-questions (2–3 specific follow-ups per section anchored to gaps Perplexity + Gemini left unresolved); optional SWAP TEST anchor customization per voice; 0–2 scholars per question cap |
+
+Rendered prompt size for human voice (Dostoevsky): ~4,900 tokens, down from ~10,500 (-53%).
+
+### What was preserved
+
+All 37 Card v2 fields supported. All Pass 1.1–1.6 schemas (LifeScaffold / Commitment / Concept / Tension / ReasoningMethod / Textures / Moves / Register / Vocabulary / KnowledgeBoundary / SensitiveTopic / HardLimits / WorkEntry / Passage / URLEntry / ReferenceOnlyPassages) have corresponding research content in the reshaped thematic questions. Boddice §13 5-part world + §14 4-part formative + §15 character-grammar preserved as research material (structure extracted at Pass 1.1 merge, applied at Pass 2 synthesis). All locked PB decisions (PB#1 3-sources-only, PB#2 Position C, PB#7 frozen 5-tag conventions, PB#9 OUTPUT FORMAT softening) honored. No architectural changes; no schema changes; no new passes.
+
+### Phase L Run 7 — decision framework
+
+Run 7 (Dostoevsky on the rewritten prompts) has three possible outcomes:
+
+1. **Fails again.** Prompt-shape diagnosis was insufficient. Fall through to existing OPEN_ITEMS fallback ladder: option 2 (paste v3.7-spec card as DR dossier and proceed through Pass 1.1–1.7 merge); option 3 (modify `chunk_runner.py` for 2-source merge — Perplexity + Gemini only).
+
+2. **Completes but Phase L.8 card only marginally better than v3.5 mock.** Phase B functionally vindicated but not transformatively. At this point genuine decision: continue Phase B for 11 more voices (50+ hours) or adopt v3.5-style for speed and spend the saved time on Voice Pipeline + microsite + closing show (all critical-path, not redundant with card production).
+
+3. **Completes and Phase L.8 card dramatically better than v3.5 mock.** Phase B vindicated. Continue all 12 voices.
+
+Honest estimate: Run 7 DR completion probability 50–65%. Outcome 2 is the most likely Phase L.8 result if Run 7 completes. The Phase L.8 quality gate IS the decision point on whether Phase B's complexity justifies its cost for Athens delivery.
+
+### Deferred for Phase L execution
+
+- **Fresh test project for Run 7:** new PROJECT_ROOT (e.g. `projects/phase-l-dostoevsky/`) separate from the existing `projects/test/` (which contains the failed-run cache). Fresh Perplexity + Gemini + Pass 0b render + tailoring.
+- **Phase L.8 comparison protocol:** explicit comparison of the rebuilt Dostoevsky card against the 2-week-old v3.7-spec-paste card (on user's Desktop). Checks per `EXECUTION_PLAN_phase_b.md §L.8` plus the "is the delta dramatic or marginal?" question.
+- **v3.5-style fallback architecture:** if Phase L.8 shows only marginal improvement, rough sketch of how to run v3.5-style for remaining voices while keeping Phase B's Pass 7-* validation passes running as QA on those cards.
 
 ---
 
