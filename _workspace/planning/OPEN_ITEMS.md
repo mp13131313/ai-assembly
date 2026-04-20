@@ -1,10 +1,66 @@
-# Open Items — post-Phase B aftermath (2026-04-19)
+# Open Items — post-Phase B aftermath (updated 2026-04-20)
 
-**Branch**: `phase-b-rebuild` (33 commits, pushed). HEAD = `062d47a`.
+**Branch**: `phase-b-rebuild` (42 commits, pushed). HEAD = `4dd58c8`.
 
-**Phases A–K landed + cleanups + deferrals + Position C + bias scrub + 5 quality fixes + Pass 1a Perplexity prompt rewrite + Pass 1a validation (Dostoevsky 17K-word dossier) + two parser/validator catch-up fixes.**
+**Phases A–K landed + cleanups + deferrals + Position C + bias scrub + 5 quality fixes + Pass 1a Perplexity prompt rewrite + Pass 1a validation (Dostoevsky 17K-word dossier) + two parser/validator catch-up fixes + 2026-04-20 DR-failure-diagnosis commits (see §"Session 2026-04-20" below).**
 
-This doc is a fresh-session recovery point capturing every loose end from the long session that produced commits `7ce1e92` through `7458d9d`. Read top-to-bottom for full context, or jump by section.
+This doc is a fresh-session recovery point capturing every loose end from the long session that produced commits `7ce1e92` through `7458d9d`, updated 2026-04-20 with the DR-failure-diagnosis session (commits `3ad1e83` through `4dd58c8`). Read top-to-bottom for full context, or jump by section.
+
+---
+
+## Session 2026-04-20 — DR-failure diagnosis + prompt hygiene
+
+9 commits landed responding to the Dostoevsky Claude DR failure ("something went wrong" after 90 min / 612 sources on the tailored prompt). HEAD `4dd58c8`, all pushed.
+
+### DR-failure diagnosis
+
+**Symptom**: Dostoevsky tailored DR prompt (50 KB, pasted into claude.ai with Opus 4.7 + Extended Thinking + Deep Research) failed twice with generic "something went wrong" backend error. 90 min wall time, 612 tool-calls / sources accumulated before fail.
+
+**Hypothesis**: tool-call cap exhaustion from compound prompt pressure — (a) `Minimum 15,000 words` floor pushing DR to keep researching, (b) `What this section feeds downstream` blocks leaking Pydantic field names that biased DR toward field-shaped output instead of 6-section dossier, (c) density of named scholars per section triggering recursive verification searches, (d) `Cite every factual claim` + `non-English scholarship` each multiplying tool calls per claim.
+
+612 sources is pathological — scholarly dossiers synthesise from 50-150 sources. The research phase never transitioned to synthesis.
+
+**Mitigations landed (all commits pushed)**:
+
+| Commit | Change | Effect |
+|---|---|---|
+| `e4d1bd7` | Stripped 24 `What this section feeds downstream` blocks from all 4 pass_0b voice-type templates | Removes Pydantic-field-name leak that biased DR output shape |
+| `91b3851` | Dropped `Minimum 15,000 words` from `pass_0b_footer.md` + lowered `dr_validation._TOTAL_WORD_FLOOR` 15000 → 8000 | Removes the signal that pushed DR to keep researching |
+| `6ff25b3` | Dropped 3 dead `perplexity_findings` / `gemini_findings` context vars from `run_phase0_1_research.py` base render | Cleanup — Position A → Position C transition artifact, no functional change |
+| `a316081` | Stripped `(→ feeds Pass 1.N chunked merge)` header annotations + inline `Feeds X` refs from all 4 pass_1a templates | Extends feeds-downstream strip philosophy to the Perplexity prompts |
+| `d073ad4` | Applied the 5 Dostoevsky-validated Pass 1a fixes to organism / system / fictional templates | Closes the "follow-up needed" item; all 4 pass_1a templates now carry the same validated pattern |
+| `4dd58c8` | Closed 3 parity gaps: hostile_sources block in organism; recent-reassessments bullet in human + fictional | All 4 pass_1a templates now fully parity-aligned |
+
+Plus infrastructure:
+
+| Commit | Change |
+|---|---|
+| `3ad1e83` | `CLAUDE.md` top-note documenting the active `phase-b-rebuild` branch state |
+| `d3e3647` | Tier 1 gitignore (regenerable per-voice artifacts: `_pass0a_review.md`, `_dr_prompts/`) |
+
+**Regeneration result**: re-ran `run_phase0_1_research.py "Fyodor Dostoevsky"` after the strip + floor-drop landed. Cached Perplexity + Gemini outputs reused (unchanged by template edits); base DR prompt re-rendered against stripped templates (31.8 KB, down from 34.6 KB); Opus 4.7 tailoring pass re-ran (359.8s wall, ~55K input / 19K output tokens, ~$0.50). Produced fresh 43 KB tailored prompt with 12 coverage-note / figure-swap / SWAP-TEST edits. Ready to paste.
+
+**Pending verification**: does the regen resolve the "something went wrong" failure? Third paste pending. If it still fails, fallback options (ordered least-disruptive to most):
+1. Paste the base (pre-tailoring) prompt instead — 31.8 KB; fewer named scholars per section.
+2. Use the 2-week-old v3.7-spec-paste Dostoevsky card as the Claude DR dossier — place it at `personas/inputs/dossiers/fyodor_dostoevsky_claude_dr.md` and proceed. Loses clean-slate Phase B lineage but unblocks.
+3. Modify `chunk_runner.py` to accept a missing DR dossier and 2-source-merge (Perplexity + Gemini). Quality impact real but measurable.
+
+### Item 6 retrospective — "cosmetic, not blocking" was wrong
+
+The 2026-04-19 quality review tagged the `What this section feeds downstream` blocks (later `Item 6 — reframe 'feeds downstream' lines without internal field names`) as **cosmetic, not blocking**. The Dostoevsky DR failure and the 612-source pathological-depth run suggest that assumption was wrong: the pipeline-field-name leaks plausibly steered DR toward field-shaped verification loops rather than a clean 6-section dossier. The strip (both pass_0b and pass_1a) is now done; the retrospective lesson is that **pipeline-internal jargon in LLM-facing prompts is load-bearing unless proven otherwise**.
+
+### Phase L first-voice switch: Plato → Dostoevsky
+
+Original plan (`EXECUTION_PLAN_phase_b.md` §L.8): compare rebuilt Plato against `_workspace/archive/runs/personas/plato/persona_card_assembled.json` as the v3.10 baseline. Current plan: Dostoevsky instead, with baseline = 2-week-old persona card the user generated by pasting the v3.7 pipeline spec into claude.ai (saved on user's Desktop, not in repo yet). Rationale: Dostoevsky's tailored DR prompt already exists; starting Plato from scratch costs an additional $10-15 and 20 min of Phase 0.5. Loses direct regression comparison against the v3.10 archived Plato card but keeps the two-week-old v3.7-paste card as a meaningful Phase L baseline. If the Dostoevsky DR completes, the Phase L.8 quality gate becomes: Boddice-shape check (§13 5-part `world`, §14 4-part `formative_experience`, §15 period character-grammar, evidence tags in place, `smoke_test_chains` build-time-only, period-vocabulary-informed-not-displayed Pass 4a) + v3.7-baseline comparison on what Phase B produces differently.
+
+Plato as Phase L is still available if the Dostoevsky run falls through — the v3.10 archived baseline is there.
+
+### Items still carrying forward (from pre-2026-04-20 review)
+
+- **Item 8** (clean panel-voice anchoring from non-human / fictional Pass 0b templates) — still pending (~1h per template). Not blocking Dostoevsky's run because Dostoevsky is a human voice.
+- **Apply the Pass 1a fix to 3 other voice-type templates** — ✅ **DONE** in `d073ad4` + parity closure `4dd58c8`.
+- **Tier 1 gitignore** — ✅ **DONE** in `d3e3647`. Dostoevsky voice config + review doc + `_dr_prompts/` no longer pollute git.
+- **Item 6** (reframe feeds-downstream lines) — ✅ **DONE** via strip in `e4d1bd7` + `a316081`; retrospective note above.
 
 ---
 
