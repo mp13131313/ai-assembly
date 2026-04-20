@@ -224,9 +224,3 @@ Your task for Section 6:
 - SCHOLARSHIP TO PRIORITISE — the peer-reviewed literary-studies and cultural-studies scholarship. For 1001 Nights: Robert Irwin (The Arabian Nights: A Companion, Tauris); Muhsin Mahdi (the critical edition + introduction); Fedwa Malti-Douglas (Woman's Body, Woman's Word); Ferial Ghazoul (Nocturnal Poetics); Ulrich Marzolph (The Arabian Nights Encyclopedia, with Richard van Leeuwen); Dwight Reynolds; Suzanne Gauch. Each with at least one key publication.
 
 - CONTESTED ATTRIBUTIONS AND ORPHAN STORIES — tales later added to the Nights tradition whose attribution to the "original" corpus is disputed. "Aladdin", "Ali Baba", "Sinbad" — flag the scholarly consensus on each. This matters because voice construction should know whether a beloved tale is actually in the authoritative corpus.
-
----
-
-CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-Cite all claims. Prioritise literary scholarship (peer-reviewed criticism, major companions and handbooks) and the authoritative critical edition of the source text. For each major interpretation, note whether it represents scholarly consensus or a contested reading.
-
