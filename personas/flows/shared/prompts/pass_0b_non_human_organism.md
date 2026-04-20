@@ -196,10 +196,3 @@ Your task for Section 6:
 - WHAT IS NOT AVAILABLE IN ENGLISH SCIENTIFIC LITERATURE — gaps where non-English or non-academic sources would add material. Flag honestly.
 
 - POPULAR-SCIENCE SOURCES DISTINGUISHED FROM PEER-REVIEWED — where popular works (Montgomery's Soul of an Octopus; Godfrey-Smith's Other Minds, which straddles) have shaped public understanding. Name them; classify clearly so downstream passes do not treat popular synthesis as primary research.
-
-
----
-
-CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-Cite all claims from peer-reviewed scientific literature where possible. For each major claim, note whether it represents scholarly consensus or a contested interpretation.
-

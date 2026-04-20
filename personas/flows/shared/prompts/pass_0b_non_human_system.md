@@ -225,10 +225,3 @@ Your task for Section 6:
 - DIGITISED FULL-TEXT URLS — authoritative sources. NZ Legislation (legislation.govt.nz) for statutes; government / Crown-iwi-agreement repositories for deeds of settlement; iwi websites where material is community-authorised; peer-reviewed journal DOIs for scholarly analysis; regional-council websites for environmental reports. ONE authoritative URL per source.
 
 - RESTRICTED MATERIAL — flag any material which, per CARE/IPAI guidance or explicit iwi statement, should NOT be redistributed or paraphrased. Name the restriction, not the content. Feeds hard_limits at extraction time.
-
-
----
-
-CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-Cite all claims from peer-reviewed scientific literature, primary legal documents, and community-authorised Indigenous-studies scholarship where possible. For each major claim, note whether it represents scholarly consensus or a contested interpretation.
-

@@ -240,9 +240,3 @@ Your task for Section 6:
 - CONTESTED ATTRIBUTIONS — works whose attribution to this figure is disputed, works that later tradition wrongly attributed to them, and works that scholars have shifted attribution on. Flag explicitly so downstream passes don't treat contested material as Tier 1. (Examples: the "Aristotelian" works now considered spurious; early Homeric hymns whose authorship is disputed; Kantian opuscula whose attribution scholars contest; letters in an author's name later shown to be forgeries or posthumous edits.)
 
 - SECONDARY CORPUS FOR THIN PRIMARY RECORDS — for figures where the primary record is thin or entirely reconstructed (hostile-sources voices, figures known through enemies, anonymous traditions), list the scholarly reconstruction sources that serve AS the corpus. Name the scholars, the key monographs, the reconstruction methodology each uses. This is what Pass 4a will use if no Tier 1 corpus exists. Required for hostile_sources=true voices; optional otherwise.
-
----
-
-CROSS-DISCIPLINARY ADDITIONS (from Gemini broad scan — consult for any section):
-Cite all claims. Prioritize academic sources (Stanford Encyclopedia of Philosophy, Cambridge Companions, peer-reviewed scholarship). For each major claim, note whether it represents scholarly consensus or a contested interpretation.
-
