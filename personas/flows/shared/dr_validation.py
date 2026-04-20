@@ -15,7 +15,11 @@ import re
 from pathlib import Path
 
 # Minimum total word count. Guards against truncated exports.
-_TOTAL_WORD_FLOOR = 15000
+# Lowered from 15000 to 8000 alongside removing the prompt-level "Minimum
+# 15,000 words" floor — DR was hitting internal tool-call caps trying to
+# reach 15K on deeply-specified 6-section asks; 8K still catches genuine
+# truncation while letting DR complete.
+_TOTAL_WORD_FLOOR = 8000
 
 # Soft per-section floor. Roughly ~1,500 words per major section across
 # the 6 expected thematic areas. We count any top-level `## ` heading.
