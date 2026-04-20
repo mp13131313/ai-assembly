@@ -73,6 +73,26 @@ venv/bin/python run_pass0a_voice_config.py "Voice Name" \
 # …or set AI_ASSEMBLY_PROJECT_ROOT=/path/to/berlin-2027 and drop the flag.
 ```
 
+## Batch: Pass 0a + Phase 0.5 for several voices in parallel
+
+The claude.ai Deep Research step is the real wall-time bottleneck
+(~60–180 min per voice, human-initiated). To get N DR prompts ready at
+once so claude.ai can research in parallel (one tab per voice):
+
+```bash
+scripts/batch_pre_dr.sh "$AI_ASSEMBLY_PROJECT_ROOT/voices_batch.txt" --parallel 3
+```
+
+`voices_batch.txt` lives under PROJECT_ROOT (per-project data), one
+voice per line: `<name> | <wiki_url>` or `<name> | NON_HUMAN` for
+voices that use curated grounding from `inputs/non_human_grounding/`.
+Blank lines and `#`-comments are ignored. See
+`projects/athens-2026/voices_batch.txt` for the Athens seed file.
+
+Outputs go to the usual places; per-voice logs land at
+`$PROJECT_ROOT/batch_logs/<slug>.log`. The script is idempotent: a
+failed voice resumes from the last cached step on re-run.
+
 ## Output per voice (under PROJECT_ROOT)
 
 - `runs/<slug>/persona_card_assembled.json` — 37-field card (consumed
