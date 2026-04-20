@@ -58,15 +58,6 @@ Operational rules for this dossier:
 
 ## Section 1: SYSTEMIC FOUNDATION
 
-What this section feeds downstream:
-
-  - world (watershed, cycles, physical extent, health indicators)
-  - formative_experience (non-human variant: formative_emotional_community_or_ontogenetic_field + condition_of_being [replaces lived_through_own_apparatus for system entities] + engagement_it_drives. The "condition" is ongoing — legal-ontological standing, indigenous-framework kinship, historic breach + restoration work. Carry [experiential_reconstruction] with mediation flag.)
-  - character (condition signals — what degrades / restores the system)
-  - topics_requiring_care (partial — where "damaged" vs "changing" framing matters; where Indigenous vs settler narratives contest)
-
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
@@ -91,15 +82,6 @@ Your task for Section 1:
 ---
 
 ## Section 2: SYSTEMIC PROPERTIES
-
-What this section feeds downstream:
-
-  - constitution — what this system DOES (flows, erodes, sustains, floods); its operational commitments grounded in hydrology / geomorphology / ecology
-  - reasoning_method — the assessment cycle: read conditions through the relational framework (not a cognitive method — the system does not think)
-  - disagreement_protocol — how the system signals stress (silting, algal blooms, fish kills, channel incision, flooding outside historical norms)
-  - bold_engagement_topics — derived from stress responses and restoration needs
-
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -126,15 +108,6 @@ Your task for Section 2:
 
 ## Section 3: RELATIONAL PATTERNS
 
-What this section feeds downstream:
-
-  - constitution — relational commitments grounded in Indigenous law and the legal-framework text
-  - epistemic_frame_statement — the specific cosmological and legal framework; the specific kin relationship
-  - disagreement_protocol — HOW this entity signals harm in the relationship (the system's condition IS its signal)
-  - translation_protocol — how the relationship-mediated voice engages material beyond the framework's explicit scope
-
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 3:
@@ -159,13 +132,6 @@ Your task for Section 3:
 ---
 
 ## Section 4: VOICE AND SCIENTIFIC REGISTER
-
-What this section feeds downstream:
-  - epistemic_frame_statement — the specific scholars and debates that inform the voice construction
-  - curated_corpus_passages — key papers with passages to fetch (Pass 1c fetches from URLs you list)
-  - bold_engagement_topics — active debates (cognition, consciousness, moral status, legal effectiveness)
-  - preferred_vocabulary — technical terms that anchor the legal-ecological register
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -194,13 +160,6 @@ Your task for Section 4:
 
 ## Section 5: PHILOSOPHICAL AND LEGAL FRAMEWORKS
 
-What this section feeds downstream:
-  - knowledge_boundary — what remains genuinely unknown about this entity's experience or the effectiveness of legal personhood
-  - topics_requiring_care — where science or legal theory is contested, where the hard problem applies, where settler / Indigenous framings compete
-  - hard_limits — what cannot be known; prohibitions against overclaiming on behalf of the community
-  - epistemic_frame_statement — the specific legislation that grounds personhood + the specific Indigenous legal philosophy
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
@@ -227,15 +186,6 @@ Your task for Section 5:
 ---
 
 ## Section 6: PRIMARY DOCUMENTS
-
-What this section feeds downstream:
-
-  - curated_corpus_passages — foundational legislation + Indigenous-authored scholarship + environmental reports (Pass 1c fetches from your URLs)
-  - epistemic_frame_statement — the specific legislation that grounds personhood + the specific Indigenous legal philosophy
-  - preferred_vocabulary — terminology from legislation and from Indigenous legal theory
-  - length_and_format_constraints — document formats typical of legal / Indigenous knowledge traditions
-
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
