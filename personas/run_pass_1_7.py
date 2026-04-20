@@ -21,6 +21,7 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 from schemas._entry import ValidationError, validate_chunk_output, generate_json_schemas
 from schemas.merged_dossier import MergedDossier
@@ -33,9 +34,9 @@ def _stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def _load_chunk_outputs(repo_root: Path, slug: str) -> dict:
+def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
     """Load the 6 chunks written by Passes 1.1-1.6."""
-    base = repo_root / "runs" / slug / "01_research"
+    base = project_root / "runs" / slug / "01_research"
     out: dict = {}
     # Per-chunk output layout: pass_1_N/<key>.json for each key.
     layout = {
@@ -61,11 +62,15 @@ def _load_chunk_outputs(repo_root: Path, slug: str) -> dict:
     return out
 
 
-def run_pass_1_7(*, name: str) -> dict:
+def run_pass_1_7(*, name: str, project_root: Path | None = None,
+                  project: str | None = None) -> dict:
     slug = voice_slug(name)
     _stamp(f"Pass 1.7 COHERENCE: '{name}' (slug={slug})")
 
-    chunks = _load_chunk_outputs(REPO_ROOT, slug)
+    if project_root is None:
+        project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+
+    chunks = _load_chunk_outputs(project_root, slug)
     generate_json_schemas()
     merged_dossier_schema = json.dumps(
         MergedDossier.model_json_schema(), indent=2, ensure_ascii=False
@@ -119,7 +124,7 @@ def run_pass_1_7(*, name: str) -> dict:
         time.sleep(15)
         result = _call_and_validate(user)
 
-    out_path = REPO_ROOT / "runs" / slug / "01_research" / "merged_dossier.json"
+    out_path = project_root / "runs" / slug / "01_research" / "merged_dossier.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     write_json_atomic(out_path, result)
     _stamp(
@@ -132,5 +137,6 @@ def run_pass_1_7(*, name: str) -> dict:
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Pass 1.7 COHERENCE")
     p.add_argument("name")
+    add_project_arg(p)
     args = p.parse_args()
-    run_pass_1_7(name=args.name)
+    run_pass_1_7(name=args.name, project=args.project)

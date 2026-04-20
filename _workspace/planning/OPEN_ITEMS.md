@@ -103,25 +103,38 @@ Runners take `--project /path/to/athens-2026/` or read env `AI_ASSEMBLY_PROJECT_
 | 2 | Move all runtime outputs to `personas/_generated/` (single gitignored hierarchy). | ~30–45 min | Skip — superseded by Tier 3 |
 | 3 | Extract `PROJECT_ROOT` from code repo. All project data lives outside the code repo. Runners take `--project`. | ~2 hours | **Do this before Phase L Plato run** — Plato will produce a real persona card you'll want clean separation for |
 
-**Tier 3 implementation checklist** (when this lands):
+**Tier 3 implementation checklist** — ✅ **LANDED 2026-04-20** (full umbrella + both pipelines):
 
-- New constant / env var pattern: `PROJECT_ROOT` resolved from `--project` arg, then `AI_ASSEMBLY_PROJECT_ROOT` env, then `./project/` default.
-- Update runners to read inputs from + write outputs to `PROJECT_ROOT`:
-  - `run_pass0a_voice_config.py` — VOICES_DIR + non_human_grounding paths
-  - `run_phase0_1_research.py` — DR_PROMPTS_DIR + runs path
-  - `run_pass_0b_tailor.py`
-  - `run_pass_1_1.py` through `run_pass_1_7.py` (via `chunk_runner.py`)
-  - `run_pass_1_all.py` (inherits from chunk_runner)
-  - `run_persona_pipeline.py`
-  - `phase_5_cross_persona_qc.py`
-- `flows/shared/chunk_runner.py` already takes `repo_root` — extend to accept `project_root` separately.
-- Move `personas/inputs/conference_facts.json`, `audience_profile.json`, `panel_roster.json`, `non_human_grounding/` to a new `athens-2026/inputs/` dir (separate from code repo).
-- Update `.gitignore` to exclude `personas/runs/`, `personas/inputs/voices/`, `personas/inputs/dossiers/_dr_prompts/` (those move to project data).
-- Remove the now-empty `personas/inputs/voices/` and `personas/inputs/dossiers/_dr_prompts/` from tracking (`git rm`).
-- Update `CLAUDE.md`, `docs/CURRENT_STATE.md`, `personas/README.md` to document the new layout.
-- Update `EXECUTION_PLAN_phase_b.md` Phase L commands to use `--project`.
+**Filesystem (umbrella restructure):**
+- ✅ Moved `~/Desktop/ai-assembly/` → `~/Desktop/AI Assembly/code/`
+- ✅ Moved `~/Desktop/athens-2026/` → `~/Desktop/AI Assembly/projects/athens-2026/`
+- ✅ Created `~/Desktop/AI Assembly/projects/test/` with baseline project context copied from Athens.
+- ✅ Split Dostoevsky (in-progress voice, runs, DR prompts) out of athens-2026 into test/ so production stays clean.
 
-**Enables**: multiple projects on one codebase (Athens 2026 + Berlin 2027 + scratch sandbox); VM-friendly deployment; trivially isolated test runs; git-clean by definition; curator/operator role separation.
+**Personas pipeline:**
+- ✅ `flows/shared/project_root.py` — precedence: `--project` → `AI_ASSEMBLY_PROJECT_ROOT` env → **hard failure** (no silent default; multiple projects make fallback dangerous).
+- ✅ All 13 runners updated (0a, 0b standalone, 0b tailor, Phase 0.5, 1.1-1.7, 1_all, persona_pipeline, phase_5_qc).
+- ✅ `chunk_runner.py` takes both `repo_root` (test fixtures) and `project_root` (live runs).
+- ✅ `io.py::load_voice_input` takes `project_root`.
+
+**Runtime pipeline:**
+- ✅ `flows/shared/project_root.py` — same module, copied per venv isolation.
+- ✅ `ingest/config.py` resolves `PROJECT_ROOT` after `load_dotenv`; `RUNS_DIR` / `REFERENCE_DIR` / `SESSIONS_PATH` / `SPEAKERS_PATH` derived from it.
+- ✅ `flows/shared/io.py::load_council_config` defaults to `$PROJECT_ROOT/council_config.json`.
+- ✅ `scripts/generate_sessions_json.py` + `generate_speakers_json.py` defaults to `$PROJECT_ROOT/reference/*.json`.
+- ✅ `INGEST_FLOW_CMD` uses `shlex.join` so paths with spaces (e.g. "AI Assembly") survive `shlex.split` in pipeline.py.
+
+**Config / secrets:**
+- ✅ `.env` at `code/.env` (zero dotenv code change).
+- ✅ `AI_ASSEMBLY_PROJECT_ROOT` set in `.env` to `projects/test` — bare invocations land in test; pass `--project` for athens-2026.
+
+**Hygiene:**
+- ✅ `.gitignore` cleaned (personas + runtime). All moved tracked files staged as deletions.
+- ✅ 29/29 runtime tests pass; personas smoke tests (import + resolver + voice load + prompt render) pass from both test and athens-2026 projects.
+
+**Docs updated:** `CLAUDE.md`, `runtime/README.md`, `personas/README.md`, `docs/CURRENT_STATE.md`, `EXECUTION_PLAN_phase_b.md`, `docs/AUDIENCE_BRIEF.md`.
+
+**Enables**: multiple projects on one codebase (test + athens-2026 today; berlin-2027 etc. later); VM-friendly deployment (mount a project volume, point env var at it); trivially isolated test runs; git-clean by definition; curator/operator role separation; cross-pipeline handoff via shared PROJECT_ROOT.
 
 ---
 

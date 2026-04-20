@@ -62,7 +62,7 @@ def validate_dr_dossier(path: Path) -> None:
         raise ValueError(
             f"DR dossier at {path} contains 'Field NN:' headings — this is a "
             f"persona card, not a research dossier. Regenerate using the "
-            f"dossier prompt from inputs/dossiers/_dr_prompts/."
+            f"dossier prompt at <project_root>/inputs/dossiers/_dr_prompts/."
         )
 
     word_count = len(text.split())

@@ -9,14 +9,14 @@ This script runs AFTER Pass 0a (voice config) and BEFORE the manual Claude
 DR session. Its outputs scaffold the DR prompt so Claude DR starts from
 grounded research instead of zero.
 
-Output files:
-  runs/<slug>/01_research/perplexity_dossier.json
-  runs/<slug>/01_research/gemini_broad_scan.json
-  inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md  — paste-ready DR prompt
+Output files (all under PROJECT_ROOT per Tier 3):
+  <project_root>/runs/<slug>/01_research/perplexity_dossier.json
+  <project_root>/runs/<slug>/01_research/gemini_broad_scan.json
+  <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md  — paste-ready DR prompt
 
 Usage:
     python3 run_phase0_1_research.py "Cleopatra"
-    python3 run_phase0_1_research.py "Plato"
+    python3 run_phase0_1_research.py "Plato" --project /path/to/athens-2026
 """
 from __future__ import annotations
 
@@ -40,6 +40,7 @@ from flows.shared.clients import call_perplexity, call_gemini
 from flows.shared.io import voice_slug, write_json_atomic, load_voice_input
 from flows.shared.node0_validation import validate_input
 from flows.shared.perplexity_split import split_dossier
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 from flows.shared.research_validation import (
     print_warnings,
@@ -74,8 +75,6 @@ def _with_retry(fn, *, label: str):
         time.sleep(15)
         return fn()  # second failure propagates
 
-VOICES_DIR = REPO_ROOT / "inputs/voices"
-DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
 TEMPLATE_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
 
 
@@ -92,16 +91,21 @@ def cached(path: Path, label: str):
     return None
 
 
-def main(voice_name: str) -> None:
+def main(voice_name: str, project: str | None = None) -> None:
     stamp(f"Phase 0.5 pre-DR research: '{voice_name}'")
 
+    project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+    stamp(f"  PROJECT_ROOT={project_root}")
+
+    DR_PROMPTS_DIR = project_root / "inputs/dossiers/_dr_prompts"
+
     # Load and validate voice config
-    vi_raw = load_voice_input(voice_name)
+    vi_raw = load_voice_input(voice_name, project_root)
     vi = validate_input(vi_raw)
     SLUG = voice_slug(vi["name"])
     stamp(f"  voice: {vi['name']} | type={vi['type']} | hostile={vi['hostile_sources']}")
 
-    RUN = REPO_ROOT / "runs" / SLUG
+    RUN = project_root / "runs" / SLUG
     (RUN / "01_research").mkdir(parents=True, exist_ok=True)
 
     # Phase B: voice-type-specific 1a + 1b prompts per decisions log #7.
@@ -247,7 +251,7 @@ def main(voice_name: str) -> None:
     dr_prompt_path = DR_PROMPTS_DIR / f"{SLUG}_dr_prompt.md"
     dr_prompt_path.write_text(dr_prompt, encoding="utf-8")
 
-    stamp(f"PASS 0b base render complete: {dr_prompt_path.relative_to(REPO_ROOT)}")
+    stamp(f"PASS 0b base render complete: {dr_prompt_path.relative_to(project_root)}")
     stamp(f"  Base prompt size: {len(dr_prompt):,} chars")
 
     # ---------- PASS 0b HYBRID TAILORING (PB#2, always runs) ----------
@@ -261,7 +265,7 @@ def main(voice_name: str) -> None:
     stamp("PASS 0b tailor: hybrid Jinja+LLM tailoring (PB#2)…")
     from run_pass_0b_tailor import run_pass_0b_tailor  # noqa: E402 — deferred
     try:
-        tailor_result = run_pass_0b_tailor(vi["name"])
+        tailor_result = run_pass_0b_tailor(vi["name"], project_root=project_root)
         stamp(f"  tailoring: {tailor_result['status']} "
               f"({tailor_result.get('tailoring_notes_count', '?')} edits)")
     except Exception as exc:
@@ -275,13 +279,15 @@ def main(voice_name: str) -> None:
     stamp(f"  1. Review {dr_prompt_path.name}")
     stamp(f"  2. Open claude.ai — select Claude Opus 4.7, enable Extended Thinking + Deep Research")
     stamp(f"  3. Paste the prompt (starts after the '---' line)")
-    stamp(f"  4. Wait 60-180 min. Save result as inputs/dossiers/{SLUG}_claude_dr.md")
-    stamp(f"  5. Validate: python3 personas/scripts/validate_dr_dossier.py inputs/dossiers/{SLUG}_claude_dr.md")
+    _claude_dr_rel = (project_root / f"inputs/dossiers/{SLUG}_claude_dr.md").relative_to(project_root)
+    stamp(f"  4. Wait 60-180 min. Save result as {_claude_dr_rel} (under PROJECT_ROOT)")
+    stamp(f"  5. Validate: python3 personas/scripts/validate_dr_dossier.py {project_root}/{_claude_dr_rel}")
     stamp(f"  6. Run pipeline: python3 run_persona_pipeline.py \"{display_name}\"")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Phase 0.5 — Pre-DR Research (Pass 1a + 1b + 0b)")
     parser.add_argument("name", help='Voice name, e.g. "Plato" or "Cleopatra"')
+    add_project_arg(parser)
     args = parser.parse_args()
-    main(args.name)
+    main(args.name, project=args.project)

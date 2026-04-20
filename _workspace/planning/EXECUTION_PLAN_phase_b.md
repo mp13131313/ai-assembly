@@ -249,10 +249,12 @@ main('Plato', wiki_url='https://en.wikipedia.org/wiki/Plato')
 "
 ```
 
-Expected: `inputs/voices/plato.json` with new schema fields
+Expected: `$PROJECT_ROOT/inputs/voices/plato.json` with new schema fields
 (`editorial_rationale: null`, `manual_grounding: <Wikipedia extract>`,
 no `conference_context`); `plato_pass0a_review.md` with CURATOR ACTION
-block. Fill in `editorial_rationale` by hand before L.2.
+block alongside it. Fill in `editorial_rationale` by hand before L.2.
+(Tier 3: `PROJECT_ROOT` defaults to sibling `../athens-2026/`; pass
+`--project <path>` to override.)
 
 ### L.2 Phase 0.5
 
@@ -261,9 +263,9 @@ cd personas && venv/bin/python run_phase0_1_research.py "Plato"
 ```
 
 Expected: fresh Perplexity + Gemini outputs. The Jinja-only Pass 0b
-template renders to `inputs/dossiers/_dr_prompts/plato_dr_prompt.md`;
-hybrid LLM tailoring pass (PB#2) is deferred to a follow-up — the Jinja
-render is functional on its own.
+template renders to `$PROJECT_ROOT/inputs/dossiers/_dr_prompts/plato_dr_prompt.md`;
+hybrid LLM tailoring (PB#2) fires automatically after the base render
+and overwrites the tailored prompt in place.
 
 ### L.3 Manual Claude DR session ← HUMAN STEP
 
@@ -271,17 +273,13 @@ render is functional on its own.
 2. Paste contents of `plato_dr_prompt.md`.
 3. Wait (~10–45 min).
 4. Save the dossier as
-   `personas/runs/plato/01_research/claude_dr_dossier.md`.
+   `$PROJECT_ROOT/runs/plato/01_research/claude_dr_dossier.md`.
 
 Then validate:
 
 ```bash
-cd personas && venv/bin/python -c "
-from flows.shared.dr_validation import validate_dr_dossier
-from pathlib import Path
-validate_dr_dossier(Path('runs/plato/01_research/claude_dr_dossier.md'))
-print('DR dossier validates')
-"
+cd personas && venv/bin/python scripts/validate_dr_dossier.py \
+  "$AI_ASSEMBLY_PROJECT_ROOT/runs/plato/01_research/claude_dr_dossier.md"
 ```
 
 ### L.4 Chunked Pass 1
@@ -324,7 +322,7 @@ Runs inside `run_persona_pipeline.py`. Emits `provocateur_profile.json`
 
 ### L.8 Review output quality ← **HUMAN QUALITY GATE**
 
-Read `personas/runs/plato/persona_card_assembled.json`. Is it BETTER than
+Read `$PROJECT_ROOT/runs/plato/persona_card_assembled.json`. Is it BETTER than
 v3.10 Plato (at `_workspace/archive/runs/personas/plato/persona_card_assembled.json`)?
 
 Checks:
@@ -348,9 +346,9 @@ that's the explicit Phase L.8 stop-and-ask trigger.
 feat(phase-b/L): first-voice end-to-end test — Plato rebuilt under Phase B
 
 Complete pipeline run from new Pass 0a through Phase 4 Derive. Plato's
-rebuilt card at runs/plato/persona_card_assembled.json; review against
-_workspace/archive/runs/personas/plato/ baseline recorded in
-runs/plato/rebuild_review.md.
+rebuilt card at $PROJECT_ROOT/runs/plato/persona_card_assembled.json; review
+against _workspace/archive/runs/personas/plato/ baseline recorded in
+$PROJECT_ROOT/runs/plato/rebuild_review.md.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ```

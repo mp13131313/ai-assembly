@@ -16,7 +16,11 @@ Each chunk pass follows the same shape:
 - `template_name` (the `.md` file under `flows/shared/prompts/`)
 - `output_keys` — a dict mapping top-level JSON key → Pydantic model
   (used for validation + per-key atomic writes under
-  `runs/<slug>/01_research/pass_<chunk>/<key>.json`).
+  `<project_root>/runs/<slug>/01_research/pass_<chunk>/<key>.json`).
+
+Per Tier 3 code/project separation, `runs/` lives under `project_root`
+(distinct from the code repo). `repo_root` is retained only for test
+fixtures (`personas/tests/fixtures/...`), which are code-level.
 """
 
 from __future__ import annotations
@@ -43,8 +47,14 @@ def _stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def _load_sources(repo_root: Path, slug: str, use_test_fixtures: bool) -> tuple[str, str, str]:
-    """Return (perplexity_text, claude_dr_text, gemini_text)."""
+def _load_sources(
+    repo_root: Path, project_root: Path, slug: str, use_test_fixtures: bool,
+) -> tuple[str, str, str]:
+    """Return (perplexity_text, claude_dr_text, gemini_text).
+
+    Test fixtures live under `repo_root/tests/fixtures/` (code-level).
+    Live runs live under `project_root/runs/` (project data).
+    """
     if use_test_fixtures:
         fixtures = repo_root / "tests/fixtures" / slug
         perp = json.loads((fixtures / "perplexity_dossier.json").read_text())
@@ -57,7 +67,7 @@ def _load_sources(repo_root: Path, slug: str, use_test_fixtures: bool) -> tuple[
             "field a real DR dossier would supply with evidence_tag=inference."
         )
     else:
-        research = repo_root / "runs" / slug / "01_research"
+        research = project_root / "runs" / slug / "01_research"
         perp = json.loads((research / "perplexity_dossier.json").read_text())
         gem = json.loads((research / "gemini_broad_scan.json").read_text())
         dr_path = research / "claude_dr_dossier.md"
@@ -126,6 +136,7 @@ def _validate(
 def run_chunk(
     *,
     repo_root: Path,
+    project_root: Path,
     chunk_name: str,  # e.g. "1.2"
     template_name: str,  # e.g. "pass_1_2_merge"
     name: str,
@@ -142,7 +153,7 @@ def run_chunk(
     slug = voice_slug(name)
     _stamp(f"Pass {chunk_name} merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
 
-    perp_text, dr_text, gem_text = _load_sources(repo_root, slug, use_test_fixtures)
+    perp_text, dr_text, gem_text = _load_sources(repo_root, project_root, slug, use_test_fixtures)
     schema_vars = _inline_schemas(output_keys)
 
     system = render(
@@ -203,9 +214,9 @@ def run_chunk(
         except _RETRYABLE as exc2:
             sys.exit(f"Pass {chunk_name} failed after retry: {exc2}")
 
-    out_dir = repo_root / "runs" / slug / "01_research" / (output_subdir or f"pass_{chunk_name.replace('.', '_')}")
+    out_dir = project_root / "runs" / slug / "01_research" / (output_subdir or f"pass_{chunk_name.replace('.', '_')}")
     out_dir.mkdir(parents=True, exist_ok=True)
     for key in output_keys:
         write_json_atomic(out_dir / f"{key}.json", result[key])
-    _stamp(f"  Wrote {', '.join(f'{k}.json' for k in output_keys)} under {out_dir.relative_to(repo_root)}")
+    _stamp(f"  Wrote {', '.join(f'{k}.json' for k in output_keys)} under {out_dir.relative_to(project_root)}")
     return result

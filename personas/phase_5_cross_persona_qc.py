@@ -29,8 +29,9 @@ runtime model) — this is NOT evaluation, it is *producing the 12
 responses* that the evaluator then compares. Evaluator still crosses
 families.
 
-Output: `runs/cross_persona_qc.json` with per-pair similarity scores +
-flagged distinctiveness gaps + per-voice "needs rework" recommendations.
+Output: `<project_root>/runs/cross_persona_qc.json` with per-pair similarity
+scores + flagged distinctiveness gaps + per-voice "needs rework"
+recommendations.
 """
 from __future__ import annotations
 
@@ -50,10 +51,10 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.io import voice_slug, write_json_atomic
+from flows.shared.project_root import add_project_arg, resolve_project_root
 
 
 SHUFFLE_SEED = 42  # per REBUILD_PLAN; reproducible sampling
-PANEL_ROSTER_PATH = REPO_ROOT / "inputs/panel_roster.json"
 EXPECTED_VOICE_COUNT = 12
 SIMILARITY_FLAG_THRESHOLD = 0.7
 
@@ -62,21 +63,21 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] [phase5_qc] {msg}", flush=True)
 
 
-def _gate_check() -> list[dict]:
+def _gate_check(project_root: Path) -> list[dict]:
     """Verify all 12 voices have assembled cards; return the loaded cards."""
-    roster = json.loads(PANEL_ROSTER_PATH.read_text())
+    roster = json.loads((project_root / "inputs/panel_roster.json").read_text())
     expected = roster.get("panel_members_final", [])
     if len(expected) != EXPECTED_VOICE_COUNT:
         sys.exit(
             f"Panel roster has {len(expected)} voices; expected "
-            f"{EXPECTED_VOICE_COUNT}. Update inputs/panel_roster.json or "
+            f"{EXPECTED_VOICE_COUNT}. Update <project_root>/inputs/panel_roster.json or "
             f"EXPECTED_VOICE_COUNT."
         )
     cards: list[dict] = []
     missing: list[str] = []
     for name in expected:
         slug = voice_slug(name)
-        card_path = REPO_ROOT / "runs" / slug / "persona_card_assembled.json"
+        card_path = project_root / "runs" / slug / "persona_card_assembled.json"
         if not card_path.exists():
             missing.append(f"{name} ({slug})")
             continue
@@ -314,7 +315,7 @@ def _invoke_voice(card_path: Path, provocation: str, max_tokens: int = 4096) -> 
     return r.get("text", "")
 
 
-def _same_question_test(cards: list[dict]) -> dict:
+def _same_question_test(cards: list[dict], project_root: Path) -> dict:
     """Run all 12 voices through one shared provocation; evaluator scores
     pairwise similarity across the 12 responses. Flag pairs > threshold.
     """
@@ -338,7 +339,7 @@ def _same_question_test(cards: list[dict]) -> dict:
     stamp(f"  invoking 12 voices on shared provocation ({len(prompt)} chars)…")
     responses: list[dict] = []
     for c in cards:
-        card_path = REPO_ROOT / "runs" / c["slug"] / "persona_card_assembled.json"
+        card_path = project_root / "runs" / c["slug"] / "persona_card_assembled.json"
         try:
             t0 = time.time()
             text = _invoke_voice(card_path, prompt)
@@ -394,9 +395,16 @@ def _same_question_test(cards: list[dict]) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def run_cross_persona_qc(out_path: Path | None = None) -> dict:
-    stamp("Phase 5 Cross-Persona QC")
-    cards = _gate_check()
+def run_cross_persona_qc(
+    out_path: Path | None = None,
+    *,
+    project_root: Path | None = None,
+    project: str | None = None,
+) -> dict:
+    if project_root is None:
+        project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+    stamp(f"Phase 5 Cross-Persona QC  (PROJECT_ROOT={project_root})")
+    cards = _gate_check(project_root)
     stamp(f"  12 assembled cards loaded.")
 
     stamp("  Sub-test 1: SWAP TEST")
@@ -408,7 +416,7 @@ def run_cross_persona_qc(out_path: Path | None = None) -> dict:
     stamp(f"    accuracy={blind_id['accuracy']:.2%} across {blind_id['excerpts_count']} excerpts")
 
     stamp("  Sub-test 3: SAME-QUESTION DISTINCTIVENESS (live 12-voice)")
-    same_q = _same_question_test(cards)
+    same_q = _same_question_test(cards, project_root)
     _flagged = len(same_q.get("flagged_pairs", []))
     stamp(f"    {_flagged} pairs flagged above threshold {SIMILARITY_FLAG_THRESHOLD}")
 
@@ -422,10 +430,10 @@ def run_cross_persona_qc(out_path: Path | None = None) -> dict:
         "recommendations": _derive_recommendations(swap, blind_id, same_q, cards),
     }
 
-    out_path = out_path or (REPO_ROOT / "runs" / "cross_persona_qc.json")
+    out_path = out_path or (project_root / "runs" / "cross_persona_qc.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     write_json_atomic(out_path, result)
-    stamp(f"  wrote {out_path.relative_to(REPO_ROOT)}")
+    stamp(f"  wrote {out_path.relative_to(project_root)}")
     return result
 
 
@@ -471,5 +479,9 @@ def _derive_recommendations(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Phase 5 Cross-Persona QC")
     parser.add_argument("--out", default=None)
+    add_project_arg(parser)
     args = parser.parse_args()
-    run_cross_persona_qc(out_path=Path(args.out) if args.out else None)
+    run_cross_persona_qc(
+        out_path=Path(args.out) if args.out else None,
+        project=args.project,
+    )

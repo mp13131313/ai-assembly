@@ -8,7 +8,7 @@ Sources: Deep Research audience profile, WBBF Athens program (index.html, 202 sp
 This brief is the authoritative source for audience description across the project. Two machine-readable config files carry compressed renderings appropriate to their consumers:
 
 - **`runtime/flows/shared/council/council_config.json`** → `audience` field (consumed by the Provocateur pipeline's Triage + Formulation prompts; optimised for friction-tagging themes and aiming formulations at stretch territory)
-- **`personas/inputs/audience_profile.json`** → `participant_profile` field (consumed by the Persona pipeline's Pass 7b Card Smoke Test; optimised for demographic grounding and reception-mode hints). Split out from the Phase B redesign — `personas/inputs/conference_facts.json` and `personas/inputs/panel_roster.json` carry the other halves; Pass 0a no longer consumes audience.
+- **`$PROJECT_ROOT/inputs/audience_profile.json`** → `participant_profile` field (consumed by the Persona pipeline's Pass 7b Card Smoke Test; optimised for demographic grounding and reception-mode hints). Split out from the Phase B redesign — `$PROJECT_ROOT/inputs/conference_facts.json` and `$PROJECT_ROOT/inputs/panel_roster.json` carry the other halves; Pass 0a no longer consumes audience. Per Tier 3 (2026-04-20), project data lives outside the code repo; for Athens, PROJECT_ROOT defaults to the sibling `../athens-2026/`.
 
 **Convention:** update this file first, then re-render both config fields. If they drift, this file is authoritative.
 

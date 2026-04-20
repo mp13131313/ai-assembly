@@ -10,13 +10,13 @@ voice_config has editorial_rationale set. If editorial_rationale is null,
 the tailoring pass is skipped with a warning (the base Jinja prompt is
 still usable; tailoring is optimization, not architectural requirement).
 
-Output:
-- inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md — the tailored prompt
-  (overwrites the base Jinja render)
-- inputs/dossiers/_dr_prompts/<slug>_dr_prompt.base.md — preserved base
-  for comparison
-- inputs/dossiers/_dr_prompts/<slug>_tailoring_notes.json — the audit
-  log the model produced
+Output (all under PROJECT_ROOT):
+- <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md — the
+  tailored prompt (overwrites the base Jinja render)
+- <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.base.md —
+  preserved base for comparison
+- <project_root>/inputs/dossiers/_dr_prompts/<slug>_tailoring_notes.json —
+  the audit log the model produced
 """
 from __future__ import annotations
 
@@ -34,6 +34,7 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 
 
@@ -41,18 +42,23 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def run_pass_0b_tailor(name: str) -> dict:
+def run_pass_0b_tailor(name: str, project_root: Path | None = None,
+                        project: str | None = None) -> dict:
     slug = voice_slug(name)
     stamp(f"Pass 0b tailor: '{name}' (slug={slug})")
 
-    # Paths.
-    voice_config_path = REPO_ROOT / "inputs" / "voices" / f"{slug}.json"
-    perp_path = REPO_ROOT / "runs" / slug / "01_research" / "perplexity_dossier.json"
-    gemini_path = REPO_ROOT / "runs" / slug / "01_research" / "gemini_broad_scan.json"
-    base_prompt_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.md"
-    base_preserved_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.base.md"
+    if project_root is None:
+        project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+    stamp(f"  PROJECT_ROOT={project_root}")
+
+    # Paths — all under PROJECT_ROOT per Tier 3.
+    voice_config_path = project_root / "inputs" / "voices" / f"{slug}.json"
+    perp_path = project_root / "runs" / slug / "01_research" / "perplexity_dossier.json"
+    gemini_path = project_root / "runs" / slug / "01_research" / "gemini_broad_scan.json"
+    base_prompt_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.md"
+    base_preserved_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.base.md"
     tailored_prompt_path = base_prompt_path  # overwrite base
-    notes_path = REPO_ROOT / "inputs/dossiers/_dr_prompts" / f"{slug}_tailoring_notes.json"
+    notes_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_tailoring_notes.json"
 
     for p in (voice_config_path, perp_path, gemini_path, base_prompt_path):
         if not p.exists():
@@ -126,5 +132,6 @@ def run_pass_0b_tailor(name: str) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pass 0b hybrid tailoring (PB#2)")
     parser.add_argument("name", help='Voice name, e.g. "Plato"')
+    add_project_arg(parser)
     args = parser.parse_args()
-    run_pass_0b_tailor(args.name)
+    run_pass_0b_tailor(args.name, project=args.project)

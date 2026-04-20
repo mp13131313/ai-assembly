@@ -32,8 +32,6 @@ scratch/
 *.webm
 
 # Cached primary text fetches that contain large copyrighted material
+# (runtime side — the personas pipeline's runs/ now lives under PROJECT_ROOT,
+# outside this repo; see _workspace/planning/OPEN_ITEMS.md Tier 3)
 runs/*/01_research/primary_texts/raw/
-
-
-# Personas pipeline runtime outputs (per-voice, regenerable)
-personas/runs/
