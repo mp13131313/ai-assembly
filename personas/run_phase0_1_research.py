@@ -224,6 +224,11 @@ def main(voice_name: str) -> None:
     )
     template = env.get_template(TEMPLATE_PATH.name)
 
+    # Position C: the base render uses classification vars only. Perplexity +
+    # Gemini research content enters the pipeline at the tailoring step
+    # (run_pass_0b_tailor.py), not here. The base template has no
+    # {{ perplexity_findings }} / {{ gemini_findings }} references in Phase B;
+    # prior Position A design inlined them, Position C does not.
     context = {
         "name": display_name,
         "display_name_with_hint": display_name,
@@ -234,9 +239,6 @@ def main(voice_name: str) -> None:
         "wikipedia_url": wiki_url or "",
         "voice_mode": vi.get("voice_mode"),
         "corpus_constraint": vi.get("corpus_constraint", "full"),
-        "perplexity_findings": perplexity_text,
-        "perplexity_sections": perplexity_sections,
-        "gemini_findings": gemini_text,
     }
 
     dr_prompt = template.render(**context)
