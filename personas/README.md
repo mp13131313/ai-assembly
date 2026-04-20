@@ -6,21 +6,41 @@ top-level [README.md](../README.md) for overall orientation.
 Pre-conference pipeline that produces Persona Cards — one per voice —
 that the runtime overnight pipeline consumes.
 
-## Local structure
+## Local structure (code — this repo)
 
 - `run_pass0a_voice_config.py` — Pass 0a: voice config + human review doc
 - `run_phase0_1_research.py` — Phase 0.5: Perplexity + Gemini parallel
   + Pass 0b DR-prompt render
 - `run_pass0b_dr_prompt.py` — Pass 0b standalone (DR prompt render only)
 - `run_persona_pipeline.py` — main pipeline (Pass 1-merge → Derive)
-- `flows/shared/` — shared code: clients, io, node validation, prompts
-- `inputs/` — per-voice inputs:
-  - `conference_facts.json` / `audience_profile.json` / `panel_roster.json` (Phase B 3-way split)
-  - `non_human_grounding/` — curated Octopus + Whanganui grounding for Pass 0a (Phase B)
-  - `voices/` — voice configs (v3.10 configs are archaeology; all 12 rebuild under Phase B)
-  - `dossiers/` — Claude DR dossiers (manually produced via claude.ai)
+- `flows/shared/` — shared code: clients, io, node validation, prompts,
+  `project_root.py` (PROJECT_ROOT resolver)
+- `schemas/` — Pydantic source-of-truth schemas (JSON Schema generated)
 - `scripts/` — standalone utilities (DR dossier validator)
-- `runs/` — per-voice build outputs (gitignored)
+- `tests/fixtures/` — pinned test fixtures (code-level, Ibn Battuta)
+
+## Project data (PROJECT_ROOT — separate dir)
+
+Per Tier 3 (2026-04-20), all per-project data lives **outside this repo**,
+under `PROJECT_ROOT`. Runners resolve it via `--project <path>` →
+`AI_ASSEMBLY_PROJECT_ROOT` env → sibling default `../athens-2026/`.
+
+Layout:
+
+```
+<PROJECT_ROOT>/
+├── inputs/
+│   ├── conference_facts.json       # project metadata
+│   ├── audience_profile.json       # compressed audience brief
+│   ├── panel_roster.json           # 12 voices for this project
+│   ├── non_human_grounding/        # curated grounding (Octopus, Whanganui…)
+│   ├── voices/<slug>.json          # Pass 0a outputs (curator-edited)
+│   │   └── <slug>_pass0a_review.md
+│   └── dossiers/
+│       ├── <slug>_claude_dr.md     # manual claude.ai DR output
+│       └── _dr_prompts/            # generated tailored prompts
+└── runs/<slug>/                    # all pipeline runtime outputs
+```
 
 ## Setup
 
@@ -35,14 +55,25 @@ API keys live in `../.env` at the monorepo root.
 
 ## Run a voice end-to-end
 
+For Athens 2026 (sibling `../athens-2026/` default, no flag needed):
+
 ```bash
 venv/bin/python run_pass0a_voice_config.py "Voice Name"
 venv/bin/python run_phase0_1_research.py "Voice Name"
-# [manual: paste DR prompt into claude.ai, save dossier]
+# [manual: paste DR prompt into claude.ai, save dossier under
+#  $PROJECT_ROOT/inputs/dossiers/<slug>_claude_dr.md]
 venv/bin/python run_persona_pipeline.py "Voice Name"
 ```
 
-## Output per voice
+For another project, point at its root:
+
+```bash
+venv/bin/python run_pass0a_voice_config.py "Voice Name" \
+  --project /path/to/berlin-2027
+# …or set AI_ASSEMBLY_PROJECT_ROOT=/path/to/berlin-2027 and drop the flag.
+```
+
+## Output per voice (under PROJECT_ROOT)
 
 - `runs/<slug>/persona_card_assembled.json` — 37-field card (consumed
   by runtime Voice Pipeline)

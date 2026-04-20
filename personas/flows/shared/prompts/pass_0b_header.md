@@ -5,9 +5,9 @@ PREAMBLE — BEFORE PASTING INTO CLAUDE.AI
 2. Enable **Extended Thinking** and **Deep Research** (both must be on).
 3. Paste everything below the dashed line as your user message.
 4. Wait 60–180 minutes. The output will be a research dossier, not a persona card.
-5. Save the full response as `inputs/dossiers/{{ voice_slug }}_claude_dr.md`.
-6. Validate it before saving: `python3 personas/scripts/validate_dr_dossier.py inputs/dossiers/{{ voice_slug }}_claude_dr.md`
-7. Run the pipeline: `python3 run_persona_pipeline.py "{{ name }}"`
+5. Save the full response as `$AI_ASSEMBLY_PROJECT_ROOT/inputs/dossiers/{{ voice_slug }}_claude_dr.md`.
+6. Validate it before saving: `python3 personas/scripts/validate_dr_dossier.py "$AI_ASSEMBLY_PROJECT_ROOT/inputs/dossiers/{{ voice_slug }}_claude_dr.md"`
+7. Run the pipeline: `python3 run_persona_pipeline.py "{{ name }}"` (add `--project <path>` to override the env-var default)
 
 ---
 

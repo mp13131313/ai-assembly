@@ -44,7 +44,7 @@ class VoiceConfig(BaseModel):
         "classification context. For human voices: Wikipedia lead paragraph "
         "or curator-written disambiguation note. For non-human voices: a "
         "Godfrey-Smith / Te Awa Tupua / similar domain-specific excerpt from "
-        "personas/inputs/non_human_grounding/.",
+        "<project_root>/inputs/non_human_grounding/.",
     )
     wikipedia_url: str | None = None
 

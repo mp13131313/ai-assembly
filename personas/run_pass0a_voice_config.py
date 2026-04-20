@@ -3,17 +3,22 @@
 Takes a voice name and optional Wikipedia URL. Produces TWO artifacts a human
 reviews and signs off on before Pass 0b generates the per-voice DR prompt:
 
-  inputs/voices/<slug>.json                  — pipeline input
-  inputs/voices/<slug>_pass0a_review.md      — human review doc
+  <project_root>/inputs/voices/<slug>.json              — pipeline input
+  <project_root>/inputs/voices/<slug>_pass0a_review.md  — human review doc
 
 Phase 0.5 (run_phase0_1_research.py) runs AFTER human sign-off: it calls
 Perplexity + Gemini in parallel and produces the customized DR prompt at
-inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
+<project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
+
+Per Tier 3 code/project separation, project data (voice configs, panel
+roster, conference facts, non-human grounding) lives under PROJECT_ROOT,
+distinct from the code repo. Resolve via --project, env, or sibling default.
 
 Usage:
     python3 run_pass0a_voice_config.py "Cleopatra"
     python3 run_pass0a_voice_config.py "Cleopatra" --wiki https://en.wikipedia.org/wiki/Cleopatra
     python3 run_pass0a_voice_config.py "Octopus" --hint "the cephalopod (no Wikipedia page needed)"
+    python3 run_pass0a_voice_config.py "Plato" --project /path/to/athens-2026
 """
 from __future__ import annotations
 
@@ -34,6 +39,7 @@ import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.node0_validation import InputRejected, validate_input
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared import wikipedia as _wiki
 
 
@@ -57,31 +63,30 @@ def _call_with_retry(stamp_fn, **kwargs):
         sys.exit(f"Pass 0a failed after retry: {exc}")
 
 
-CONFERENCE_FACTS_PATH = REPO_ROOT / "inputs/conference_facts.json"
-PANEL_ROSTER_PATH = REPO_ROOT / "inputs/panel_roster.json"
 SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/pass_0a_voice_config.md"
-VOICES_DIR = REPO_ROOT / "inputs/voices"
-NON_HUMAN_GROUNDING_DIR = REPO_ROOT / "inputs/non_human_grounding"
 
 
-def _load_pass0a_context() -> dict:
+def _load_pass0a_context(project_root: Path) -> dict:
     """Assemble the conference context dict Pass 0a sees (facts + roster only)."""
-    facts = json.loads(CONFERENCE_FACTS_PATH.read_text())
-    roster = json.loads(PANEL_ROSTER_PATH.read_text())
+    facts_path = project_root / "inputs/conference_facts.json"
+    roster_path = project_root / "inputs/panel_roster.json"
+    facts = json.loads(facts_path.read_text())
+    roster = json.loads(roster_path.read_text())
     return {**facts, **roster}
 
 
-def _resolve_non_human_grounding(name: str) -> str | None:
-    """For non-human voices, check personas/inputs/non_human_grounding/<slug>.md.
+def _resolve_non_human_grounding(name: str, project_root: Path) -> str | None:
+    """For non-human voices, check <project_root>/inputs/non_human_grounding/<slug>.md.
 
     Per decisions log #4: non-human voices get domain-specific curated
     grounding (Godfrey-Smith for Octopus, Te Awa Tupua Act for Whanganui)
     rather than Wikipedia. Returns the file contents if present, else None.
     """
-    if not NON_HUMAN_GROUNDING_DIR.exists():
+    grounding_dir = project_root / "inputs/non_human_grounding"
+    if not grounding_dir.exists():
         return None
     slug = voice_slug(name)
-    path = NON_HUMAN_GROUNDING_DIR / f"{slug}.md"
+    path = grounding_dir / f"{slug}.md"
     if path.exists():
         return path.read_text()
     return None
@@ -166,17 +171,25 @@ def main(
     hint: str | None = None,
     choose: int | None = None,
     editorial_rationale: str | None = None,
+    project: str | None = None,
 ) -> None:
     stamp(f"Pass 0a voice config: '{name}'")
 
-    for p in (CONFERENCE_FACTS_PATH, PANEL_ROSTER_PATH):
+    project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+    stamp(f"  PROJECT_ROOT={project_root}")
+
+    facts_path = project_root / "inputs/conference_facts.json"
+    roster_path = project_root / "inputs/panel_roster.json"
+    for p in (facts_path, roster_path):
         if not p.exists():
             sys.exit(f"Missing project config: {p}")
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
 
+    voices_dir = project_root / "inputs/voices"
+
     # Resolve grounding: non-human domain file first, then Wikipedia, then hint.
-    nh_grounding = _resolve_non_human_grounding(name)
+    nh_grounding = _resolve_non_human_grounding(name, project_root)
     wiki_summary = None
     manual_grounding: str | None = None
     if nh_grounding:
@@ -189,7 +202,7 @@ def main(
         elif hint:
             manual_grounding = hint
 
-    project_ctx = _load_pass0a_context()
+    project_ctx = _load_pass0a_context(project_root)
     system = SYSTEM_PROMPT_PATH.read_text()
     user_payload: dict = {
         "name": name,
@@ -264,17 +277,17 @@ def main(
         voice_config["editorial_rationale"] = editorial_rationale
 
     # Write artifacts
-    VOICES_DIR.mkdir(parents=True, exist_ok=True)
+    voices_dir.mkdir(parents=True, exist_ok=True)
 
-    voice_path = VOICES_DIR / f"{slug}.json"
-    review_path = VOICES_DIR / f"{slug}_pass0a_review.md"
+    voice_path = voices_dir / f"{slug}.json"
+    review_path = voices_dir / f"{slug}_pass0a_review.md"
 
     write_json_atomic(voice_path, voice_config)
     review_path.write_text(review_doc, encoding="utf-8")
 
     stamp("Pass 0a complete.")
-    stamp(f"  Voice config:  {voice_path.relative_to(REPO_ROOT)}")
-    stamp(f"  Review doc:    {review_path.relative_to(REPO_ROOT)}")
+    stamp(f"  Voice config:  {voice_path.relative_to(project_root)}")
+    stamp(f"  Review doc:    {review_path.relative_to(project_root)}")
     stamp("")
     if nh_grounding is None and wiki_summary is None:
         stamp("⚠ No manual_grounding was provided. Classification confidence will be low.")
@@ -283,8 +296,8 @@ def main(
         stamp("")
     if not voice_config.get("editorial_rationale"):
         stamp("✍ CURATOR ACTION — editorial_rationale not set.")
-        stamp(f"  Open {review_path.relative_to(REPO_ROOT)} and fill in the rationale paragraph.")
-        stamp(f"  Then edit {voice_path.relative_to(REPO_ROOT)} to replace the null.")
+        stamp(f"  Open {review_path.relative_to(project_root)} and fill in the rationale paragraph.")
+        stamp(f"  Then edit {voice_path.relative_to(project_root)} to replace the null.")
         stamp("")
     stamp("Next steps:")
     stamp(f"  1. Read {review_path.name}; fill editorial_rationale in {voice_path.name} if needed.")
@@ -305,8 +318,9 @@ if __name__ == "__main__":
     parser.add_argument("--editorial-rationale", metavar="TEXT", default=None,
                         help="Curator-written rationale to drop straight into voice_config. "
                              "If omitted, the config emits null and the review doc prompts the curator.")
+    add_project_arg(parser)
     args = parser.parse_args()
     main(
         args.name, wiki_url=args.wiki, hint=args.hint, choose=args.choose,
-        editorial_rationale=args.editorial_rationale,
+        editorial_rationale=args.editorial_rationale, project=args.project,
     )

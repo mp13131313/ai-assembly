@@ -17,7 +17,6 @@ from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 _PROMPTS_DIR = _REPO_ROOT / "flows" / "shared" / "prompts"
-_INPUTS_DIR = _REPO_ROOT / "inputs" / "voices"
 
 
 VALID_TYPES = {"human", "non_human", "fictional"}
@@ -77,19 +76,22 @@ def load_prompt(name: str) -> str:
     return prompt_path.read_text(encoding="utf-8")
 
 
-def load_voice_input(name_or_slug: str) -> dict[str, Any]:
-    """Load a voice's input schema from inputs/voices/{slug}.json.
+def load_voice_input(name_or_slug: str, project_root: Path) -> dict[str, Any]:
+    """Load a voice's input schema from <project_root>/inputs/voices/{slug}.json.
 
     Accepts either the full name ("Hannah Arendt") or the slug
-    ("hannah_arendt").
+    ("hannah_arendt"). `project_root` is resolved by the caller via
+    `flows.shared.project_root.resolve_project_root()` — per Tier 3,
+    voice configs are project data, not code.
     """
+    voices_dir = project_root / "inputs" / "voices"
     candidates = [name_or_slug, _slugify(name_or_slug)]
     for c in candidates:
-        path = _INPUTS_DIR / f"{c}.json"
+        path = voices_dir / f"{c}.json"
         if path.exists():
             with path.open(encoding="utf-8") as f:
                 return json.load(f)
     raise FileNotFoundError(
         f"No input schema for {name_or_slug!r}. Tried: "
-        + ", ".join(str(_INPUTS_DIR / f"{c}.json") for c in candidates)
+        + ", ".join(str(voices_dir / f"{c}.json") for c in candidates)
     )

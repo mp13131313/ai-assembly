@@ -18,6 +18,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from run_pass_1_1 import run_pass_1_1
 from run_pass_1_2 import run_pass_1_2
 from run_pass_1_3 import run_pass_1_3
@@ -49,8 +50,14 @@ def run_pass_1_all(
     voice_mode: str = "philosophical",
     use_test_fixtures: bool = False,
     max_parallel: int = 3,
+    project_root=None,
+    project: str | None = None,
 ) -> dict:
+    if project_root is None:
+        project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+
     stamp(f"Pass 1 orchestrator: '{name}' type={voice_type} subtype={subtype} mode={voice_mode}")
+    stamp(f"  PROJECT_ROOT={project_root}")
     stamp(f"Phase 1A — chunks 1.1-1.6 in parallel (max_parallel={max_parallel})")
 
     t0 = time.time()
@@ -59,6 +66,7 @@ def run_pass_1_all(
             pool.submit(
                 fn, name=name, voice_type=voice_type, subtype=subtype,
                 voice_mode=voice_mode, use_test_fixtures=use_test_fixtures,
+                project_root=project_root,
             ): chunk_id
             for chunk_id, fn in CHUNKS
         }
@@ -75,7 +83,7 @@ def run_pass_1_all(
 
     stamp("Phase 1B — Pass 1.7 coherence")
     t1 = time.time()
-    dossier = run_pass_1_7(name=name)
+    dossier = run_pass_1_7(name=name, project_root=project_root)
     stamp(f"Phase 1B done in {time.time() - t1:.1f}s")
     stamp(f"Total Pass 1 wall: {time.time() - t0:.1f}s")
     return dossier
@@ -89,8 +97,10 @@ if __name__ == "__main__":
     p.add_argument("--voice-mode", default="philosophical")
     p.add_argument("--use-test-fixtures", action="store_true")
     p.add_argument("--max-parallel", type=int, default=3)
+    add_project_arg(p)
     a = p.parse_args()
     run_pass_1_all(
         name=a.name, voice_type=a.type, subtype=a.subtype, voice_mode=a.voice_mode,
         use_test_fixtures=a.use_test_fixtures, max_parallel=a.max_parallel,
+        project=a.project,
     )

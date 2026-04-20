@@ -26,7 +26,10 @@ REPO = Path(__file__).resolve().parent.parent.parent
 FAKE_FLOW = REPO / "ingest" / "tests" / "fake_transcription_flow.py"
 
 # Redirect transcription to the fake flow for all tests in this file.
-os.environ["INGEST_FLOW_CMD"] = f"{sys.executable} {FAKE_FLOW}"
+# shlex.join quotes tokens so paths containing spaces (e.g. "AI Assembly/code")
+# survive the shlex.split round-trip in ingest/pipeline.py::_launch_stage0.
+import shlex as _shlex  # noqa: E402
+os.environ["INGEST_FLOW_CMD"] = _shlex.join([sys.executable, str(FAKE_FLOW)])
 os.environ["FAKE_DELAY_SECONDS"] = "1"
 
 from ingest.app import app  # noqa: E402

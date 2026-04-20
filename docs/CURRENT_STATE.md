@@ -210,7 +210,7 @@ runs/plato/
 - Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (smoke_test_chains is a build-time smoke test, NOT a runtime few-shot — critical).
 - Foundational fields (12) appear in both Step 1 and Step 2 system prompts.
 - Step 1 uses Reasoning + Engagement fields; Step 2 uses Voice + Artifact fields.
-- Runtime reads `personas/runs/<voice_slug>/persona_card_assembled.json` directly.
+- Runtime reads `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json` directly (Tier 3 — project data lives outside the code repo; see CLAUDE.md §"Code / project separation").
 
 **What needs building:**
 - Prefect flow with Step 1 task + Step 2 task
@@ -307,7 +307,7 @@ Per Briefing v3.1: Astro or Next.js static site, Vercel/Netlify hosting, content
 
 ### 3.7 Cross-repo tooling
 
-- **Sync council config**: script that reads all `personas/runs/*/provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json` members array, bumping version. Currently manual copy-paste. Easy Python script; natural first feature for admin console.
+- **Sync council config**: script that reads all `$PROJECT_ROOT/runs/*/provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json` members array, bumping version. Currently manual copy-paste. Easy Python script; natural first feature for admin console.
 
 ---
 
@@ -318,13 +318,13 @@ Documented precisely so nothing drifts.
 ### 4.1 Persona → Runtime (2 artifacts per voice)
 
 **Provocateur Profile (8 fields):**
-- File: `personas/runs/<voice_slug>/provocateur_profile.json`
+- File: `$PROJECT_ROOT/runs/<voice_slug>/provocateur_profile.json` (per Tier 3, project data lives outside the code repo; default sibling `../athens-2026/`)
 - Consumer: `runtime/flows/shared/council/council_config.json#members[]`
 - Fields: `name`, `speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`
 - Currently: **council_config is `dev_stub_v2`** — hand-written, not derived. 12 stub members present. Needs replacement with real derived profiles before production.
 
 **Assembled Persona Card (37 fields):**
-- File: `personas/runs/<voice_slug>/persona_card_assembled.json`
+- File: `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json`
 - Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt
 - Runtime MUST drop `metadata` block and `smoke_test_chains` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
 - 35 fields appear as system prompt content; 2 null continuity fields populated during runtime Night 2.
@@ -470,8 +470,8 @@ or expand?"`. Default for now: keep the 3-enum.
 - **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching. Expected accuracy degrades from 70–85% to 40–50% without bios. **Pre-Athens blocker** — bios must be populated before first production session.
 - **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC` (Philosophical Speed-Dating Rave, How to Meet an Idiot). Either firm up venues in program or leave them skipped.
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs for all 12 members; not derived from real persona-pipeline Derive output. Will be replaced with real Derive output from the rebuilt Phase B persona pipeline.
-- **`personas/inputs/voices/`**: 5 v3.10 Pass 0a artifacts on disk (plato, hannah_arendt, cleopatra, octopus, ibn_battuta). **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The 5 existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace, Dostoevsky).
-- **`personas/inputs/dossiers/`**: 0 of 12 Claude DR dossiers in the current tree. All 12 will be generated under the new Pass 0b template (PB#2 hybrid Jinja+LLM tailoring) once Phase B lands.
+- **`$PROJECT_ROOT/inputs/voices/`** (for Athens: `../athens-2026/inputs/voices/`): 5 v3.10 Pass 0a artifacts on disk (plato, hannah_arendt, cleopatra, octopus, ibn_battuta) plus an in-progress Dostoevsky config. **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace). Per Tier 3 (2026-04-20), this directory lives outside the code repo under PROJECT_ROOT.
+- **`$PROJECT_ROOT/inputs/dossiers/`**: 0 of 12 Claude DR dossiers in the current tree. All 12 will be generated under the new Pass 0b template (PB#2 hybrid Jinja+LLM tailoring) once Phase B lands.
 - **`_workspace/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer.
 
 ### 6.2 Pipeline gaps

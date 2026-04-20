@@ -72,7 +72,7 @@
         }
       ],
       "default": null,
-      "description": "Human-curated grounding text the model can rely on for classification context. For human voices: Wikipedia lead paragraph or curator-written disambiguation note. For non-human voices: a Godfrey-Smith / Te Awa Tupua / similar domain-specific excerpt from personas/inputs/non_human_grounding/.",
+      "description": "Human-curated grounding text the model can rely on for classification context. For human voices: Wikipedia lead paragraph or curator-written disambiguation note. For non-human voices: a Godfrey-Smith / Te Awa Tupua / similar domain-specific excerpt from <project_root>/inputs/non_human_grounding/.",
       "title": "Manual Grounding"
     },
     "wikipedia_url": {

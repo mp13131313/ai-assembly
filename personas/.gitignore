@@ -17,15 +17,11 @@ venv/
 .vscode/
 .idea/
 
-# Cached primary text fetches that contain large copyrighted material
-# (we'll selectively re-add specific fair-use excerpts later if needed)
-runs/*/01_research/primary_texts/raw/
-
-# Tier 1 — per-voice regenerable artifacts (OPEN_ITEMS.md Tier 1, 2026-04-20).
-# Voice configs stay tracked (curator-edited, not regenerable). Review docs,
-# DR prompts, base prompts, and tailoring notes are all regenerable via
-# run_pass0a_voice_config.py + run_phase0_1_research.py and should not
-# pollute git on every test run. Tier 3 (PROJECT_ROOT extraction) will
-# move these outside the code repo entirely; this is the interim fix.
-inputs/voices/*_pass0a_review.md
-inputs/dossiers/_dr_prompts/
+# Tier 3 (2026-04-20): per-voice inputs + runs live under PROJECT_ROOT
+# (a separate directory, e.g. ../athens-2026/), not in this code repo.
+# See _workspace/planning/OPEN_ITEMS.md §"Code / project separation (Tier 3)".
+# No `inputs/` or `runs/` patterns are needed here — those dirs no longer
+# exist under personas/. If a stray `inputs/` or `runs/` shows up, it's
+# a bug in a runner that's writing to the wrong root.
+inputs/
+runs/

@@ -30,22 +30,9 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 
-def _load_conference_context_string() -> str:
-    """Assemble the short conference-context string for Pass 7b / metadata.
-
-    Phase B dropped the `conference_context` field from voice_config; runners
-    that still need the short context paragraph (Pass 7b; pipeline metadata)
-    read it directly from the split conference_facts.json.
-    """
-    facts_path = REPO_ROOT / "inputs/conference_facts.json"
-    if facts_path.exists():
-        facts = json.loads(facts_path.read_text())
-        return facts.get("conference_context_paragraph", "")
-    return ""
-
-
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
@@ -55,11 +42,29 @@ from flows.shared.dr_validation import validate_dr_dossier
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
 _parser.add_argument("name", help='Voice name, e.g. "Plato" or "Hannah Arendt"')
+add_project_arg(_parser)
 _args = _parser.parse_args()
+
+PROJECT_ROOT = resolve_project_root(_args.project, repo_root=REPO_ROOT)
 
 VOICE_NAME = _args.name
 SLUG = voice_slug(VOICE_NAME)
-RUN = REPO_ROOT / "runs" / SLUG
+RUN = PROJECT_ROOT / "runs" / SLUG
+
+
+def _load_conference_context_string() -> str:
+    """Assemble the short conference-context string for Pass 7b / metadata.
+
+    Phase B dropped the `conference_context` field from voice_config; runners
+    that still need the short context paragraph (Pass 7b; pipeline metadata)
+    read it directly from the split conference_facts.json under PROJECT_ROOT.
+    """
+    facts_path = PROJECT_ROOT / "inputs/conference_facts.json"
+    if facts_path.exists():
+        facts = json.loads(facts_path.read_text())
+        return facts.get("conference_context_paragraph", "")
+    return ""
+
 (RUN / "01_research").mkdir(parents=True, exist_ok=True)
 (RUN / "02_passes").mkdir(parents=True, exist_ok=True)
 
@@ -92,8 +97,8 @@ def call_or_cache(path: Path, label: str, runner):
 
 
 # ---------- NODE 0 ----------
-stamp(f"NODE 0: validating {VOICE_NAME}")
-vi = validate_input(load_voice_input(VOICE_NAME))
+stamp(f"NODE 0: validating {VOICE_NAME}  (PROJECT_ROOT={PROJECT_ROOT})")
+vi = validate_input(load_voice_input(VOICE_NAME, PROJECT_ROOT))
 stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_sources']}")
 
 
@@ -102,7 +107,7 @@ stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_s
 # via run_phase0_1_research.py. Check that both outputs exist.
 _pass1a_path = RUN / "01_research/perplexity_dossier.json"
 _pass1b_path = RUN / "01_research/gemini_broad_scan.json"
-_missing = [str(p.relative_to(REPO_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
+_missing = [str(p.relative_to(PROJECT_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
 if _missing:
     sys.exit(
         "Pass 1a + 1b outputs missing. Run run_phase0_1_research.py first:\n"
@@ -121,10 +126,10 @@ stamp(f"PASS 1b: loaded Gemini broad scan ({len(broad_scan_text)} chars)")
 
 # ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
 # Path derived from voice slug. User runs claude.ai with Opus 4.7 + extended
-# thinking + Deep Research, saves result to inputs/dossiers/<slug>_claude_dr.md.
+# thinking + Deep Research, saves result to $PROJECT_ROOT/inputs/dossiers/<slug>_claude_dr.md.
 # Pass 1-merge does a three-way contradiction check when this file is present.
 claude_dr_text = ""
-_claude_dr_path = REPO_ROOT / f"inputs/dossiers/{SLUG}_claude_dr.md"
+_claude_dr_path = PROJECT_ROOT / f"inputs/dossiers/{SLUG}_claude_dr.md"
 if _claude_dr_path.exists():
     validate_dr_dossier(_claude_dr_path)
     claude_dr_text = _claude_dr_path.read_text()
@@ -164,6 +169,7 @@ else:
         voice_mode=vi.get("voice_mode") or "philosophical",
         use_test_fixtures=False,
         max_parallel=3,
+        project_root=PROJECT_ROOT,
     )
     # run_pass_1_7 already writes merged_dossier.json to this path; the cache
     # branch above picks it up on re-run.
@@ -296,10 +302,10 @@ if not _review_flag.exists():
     sys.exit(
         f"\n=== PASS 1c REVIEW GATE ===\n"
         f"Primary text fetch complete. Human review required before pipeline continues.\n\n"
-        f"  1. Read:    {_review_path.relative_to(REPO_ROOT)}\n"
-        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(REPO_ROOT)} "
+        f"  1. Read:    {_review_path.relative_to(PROJECT_ROOT)}\n"
+        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(PROJECT_ROOT)} "
         f"(add/replace passages if needed)\n"
-        f"  3. Create:  touch {_review_flag.relative_to(REPO_ROOT)}\n"
+        f"  3. Create:  touch {_review_flag.relative_to(PROJECT_ROOT)}\n"
         f"  4. Re-run:  python3 run_persona_pipeline.py \"{vi['name']}\"\n"
     )
 stamp("PASS 1c gate: review flag present — continuing to Pass 1d")

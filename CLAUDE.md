@@ -6,7 +6,31 @@ Active branch: `phase-b-rebuild` (~34 commits ahead of `main`, not yet merged). 
 
 If you land fresh, read `OPEN_ITEMS.md` before the v3.10 pipeline spec — otherwise you'll build the wrong mental model.
 
-## Repo layout
+## Filesystem layout (umbrella — 2026-04-20)
+
+Everything lives under `~/Desktop/AI Assembly/`:
+
+```
+~/Desktop/AI Assembly/
+├── .env -> code/.env       # symlink or code/.env directly (shared secrets)
+├── code/                   # THE GIT REPO — this directory. Only what's here
+│   │                         pushes to GitHub.
+│   ├── personas/           # persona-pipeline code
+│   ├── runtime/            # runtime-pipeline code
+│   ├── docs/               # specs + briefings
+│   ├── research/           # preserved baseline research
+│   └── _workspace/         # planning + archive
+└── projects/               # NEVER pushed to GitHub
+    ├── test/               # sandbox / experimentation
+    │   ├── inputs/…        # voices, dossiers, non_human_grounding, JSON configs
+    │   ├── reference/…     # sessions.json, speakers.json (runtime-side)
+    │   ├── council_config.json
+    │   └── runs/           # all pipeline outputs, both pipelines
+    └── athens-2026/        # production instance
+        └── (same shape as test/)
+```
+
+## Repo layout (inside `code/`)
 
 Four categories:
 
@@ -14,7 +38,44 @@ Four categories:
 - `research/` — **preserved grounding**. Deep Research artifacts that ground architecture decisions. Not deletable.
 - `_workspace/planning/` — **forward-looking design**. Active docs for unbuilt work (Phase B rebuild plan, binding decisions). Promoted to `docs/` when the work lands.
 - `_workspace/archive/` — **historical detritus**. Executed fix plans, stale specs, session artifacts, run artifacts. Eligible for pruning. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
-- `.env` — shared secrets at repo root (not committed). Both sub-trees load from `../.env` (one directory above their own root).
+- `.env` — shared secrets at `code/.env` (not committed). Both sub-trees load from `../.env` (one directory above their own root, so `code/.env` since they live at `code/personas/` and `code/runtime/`).
+
+## Code / project separation (Tier 3)
+
+As of 2026-04-20, per-project data lives **outside** this code repo under a
+`PROJECT_ROOT` directory. Both the personas pipeline and the runtime pipeline
+resolve PROJECT_ROOT via the same shared module
+(`flows/shared/project_root.py` in each sub-tree) — they operate on the same
+project root per deployment (personas writes persona cards; runtime reads
+them from the same place).
+
+Precedence:
+
+1. `--project <path>` CLI arg (personas runners; runtime CLI flows take
+   explicit paths, the ingest app reads env/arg)
+2. `AI_ASSEMBLY_PROJECT_ROOT` environment variable (typically set in the
+   shared `code/.env` — on this machine defaults to `projects/test`)
+3. **No fallback** — exits with a clear message. With multiple projects
+   active, a silent default risks writing to the wrong one.
+
+Under `PROJECT_ROOT/`:
+
+- **Shared by both pipelines:** `runs/` (personas writes `runs/<voice_slug>/`,
+  runtime writes `runs/<run_id>/...` — different key patterns, same root)
+- **Personas only:** `inputs/voices/`, `inputs/dossiers/`,
+  `inputs/non_human_grounding/`, `inputs/conference_facts.json` +
+  `audience_profile.json` + `panel_roster.json`
+- **Runtime only:** `reference/sessions.json` + `speakers.json` +
+  `sessions.skipped.json`, `council_config.json`
+
+The code repo holds runners, schemas, prompts, pinned test fixtures,
+`reference/session_template.json` (schema template, not project data), and
+`flows/shared/council/README.md` (schema doc).
+
+To run against Athens 2026: `--project "../../projects/athens-2026"` or set
+the env var. To run against test: the env default already points there.
+See `_workspace/planning/OPEN_ITEMS.md` §"Code / project separation (Tier 3)"
+for the design rationale.
 
 ## Orientation reading order
 

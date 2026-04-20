@@ -5,11 +5,11 @@ Reads Perplexity + Claude DR + Gemini dossiers for a voice, calls Claude Opus
 `schemas.pass_1_1.LifeScaffold` + `FormativeCandidate[]`, retries once with
 critique on validation failure, writes:
 
-    runs/<slug>/01_research/pass_1_1/life_scaffold.json
-    runs/<slug>/01_research/pass_1_1/formative_candidates.json
+    <project_root>/runs/<slug>/01_research/pass_1_1/life_scaffold.json
+    <project_root>/runs/<slug>/01_research/pass_1_1/formative_candidates.json
 
 Test mode: `--use-test-fixtures` reads from `personas/tests/fixtures/ibn_battuta/`
-instead of `runs/<slug>/01_research/`, uses a truncated mock DR dossier, and
+(code-level) instead of `<project_root>/runs/<slug>/01_research/`, uses a truncated mock DR dossier, and
 exercises merge mechanics (schema validation + retry + atomic write). Content
 will be v3.10-wound-shaped because the fixtures predate Boddice integration —
 end-to-end Boddice-shape validation lands with the first real voice run in
@@ -34,6 +34,7 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 import anthropic as _anthropic
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 from schemas._entry import ValidationError, validate_chunk_output, generate_json_schemas
 from schemas.pass_1_1 import FormativeCandidate, LifeScaffold
@@ -46,8 +47,12 @@ def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def _load_sources(slug: str, use_test_fixtures: bool) -> tuple[str, str, str]:
-    """Return (perplexity_text, claude_dr_text, gemini_text)."""
+def _load_sources(project_root: Path, slug: str, use_test_fixtures: bool) -> tuple[str, str, str]:
+    """Return (perplexity_text, claude_dr_text, gemini_text).
+
+    Test fixtures live under `REPO_ROOT/tests/fixtures/` (code).
+    Live runs live under `project_root/runs/` (project data).
+    """
     if use_test_fixtures:
         fixtures = REPO_ROOT / "tests/fixtures" / slug
         perp = json.loads((fixtures / "perplexity_dossier.json").read_text())
@@ -63,7 +68,7 @@ def _load_sources(slug: str, use_test_fixtures: bool) -> tuple[str, str, str]:
             "short note."
         )
     else:
-        research = REPO_ROOT / "runs" / slug / "01_research"
+        research = project_root / "runs" / slug / "01_research"
         perp = json.loads((research / "perplexity_dossier.json").read_text())
         gem = json.loads((research / "gemini_broad_scan.json").read_text())
         dr_path = research / "claude_dr_dossier.md"
@@ -118,11 +123,16 @@ def run_pass_1_1(
     voice_mode: str = "philosophical",
     use_test_fixtures: bool = False,
     output_dir: Path | None = None,
+    project_root: Path | None = None,
+    project: str | None = None,
 ) -> dict:
     slug = voice_slug(name)
     stamp(f"Pass 1.1 BIOGRAPHICAL merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
 
-    perp_text, dr_text, gem_text = _load_sources(slug, use_test_fixtures)
+    if project_root is None:
+        project_root = resolve_project_root(project, repo_root=REPO_ROOT)
+
+    perp_text, dr_text, gem_text = _load_sources(project_root, slug, use_test_fixtures)
     life_scaffold_schema, formative_candidate_schema = _inline_schemas()
 
     system = render(
@@ -188,14 +198,14 @@ def run_pass_1_1(
             sys.exit(f"Pass 1.1 failed after retry: {exc2}")
 
     # Write artifacts.
-    out_dir = output_dir or (REPO_ROOT / "runs" / slug / "01_research/pass_1_1")
+    out_dir = output_dir or (project_root / "runs" / slug / "01_research/pass_1_1")
     out_dir.mkdir(parents=True, exist_ok=True)
     write_json_atomic(out_dir / "life_scaffold.json", result["life_scaffold"])
     write_json_atomic(out_dir / "formative_candidates.json", result["formative_candidates"])
 
     stamp(f"  LifeScaffold fields: {list(result['life_scaffold'].keys())}")
     stamp(f"  FormativeCandidates: {len(result['formative_candidates'])}")
-    stamp(f"  Wrote {out_dir.relative_to(REPO_ROOT)}")
+    stamp(f"  Wrote {out_dir.relative_to(project_root)}")
     return result
 
 
@@ -207,9 +217,11 @@ if __name__ == "__main__":
     parser.add_argument("--voice-mode", default="philosophical")
     parser.add_argument(
         "--use-test-fixtures", action="store_true",
-        help="Read from personas/tests/fixtures/<slug>/ instead of runs/<slug>/01_research/ "
+        help="Read from personas/tests/fixtures/<slug>/ (code-level) instead of "
+             "<project_root>/runs/<slug>/01_research/ "
              "(exercises merge mechanics without a live Phase 0.5 run).",
     )
+    add_project_arg(parser)
     args = parser.parse_args()
     run_pass_1_1(
         name=args.name,
@@ -217,4 +229,5 @@ if __name__ == "__main__":
         subtype=args.subtype,
         voice_mode=args.voice_mode,
         use_test_fixtures=args.use_test_fixtures,
+        project=args.project,
     )
