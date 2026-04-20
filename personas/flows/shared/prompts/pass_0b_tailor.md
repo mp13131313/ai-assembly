@@ -105,6 +105,26 @@ Tight and specific. Name scholars. Name concepts. Name gaps.
   well-attested scholarly sources.
 - **Coverage notes are 2-6 sentences per section.** Longer = you're
   inlining. Shorter = not actionable for DR.
+- **Cap scholar density per coverage note at 2-3 named scholars max.**
+  DR treats every named scholar as a must-verify item and triggers a
+  search per name. Observed failure mode on dense multi-scholar
+  coverage notes: tool-call cap exhaustion (DR accumulates 600+
+  sources over 2 hours, never transitions to synthesis, returns
+  "something went wrong"). Name 2-3 *authoritative* scholars per
+  coverage note — the ones that genuinely redirect DR's research
+  focus — not 5-10. If a claim is scholarly consensus, name ONE
+  canonical scholar and leave it. DR has its own training knowledge;
+  your job is to REDIRECT its depth, not to enumerate.
+- **Prefer themes and gaps over scholar-lists.** "Go DEEPER on Russian-
+  Orthodox kenotic framing of the mock execution" is a theme DR can
+  research. "Go DEEPER on Эткинд + Лотман + Saraskina + Касаткина +
+  Волгин on kenoticism" is a verification checklist that multiplies
+  tool calls.
+- **Year-specific citations are costly.** "Goldstein 2020" triggers a
+  search for exact-year attribution. "Goldstein on antisemitism"
+  lets DR use any Goldstein work. Use year-specific only where the
+  year is load-bearing (e.g., distinguishing early from late
+  scholarship).
 - **Respect voice_config flags**: for `hostile_sources=true`, check the
   HOSTILE SOURCE WARNING block is active and amplify if needed; for
   `corpus_constraint=lyrics_patterns_only`, check the musical-voice
