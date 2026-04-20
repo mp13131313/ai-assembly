@@ -51,13 +51,6 @@ This voice is a FICTIONAL / LITERARY / MYTHOLOGICAL CHARACTER. The character's e
 
 ## Section 1: TEXTUAL FOUNDATION
 
-What this section feeds downstream:
-  - world (the narrative world — its ontology, key dates internal to the narrative, textual variants, compositional history)
-  - formative_experience (the narrative premise that organises the character's engagement — e.g., for Scheherazade: Shahryar's compulsion and the nightly executions)
-  - character (how described in text; role; key scenes and speeches; scholarly characterisation)
-  - topics_requiring_care (partial — variant traditions that produce different characterisations)
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
@@ -86,13 +79,6 @@ Your task for Section 1:
 
 ## Section 2: CHARACTER AS INTELLECTUAL CONSTRUCT
 
-What this section feeds downstream:
-  - constitution — 10-20 commitments attributed to the character, tagged with the EVIDENCE TAGGING core values (mostly [inference] for commitments implied by narrative function; [stated] for explicit text)
-  - concept_lexicon — concepts defined by the narrative tradition itself (frame tale, dawn-break, embedded narrator)
-  - epistemic_frame_statement — the specific scholars and translation traditions whose reading informs the construction
-  - bold_engagement_topics — derived from the character's narrative function and most contested scholarly meanings
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
@@ -114,14 +100,6 @@ Your task for Section 2:
 ---
 
 ## Section 3: NARRATIVE STRATEGY
-
-What this section feeds downstream:
-  - reasoning_method — how this character characteristically acts and engages within the text; 5-8 narrative moves with worked demonstrations
-  - finds_compelling / resists — narrative textures that activate the character / trigger non-engagement
-  - disagreement_protocol — HOW this character resists (silence, new tale, refusal — not counter-argument)
-  - translation_protocol — how this character encounters and reframes the unfamiliar within their narrative world
-  - default_questions — the interrogatives the character's narrative position habitually brings
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -148,16 +126,6 @@ Your task for Section 3:
 ---
 
 ## Section 4: VOICE AND STYLE
-
-What this section feeds downstream:
-  - rhetorical_mode — fundamental mode of expression in 1-2 sentences
-  - characteristic_moves — 3-5 named expression patterns (distinct from Section 3's narrative moves)
-  - register_and_tone — what the voice IS and what it is NOT, across major translation traditions
-  - metaphorical_repertoire — recurring imagery and sensory fields in the text
-  - preferred_vocabulary — the words this voice thinks in (and which translation rendering they are in)
-  - banned_language / banned_modes — what this voice would never say or do
-  - medium, characteristic_output_structure — the form and arc of this character's typical expression
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -197,12 +165,6 @@ Your task for Section 4:
 
 ## Section 5: ONTOLOGICAL BOUNDARIES
 
-What this section feeds downstream:
-  - knowledge_boundary — what exists and does not exist in the character's narrative world (ontological boundary, not historical-period boundary though the two may overlap)
-  - topics_requiring_care — the character's narrative-world material that conflicts with modern sensibilities; contested scholarly readings of that material
-  - hard_limits — what the character's narrative world excludes absolutely (anachronism, genre violations, character-breaking moves)
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
@@ -229,14 +191,6 @@ Your task for Section 5:
 ---
 
 ## Section 6: RECEPTION AND INFLUENCE
-
-What this section feeds downstream:
-  - curated_corpus_passages — the source text in authoritative edition + scholarly reception (Pass 1c fetches from your URLs)
-  - preferred_vocabulary, metaphorical_repertoire — textured content extracted from primary text and scholarship
-  - bold_engagement_topics — how the character's meaning is contested across cultures and periods
-  - epistemic_frame_statement — which scholarly / readerly tradition shapes this construction
-  - length_and_format_constraints — reception patterns and the tradition's typical output arc
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 

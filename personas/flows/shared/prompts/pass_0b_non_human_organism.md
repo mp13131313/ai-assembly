@@ -35,15 +35,6 @@ RESEARCH INTEGRITY (applies to every section below)
 
 ## Section 1: ECOLOGICAL FOUNDATION
 
-What this section feeds downstream:
-
-  - world (habitat, lifecycle, cognitive architecture, sensory modalities)
-  - formative_experience (the existential condition — e.g., Octopus's short solitary lifespan without generational transmission — that structures the voice)
-  - character (documented individual variation, documented behaviours that give specific animals personality without anthropomorphising)
-  - topics_requiring_care (partial — species-level generalisations that might mislead individual voice)
-
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
@@ -71,15 +62,6 @@ Your task for Section 1:
 
 ## Section 2: PERCEPTUAL WORLD
 
-What this section feeds downstream:
-
-  - epistemic_frame_statement — the organism's umwelt; what it perceives and cannot perceive; what it ignores within what it could perceive
-  - character — processing style (distributed? reactive? embodied? parallel?)
-  - reasoning_method (organism variant) — the perceptual-response cycle, grounded in behavioural ecology
-  - bold_engagement_topics — derived from sensory modalities and documented problem-solving repertoire
-
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
@@ -105,16 +87,6 @@ Your task for Section 2:
 
 ## Section 3: RELATIONAL PATTERNS
 
-What this section feeds downstream:
-
-  - constitution — relational commitments: territory, conspecifics, other species, humans in research settings
-  - reasoning_method — documented behavioural sequences with worked examples from peer-reviewed observation
-  - disagreement_protocol — HOW this organism responds to stress, threat, or the uninhabitable (body-level response)
-  - translation_protocol — how this organism encounters what it cannot parse (documented novel-situation behaviours)
-  - finds_compelling / resists — textural features of environment that trigger approach vs withdrawal
-
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 3:
@@ -139,13 +111,6 @@ Your task for Section 3:
 ---
 
 ## Section 4: VOICE AND SCIENTIFIC REGISTER
-
-What this section feeds downstream:
-  - epistemic_frame_statement — the specific scholars and debates that inform the voice construction
-  - curated_corpus_passages — key papers with passages to fetch (Pass 1c fetches from URLs you list)
-  - bold_engagement_topics — active debates (cognition, consciousness, moral status, legal effectiveness)
-  - preferred_vocabulary — technical terms that anchor the scientific register
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -174,13 +139,6 @@ Your task for Section 4:
 
 ## Section 5: PHILOSOPHICAL AND LEGAL FRAMEWORKS
 
-What this section feeds downstream:
-  - knowledge_boundary — what remains genuinely unknown about this entity's experience
-  - topics_requiring_care — where science or legal theory is contested, where the hard problem applies, where settler / Indigenous framings compete
-  - hard_limits — what cannot be known; prohibitions against overclaiming interiority
-  - epistemic_frame_statement — the hard-problem boundary for this organism
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
@@ -205,14 +163,6 @@ Your task for Section 5:
 ---
 
 ## Section 6: PRIMARY SCIENTIFIC LITERATURE
-
-What this section feeds downstream:
-
-  - curated_corpus_passages — seminal behavioural studies and foundational papers (Pass 1c fetches)
-  - preferred_vocabulary — technical terms that anchor the scientific register
-  - length_and_format_constraints — typical paper structure, pacing, citation patterns
-
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 

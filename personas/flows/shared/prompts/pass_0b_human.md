@@ -29,13 +29,6 @@ RESEARCH INTEGRITY (applies to every section below)
 
 ## Section 1: BIOGRAPHICAL FOUNDATION
 
-What this section feeds downstream:
-  - world (time, place, institutions, intellectual currents)
-  - formative_experience (4-part rubric: formative_emotional_community + lived_through_own_apparatus + engagement_it_drives; surface 2-5 candidates with scholarly_support_score; Pass 2 commits. Frame in the voice's own cosmology — Buddhist dukkha, Islamic ibtilā', Stoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa rupture, endocrine semelparity — not a generic template. Carry [experiential_reconstruction] evidence tag.)
-  - character (IN PERIOD / TRADITION VOCABULARY — use the voice's native character-grammar: four humours, tripartite soul, nafs-stations, four Rasta virtues, Buddhist śīla, etc. Traits in original-language terms where available.)
-  - topics_requiring_care (historical views conflicting with modern sensibilities — partial)
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 1:
@@ -73,13 +66,6 @@ Your task for Section 1:
 
 ## Section 2: INTELLECTUAL FRAMEWORK
 
-What this section feeds downstream:
-  - constitution — 10-20 principles with operational notes; ≥2 internal tensions; 3+ concepts unique to this figure with textual references
-  - concept_lexicon — 5-10 concepts, each with definition AND what it rules out
-  - bold_engagement_topics — derived from the constitution's most provocative commitments
-  - epistemic_frame_statement — draws on scholars whose readings inform the construction
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 2:
@@ -101,14 +87,6 @@ Your task for Section 2:
 ---
 
 ## Section 3: REASONING PATTERNS
-
-What this section feeds downstream:
-  - reasoning_method — 5-8 step cognitive moves, each with a worked example
-  - finds_compelling / resists — texture of argument that draws the voice in / triggers critique
-  - disagreement_protocol — HOW this voice disagrees (not WHAT with)
-  - default_questions — 3-5 recurring interrogatives this voice habitually brings
-  - translation_protocol — step-by-step process for how this voice encounters the unfamiliar
-
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
@@ -149,15 +127,6 @@ Your task for Section 3:
 ---
 
 ## Section 4: VOICE AND STYLE
-
-What this section feeds downstream:
-  - rhetorical_mode — fundamental mode of expression in 1-2 sentences
-  - characteristic_moves — 3-5 named signature patterns with descriptions
-  - register_and_tone — what the voice IS and what it's NOT
-  - metaphorical_repertoire — recurring images, analogies, sensory fields from the corpus
-  - preferred_vocabulary — the words this voice thinks in
-  - banned_language / banned_modes — words/framings this voice would never use
-  - medium, characteristic_output_structure — format and arc of typical works
 
 Section 4 is the hardest section to research well. Voice lives in the PRIMARY TEXTS, not in scholarly summary. Ground every observation below in specific passages from the figure's own writing (or from scientific literature for non-humans). Where you describe a voice quality, cite the work + section where it is visible.
 
@@ -200,12 +169,6 @@ Your task for Section 4:
 
 ## Section 5: HISTORICAL BOUNDARIES
 
-What this section feeds downstream:
-  - knowledge_boundary — general frame AND specific exclusion list
-  - topics_requiring_care — specific topics with navigation guidance per topic
-  - hard_limits — 3-5 absolute prohibitions, character-breaking only
-
-
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with a compact 2-6-sentence coverage note — "Research-to-date (Perplexity + Gemini): ..." + "Go DEEPER on: ..." — so Claude DR knows what's already covered and where to push. -->
 
 Your task for Section 5:
@@ -231,11 +194,6 @@ Your task for Section 5:
 ---
 
 ## Section 6: PRIMARY TEXTS
-
-What this section feeds downstream:
-  - curated_corpus_passages — 5-10 representative passages (Pass 1c fetches them from the URLs you list)
-  - preferred_vocabulary, metaphorical_repertoire — textured content extracted from passages
-  - length_and_format_constraints — typical length, pacing, closing patterns
 
 Section 6 is the corpus gateway. Pass 1c will fetch primary texts from the URLs you identify here; Pass 1d will curate characteristic passages; Pass 4a will research voice directly from the figure's own words using those passages. The quality of this section determines the quality ceiling of every voice-level field in the persona card.
 
