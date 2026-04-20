@@ -12,22 +12,28 @@ Everything lives under `~/Desktop/AI Assembly/`:
 
 ```
 ~/Desktop/AI Assembly/
-├── .env -> code/.env       # symlink or code/.env directly (shared secrets)
-├── code/                   # THE GIT REPO — this directory. Only what's here
-│   │                         pushes to GitHub.
+├── code/                   # THE GIT REPO — only what's here pushes to GitHub.
+│   ├── .env                # shared secrets (gitignored at code/.env)
 │   ├── personas/           # persona-pipeline code
 │   ├── runtime/            # runtime-pipeline code
 │   ├── docs/               # specs + briefings
 │   ├── research/           # preserved baseline research
-│   └── _workspace/         # planning + archive
-└── projects/               # NEVER pushed to GitHub
-    ├── test/               # sandbox / experimentation
-    │   ├── inputs/…        # voices, dossiers, non_human_grounding, JSON configs
-    │   ├── reference/…     # sessions.json, speakers.json (runtime-side)
-    │   ├── council_config.json
-    │   └── runs/           # all pipeline outputs, both pipelines
-    └── athens-2026/        # production instance
-        └── (same shape as test/)
+│   └── _workspace/         # planning + doc archive (fix-plans, session-artifacts, specs)
+├── projects/               # NEVER pushed to GitHub — active project data
+│   ├── test/               # sandbox / experimentation (Dostoevsky lives here)
+│   │   ├── inputs/…        # voices, dossiers, non_human_grounding, JSON configs
+│   │   ├── reference/…     # sessions.json, speakers.json (runtime-side)
+│   │   ├── council_config.json
+│   │   └── runs/           # all pipeline outputs, both pipelines
+│   └── athens-2026/        # production instance
+│       └── (same shape as test/)
+└── archive/                # frozen historical runs — NEVER pushed
+    └── runs/
+        ├── personas/       # v3.10 run artifacts (Plato baseline for Phase L.8,
+        │                     Hannah Arendt partial, Ibn Battuta minimal, old
+        │                     DR prompts)
+        └── runtime/dev_msc_test/  # rehearsal run, 3 sessions, multiple
+                                   # researcher/provocateur versions
 ```
 
 ## Repo layout (inside `code/`)
@@ -37,7 +43,7 @@ Four categories:
 - `docs/`, `runtime/`, `personas/` — **production** slice. Current specs, running code, canonical pipeline. In scope for every code review and VM deploy.
 - `research/` — **preserved grounding**. Deep Research artifacts that ground architecture decisions. Not deletable.
 - `_workspace/planning/` — **forward-looking design**. Active docs for unbuilt work (Phase B rebuild plan, binding decisions). Promoted to `docs/` when the work lands.
-- `_workspace/archive/` — **historical detritus**. Executed fix plans, stale specs, session artifacts, run artifacts. Eligible for pruning. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
+- `_workspace/archive/` — **historical docs only** (executed fix plans, stale specs, session artifacts). Actual run data (persona + runtime runs from v3.10 and the dev_msc_test rehearsal) lives at the umbrella level under `~/Desktop/AI Assembly/archive/runs/` — moved out of the code repo in Tier 3, 2026-04-20. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
 - `.env` — shared secrets at `code/.env` (not committed). Both sub-trees load from `../.env` (one directory above their own root, so `code/.env` since they live at `code/personas/` and `code/runtime/`).
 
 ## Code / project separation (Tier 3)
