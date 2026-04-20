@@ -198,7 +198,7 @@ Treat Rob Boddice's biocultural critique of the persona card schema (5th baselin
 
 ### Why no v3.10 bridge patch
 
-All 12 persona cards (including the 5 with v3.10 partials — Plato, Cleopatra, Arendt, Octopus, Ibn Battuta) get rebuilt on the Phase B architecture per §"Voices to build" above. Existing run outputs (now at `_workspace/archive/runs/personas/`) are archaeology. There is no "ship pre-Athens on v3.10" path; the rebuild itself produces the Athens-ready cards. Bridge patches to v3.10 prompts for Boddice would be discarded. Captured here so a future session doesn't re-suggest it.
+All 12 persona cards (including the 5 with v3.10 partials — Plato, Cleopatra, Arendt, Octopus, Ibn Battuta) get rebuilt on the Phase B architecture per §"Voices to build" above. Existing run outputs (now at `~/Desktop/AI Assembly/archive/runs/personas/`, moved out of the code repo in Tier 3) are archaeology. There is no "ship pre-Athens on v3.10" path; the rebuild itself produces the Athens-ready cards. Bridge patches to v3.10 prompts for Boddice would be discarded. Captured here so a future session doesn't re-suggest it.
 
 ---
 

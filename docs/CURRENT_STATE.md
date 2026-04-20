@@ -67,7 +67,7 @@ ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
 
 **Status: built, end-to-end. Phases 1, 2, 3, 4 complete. Phase 5 Cross-Persona QC not built.**
 
-Two full runs completed: **Plato** (full pipeline, all artifacts in `_workspace/archive/runs/personas/plato/`) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
+Two full runs completed: **Plato** (full pipeline, all artifacts in `~/Desktop/AI Assembly/archive/runs/personas/plato/` — moved out of the code repo in Tier 3, 2026-04-20) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
 
 Built and verified:
 
@@ -472,7 +472,7 @@ or expand?"`. Default for now: keep the 3-enum.
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs for all 12 members; not derived from real persona-pipeline Derive output. Will be replaced with real Derive output from the rebuilt Phase B persona pipeline.
 - **`$PROJECT_ROOT/inputs/voices/`** (for Athens: `../athens-2026/inputs/voices/`): 5 v3.10 Pass 0a artifacts on disk (plato, hannah_arendt, cleopatra, octopus, ibn_battuta) plus an in-progress Dostoevsky config. **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace). Per Tier 3 (2026-04-20), this directory lives outside the code repo under PROJECT_ROOT.
 - **`$PROJECT_ROOT/inputs/dossiers/`**: 0 of 12 Claude DR dossiers in the current tree. All 12 will be generated under the new Pass 0b template (PB#2 hybrid Jinja+LLM tailoring) once Phase B lands.
-- **`_workspace/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer.
+- **`~/Desktop/AI Assembly/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer. (Moved to umbrella-level archive/ in Tier 3 cleanup, 2026-04-20.)
 
 ### 6.2 Pipeline gaps
 

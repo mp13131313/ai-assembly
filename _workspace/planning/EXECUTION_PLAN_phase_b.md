@@ -323,7 +323,7 @@ Runs inside `run_persona_pipeline.py`. Emits `provocateur_profile.json`
 ### L.8 Review output quality ← **HUMAN QUALITY GATE**
 
 Read `$PROJECT_ROOT/runs/plato/persona_card_assembled.json`. Is it BETTER than
-v3.10 Plato (at `_workspace/archive/runs/personas/plato/persona_card_assembled.json`)?
+v3.10 Plato (at `~/Desktop/AI Assembly/archive/runs/personas/plato/persona_card_assembled.json` — umbrella-level archive, moved out of the code repo in Tier 3 on 2026-04-20)?
 
 Checks:
 - Does `formative_experience` use Boddice §14 4-part structure (not "one wound + lesson")?
@@ -347,7 +347,7 @@ feat(phase-b/L): first-voice end-to-end test — Plato rebuilt under Phase B
 
 Complete pipeline run from new Pass 0a through Phase 4 Derive. Plato's
 rebuilt card at $PROJECT_ROOT/runs/plato/persona_card_assembled.json; review
-against _workspace/archive/runs/personas/plato/ baseline recorded in
+against ~/Desktop/AI Assembly/archive/runs/personas/plato/ baseline recorded in
 $PROJECT_ROOT/runs/plato/rebuild_review.md.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
