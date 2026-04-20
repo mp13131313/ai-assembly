@@ -155,6 +155,13 @@ Target: 2,500+ words.
   heroine; cipher for the compiler's authorial self-awareness;
   orientalist-critical (Said, Kabbani) vs. literary-historicist
   (Irwin, Marzolph).
+- **Recent scholarly reassessments (2020-2026)** that update,
+  complicate, or reject the prior dominant reading of the character.
+  Especially valuable where translation-tradition shifts (post-
+  Mahdi critical-edition reception; post-Ready / post-Katz Russian-
+  novel retranslations; decolonial-literary-critical turns) have
+  materially reframed how the character is read. Cite author + year
+  + key publication.
 - **The character's narrative function**: what question or problem
   does this character embody? For Scheherazade: can language defer
   violence? can listening transform the listener? what is the

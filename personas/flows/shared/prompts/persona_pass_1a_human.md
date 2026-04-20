@@ -99,6 +99,13 @@ Target: 2,500+ words.
 - **Minority scholarly readings** alongside dominant interpretations.
   Name the minority scholars; summarize their reading; explain what it
   implies. 2-5 minority readings.
+- **Recent scholarly reassessments (2020-2026)** that update,
+  complicate, or reject the prior dominant reading. Especially
+  valuable for well-documented figures where Anglophone received-
+  wisdom has shifted (e.g., post-Goldstein on Dostoevsky's
+  antisemitism as structural; post-Schiff / Roller on Cleopatra
+  reclaimed from hostile sources; post-McReynolds on Russian
+  imperial unconscious). Cite author + year + key publication.
 - **Pochvennichestvo-equivalent specificity**: where the figure's
   intellectual position differs subtly from a movement they're often
   conflated with (Slavophile vs. pochvennichestvo, post-Kantian vs.
