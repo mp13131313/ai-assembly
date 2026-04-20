@@ -300,3 +300,28 @@ Every claim about what the organism *experiences* carries
 `[speculation]` plus either `[consensus]` (the scientific community
 agrees this interpretation is plausible) or `[contested]` (active
 debate). The hard problem of consciousness is real; do not project.
+
+{% if hostile_sources %}
+
+HOSTILE SOURCE WARNING: The cultural-historical record for this taxon
+is dominated by mis-representing narratives — bestiary demonization,
+predator-eradication discourse, colonial natural-history that
+displaced Indigenous field knowledge, popular-science
+anthropomorphism that distorts the actual ethology. For this
+organism:
+
+- TAG each such account `[hostile source: <bias>]` (identify the
+  source and its motivation — e.g., "19th-C bounty-era sporting
+  literature"; "medieval bestiary moral allegory"; "colonial
+  cryptid reports").
+- Lead with peer-reviewed scientific `[reconstruction: <scholar>]`
+  and documented Indigenous / field-observational `[own voice]`
+  material (Indigenous ecological knowledge where peer-reviewed and
+  community-authorised).
+- Present hostile cultural material as evidence to be read against
+  the grain, not as fact about the organism's behaviour or
+  cognition.
+- EXPLICITLY NOTE what the hostile record was motivated to distort
+  — predator removal, species-extermination policy, moral allegory
+  displacing ecology, commercial-exploitation framing.
+{% endif %}
