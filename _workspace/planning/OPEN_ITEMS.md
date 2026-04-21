@@ -20,6 +20,10 @@ Pending code items 1–5 from §"Pending code changes" below: **SHIPPED** (phase
 **What's still open for Phase L:**
 - Dostoevsky §5–§6 DR sessions (manual operator task — claude.ai)
 - Full Dostoevsky pipeline run after §5–§6 land (Phase L.8 quality gate)
+- `run_persona_pipeline.py` pass 2-7 write paths: 15+ `RUN / "02_passes/..."` calls
+  still write to old `runs/<slug>/02_passes/` layout. Must be updated to `_paths.*`
+  before the first full pipeline run completes. Blocked by §5-§6 anyway — do this
+  at the start of the Phase L run session (search for `02_passes/` in that file).
 - Docstring/comment stale paths in 6 files (listed in test report — cosmetic only)
 
 ---
