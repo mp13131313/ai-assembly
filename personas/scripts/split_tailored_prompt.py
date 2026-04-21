@@ -83,7 +83,11 @@ def wrap_section(
         "pass_0b_footer.md",
         corpus_constraint=voice_config.get("corpus_constraint", "full"),
         hostile_sources=voice_config.get("hostile_sources", False),
-        display_name_with_hint=voice_config["name"],  # TODO J.2: use display_name_with_hint field
+        display_name_with_hint=(
+            f"{voice_config['name']} ({voice_config['wikipedia_disambiguation_hint']})"
+            if voice_config.get("wikipedia_disambiguation_hint")
+            else voice_config["name"]
+        ),
         section_mode=True,
     )
     provenance = (
