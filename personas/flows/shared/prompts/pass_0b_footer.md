@@ -1,4 +1,5 @@
 {# Pass 0b footer — hostile_sources + corpus_constraint blocks + OUTPUT FORMAT. Shared across types. #}
+{% set section_mode = section_mode | default(false) %}
 {% if hostile_sources %}
 
 HOSTILE SOURCE — READING AGAINST THE GRAIN
@@ -32,7 +33,12 @@ This voice's primary corpus is copyrighted lyrics. In this dossier:
 
 OUTPUT FORMAT
 
-A research dossier only. NOT a persona card — no "Field NN:" structure, no "Block" headings. Organise under six thematic area headings matching the list above (the `dr_validation.py` check is lenient on format but strict on persona-card-shape leakage).
+A research dossier only. NOT a persona card — no "Field NN:" structure, no "Block" headings.
+{% if section_mode %}
+Organise under the thematic area heading matching the area above (the `dr_validation.py` check is lenient on format but strict on persona-card-shape leakage).
+{% else %}
+Organise under six thematic area headings matching the list above (the `dr_validation.py` check is lenient on format but strict on persona-card-shape leakage).
+{% endif %}
 
 Narrative prose. Cite the primary argument of each paragraph (author + work minimum; section/page where available; year only where load-bearing). Mark primary-source quotations `[quote: <work>, <section>]` in prose. Mark speculative or inferential claims `[~uncertain]`. Do not produce other tag forms — downstream passes apply the full evidence-tagging convention.
 
