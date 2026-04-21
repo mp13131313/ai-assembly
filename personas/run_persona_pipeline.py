@@ -30,6 +30,9 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 
+from flows.shared import paths as _paths
+from flows.shared.chunk_runner import detect_dr_mode
+from flows.shared.dr_validation import validate_dr_dossier
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
 from flows.shared.project_root import add_project_arg, resolve_project_root
@@ -37,7 +40,6 @@ from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
-from flows.shared.dr_validation import validate_dr_dossier
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
@@ -124,22 +126,23 @@ broad_scan_text = pass1b["text"]
 stamp(f"PASS 1b: loaded Gemini broad scan ({len(broad_scan_text)} chars)")
 
 
-# ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
-# Path derived from voice slug. User runs claude.ai with Opus 4.7 + extended
-# thinking + Deep Research, saves result to $PROJECT_ROOT/inputs/dossiers/<slug>_claude_dr.md.
-# Pass 1-merge does a three-way contradiction check when this file is present.
-claude_dr_text = ""
-_claude_dr_path = PROJECT_ROOT / f"inputs/dossiers/{SLUG}_claude_dr.md"
-if _claude_dr_path.exists():
-    validate_dr_dossier(_claude_dr_path)
-    claude_dr_text = _claude_dr_path.read_text()
-    stamp(f"PASS 1a-DR: loaded Claude Deep Research from {_claude_dr_path.name} ({len(claude_dr_text)} chars)")
-    write_json_atomic(RUN / "01_research/claude_dr_dossier.json", {
-        "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1a_dr_claude_deep_research",
-        "source_file": str(_claude_dr_path), "char_count": len(claude_dr_text), "text": claude_dr_text,
-    })
-else:
-    stamp(f"PASS 1a-DR: no file at {_claude_dr_path.name} — falling back to 2-source merge (Perplexity + Gemini only)")
+# ---------- DR MODE DETECTION ----------
+# Auto-detect per-section vs monolithic DR mode. Errors cleanly on partial state.
+try:
+    dr_mode = detect_dr_mode(SLUG, PROJECT_ROOT)
+    stamp(f"PASS 1a-DR: detected DR mode = {dr_mode}")
+    if dr_mode == "per_section":
+        dr_dossier_path = _paths.dr_dossier_dir(SLUG, PROJECT_ROOT)
+        validate_dr_dossier(dr_dossier_path)
+        claude_dr_text = "per_section"  # signals DR is present; chunk_runner loads per-section
+    else:
+        monolithic_path = _paths.concat_claude_dr(SLUG, PROJECT_ROOT)
+        validate_dr_dossier(monolithic_path)
+        claude_dr_text = monolithic_path.read_text(encoding="utf-8")
+        stamp(f"  monolithic DR: {len(claude_dr_text):,} chars")
+except RuntimeError as e:
+    stamp(f"ERROR: {e}")
+    sys.exit(1)
 
 
 # ---------- PHASE B CHUNKED PASS 1 MERGE ----------
@@ -170,6 +173,7 @@ else:
         use_test_fixtures=False,
         max_parallel=3,
         project_root=PROJECT_ROOT,
+        dr_mode=dr_mode,
     )
     # run_pass_1_7 already writes merged_dossier.json to this path; the cache
     # branch above picks it up on re-run.
