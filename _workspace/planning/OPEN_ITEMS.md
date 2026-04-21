@@ -1,10 +1,11 @@
 # Open Items — post-Phase B aftermath (updated 2026-04-21)
 
-**Branch**: `phase-b-rebuild` (~44 commits, pushed). HEAD = `ae03f80`.
+**Branch**: `phase-b-rebuild` (~45 commits, pushed). HEAD = `6c6c396`.
 
 **--- PHASE B RESTRUCTURE COMPLETE (2026-04-21) ---**
-Phases N–P landed: per-voice folder layout migration, per-section manual DR workflow,
-manifest telemetry, runner path updates, E2E testing. Commit range: `c7f3eeb` → `ae03f80`.
+Phases N–R landed: per-voice folder layout migration, per-section manual DR workflow,
+manifest telemetry, runner path updates (including full Pass 2-7 migration), E2E testing.
+Commit range: `c7f3eeb` → `6c6c396`.
 See `_workspace/planning/SONNET_PHASE_B_RESTRUCTURE_TEST_REPORT.md` for test results.
 
 Pending code items 1–5 from §"Pending code changes" below: **SHIPPED** (phases E–O).
@@ -16,14 +17,13 @@ Pending code items 1–5 from §"Pending code changes" below: **SHIPPED** (phase
 - perplexity_split fallback: SHIPPED in phase H
 - _manifest.json telemetry: SHIPPED in phase L
 - migration script + execute: SHIPPED in phase N
+- run_persona_pipeline.py Pass 2-7 paths: **SHIPPED in phase R** (commit `6c6c396`)
+  All `RUN / "02_passes/..."` references replaced with `_paths.*` accessors.
+  RUN variable removed. 128 tests passing.
 
 **What's still open for Phase L:**
 - Dostoevsky §5–§6 DR sessions (manual operator task — claude.ai)
 - Full Dostoevsky pipeline run after §5–§6 land (Phase L.8 quality gate)
-- `run_persona_pipeline.py` pass 2-7 write paths: 15+ `RUN / "02_passes/..."` calls
-  still write to old `runs/<slug>/02_passes/` layout. Must be updated to `_paths.*`
-  before the first full pipeline run completes. Blocked by §5-§6 anyway — do this
-  at the start of the Phase L run session (search for `02_passes/` in that file).
 - Docstring/comment stale paths in 6 files (listed in test report — cosmetic only)
 
 ---
