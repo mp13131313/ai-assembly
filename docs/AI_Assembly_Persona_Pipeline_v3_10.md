@@ -71,7 +71,7 @@
 **Changelog from v3.3:**
 - FIX: Duplicate `"voice"` key in final JSON assembly — top-level convenience field renamed from `"voice"` to `"voice_name"` (previous: both the voice-name string and the voice-section object used the same key; most JSON parsers silently drop the first, losing the name field)
 - STRUCTURAL: Flattened final JSON output — all 37 card fields at root level plus `metadata` block, no section nesting. Rationale: the Card v2 template defines a flat field list; the Voice Pipeline consumes individual fields via `{{field_name}}`, not sections; section groupings are for human readability (provided by the Card v2 document itself, not the JSON). Eliminates `constitution.constitution` and similar section/field name collisions that would require flattening or renaming in the orchestration layer
-- DEPLOYMENT: `worked_provocations` are now explicitly marked as deployment-specific. Added `deployment_context` metadata field recording which `conference_context` was used at generation time. When re-deploying cards to a different context (e.g., Auroville), re-run Pass 7b with the new `conference_context` — do not re-run the full pipeline
+- DEPLOYMENT: `smoke_test_chains` are now explicitly marked as deployment-specific. Added `deployment_context` metadata field recording which `conference_context` was used at generation time. When re-deploying cards to a different context (e.g., Auroville), re-run Pass 7b with the new `conference_context` — do not re-run the full pipeline
 - Updated pipeline_version to "3.4" in final assembly
 - Updated all internal version references
 
@@ -146,7 +146,7 @@ The Persona Card is not a dossier about a voice. It is the system prompt the voi
 | Register | Fields |
 |---|---|
 | **Second person** ("You are...", "Your reasoning...", "Do not...") | `epistemic_frame_statement`, `hard_limits`, `banned_language`, `banned_modes`, `knowledge_boundary`, `translation_protocol`, `topics_requiring_care`, `quality_criteria` |
-| **First person** ("I hold that...", "I earned the nickname...", "I disagree by...") | `constitution`, `character`, `formative_experience`, `world`, `reasoning_method`, `disagreement_protocol`, `unique_contribution`, `bold_engagement_topics`, `default_questions`, `finds_compelling`, `resists`, `worked_provocations` |
+| **First person** ("I hold that...", "I earned the nickname...", "I disagree by...") | `constitution`, `character`, `formative_experience`, `world`, `reasoning_method`, `disagreement_protocol`, `unique_contribution`, `bold_engagement_topics`, `default_questions`, `finds_compelling`, `resists`, `smoke_test_chains` |
 | **Either** (whichever is natural for the field's function) | `rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `metaphorical_repertoire`, `preferred_vocabulary`, `concept_lexicon`, `curated_corpus_passages`, `medium`, `technical_capabilities`, `characteristic_output_structure`, `relationship_to_detailed_response`, `aesthetic_qualities`, `stance_tendency`, `length_and_format_constraints` |
 
 **The read-aloud test:** Read any field aloud. If it sounds like a scholar describing someone, it is wrong. If it sounds like a person speaking, or like an instruction addressed to that person, it is right. "Bob Marley's reasoning is analogical and testimonial" is wrong. "Your reasoning is analogical and testimonial — you do not build syllogisms" is right.
@@ -552,7 +552,7 @@ If issues found: revision loop — re-run the flagged Claude pass with critique 
 ## Pass 7b: Worked Provocations
 
 **Tool:** Claude API or ChatGPT DR
-**Fields (1):** `worked_provocations`
+**Fields (1):** `smoke_test_chains`
 
 Generates 3–5 complete provocation → detailed response chains that demonstrate the voice in action on novel material. These become few-shot exemplars in the Voice Pipeline's Step 1 prompt. Quality over quantity.
 
@@ -770,7 +770,7 @@ After Pass 5: adds `bold_engagement_topics`, `default_questions`, `disagreement_
 
 After Pass 6: adds `curated_corpus_passages`
 
-After Pass 7b: adds `worked_provocations`
+After Pass 7b: adds `smoke_test_chains`
 
 After Pass 7c: updates `banned_language` and `banned_modes` with testing additions
 
@@ -803,7 +803,7 @@ Final assembly produces a flat JSON — all 37 card fields at root level, plus m
   "reasoning_method": "...",
   "finds_compelling": "...",
   "resists": "...",
-  "worked_provocations": "...",
+  "smoke_test_chains": "...",
 
   "bold_engagement_topics": "...",
   "default_questions": "...",
@@ -847,7 +847,7 @@ Final assembly produces a flat JSON — all 37 card fields at root level, plus m
 
 **Why flat?** The Card v2 template defines a flat field list grouped by human-readable headings. The Voice Pipeline templates reference fields directly (`{{constitution}}`, `{{rhetorical_mode}}`). Section nesting would create collisions (`constitution.constitution`, `voice.rhetorical_mode`) requiring either flattening in the orchestration layer or awkward path references. The grouping in the JSON above (blank lines between sections) is for readability only — all keys are at root level.
 
-**Deployment note:** `worked_provocations` are generated using `{{conference_context}}` from the input. When re-deploying the same cards to a different context (e.g., Auroville), re-run Pass 7b with the updated `conference_context` — the rest of the card is deployment-agnostic. The `metadata.deployment_context` field records which context was used, so the builder knows whether provocations need regeneration.
+**Deployment note:** `smoke_test_chains` are generated using `{{conference_context}}` from the input. When re-deploying the same cards to a different context (e.g., Auroville), re-run Pass 7b with the updated `conference_context` — the rest of the card is deployment-agnostic. The `metadata.deployment_context` field records which context was used, so the builder knows whether provocations need regeneration.
 
 ## Error Handling
 
@@ -1901,7 +1901,7 @@ Complete Persona Card:
 Generate 3-5 chains.
 ```
 
-**Output:** JSON array of provocation/response pairs. Stored as `worked_provocations`.
+**Output:** JSON array of provocation/response pairs. Stored as `smoke_test_chains`.
 
 ---
 
@@ -1941,7 +1941,7 @@ Persona specification (how this voice SHOULD sound):
 {{persona_card.banned_modes}}
 
 Worked provocations (how the voice ACTUALLY performed):
-{{worked_provocations}}
+{{smoke_test_chains}}
 
 Output updated banned_language and banned_modes as JSON.
 ```
@@ -2106,7 +2106,7 @@ Non-human voices: 4-5 hours each. Run cross-persona distinctiveness tests.
 
 ## Week 5-6: Testing and Refinement
 
-Expand worked_provocations. Build out banned lists. Run evaluation rubrics. Final human review of all cards.
+Expand smoke_test_chains. Build out banned lists. Run evaluation rubrics. Final human review of all cards.
 
 ---
 

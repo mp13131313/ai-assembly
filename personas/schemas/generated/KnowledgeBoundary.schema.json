@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus a\nspecific exclusion list that catches the things the model would\notherwise slip on. For pre-modern voices: temporal exclusions. For\nnon-human voices: ontological-access exclusions. For cultural voices\nwithin modernity: tradition-specific exclusions.",
+  "properties": {
+    "general_frame": {
+      "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.'",
+      "title": "General Frame",
+      "type": "string"
+    },
+    "temporal_exclusions": {
+      "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Temporal Exclusions",
+      "type": "array"
+    },
+    "geographic_exclusions": {
+      "description": "Places outside this voice's known world.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Geographic Exclusions",
+      "type": "array"
+    },
+    "conceptual_exclusions": {
+      "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. Tag each with the reason it's excluded.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Conceptual Exclusions",
+      "type": "array"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "general_frame"
+  ],
+  "title": "KnowledgeBoundary",
+  "type": "object"
+}

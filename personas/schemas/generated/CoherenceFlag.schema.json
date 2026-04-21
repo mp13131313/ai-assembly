@@ -1,0 +1,54 @@
+{
+  "description": "One cross-chunk consistency issue flagged by Pass 1.7.",
+  "properties": {
+    "flag_id": {
+      "description": "Short label, e.g. 'CF-01'.",
+      "title": "Flag Id",
+      "type": "string"
+    },
+    "severity": {
+      "enum": [
+        "minor",
+        "moderate",
+        "major"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "cross_chunk_citation_mismatch",
+        "commitment_formative_misalignment",
+        "concept_undefined_in_reasoning",
+        "voice_reasoning_mismatch",
+        "anachronism_boundary_mismatch",
+        "passage_work_orphan",
+        "other"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "description": {
+      "description": "1-3 sentences naming the issue.",
+      "title": "Description",
+      "type": "string"
+    },
+    "affected_chunks": {
+      "description": "e.g. ['1.1 formative_candidates', '1.2 commitments']",
+      "items": {
+        "type": "string"
+      },
+      "title": "Affected Chunks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "flag_id",
+    "severity",
+    "category",
+    "description",
+    "affected_chunks"
+  ],
+  "title": "CoherenceFlag",
+  "type": "object"
+}

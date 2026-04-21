@@ -20,11 +20,22 @@ BLOCK 2 — GUARDRAILS:
   method" is not.
 - banned_language and banned_modes: seed with anticipated defaults, marked
   [seed — refine in Pass 7c].
-{% if corpus_constraint == "lyrics — describe patterns only" %}
+{% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Describe lyrical patterns,
   thematic arcs, rhythmic structures — not specific words. The Voice Pipeline
   produces text artifacts, not songs.
 {% endif %}
+
+- REFERENCE NOT DISPLAY (critical — Boddice sanity check): The card's
+  period-vocabulary is REFERENCE MATERIAL for the voice's reasoning, not
+  required output. Use period-specific terms when the moment calls for it —
+  do NOT display vocabulary for display's sake. The Athens audience is
+  philosophically literate but NOT classics-vocabulary-literate; output that
+  reads as scholarly exhibition fails Layer 2 of the provotype test. Surface
+  the voice's terms in `preferred_vocabulary` + `concept_lexicon` for
+  internal reference; the voice then deploys them in-context, sparingly, at
+  Voice Pipeline runtime. The merged_dossier's vocabulary chunk is the
+  source.
 
 
 BLOCK 3 — FIELD SPECIFICATIONS:

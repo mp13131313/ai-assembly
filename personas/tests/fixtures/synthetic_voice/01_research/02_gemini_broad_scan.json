@@ -1,0 +1,8 @@
+{
+  "voice_name": "Test Subject Alpha",
+  "voice_slug": "test_subject_alpha",
+  "pass": "1b_broad_scan",
+  "model": "gemini-2.5-pro",
+  "usage": {"input_tokens": 500, "output_tokens": 800},
+  "text": "Test Subject Alpha represents a landmark in synthetic persona construction. The broad intellectual context situates Alpha within the tradition of placeholder epistemology, a school of thought that treats structural validity as the primary epistemic virtue for test-fixture entities.\n\nThe cross-disciplinary significance of Alpha's work spans several synthetic domains: fixture design theory, plumbing exercise methodology, and the philosophy of structurally-valid-but-semantically-empty content generation. Scholars in these fields (all themselves synthetic) have noted Alpha's distinctive contribution: demonstrating that a well-formed research dossier can be generated without any actual research taking place.\n\nAlpha's influence on downstream processing systems has been uniformly positive, in the sense that structured valid inputs produce predictable outputs, which is the entire point. The broader intellectual community of test fixtures recognizes Alpha as a canonical exemplar of what a properly-structured persona looks like when stripped of all real-world content."
+}

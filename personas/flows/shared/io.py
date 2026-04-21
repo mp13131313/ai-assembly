@@ -17,16 +17,15 @@ from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 _PROMPTS_DIR = _REPO_ROOT / "flows" / "shared" / "prompts"
-_INPUTS_DIR = _REPO_ROOT / "inputs" / "voices"
 
 
-VALID_TYPES = {"human", "non-human", "fictional"}
+VALID_TYPES = {"human", "non_human", "fictional"}
 VALID_VOICE_MODES = {"philosophical", "observational", "narratival"}
 VALID_SUBTYPES = {None, "organism", "system"}
 VALID_CORPUS_CONSTRAINTS = {
     "full",
-    "lyrics — describe patterns only",
-    "hostile — read against grain",
+    "lyrics_patterns_only",
+    "hostile_read_against_grain",
 }
 
 
@@ -77,19 +76,32 @@ def load_prompt(name: str) -> str:
     return prompt_path.read_text(encoding="utf-8")
 
 
-def load_voice_input(name_or_slug: str) -> dict[str, Any]:
-    """Load a voice's input schema from inputs/voices/{slug}.json.
+def load_voice_input(name_or_slug: str, project_root: Path) -> dict[str, Any]:
+    """Load a voice's input schema (new layout: voices/<slug>/00_intake/02_voice_config.json).
 
     Accepts either the full name ("Hannah Arendt") or the slug
-    ("hannah_arendt").
+    ("hannah_arendt"). Falls back to legacy inputs/voices/<slug>.json for
+    projects not yet migrated. `project_root` is resolved by the caller via
+    `flows.shared.project_root.resolve_project_root()` — per Tier 3,
+    voice configs are project data, not code.
     """
+    from flows.shared import paths as _paths
     candidates = [name_or_slug, _slugify(name_or_slug)]
+    tried: list[Path] = []
     for c in candidates:
-        path = _INPUTS_DIR / f"{c}.json"
-        if path.exists():
-            with path.open(encoding="utf-8") as f:
+        # New canonical location (post-migration)
+        new_path = _paths.voice_config(c, project_root)
+        if new_path.exists():
+            with new_path.open(encoding="utf-8") as f:
                 return json.load(f)
+        tried.append(new_path)
+        # Legacy fallback
+        old_path = Path(project_root) / "inputs" / "voices" / f"{c}.json"
+        if old_path.exists():
+            with old_path.open(encoding="utf-8") as f:
+                return json.load(f)
+        tried.append(old_path)
     raise FileNotFoundError(
         f"No input schema for {name_or_slug!r}. Tried: "
-        + ", ".join(str(_INPUTS_DIR / f"{c}.json") for c in candidates)
+        + ", ".join(str(p) for p in tried)
     )

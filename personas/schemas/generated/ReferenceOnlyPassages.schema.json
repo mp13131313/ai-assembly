@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "ReferenceOnlyPassage": {
+      "description": "Private-reasoning corpus — injected into Voice Pipeline Step 1 ONLY.\n\nTwo-tier corpus design (Phase B, cleanup deferrals): for voices whose\nprimary corpus is copyright-sensitive (musical voices: Marley; possibly\nDostoevsky if we pin specific modern-critical-edition translations),\npattern descriptions alone in `Passages` underfit the voice. The voice\ncan reason much more fluently if it has direct access to its own words\nas REFERENCE MATERIAL inside private reasoning.\n\nCritical runtime contract:\n  - Voice Pipeline Step 1 (Private Reasoning) loads these passages into\n    its system prompt alongside the public `curated_corpus_passages`.\n  - Voice Pipeline Step 2 (Public Expression) does NOT load these. The\n    artifact the audience reads must not contain direct lyric quotation\n    (copyright) or any material flagged here as reasoning-only.\n  - The PROHIBITION against quoting these is stronger than banned_language:\n    it applies to ANY output the audience sees, including paraphrase\n    that's identifiably sourced.\n\nLeakage risk: the model could still lift phrases inadvertently in Step 2\neven though the passages aren't loaded there. Pass 7c scans for this\nand should add such lift-phrases to `banned_language` if observed.\n\nVoices for which this field is populated:\n  - `corpus_constraint: lyrics_patterns_only` voices (Marley): YES\n  - Translation-sensitive corpora (Dostoevsky translations under\n    copyright, perhaps): optionally YES with scholarly-edition attribution\n  - Voices with fully public-domain corpora (Plato, Ibn Battuta):\n    usually empty — the regular `Passages` already carries the material",
+      "properties": {
+        "passage_id": {
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "canonical_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Reference"
+        },
+        "contextual_header": {
+          "description": "What the passage is. Same shape as public Passage.",
+          "title": "Contextual Header",
+          "type": "string"
+        },
+        "content": {
+          "description": "The actual text — lyrics, copyrighted translation, etc. Injected into Step 1 ONLY. Never reaches the audience-facing artifact.",
+          "title": "Content",
+          "type": "string"
+        },
+        "source_attribution": {
+          "description": "Full copyright attribution: 'Marley, Bob. \"Redemption Song.\" Uprising (Island Records, 1980). Used as reference-only material under private-use / fair-use reasoning; not redistributed.'",
+          "title": "Source Attribution",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "voice_exemplar",
+            "intellectual_substance"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "passage_id",
+        "work_title",
+        "contextual_header",
+        "content",
+        "source_attribution",
+        "purpose"
+      ],
+      "title": "ReferenceOnlyPassage",
+      "type": "object"
+    }
+  },
+  "description": "Container for the private-reasoning tier. Step 1 reads; Step 2 does not.",
+  "properties": {
+    "passages": {
+      "description": "Usually empty; populated for musical + translation-sensitive voices.",
+      "items": {
+        "$ref": "#/$defs/ReferenceOnlyPassage"
+      },
+      "title": "Passages",
+      "type": "array"
+    },
+    "runtime_contract_note": {
+      "default": "RUNTIME CONTRACT: These passages are loaded into Voice Pipeline Step 1 (Private Reasoning) ONLY. They are NEVER loaded into Step 2 (Public Expression), and no direct quotation of them is permitted in the artifact the audience reads. Enforcement: the runtime's Voice Pipeline Step 2 system-prompt assembly code MUST drop this field before rendering. See personas/HANDOFF.md for the runtime contract.",
+      "description": "Inline reminder the runtime reads.",
+      "title": "Runtime Contract Note",
+      "type": "string"
+    }
+  },
+  "title": "ReferenceOnlyPassages",
+  "type": "object"
+}

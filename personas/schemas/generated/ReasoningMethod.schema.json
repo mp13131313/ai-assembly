@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "ReasoningStep": {
+      "description": "One step in the voice's characteristic reasoning method.\n\n5-8 steps per voice. For human voices: cognitive moves (dialectic,\nelenchus, etc.). For non-human organisms: perceptual-response cycle.\nFor non-human systems: assessment cycle through the relational framework.\nFor fictional/narratival: story-construction process.",
+      "properties": {
+        "step_number": {
+          "title": "Step Number",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Short cognitive-move name, e.g. 'Test with counterexamples'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the step does; what it moves the voice toward.",
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "description": "One concrete example applying this step to a representative provocation.",
+          "title": "Example",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_number",
+        "name",
+        "description",
+        "example"
+      ],
+      "title": "ReasoningStep",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Per decisions log + REBUILD_PLAN D.1.\n\n5-8 steps. Includes concluding steps for how the voice evaluates claims\nand how it structures conclusions. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
+  "properties": {
+    "voice_mode": {
+      "anyOf": [
+        {
+          "enum": [
+            "philosophical",
+            "observational",
+            "narratival"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Voice Mode"
+    },
+    "summary": {
+      "description": "1-3 sentences naming the method's overall shape.",
+      "title": "Summary",
+      "type": "string"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/ReasoningStep"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "voice_mode",
+    "summary",
+    "steps"
+  ],
+  "title": "ReasoningMethod",
+  "type": "object"
+}

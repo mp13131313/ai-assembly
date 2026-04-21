@@ -82,7 +82,7 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
 
     # subtype — required for non-human, optional otherwise
     subtype = voice_input.get("subtype")
-    if vtype == "non-human":
+    if vtype == "non_human":
         non_human_subtypes = {"organism", "system"}
         if subtype not in non_human_subtypes:
             raise InputRejected(
@@ -113,8 +113,10 @@ def validate_input(voice_input: dict[str, Any]) -> dict[str, Any]:
             ),
         )
 
-    # Required string fields
-    for field in ["name", "conference_context"]:
+    # Required string fields — Phase B redesign drops `conference_context`
+    # (Pass 7b loads conference facts + audience + roster directly from the
+    # split inputs/ files; voice_config no longer carries conference context).
+    for field in ["name"]:
         if not voice_input.get(field):
             raise InputRejected(
                 status="REJECTED",

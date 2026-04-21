@@ -1,0 +1,151 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Per Boddice §14 4-part rubric. Multiple candidates possible; Pass 2 commits to one.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.",
+  "properties": {
+    "candidate_label": {
+      "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates', 'Semelparous lifespan', '1977 melanoma diagnosis refused as toe-amputation'.",
+      "title": "Candidate Label",
+      "type": "string"
+    },
+    "formative_emotional_community": {
+      "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage).",
+      "title": "Formative Emotional Community",
+      "type": "string"
+    },
+    "lived_through_own_apparatus": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Per §14 sub-field 2 (HUMAN voices only). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction).",
+      "title": "Lived Through Own Apparatus"
+    },
+    "condition_of_being": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Per §14 sub-field 4 (NON-HUMAN / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus.",
+      "title": "Condition Of Being"
+    },
+    "engagement_it_drives": {
+      "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological.",
+      "title": "Engagement It Drives",
+      "type": "string"
+    },
+    "evidence_tag": {
+      "default": "experiential_reconstruction",
+      "description": "Usually 'experiential_reconstruction' for §14 content.",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    },
+    "scholarly_support_score": {
+      "description": "Pass 2 uses this when committing to a candidate.",
+      "enum": [
+        "strong",
+        "moderate",
+        "contested"
+      ],
+      "title": "Scholarly Support Score",
+      "type": "string"
+    }
+  },
+  "required": [
+    "candidate_label",
+    "formative_emotional_community",
+    "engagement_it_drives",
+    "scholarly_support_score"
+  ],
+  "title": "FormativeCandidate",
+  "type": "object"
+}

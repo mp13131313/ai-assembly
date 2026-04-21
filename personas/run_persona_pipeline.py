@@ -27,26 +27,46 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(REPO_ROOT.parent / ".env")
+load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
+
+from flows.shared import paths as _paths
+from flows.shared.chunk_runner import detect_dr_mode
+from flows.shared.dr_validation import validate_dr_dossier
 from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_json_atomic
 from flows.shared.node0_validation import validate_input
+from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_gemini
+from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
-from flows.shared.dr_validation import validate_dr_dossier
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
 _parser.add_argument("name", help='Voice name, e.g. "Plato" or "Hannah Arendt"')
+add_project_arg(_parser)
 _args = _parser.parse_args()
+
+PROJECT_ROOT = resolve_project_root(_args.project, repo_root=REPO_ROOT)
 
 VOICE_NAME = _args.name
 SLUG = voice_slug(VOICE_NAME)
-RUN = REPO_ROOT / "runs" / SLUG
-(RUN / "01_research").mkdir(parents=True, exist_ok=True)
-(RUN / "02_passes").mkdir(parents=True, exist_ok=True)
+
+
+def _load_conference_context_string() -> str:
+    """Assemble the short conference-context string for Pass 7b / metadata.
+
+    Phase B dropped the `conference_context` field from voice_config; runners
+    that still need the short context paragraph (Pass 7b; pipeline metadata)
+    read it directly from the split conference_facts.json under PROJECT_ROOT.
+    """
+    facts_path = _paths.conference_facts(PROJECT_ROOT)
+    if facts_path.exists():
+        facts = json.loads(facts_path.read_text())
+        return facts.get("conference_context_paragraph", "")
+    return ""
+
+_paths.ensure_voice_dirs(SLUG, PROJECT_ROOT)
 
 
 def stamp(msg: str) -> None:
@@ -77,17 +97,17 @@ def call_or_cache(path: Path, label: str, runner):
 
 
 # ---------- NODE 0 ----------
-stamp(f"NODE 0: validating {VOICE_NAME}")
-vi = validate_input(load_voice_input(VOICE_NAME))
+stamp(f"NODE 0: validating {VOICE_NAME}  (PROJECT_ROOT={PROJECT_ROOT})")
+vi = validate_input(load_voice_input(VOICE_NAME, PROJECT_ROOT))
 stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_sources']}")
 
 
 # ---------- VALIDATE PRE-COMPUTED PASS 1a + 1b OUTPUTS ----------
 # Pass 1a (Perplexity) and Pass 1b (Gemini) must be run BEFORE this script
 # via run_phase0_1_research.py. Check that both outputs exist.
-_pass1a_path = RUN / "01_research/perplexity_dossier.json"
-_pass1b_path = RUN / "01_research/gemini_broad_scan.json"
-_missing = [str(p.relative_to(REPO_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
+_pass1a_path = _paths.perplexity_dossier(SLUG, PROJECT_ROOT)
+_pass1b_path = _paths.gemini_broad_scan(SLUG, PROJECT_ROOT)
+_missing = [str(p.relative_to(PROJECT_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
 if _missing:
     sys.exit(
         "Pass 1a + 1b outputs missing. Run run_phase0_1_research.py first:\n"
@@ -104,91 +124,63 @@ broad_scan_text = pass1b["text"]
 stamp(f"PASS 1b: loaded Gemini broad scan ({len(broad_scan_text)} chars)")
 
 
-# ---------- PASS 1a-DR (Claude Deep Research, manually produced) ----------
-# Path derived from voice slug. User runs claude.ai with Opus 4.7 + extended
-# thinking + Deep Research, saves result to inputs/dossiers/<slug>_claude_dr.md.
-# Pass 1-merge does a three-way contradiction check when this file is present.
-claude_dr_text = ""
-_claude_dr_path = REPO_ROOT / f"inputs/dossiers/{SLUG}_claude_dr.md"
-if _claude_dr_path.exists():
-    validate_dr_dossier(_claude_dr_path)
-    claude_dr_text = _claude_dr_path.read_text()
-    stamp(f"PASS 1a-DR: loaded Claude Deep Research from {_claude_dr_path.name} ({len(claude_dr_text)} chars)")
-    write_json_atomic(RUN / "01_research/claude_dr_dossier.json", {
-        "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1a_dr_claude_deep_research",
-        "source_file": str(_claude_dr_path), "char_count": len(claude_dr_text), "text": claude_dr_text,
-    })
+# ---------- DR MODE DETECTION ----------
+# Auto-detect per-section vs monolithic DR mode. Errors cleanly on partial state.
+try:
+    dr_mode = detect_dr_mode(SLUG, PROJECT_ROOT)
+    stamp(f"PASS 1a-DR: detected DR mode = {dr_mode}")
+    if dr_mode == "per_section":
+        dr_dossier_path = _paths.dr_dossier_dir(SLUG, PROJECT_ROOT)
+        validate_dr_dossier(dr_dossier_path)
+        claude_dr_text = "per_section"  # signals DR is present; chunk_runner loads per-section
+    else:
+        monolithic_path = _paths.concat_claude_dr(SLUG, PROJECT_ROOT)
+        validate_dr_dossier(monolithic_path)
+        claude_dr_text = monolithic_path.read_text(encoding="utf-8")
+        stamp(f"  monolithic DR: {len(claude_dr_text):,} chars")
+except RuntimeError as e:
+    stamp(f"ERROR: {e}")
+    sys.exit(1)
+
+
+# ---------- PHASE B CHUNKED PASS 1 MERGE ----------
+# Replaces v3.10's monolithic contradiction-check merge with the 6+1 chunked
+# merge (Pass 1.1-1.7). Run via the Phase B orchestrator which handles
+# parallel chunk execution + coherence pass + Pydantic validation + atomic
+# writes. Output shape is the MergedDossier Pydantic schema at
+# personas/schemas/merged_dossier.py (16 chunk keys + coherence_flags +
+# coherence_resolutions) rather than v3.10's concatenated-markdown blob.
+#
+# Pass 2-6 prompts (updated in Phase H) read from merged_dossier.<chunk_key>
+# paths into this JSON shape. We serialize the dossier dict and pass it as
+# the `merged_dossier` template variable — the same variable name Pass 2-6
+# user prompts already use, so no prompt changes needed here.
+stamp("PASS 1 (Phase B): chunked merge 1.1-1.7 (parallel + coherence)")
+_merged_dossier_path = _paths.merged_dossier(SLUG, PROJECT_ROOT)
+if _merged_dossier_path.exists():
+    # Cached: load prior run's chunked merged_dossier as-is.
+    stamp(f"  CACHE HIT: loading {_merged_dossier_path.name}")
+    merged_dossier_dict = json.loads(_merged_dossier_path.read_text())
 else:
-    stamp(f"PASS 1a-DR: no file at {_claude_dr_path.name} — falling back to 2-source merge (Perplexity + Gemini only)")
+    from run_pass_1_all import run_pass_1_all  # noqa: E402 — deferred to runtime
+    merged_dossier_dict = run_pass_1_all(
+        name=vi["name"],
+        voice_type=vi["type"],
+        subtype=vi.get("subtype"),
+        voice_mode=vi.get("voice_mode") or "philosophical",
+        use_test_fixtures=False,
+        max_parallel=3,
+        project_root=PROJECT_ROOT,
+        dr_mode=dr_mode,
+    )
+    # run_pass_1_7 already writes merged_dossier.json to this path; the cache
+    # branch above picks it up on re-run.
 
-
-# ---------- PASS 1-MERGE (Claude contradiction check, three-way: Perplexity + Claude DR + Gemini) ----------
-def _pass_1merge():
-    sysp = load_prompt("persona_pass_1merge_contradiction_system").strip()
-    userp = render("persona_pass_1merge_three_way_user",
-                   perplexity_dossier=dossier_text,
-                   claude_dr_dossier=claude_dr_text or None,
-                   gemini_broad_scan=broad_scan_text)
-    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=16000, temperature=1.0, thinking=True,
-                    response_format_json=True)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1merge_contradiction_check",
-            "model": r["model"], "usage": r["usage"], "result": r["json"],
-            "sources_compared": ["perplexity"] + (["claude_dr"] if claude_dr_text else []) + ["gemini"]}
-
-n_sources = 2 + (1 if claude_dr_text else 0)
-stamp(f"PASS 1-merge: contradiction check ({n_sources}-way, Opus 4.7)")
-pass1merge = call_or_cache(RUN / "01_research/contradiction_check.json", "Pass 1-merge", _pass_1merge)
-merge_status = pass1merge["result"].get("status", "UNKNOWN")
-stamp(f"  status: {merge_status}")
-
-# Build merged_dossier: all available sources concatenated + contradiction flags
-merged_dossier_parts = [
-    "=== PRIMARY DOSSIER (Perplexity sonar-deep-research) ===",
-    dossier_text,
-]
-if claude_dr_text:
-    merged_dossier_parts += [
-        "",
-        "=== CLAUDE DEEP RESEARCH DOSSIER (Opus 4.7 + extended thinking + DR) ===",
-        claude_dr_text,
-    ]
-merged_dossier_parts += [
-    "",
-    "=== BROAD SCAN SUPPLEMENT (Gemini 2.5 Pro) ===",
-    broad_scan_text,
-]
-if merge_status == "CONTRADICTIONS":
-    items = pass1merge["result"].get("items", [])
-    merged_dossier_parts += [
-        "",
-        f"=== FLAGGED CONTRADICTIONS ({len(items)}) ===",
-        "Subsequent passes should treat the following as flagged for caution:",
-    ]
-    for i, item in enumerate(items, 1):
-        merged_dossier_parts += [f"\n[{i}] Assessment: {item.get('assessment', '?')}"]
-        # New shape: claims is a list of {source, claim}
-        claims = item.get("claims", [])
-        if claims:
-            for c in claims:
-                merged_dossier_parts.append(f"    Source {c.get('source', '?')}: {c.get('claim', '')}")
-        else:
-            # Backward-compat with old two-source shape
-            merged_dossier_parts += [
-                f"    Claim A: {item.get('claim_a', '')}",
-                f"    Claim B: {item.get('claim_b', '')}",
-            ]
-merged_dossier = "\n".join(merged_dossier_parts)
-
-write_json_atomic(RUN / "01_research/merged_dossier.json", {
-    "voice_name": vi["name"], "voice_slug": SLUG,
-    "merged_dossier": merged_dossier,
-    "sources": pass1merge.get("sources_compared", []),
-    "contradiction_check": pass1merge["result"],
-    "approach_c": bool(claude_dr_text),
-    "degraded_mode": False,
-})
-stamp(f"  merged_dossier: {len(merged_dossier)} chars")
+# The template variable Pass 2-6 see. JSON-serialized with indent for
+# readability; Claude parses structured input from this cleanly.
+merged_dossier = json.dumps(merged_dossier_dict, ensure_ascii=False, indent=2)
+_n_flags = len(merged_dossier_dict.get("coherence_flags", []))
+stamp(f"  merged_dossier: {len(merged_dossier)} chars; {_n_flags} coherence_flags")
 
 
 # ---------- PASS 1c-extract: Extract primary text URLs from merged dossier ----------
@@ -203,26 +195,27 @@ if vi["primary_text_sources"]:
     _extracted_url_items: list = []  # no extraction step, manual override
     stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
 else:
-    def _pass_1c_extract():
-        sysp = "You extract primary text URLs from a merged research dossier. Return only valid JSON, no preamble."
-        userp = render("persona_pass_1c_extract_urls", name=vi["name"]) + \
-                f"\n\nMERGED DOSSIER:\n{merged_dossier}"
-        r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                        max_tokens=4096, temperature=0.0, thinking=False,
-                        response_format_json=True)
-        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls",
-                "model": r["model"], "usage": r["usage"], "result": r["json"]}
-
-    stamp("PASS 1c-extract: extracting primary text URLs from merged dossier (Sonnet)")
-    pass1c_extract = call_or_cache(RUN / "01_research/primary_text_urls.json",
-                                   "Pass 1c-extract", _pass_1c_extract)
-    extracted = pass1c_extract.get("result", {}).get("primary_text_urls", [])
-    _extracted_url_items = extracted  # saved for review gate
-    primary_text_urls = [item["url"] for item in extracted if item.get("url")]
-    stamp(f"  extracted {len(primary_text_urls)} URLs from dossier")
-    notes = pass1c_extract.get("result", {}).get("extraction_notes", "")
-    if notes:
-        stamp(f"  notes: {notes}")
+    # Phase B: Pass 1.6 CORPUS chunk already produced structured URLs with
+    # work titles + source + license notes. Read them directly — no Sonnet
+    # call needed (v3.10's URL-extraction pass was necessary because the
+    # 6-section markdown buried URLs in prose; Phase B's chunked output
+    # surfaces them explicitly).
+    stamp("PASS 1c-extract: reading URLs from Phase B chunked dossier (no LLM)")
+    _urls_chunk = merged_dossier_dict.get("urls", {}).get("urls", [])
+    _extracted_url_items = [
+        {"url": u.get("url"), "work": u.get("work_title"), "source": u.get("source"),
+         "note": u.get("license_or_access_note", "")}
+        for u in _urls_chunk if u.get("url")
+    ]
+    primary_text_urls = [item["url"] for item in _extracted_url_items]
+    stamp(f"  {len(primary_text_urls)} URLs from merged_dossier.urls chunk")
+    notes = ""
+    # Satisfy the downstream pass1c_extract reference with a synthetic cache entry.
+    pass1c_extract = {
+        "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls_phase_b",
+        "result": {"primary_text_urls": _extracted_url_items, "extraction_notes": ""},
+    }
+    write_json_atomic(_paths.primary_text_urls(SLUG, PROJECT_ROOT), pass1c_extract)
 
 
 # ---------- PASS 1c: Fetch primary texts ----------
@@ -234,7 +227,7 @@ def _pass_1c():
 
 if primary_text_urls:
     stamp("PASS 1c: fetching primary texts")
-    pass1c = call_or_cache(RUN / "01_research/primary_texts.json", "Pass 1c", _pass_1c)
+    pass1c = call_or_cache(_paths.primary_texts(SLUG, PROJECT_ROOT), "Pass 1c", _pass_1c)
     stamp(f"  fetched {pass1c['source_count']} sources, {pass1c['total_chars']} total chars")
 else:
     stamp("PASS 1c: SKIPPED (no primary text URLs found)")
@@ -298,23 +291,23 @@ def _write_primary_texts_review(review_path: Path) -> None:
         "## Next Steps",
         "",
         "1. Review fetch results above.",
-        f"2. Optionally edit 01_research/primary_texts.json to add or replace passages.",
-        "3. Create the flag to continue: touch 01_research/primary_texts_reviewed.flag",
+        f"2. Optionally edit voices/{SLUG}/03_corpus/01_primary_texts.json to add or replace passages.",
+        f"3. Create the flag to continue: touch voices/{SLUG}/03_corpus/03_primary_texts_reviewed.flag",
         f"4. Re-run: python3 run_persona_pipeline.py \"{vi['name']}\"",
     ]
     review_path.write_text("\n".join(lines), encoding="utf-8")
 
-_review_flag = RUN / "01_research/primary_texts_reviewed.flag"
+_review_flag = _paths.primary_texts_reviewed_flag(SLUG, PROJECT_ROOT)
 if not _review_flag.exists():
-    _review_path = RUN / "01_research/primary_texts_review.md"
+    _review_path = _paths.primary_texts_review(SLUG, PROJECT_ROOT)
     _write_primary_texts_review(_review_path)
     sys.exit(
         f"\n=== PASS 1c REVIEW GATE ===\n"
         f"Primary text fetch complete. Human review required before pipeline continues.\n\n"
-        f"  1. Read:    {_review_path.relative_to(REPO_ROOT)}\n"
-        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(REPO_ROOT)} "
+        f"  1. Read:    {_review_path.relative_to(PROJECT_ROOT)}\n"
+        f"  2. Edit:    {_paths.primary_texts(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)} "
         f"(add/replace passages if needed)\n"
-        f"  3. Create:  touch {_review_flag.relative_to(REPO_ROOT)}\n"
+        f"  3. Create:  touch {_review_flag.relative_to(PROJECT_ROOT)}\n"
         f"  4. Re-run:  python3 run_persona_pipeline.py \"{vi['name']}\"\n"
     )
 stamp("PASS 1c gate: review flag present — continuing to Pass 1d")
@@ -351,9 +344,18 @@ def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temper
     )
 
 
+# label → paths accessor for coherence threading cache files
+_CT_PATH_MAP = {
+    "pass2":     lambda: _paths.ct_after_pass_2(SLUG, PROJECT_ROOT),
+    "pass2_3":   lambda: _paths.ct_after_pass_3(SLUG, PROJECT_ROOT),
+    "pass2_3_4a": lambda: _paths.ct_after_pass_4a(SLUG, PROJECT_ROOT),
+    "pass2_3_4": lambda: _paths.ct_after_pass_4b(SLUG, PROJECT_ROOT),
+}
+
+
 # ---------- HELPER: coherence threading compress ----------
 def _ct_compress(prior_pass_output: dict, label: str) -> str:
-    ct_path = RUN / f"02_passes/_ct_{label}.json"
+    ct_path = _CT_PATH_MAP[label]()
     cached_v = cached(ct_path, f"CT compress {label}")
     if cached_v is not None:
         return cached_v["summary_text"]
@@ -379,7 +381,7 @@ def _pass_2():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 2: Identity & Boundaries (Opus + thinking)")
-pass2 = call_or_cache(RUN / "02_passes/pass2_identity_boundaries.json", "Pass 2", _pass_2)
+pass2 = call_or_cache(_paths.pass_2(SLUG, PROJECT_ROOT), "Pass 2", _pass_2)
 pass_2_summary = _ct_compress(pass2["fields"], "pass2")
 
 
@@ -395,7 +397,7 @@ def _pass_3():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 3: Intellectual Core (Opus + thinking, ~5 min)")
-pass3 = call_or_cache(RUN / "02_passes/pass3_intellectual_core.json", "Pass 3", _pass_3)
+pass3 = call_or_cache(_paths.pass_3(SLUG, PROJECT_ROOT), "Pass 3", _pass_3)
 combined_2_3 = {**pass2["fields"], **pass3["fields"]}
 pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
 
@@ -426,7 +428,7 @@ def _pass_1d():
             "selections": selections, "selected_text": selected_text}
 
 stamp("PASS 1d: Excerpt Selection (Sonnet, curated subset)")
-pass1d = call_or_cache(RUN / "01_research/excerpt_selections.json", "Pass 1d", _pass_1d)
+pass1d = call_or_cache(_paths.excerpt_selections(SLUG, PROJECT_ROOT), "Pass 1d", _pass_1d)
 primary_block = pass1d["selected_text"]
 stamp(f"  primary_texts block: {len(primary_block)} chars from {pass1d.get('selection_count', 0)} curated selections")
 
@@ -446,7 +448,7 @@ def _pass_4a():
             "voice_basis": "corpus-based" if pass1c.get("passages") else "training-data"}
 
 stamp("PASS 4a: Voice (Opus + thinking, corpus-grounded)")
-pass4a = call_or_cache(RUN / "02_passes/pass4a_voice.json", "Pass 4a", _pass_4a)
+pass4a = call_or_cache(_paths.pass_4a(SLUG, PROJECT_ROOT), "Pass 4a", _pass_4a)
 combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
 pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
 
@@ -465,7 +467,7 @@ def _pass_4b():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 4b: Artifact (Sonnet)")
-pass4b = call_or_cache(RUN / "02_passes/pass4b_artifact.json", "Pass 4b", _pass_4b)
+pass4b = call_or_cache(_paths.pass_4b(SLUG, PROJECT_ROOT), "Pass 4b", _pass_4b)
 combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
 pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 
@@ -473,7 +475,7 @@ pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 # ---------- PASS 5 (Engagement) ----------
 def _pass_5():
     sysp = render("persona_pass_5_engagement", name=vi["name"], type=vi["type"],
-                  voice_mode=vi["voice_mode"])
+                  subtype=vi.get("subtype"), voice_mode=vi["voice_mode"])
     userp = render(
         "persona_pass_5_user",
         pass_2_3_4_summary=pass_2_3_4_summary,
@@ -486,7 +488,7 @@ def _pass_5():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 5: Engagement (Opus + thinking)")
-pass5 = call_or_cache(RUN / "02_passes/pass5_engagement.json", "Pass 5", _pass_5)
+pass5 = call_or_cache(_paths.pass_5(SLUG, PROJECT_ROOT), "Pass 5", _pass_5)
 
 
 # ---------- PASS 6 (Corpus Curation) ----------
@@ -518,7 +520,7 @@ def _pass_6():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 6: Corpus Curation (Sonnet, selection task)")
-pass6 = call_or_cache(RUN / "02_passes/pass6_corpus.json", "Pass 6", _pass_6)
+pass6 = call_or_cache(_paths.pass_6(SLUG, PROJECT_ROOT), "Pass 6", _pass_6)
 
 
 # ---------- PASS 7-pre (Citation Verification) ----------
@@ -543,7 +545,7 @@ def _pass_7pre():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7-pre: Citation Verification (Sonnet)")
-pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json", "Pass 7-pre", _pass_7pre)
+pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT), "Pass 7-pre", _pass_7pre)
 verif = pass7pre["result"]
 stamp(f"  verification: {verif.get('overall', '?')} | "
       f"verified={verif.get('summary', {}).get('verified', 0)} "
@@ -552,6 +554,66 @@ stamp(f"  verification: {verif.get('overall', '?')} | "
       f"dossier_only={verif.get('summary', {}).get('dossier_only', 0)} "
       f"inconsistent={verif.get('summary', {}).get('inconsistent', 0)} "
       f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
+
+
+# ---------- PASS 7-anachronism (TimeChara-style temporal check) ----------
+# Phase B NEW sub-pass (decisions log #14). Runs between 7-pre and 7a.
+# Cross-family evaluator (NOT Claude, per self-preference-bias argument);
+# o3 primary, Gemini fallback. Reads the assembled card; checks every
+# concept / framing / vocabulary term for period-access anachronism.
+# If REVISION_NEEDED, feeds into the same revision loop as Pass 7a.
+def _pass_7_anachronism():
+    full_card_for_anach = {**combined_2_3_4, **pass5["fields"]}
+    if pass6.get("fields"):
+        full_card_for_anach.update(pass6["fields"])
+    # Derive voice_world_period from the card's world field for the prompt.
+    _world = full_card_for_anach.get("world", "")
+    _world_period = _world.split("\n", 1)[0][:300] if isinstance(_world, str) else str(_world)[:300]
+    sysp = render("persona_pass_7_anachronism",
+                  voice_name=vi["name"], voice_type=vi["type"],
+                  voice_world_period=_world_period,
+                  persona_card_json=json.dumps(full_card_for_anach, ensure_ascii=False, indent=2))
+    userp = (
+        "Run the S²RD temporal-anachronism check across the card per the "
+        "system prompt. Emit anachronism_flags[] with severity + category + "
+        "field_path + problematic_text + reason + suggested_fix. Emit "
+        "overall verdict. JSON only."
+    )
+    for openai_model in ("o3", "gpt-4o"):
+        try:
+            r = call_openai(system=sysp, user=userp, model=openai_model,
+                            temperature=0.0, max_tokens=8192,
+                            response_format_json=True)
+            return {"voice_name": vi["name"], "voice_slug": SLUG,
+                    "pass": "7_anachronism_check",
+                    "validator": f"openai:{openai_model}", "model": r["model"],
+                    "usage": r["usage"], "result": r["json"]}
+        except Exception as e:
+            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    try:
+        r = call_gemini(user=sysp + "\n\n" + userp, temperature=0.0,
+                        max_output_tokens=16384)
+        cleaned = r["text"].strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7_anachronism_check",
+                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "usage": r["usage"], "result": json.loads(cleaned)}
+    except Exception as e:
+        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7_anachronism_check", "validator": "skipped",
+                "result": {"overall": "SKIPPED",
+                           "summary": "No cross-model evaluator available."}}
+
+stamp("PASS 7-anachronism: TimeChara temporal check (o3 → Gemini fallback)")
+pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
+                            "Pass 7-anachronism", _pass_7_anachronism)
+_anach_flags = pass7_anach["result"].get("anachronism_flags", [])
+stamp(f"  validator: {pass7_anach.get('validator', '?')} | "
+      f"overall: {pass7_anach['result'].get('overall', '?')} | "
+      f"flags: {len(_anach_flags)}")
 
 
 # ---------- PASS 7a (Cross-Model Validation) ----------
@@ -592,7 +654,7 @@ def _pass_7a():
                 "summary": "No cross-model validator available."}}
 
 stamp("PASS 7a: Cross-Model Validation (gpt-4o -> Gemini fallback)")
-pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json", "Pass 7a", _pass_7a)
+pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT), "Pass 7a", _pass_7a)
 stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
 
@@ -615,6 +677,22 @@ DOWNSTREAM_CHAIN = {
     "6":  ["pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
 }
 
+# fname string → paths accessor (used to invalidate downstream caches in revision loop)
+_FNAME_TO_PATH = {
+    "pass2_identity_boundaries": lambda: _paths.pass_2(SLUG, PROJECT_ROOT),
+    "_ct_pass2":                 lambda: _paths.ct_after_pass_2(SLUG, PROJECT_ROOT),
+    "pass3_intellectual_core":   lambda: _paths.pass_3(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3":               lambda: _paths.ct_after_pass_3(SLUG, PROJECT_ROOT),
+    "pass4a_voice":              lambda: _paths.pass_4a(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3_4a":            lambda: _paths.ct_after_pass_4a(SLUG, PROJECT_ROOT),
+    "pass4b_artifact":           lambda: _paths.pass_4b(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3_4":             lambda: _paths.ct_after_pass_4b(SLUG, PROJECT_ROOT),
+    "pass5_engagement":          lambda: _paths.pass_5(SLUG, PROJECT_ROOT),
+    "pass6_corpus":              lambda: _paths.pass_6(SLUG, PROJECT_ROOT),
+    "pass7pre_citation":         lambda: _paths.pass_7_pre(SLUG, PROJECT_ROOT),
+    "pass7a_cross_model":        lambda: _paths.pass_7a(SLUG, PROJECT_ROOT),
+}
+
 # Map from spec target labels (2, 3, 4a, ...) to the runner's pass function +
 # its result variable name. Used to re-bind after re-running.
 PASS_RUNNERS = {
@@ -628,6 +706,45 @@ PASS_RUNNERS = {
 
 revision_loops = 0
 MAX_REVISION_LOOPS = 2
+
+# Phase B: merge Pass 7-anachronism flags into Pass 7a's revision decision.
+# Anachronism flags are structured {category, field_path, problematic_text,
+# reason, suggested_fix, severity}; we translate them into field_issues the
+# revision loop already understands. Pass 2 + 4a + 5 are the usual targets
+# (world-field anachronisms → Pass 2; voice-vocabulary anachronisms → Pass 4a;
+# engagement-protocol anachronisms → Pass 5).
+if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
+    _anach_issues = []
+    for flag in pass7_anach["result"].get("anachronism_flags", []):
+        _path = flag.get("field_path", "")
+        _target = "2"  # default
+        if _path.startswith(("constitution", "concept_lexicon", "reasoning_method",
+                              "finds_compelling", "resists")):
+            _target = "3"
+        elif _path.startswith(("rhetorical_mode", "characteristic_moves",
+                                "register_and_tone", "metaphorical_repertoire",
+                                "preferred_vocabulary", "banned_language",
+                                "banned_modes")):
+            _target = "4a"
+        elif _path.startswith(("bold_engagement", "default_questions",
+                                "disagreement_protocol", "unique_contribution")):
+            _target = "5"
+        _anach_issues.append({
+            "flagged_pass": _target,
+            "field": _path,
+            "issue": f"[anachronism/{flag.get('category', 'vocabulary')}/{flag.get('severity', 'minor')}] {flag.get('reason', '')}",
+            "recommended_fix": flag.get("suggested_fix", ""),
+        })
+    # Merge into pass7a result so the existing loop picks them up.
+    pass7a["result"].setdefault("field_issues", []).extend(_anach_issues)
+    pass7a["result"].setdefault("revision_target_passes", [])
+    for issue in _anach_issues:
+        if issue["flagged_pass"] not in pass7a["result"]["revision_target_passes"]:
+            pass7a["result"]["revision_target_passes"].append(issue["flagged_pass"])
+    # If 7a said PASS but 7-anach said REVISION_NEEDED, escalate the overall.
+    if pass7a["result"].get("overall") != "REVISION_NEEDED":
+        pass7a["result"]["overall"] = "REVISION_NEEDED"
+        stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
 while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
     targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
@@ -668,7 +785,7 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
 
     # Delete cache files
     for fname in to_invalidate:
-        cache_path = RUN / "02_passes" / f"{fname}.json"
+        cache_path = _FNAME_TO_PATH[fname]()
         if cache_path.exists():
             cache_path.unlink()
 
@@ -681,12 +798,12 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
     # changed. (Captured as a known bug in commit 0452a23 during the
     # Plato revision-loop verification.)
     post_7a_invalidation = [
-        (RUN / "02_passes" / "pass7b_provocations.json"),
-        (RUN / "02_passes" / "pass7c_negative.json"),
-        (RUN / "02_passes" / "derive.json"),
-        (RUN / "persona_card_assembled.json"),
-        (RUN / "provocateur_profile.json"),
-        (RUN / "evaluation_rubric.json"),
+        _paths.pass_7b(SLUG, PROJECT_ROOT),
+        _paths.pass_7c(SLUG, PROJECT_ROOT),
+        _paths.derive_raw(SLUG, PROJECT_ROOT),
+        _paths.assembled_card(SLUG, PROJECT_ROOT),
+        _paths.provocateur_profile(SLUG, PROJECT_ROOT),
+        _paths.evaluation_rubric(SLUG, PROJECT_ROOT),
     ]
     for cache_path in post_7a_invalidation:
         if cache_path.exists():
@@ -699,15 +816,14 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
     earliest = min((pass_order.index(t) for t in targets), default=0)
     chain_to_run = pass_order[earliest:]
 
+    _pass_path_fns = {
+        "2": _paths.pass_2, "3": _paths.pass_3, "4a": _paths.pass_4a,
+        "4b": _paths.pass_4b, "5": _paths.pass_5, "6": _paths.pass_6,
+    }
     for pass_label in chain_to_run:
         runner_name, var_name = PASS_RUNNERS[pass_label]
         runner_fn = globals()[runner_name]
-        suffix = {
-            "2": "identity_boundaries", "3": "intellectual_core",
-            "4a": "voice", "4b": "artifact",
-            "5": "engagement", "6": "corpus",
-        }[pass_label]
-        cache_path = RUN / "02_passes" / f"pass{pass_label}_{suffix}.json"
+        cache_path = _pass_path_fns[pass_label](SLUG, PROJECT_ROOT)
         result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops})", runner_fn)
         globals()[var_name] = result
         # Update derived combined dicts so downstream reads see fresh fields
@@ -724,13 +840,13 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
             pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 
     # Re-run Pass 7-pre (verifies revised card)
-    pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json",
+    pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
                              f"Pass 7-pre (revision loop {revision_loops})", _pass_7pre)
     verif = pass7pre["result"]
     stamp(f"  verification (loop {revision_loops}): {verif.get('overall', '?')}")
 
     # Re-run Pass 7a (re-validates)
-    pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json",
+    pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
                            f"Pass 7a (revision loop {revision_loops})", _pass_7a)
     stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
@@ -747,25 +863,25 @@ else:
 # Spec: Sonnet temp 0.4. We use Opus + adaptive thinking — these
 # provocations are a build-time smoke test + Pass 7c diagnostic
 # surface + human-review artifact. They are NOT runtime few-shot
-# exemplars (see metadata.worked_provocations_role below, and
+# exemplars (see metadata.smoke_test_chains_role below, and
 # personas/HANDOFF.md). High stakes because Pass 7c reads them.
 def _pass_7b():
     full_card_for_provoke = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):
         full_card_for_provoke.update(pass6["fields"])
-    sysp = render("persona_pass_7b_provocations",
-                  conference_context=vi["conference_context"],
-                  voice_mode=vi["voice_mode"])
-    userp = render("persona_pass_7b_provocations_user",
+    sysp = render("persona_pass_7b_smoke_test",
+                  conference_context=_load_conference_context_string(),
+                  voice_mode=vi["voice_mode"], subtype=vi.get("subtype"))
+    userp = render("persona_pass_7b_smoke_test_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=24000, thinking=True, temperature=1.0)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_worked_provocations",
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_smoke_test_chains",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 7b: Worked Provocations (Opus + thinking)")
-pass7b = call_or_cache(RUN / "02_passes/pass7b_provocations.json", "Pass 7b", _pass_7b)
-n_provs = len(pass7b["fields"].get("worked_provocations", []))
+pass7b = call_or_cache(_paths.pass_7b(SLUG, PROJECT_ROOT), "Pass 7b", _pass_7b)
+n_provs = len(pass7b["fields"].get("smoke_test_chains", []))
 stamp(f"  generated {n_provs} provocation chains")
 
 
@@ -780,7 +896,7 @@ def _pass_7c():
                    register_and_tone=json.dumps(voice_fields.get("register_and_tone", ""), ensure_ascii=False),
                    banned_language=json.dumps(voice_fields.get("banned_language", []), ensure_ascii=False, indent=2),
                    banned_modes=json.dumps(voice_fields.get("banned_modes", []), ensure_ascii=False, indent=2),
-                   worked_provocations=json.dumps(pass7b["fields"].get("worked_provocations", []), ensure_ascii=False, indent=2))
+                   smoke_test_chains=json.dumps(pass7b["fields"].get("smoke_test_chains", []), ensure_ascii=False, indent=2))
     # Try Gemini first (preferred per spec)
     sysp_gemini = render("persona_pass_7c_negative", claude_fallback=False)
     try:
@@ -804,7 +920,7 @@ def _pass_7c():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7c: Negative Constraints (Gemini -> Sonnet fallback)")
-pass7c = call_or_cache(RUN / "02_passes/pass7c_negative.json", "Pass 7c", _pass_7c)
+pass7c = call_or_cache(_paths.pass_7c(SLUG, PROJECT_ROOT), "Pass 7c", _pass_7c)
 add_summary = pass7c["result"].get("additions_summary", {})
 stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_language +{add_summary.get('language_added', 0)} "
@@ -837,7 +953,7 @@ def _derive():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Sonnet)")
-derive = call_or_cache(RUN / "02_passes/derive.json", "Derive", _derive)
+derive = call_or_cache(_paths.derive_raw(SLUG, PROJECT_ROOT), "Derive", _derive)
 prov_profile = derive["result"].get("provocateur_profile", {})
 eval_rubric = derive["result"].get("evaluation_rubric", {})
 stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
@@ -847,9 +963,9 @@ stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
 
 # Save Provocateur Profile as standalone artifact for the runtime ai-assembly
 # repo's council_config.json wiring (per spec — stored separately).
-write_json_atomic(RUN / "provocateur_profile.json", prov_profile)
-write_json_atomic(RUN / "evaluation_rubric.json", eval_rubric)
-stamp(f"  saved: {RUN}/provocateur_profile.json + evaluation_rubric.json")
+write_json_atomic(_paths.provocateur_profile(SLUG, PROJECT_ROOT), prov_profile)
+write_json_atomic(_paths.evaluation_rubric(SLUG, PROJECT_ROOT), eval_rubric)
+stamp(f"  saved: provocateur_profile.json + evaluation_rubric.json → voices/{SLUG}/06_derive/")
 
 
 # ---------- FINAL SUMMARY ----------
@@ -859,7 +975,8 @@ REGISTER_CHECK_SKIP_FIELDS = {
     # not voice-field content. Third-person in these fields is NOT a register
     # violation.
     "curated_corpus_passages",   # primary text excerpts + scholarly annotations
-    "worked_provocations",        # diagnostic artifact with scholarly gloss
+    "reference_only_passages",   # two-tier corpus private tier (Step 1 only)
+    "smoke_test_chains",        # diagnostic artifact with scholarly gloss
     "metadata",                   # pipeline metadata
 }
 
@@ -882,7 +999,7 @@ def _check_register(card_fields: dict, voice_last_name: str):
     Two corrections over the original string-match version:
 
     1. Scholar-annotation fields are SKIPPED. Fields like curated_corpus_passages,
-       worked_provocations, and metadata legitimately contain third-person
+       smoke_test_chains, and metadata legitimately contain third-person
        scholarly commentary about the figure (e.g., "Plato's method of
        steelmanning" as an annotation on a Republic excerpt). These are not
        voice-field content and shouldn't be flagged.
@@ -923,7 +1040,7 @@ def _check_register(card_fields: dict, voice_last_name: str):
 full_card = {**combined_2_3_4, **pass5["fields"]}
 if pass6.get("fields"):
     full_card.update(pass6["fields"])
-# Pass 7b: worked_provocations field
+# Pass 7b: smoke_test_chains field
 if pass7b.get("fields"):
     full_card.update(pass7b["fields"])
 # Pass 7c: refined banned_language and banned_modes (overwrite Pass 4a's seeds)
@@ -962,16 +1079,16 @@ stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
 stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
 stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
       f"after {revision_loops} revision loop(s)")
-stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('worked_provocations', []))} chains")
+stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('smoke_test_chains', []))} chains")
 stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
       f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
 stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
 stamp(f"  Total card fields:    {len(full_card)}")
 stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
-stamp(f"  Card saved to:        {RUN}/02_passes/")
+stamp(f"  Card saved to:        {_paths.voice_root(SLUG, PROJECT_ROOT)}/")
 stamp("=" * 60)
 
-write_json_atomic(RUN / "persona_card_assembled.json", {
+write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
     # Spec wants 37 card fields flat at root + a metadata block.
     "voice_name": vi["name"],
     "voice_mode": vi["voice_mode"],
@@ -980,6 +1097,12 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
 
     # All 35 generated card fields, flat at root level
     **full_card,
+
+    # Two-tier corpus (Phase B): reference_only_passages is loaded into
+    # Voice Pipeline Step 1 ONLY; Step 2 drops it before assembling its
+    # system prompt. See personas/HANDOFF.md §"reference_only_passages is
+    # Step 1 only" for the enforcement contract.
+    "reference_only_passages": merged_dossier_dict.get("reference_only_passages", {"passages": []}),
 
     # Runtime continuity fields (populated by Voice Pipeline at deployment, not
     # by Persona Pipeline). Initialized null so consumers don't get KeyError.
@@ -1000,7 +1123,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
             "7pre_citation_verification",
             "7a_cross_model_validation",
-            "7b_worked_provocations",
+            "7b_smoke_test_chains",
             "7c_negative_constraints",
             "derive_provocateur_profile_and_rubric",
         ],
@@ -1011,7 +1134,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),
         "subtype": vi.get("subtype"),
-        "deployment_context": vi.get("conference_context", ""),
+        "deployment_context": _load_conference_context_string(),
         "human_review_status": "pending",
         "approach_c": bool(claude_dr_text),
         "citation_verification": {
@@ -1029,7 +1152,7 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "evaluator": pass7c.get("evaluator"),
             "additions_summary": pass7c["result"].get("additions_summary", {}),
         },
-        "worked_provocations_role": (
+        "smoke_test_chains_role": (
             "DIAGNOSTIC + HANDOFF ARTIFACT, NOT RUNTIME EXEMPLAR. "
             "These provocations are the card's first words — generated by "
             "Pass 7b as (1) a smoke test that the 35-field spec coheres into "
@@ -1041,8 +1164,8 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "question arrives that's nothing like the test set."
         ),
         "derived_outputs": {
-            "provocateur_profile_path": f"runs/{SLUG}/provocateur_profile.json",
-            "evaluation_rubric_path": f"runs/{SLUG}/evaluation_rubric.json",
+            "provocateur_profile_path": f"voices/{SLUG}/06_derive/01_provocateur_profile.json",
+            "evaluation_rubric_path": f"voices/{SLUG}/06_derive/02_evaluation_rubric.json",
             "note": (
                 "Provocateur Profile is the 8-field council_config.json member "
                 "entry. Evaluation Rubric is 9 test prompts (3 identity + 3 "
@@ -1057,10 +1180,10 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "pass2": len(pass2["fields"]), "pass3": len(pass3["fields"]),
             "pass4a": len(pass4a["fields"]), "pass4b": len(pass4b["fields"]),
             "pass5": len(pass5["fields"]), "pass6": len(pass6.get("fields", {})),
-            "pass7b_provocations": len(pass7b["fields"].get("worked_provocations", [])),
+            "pass7b_smoke_test": len(pass7b["fields"].get("smoke_test_chains", [])),
         },
         "register_violations": register_violations,
         "register_violation_details": register_details,
     },
 })
-stamp(f"Assembled card -> {RUN}/persona_card_assembled.json")
+stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")

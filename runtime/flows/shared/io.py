@@ -108,8 +108,11 @@ def load_prompt(name: str) -> str:
 
 
 
-_COUNCIL_DIR = Path(__file__).resolve().parent / "council"
-_COUNCIL_CONFIG_PATH = _COUNCIL_DIR / "council_config.json"
+_COUNCIL_DIR = Path(__file__).resolve().parent / "council"  # docs + schema live here
+# Per Tier 3 (2026-04-20), the council_config.json JSON itself lives under
+# PROJECT_ROOT (project data — derived from the persona pipeline's per-voice
+# Provocateur Profiles). The README at _COUNCIL_DIR/README.md stays in code.
+# `load_council_config()` below resolves PROJECT_ROOT via the shared module.
 
 # Fields every council member is required to have, per the Provocateur
 # Pipeline spec. Enforced at load time so downstream tasks can rely on
@@ -149,8 +152,10 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
     missing field rather than silently degrading later.
 
     Args:
-        path: Optional override for testing. Defaults to the canonical
-            location at flows/shared/council/council_config.json.
+        path: Optional override for testing. Defaults to
+            `$PROJECT_ROOT/council_config.json` per Tier 3 (2026-04-20).
+            Previously lived at `flows/shared/council/council_config.json`
+            under the code repo.
 
     Returns:
         The parsed config as a dict. The returned dict is trusted by
@@ -160,12 +165,16 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
         FileNotFoundError: If the config file doesn't exist.
         ValueError: If required fields are missing or `members` is empty.
     """
-    config_path = Path(path) if path is not None else _COUNCIL_CONFIG_PATH
+    if path is None:
+        from flows.shared.project_root import resolve_project_root
+        config_path = resolve_project_root(None, repo_root=None) / "council_config.json"
+    else:
+        config_path = Path(path)
     if not config_path.exists():
         raise FileNotFoundError(
             f"Council config not found at {config_path}. "
-            f"Expected a JSON file. See flows/shared/council/README.md "
-            f"for the schema."
+            f"Expected a JSON file at $PROJECT_ROOT/council_config.json. "
+            f"See flows/shared/council/README.md for the schema."
         )
     with open(config_path, encoding="utf-8") as f:
         cfg = json.load(f)

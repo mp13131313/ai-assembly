@@ -10,6 +10,7 @@ Load order:
 from __future__ import annotations
 
 import os
+import shlex
 import sys
 from pathlib import Path
 
@@ -19,10 +20,6 @@ from dotenv import load_dotenv
 
 INGEST_DIR = Path(__file__).resolve().parent
 REPO_ROOT = INGEST_DIR.parent
-RUNS_DIR = REPO_ROOT / "runs"
-REFERENCE_DIR = REPO_ROOT / "reference"
-SESSIONS_PATH = REFERENCE_DIR / "sessions.json"
-SPEAKERS_PATH = REFERENCE_DIR / "speakers.json"
 TEMPLATES_DIR = INGEST_DIR / "templates"
 STATIC_DIR = INGEST_DIR / "static"
 
@@ -39,6 +36,19 @@ if str(REPO_ROOT) not in sys.path:
 # reads it the same way as in dev — no behavioural difference, just a
 # different repo root path resolved at runtime.
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
+
+# --- PROJECT_ROOT (Tier 3) ---------------------------------------------------
+# Per-project data (reference/sessions.json + speakers.json, council_config,
+# runs/) lives outside the code repo under a PROJECT_ROOT. Resolved AFTER
+# load_dotenv so AI_ASSEMBLY_PROJECT_ROOT can come from the shared .env.
+# See CLAUDE.md §"Code / project separation (Tier 3)".
+from flows.shared.project_root import resolve_project_root  # noqa: E402
+
+PROJECT_ROOT = resolve_project_root(None, repo_root=REPO_ROOT)
+RUNS_DIR = PROJECT_ROOT / "runs"
+REFERENCE_DIR = PROJECT_ROOT / "reference"
+SESSIONS_PATH = REFERENCE_DIR / "sessions.json"
+SPEAKERS_PATH = REFERENCE_DIR / "speakers.json"
 
 
 def _required(name: str) -> str:
@@ -110,7 +120,9 @@ UPLOAD_LOCK_FILENAME = "upload.lock"
 STATIC_VERSION = "11"
 
 # The app always appends <audio_path> <session_json_path> as positional args.
+# shlex.join quotes tokens so paths containing spaces (e.g. "AI Assembly/code")
+# survive the shlex.split round-trip in ingest/pipeline.py::_launch_stage0.
 INGEST_FLOW_CMD = os.environ.get(
     "INGEST_FLOW_CMD",
-    f"{sys.executable} {REPO_ROOT / 'flows' / 'transcription_flow.py'}",
+    shlex.join([sys.executable, str(REPO_ROOT / "flows" / "transcription_flow.py")]),
 )
