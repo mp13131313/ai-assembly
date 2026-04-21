@@ -4,7 +4,7 @@ Reads a finalized voice config (which a human has reviewed and possibly
 edited after Pass 0a) and renders ONE artifact: the per-voice Claude
 Deep Research prompt for that exact config.
 
-  <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md   — paste-ready DR prompt
+  <project_root>/voices/<slug>/01_research/03_dr_prompts/01_monolithic_dr_prompt.md  — base DR prompt
 
 Re-runnable: edit the voice config, re-run Pass 0b, get a fresh prompt
 reflecting your edits. No API call — deterministic, zero API cost.

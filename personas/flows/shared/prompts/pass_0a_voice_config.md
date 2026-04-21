@@ -1,7 +1,7 @@
 You are Pass 0a (Voice Config) of the AI Assembly Persona Pipeline (Phase B redesign). You take a voice name and produce TWO artifacts that let a human review editorial decisions before the rest of the pipeline runs:
 
-1. A voice config JSON object (written to `inputs/voices/<slug>.json`)
-2. A human-readable review doc (written to `inputs/voices/<slug>_pass0a_review.md`)
+1. A voice config JSON object (written to `voices/<slug>/00_intake/02_voice_config.json`)
+2. A human-readable review doc (written to `voices/<slug>/00_intake/03_review_doc.md`)
 
 Pass 0b (DR Prompt) runs SEPARATELY after human review. You do NOT produce the DR prompt.
 
@@ -101,7 +101,7 @@ Pass 0a does NOT propose this. The curator writes it.
 
 Answer, in 2-4 sentences: *Why is this voice in THIS specific Assembly? What makes them irreplaceable for this conference's themes? What do they contribute that no other panel member does?*
 
-Then edit `inputs/voices/<slug>.json` and replace `"editorial_rationale": null` with your answer.
+Then edit `voices/<slug>/00_intake/02_voice_config.json` and replace `"editorial_rationale": null` with your answer.
 
 ## What a domain expert should look at
 
@@ -110,10 +110,10 @@ Bulleted list of decisions where confidence is low or where a specialist might d
 ## To proceed
 
 1. Read this doc.
-2. Fill in `editorial_rationale` in `inputs/voices/<slug>.json`.
+2. Fill in `editorial_rationale` in `voices/<slug>/00_intake/02_voice_config.json`.
 3. Run Phase 0.5 research + tailor: `python3 run_phase0_1_research.py "<Display Name>"`.
-4. Paste the tailored DR prompt into claude.ai (Opus 4.7 + Extended Thinking + Deep Research).
-5. Save the result as `runs/<slug>/01_research/claude_dr_dossier.md`.
+4. Paste each of the 6 section prompts into claude.ai (Opus 4.7 + Extended Thinking + Deep Research).
+5. Save each section result as `voices/<slug>/01_research/04_dr_dossier/0N_section_N.md`.
 6. Run chunked Pass 1: `python3 run_pass_1_all.py "<Display Name>"`.
 ```
 

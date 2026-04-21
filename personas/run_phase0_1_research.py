@@ -9,10 +9,11 @@ This script runs AFTER Pass 0a (voice config) and BEFORE the manual Claude
 DR session. Its outputs scaffold the DR prompt so Claude DR starts from
 grounded research instead of zero.
 
-Output files (all under PROJECT_ROOT per Tier 3):
-  <project_root>/runs/<slug>/01_research/perplexity_dossier.json
-  <project_root>/runs/<slug>/01_research/gemini_broad_scan.json
-  <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md  — paste-ready DR prompt
+Output files (all under PROJECT_ROOT per Tier 3, per-voice layout):
+  <project_root>/voices/<slug>/01_research/01_perplexity_dossier.json
+  <project_root>/voices/<slug>/01_research/02_gemini_broad_scan.json
+  <project_root>/voices/<slug>/01_research/03_dr_prompts/01_monolithic_dr_prompt.md  — base DR prompt
+  <project_root>/voices/<slug>/01_research/03_dr_prompts/0N_section_N_dr_prompt.md  — 6 paste-ready section prompts
 
 Usage:
     python3 run_phase0_1_research.py "Cleopatra"
