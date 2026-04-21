@@ -34,6 +34,8 @@ from typing import Any, Callable
 import anthropic as _anthropic
 from pydantic import BaseModel
 
+from flows.shared import paths as _paths
+from flows.shared import perplexity_split as _perp_split
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.prompt_render import render
@@ -47,37 +49,81 @@ def _stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
+def detect_dr_mode(slug: str, project_root: Path) -> str:
+    """Auto-detect per-section vs monolithic DR mode from filesystem state.
+
+    Returns "per_section" if all 6 section files exist, "monolithic" if the
+    concat file exists. Raises RuntimeError on partial state or no DR found.
+    """
+    section_files = [_paths.section_dr_dossier(slug, n, project_root) for n in range(1, 7)]
+    monolithic = _paths.concat_claude_dr(slug, project_root)
+
+    n_sections = sum(1 for p in section_files if p.exists())
+    if n_sections == 6:
+        return "per_section"
+    if n_sections == 0 and monolithic.exists():
+        return "monolithic"
+    if n_sections > 0:
+        missing = [n for n, p in enumerate(section_files, 1) if not p.exists()]
+        raise RuntimeError(
+            f"Partial DR state for {slug}: {n_sections}/6 section files present. "
+            f"Missing: sections {missing}. Complete DR for these before running pipeline."
+        )
+    raise RuntimeError(
+        f"No DR dossier found for {slug}. Expected either:\n"
+        f"  (a) 6 section files at {_paths.dr_dossier_dir(slug, project_root)}/\n"
+        f"  (b) monolithic at {monolithic}"
+    )
+
+
 def _load_sources(
-    repo_root: Path, project_root: Path, slug: str, use_test_fixtures: bool,
+    repo_root: Path,
+    project_root: Path,
+    slug: str,
+    chunk_num: int,
+    mode: str,
+    use_test_fixtures: bool,
 ) -> tuple[str, str, str]:
     """Return (perplexity_text, claude_dr_text, gemini_text).
 
-    Test fixtures live under `repo_root/tests/fixtures/` (code-level).
-    Live runs live under `project_root/runs/` (project data).
+    Test fixtures: repo_root/tests/fixtures/<slug>/01_research/{perplexity,gemini,dr_dossier/}
+    Live runs: project_root/voices/<slug>/01_research/{...} via paths module.
+
+    Perplexity: split by section (chunk_num), fall back to full dossier if missing.
+    Claude DR: per-section file if mode=per_section, monolithic concat if mode=monolithic.
+    Gemini: always full (not sectioned — cross-cutting material by design).
     """
     if use_test_fixtures:
-        fixtures = repo_root / "tests/fixtures" / slug
-        perp = json.loads((fixtures / "perplexity_dossier.json").read_text())
-        gem = json.loads((fixtures / "gemini_broad_scan.json").read_text())
-        dr_text = (
-            "[MOCK DEEP RESEARCH DOSSIER — fixtures mode.]\n\n"
-            "Phase B test harness placeholder. Merge mechanics are exercised; "
-            "Boddice-shape content depends on a real DR dossier and lands in "
-            "Phase L. Treat Perplexity + Gemini as primary grounding; flag any "
-            "field a real DR dossier would supply with evidence_tag=inference."
-        )
+        res = repo_root / "tests/fixtures" / slug / "01_research"
+        perp = json.loads((res / "01_perplexity_dossier.json").read_text())
+        gem = json.loads((res / "02_gemini_broad_scan.json").read_text())
+        dr_dossier = res / "04_dr_dossier"
+        dr_candidates = sorted(dr_dossier.glob(f"*_section_{chunk_num}.md"))
+        if dr_candidates:
+            dr_text = dr_candidates[0].read_text(encoding="utf-8")
+        else:
+            dr_text = (
+                f"[MOCK DR DOSSIER — fixtures mode, section {chunk_num}]\n\n"
+                "Phase B test harness placeholder. Treat Perplexity + Gemini as primary "
+                "grounding; flag missing material with evidence_tag=inference."
+            )
     else:
-        research = project_root / "runs" / slug / "01_research"
-        perp = json.loads((research / "perplexity_dossier.json").read_text())
-        gem = json.loads((research / "gemini_broad_scan.json").read_text())
-        dr_path = research / "claude_dr_dossier.md"
+        perp = json.loads(_paths.perplexity_dossier(slug, project_root).read_text())
+        gem = json.loads(_paths.gemini_broad_scan(slug, project_root).read_text())
+        if mode == "per_section":
+            dr_path = _paths.section_dr_dossier(slug, chunk_num, project_root)
+        else:
+            dr_path = _paths.concat_claude_dr(slug, project_root)
         if not dr_path.exists():
             sys.exit(
-                f"Missing Claude DR dossier at {dr_path}. Phase 0.5 must complete "
-                f"+ human must paste the claude.ai output before Pass {slug} chunk runs."
+                f"Missing Claude DR dossier at {dr_path}. Phase 0.5 + manual DR must "
+                f"complete before Pass 1.{chunk_num} runs."
             )
-        dr_text = dr_path.read_text()
-    perp_text = perp.get("text") or json.dumps(perp, ensure_ascii=False, indent=2)
+        dr_text = dr_path.read_text(encoding="utf-8")
+
+    perp_text_full = perp.get("text") or json.dumps(perp, ensure_ascii=False, indent=2)
+    perp_sections = _perp_split.split_dossier(perp_text_full)
+    perp_text = perp_sections.get(chunk_num, perp_text_full)  # fall back to full if missing
     gem_text = gem.get("text") or json.dumps(gem, ensure_ascii=False, indent=2)
     return perp_text, dr_text, gem_text
 
@@ -148,12 +194,20 @@ def run_chunk(
     use_test_fixtures: bool = False,
     user_prompt: str | None = None,
     max_tokens: int = 32000,
+    mode: str = "auto",  # "per_section", "monolithic", or "auto"
 ) -> dict[str, Any]:
     """Run a single chunked-merge pass end-to-end. Returns the validated dict."""
     slug = voice_slug(name)
+    chunk_num = int(chunk_name.split(".")[1])  # "1.2" → 2
     _stamp(f"Pass {chunk_name} merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
 
-    perp_text, dr_text, gem_text = _load_sources(repo_root, project_root, slug, use_test_fixtures)
+    if not use_test_fixtures and mode == "auto":
+        mode = detect_dr_mode(slug, project_root)
+        _stamp(f"  DR mode: {mode}")
+
+    perp_text, dr_text, gem_text = _load_sources(
+        repo_root, project_root, slug, chunk_num, mode, use_test_fixtures
+    )
     schema_vars = _inline_schemas(output_keys)
 
     system = render(

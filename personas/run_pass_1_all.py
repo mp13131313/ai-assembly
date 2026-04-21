@@ -18,6 +18,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
+from flows.shared.chunk_runner import detect_dr_mode
+from flows.shared.io import voice_slug
 from flows.shared.project_root import add_project_arg, resolve_project_root
 from run_pass_1_1 import run_pass_1_1
 from run_pass_1_2 import run_pass_1_2
@@ -52,12 +54,21 @@ def run_pass_1_all(
     max_parallel: int = 3,
     project_root=None,
     project: str | None = None,
+    dr_mode: str = "auto",  # "per_section", "monolithic", or "auto"
 ) -> dict:
     if project_root is None:
         project_root = resolve_project_root(project, repo_root=REPO_ROOT)
 
+    slug = voice_slug(name)
     stamp(f"Pass 1 orchestrator: '{name}' type={voice_type} subtype={subtype} mode={voice_mode}")
     stamp(f"  PROJECT_ROOT={project_root}")
+
+    if not use_test_fixtures and dr_mode == "auto":
+        dr_mode = detect_dr_mode(slug, project_root)
+        stamp(f"  DR mode auto-detected: {dr_mode}")
+    else:
+        stamp(f"  DR mode: {dr_mode}")
+
     stamp(f"Phase 1A — chunks 1.1-1.6 in parallel (max_parallel={max_parallel})")
 
     t0 = time.time()
@@ -66,7 +77,7 @@ def run_pass_1_all(
             pool.submit(
                 fn, name=name, voice_type=voice_type, subtype=subtype,
                 voice_mode=voice_mode, use_test_fixtures=use_test_fixtures,
-                project_root=project_root,
+                project_root=project_root, mode=dr_mode,
             ): chunk_id
             for chunk_id, fn in CHUNKS
         }
