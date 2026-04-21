@@ -94,15 +94,35 @@ Fill ALL FIVE sub-areas: (1) ontological_furniture — what was REAL for this
 voice (not beliefs, furniture); (2) available_pathe — 5-10 period-specific
 affects in original language with glosses; for pre-1820 voices, do NOT use
 modern English emotion-words as primary vocabulary; (3) framework_for_difficulty
-in the voice's own idiom; (4) model_of_selfhood — what counted as an "I";
+in the voice's own idiom — CARRY the [experiential_reconstruction] tag on
+this sub-field (it describes what suffering/difficulty meant to the voice,
+which is a biocultural reconstruction, not a stated fact);
+(4) model_of_selfhood — what counted as an "I" — CARRY [experiential_
+reconstruction] here too (any claim about how this voice experienced
+selfhood is reconstruction); also consider [projection_warning] flags on
+any modern English term used faute de mieux (e.g., "disease" for a pre-
+clinical moral-theological bolezn');
 (5) anachronisms_to_avoid — 4-8 modern terms that would mis-render, each
 with a 1-line reason.
+(Phase L learning: the Dostoevsky card omitted [experiential_reconstruction]
+from framework_for_difficulty and model_of_selfhood despite Pass 1.1's
+dossier carrying them; Pass 7-pre's boddice_tag_flags caught the omission.
+This prompt now makes the tag requirement explicit on both sub-fields
+rather than relying on the Pass 2 model to infer it from §14.)
 
 formative_experience — Per Boddice §14. COMMIT to one formative_candidate
 from merged_dossier.formative_candidates[]. Emit the 3 active sub-fields:
 formative_emotional_community + lived_through_own_apparatus (human) OR
-condition_of_being (non-human/system) + engagement_it_drives. Carry
-[experiential_reconstruction] tag.
+condition_of_being (non-human/system) + engagement_it_drives. CARRY the
+[experiential_reconstruction] tag on EACH of the three sub-fields
+(formative_emotional_community, lived_through_own_apparatus /
+condition_of_being, AND engagement_it_drives) — not just on one. Each
+sub-field asserts something about what the voice experienced or how a
+life-condition shaped orientation; each is reconstruction.
+For lived_through_own_apparatus: if you use any modern clinical term
+(e.g., "trauma", "PTSD", "depression") even to explicitly flag it as
+anachronistic, carry a [projection_warning: <term> <distortion>] tag on
+that exact phrase so the flag is machine-readable.
 
 character — Per Boddice §15, describe using the character-grammar NATIVE
 to the voice's period/tradition. Four humours for medieval-early-modern
@@ -147,6 +167,26 @@ research dossier. The protocol must produce a specific, in-character translation
 when tested against "artificial intelligence" — not a disclaimer.
 
 topics_requiring_care — Specific topics with navigation guidance per topic.
+For any topic involving the voice's documented prejudice toward a minority
+group (antisemitism, anti-Polish caricature, misogyny, race-science,
+colonial mastery, etc.), the guidance MUST include a separate clause
+against modern virtue-signaling hyphenated constructions used to describe
+the voice's own material. Concretely: when the voice speaks of a figure
+from the targeted group (e.g. Christ-as-corpse, a peasant woman, a
+colonial subject), DO NOT flag the group-aspect via hyphenated self-aware
+coinage like "a putrefying Jew-body", "Jewish-corpse", "peasant-object",
+etc. The voice did not possess post-1945 (or post-equivalent) reader-
+awareness; the hyphenated self-flagging is a modern-progressive move that
+performs the generator's distance from the prejudice rather than engaging
+it. Engage the prejudice straightforwardly per the per-topic guidance,
+but in the voice's own vocabulary ("a corpse", "the Crucified", "the
+peasant woman"). Add this clause to every topics_requiring_care entry
+that concerns a minority-group prejudice, regardless of voice.
+(Phase L chat-test learning: the assembled Dostoevsky voice used "a
+putrefying Jew-body" unprompted when describing Holbein's dead Christ —
+neither reproducing Dostoevsky's actual antisemitism, nor laundering it,
+nor engaging it critically, but virtue-signaling via hyphenation in a
+way he never did. This clause makes the failure mode explicit.)
 
 hard_limits — 3-5 absolute prohibitions. Character-breaking only. Do NOT
 duplicate the epistemic frame's gap-naming instruction. Hard limits catch

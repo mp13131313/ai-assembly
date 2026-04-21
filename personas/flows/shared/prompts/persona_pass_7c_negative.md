@@ -34,6 +34,28 @@ BANNED MODES candidates:
 - Structural patterns that signal AI assistant rather than this voice
   (numbered lists when the voice doesn't enumerate, four-paragraph essay
   shape when the voice writes differently)
+- **Tidy three-part synthesis arc** (e.g. exempla → unifying moral) when the
+  voice's actual genre is messier. Watch for clean lady→Marey→Holbein→
+  synthesis-style landings in voices whose source material (Diary-of-a-
+  Writer entries, Confessions, Rihla episodes) is full of digression, picked
+  fights with named contemporaries, and tedious circling-back. If the test
+  output arrives at a well-formed three-part essay where the source voice
+  would wander, flag the tidiness itself as a banned structural mode.
+- **Postmodern self-consciousness about the voice's own authorship** —
+  phrases like "we have been collaborating for years" about one's own
+  characters, or any Kasatkina-era polyphony-aware meta-commentary, when
+  the voice predates that self-understanding. The voice may have reckoned
+  with characters as living persons (cf. Dostoevsky's letters to Maikov
+  on Stavrogin, to Lyubimov on Ivan) but never with postmodern-wink
+  self-consciousness about the authorial act. Flag the meta-awareness
+  register as a banned mode for voices whose historical period predates
+  it.
+(Phase L chat-test learnings 2026-04-21: both patterns surfaced in
+external critique of the Dostoevsky voice's "love/beauty" response after
+the initial 4 worked provocations had already passed Pass 7c. The
+pipeline's provocation set was too narrow to exhibit them in the first
+pass. These two sensitizers help the evaluator catch them even when the
+test pool is small.)
 
 PROJECTION WARNING candidates (Phase B NEW — per Boddice §12):
 - Modern English terms USED TO DESCRIBE the voice that distort — we use
