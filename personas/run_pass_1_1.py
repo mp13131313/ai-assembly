@@ -8,12 +8,10 @@ critique on validation failure, writes:
     <project_root>/runs/<slug>/01_research/pass_1_1/life_scaffold.json
     <project_root>/runs/<slug>/01_research/pass_1_1/formative_candidates.json
 
-Test mode: `--use-test-fixtures` reads from `personas/tests/fixtures/ibn_battuta/`
-(code-level) instead of `<project_root>/runs/<slug>/01_research/`, uses a truncated mock DR dossier, and
-exercises merge mechanics (schema validation + retry + atomic write). Content
-will be v3.10-wound-shaped because the fixtures predate Boddice integration —
-end-to-end Boddice-shape validation lands with the first real voice run in
-Phase L.
+Test mode: `--use-test-fixtures` reads from `personas/tests/fixtures/<slug>/`
+(code-level) instead of `<project_root>/voices/<slug>/01_research/`, uses a
+truncated mock DR dossier, and exercises merge mechanics (schema validation +
+retry + atomic write). Use `synthetic_voice` slug for the code-level fixture.
 """
 from __future__ import annotations
 
