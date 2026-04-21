@@ -44,8 +44,11 @@ ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
 │   ├── run_persona_pipeline.py            # main pipeline (Pass 1-merge → Derive)
 │   ├── flows/shared/                      # io, clients, node0_validation, wikipedia, dr_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
 │   ├── inputs/
-│   │   ├── conference_context.json
-│   │   ├── voices/                        # 4 voice configs: cleopatra, hannah_arendt, octopus, plato
+│   │   ├── conference_facts.json          # Phase B split — conference metadata (Pass 0a + Pass 7b)
+│   │   ├── audience_profile.json          # Phase B split — audience profile (Pass 7b only)
+│   │   ├── panel_roster.json              # Phase B split — 12-voice panel list (Pass 0a)
+│   │   ├── non_human_grounding/           # Phase B — curated Octopus + Whanganui grounding for Pass 0a
+│   │   ├── voices/                        # voice configs (v3.10 configs archaeology; rebuild under Phase B)
 │   │   └── dossiers/                      # Claude DR dossiers (manually produced)
 │   └── HANDOFF.md                         # cross-repo contract (production, active)
 ├── research/                  # PRESERVED: grounding material, not deletable
@@ -64,7 +67,7 @@ ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
 
 **Status: built, end-to-end. Phases 1, 2, 3, 4 complete. Phase 5 Cross-Persona QC not built.**
 
-Two full runs completed: **Plato** (full pipeline, all artifacts in `_workspace/archive/runs/personas/plato/`) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
+Two full runs completed: **Plato** (full pipeline, all artifacts in `~/Desktop/AI Assembly/archive/runs/personas/plato/` — moved out of the code repo in Tier 3, 2026-04-20) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
 
 Built and verified:
 
@@ -121,7 +124,7 @@ runs/plato/
     ├── pass6_corpus.json
     ├── pass7pre_citation.json
     ├── pass7a_cross_model.json
-    ├── pass7b_provocations.json
+    ├── pass7b_smoke_test.json
     ├── pass7c_negative.json
     ├── derive.json
     └── _ct_pass2.json, _ct_pass2_3.json, _ct_pass2_3_4a.json, _ct_pass2_3_4.json
@@ -204,10 +207,10 @@ runs/plato/
 **What Step 2 does:** Read back all detailed responses → make focus + stance decisions → produce one artifact per voice in the voice's natural medium.
 
 **Key wiring decisions already made (documented in voice/README.md and personas/HANDOFF.md):**
-- Load persona card fields as system prompt; DROP `metadata` and `worked_provocations` (worked_provocations is a build-time smoke test, NOT a runtime few-shot — critical).
+- Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (smoke_test_chains is a build-time smoke test, NOT a runtime few-shot — critical).
 - Foundational fields (12) appear in both Step 1 and Step 2 system prompts.
 - Step 1 uses Reasoning + Engagement fields; Step 2 uses Voice + Artifact fields.
-- Runtime reads `personas/runs/<voice_slug>/persona_card_assembled.json` directly.
+- Runtime reads `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json` directly (Tier 3 — project data lives outside the code repo; see CLAUDE.md §"Code / project separation").
 
 **What needs building:**
 - Prefect flow with Step 1 task + Step 2 task
@@ -304,7 +307,7 @@ Per Briefing v3.1: Astro or Next.js static site, Vercel/Netlify hosting, content
 
 ### 3.7 Cross-repo tooling
 
-- **Sync council config**: script that reads all `personas/runs/*/provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json` members array, bumping version. Currently manual copy-paste. Easy Python script; natural first feature for admin console.
+- **Sync council config**: script that reads all `$PROJECT_ROOT/runs/*/provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json` members array, bumping version. Currently manual copy-paste. Easy Python script; natural first feature for admin console.
 
 ---
 
@@ -315,15 +318,15 @@ Documented precisely so nothing drifts.
 ### 4.1 Persona → Runtime (2 artifacts per voice)
 
 **Provocateur Profile (8 fields):**
-- File: `personas/runs/<voice_slug>/provocateur_profile.json`
+- File: `$PROJECT_ROOT/runs/<voice_slug>/provocateur_profile.json` (per Tier 3, project data lives outside the code repo; default sibling `../athens-2026/`)
 - Consumer: `runtime/flows/shared/council/council_config.json#members[]`
 - Fields: `name`, `speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`
 - Currently: **council_config is `dev_stub_v2`** — hand-written, not derived. 12 stub members present. Needs replacement with real derived profiles before production.
 
 **Assembled Persona Card (37 fields):**
-- File: `personas/runs/<voice_slug>/persona_card_assembled.json`
+- File: `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json`
 - Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt
-- Runtime MUST drop `metadata` block and `worked_provocations` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
+- Runtime MUST drop `metadata` block and `smoke_test_chains` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
 - 35 fields appear as system prompt content; 2 null continuity fields populated during runtime Night 2.
 
 ### 4.2 Transcription → Researcher
@@ -418,9 +421,9 @@ Key decisions that aren't obvious from reading the code and that a new session/c
 
 **Why:** session-ordered concatenation produces session-grouped reading order bias. Fixed seed breaks the bias without losing reproducibility.
 
-### 5.10 `worked_provocations` is build-time only, NOT runtime few-shot
+### 5.10 `smoke_test_chains` is build-time only, NOT runtime few-shot
 
-**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_provocations.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
+**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
 ### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
 
@@ -467,9 +470,9 @@ or expand?"`. Default for now: keep the 3-enum.
 - **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching. Expected accuracy degrades from 70–85% to 40–50% without bios. **Pre-Athens blocker** — bios must be populated before first production session.
 - **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC` (Philosophical Speed-Dating Rave, How to Meet an Idiot). Either firm up venues in program or leave them skipped.
 - **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs for all 12 members; not derived from real persona-pipeline Derive output. Will be replaced with real Derive output from the rebuilt Phase B persona pipeline.
-- **`personas/inputs/voices/`**: 5 v3.10 Pass 0a artifacts on disk (plato, hannah_arendt, cleopatra, octopus, ibn_battuta). **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The 5 existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace, Dostoevsky).
-- **`personas/inputs/dossiers/`**: 0 of 12 Claude DR dossiers in the current tree. All 12 will be generated under the new Pass 0b template (PB#2 hybrid Jinja+LLM tailoring) once Phase B lands.
-- **`_workspace/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer.
+- **`$PROJECT_ROOT/voices/<slug>/00_intake/02_voice_config.json`** (new layout since 2026-04-21): 6 voice configs migrated (Dostoevsky × 2 projects, Cleopatra, Hannah Arendt, Ibn Battuta, Octopus, Plato in athens-2026). **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace).
+- **`$PROJECT_ROOT/voices/<slug>/01_research/04_dr_dossier/`**: Dostoevsky §1–§4 present (4.6 model). §5–§6 pending manual DR sessions. 0 of remaining 11 voices have DR dossiers yet.
+- **`~/Desktop/AI Assembly/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer. (Moved to umbrella-level archive/ in Tier 3 cleanup, 2026-04-20.)
 
 ### 6.2 Pipeline gaps
 
@@ -577,7 +580,7 @@ In the sequence the user intends to work:
 
 ### Phase A — Persona Pipeline validation (now → +1 day)
 
-- [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of worked_provocations.
+- [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of smoke_test_chains.
 - [ ] Re-read Arendt's 02_passes output; complete any passes that failed or didn't run; produce final assembled card + provocateur_profile.
 - [ ] Spot-check Cleopatra's Pass 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Pass 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
 - [ ] Spot-check Octopus similarly.
@@ -701,7 +704,7 @@ For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4
 - `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
 - `_workspace/archive/fix-plans/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
 - `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
-- `personas/flows/shared/prompts/persona_pass_7b_provocations.md` — header comment documents the "worked_provocations are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
+- `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` — header comment documents the "smoke_test_chains are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
 - `_workspace/archive/fix-plans/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes (archived; absorbed into current specs)
 
 ---

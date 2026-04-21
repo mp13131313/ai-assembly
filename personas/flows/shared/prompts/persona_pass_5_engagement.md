@@ -1,6 +1,11 @@
-{# Pass 5 — Engagement (Claude). v3.10 Node 5.
+{# Pass 5 — Engagement (Claude).
    4 fields: bold_engagement_topics, default_questions, disagreement_protocol,
-   unique_contribution. Synthesised from Passes 2-3, not researched. #}
+   unique_contribution. Phase B: reads from Pass 2 constitution + Pass 3
+   reasoning_method, both now built from merged_dossier chunks.
+   formative_candidates[] (Pass 1.1) supplies engagement_it_drives — use
+   Pass 2's committed candidate to shape bold_engagement_topics +
+   unique_contribution.
+#}
 BLOCK 1 — EXPERT IDENTITY:
 You are designing the engagement protocol for an AI persona — the rules
 governing how {{ name }} interacts with material it hasn't encountered before.

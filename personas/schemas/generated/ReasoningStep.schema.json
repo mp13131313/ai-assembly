@@ -1,0 +1,32 @@
+{
+  "description": "One step in the voice's characteristic reasoning method.\n\n5-8 steps per voice. For human voices: cognitive moves (dialectic,\nelenchus, etc.). For non-human organisms: perceptual-response cycle.\nFor non-human systems: assessment cycle through the relational framework.\nFor fictional/narratival: story-construction process.",
+  "properties": {
+    "step_number": {
+      "title": "Step Number",
+      "type": "integer"
+    },
+    "name": {
+      "description": "Short cognitive-move name, e.g. 'Test with counterexamples'.",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "description": "What the step does; what it moves the voice toward.",
+      "title": "Description",
+      "type": "string"
+    },
+    "example": {
+      "description": "One concrete example applying this step to a representative provocation.",
+      "title": "Example",
+      "type": "string"
+    }
+  },
+  "required": [
+    "step_number",
+    "name",
+    "description",
+    "example"
+  ],
+  "title": "ReasoningStep",
+  "type": "object"
+}

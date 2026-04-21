@@ -23,9 +23,15 @@ import json
 from pathlib import Path
 
 
-REFERENCE_DIR = Path(__file__).resolve().parent.parent / "reference"
-SESSIONS_PATH = REFERENCE_DIR / "sessions.json"
-SPEAKERS_PATH = REFERENCE_DIR / "speakers.json"
+# Defaults resolved from $AI_ASSEMBLY_PROJECT_ROOT (Tier 3). Override via
+# --sessions / --output for scripted use. Falls back to an empty Path if the
+# env var is unset — argparse will report "required" via required=True below
+# if the user also omits the explicit flags.
+import os as _os
+_env_project = _os.environ.get("AI_ASSEMBLY_PROJECT_ROOT")
+_PROJECT_ROOT = Path(_env_project).expanduser() if _env_project else None
+SESSIONS_PATH = (_PROJECT_ROOT / "reference/sessions.json") if _PROJECT_ROOT else None
+SPEAKERS_PATH = (_PROJECT_ROOT / "reference/speakers.json") if _PROJECT_ROOT else None
 
 
 def load_existing(path: Path) -> dict[str, dict]:
@@ -81,9 +87,17 @@ def merge(name_to_sessions: dict[str, list[str]], existing: dict[str, dict]) -> 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--sessions", type=Path, default=SESSIONS_PATH)
-    ap.add_argument("--output", type=Path, default=SPEAKERS_PATH)
+    ap.add_argument("--sessions", type=Path, default=SESSIONS_PATH,
+                    help="Path to sessions.json (default: $AI_ASSEMBLY_PROJECT_ROOT/reference/sessions.json)")
+    ap.add_argument("--output", type=Path, default=SPEAKERS_PATH,
+                    help="Path to write speakers.json (default: $AI_ASSEMBLY_PROJECT_ROOT/reference/speakers.json)")
     args = ap.parse_args()
+
+    if args.sessions is None or args.output is None:
+        raise SystemExit(
+            "Paths unresolved: set AI_ASSEMBLY_PROJECT_ROOT or pass "
+            "--sessions / --output explicitly."
+        )
 
     if not args.sessions.exists():
         raise SystemExit(

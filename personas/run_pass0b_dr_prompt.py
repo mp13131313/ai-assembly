@@ -4,7 +4,7 @@ Reads a finalized voice config (which a human has reviewed and possibly
 edited after Pass 0a) and renders ONE artifact: the per-voice Claude
 Deep Research prompt for that exact config.
 
-  inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md   — paste-ready DR prompt
+  <project_root>/voices/<slug>/01_research/03_dr_prompts/01_monolithic_dr_prompt.md  — base DR prompt
 
 Re-runnable: edit the voice config, re-run Pass 0b, get a fresh prompt
 reflecting your edits. No API call — deterministic, zero API cost.
@@ -32,26 +32,27 @@ try:
 except ImportError:
     sys.exit("Pass 0b requires jinja2. Install with: pip install jinja2")
 
+from flows.shared import paths as _paths
 from flows.shared.io import voice_slug
+from flows.shared.project_root import add_project_arg, resolve_project_root
 
-PROJECT_CONTEXT_PATH = REPO_ROOT / "inputs/conference_context.json"
 TEMPLATE_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
-VOICES_DIR = REPO_ROOT / "inputs/voices"
-DR_PROMPTS_DIR = REPO_ROOT / "inputs/dossiers/_dr_prompts"
 
 
 def stamp(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def main(name: str) -> None:
+def main(name: str, project: str | None = None) -> None:
     stamp(f"Pass 0b DR-prompt: '{name}'")
+
+    project_root = resolve_project_root(project, repo_root=REPO_ROOT)
 
     if not TEMPLATE_PATH.exists():
         sys.exit(f"Missing template: {TEMPLATE_PATH}")
 
     slug = voice_slug(name)
-    voice_path = VOICES_DIR / f"{slug}.json"
+    voice_path = _paths.voice_config(slug, project_root)
     if not voice_path.exists():
         sys.exit(
             f"Missing voice config at {voice_path}. "
@@ -60,10 +61,13 @@ def main(name: str) -> None:
 
     voice_config = json.loads(voice_path.read_text())
 
-    # Build display_name_with_hint: name + Wikipedia description if available
+    # Build display_name_with_hint: name + optional disambiguation hint.
+    # Set voice_config.wikipedia_disambiguation_hint to e.g. "Russian novelist,
+    # 1821-1881" for disambiguation-heavy names like "Plato" or "Cleopatra".
     display_name = voice_config.get("name", name)
     wiki_url = voice_config.get("wikipedia_url")
-    display_name_with_hint = display_name
+    _hint = voice_config.get("wikipedia_disambiguation_hint")
+    display_name_with_hint = f"{display_name} ({_hint})" if _hint else display_name
 
     # Render Jinja2 template
     template_src = TEMPLATE_PATH.read_text(encoding="utf-8")
@@ -92,24 +96,27 @@ def main(name: str) -> None:
 
     dr_prompt = template.render(**context)
 
-    DR_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
-    dr_prompt_path = DR_PROMPTS_DIR / f"{slug}_dr_prompt.md"
+    dr_prompt_path = _paths.monolithic_dr_prompt(slug, project_root)
+    dr_prompt_path.parent.mkdir(parents=True, exist_ok=True)
     dr_prompt_path.write_text(dr_prompt, encoding="utf-8")
 
     stamp(f"Pass 0b complete — review {dr_prompt_path.name} before pasting into claude.ai.")
-    stamp(f"  DR prompt:     {dr_prompt_path.relative_to(REPO_ROOT)}")
+    stamp(f"  DR prompt:     {dr_prompt_path.relative_to(project_root)}")
     stamp("")
     stamp("Next steps:")
+    stamp(f"  NOTE: run_phase0_1_research.py auto-tailors + splits into 6 section prompts.")
+    stamp(f"  If using this base prompt directly:")
     stamp(f"  1. Open claude.ai, select Claude Opus 4.7 in the model picker")
     stamp(f"  2. Enable Extended Thinking + Deep Research")
     stamp(f"  3. Paste the prompt from {dr_prompt_path.name}")
-    stamp(f"  4. Expect 60-180 min wait")
-    stamp(f"  5. Save the result as inputs/dossiers/{slug}_claude_dr.md")
+    stamp(f"  4. Expect 20-40 min per section")
+    stamp(f"  5. Save each section as voices/{slug}/01_research/04_dr_dossier/0N_section_N.md")
     stamp(f"  6. Run: python3 run_persona_pipeline.py \"{display_name}\"")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pass 0b — DR Prompt Generator")
     parser.add_argument("name", help='Voice name (must match Pass 0a output)')
+    add_project_arg(parser)
     args = parser.parse_args()
-    main(args.name)
+    main(args.name, project=args.project)

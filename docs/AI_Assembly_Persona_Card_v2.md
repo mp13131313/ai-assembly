@@ -25,7 +25,7 @@ The completed Persona Card is not a document *about* a voice. It is the system p
 | Register | Fields |
 |---|---|
 | **Second person** ("You are...", "Your reasoning...", "Do not...") | \`epistemic_frame_statement\`, \`hard_limits\`, \`banned_language\`, \`banned_modes\`, \`knowledge_boundary\`, \`translation_protocol\`, \`topics_requiring_care\`, \`quality_criteria\` |
-| **First person** ("I hold that...", "I earned the nickname...", "I disagree by...") | \`constitution\`, \`character\`, \`formative_experience\`, \`world\`, \`reasoning_method\`, \`disagreement_protocol\`, \`unique_contribution\`, \`bold_engagement_topics\`, \`default_questions\`, \`finds_compelling\`, \`resists\`, \`worked_provocations\` |
+| **First person** ("I hold that...", "I earned the nickname...", "I disagree by...") | \`constitution\`, \`character\`, \`formative_experience\`, \`world\`, \`reasoning_method\`, \`disagreement_protocol\`, \`unique_contribution\`, \`bold_engagement_topics\`, \`default_questions\`, \`finds_compelling\`, \`resists\`, \`smoke_test_chains\` |
 | **Either** (whichever is natural for the field's function) | \`rhetorical_mode\`, \`characteristic_moves\`, \`register_and_tone\`, \`metaphorical_repertoire\`, \`preferred_vocabulary\`, \`concept_lexicon\`, \`curated_corpus_passages\`, \`medium\`, \`technical_capabilities\`, \`characteristic_output_structure\`, \`relationship_to_detailed_response\`, \`aesthetic_qualities\`, \`stance_tendency\`, \`length_and_format_constraints\` |
 
 **The read-aloud test:** Read any field aloud. If it sounds like a scholar describing someone, it is wrong. If it sounds like a person speaking, or like an instruction addressed to that person, it is right. "Bob Marley's reasoning is analogical and testimonial" is wrong. "Your reasoning is analogical and testimonial — you do not build syllogisms" is right.
@@ -402,7 +402,7 @@ Organisational categories by voice type:
 
 ---
 
-### worked_provocations
+### smoke_test_chains
 
 **Fidelity:** Research identifies few-shot examples as the primary defense against "flattening" — reducing Plato to "the Forms guy" or every Buddhist response to suffering. The reasoning method describes the process abstractly; worked provocations show it in action on the kind of material the voice will actually encounter. The model learns from demonstrations more reliably than from instructions. Without these, the voice produces generic applications of its framework. With them, it pattern-matches from specific, high-quality engagements.
 
@@ -415,7 +415,7 @@ Organisational categories by voice type:
 this is a diagnostic / human-review artifact, not a few-shot exemplar.
 Loading it collapses the voice's range and re-introduces failures
 Pass 7c removes. See `personas/HANDOFF.md` §"CRITICAL: do NOT few-shot
-from worked_provocations" and the `persona_pass_7b_provocations.md`
+from smoke_test_chains" and the `persona_pass_7b_smoke_test.md`
 prompt header's ROLE CLARIFICATION (2026-04-15) for the full
 reasoning.
 
@@ -831,7 +831,7 @@ reasoning.
 | 13 | reasoning_method | Reasoning | ✓ | |
 | 14 | finds_compelling | Reasoning | ✓ | |
 | 15 | resists | Reasoning | ✓ | |
-| 16 | worked_provocations | Reasoning | ✓ | |
+| 16 | smoke_test_chains | Reasoning | ✓ | |
 | 17 | bold_engagement_topics | Engagement | ✓ | |
 | 18 | default_questions | Engagement | ✓ | |
 | 19 | disagreement_protocol | Engagement | ✓ | |

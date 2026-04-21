@@ -3,16 +3,50 @@
 Each function takes a fully-rendered prompt and returns plain text or parsed
 JSON. Retries, timeouts, and rate-limit handling live in the calling Prefect
 task — these wrappers do exactly one thing: make the call.
+
+Each wrapper accepts optional slug/pass_name/project_root kwargs. When slug
+is provided, a telemetry entry is recorded to voices/<slug>/_manifest.json
+via flows.shared.manifest.record().
 """
 from __future__ import annotations
 
 import json
 import os
+import time
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def _record(
+    slug: str | None,
+    pass_name: str | None,
+    provider: str,
+    model: str,
+    usage: dict,
+    wall_seconds: float,
+    project_root: Path | None,
+) -> None:
+    if not slug or not pass_name:
+        return
+    try:
+        from flows.shared.manifest import record
+        record(
+            slug=slug,
+            pass_name=pass_name,
+            model=model,
+            provider=provider,
+            input_tokens=usage.get("input_tokens", 0) or 0,
+            output_tokens=usage.get("output_tokens", 0) or 0,
+            thinking_tokens=usage.get("thinking_tokens", 0) or 0,
+            wall_seconds=wall_seconds,
+            project_root=project_root,
+        )
+    except Exception:
+        pass  # never let telemetry failures break the pipeline
 
 
 # --- Anthropic / Claude --------------------------------------------------
@@ -26,6 +60,9 @@ def call_claude(
     temperature: float = 0.2,
     thinking: bool = False,
     response_format_json: bool = False,
+    slug: str | None = None,
+    pass_name: str | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """One Claude call. Returns dict with `text` (str) and `usage` (dict).
 
@@ -57,6 +94,7 @@ def call_claude(
     # >10 min. With max_tokens >= 16384 + adaptive thinking, the estimate
     # crosses that threshold. Use streaming and accumulate text + thinking.
     use_streaming = max_tokens >= 16384 or thinking
+    _t0 = time.time()
     if use_streaming:
         text_parts: list[str] = []
         usage_in = 0
@@ -112,6 +150,8 @@ def call_claude(
                     f"Bump max_tokens and retry. Raw text len: {len(text)}"
                 ) from e
             raise RuntimeError(f"Claude returned invalid JSON: {e}") from e
+    out["_wall_seconds"] = time.time() - _t0
+    _record(slug, pass_name, "anthropic", out["model"], out["usage"], out["_wall_seconds"], project_root)
     return out
 
 
@@ -123,6 +163,9 @@ def call_perplexity(
     model: str | None = None,
     temperature: float = 0.0,
     return_citations: bool = True,
+    slug: str | None = None,
+    pass_name: str | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """One Perplexity call. Uses OpenAI-compatible REST endpoint.
 
@@ -140,6 +183,7 @@ def call_perplexity(
     model = model or os.environ.get("PERPLEXITY_MODEL", "sonar-deep-research")
     api_key = os.environ["PERPLEXITY_API_KEY"]
 
+    _t0_perp = time.time()
     resp = requests.post(
         "https://api.perplexity.ai/chat/completions",
         headers={
@@ -173,15 +217,18 @@ def call_perplexity(
         think = ""
         text = raw_text.strip()
 
-    return {
+    out_perp = {
         "text": text,
         "think": think,
         "raw_text": raw_text,
         "citations": data.get("citations", []),
-        "search_results": data.get("search_results", []),  # newer field name
+        "search_results": data.get("search_results", []),
         "usage": data.get("usage", {}),
         "model": model,
+        "_wall_seconds": time.time() - _t0_perp,
     }
+    _record(slug, pass_name, "perplexity", model, out_perp["usage"], out_perp["_wall_seconds"], project_root)
+    return out_perp
 
 
 # --- Gemini -------------------------------------------------------------
@@ -193,6 +240,9 @@ def call_gemini(
     temperature: float = 0.2,
     max_output_tokens: int = 16384,
     thinking_budget: int | None = None,
+    slug: str | None = None,
+    pass_name: str | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """One Gemini call. Uses google-genai SDK (the supported library; the
     older google-generativeai package is deprecated as of late 2025).
@@ -216,6 +266,7 @@ def call_gemini(
             thinking_budget=thinking_budget
         )
 
+    _t0_gem = time.time()
     resp = client.models.generate_content(
         model=model_name,
         contents=user,
@@ -231,7 +282,9 @@ def call_gemini(
             "output_tokens": getattr(u, "candidates_token_count", None),
             "thoughts_tokens": getattr(u, "thoughts_token_count", None),
         }
-    return {"text": text, "model": model_name, "usage": usage}
+    out_gem = {"text": text, "model": model_name, "usage": usage, "_wall_seconds": time.time() - _t0_gem}
+    _record(slug, pass_name, "google", model_name, usage, out_gem["_wall_seconds"], project_root)
+    return out_gem
 
 
 # --- OpenAI (GPT-4o for cross-model validation) -------------------------
@@ -244,6 +297,9 @@ def call_openai(
     temperature: float = 0.0,
     max_tokens: int = 8192,
     response_format_json: bool = False,
+    slug: str | None = None,
+    pass_name: str | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """One OpenAI call. Uses openai SDK."""
     from openai import OpenAI
@@ -271,21 +327,25 @@ def call_openai(
     if response_format_json:
         kwargs["response_format"] = {"type": "json_object"}
 
+    _t0_oai = time.time()
     resp = client.chat.completions.create(**kwargs)
     if not resp.choices:
         raise RuntimeError(f"OpenAI returned no choices for model {model}")
     text = resp.choices[0].message.content or ""
+    oai_usage = {
+        "input_tokens": resp.usage.prompt_tokens,
+        "output_tokens": resp.usage.completion_tokens,
+    }
     out: dict[str, Any] = {
         "text": text,
-        "usage": {
-            "input_tokens": resp.usage.prompt_tokens,
-            "output_tokens": resp.usage.completion_tokens,
-        },
+        "usage": oai_usage,
         "model": model,
+        "_wall_seconds": time.time() - _t0_oai,
     }
     if response_format_json:
         try:
             out["json"] = json.loads(text)
         except json.JSONDecodeError as e:
             raise RuntimeError(f"OpenAI ({model}) returned invalid JSON: {e}") from e
+    _record(slug, pass_name, "openai", model, oai_usage, out["_wall_seconds"], project_root)
     return out

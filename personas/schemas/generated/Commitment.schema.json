@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field (10-20 principles per voice).\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel.",
+  "properties": {
+    "statement": {
+      "description": "The commitment, 1-2 sentences.",
+      "title": "Statement",
+      "type": "string"
+    },
+    "operational_note": {
+      "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete.",
+      "title": "Operational Note",
+      "type": "string"
+    },
+    "textual_source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Primary-text grounding: passage + work + Stephanus / canonical reference. Null if commitment is inferred from practice.",
+      "title": "Textual Source"
+    },
+    "unique_to_this_voice": {
+      "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic.",
+      "title": "Unique To This Voice",
+      "type": "boolean"
+    },
+    "evidence_tag": {
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "statement",
+    "operational_note",
+    "unique_to_this_voice",
+    "evidence_tag"
+  ],
+  "title": "Commitment",
+  "type": "object"
+}

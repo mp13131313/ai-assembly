@@ -1,14 +1,99 @@
 # AI Assembly — Claude context
 
-## Repo layout
+## Current branch state (2026-04-21)
+
+Active branch: `phase-b-rebuild` (~44 commits ahead of `main`, not yet merged). The v3.10 persona pipeline is being replaced by a chunked Pass 1.1–1.7 architecture with Boddice biocultural rubrics + Pydantic schemas + Position-C DR-prompt tailoring. Phase B restructure (per-voice folder layout, per-section manual DR workflow, telemetry, migration) is now complete and tested. Phase L (first full Dostoevsky pipeline run) is the next gate — gated on §5–§6 DR completion. `_workspace/planning/OPEN_ITEMS.md` is the authoritative pickup doc.
+
+If you land fresh, read `OPEN_ITEMS.md` before the v3.10 pipeline spec — otherwise you'll build the wrong mental model.
+
+## Filesystem layout (umbrella — 2026-04-21)
+
+Everything lives under `~/Desktop/AI Assembly/`:
+
+```
+~/Desktop/AI Assembly/
+├── code/                   # THE GIT REPO — only what's here pushes to GitHub.
+│   ├── .env                # shared secrets (gitignored at code/.env)
+│   ├── personas/           # persona-pipeline code
+│   ├── runtime/            # runtime-pipeline code
+│   ├── docs/               # specs + briefings
+│   ├── research/           # preserved baseline research
+│   └── _workspace/         # planning + doc archive (fix-plans, session-artifacts, specs)
+├── projects/               # NEVER pushed to GitHub — active project data
+│   ├── test/               # sandbox / experimentation (Dostoevsky lives here)
+│   │   ├── voices/         # per-voice folders (NEW — migrated 2026-04-21)
+│   │   │   └── <slug>/     # 00_intake/ 01_research/ 02_merge/ … 06_derive/
+│   │   ├── conference_facts.json  # project-level shared files (at root, not under inputs/)
+│   │   ├── audience_profile.json
+│   │   ├── panel_roster.json
+│   │   └── reference/…     # sessions.json, speakers.json (runtime-side)
+│   ├── phase-l-dostoevsky/ # Dostoevsky Phase L working project
+│   │   └── (same shape as test/)
+│   └── athens-2026/        # production instance (voices migrated 2026-04-21)
+│       └── (same shape as test/)
+└── archive/                # frozen historical runs — NEVER pushed
+    └── runs/
+        ├── personas/       # v3.10 run artifacts (Plato baseline for Phase L.8,
+        │                     Hannah Arendt partial, Ibn Battuta minimal, old
+        │                     DR prompts)
+        └── runtime/dev_msc_test/  # rehearsal run, 3 sessions, multiple
+                                   # researcher/provocateur versions
+```
+
+Note: old `inputs/` and `runs/` subdirs remain in projects for non-migrated non-human
+grounding files and residual data. Empty dirs were NOT auto-deleted — operator task.
+
+## Repo layout (inside `code/`)
 
 Four categories:
 
 - `docs/`, `runtime/`, `personas/` — **production** slice. Current specs, running code, canonical pipeline. In scope for every code review and VM deploy.
 - `research/` — **preserved grounding**. Deep Research artifacts that ground architecture decisions. Not deletable.
 - `_workspace/planning/` — **forward-looking design**. Active docs for unbuilt work (Phase B rebuild plan, binding decisions). Promoted to `docs/` when the work lands.
-- `_workspace/archive/` — **historical detritus**. Executed fix plans, stale specs, session artifacts, run artifacts. Eligible for pruning. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
-- `.env` — shared secrets at repo root (not committed). Both sub-trees load from `../.env` (one directory above their own root).
+- `_workspace/archive/` — **historical docs only** (executed fix plans, stale specs, session artifacts). Actual run data (persona + runtime runs from v3.10 and the dev_msc_test rehearsal) lives at the umbrella level under `~/Desktop/AI Assembly/archive/runs/` — moved out of the code repo in Tier 3, 2026-04-20. **Out of scope for code reviews and VM deploys by default — mention it explicitly if you want Claude to look here.**
+- `.env` — shared secrets at `code/.env` (not committed). Both sub-trees load from `../.env` (one directory above their own root, so `code/.env` since they live at `code/personas/` and `code/runtime/`).
+
+## Code / project separation (Tier 3)
+
+As of 2026-04-20, per-project data lives **outside** this code repo under a
+`PROJECT_ROOT` directory. Both the personas pipeline and the runtime pipeline
+resolve PROJECT_ROOT via the same shared module
+(`flows/shared/project_root.py` in each sub-tree) — they operate on the same
+project root per deployment (personas writes persona cards; runtime reads
+them from the same place).
+
+Precedence:
+
+1. `--project <path>` CLI arg (personas runners; runtime CLI flows take
+   explicit paths, the ingest app reads env/arg)
+2. `AI_ASSEMBLY_PROJECT_ROOT` environment variable (typically set in the
+   shared `code/.env` — on this machine defaults to `projects/test`)
+3. **No fallback** — exits with a clear message. With multiple projects
+   active, a silent default risks writing to the wrong one.
+
+Under `PROJECT_ROOT/`:
+
+- **Shared by both pipelines:** `runs/` (runtime writes `runs/<run_id>/...`)
+- **Personas only (per-voice):** `voices/<slug>/00_intake/`, `01_research/`,
+  `02_merge/`, `03_corpus/`, `04_generation/`, `05_validation/`, `06_derive/`,
+  `07_persona_card_assembled.json`, `_manifest.json`
+- **Personas only (project-level):** `conference_facts.json`,
+  `audience_profile.json`, `panel_roster.json` (at project root, NOT under `inputs/`)
+- **Runtime only:** `reference/sessions.json` + `speakers.json` +
+  `sessions.skipped.json`, `council_config.json`
+
+The per-voice folder layout was migrated from the old flat layout (`inputs/voices/`,
+`inputs/dossiers/`, `runs/<slug>/`) on 2026-04-21 via
+`personas/scripts/migrate_to_per_voice_layout.py`. All three projects migrated.
+
+The code repo holds runners, schemas, prompts, pinned test fixtures,
+`reference/session_template.json` (schema template, not project data), and
+`flows/shared/council/README.md` (schema doc).
+
+To run against Athens 2026: `--project "../../projects/athens-2026"` or set
+the env var. To run against test: the env default already points there.
+See `_workspace/planning/OPEN_ITEMS.md` §"Code / project separation (Tier 3)"
+for the design rationale.
 
 ## Orientation reading order
 
@@ -54,7 +139,7 @@ The personas pipeline produces a `provocateur_profile.json` per voice (37 fields
 All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Briefing_v3_1.md` — the authoritative project briefing (as of 2026-04-17)
 - `AI_Assembly_Persona_Card_v2.md` — the 37-field card template
-- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona build pipeline
+- `AI_Assembly_Persona_Pipeline_v3_10.md` — persona build pipeline (being replaced by Phase B chunked architecture on `phase-b-rebuild`; see `_workspace/planning/EXECUTION_PLAN_phase_b.md`)
 - `AI_Assembly_Researcher_Pipeline.md` — researcher extraction and grouping
 - `AI_Assembly_Provocateur_Pipeline.md` — triage, selection, formulation, packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript pipeline

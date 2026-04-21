@@ -1,6 +1,16 @@
 {# Pass 3 — Intellectual Core (Claude)
-   v3.10 Node 3. 5 fields: constitution, concept_lexicon, reasoning_method,
-   finds_compelling, resists. Uses coherence-threaded pass_2_summary. #}
+   5 fields: constitution, concept_lexicon, reasoning_method, finds_compelling,
+   resists. Phase B: reads from merged_dossier.commitments / .concepts /
+   .tensions / .reasoning_method / .textures (chunked Pass 1.2 + 1.3 outputs).
+
+   Field mapping (merged_dossier → persona card):
+   - constitution ← commitments[] (10-20; COMMIT to the specificity +
+     operational_note already produced; refine register to first-person)
+   - concept_lexicon ← concepts[] (5-10; preserve what_it_rules_out)
+   - reasoning_method ← reasoning_method (5-8 steps; first-person register)
+   - finds_compelling ← textures.finds_compelling
+   - resists ← textures.resists
+#}
 BLOCK 1 — EXPERT IDENTITY:
 You hold deep expertise in {{ name }}'s intellectual tradition and their reception
 history across major scholarly traditions. Your task is to produce the intellectual

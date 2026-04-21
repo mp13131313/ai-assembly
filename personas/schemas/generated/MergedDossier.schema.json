@@ -1,0 +1,1513 @@
+{
+  "$defs": {
+    "CoherenceFlag": {
+      "description": "One cross-chunk consistency issue flagged by Pass 1.7.",
+      "properties": {
+        "flag_id": {
+          "description": "Short label, e.g. 'CF-01'.",
+          "title": "Flag Id",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "minor",
+            "moderate",
+            "major"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "cross_chunk_citation_mismatch",
+            "commitment_formative_misalignment",
+            "concept_undefined_in_reasoning",
+            "voice_reasoning_mismatch",
+            "anachronism_boundary_mismatch",
+            "passage_work_orphan",
+            "other"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "description": {
+          "description": "1-3 sentences naming the issue.",
+          "title": "Description",
+          "type": "string"
+        },
+        "affected_chunks": {
+          "description": "e.g. ['1.1 formative_candidates', '1.2 commitments']",
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Chunks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "flag_id",
+        "severity",
+        "category",
+        "description",
+        "affected_chunks"
+      ],
+      "title": "CoherenceFlag",
+      "type": "object"
+    },
+    "CoherenceResolution": {
+      "description": "How Pass 1.7 resolved (or declined to resolve) a flag.",
+      "properties": {
+        "flag_id": {
+          "title": "Flag Id",
+          "type": "string"
+        },
+        "resolution": {
+          "description": "What was changed, or why the flag was accepted as-is (productive tension rather than inconsistency).",
+          "title": "Resolution",
+          "type": "string"
+        },
+        "revised_field_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If a chunk output was revised, dotted path to the field (e.g. 'pass_1_2.commitments[3].operational_note').",
+          "title": "Revised Field Path"
+        }
+      },
+      "required": [
+        "flag_id",
+        "resolution"
+      ],
+      "title": "CoherenceResolution",
+      "type": "object"
+    },
+    "Commitment": {
+      "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field (10-20 principles per voice).\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel.",
+      "properties": {
+        "statement": {
+          "description": "The commitment, 1-2 sentences.",
+          "title": "Statement",
+          "type": "string"
+        },
+        "operational_note": {
+          "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete.",
+          "title": "Operational Note",
+          "type": "string"
+        },
+        "textual_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Primary-text grounding: passage + work + Stephanus / canonical reference. Null if commitment is inferred from practice.",
+          "title": "Textual Source"
+        },
+        "unique_to_this_voice": {
+          "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic.",
+          "title": "Unique To This Voice",
+          "type": "boolean"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "statement",
+        "operational_note",
+        "unique_to_this_voice",
+        "evidence_tag"
+      ],
+      "title": "Commitment",
+      "type": "object"
+    },
+    "Concept": {
+      "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon` field (5-10 concepts per voice).\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage.",
+      "properties": {
+        "term": {
+          "description": "The term as the voice uses it.",
+          "title": "Term",
+          "type": "string"
+        },
+        "term_in_original_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri.",
+          "title": "Term In Original Language"
+        },
+        "definition": {
+          "description": "The voice's definition, not the modern English one.",
+          "title": "Definition",
+          "type": "string"
+        },
+        "what_it_rules_out": {
+          "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense.",
+          "title": "What It Rules Out",
+          "type": "string"
+        },
+        "textual_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Textual Source"
+        },
+        "unique_to_this_voice": {
+          "title": "Unique To This Voice",
+          "type": "boolean"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term",
+        "definition",
+        "what_it_rules_out",
+        "unique_to_this_voice",
+        "evidence_tag"
+      ],
+      "title": "Concept",
+      "type": "object"
+    },
+    "FormativeCandidate": {
+      "description": "Per Boddice §14 4-part rubric. Multiple candidates possible; Pass 2 commits to one.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.",
+      "properties": {
+        "candidate_label": {
+          "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates', 'Semelparous lifespan', '1977 melanoma diagnosis refused as toe-amputation'.",
+          "title": "Candidate Label",
+          "type": "string"
+        },
+        "formative_emotional_community": {
+          "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage).",
+          "title": "Formative Emotional Community",
+          "type": "string"
+        },
+        "lived_through_own_apparatus": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Per §14 sub-field 2 (HUMAN voices only). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction).",
+          "title": "Lived Through Own Apparatus"
+        },
+        "condition_of_being": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Per §14 sub-field 4 (NON-HUMAN / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus.",
+          "title": "Condition Of Being"
+        },
+        "engagement_it_drives": {
+          "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological.",
+          "title": "Engagement It Drives",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "default": "experiential_reconstruction",
+          "description": "Usually 'experiential_reconstruction' for §14 content.",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "scholarly_support_score": {
+          "description": "Pass 2 uses this when committing to a candidate.",
+          "enum": [
+            "strong",
+            "moderate",
+            "contested"
+          ],
+          "title": "Scholarly Support Score",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_label",
+        "formative_emotional_community",
+        "engagement_it_drives",
+        "scholarly_support_score"
+      ],
+      "title": "FormativeCandidate",
+      "type": "object"
+    },
+    "HardLimits": {
+      "description": "3-5 absolute prohibitions — character-breaking moves this voice never makes.\n\nMinimal and focused on CATASTROPHIC character failure, not expression-level\nconstraint. Expression-level constraints live in Pass 1.4's banned-language\noutput (Pass 7c-derived). Hard limits catch: adopting modern vocabulary,\nbreaking the characteristic mode of reasoning, producing arguments the\nvoice structurally would not make, abandoning dialectic for declaration.",
+      "properties": {
+        "prohibitions": {
+          "description": "3-5 absolute prohibitions. Each catches a specific failure mode the epistemic frame doesn't already cover. Example for Plato: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+          "items": {
+            "type": "string"
+          },
+          "title": "Prohibitions",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "inference",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "prohibitions"
+      ],
+      "title": "HardLimits",
+      "type": "object"
+    },
+    "KeyRelationship": {
+      "description": "One formative relationship (teacher, student, rival, consort, enemy, etc.).",
+      "properties": {
+        "person": {
+          "title": "Person",
+          "type": "string"
+        },
+        "relation_type": {
+          "title": "Relation Type",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "person",
+        "relation_type",
+        "evidence_tag"
+      ],
+      "title": "KeyRelationship",
+      "type": "object"
+    },
+    "KnowledgeBoundary": {
+      "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus a\nspecific exclusion list that catches the things the model would\notherwise slip on. For pre-modern voices: temporal exclusions. For\nnon-human voices: ontological-access exclusions. For cultural voices\nwithin modernity: tradition-specific exclusions.",
+      "properties": {
+        "general_frame": {
+          "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.'",
+          "title": "General Frame",
+          "type": "string"
+        },
+        "temporal_exclusions": {
+          "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Temporal Exclusions",
+          "type": "array"
+        },
+        "geographic_exclusions": {
+          "description": "Places outside this voice's known world.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Geographic Exclusions",
+          "type": "array"
+        },
+        "conceptual_exclusions": {
+          "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. Tag each with the reason it's excluded.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Conceptual Exclusions",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "general_frame"
+      ],
+      "title": "KnowledgeBoundary",
+      "type": "object"
+    },
+    "LifeScaffold": {
+      "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "human",
+            "non_human",
+            "fictional"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "subtype": {
+          "anyOf": [
+            {
+              "enum": [
+                "organism",
+                "system"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subtype"
+        },
+        "birth_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Birth Year"
+        },
+        "death_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Death Year"
+        },
+        "primary_locations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Locations",
+          "type": "array"
+        },
+        "institutions_founded_joined_opposed": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Institutions Founded Joined Opposed",
+          "type": "array"
+        },
+        "key_relationships": {
+          "items": {
+            "$ref": "#/$defs/KeyRelationship"
+          },
+          "title": "Key Relationships",
+          "type": "array"
+        },
+        "intellectual_world": {
+          "description": "Period intellectual currents in the voice's own framing.",
+          "title": "Intellectual World",
+          "type": "string"
+        },
+        "ontological_furniture": {
+          "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture.",
+          "title": "Ontological Furniture",
+          "type": "string"
+        },
+        "available_pathe": {
+          "description": "5-10 period-specific affects in original language with glosses. Flag any for which no modern equivalent exists. Pre-1820 voices: do not use 'emotions' as organizing category.",
+          "items": {
+            "$ref": "#/$defs/PeriodPathos"
+          },
+          "title": "Available Pathe",
+          "type": "array"
+        },
+        "framework_for_difficulty": {
+          "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework.",
+          "title": "Framework For Difficulty",
+          "type": "string"
+        },
+        "model_of_selfhood": {
+          "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly.",
+          "title": "Model Of Selfhood",
+          "type": "string"
+        },
+        "anachronisms_to_avoid": {
+          "description": "4-8 modern terms that would mis-render this voice (e.g. 'career', 'self-actualization', 'trauma', 'romance', 'identity'). Each entry: term + 1-line reason.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Anachronisms To Avoid",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "intellectual_world",
+        "ontological_furniture",
+        "framework_for_difficulty",
+        "model_of_selfhood"
+      ],
+      "title": "LifeScaffold",
+      "type": "object"
+    },
+    "Move": {
+      "description": "One named rhetorical / characteristic move.\n\n3-6 per voice. These are the fingerprints — things that make a reader\nwho knows this voice say \"that's unmistakably X.\"",
+      "properties": {
+        "name": {
+          "description": "Short name, e.g. 'The definitional challenge'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the move does; when the voice deploys it.",
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One concrete example — short phrase or sentence illustrating the move in action.",
+          "title": "Example"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "Move",
+      "type": "object"
+    },
+    "Moves": {
+      "properties": {
+        "moves": {
+          "items": {
+            "$ref": "#/$defs/Move"
+          },
+          "title": "Moves",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "moves"
+      ],
+      "title": "Moves",
+      "type": "object"
+    },
+    "Passage": {
+      "description": "A characteristic passage — 8-15 per voice.\n\nEach passage tagged with `purpose` (intellectual substance / voice\nexemplar / translation anchor). Pass 4a uses voice exemplars as\nstylistic models. For musical voices: DESCRIPTION ONLY (no direct lyric\nquotation).\n\nTwo-tier corpus note (Phase B): this is the PUBLIC-SAFE tier. Voices\nwith `corpus_constraint: lyrics_patterns_only` emit pattern descriptions\nhere (`is_direct_quotation=false`). The private-reasoning tier lives in\nthe sibling `ReferenceOnlyPassage` — loaded into Voice Pipeline Step 1\nonly, never Step 2. See the `ReferenceOnlyPassages` model.",
+      "properties": {
+        "passage_id": {
+          "description": "Short reference label, e.g. 'Republic-488a' or 'Rihla-Delhi-imprisonment'.",
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "canonical_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Canonical Reference"
+        },
+        "contextual_header": {
+          "description": "What the passage is and why it matters. 1-3 sentences.",
+          "title": "Contextual Header",
+          "type": "string"
+        },
+        "content_or_description": {
+          "description": "For corpus-based voices: the passage text from scholarly translation. For musical voices: STRUCTURAL-THEMATIC DESCRIPTION only — no direct lyric. For hostile-source passages: the text with bias flag in contextual_header.",
+          "title": "Content Or Description",
+          "type": "string"
+        },
+        "is_direct_quotation": {
+          "default": true,
+          "description": "True for corpus passages; False for musical-voice descriptions or paraphrases.",
+          "title": "Is Direct Quotation",
+          "type": "boolean"
+        },
+        "purpose": {
+          "enum": [
+            "intellectual_substance",
+            "voice_exemplar",
+            "translation_anchor"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "default": "stated",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passage_id",
+        "work_title",
+        "canonical_reference",
+        "contextual_header",
+        "content_or_description",
+        "purpose",
+        "tier"
+      ],
+      "title": "Passage",
+      "type": "object"
+    },
+    "Passages": {
+      "properties": {
+        "passages": {
+          "items": {
+            "$ref": "#/$defs/Passage"
+          },
+          "title": "Passages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "passages"
+      ],
+      "title": "Passages",
+      "type": "object"
+    },
+    "PeriodPathos": {
+      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: 5-10 terms per voice in original language,\nwith short glosses. No modern English emotion-words as primary vocabulary\nfor pre-1820 voices.",
+      "properties": {
+        "term_in_original_language": {
+          "title": "Term In Original Language",
+          "type": "string"
+        },
+        "gloss": {
+          "title": "Gloss",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term_in_original_language",
+        "gloss",
+        "evidence_tag"
+      ],
+      "title": "PeriodPathos",
+      "type": "object"
+    },
+    "ReasoningMethod": {
+      "description": "Per decisions log + REBUILD_PLAN D.1.\n\n5-8 steps. Includes concluding steps for how the voice evaluates claims\nand how it structures conclusions. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
+      "properties": {
+        "voice_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "philosophical",
+                "observational",
+                "narratival"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Voice Mode"
+        },
+        "summary": {
+          "description": "1-3 sentences naming the method's overall shape.",
+          "title": "Summary",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/ReasoningStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "voice_mode",
+        "summary",
+        "steps"
+      ],
+      "title": "ReasoningMethod",
+      "type": "object"
+    },
+    "ReasoningStep": {
+      "description": "One step in the voice's characteristic reasoning method.\n\n5-8 steps per voice. For human voices: cognitive moves (dialectic,\nelenchus, etc.). For non-human organisms: perceptual-response cycle.\nFor non-human systems: assessment cycle through the relational framework.\nFor fictional/narratival: story-construction process.",
+      "properties": {
+        "step_number": {
+          "title": "Step Number",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Short cognitive-move name, e.g. 'Test with counterexamples'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the step does; what it moves the voice toward.",
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "description": "One concrete example applying this step to a representative provocation.",
+          "title": "Example",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_number",
+        "name",
+        "description",
+        "example"
+      ],
+      "title": "ReasoningStep",
+      "type": "object"
+    },
+    "ReferenceOnlyPassage": {
+      "description": "Private-reasoning corpus — injected into Voice Pipeline Step 1 ONLY.\n\nTwo-tier corpus design (Phase B, cleanup deferrals): for voices whose\nprimary corpus is copyright-sensitive (musical voices: Marley; possibly\nDostoevsky if we pin specific modern-critical-edition translations),\npattern descriptions alone in `Passages` underfit the voice. The voice\ncan reason much more fluently if it has direct access to its own words\nas REFERENCE MATERIAL inside private reasoning.\n\nCritical runtime contract:\n  - Voice Pipeline Step 1 (Private Reasoning) loads these passages into\n    its system prompt alongside the public `curated_corpus_passages`.\n  - Voice Pipeline Step 2 (Public Expression) does NOT load these. The\n    artifact the audience reads must not contain direct lyric quotation\n    (copyright) or any material flagged here as reasoning-only.\n  - The PROHIBITION against quoting these is stronger than banned_language:\n    it applies to ANY output the audience sees, including paraphrase\n    that's identifiably sourced.\n\nLeakage risk: the model could still lift phrases inadvertently in Step 2\neven though the passages aren't loaded there. Pass 7c scans for this\nand should add such lift-phrases to `banned_language` if observed.\n\nVoices for which this field is populated:\n  - `corpus_constraint: lyrics_patterns_only` voices (Marley): YES\n  - Translation-sensitive corpora (Dostoevsky translations under\n    copyright, perhaps): optionally YES with scholarly-edition attribution\n  - Voices with fully public-domain corpora (Plato, Ibn Battuta):\n    usually empty — the regular `Passages` already carries the material",
+      "properties": {
+        "passage_id": {
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "canonical_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Reference"
+        },
+        "contextual_header": {
+          "description": "What the passage is. Same shape as public Passage.",
+          "title": "Contextual Header",
+          "type": "string"
+        },
+        "content": {
+          "description": "The actual text — lyrics, copyrighted translation, etc. Injected into Step 1 ONLY. Never reaches the audience-facing artifact.",
+          "title": "Content",
+          "type": "string"
+        },
+        "source_attribution": {
+          "description": "Full copyright attribution: 'Marley, Bob. \"Redemption Song.\" Uprising (Island Records, 1980). Used as reference-only material under private-use / fair-use reasoning; not redistributed.'",
+          "title": "Source Attribution",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "voice_exemplar",
+            "intellectual_substance"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "passage_id",
+        "work_title",
+        "contextual_header",
+        "content",
+        "source_attribution",
+        "purpose"
+      ],
+      "title": "ReferenceOnlyPassage",
+      "type": "object"
+    },
+    "ReferenceOnlyPassages": {
+      "description": "Container for the private-reasoning tier. Step 1 reads; Step 2 does not.",
+      "properties": {
+        "passages": {
+          "description": "Usually empty; populated for musical + translation-sensitive voices.",
+          "items": {
+            "$ref": "#/$defs/ReferenceOnlyPassage"
+          },
+          "title": "Passages",
+          "type": "array"
+        },
+        "runtime_contract_note": {
+          "default": "RUNTIME CONTRACT: These passages are loaded into Voice Pipeline Step 1 (Private Reasoning) ONLY. They are NEVER loaded into Step 2 (Public Expression), and no direct quotation of them is permitted in the artifact the audience reads. Enforcement: the runtime's Voice Pipeline Step 2 system-prompt assembly code MUST drop this field before rendering. See personas/HANDOFF.md for the runtime contract.",
+          "description": "Inline reminder the runtime reads.",
+          "title": "Runtime Contract Note",
+          "type": "string"
+        }
+      },
+      "title": "ReferenceOnlyPassages",
+      "type": "object"
+    },
+    "Register": {
+      "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.",
+      "properties": {
+        "rhetorical_mode": {
+          "description": "One or two sentences naming the primary mode of expression. Example: 'Dialogic and interrogative; primary mode is the guided question.'",
+          "title": "Rhetorical Mode",
+          "type": "string"
+        },
+        "register_and_tone": {
+          "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.'",
+          "title": "Register And Tone",
+          "type": "string"
+        },
+        "tradition_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "For oral, ritual, or performative traditions: name the tradition that speaks through the voice. For non-human voices: describe the mediation (Te Pou Tupua, scientific reconstruction, narratorial construct). Null for individual-authorial voices.",
+          "title": "Tradition Note"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rhetorical_mode",
+        "register_and_tone"
+      ],
+      "title": "Register",
+      "type": "object"
+    },
+    "SensitiveTopic": {
+      "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (the sanitization paradox per baseline File 3).",
+      "properties": {
+        "topic": {
+          "title": "Topic",
+          "type": "string"
+        },
+        "what_the_voice_actually_thought": {
+          "description": "The substantive position, sourced. Do NOT sanitise.",
+          "title": "What The Voice Actually Thought",
+          "type": "string"
+        },
+        "navigation_guidance": {
+          "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them.",
+          "title": "Navigation Guidance",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "topic",
+        "what_the_voice_actually_thought",
+        "navigation_guidance",
+        "evidence_tag"
+      ],
+      "title": "SensitiveTopic",
+      "type": "object"
+    },
+    "SensitiveTopics": {
+      "properties": {
+        "topics": {
+          "items": {
+            "$ref": "#/$defs/SensitiveTopic"
+          },
+          "title": "Topics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "topics"
+      ],
+      "title": "SensitiveTopics",
+      "type": "object"
+    },
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    },
+    "Tension": {
+      "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are productive:\nthey mark where the voice's reasoning genuinely divides.",
+      "properties": {
+        "description": {
+          "description": "The tension, named explicitly. 1-2 sentences.",
+          "title": "Description",
+          "type": "string"
+        },
+        "conflicting_commitments": {
+          "description": "References to Commitment.statement values or short summary labels for the commitments that pull against each other.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Conflicting Commitments",
+          "type": "array"
+        },
+        "passage_citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Passage Citations",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "description": "Usually scholarly_consensus (tensions are typically identified in the literature); occasionally inference.",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "Tension",
+      "type": "object"
+    },
+    "Textures": {
+      "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.",
+      "properties": {
+        "finds_compelling": {
+          "description": "4-8 textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation'.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Finds Compelling",
+          "type": "array"
+        },
+        "resists": {
+          "description": "4-8 textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting'.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Resists",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "finds_compelling",
+        "resists"
+      ],
+      "title": "Textures",
+      "type": "object"
+    },
+    "URLEntry": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "work_title": {
+          "title": "Work Title",
+          "type": "string"
+        },
+        "source": {
+          "description": "Perseus, Project Gutenberg, Google Books, BAWS-online, etc.",
+          "title": "Source",
+          "type": "string"
+        },
+        "license_or_access_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Or Access Note"
+        }
+      },
+      "required": [
+        "url",
+        "work_title",
+        "source"
+      ],
+      "title": "URLEntry",
+      "type": "object"
+    },
+    "URLs": {
+      "properties": {
+        "urls": {
+          "items": {
+            "$ref": "#/$defs/URLEntry"
+          },
+          "title": "Urls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "urls"
+      ],
+      "title": "URLs",
+      "type": "object"
+    },
+    "Vocabulary": {
+      "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary).",
+      "properties": {
+        "preferred_vocabulary": {
+          "description": "15-30 words/terms the voice reaches for. Period vocabulary primary for pre-1820 voices. No generic management terms.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Preferred Vocabulary",
+          "type": "array"
+        },
+        "metaphorical_repertoire": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named metaphor families → short description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination'}.",
+          "title": "Metaphorical Repertoire",
+          "type": "object"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "preferred_vocabulary",
+        "metaphorical_repertoire"
+      ],
+      "title": "Vocabulary",
+      "type": "object"
+    },
+    "WorkEntry": {
+      "description": "One work in the voice's corpus.",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "canonical_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stephanus pagination for Plato, BAWS volume for Ambedkar, stemma reference for Scheherazade, catalogue number for songs, etc. Null where no canonical scheme exists.",
+          "title": "Canonical Reference"
+        },
+        "translator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translator"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "primary_in_voice",
+            "hostile_source",
+            "scholarly_commentary",
+            "legal_instrument",
+            "scientific_literature",
+            "musical_catalogue",
+            "interview_or_speech"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "title",
+        "tier",
+        "source_type"
+      ],
+      "title": "WorkEntry",
+      "type": "object"
+    },
+    "Works": {
+      "properties": {
+        "works": {
+          "items": {
+            "$ref": "#/$defs/WorkEntry"
+          },
+          "title": "Works",
+          "type": "array"
+        }
+      },
+      "required": [
+        "works"
+      ],
+      "title": "Works",
+      "type": "object"
+    }
+  },
+  "description": "Chunks 1.1-1.6 composed + Pass 1.7 coherence metadata.\n\nNote on the `voice_register` / `register` aliasing:\nPydantic's BaseModel metaclass inherits a `register()` method from the\nabstract-base-class machinery. Using `register` directly as a field name\ntriggers `UserWarning: Field name \"register\" in \"MergedDossier\" shadows\nan attribute in parent \"BaseModel\"` plus a JSON-schema warning about the\ninherited method being treated as a default. We rename the Python\nattribute to `voice_register` but preserve the JSON key `register` via\nalias + serialization_alias + `populate_by_name=True`, so callers that\nread `merged_dossier[\"register\"]` continue to work unchanged.\n\nAll `.model_dump()` calls in runners that serialize to JSON consumed by\nthe pipeline use `by_alias=True` — see run_pass_1_7.py.",
+  "properties": {
+    "life_scaffold": {
+      "$ref": "#/$defs/LifeScaffold"
+    },
+    "formative_candidates": {
+      "items": {
+        "$ref": "#/$defs/FormativeCandidate"
+      },
+      "title": "Formative Candidates",
+      "type": "array"
+    },
+    "commitments": {
+      "items": {
+        "$ref": "#/$defs/Commitment"
+      },
+      "title": "Commitments",
+      "type": "array"
+    },
+    "concepts": {
+      "items": {
+        "$ref": "#/$defs/Concept"
+      },
+      "title": "Concepts",
+      "type": "array"
+    },
+    "tensions": {
+      "items": {
+        "$ref": "#/$defs/Tension"
+      },
+      "title": "Tensions",
+      "type": "array"
+    },
+    "reasoning_method": {
+      "$ref": "#/$defs/ReasoningMethod"
+    },
+    "textures": {
+      "$ref": "#/$defs/Textures"
+    },
+    "moves": {
+      "$ref": "#/$defs/Moves"
+    },
+    "register": {
+      "$ref": "#/$defs/Register",
+      "description": "Voice register/tone block — aliased to JSON key 'register'."
+    },
+    "vocabulary": {
+      "$ref": "#/$defs/Vocabulary"
+    },
+    "knowledge_boundary": {
+      "$ref": "#/$defs/KnowledgeBoundary"
+    },
+    "sensitive_topics": {
+      "$ref": "#/$defs/SensitiveTopics"
+    },
+    "hard_limits": {
+      "$ref": "#/$defs/HardLimits"
+    },
+    "works": {
+      "$ref": "#/$defs/Works"
+    },
+    "passages": {
+      "$ref": "#/$defs/Passages"
+    },
+    "urls": {
+      "$ref": "#/$defs/URLs"
+    },
+    "reference_only_passages": {
+      "$ref": "#/$defs/ReferenceOnlyPassages",
+      "description": "Private-reasoning corpus; Step 1 loads, Step 2 drops. Usually empty for public-domain voices."
+    },
+    "coherence_flags": {
+      "items": {
+        "$ref": "#/$defs/CoherenceFlag"
+      },
+      "title": "Coherence Flags",
+      "type": "array"
+    },
+    "coherence_resolutions": {
+      "items": {
+        "$ref": "#/$defs/CoherenceResolution"
+      },
+      "title": "Coherence Resolutions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "life_scaffold",
+    "formative_candidates",
+    "commitments",
+    "concepts",
+    "tensions",
+    "reasoning_method",
+    "textures",
+    "moves",
+    "register",
+    "vocabulary",
+    "knowledge_boundary",
+    "sensitive_topics",
+    "hard_limits",
+    "works",
+    "passages",
+    "urls"
+  ],
+  "title": "MergedDossier",
+  "type": "object"
+}

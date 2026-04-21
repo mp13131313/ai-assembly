@@ -1,0 +1,13 @@
+{
+  "name": "Test Subject Alpha",
+  "voice_slug": "test_subject_alpha",
+  "type": "human",
+  "subtype": null,
+  "voice_mode": "philosophical",
+  "corpus_constraint": "full",
+  "hostile_sources": false,
+  "primary_text_sources": [],
+  "wikipedia_url": "",
+  "wikipedia_extract": "Test Subject Alpha is a synthetic persona used for pipeline plumbing tests. Not a real historical figure.",
+  "editorial_rationale": null
+}

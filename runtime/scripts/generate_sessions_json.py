@@ -210,11 +210,16 @@ def main() -> int:
         default=Path("/Users/Shared/index.html"),
         help="Path to the program HTML containing `const SESSIONS = [...]`",
     )
+    import os as _os
+    _env_project = _os.environ.get("AI_ASSEMBLY_PROJECT_ROOT")
+    _default_out = Path(_env_project).expanduser() / "reference/sessions.json" if _env_project else None
     ap.add_argument(
         "--output",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "reference" / "sessions.json",
-        help="Where to write the normalized sessions.json",
+        default=_default_out,
+        required=_default_out is None,
+        help="Where to write the normalized sessions.json "
+             "(default: $AI_ASSEMBLY_PROJECT_ROOT/reference/sessions.json)",
     )
     args = ap.parse_args()
 
