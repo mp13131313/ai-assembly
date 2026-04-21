@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 import anthropic as _anthropic
+from flows.shared import paths as _paths
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.project_root import add_project_arg, resolve_project_root
@@ -36,7 +37,7 @@ def _stamp(msg: str) -> None:
 
 def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
     """Load the 6 chunks written by Passes 1.1-1.6."""
-    base = project_root / "runs" / slug / "01_research"
+    base = _paths.merge_dir(slug, project_root)
     out: dict = {}
     # Per-chunk output layout: pass_1_N/<key>.json for each key.
     layout = {
@@ -92,7 +93,7 @@ def run_pass_1_7(*, name: str, project_root: Path | None = None,
     call_kwargs = dict(
         system=system,
         model="claude-opus-4-7",
-        max_tokens=40000,
+        max_tokens=64000,
         temperature=1.0,
         thinking=True,
         response_format_json=True,
@@ -124,7 +125,7 @@ def run_pass_1_7(*, name: str, project_root: Path | None = None,
         time.sleep(15)
         result = _call_and_validate(user)
 
-    out_path = project_root / "runs" / slug / "01_research" / "merged_dossier.json"
+    out_path = _paths.merged_dossier(slug, project_root)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     write_json_atomic(out_path, result)
     _stamp(

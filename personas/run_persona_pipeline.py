@@ -475,7 +475,7 @@ pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 # ---------- PASS 5 (Engagement) ----------
 def _pass_5():
     sysp = render("persona_pass_5_engagement", name=vi["name"], type=vi["type"],
-                  voice_mode=vi["voice_mode"])
+                  subtype=vi.get("subtype"), voice_mode=vi["voice_mode"])
     userp = render(
         "persona_pass_5_user",
         pass_2_3_4_summary=pass_2_3_4_summary,
@@ -871,7 +871,7 @@ def _pass_7b():
         full_card_for_provoke.update(pass6["fields"])
     sysp = render("persona_pass_7b_smoke_test",
                   conference_context=_load_conference_context_string(),
-                  voice_mode=vi["voice_mode"])
+                  voice_mode=vi["voice_mode"], subtype=vi.get("subtype"))
     userp = render("persona_pass_7b_smoke_test_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",

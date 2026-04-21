@@ -133,12 +133,18 @@ def _inline_schemas(output_keys: dict[str, type[BaseModel] | tuple[type[BaseMode
 
     Regenerates generated/ files as a side effect.
     """
+    import re
     generate_json_schemas()
     out: dict[str, str] = {}
     for key, spec in output_keys.items():
         model = spec[0] if isinstance(spec, tuple) else spec
         # Template vars follow convention `<model_name_snake>_schema`. E.g. LifeScaffold → life_scaffold_schema.
-        name = "".join("_" + c.lower() if c.isupper() else c for c in model.__name__).lstrip("_")
+        # Acronym special case: ALL-CAPS + lowercase suffix (URLs → urls, not u_r_ls).
+        cls_name = model.__name__
+        if re.match(r'^[A-Z]{2,}[a-z]+$', cls_name):
+            name = cls_name.lower()
+        else:
+            name = "".join("_" + c.lower() if c.isupper() else c for c in cls_name).lstrip("_")
         out[f"{name}_schema"] = json.dumps(
             model.model_json_schema(), indent=2, ensure_ascii=False
         )
@@ -268,7 +274,7 @@ def run_chunk(
         except _RETRYABLE as exc2:
             sys.exit(f"Pass {chunk_name} failed after retry: {exc2}")
 
-    out_dir = project_root / "runs" / slug / "01_research" / (output_subdir or f"pass_{chunk_name.replace('.', '_')}")
+    out_dir = _paths.merge_dir(slug, project_root) / (output_subdir or f"pass_{chunk_name.replace('.', '_')}")
     out_dir.mkdir(parents=True, exist_ok=True)
     for key in output_keys:
         write_json_atomic(out_dir / f"{key}.json", result[key])
