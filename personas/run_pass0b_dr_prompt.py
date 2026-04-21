@@ -104,11 +104,13 @@ def main(name: str, project: str | None = None) -> None:
     stamp(f"  DR prompt:     {dr_prompt_path.relative_to(project_root)}")
     stamp("")
     stamp("Next steps:")
+    stamp(f"  NOTE: run_phase0_1_research.py auto-tailors + splits into 6 section prompts.")
+    stamp(f"  If using this base prompt directly:")
     stamp(f"  1. Open claude.ai, select Claude Opus 4.7 in the model picker")
     stamp(f"  2. Enable Extended Thinking + Deep Research")
     stamp(f"  3. Paste the prompt from {dr_prompt_path.name}")
-    stamp(f"  4. Expect 60-180 min wait")
-    stamp(f"  5. Save the result as <project_root>/inputs/dossiers/{slug}_claude_dr.md")
+    stamp(f"  4. Expect 20-40 min per section")
+    stamp(f"  5. Save each section as voices/{slug}/01_research/04_dr_dossier/0N_section_N.md")
     stamp(f"  6. Run: python3 run_persona_pipeline.py \"{display_name}\"")
 
 

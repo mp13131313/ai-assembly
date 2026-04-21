@@ -1062,7 +1062,7 @@ stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).
 stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
 stamp(f"  Total card fields:    {len(full_card)}")
 stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
-stamp(f"  Card saved to:        {RUN}/02_passes/")
+stamp(f"  Card saved to:        {_paths.voice_root(SLUG, PROJECT_ROOT)}/")
 stamp("=" * 60)
 
 write_json_atomic(RUN / "persona_card_assembled.json", {
