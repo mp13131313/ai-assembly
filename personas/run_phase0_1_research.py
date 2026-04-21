@@ -36,6 +36,7 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 import jinja2
 import requests
 
+from flows.shared import paths
 from flows.shared.clients import call_perplexity, call_gemini
 from flows.shared.io import voice_slug, write_json_atomic, load_voice_input
 from flows.shared.node0_validation import validate_input
@@ -60,20 +61,21 @@ _RETRYABLE = (
 
 
 def _with_retry(fn, *, label: str):
-    """Call fn(); on retryable error, sleep 15s and try once more.
+    """Call fn(); on retryable error, retry twice (15s then 60s).
 
-    Saves a failed $5-10 Perplexity call from a single network blip. On
-    the second failure, raises — the pipeline loses the call, but at
-    least the curator knows to investigate rather than silently proceed
-    with an empty result.
+    Saves a failed $5-10 Perplexity call from transient network blips. On
+    the third failure, raises — the pipeline loses the call, but at least
+    the curator knows to investigate rather than silently proceed with an
+    empty result.
     """
-    try:
-        return fn()
-    except _RETRYABLE as exc:
-        stamp(f"  {label}: retryable error ({type(exc).__name__}: {str(exc)[:120]}); "
-              f"sleeping 15s then retrying once")
-        time.sleep(15)
-        return fn()  # second failure propagates
+    for delay in (15, 60):
+        try:
+            return fn()
+        except _RETRYABLE as exc:
+            stamp(f"  {label}: retryable error ({type(exc).__name__}: {str(exc)[:120]}); "
+                  f"sleeping {delay}s then retrying")
+            time.sleep(delay)
+    return fn()  # third attempt — propagates on failure
 
 TEMPLATE_PATH = REPO_ROOT / "flows/shared/prompts/pass_0b_dr_prompt.md"
 
@@ -264,25 +266,68 @@ def main(voice_name: str, project: str | None = None) -> None:
     # Overwrites the base prompt; preserves the base at <slug>_dr_prompt.base.md.
     stamp("PASS 0b tailor: hybrid Jinja+LLM tailoring (PB#2)…")
     from run_pass_0b_tailor import run_pass_0b_tailor  # noqa: E402 — deferred
+    section_paths: list[Path] = []
     try:
         tailor_result = run_pass_0b_tailor(vi["name"], project_root=project_root)
         stamp(f"  tailoring: {tailor_result['status']} "
               f"({tailor_result.get('tailoring_notes_count', '?')} edits)")
+
+        # Copy tailored output to new per-voice path, then split into 6 sections.
+        old_tailored_path = DR_PROMPTS_DIR / f"{SLUG}_dr_prompt.md"
+        monolithic_path = paths.monolithic_dr_prompt(SLUG, project_root)
+        monolithic_path.parent.mkdir(parents=True, exist_ok=True)
+        monolithic_path.write_text(old_tailored_path.read_text(encoding="utf-8"), encoding="utf-8")
+        stamp(f"  monolithic → {monolithic_path.relative_to(project_root)}")
+
+        from scripts.split_tailored_prompt import split_tailored_prompt  # noqa: E402
+        section_paths = split_tailored_prompt(SLUG, project_root)
+        stamp(f"  split → {len(section_paths)} section prompt files")
     except Exception as exc:
-        stamp(f"  WARN: tailoring pass failed ({type(exc).__name__}: {str(exc)[:120]}); "
+        stamp(f"  WARN: tailoring/split pass failed ({type(exc).__name__}: {str(exc)[:120]}); "
               f"base prompt remains in place")
 
     stamp("")
     stamp("=" * 60)
-    stamp("NEXT STEPS")
+    stamp("NEXT STEPS — manual Claude Deep Research")
     stamp("=" * 60)
-    stamp(f"  1. Review {dr_prompt_path.name}")
-    stamp(f"  2. Open claude.ai — select Claude Opus 4.7, enable Extended Thinking + Deep Research")
-    stamp(f"  3. Paste the prompt (starts after the '---' line)")
-    _claude_dr_rel = (project_root / f"inputs/dossiers/{SLUG}_claude_dr.md").relative_to(project_root)
-    stamp(f"  4. Wait 60-180 min. Save result as {_claude_dr_rel} (under PROJECT_ROOT)")
-    stamp(f"  5. Validate: python3 personas/scripts/validate_dr_dossier.py {project_root}/{_claude_dr_rel}")
-    stamp(f"  6. Run pipeline: python3 run_persona_pipeline.py \"{display_name}\"")
+    _mono_rel = paths.monolithic_dr_prompt(SLUG, project_root).relative_to(project_root)
+    stamp(f"Phase 0.5 research complete. Tailored monolithic prompt at:")
+    stamp(f"  {_mono_rel}")
+    _dr_prompts_rel = paths.dr_prompts_dir(SLUG, project_root).relative_to(project_root)
+    stamp(f"\nSplit into 6 paste-ready section prompts at:")
+    stamp(f"  {_dr_prompts_rel}/")
+    for n in range(1, 7):
+        p = paths.section_dr_prompt(SLUG, n, project_root)
+        arrow = "  ← paste these" if n == 1 else ""
+        stamp(f"    {p.name}{arrow}")
+    stamp(f"""
+WORKFLOW:
+
+1. Open claude.ai, select Opus 4.6, enable Extended Thinking + Deep Research.
+
+2. For each section (1 through 6):
+   (a) Paste the section prompt into claude.ai.
+   (b) Wait ~30 min for Research to complete (if past 60 min without draft
+       streaming visible, cancel and retry).
+   (c) Click "Download as .md" button to save the DR output.
+   (d) Move/rename the download to:
+       voices/{SLUG}/01_research/04_dr_dossier/0N_section_N.md
+
+3. Operator choice: paste all 6 in the same thread (for cross-section
+   coherence) or in fresh threads per section (for independent sampling).
+   Both paths are empirically validated.
+
+4. When all 6 sections are saved, run the pipeline:
+   cd personas && venv/bin/python run_persona_pipeline.py "{display_name}" --project {project_root}
+
+The pipeline auto-detects per-section mode from the dr_dossier/ directory
+state. If fewer than 6 section files present, it errors with a clear
+message indicating which section is missing.
+
+For monolithic fallback (treat saved DR outputs as one file): concatenate
+the 6 section files into voices/{SLUG}/01_research/04_dr_dossier/07_concat_claude_dr.md
+before running the pipeline. Chunk_runner auto-detects the monolithic
+file if per-section files absent.""")
 
 
 if __name__ == "__main__":
