@@ -216,6 +216,8 @@ def main(voice_name: str, project: str | None = None) -> None:
 
     display_name = vi["name"]
     wiki_url = vi_raw.get("wikipedia_url", "")
+    _hint = vi_raw.get("wikipedia_disambiguation_hint")
+    display_name_with_hint = f"{display_name} ({_hint})" if _hint else display_name
 
     # Phase B G.3: pass_0b_dr_prompt.md is now a wrapper that `{% include %}`s
     # per-type sub-templates. Need FileSystemLoader pointing at the prompts/
@@ -237,7 +239,7 @@ def main(voice_name: str, project: str | None = None) -> None:
     # prior Position A design inlined them, Position C does not.
     context = {
         "name": display_name,
-        "display_name_with_hint": display_name,
+        "display_name_with_hint": display_name_with_hint,
         "voice_slug": SLUG,
         "type": vi["type"],
         "subtype": vi.get("subtype"),

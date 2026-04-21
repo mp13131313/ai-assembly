@@ -62,10 +62,13 @@ def main(name: str, project: str | None = None) -> None:
 
     voice_config = json.loads(voice_path.read_text())
 
-    # Build display_name_with_hint: name + Wikipedia description if available
+    # Build display_name_with_hint: name + optional disambiguation hint.
+    # Set voice_config.wikipedia_disambiguation_hint to e.g. "Russian novelist,
+    # 1821-1881" for disambiguation-heavy names like "Plato" or "Cleopatra".
     display_name = voice_config.get("name", name)
     wiki_url = voice_config.get("wikipedia_url")
-    display_name_with_hint = display_name
+    _hint = voice_config.get("wikipedia_disambiguation_hint")
+    display_name_with_hint = f"{display_name} ({_hint})" if _hint else display_name
 
     # Render Jinja2 template
     template_src = TEMPLATE_PATH.read_text(encoding="utf-8")
