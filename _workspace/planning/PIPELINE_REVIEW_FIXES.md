@@ -142,6 +142,67 @@ Estimated: 1-2 days focused engineering + testing.
 
 ---
 
+### 1-arch-02 — Gemini's per-chunk role is wrong-lane; re-route to either sectioned-per-chunk or coherence-only
+
+**Severity:** HIGH (quality ceiling, not blocker)
+**Status:** PROPOSED (post-Phase-N revisit; flag for empirical test during voices 2-12)
+**Scope:** `chunk_runner._load_sources()` + `pass_1_b_*.md` prompts (to require section headings if sectioned variant adopted) + Pass 1.7 prompt + token-budget on Pass 1.7 + PB#3 decision-log reversal/refinement
+
+**Problem:**
+
+Current architecture (per `chunk_runner.py:79-128`):
+- Perplexity: section-N per chunk (via `perplexity_split.split_dossier()`)
+- Claude DR: section-N per chunk (per-section mode, Phase-L-validated default)
+- **Gemini: full, handed to every chunk**
+
+Gemini is the only full-corpus feed per chunk. Each of chunks 1.1-1.6 reads the same ~15-50KB Gemini breadth-scan and must self-filter relevance — the per-chunk prompts carry an implicit relevance-filtering task on top of their main synthesis task.
+
+**This is wrong-lane for Gemini per baseline File 4:**
+- File 4 documents Gemini as "unusable for basic humanities research" at depth — strong at *breadth-first discovery, adjacency surfacing, multilingual-scholarship indexing, lineage connections*.
+- File 4's tool-section table places Gemini as secondary for S1 (Identity) only, never as primary for any humanities section.
+- Breadth/adjacency/cross-cutting material is **structurally a coherence-pass concern**, not a per-section synthesis concern.
+
+The per-chunk relevance-filtering burden is real and unmeasured. Every chunk spends attention-budget filtering Gemini noise from its §N focus. Opus 4.7 filters well enough that we haven't seen catastrophic leakage on Dostoevsky — but the cost is invisible, and may surface as diffuse "off-register" material (Gemini-flavored phrasings, off-topic scholar name-drops) that's hard to trace back to its cause.
+
+**Two variants, in order of conservatism:**
+
+**Variant A — Gemini sectioned per chunk (like Perplexity + DR).**
+- Apply `perplexity_split`-style section-heading logic to Gemini output.
+- **Prerequisite:** `pass_1_b_*.md` prompts must mandate the same 6-section heading format Perplexity uses (`## 1. BIOGRAPHICAL FOUNDATION` etc.) — currently they don't.
+- Preserves PB#3 three-way triangulation per chunk.
+- Drops Gemini-noise-burden from 6 chunks to 1 topical slice per chunk.
+- Implementation: ~1 hour prompt edits (Pass 1b family, 4 voice-type variants) + `flows/shared/gemini_split.py` mirroring `perplexity_split.py` + wiring in `chunk_runner._load_sources()`.
+
+**Variant B — Gemini only at Pass 1.7 coherence.**
+- Chunks 1.1-1.6 merge from Perplexity §N + Claude DR §N only (2 sources per chunk).
+- Gemini (full) becomes an input to Pass 1.7 alongside the 6 chunk outputs.
+- **Matches Gemini's actual documented strength** — cross-cutting / adjacency / lineage belongs structurally in coherence, not per-section synthesis.
+- Violates PB#3 "each chunk reads ALL 3 sources" — requires a decision-log-level reversal, not a prompt tweak.
+- Cost: Pass 1.7 token-budget pressure (currently 64K max_tokens post-Bug-5; adding full Gemini input may force another bump and input-side context pressure).
+- Benefit: cleaner per-chunk focus (each chunk has 2 topical sources, not 2 topical + 1 full); Pass 1.7 gets the triangulation role it's already structured for (it edits chunk outputs to resolve flags).
+
+**Variant A is the correct first move.** Less radical, preserves PB#3, addresses the main cost (per-chunk noise). Variant B is worth holding open as a second step if Variant A still shows evidence of Gemini lane-mismatch.
+
+**Empirical test during voices 2-12:**
+
+Add a standing review item to Steps 21-26 per-prompt reads: **watch chunk outputs for Gemini-noise-leakage signatures** — off-topic scholar mentions that trace to Gemini §X, phrasings that carry Gemini's register rather than Perplexity/DR depth, adjacent-topic material intruding into §N synthesis. If present on 1-2 voices beyond Dostoevsky, 1-arch-02 is empirically vindicated and Variant A lands post-Phase-N. If absent across 3-4 voices, current architecture's "Opus filters Gemini well" trust is vindicated and 1-arch-02 closes as REJECTED.
+
+**Why not now:**
+- Phase N is about to fire; Gemini re-routing would delay voice builds.
+- Dostoevsky ran on current architecture to validation-complete — evidence of a leak is plausible but not blocking.
+- Variant A's prerequisite (Pass 1b section-heading mandate) is a prompt edit that should run alongside the Wave-1 Pass 1b fixes (`1b-02` through `1b-14`), not separately.
+
+**Why do it post-Phase-N:**
+- At scale (12 voices × 6 chunks), the relevance-filtering burden compounds. If Variant A saves 5-10% of per-chunk attention, that's 60-120 chunks × small quality lift = measurable.
+- Post-Phase-N cross-card review of all 12 voices will surface Gemini-leakage signatures if they exist; blind-spot-to-scale failure modes become visible with comparison.
+
+**Cross-references:**
+- Depends on: Wave-1 Pass 1b prompt fixes landing first (Variant A's section-heading prerequisite)
+- Affects: `chunk_runner._load_sources()` · `pass_1_b_*.md` (4 variants) · `pass_1_7_coherence.md` (Variant B only) · PB#3 in REBUILD_PLAN (Variant B only)
+- Validates via: empirical Gemini-noise-leakage signatures during voices 2-12 review
+
+---
+
 ## Cross-template patterns to harmonize
 
 Observations that cut across multiple prompts — these are NOT individual fixes but structural patterns one template does well that others could lift. **Implementation pass should coordinate these rather than working file-by-file**, otherwise good patterns in one variant get silently left out of the others.
@@ -644,9 +705,9 @@ The fuzzy-match approach treats Pass 1.6's passages as "seed points," expands co
 
 **By severity:**
 - CRITICAL: 0
-- HIGH: 2 (1d-06 fuzzy-match + 1-arch-01 curated_corpus_passages-from-Pass-1d architectural proposal)
-- MEDIUM: 25
-- LOW: 39
+- HIGH: 3 (1d-06 fuzzy-match + 1-arch-01 curated_corpus_passages-from-Pass-1d + 1-arch-02 Gemini re-route architectural proposals)
+- MEDIUM: 31 (no change — 6 Gemini-filtering directives at 1.1-1.6; 1.7 not applicable as no dossier inputs)
+- LOW: 62 (+23: 1.1-02 through 1.1-06 at Pass 1.1 · 1.2-02 + 1.2-03 at Pass 1.2 · 1.3-02 + 1.3-03 at Pass 1.3 · 1.4-02 + 1.4-03 + 1.4-04 at Pass 1.4 · 1.5-02 + 1.5-03 + 1.5-04 at Pass 1.5 · 1.6-02 + 1.6-03 + 1.6-04 + 1.6-06 at Pass 1.6 · 1.7-01 worked examples + 1.7-02 edit-scope + 1.7-03 escalation-pathway + 1.7-04 productive-tension-criteria at Pass 1.7; 1.6-05 resolved-via-1.6-03)
 - REJECTED: 1 (1b-01 `GEMINI_MODEL` downgrade — user preference); earlier 1b-R1/R2/R3 elevation proposal retracted after research sanity-check
 
 **By file:**
@@ -669,14 +730,408 @@ The fuzzy-match approach treats Pass 1.6's passages as "seed points," expands co
 - `pass_0b_tailor.md`: 2 fixes (0b-22, 0b-23)
 - `flows/shared/node1c_fetch.py`: 6 fixes (1c-01 through 1c-06)
 - `flows/shared/node1d_excerpt_selection.py` + `persona_pass_1d_excerpt_selection.md`: 6 fixes (1d-01 through 1d-06 — includes 1d-06 architectural fuzzy-match proposal; severity re-calibrated post review-challenge)
+- `pass_1_1_merge.md`: 6 fixes (1.1-01 through 1.1-06; 1.1-01 MEDIUM feeds 1-arch-02 empirical test; 1.1-05 is a prompt-schema mismatch on `ContestedReading`; 1.1-06 closes null-discipline gap for fictional voices)
+- `pass_1_2_merge.md`: 3 fixes (1.2-01 MEDIUM Gemini-filtering mirror with stronger positive framing; 1.2-02 makes voice_mode load-bearing for commitment-extraction; 1.2-03 Scheherazade fictional worked example)
+- `pass_1_3_merge.md`: 3 fixes (1.3-01 MEDIUM Gemini-filtering mirror; 1.3-02 Dostoevsky narratival worked example — lift from Phase-L-validated card; 1.3-03 period-vocabulary gradation ripple coordinating with 1.1-04)
+- `pass_1_4_merge.md`: 4 fixes (1.4-01 MEDIUM Gemini-filtering mirror; 1.4-02 Marley worked example completion — missing `moves`; 1.4-03 Octopus non-human organism worked example; 1.4-04 voice_mode load-bearing at register level)
+- `pass_1_5_merge.md`: 4 fixes (1.5-01 MEDIUM Gemini-filtering mirror; 1.5-02 Cleopatra hostile-source worked example — high-stakes before Cleopatra Phase N build; 1.5-03 fictional-voice general_frame rule; 1.5-04 voice_mode drop — follows 1.1-03 irrelevant-here pattern)
+- `pass_1_6_merge.md`: 5 fixes + 1 merged (1.6-01 MEDIUM Gemini-filtering with strongest positive framing — Gemini actively preferred for URL surfacing; 1.6-02 Octopus non-human organism example; 1.6-03 Scheherazade fictional multi-translator example — also resolves 1.6-05 translation_anchor; 1.6-04 Marley reference_only_passages private-tier demonstration; 1.6-05 resolved-via-1.6-03; 1.6-06 voice_mode drop completing cross-chunk policy). **1-arch-01 architecturally restructures this chunk if adopted post-Phase-N.**
+- `pass_1_7_coherence.md`: 4 fixes, all LOW (1.7-01 add BLOCK 4 WORKED EXAMPLES — pattern-break repair; 1.7-02 edit-scope discipline; 1.7-03 escalation-pathway documentation; 1.7-04 productive-tension criteria). **Genuinely not rubber-stamp** — 7 operational checks + 3-category resolution policy + real chunk-output edits + Phase-L-validated. Wave 3 architecture verdict vindicated at per-prompt level.
 
 **🎯 WAVE 1 COMPLETE.** All 17 steps reviewed. Phase 0 + Phase 0.5 coverage.
-**Wave 2 in progress.** Steps 18-19 reviewed.
+**Wave 2 complete.** Steps 18-19 reviewed.
+**🎯 WAVE 3 COMPLETE.** Steps 20-26 reviewed. Phase 1 chunked merge + coherence coverage done.
+
+---
+
+## Forward-references parked for later waves
+
+Observations surfaced during Waves 1-3 that can't be resolved at their originating step but need to be re-examined when the relevant later-wave step fires. Checked at the opening of each wave.
+
+### For Wave 4 (Pass 2-6 + Coherence Threading)
+
+- **Zosima-overanchoring risk at Pass 2 (commits-to-one).** Pass 1.1 surfaces 2-5 formative candidates ranked by `scholarly_support_score: strong|moderate|contested`. Pass 2 commits to ONE. For well-documented voices (Dostoevsky: 6 major candidates), the compression from "breadth surfaced" to "one chosen" is where anchor-concentration risk concentrates downstream. *Originated at Step 20 (1.1).* **Ask at Pass 2 review:** does the Pass 2 prompt direct the LLM to weigh competing candidates against voice-function (engagement_it_drives) rather than defaulting to highest scholarly_support_score? Is there anti-anchor guidance?
+- **Zosima-overanchoring at Pass 2 commitment selection.** Pass 1.2 surfaces 10-20 commitments with specificity-rule discipline; Pass 2 then produces a persona card `constitution` with 10-20 principles. 1:1 mapping means selection happens at synthesis, not generation. *Originated at Step 21 (1.2).* **Ask at Pass 2/3 review:** how does the compression actually happen — does Pass 2 preserve breadth or does it silently narrow to anchor-themes?
+- **`coherence_flags[]` + `coherence_resolutions[]` downstream use.** Pass 1.7 emits these as first-class audit fields on `merged_dossier.json`. Do Pass 2-6 prompts actually read and respond to them, or are they ignored at synthesis? *Originated at architecture confirmation (Step 20 preamble).* **Ask at each Pass 2-6 review:** does the prompt reference `coherence_flags` from the merged_dossier or bypass them?
+- **Merged dossier size vs. Pass 2-6 consumption.** Dostoevsky's `merged_dossier.json` is the sole input to Pass 2-6 synthesis (plus `primary_block` to Pass 4a). Whether Pass 2-6 prompts actually read the full dossier or short-circuit on a few fields is the symmetric concern to "is research used well at merge." *Originated at Q5 (architecture preamble).*
+- **`voice_temporal_stance` field — keep/rewrite/delete decision.** Added during Phase M from chat-test learning (Dostoevsky "twenty-eight years after Sonya" error). Athens deployment brief is "impossible participants take the floor while you sleep" — fluid-across-time. The 1881 anchor may be over-specified for runtime. *Originated at task description.* **Decision must land before Phase N voice builds.** Wave 3/4 boundary.
+- **"Reference, not display" boundary at Pass 4a.** Pass 1.4's guardrails explicitly name the discipline: 1.4 collects vocabulary as reference material; **Pass 4a decides deployment**. Output that reads as scholarly exhibition fails Layer 2 of the provotype test (philosophically literate audience, NOT classics-vocabulary-literate). *Originated at Step 23 (1.4).* **Ask at Pass 4a review:** does the prompt actually respect this boundary, or does it direct period-vocabulary-exhibition in output? If the latter, the 1.4→4a handoff is broken and the Dostoevsky card's gloss-in-parens register ("the lik — the face — of Christ") failure mode will recur.
+- **1.4's guardrail-level voice-type awareness as meta-pattern.** Pass 1.4 names 4 tradition-channelled panel voices directly in Block 1 (not via worked examples). This achieves voice-type coverage more efficiently than the 1.1-02/1.2-03/1.3-02 worked-example additions. *Originated at Step 23; confirmed at Step 24* (1.5 also uses guardrail-level voice-type awareness in general_frame rule). **Consider during implementation pass:** could some worked-example fixes at 1.1/1.2/1.3 be replaced by guardrail-level voice-type callouts following 1.4/1.5's pattern? Would reduce prompt-length growth.
+- **Pass 1.5 → Pass 7c handoff — `hard_limits` vs `banned_language` drift risk.** Pass 1.5 explicitly scopes HardLimits as character-level; Pass 7c produces expression-level banned_language. Independent synthesis paths — overlap + drift observed empirically on Dostoevsky (hard_limit "Never speak in the clinical-psychological register" near-mirrors banned_language "clinical-diagnostic vocabulary"). *Originated at Step 24 observation.* **Ask at Pass 7c review:** does Pass 7c's prompt actually read `hard_limits` as input and build banned_language compatibly, or synthesized independently with drift? If independent, drift is real; either cross-wire the two or accept as acceptable belt-and-braces redundancy.
+- **Voice_mode disposition cross-chunk policy (1.1-1.5 mapped).** Voice_mode is: **dead/drop** at 1.1 (biographical) + 1.5 (boundaries); **load-bearing by design** at 1.3 (reasoning); **make-load-bearing** at 1.2 (commitments) + 1.4 (voice). *Originated across Steps 20-24.* **Implementation pass:** apply coherent policy in one coordinated edit across all 6 merge prompts; verify 1.6 disposition at Step 25.
+
+### For Wave 5 (Pass 7 validation + Derive + Orchestration + Card-size)
+
+- **Pass 1.7 coherence prompt depth.** Does the 7-check pattern have enough teeth, or does it lean on LLM charity? 1.7 edits chunk outputs itself in single LLM pass — reconciliation quality bounded by Opus 4.7's in-context reasoning across 6 chunks simultaneously. *Originated at Step 20 preamble.* **Ask at Step 26:** is the coherence discipline operationally enforceable, or are flags gestural?
+- **Card-size question.** Dostoevsky assembled card is 114KB. Right allocation vs. tighter 60-80KB card with sharper selection? Runtime cost matters — Voice Pipeline Step 1 loads full card into system prompt every night. Compare to File 2's GPT-Lister study (~40KB, rated "strong fidelity"). *Originated at task description.* Surface during Wave 5 after validation-chain review.
+- **`scholarly_support_score` calibration.** Pass 1.1 FormativeCandidate schema requires `Literal["strong","moderate","contested"]`. Prompt doesn't direct how to calibrate — Opus likely defaults to "strong" for well-documented candidates. If Pass 2's commit-to-one logic leans on this score, miscalibration propagates. *Originated at Step 20 self-review.* **Ask at Step 27 (Pass 2):** does Pass 2 use scholarly_support_score for selection; if yes, is 1.1's calibration guidance adequate?
+
+### For Phase N strategy (across waves)
+
+- **`unique_to_this_voice` flag wired to Pass 7 cross-persona QC.** 1.2's `unique_to_this_voice` flag is declared as anti-flattening mechanism with downstream enforcement. *Originated at Step 21.* **Verify at Wave 5:** does Pass 7 (specifically 7a cross-model or 7b smoke test) actually read this flag, or is it declared but not consumed?
+
+---
+
+## Wave 3 architecture confirmation (preamble to Steps 20-26)
+
+Before per-prompt reviews fire, the chunked-merge architecture was confirmed against the 5 Wave-3 questions from the task description. Findings:
+
+**Q1 — Chunked LLM calls + LLM coherence, or Jinja doing structural work?** Chunked LLM calls. Jinja handles prompt assembly only (conditional branching + schema inlining via `{{ <model>_schema }}`). No Jinja-based structural merging. User's working assumption ("Jinja + LLM coherence check") correct on the coherence half; over-weighted Jinja. Pass 1.7 is NOT a rubber-stamp — it edits chunk outputs to resolve flags AND composes the full MergedDossier in a single LLM call.
+
+**Q2 — Full 3-source dossier per chunk, or pre-filtered slices?** Mixed by design. Perplexity: section-N per chunk (via `perplexity_split`). Claude DR: section-N per chunk in per-section mode (Phase-L-validated default) / full in monolithic fallback. **Gemini: always full, every chunk** — the only full-corpus feed in the per-section path.
+
+**Q3 — Does merge ingest FULL corpus or is relevance-filtering silently shedding material?** Full per-chunk ingest of Gemini; sectioned on Perplexity + DR. Opus 4.7 1M context has headroom (~400KB max input). **Risk point: Gemini-full-to-every-chunk** means every chunk must self-filter Gemini's breadth-scan for §N relevance. Whether each chunk's prompt actually directs this filtering is Step 20-25 per-prompt territory (see SRI-1 below).
+
+**Q4 — Pass 1.7 genuinely reconciling, or rubber-stamp?** Genuine. Prompt runs 7 named cross-chunk checks (formative/commitment alignment · concept usage · voice/reasoning register · anachronism/boundary · passage/work orphans · hard-limits/commitments · period-vocabulary consistency). Three resolution categories: resolve-by-edit · accept-as-productive-tension · escalate-for-human. Output carries `coherence_flags[]` + `coherence_resolutions[]` as first-class audit trail. One caveat to check at Step 26: 1.7 edits chunk outputs itself in a single LLM pass, so reconciliation quality is bounded by Opus 4.7's in-context reasoning over all 6 chunks simultaneously.
+
+**Q5 — Merged dossier right size for Pass 2-6, or bottleneck?** Deferred to Wave 4 — we'll size Dostoevsky's `merged_dossier.json` when Pass 2 opens. Symmetric to Wave 3's "is research used well at merge" lives "is merge used well downstream."
+
+**Architecture-level verdict:** **KEEP.** Zero architectural fixes against the chunked-merge mechanism. The design correctly realizes PB#3 (chunked merge) · PB#4 (structured JSON not markdown) · PB#5 (no per-chunk human review; Pydantic as gate) · PB#7 (meta-conventions frozen after 1.1+1.2) · PB#8 (Opus 4.7 1M context for 3-source input). Phase L bugs (1-5 in OPEN_ITEMS, committed `f1ebf6a`) were path-migration + max_tokens issues, not architectural flaws.
+
+**Latent concerns parked:**
+1. Gemini's per-chunk role is wrong-lane per File 4 → **1-arch-02** (below, HIGH, post-Phase-N revisit); empirical test via SRI-1 during Steps 20-26 per-prompt reads.
+2. Pass 1.7 coherence prompt depth — does it have enough teeth? Parked for Step 26.
+3. `coherence_flags[]` downstream use — does Pass 2 actually read them, or ignore? Parked for Wave 4.
+4. Merged-dossier size vs. Pass 2-6 consumption — Wave 4 / 5 bleed.
+
+---
+
+## Wave 3 standing review items (applied to every Step 20-26 per-prompt block)
+
+In addition to the per-step block format, Wave 3 carries two standing review criteria applied to every chunked-merge prompt (1.1-1.6 for all; 1.7 for the coherence-specific variant).
+
+### SRI-1 — Gemini-noise-leakage watch
+
+Per 1-arch-02, Gemini is the only full-corpus feed per chunk in current architecture. The per-chunk prompts carry an implicit relevance-filtering task. For each of Steps 20-25, assess:
+
+- Does the prompt explicitly direct Gemini-relevance-filtering for this chunk's §N focus? Or does it hand Gemini in as an equal-weighted third source and trust the LLM to filter silently?
+- Are there worked-example signatures where Gemini material has leaked into a chunk's output where it shouldn't (off-topic scholar mentions, adjacent-topic intrusions)?
+- Does the prompt mention Gemini's breadth-scan role explicitly, or treat all 3 sources as interchangeable depth-sources?
+
+Findings feed 1-arch-02's empirical test. If 3+ of 6 chunks show explicit leakage signatures or weak filter-directives, Variant A (Gemini sectioned) becomes post-Phase-N priority. If absent, Variant A remains deferred and current architecture is empirically vindicated.
+
+### SRI-2 — Corpus utilisation depth
+
+The Wave 3 lead question: is the merge extracting breadth from the dossier or narrowing to anchor-themes? For each chunk prompt, assess:
+
+- Does the prompt direct the LLM to use the FULL section-N material, or does it let the LLM shortcut to a few salient passages?
+- Does the prompt's guardrails language prevent Zosima-overanchoring (where a few dossier passages dominate downstream because the chunk crystallized around them)?
+- Do the worked examples demonstrate breadth-across-material or depth-on-one-theme?
+
+Findings inform whether the merge layer is the right size for Pass 2-6 to draw from (Wave 4 bleed).
+
+---
+
+# WAVE 3 — Phase 1 chunked merge + coherence
+
+## Step 20 — Pass 1.1 BIOGRAPHICAL merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_1_merge.md` (340 lines)
+**Does:** Merges Perplexity §1 + Claude DR §1 + full Gemini into Boddice §13-shaped `LifeScaffold` + 2-5 §14-shaped `FormativeCandidate[]`. Pass 2 later commits to ONE candidate.
+**Verdict:** TUNE — 6 fixes, 1 MEDIUM + 5 LOW. Core architecture sound, Phase-L-validated. Not a Phase-N blocker but fixes should land before voices 2-12 if feasible.
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.1-01 | MEDIUM | `pass_1_1_merge.md:73-82` (Block 2 Reconciliation rule) | Add Gemini-filtering directive: name Gemini as breadth-scan tier (not equal-weighted depth); prefer Perplexity/DR for biographical-fact precedence; Gemini as cross-check only. Concrete wording: "Gemini is breadth-scan (per Pass 1b role): use for adjacency surfacing, multilingual-scholarship indexing, recent-reassessment pointers. Prefer Perplexity and Claude DR for §1 biographical depth; treat Gemini as a third-source cross-check, not an equal-weighted depth source. Where Gemini contradicts Perplexity/DR on a biographical fact, prefer the latter absent explicit scholarly citation." **Feeds 1-arch-02 empirical test — if this fix cleans up Gemini-noise across voices 2-12, Variant A (Gemini sectioned) becomes less urgent.** Mirror to Pass 1.2-1.6 merge prompts (expect same fix to propagate to Steps 21-25). | PROPOSED |
+| 1.1-02 | LOW | `pass_1_1_merge.md` (new Example D, ~line 292) | Add hostile-sourced human worked example — Cleopatra: Ptolemaic divine-kingship ontological_furniture, philadelphia/timē pathē, reconstruction-from-hostile-sources handling, condition-of-being framing (divine-royal corporate body). ~40 lines. Extends worked-example coverage from 3 to 4 of 5 panel voice-type branches. Current coverage (Plato/Octopus/Whanganui) leaves hostile-sourced + fictional + musical voices to extrapolation; Cleopatra is the highest-leverage addition for current panel. | PROPOSED |
+| 1.1-03 | LOW | `pass_1_1_merge.md:298` (Block 5 INPUT) | `voice_mode` rendered as LLM-visible context but no directive in Blocks 1-4 or 6 references it. Not "dead" — functions as silent context (LLM can use as implicit metadata) — but intent is ambiguous. Resolve either direction: (a) drop from Block 5 (cleaner template; chunks 1.3-1.4 need voice_mode, this chunk structurally doesn't), OR (b) add one-line Block 2 guidance naming voice_mode's role explicitly (e.g. "for `narratival` voices, prefer passages-as-incarnations in §14 framing; for `observational`, favor practice-driven formative candidates"). Recommend (a) for consistency with the 4-block-prompt's explicit-guidance style; (b) acceptable if silent-context is the intent. | PROPOSED |
+| 1.1-04 | LOW | `pass_1_1_merge.md:49-52` (Block 2 Period-vocabulary rule) | Reword the binary pre-1820 cutoff to gradate. The 6 voice-type exemplar lists at lines 52-68 already include Arendt (1906-1975) and Marley (1945-1981) — post-1820 — both correctly carrying tradition-specific native lexicons. Reword: "For any voice with a tradition-specific lexicon (Russian Orthodox, Rastafari, Arendtian German-Jewish, Confucian civic-tech, etc.), prefer the voice's own terms over generic English emotion-vocabulary — regardless of period. For pre-1820 voices especially, do NOT use 'emotion' as organizing category." More permissive floor, same discipline on the common failure mode. | PROPOSED |
+| 1.1-05 | LOW | `pass_1_1_merge.md:77` (Block 2 Reconciliation rule) | **Prompt-schema mismatch.** Prompt says "surface contested scholarly interpretations as `ContestedReading`" but `ContestedReading` (defined in `schemas/_conventions.py:55`) is NOT imported into `schemas/pass_1_1.py` — LifeScaffold has no field typed `ContestedReading` or `list[ContestedReading]`. The LLM cannot emit this type in 1.1 output. Three resolutions: (a) add `contested_readings: list[ContestedReading]` field to LifeScaffold (semantically awkward — biographical contested readings are thin); (b) reword to match existing mechanism: "flag contested scholarly readings inline with both interpretations cited via `evidence_tag: inference`, per the reconciliation convention"; (c) verify this is a cross-chunk forward-reference and accept as documentation-only — `ContestedReading` belongs more naturally in Pass 1.2 `commitments[]` / `tensions[]`. Recommend (b) — reword, drop the phantom type reference from this chunk's prompt. | PROPOSED |
+| 1.1-06 | LOW | `pass_1_1_merge.md:120-124` (Block 3 STRICT RULES) | **Null-discipline rule silent on fictional voices.** Current rule covers human (populate `lived_through_own_apparatus`) and non-human/cosmic (populate `condition_of_being`). Schema enum `type: Literal["human", "non_human", "fictional"]` includes fictional; Scheherazade is the only fictional voice in the Athens panel. Opus must extrapolate without guidance. Add explicit rule: "For fictional voices, populate `condition_of_being` (the narratorial / frame-tale condition — e.g. Scheherazade speaking under threat of execution within 1001 Nights, with `evidence_tag: experiential_reconstruction` per §14 attributed-by-narrative-function discipline); leave `lived_through_own_apparatus` null. The voice's 'lived apparatus' is attributed by narrative function, not direct biographical event-plus-framework." Cross-reference 1.1-02 (Scheherazade worked example would demonstrate this). | PROPOSED |
+
+**Review — model + config:** KEEP. Opus 4.7 + adaptive thinking + 32K max_tokens correctly calibrated. Cross-source biographical reconciliation + Boddice §13/§14 rubric + 5-tag evidence discipline is judgment-heavy; Sonnet would regress on tag discipline (Phase L showed gaps on Opus itself). No config changes.
+
+**Review — prompt (strengths):** 4-block-prompt + 3 voice-type worked examples is the right shape per File 2/3. PB#7 meta-convention establishment is here (5-tag vocabulary gets frozen after chunk 1.2). Period-vocabulary primary rule with 6 voice-type exemplar lists is operationally sharp. Formative-candidates non-commit rule (2-5; Pass 2 commits) separates "what's supported" from "what we're choosing" cleanly. "Never invent" anti-hallucination rule is right. Human vs. non-human null-discipline on `lived_through_own_apparatus` vs `condition_of_being` is explicit and Pydantic-enforced. Empirically Phase-L-validated on Dostoevsky — 11 pathē terms, 8 anachronisms, 6 formative candidates output.
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No Gemini-filtering directive in prompt. All 3 sources framed as equal-weighted depth in Block 2 Reconciliation rule + Block 5 INPUT. Gemini's breadth-scan role (per File 4) not named. Primary driver of fix 1.1-01. Feeds 1-arch-02 empirical vindication.
+- **SRI-2:** Task step 1 directs cross-source reading; 2-5 formative candidate range is right (Dostoevsky had 6 major candidates in dossier, 5-max was acceptable constraint). Worked examples demonstrate breadth within §13 (multiple pathē + anachronisms + furniture per voice). Zosima-overanchoring risk lives at Pass 2 (commits-to-one), not 1.1 — parked for Wave 4.
+
+*Observations (not fixes):*
+- **Empirically validated.** Dostoevsky Phase L output was strong on breadth.
+- **Phase-N blocker?** No. Fixes are quality improvements, not blockers. Current architecture produces Phase-N-acceptable output.
+- Cross-reference 1.1-01 forward: expect SRI-1 pattern to repeat in Steps 21-25; propose mirror fix at each if prompt doesn't already surface Gemini-filtering.
+
+---
+
+## Step 21 — Pass 1.2 INTELLECTUAL merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_2_merge.md` (253 lines)
+**Does:** Merges Perplexity §2 + Claude DR §2 + full Gemini into `Commitment[]` (10-20 with operational_note + `unique_to_this_voice` flag) + `Concept[]` (5-10 with mandatory `what_it_rules_out`) + `Tension[]` (2-6, unflattened). Chunk 1.2 is the PB#7 convention-lock point — conventions FROZEN after this lands.
+**Verdict:** TUNE — 3 fixes, 1 MEDIUM + 2 LOW. **Best-engineered merge prompt in the family** (specificity-rule two-voice swap test + mandatory `what_it_rules_out` + tensions-not-resolved + `unique_to_this_voice` anti-flattening flag + Phase-L-validated 17-commitment Dostoevsky output). Not a Phase-N blocker.
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.2-01 | MEDIUM | `pass_1_2_merge.md:74-82` (Block 2 cross-source guidance) | Add Gemini-filtering directive with 1.2-specific right-lane framing: "Gemini is breadth-scan — lean into it for cross-disciplinary scholarship indexing, non-Anglophone tradition surfacing, and lineage connections between this voice's commitments and adjacent thinkers. Prefer Perplexity and Claude DR for commitment-extraction depth (primary-text anchored); treat Gemini as adjacency scanner, not equal-weighted source." Unlike 1.1, Gemini has genuine right-lane value for 1.2 — the fix unlocks that value while preventing noise. Mirror of 1.1-01 with stronger positive framing. Feeds 1-arch-02 empirical test. | PROPOSED |
+| 1.2-02 | LOW | `pass_1_2_merge.md:219` (Block 5 INPUT) + new line ~90 (Block 2) | Make `voice_mode` load-bearing in this chunk (unlike 1.1 where it's structurally irrelevant). Add Block 2 guidance: "For `narratival` voices (Dostoevsky, Scheherazade), commitments are often enacted-in-story rather than declared; operational_note should name the scene/passage where the commitment becomes visible. For `philosophical` voices, commitments are stated; operational_note extends them to novel applications. For `observational` voices, commitments are inferred from practice; tag as `experiential` or `inference`, not `stated`." | PROPOSED |
+| 1.2-03 | LOW | `pass_1_2_merge.md` (new Example D after line 216) | Add fictional voice worked example (Scheherazade) showing `[attributed_by_narrative_function]` tag on a Commitment. Block 1 names fictional voices explicitly; Block 4 doesn't demonstrate. Concrete shape: commitment "narrative as stay of execution" with operational_note "every proposition answered by a tale that defers judgment; abstract arguments treated as the Shah's power-to-command rather than claims to be refuted." ~30 lines. Hostile-sourced (Cleopatra) + musical (Marley) extensions are lower priority — fictional is the prompt's named-but-undemonstrated case. | PROPOSED |
+
+**Review — model + config:** KEEP. Opus 4.7 + adaptive thinking + 32K max_tokens is correctly fit. 10-20 specificity-tested commitments + 5-10 exclusion-bearing concepts + 2-6 unflattened tensions demands judgment-heavy cross-source synthesis; Sonnet would under-specify or fabricate operational notes. Dostoevsky empirical output ~18K tokens, well under 32K ceiling.
+
+**Review — prompt (strengths):** Best-engineered merge prompt.
+- **Specificity rule with two-voice swap test** at line 46-49 operationalizes File 3's "fine-grained constitutional principles" prescription. LLM self-applies the test during synthesis.
+- **`what_it_rules_out` mandatory + 3 worked exclusion examples** (episteme / ibtilā' / mauri) directly addresses File 3 Failure 3 (generic philosophical positions).
+- **Tensions-not-resolved discipline** with 4 cross-voice concrete cues (Plato Republic-vs-Laws, Arendt on Heidegger, Marley on violence, Ibn Battuta on non-Maliki women). File 3 Failure 5 addressed at prompt-discipline level.
+- **`unique_to_this_voice` flag** wired to downstream Pass 7 cross-persona QC — anti-flattening has enforcement loop.
+- **PB#7 freeze explicit** in prompt comment — Opus sees chunk 1.2 as convention-locking.
+- **"Never invent" with specific anti-hallucination discipline** (no citation-free quotes, no implied attributions, no "Plato said" without work + passage).
+- **Phase-L-validated.** Dostoevsky's 17-commitment constitution visibly respected specificity rule (each principle operationally specific, textually anchored).
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No Gemini-filtering directive; all 3 sources framed equal-weighted. 1.2-01 resolves. Gemini has genuine right-lane value for commitment-extraction (cross-disciplinary adjacency) — naming the lane unlocks that value.
+- **SRI-2:** Specificity rule IS the breadth-protecting mechanism at 1.2. Forces 10-20 operationally-distinct commitments, not collapse to famous positions. **Breadth well-defended at 1.2 layer.** Zosima-overanchoring risk shifts to Pass 2 (commits-to-fewer-fields) — Wave 4 concern, not 1.2's.
+
+*Observations (not fixes):*
+- **1.2 is best-engineered chunk of family.** 1.1's fixes (1.1-02, -04, -05, -06) mostly don't repeat — 1.2's prompt architecture is tighter, more explicit, fewer gaps.
+- **Expect 1.2-01 Gemini-filtering pattern to mirror across 1.3, 1.4, 1.5, 1.6.** If confirmed at each, a single coordinated 6-file prompt-patch lands the Gemini-lane fix simultaneously.
+- **`ContestedReading` not referenced in 1.2 prompt** — 1.1-05 prompt-schema mismatch doesn't repeat. 1.2's contested-readings mechanism is `Tension[]` with `conflicting_commitments: list[str]` + `passage_citations` — real schema, real field, cleanly serializable.
+
+---
+
+## Step 22 — Pass 1.3 REASONING merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_3_merge.md` (167 lines)
+**Does:** Merges Perplexity §3 + Claude DR §3 + full Gemini into `ReasoningMethod` (5-8 voice-mode-branched steps with name+description+example) + `Textures` (`finds_compelling[]` + `resists[]` as **textures of argument not topics**, 4-8 each). File 3's "the layer most implementations miss."
+**Verdict:** TUNE — 3 fixes, 1 MEDIUM + 2 LOW. **voice_mode is load-bearing here** (5-way branch) — contrast with 1.1 (dead context) and 1.2 (silent context). Specificity self-test + texture-vs-topic discrimination both sharp. Narratival worked example is the most impactful missing piece for Phase N.
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.3-01 | MEDIUM | `pass_1_3_merge.md:22-33` (Block 2) | Add Gemini-filtering directive with reasoning-method-specific right-lane framing: "Gemini is breadth-scan — use for cross-disciplinary parallels to the voice's reasoning method (Arendt's judgment has Kantian lineage; Dostoevsky's scenic-collision shares shape with Kierkegaard's dialectic-of-existence). Prefer Perplexity and Claude DR for reasoning-method depth (primary-text grounded). Treat Gemini as adjacency scanner." Mirror of 1.1-01/1.2-01. Feeds 1-arch-02 empirical test. | PROPOSED |
+| 1.3-02 | LOW | `pass_1_3_merge.md` (new Example C after line 140) | Add narratival worked example — Dostoevsky, showing 6-8 steps of "reason by incarnation and scenic collision." Lift-from-Phase-L-card: incarnate-idea-in-person → stage-at-porog → follow-logic-to-body → surface-zhivaya-zhizn' → offer-image-not-argument → split-across-doubles → hold-vdrug-open → open-toward-resurrection. Textures drawn from assembled Dostoevsky card. ~45 lines. **Highest-leverage addition — narratival is the most-extrapolation-dependent of 5 branches** named in Block 1 (Scheherazade, Marley voices will need it). | PROPOSED |
+| 1.3-03 | LOW | `pass_1_3_merge.md:30` | Period-vocabulary gradation ripple — same fix as 1.1-04. **Land as coordinated single-patch across 1.1 + 1.2 + 1.3 + (verify) 1.4/1.5** — uniform wording in all merge prompts. | PROPOSED |
+
+**Review — model + config:** KEEP. Reasoning-method extraction is File 3's "most implementations miss this" layer — judgment-heavy synthesis of *how* voice moves through problem. Sonnet would generic-dialectic the philosophical voices and miss perceptual-response / narratival shapes. Opus earns its keep. Output ~3-6K tokens well within 32K ceiling; cost ~$0.80-1.20/voice proportional.
+
+**Review — prompt (strengths):**
+- **voice_mode load-bearing** — Block 1 branches 5 ways (philosophical / observational / organism / system / narratival). This chunk is where voice_mode does real work.
+- **Specificity self-test** (line 25-26): "if two different provocations run through this method, do the results sound like THIS voice engaging differently, or like a generic responder?" Analogous to 1.2's two-voice swap test.
+- **Texture-vs-topic discrimination** (line 27-29) operationally sharp. Prevents the common failure mode where `finds_compelling` lists subjects-the-voice-cares-about instead of argument-shapes-the-voice-responds-to.
+- **Plato worked example textures are exemplary** — "arguments from principle rather than from data", "procedural solutions that avoid the question of what the procedure is FOR" — textures with voice-specific resonance, not topics.
+- **Octopus worked example correctly recasts** reasoning as perceptual-response cycle, ban on "thinks/believes" vocabulary — right anti-anthropomorphization move.
+- **Short prompt (167 lines)** — doesn't over-explain; branching + self-test + discrimination + worked examples do the work economically.
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No explicit Gemini-filtering directive. 1.3-01 resolves. Gemini's right-lane for reasoning-method is thinner than for 1.2 but not nil (cross-disciplinary parallels on method shape).
+- **SRI-2:** Specificity self-test is the breadth-protecting mechanism. Forces generalizing method, not 3-step summary of one famous argument. 5-8 step range prevents thinning and padding. Worked examples demonstrate breadth-within-method (Plato's 7 steps = full dialectical cycle, not just "ask questions"). **Zosima-overanchoring well-defended at 1.3.**
+
+*Observations (not fixes):*
+- **voice_mode load-bearing at 1.3** validates 1.2-02 direction and reinforces 1.1-03 (drop from 1.1 where irrelevant). Pattern clarifies: voice_mode matters at reasoning (1.3), commitments (1.2), likely voice (1.4) — but not biographical foundation (1.1).
+- **1.3-02 Dostoevsky narratival example is lift-from-Phase-L-card** — `reasoning_method.steps` in assembled Dostoevsky card IS the right shape. Implementation is template-selection, not drafting.
+- **Expect 1.4 (VOICE) to again branch on voice_mode.**
+- **1.3-03 coordinated patch across 1.1 + 1.2 + 1.3** lands period-vocabulary gradation in one edit cycle.
+
+---
+
+## Step 23 — Pass 1.4 VOICE merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_4_merge.md` (150 lines)
+**Does:** Merges Perplexity §4 + Claude DR §4 + full Gemini into `Moves` (3-6 signature patterns) + `Register` (rhetorical_mode + register_and_tone + `tradition_note` for oral/ritual/performative voices per Boddice §15) + `Vocabulary` (15-30 preferred_vocabulary + 3-8 metaphorical_repertoire families).
+**Verdict:** TUNE — 4 fixes, 1 MEDIUM + 3 LOW. **Several design improvements over 1.1/1.2/1.3:** guardrail-level voice-type awareness (names 4 tradition-channelled panel voices); Boddice §13 pathē carryover wired at prompt level; negative-boundary register_and_tone rule; "reference, not display" discipline naming Pass 4a handoff; period-vocabulary rule already gradated. Not a Phase-N blocker.
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.4-01 | MEDIUM | `pass_1_4_merge.md:23-39` (Block 2) | Add Gemini-filtering directive with 1.4-specific right-lane framing: "Gemini is breadth-scan — lean into it for multilingual-scholarship on voice-signature (Russian scholarship on Dostoevsky's scenic form, Sanskrit-adjacent analysis of Rastafari Iyaric origins, German Kantian-tradition lineage for Arendt's register), stylistic-reception history in non-Anglophone traditions, and translator-tradition criticism for fictional voices. Prefer Perplexity and Claude DR for primary-text stylistic depth. Treat Gemini as adjacency scanner." Mirror of 1.1-01/1.2-01/1.3-01. Feeds 1-arch-02 empirical test. | PROPOSED |
+| 1.4-02 | LOW | `pass_1_4_merge.md:99-121` (Block 4 Marley example) | **Complete the Marley worked example** — currently shows register + vocabulary but omits `moves` entirely. Add 3-5 moves demonstrating tradition-channelled pattern: refrain-as-prophetic-injunctive / witness-narrative-verse / Garveyite-compression / reasoning-as-communal-speech-act / imperative-second-person-interleaved-with-first-person-communal. ~15 lines. Closes the 2-of-3-output-keys gap. | PROPOSED |
+| 1.4-03 | LOW | `pass_1_4_merge.md` (new Example C after line 121) | Add non-human organism worked example — Octopus. Moves = [full-body-registration / arm-probe / chromatic-display / environmental-assessment / decisive-movement-or-stillness]; register = ["non-propositional; displays rather than argues; alien but not hostile"; tradition_note: null]; vocabulary = [tactile-visual-spatial lexicon 15-25 terms]. ~30 lines. **Highest-leverage missing example — non-human voice-signature is the hardest extrapolation from Plato + Marley.** | PROPOSED |
+| 1.4-04 | LOW | `pass_1_4_merge.md:~28` (Block 2 new line) | Make voice_mode load-bearing at 1.4: "Voice_mode as prior: for `narratival` voices, rhetorical_mode defaults to scenic-confessional; for `philosophical`, declarative-dialectical; for `observational`, descriptive-witnessing. The voice_mode is a prior; the corpus evidence is final — naming the prior prevents generic-register drift." Parallel to 1.3's voice_mode-load-bearing pattern. | PROPOSED |
+
+**Review — model + config:** KEEP. Output ~3-5K tokens; cost ~$0.80-1.20/voice. 32K headroom large.
+
+**Review — prompt (strengths):**
+- **Voice-type awareness in guardrails directly** (Block 1 names Scheherazade, Marley, Whanganui-via-Te-Pou-Tupua, Cleopatra-Isis-register as tradition-channelled). This achieves what 1.1-02/1.2-03/1.3-02 worked-example fixes target — **pattern worth lifting back** to 1.1/1.2/1.3.
+- **Boddice §13 pathē carryover** — explicit cross-chunk coherence wiring at prompt level.
+- **Negative-boundary rule** on register_and_tone — "what IS and what is NOT." Prevents default to academic register.
+- **"Reference, not display" discipline** (lines 36-41) names Athens-audience constraint; draws clean 1.4 → Pass 4a handoff. **Sophisticated prompt-level systems thinking.**
+- **Period-vocabulary rule already gradated** — "Pre-1820 voices: period language primary. Modern voices: tradition-specific terms." 1.1-04 ripple doesn't need to propagate here.
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No Gemini-filtering directive. Pattern consistent. 1.4-01 resolves.
+- **SRI-2:** "Reference, not display" IS the anti-Zosima-overanchoring mechanism for 1.4. Forces 15-30 vocabulary (not 5 most-used words), 3-8 metaphorical families (not one famous metaphor). **Breadth well-defended at 1.4.** Compression risk shifts to Pass 4a — parked for Wave 4.
+
+*Observations (not fixes):*
+- **1.4's guardrail-level voice-type awareness is a meta-pattern worth lifting back to 1.1/1.2/1.3** during coordinated implementation — more efficient than worked-example additions.
+- **"Reference, not display" boundary** is Pass 4a deployment-discipline naming. Forward-referenced for Wave 4.
+- **Period-vocabulary already gradated at 1.4** — 1.3-03 coordinated patch targets 1.1 + 1.2 + 1.3 only, not 1.4.
+
+---
+
+## Step 24 — Pass 1.5 BOUNDARIES merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_5_merge.md` (174 lines)
+**Does:** Merges Perplexity §5 + Claude DR §5 + full Gemini into `KnowledgeBoundary` (general_frame + temporal/geographic/conceptual exclusions) + `SensitiveTopics` (3-6 topics with substantive what_the_voice_actually_thought + navigation_guidance) + `HardLimits` (3-5 catastrophic character-level prohibitions, expression-level deferred to Pass 7c). **Directly addresses File 3 Failure 4 (sanitisation paradox) at prompt-discipline level.**
+**Verdict:** TUNE — 4 fixes, 1 MEDIUM + 3 LOW. **Sanitisation-paradox naming + expression-vs-character-level boundary + voice-type-aware general_frame rule** are best-of-class design elements. Gap: hostile-sourced + fictional voice-type coverage. 1.5-02 Cleopatra example high-value before Cleopatra Phase N build.
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.5-01 | MEDIUM | `pass_1_5_merge.md:19-35` (Block 2) | Add Gemini-filtering directive with 1.5-specific right-lane framing: "Gemini is breadth-scan — lean into it for scholarly debates about the voice's contested territory (orientalist-reception debates on Scheherazade, Roman-propaganda-vs-scholarly-reconstruction on Cleopatra, competing interpretations of Dostoevsky's Jewish-question writing), comparative boundary-cases across traditions. Prefer Perplexity and Claude DR for primary-text depth and explicit voice-thought-on-topic. Treat Gemini as adjacency scanner for scholarly debate surrounding the topic." Mirror of 1.1-01/1.2-01/1.3-01/1.4-01. Feeds 1-arch-02 empirical test. | PROPOSED |
+| 1.5-02 | LOW | `pass_1_5_merge.md` (new Example C after line 145) | Add hostile-sourced human worked example — Cleopatra. Demonstrates **reconstruction-against-hostile-sources navigation pattern** (different from Plato's stated-in-primary-text pattern). 3 sensitive_topics: (1) Hostile Roman characterizations with lead-with-scholarly-reconstruction navigation; (2) Ptolemaic divine kingship vs modern secular leadership; (3) Mixed Egyptian/Greek identity in colonial-reception discourse. ~40 lines. **High-stakes extrapolation — Cleopatra Phase N build depends on this navigation pattern.** | PROPOSED |
+| 1.5-03 | LOW | `pass_1_5_merge.md:21-23` (Block 2 general_frame rule) | Close fictional-voice gap in general_frame rule. Currently covers pre-modern / non-human organism / non-human system; omits fictional. Add: "For fictional voices, a narrative-internal + translation-tradition boundary — the voice knows what the text includes; conceptual exclusions follow narrative coherence. Sensitive_topics may include translation-tradition-reception controversies (Burton's orientalist register vs. Haddawy's vs. Lyons's — the character's voice is tradition-shaped)." Cross-reference 1.1-06 parallel fictional null-discipline fix. | PROPOSED |
+| 1.5-04 | LOW | `pass_1_5_merge.md:148` (Block 5 INPUT) | Drop `voice_mode` — structurally irrelevant at 1.5 (boundaries = type+period+subtype; voice_mode's weak purchase at sensitive_topics is redundantly covered by voice_mode's effect on reasoning-method and register at 1.3/1.4). Follows 1.1-03 drop-where-irrelevant pattern. | PROPOSED |
+
+**Review — model + config:** KEEP. Sensitive-topic navigation_guidance is File 3 Failure 4 territory where generic-AI fails catastrophically (Khanmigo). Sonnet would default to safer-but-flatter guidance; Opus earns its keep. Output small; cost ~$0.80-1.20/voice.
+
+**Review — prompt (strengths):**
+- **Sanitisation paradox named directly in Block 1** with File 3 Failure 4 cited and navigation_guidance designated as the load-bearing field. **Best-of-prompt meta-design across the chunk family** — Khanmigo failure mode prevented at prompt-discipline level.
+- **Voice-type-aware general_frame rule** at guardrail level (pre-modern/organism/system branched). 1.4-originated meta-pattern confirmed here.
+- **Expression vs. character-level boundary explicit** — HardLimits = catastrophic character only; banned_language deferred to Pass 7c. Clean downstream handoff.
+- **Conceptual exclusions tagged with REASON** — downstream Pass 2's translation_protocol benefits.
+- **Phase-L-validated.** Dostoevsky's 6-topic topics_requiring_care (Jewish question / imperial mission / anti-Catholicism / women + sexual violence / theology of suffering / faith-and-doubt) is among the richest content on the assembled card — sanitisation-paradox discipline working empirically.
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No Gemini-filtering directive. Gemini's right-lane for 1.5 is thinner than 1.2/1.4 but real — scholarly-debate-about-contested-territory surfaces well. 1.5-01 resolves.
+- **SRI-2:** Navigation_guidance discipline IS the anti-flattening mechanism. Forces substantive what-voice-thought + specific-how-to-engage, not safe-avoidance. 3-6 topics range prevents both under-coverage and over-coverage. **Breadth well-defended at 1.5.** No Zosima-overanchoring risk at boundary layer (exclusionary by design).
+
+*Observations (not fixes):*
+- **Voice_mode disposition pattern now clarified across 1.1-1.5:** dead/drop at 1.1 + 1.5 (biographical + boundaries); load-bearing by design at 1.3 (reasoning); make-load-bearing at 1.2 (commitments) + 1.4 (voice). One coherent policy, different per-chunk applications — log as cross-chunk coordination insight for implementation pass.
+- **Guardrail-level voice-type awareness** (1.4 meta-pattern) appears here too — Block 2's general_frame rule branches on type. 1.5-03 extends to fictional. **Confirms 1.4-originated pattern is a general design principle across the chunk family**, not 1.4-unique.
+- **Pass 1.5 → Pass 7c handoff explicit** — expression-level constraints deferred to Pass 7c. Forward-referenced for Wave 5.
+
+---
+
+## Step 25 — Pass 1.6 CORPUS merge
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · max_tokens=32000 · temperature=1.0 · response_format_json=True · Pydantic validation · 1-retry-with-critique
+**Prompt:** `personas/flows/shared/prompts/pass_1_6_merge.md` (191 lines)
+**Does:** Merges Perplexity §6 + Claude DR §6 + full Gemini into `Works[]` (5-20+) + `Passages[]` (8-15 with purpose trichotomy) + `URLs[]` (Pass 1c fetch targets) + `ReferenceOnlyPassages` (optional two-tier for musical voices). **Most structurally-complex merge prompt** — 4 output keys, 5 corpus-variant branches.
+**Verdict:** TUNE — 6 fixes, 1 MEDIUM + 5 LOW (1.6-05 merged into 1.6-03). Two-tier musical corpus runtime contract is **best-of-class systems-engineering**; most voice-type branches mean most worked-example gaps. Not a Phase-N blocker but 1.6-02/1.6-03/1.6-04 all high-value before their respective voice builds. **MAJOR cross-reference: 1-arch-01 directly restructures this chunk if adopted post-Phase-N.**
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.6-01 | MEDIUM | `pass_1_6_merge.md:44-57` (Block 2) | Add Gemini-filtering directive with **strongest positive framing in the family** — for corpus work, Gemini is actively preferred over Perplexity/DR for URL surfacing + translator-tradition breadth (multilingual archives, non-Anglophone translations, recent-digitization 2020-2026). Concrete wording: "Gemini is breadth-scan — for corpus work, lean into it hard: multilingual primary-text URLs (Cyrillic archives for Russian, Arabic for Islamic, Sanskrit for Buddhist), non-Anglophone translator traditions, comparative translation-reception scholarship, unusual canonical-passage surfacing, recent-digitization announcements. Prefer Perplexity and Claude DR for canonical-text depth + scholarly interpretation; treat Gemini as primary source for URL surfacing + translator-tradition breadth." Feeds 1-arch-02 empirical test with highest-positive-value-framing of the 6 Gemini-filtering fixes. | PROPOSED |
+| 1.6-02 | LOW | `pass_1_6_merge.md` (new Example C after line 162) | Add non-human organism worked example — Octopus. Works: Godfrey-Smith 2016 + Hanlon/Messenger + Mather + Amodio (all tier_2_scholarly, scientific_literature). 3-4 passages on distributed cognition / chromatic display with purpose=intellectual_substance. URLs: JSTOR + Current Biology open-access. ~25 lines. Closes non-human-organism branch gap. | PROPOSED |
+| 1.6-03 | LOW | `pass_1_6_merge.md` (new Example D after 1.6-02) | Add fictional worked example — Scheherazade. Demonstrates **multiple-translator-tradition corpus shape** unique to fictional voices. Works: Galland 1704 + Burton 1885 + Haddawy 1990 + Lyons 2008. Passages include at least one with `purpose=translation_anchor` (register-shift across translators). URLs: Gutenberg Burton + publisher pages. ~30 lines. **Also resolves 1.6-05** — translation_anchor purpose tag demonstrated. | PROPOSED |
+| 1.6-04 | LOW | `pass_1_6_merge.md:129-160` (Block 4 Marley example) | Extend Marley example with `reference_only_passages` private-tier demonstration. Currently shows PUBLIC tier only; PRIVATE tier structure is the unique corpus_constraint=lyrics_patterns_only feature, undemonstrated. Add 2-3 schematic reference_only_passages entries: one direct-lyric-quotation stub + copyright attribution + runtime_contract_note. ~15 lines. | PROPOSED |
+| 1.6-05 | LOW | (merged into 1.6-03) | `translation_anchor` purpose_tag defined line 51 but never demonstrated in Block 4. Resolved by 1.6-03 Scheherazade example. **Merged — no separate fix.** | RESOLVED-VIA-1.6-03 |
+| 1.6-06 | LOW | `pass_1_6_merge.md:166` (Block 5 INPUT) | Drop `voice_mode` — structurally irrelevant at 1.6. Bibliographic shape = corpus_constraint + type + subtype + hostile_sources; voice_mode doesn't affect works/passages/urls extraction. Follows 1.1-03 / 1.5-04 pattern. **Completes voice_mode cross-chunk policy:** dropped at 1.1 + 1.5 + 1.6; load-bearing at 1.3; make-load-bearing at 1.2 + 1.4. | PROPOSED |
+
+**Review — model + config:** KEEP. Bibliographic synthesis + 5-branch discrimination + two-tier musical contract + URL-fabrication discipline requires judgment-heavy Opus-level work. Sonnet would plausibly catalogue but miss two-tier handling and hostile-source bias-flag. Output ~6-12K (larger than 1.3/1.4/1.5; passages carry verbatim text) — 32K headroom fine. Cost ~$1.20-1.80/voice.
+
+**Review — prompt (strengths):**
+- **Two-tier musical corpus with runtime contract** (public pattern-descriptions + private direct-quotation loaded into Step 1 only, runtime drops before Step 2, cross-repo contract to HANDOFF.md). **Architecturally sophisticated** — resolves copyright/voice-fidelity tradeoff cleanly at prompt-discipline level.
+- **5 corpus-variant branches named in guardrails** (Block 1 lines 15-42). Same 1.4/1.5 guardrail-level voice-type awareness pattern — no reliance on extrapolation for branch identification.
+- **Anti-URL-fabrication discipline explicit** — "Never fabricate URLs. If uncertain, omit." Phase L Dostoevsky 18/22 fetch success confirms working empirically.
+- **Purpose-tag trichotomy** (intellectual_substance / voice_exemplar / translation_anchor) gives passages clear downstream function.
+- **Tier system properly applied** (tier_1_primary / tier_2_scholarly / tier_3_contested) — `_conventions.py` single-source-of-truth.
+- **`reference_only_passages` default** prevents optional-field confusion.
+- **Phase-L-validated.** Dostoevsky output + 18/22 URL fetch success = working as designed under real pressure.
+
+**Review — research utilisation (SRI-1 + SRI-2):**
+- **SRI-1:** No Gemini-filtering directive. **1.6's Gemini right-lane is the richest in the chunk family** — multilingual URLs + translator-tradition scholarship + recent digitization. 1.6-01 resolves with largest positive-value framing (Gemini actively preferred for URL surfacing).
+- **SRI-2:** "Complete-as-possible catalogue" directive + 5-20 works + 8-15 passages + 3-purpose-tag discrimination is the breadth-protecting mechanism at 1.6. Forces comprehensive bibliography, not "3 most famous works." **Breadth well-defended at 1.6.** Compression risk shifts to Pass 6 curation (5-10 curated_corpus_passages) — Wave 4 concern.
+
+*Observations (not fixes):*
+- **1-arch-01 directly affects this chunk.** Current 6 fixes apply to current-architecture prompt; become partial-rewrite scope under 1-arch-01. **Cost-benefit:** land current fixes for voices 2-12; decide 1-arch-01 post-Phase-N based on card-quality calibration.
+- **SRI-1 Gemini-filtering 6/6** at Pass 1.1-1.6. Coordinated cross-chunk patch is the efficient implementation path.
+- **Voice_mode cross-chunk policy complete.** Dropped at 1.1 + 1.5 + 1.6; load-bearing at 1.3; make-load-bearing at 1.2 + 1.4. Land in one coordinated 6-file edit.
+- **Two-tier runtime contract forward-referenced to Voice Pipeline Step 1/2 assembly** (separate workstream per REBUILD_PLAN) — verify enforcement when that work starts.
+
+---
+
+## Step 26 — Pass 1.7 COHERENCE
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · **max_tokens=64000** (bumped from 40K per Bug 5) · temperature=1.0 · response_format_json=True · Pydantic MergedDossier validation · 1-retry-with-critique · `by_alias=True` on model_dump. **NOT shared chunk_runner harness** — runs own orchestrator (`run_pass_1_7.py`).
+**Prompt:** `personas/flows/shared/prompts/pass_1_7_coherence.md` (183 lines)
+**Does:** Reads all 6 chunk outputs (1.1-1.6), runs 7 named cross-chunk consistency checks, **edits chunk outputs to resolve flags** (not rubber-stamp), emits final composed `MergedDossier` with `coherence_flags[]` + `coherence_resolutions[]`. Single input to Pass 2-6 synthesis.
+**Verdict:** TUNE — 4 fixes, all LOW. **Genuinely not rubber-stamp** — 7 operational checks + 3-category resolution policy + real chunk-output edits + Phase-L-validated. Fixes are prompt-discipline refinements, not structural defects. **Wave 3 architecture-level verdict on coherence pass: working as designed.**
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 1.7-01 | LOW | `pass_1_7_coherence.md` (new Block 4 after line 72) | Add 3 worked examples — pattern-break repair (1.1-1.6 all have Block 4 WORKED EXAMPLES; 1.7 skips). Examples: (a) **resolve-by-edit** — concept-undefined flag, chunk 1.2 gets new Concept appended; (b) **accept-productive-tension** — Plato Republic-vs-Laws with scholarly-consensus justification + criteria-satisfaction check; (c) **escalate** — META-frozen convention question (rare per PB#7). ~40 lines. **Highest-leverage fix for 1.7.** Reduces extrapolation burden on Opus for trickiest prompt-discipline decision. | PROPOSED |
+| 1.7-02 | LOW | `pass_1_7_coherence.md:63-65` (Block 3 resolve-by-edit) | Add edit-scope discipline: "Edit scope: prefer minimal edits — append clarifying phrases, add missing terms to lists, tighten operational_notes. Do NOT rewrite entire commitments, reshape reasoning steps, or synthesize new content. If reconciliation requires more than minor edits, escalate instead." Keeps coherence pass focused on reconciliation, not re-synthesis. | PROPOSED |
+| 1.7-03 | LOW | `pass_1_7_coherence.md:71-72` (Block 3 escalate) | Document escalation downstream pathway: "Escalation-flagged items surface at the post-Pass-2 human review gate per PB#5; until reviewed, Pass 3-6 synthesis proceeds on unresolved chunk outputs (productive-tension-acceptance is default for unresolved-but-escalated flags). Operator has final say at human gate." Cross-reference operator-review-gate at Pass 2 (Wave 4). | PROPOSED |
+| 1.7-04 | LOW | `pass_1_7_coherence.md:66-68` (Block 3 accept-productive-tension) | Sharpen productive-tension criteria against escape-hatch usage: "Productive-tension criteria (ALL must hold): (a) both poles have primary-text or scholarly-consensus support; (b) tension drives rather than derails the voice's thinking; (c) scholarly tradition names the tension explicitly (not invented by the merge). If ANY unmet, it's a real contradiction — resolve by edit." | PROPOSED |
+
+**Review — model + config:** KEEP. Opus 4.7 + adaptive thinking + **64K max_tokens** correctly calibrated post-Bug-5. Reconciliation requires simultaneously holding all 6 chunks (~80-120K input tokens), running 7 checks, editing outputs, composing final dossier in single LLM pass. Sonnet would drop checks under context pressure. **by_alias=True on model_dump** correctly preserves "register" JSON key for downstream. Cost ~$3.00-5.00/voice — largest single-call cost in family; input volume dominates. No config changes.
+
+**Review — prompt (strengths):**
+- **7 named operational checks** — each specific and mechanically runnable. Check 5 (passage-work orphan) is deterministic schema-validator-like. Check 7 (pathē carryover) directly honors Pass 1.4's Boddice §13 carryover directive — cross-chunk handoff wiring.
+- **3-category resolution policy** preserves productive tensions — anti-flattening at coherence layer.
+- **Explicit stake-naming** ("every inconsistency you miss becomes a silent contradiction propagated to the persona card") — real consequence-of-failure language.
+- **Edits chunk outputs in place** — material reconciliation work, not flagging-only.
+- **Cross-chunk handoff wiring.** Check 6 (hard_limits/commitments) enforces 1.2↔1.5 consistency. Check 7 (pathē→vocabulary) enforces 1.1→1.4 carryover. Coherence pass operationalizes discipline individual chunks set up but can't enforce alone.
+- **Phase-L-validated.** Dostoevsky merged_dossier composed successfully; coherence_flags[] + coherence_resolutions[] both populated with real reconciliation entries.
+
+**Review — research utilisation:** **Not applicable at 1.7** — SRI-1 + SRI-2 both concern how upstream research is used; 1.7 operates on already-merged chunk outputs (no dossier inputs). **SRI-1 pattern locked at 6/6 across Pass 1.1-1.6.** SRI-2 concentration remains at chunk level — forward-referenced Wave 4 compression concern.
+
+*Observations (not fixes):*
+- **max_tokens=64K may be tight for voices with large chunks.** Phase L Dostoevsky fit. If any Phase N voice hits max_tokens before JSON completes, bump to 80K. Related OPEN_ITEMS.md follow-up: retry-path should bump max_tokens on max_tokens-specific retry.
+- **`coherence_flags` downstream use at Pass 2-6 forward-referenced to Wave 4** — verify whether synthesis reads flags (especially productive-tensions) or ignores them.
+- **No BLOCK 4 WORKED EXAMPLES** in this prompt — pattern-break from 1.1-1.6. Resolved by 1.7-01.
+- **SRI-1 Gemini-filtering not applicable here** — 1.7 has no dossier inputs. Pattern 6/6 at Pass 1.1-1.6 holds.
+- **Pass 1.7 closes Wave 3.** Steps 20-26 all reviewed.
+
+---
+
+## 🎯 Wave 3 summary — Phase 1 chunked merge + coherence, reviewed end-to-end
+
+**Coverage:** 7 steps (20-26). Pass 1.1 BIOGRAPHICAL / 1.2 INTELLECTUAL / 1.3 REASONING / 1.4 VOICE / 1.5 BOUNDARIES / 1.6 CORPUS / 1.7 COHERENCE.
+
+**Fixes logged:** 30 fixes across 7 steps (6 MEDIUM Gemini-filtering + 23 LOW refinements + 1 merged). Plus 1-arch-02 HIGH architectural proposal (Gemini re-route; post-Phase-N revisit). Plus 2 standing review items (SRI-1 Gemini-noise-leakage watch, SRI-2 corpus-utilisation depth).
+
+### Architectural verdict (from Wave 3 preamble)
+
+**KEEP.** Zero architectural fixes against the chunked-merge mechanism. PB#3/4/5/7/8 correctly realized. Shared chunk_runner harness + Pydantic validation + retry-with-critique + atomic writes + parallel 1.1-1.6 + sequential 1.7 + Phase-L-validated. Phase L bugs (1-5) were path-migration + max_tokens issues, not architectural flaws.
+
+### Top 3 issues found
+
+1. **SRI-1 Gemini-filtering absent 6/6 across Pass 1.1-1.6.** Fixes 1.1-01, 1.2-01, 1.3-01, 1.4-01, 1.5-01, 1.6-01 — all MEDIUM. **Coordinated cross-chunk patch is the efficient implementation path.** Feeds 1-arch-02 empirical test during voices 2-12: if the 6-file Gemini-lane-naming patch cleans up Gemini-noise signatures, Variant A (Gemini sectioned per-chunk) becomes less urgent. If noise persists, Variant A is vindicated.
+
+2. **Worked-example coverage thin across 1.1/1.2/1.3/1.4/1.5/1.6** — 2-3 examples cover 5+ voice-type branches per chunk. Most impactful gaps: Cleopatra hostile-source (1.1-02 + 1.5-02), Scheherazade fictional (1.2-03 + 1.6-03), Dostoevsky narratival (1.3-02), Octopus non-human-organism (1.4-03 + 1.6-02), Marley `reference_only_passages` private tier (1.6-04). **All are lifts-from-Phase-L or small additions — low implementation cost.**
+
+3. **1-arch-02 architectural refactor (HIGH, deferred).** Single largest open architectural question in Wave 3. Two variants (A: Gemini sectioned per-chunk; B: Gemini-only-at-1.7). Empirical test via SRI-1 during voices 2-12 determines urgency.
+
+### Top 3 "keep as-is" endorsements
+
+1. **Chunked merge architecture itself.** 6 parallel chunks + 1 sequential coherence + shared harness + Pydantic-validated + Opus 4.7 1M context + PB#7 convention-freeze discipline. **Zero architectural fixes.**
+
+2. **Pass 1.2's specificity-rule two-voice swap test** (line 46-49) — File 3 "fine-grained constitutional principles" prescription operationalized at prompt-discipline level. "If two voices with different frameworks could both honestly assert this commitment, it is too generic — tighten it." Best-engineered merge prompt in the family.
+
+3. **Pass 1.5's sanitisation-paradox naming + expression-vs-character-level boundary** — Khanmigo failure mode (File 3 Failure 4) named directly in prompt; `navigation_guidance` designated load-bearing; `hard_limits` scope cleanly bounded to catastrophic character failure with expression-level constraints deferred to Pass 7c. Best-of-prompt meta-design across the chunk family.
+
+### Cross-chunk coordination insights (for implementation pass)
+
+- **SRI-1 Gemini-filtering (6 files):** single coordinated edit cycle, per-chunk right-lane framing. Each chunk gets tailored wording (1.6's "actively preferred for URL surfacing" ≠ 1.5's "adjacency scanner on contested territory") but structural fix is uniform.
+- **Voice_mode cross-chunk disposition policy:**
+  - **Dropped** at 1.1 + 1.5 + 1.6 (biographical / boundaries / corpus) — where voice_mode doesn't affect extracted-material shape.
+  - **Load-bearing by design** at 1.3 (reasoning) — Block 1 branches 5 ways.
+  - **Make-load-bearing** at 1.2 + 1.4 (commitments / voice) — where reasoning-mode inflects extracted content.
+  - One coherent policy; land in single coordinated 6-file edit.
+- **Period-vocabulary gradation ripple (1.1-04 / 1.3-03):** coordinated patch targets **1.1 + 1.2 + 1.3 only** — 1.4 already has gradated wording; 1.5 + 1.6 don't use period-vocabulary rule.
+- **1.4/1.5's guardrail-level voice-type awareness** (naming panel voices directly in Block 1 guardrails) is a **meta-pattern worth lifting back to 1.1/1.2/1.3** — more efficient than worked-example additions at resolving voice-type coverage gaps. Consider during implementation whether some 1.1-02/1.2-03/1.3-02 worked-example fixes can be replaced by guardrail-level callouts.
+- **1-arch-01 + 1-arch-02 deferred post-Phase-N.** Both are architectural refactors that would restructure merge chunks substantially (1-arch-01: Pass 1.6 metadata-only + Pass 1d fuzzy-match; 1-arch-02: Gemini re-route). Both would partially invalidate Wave 3 fixes if landed before Phase N. **Correct sequencing:** land Wave 3 prompt fixes + run voices 2-12 on current architecture + review empirical output + decide arch refactors post-Phase-N based on calibration.
+
+### Phase N strategy implications
+
+- **NOT a Phase-N blocker.** Current architecture produced Phase-L-acceptable Dostoevsky output. Voices 2-12 can run on current prompts without Wave 3 fixes.
+- **High-value-before-Phase-N fixes** (land before voice builds start):
+  - 6 Gemini-filtering MEDIUM fixes (1.x-01) as coordinated patch — ~2 hours prompt edits, highest SRI-1 leverage
+  - Cleopatra worked example at 1.1-02 + 1.5-02 (before Cleopatra Phase N build)
+  - Scheherazade worked example at 1.2-03 + 1.6-03 (before Scheherazade build)
+  - Marley `reference_only_passages` demonstration at 1.6-04 (before Marley build)
+  - Dostoevsky narratival worked example at 1.3-02 (lift-from-Phase-L-card; cheap)
+  - Octopus non-human worked example at 1.4-03 + 1.6-02 (before Octopus build)
+- **Post-Phase-N decisions** (need empirical voices-2-12 data):
+  - 1-arch-01 (curated_corpus_passages from Pass 1d) — calibrate based on passage-quality gap observed
+  - 1-arch-02 (Gemini re-route) — calibrate based on Gemini-noise-leakage signatures under SRI-1 watch
+  - Card-size question (Wave 5 concern; Dostoevsky 114KB vs. File 2 Lister 40KB) — surfaces after all 12 cards built
+
+### Decisions needing input before Wave 4
+
+1. **Implementation-pass timing.** Land Wave 3 fixes before Phase N starts, during Phase N, or after all 12 voices built? Coordinated 6-file Gemini-filtering patch alone is ~2 hours of prompt edits. Other Wave 3 fixes total ~10-15 hours.
+
+2. **Wave 4 scope and sequencing.** Pass 2 / 3 / 4a / 4b / 5 / 6 + CT threading. **Temporal-stance keep/rewrite/delete verdict lands here** (Wave 3/4 boundary decision per task description). Forward-referenced Wave 4 items in registry above.
+
+---
 
 **Panel composition confirmed (12 voices):** Scheherazade (fictional), Cleopatra (human, hostile_sources=true), Whanganui (non_human, system), Audrey Tang (human), Ibn Battuta (human), Fyodor Dostoevsky (human — Phase L validated), Hannah Arendt (human), Plato (human — Phase N first voice), Ada Lovelace (human), Peter Thiel (human, legal-risk-flagged), Bob Marley (human, corpus_constraint=lyrics_patterns_only), Octopus (non_human, organism).
 
 **By status:**
-- PROPOSED: 66 (incl. 1-arch-01 architectural refactor)
+- PROPOSED: 96 (incl. 1-arch-01 + 1-arch-02 architectural refactors + 6 Step 20 fixes + 3 Step 21 fixes + 3 Step 22 fixes + 4 Step 23 fixes + 4 Step 24 fixes + 5 Step 25 fixes + 4 Step 26 fixes; 1.6-05 resolved-via-merge)
 - APPROVED: 0
 - REJECTED: 1
 - RETRACTED: 3 (prior 1b-R1/R2/R3 elevation items — research-misaligned)
