@@ -51,7 +51,6 @@ PROJECT_ROOT = resolve_project_root(_args.project, repo_root=REPO_ROOT)
 
 VOICE_NAME = _args.name
 SLUG = voice_slug(VOICE_NAME)
-RUN = PROJECT_ROOT / "runs" / SLUG
 
 
 def _load_conference_context_string() -> str:
@@ -157,7 +156,7 @@ except RuntimeError as e:
 # the `merged_dossier` template variable — the same variable name Pass 2-6
 # user prompts already use, so no prompt changes needed here.
 stamp("PASS 1 (Phase B): chunked merge 1.1-1.7 (parallel + coherence)")
-_merged_dossier_path = RUN / "01_research/merged_dossier.json"
+_merged_dossier_path = _paths.merged_dossier(SLUG, PROJECT_ROOT)
 if _merged_dossier_path.exists():
     # Cached: load prior run's chunked merged_dossier as-is.
     stamp(f"  CACHE HIT: loading {_merged_dossier_path.name}")
@@ -216,7 +215,7 @@ else:
         "voice_name": vi["name"], "voice_slug": SLUG, "pass": "1c_extract_urls_phase_b",
         "result": {"primary_text_urls": _extracted_url_items, "extraction_notes": ""},
     }
-    write_json_atomic(RUN / "01_research/primary_text_urls.json", pass1c_extract)
+    write_json_atomic(_paths.primary_text_urls(SLUG, PROJECT_ROOT), pass1c_extract)
 
 
 # ---------- PASS 1c: Fetch primary texts ----------
@@ -228,7 +227,7 @@ def _pass_1c():
 
 if primary_text_urls:
     stamp("PASS 1c: fetching primary texts")
-    pass1c = call_or_cache(RUN / "01_research/primary_texts.json", "Pass 1c", _pass_1c)
+    pass1c = call_or_cache(_paths.primary_texts(SLUG, PROJECT_ROOT), "Pass 1c", _pass_1c)
     stamp(f"  fetched {pass1c['source_count']} sources, {pass1c['total_chars']} total chars")
 else:
     stamp("PASS 1c: SKIPPED (no primary text URLs found)")
@@ -292,21 +291,21 @@ def _write_primary_texts_review(review_path: Path) -> None:
         "## Next Steps",
         "",
         "1. Review fetch results above.",
-        f"2. Optionally edit 01_research/primary_texts.json to add or replace passages.",
-        "3. Create the flag to continue: touch 01_research/primary_texts_reviewed.flag",
+        f"2. Optionally edit voices/{SLUG}/03_corpus/01_primary_texts.json to add or replace passages.",
+        f"3. Create the flag to continue: touch voices/{SLUG}/03_corpus/03_primary_texts_reviewed.flag",
         f"4. Re-run: python3 run_persona_pipeline.py \"{vi['name']}\"",
     ]
     review_path.write_text("\n".join(lines), encoding="utf-8")
 
-_review_flag = RUN / "01_research/primary_texts_reviewed.flag"
+_review_flag = _paths.primary_texts_reviewed_flag(SLUG, PROJECT_ROOT)
 if not _review_flag.exists():
-    _review_path = RUN / "01_research/primary_texts_review.md"
+    _review_path = _paths.primary_texts_review(SLUG, PROJECT_ROOT)
     _write_primary_texts_review(_review_path)
     sys.exit(
         f"\n=== PASS 1c REVIEW GATE ===\n"
         f"Primary text fetch complete. Human review required before pipeline continues.\n\n"
         f"  1. Read:    {_review_path.relative_to(PROJECT_ROOT)}\n"
-        f"  2. Edit:    {(RUN / '01_research/primary_texts.json').relative_to(PROJECT_ROOT)} "
+        f"  2. Edit:    {_paths.primary_texts(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)} "
         f"(add/replace passages if needed)\n"
         f"  3. Create:  touch {_review_flag.relative_to(PROJECT_ROOT)}\n"
         f"  4. Re-run:  python3 run_persona_pipeline.py \"{vi['name']}\"\n"
@@ -345,9 +344,18 @@ def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temper
     )
 
 
+# label → paths accessor for coherence threading cache files
+_CT_PATH_MAP = {
+    "pass2":     lambda: _paths.ct_after_pass_2(SLUG, PROJECT_ROOT),
+    "pass2_3":   lambda: _paths.ct_after_pass_3(SLUG, PROJECT_ROOT),
+    "pass2_3_4a": lambda: _paths.ct_after_pass_4a(SLUG, PROJECT_ROOT),
+    "pass2_3_4": lambda: _paths.ct_after_pass_4b(SLUG, PROJECT_ROOT),
+}
+
+
 # ---------- HELPER: coherence threading compress ----------
 def _ct_compress(prior_pass_output: dict, label: str) -> str:
-    ct_path = RUN / f"02_passes/_ct_{label}.json"
+    ct_path = _CT_PATH_MAP[label]()
     cached_v = cached(ct_path, f"CT compress {label}")
     if cached_v is not None:
         return cached_v["summary_text"]
@@ -373,7 +381,7 @@ def _pass_2():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 2: Identity & Boundaries (Opus + thinking)")
-pass2 = call_or_cache(RUN / "02_passes/pass2_identity_boundaries.json", "Pass 2", _pass_2)
+pass2 = call_or_cache(_paths.pass_2(SLUG, PROJECT_ROOT), "Pass 2", _pass_2)
 pass_2_summary = _ct_compress(pass2["fields"], "pass2")
 
 
@@ -389,7 +397,7 @@ def _pass_3():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 3: Intellectual Core (Opus + thinking, ~5 min)")
-pass3 = call_or_cache(RUN / "02_passes/pass3_intellectual_core.json", "Pass 3", _pass_3)
+pass3 = call_or_cache(_paths.pass_3(SLUG, PROJECT_ROOT), "Pass 3", _pass_3)
 combined_2_3 = {**pass2["fields"], **pass3["fields"]}
 pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
 
@@ -420,7 +428,7 @@ def _pass_1d():
             "selections": selections, "selected_text": selected_text}
 
 stamp("PASS 1d: Excerpt Selection (Sonnet, curated subset)")
-pass1d = call_or_cache(RUN / "01_research/excerpt_selections.json", "Pass 1d", _pass_1d)
+pass1d = call_or_cache(_paths.excerpt_selections(SLUG, PROJECT_ROOT), "Pass 1d", _pass_1d)
 primary_block = pass1d["selected_text"]
 stamp(f"  primary_texts block: {len(primary_block)} chars from {pass1d.get('selection_count', 0)} curated selections")
 
@@ -440,7 +448,7 @@ def _pass_4a():
             "voice_basis": "corpus-based" if pass1c.get("passages") else "training-data"}
 
 stamp("PASS 4a: Voice (Opus + thinking, corpus-grounded)")
-pass4a = call_or_cache(RUN / "02_passes/pass4a_voice.json", "Pass 4a", _pass_4a)
+pass4a = call_or_cache(_paths.pass_4a(SLUG, PROJECT_ROOT), "Pass 4a", _pass_4a)
 combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
 pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
 
@@ -459,7 +467,7 @@ def _pass_4b():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 4b: Artifact (Sonnet)")
-pass4b = call_or_cache(RUN / "02_passes/pass4b_artifact.json", "Pass 4b", _pass_4b)
+pass4b = call_or_cache(_paths.pass_4b(SLUG, PROJECT_ROOT), "Pass 4b", _pass_4b)
 combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
 pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 
@@ -480,7 +488,7 @@ def _pass_5():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 5: Engagement (Opus + thinking)")
-pass5 = call_or_cache(RUN / "02_passes/pass5_engagement.json", "Pass 5", _pass_5)
+pass5 = call_or_cache(_paths.pass_5(SLUG, PROJECT_ROOT), "Pass 5", _pass_5)
 
 
 # ---------- PASS 6 (Corpus Curation) ----------
@@ -512,7 +520,7 @@ def _pass_6():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 6: Corpus Curation (Sonnet, selection task)")
-pass6 = call_or_cache(RUN / "02_passes/pass6_corpus.json", "Pass 6", _pass_6)
+pass6 = call_or_cache(_paths.pass_6(SLUG, PROJECT_ROOT), "Pass 6", _pass_6)
 
 
 # ---------- PASS 7-pre (Citation Verification) ----------
@@ -537,7 +545,7 @@ def _pass_7pre():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7-pre: Citation Verification (Sonnet)")
-pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json", "Pass 7-pre", _pass_7pre)
+pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT), "Pass 7-pre", _pass_7pre)
 verif = pass7pre["result"]
 stamp(f"  verification: {verif.get('overall', '?')} | "
       f"verified={verif.get('summary', {}).get('verified', 0)} "
@@ -600,7 +608,7 @@ def _pass_7_anachronism():
                            "summary": "No cross-model evaluator available."}}
 
 stamp("PASS 7-anachronism: TimeChara temporal check (o3 → Gemini fallback)")
-pass7_anach = call_or_cache(RUN / "02_passes/pass7_anachronism.json",
+pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
                             "Pass 7-anachronism", _pass_7_anachronism)
 _anach_flags = pass7_anach["result"].get("anachronism_flags", [])
 stamp(f"  validator: {pass7_anach.get('validator', '?')} | "
@@ -646,7 +654,7 @@ def _pass_7a():
                 "summary": "No cross-model validator available."}}
 
 stamp("PASS 7a: Cross-Model Validation (gpt-4o -> Gemini fallback)")
-pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json", "Pass 7a", _pass_7a)
+pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT), "Pass 7a", _pass_7a)
 stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
 
@@ -667,6 +675,22 @@ DOWNSTREAM_CHAIN = {
            "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
     "5":  ["pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
     "6":  ["pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
+}
+
+# fname string → paths accessor (used to invalidate downstream caches in revision loop)
+_FNAME_TO_PATH = {
+    "pass2_identity_boundaries": lambda: _paths.pass_2(SLUG, PROJECT_ROOT),
+    "_ct_pass2":                 lambda: _paths.ct_after_pass_2(SLUG, PROJECT_ROOT),
+    "pass3_intellectual_core":   lambda: _paths.pass_3(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3":               lambda: _paths.ct_after_pass_3(SLUG, PROJECT_ROOT),
+    "pass4a_voice":              lambda: _paths.pass_4a(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3_4a":            lambda: _paths.ct_after_pass_4a(SLUG, PROJECT_ROOT),
+    "pass4b_artifact":           lambda: _paths.pass_4b(SLUG, PROJECT_ROOT),
+    "_ct_pass2_3_4":             lambda: _paths.ct_after_pass_4b(SLUG, PROJECT_ROOT),
+    "pass5_engagement":          lambda: _paths.pass_5(SLUG, PROJECT_ROOT),
+    "pass6_corpus":              lambda: _paths.pass_6(SLUG, PROJECT_ROOT),
+    "pass7pre_citation":         lambda: _paths.pass_7_pre(SLUG, PROJECT_ROOT),
+    "pass7a_cross_model":        lambda: _paths.pass_7a(SLUG, PROJECT_ROOT),
 }
 
 # Map from spec target labels (2, 3, 4a, ...) to the runner's pass function +
@@ -761,7 +785,7 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
 
     # Delete cache files
     for fname in to_invalidate:
-        cache_path = RUN / "02_passes" / f"{fname}.json"
+        cache_path = _FNAME_TO_PATH[fname]()
         if cache_path.exists():
             cache_path.unlink()
 
@@ -774,12 +798,12 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
     # changed. (Captured as a known bug in commit 0452a23 during the
     # Plato revision-loop verification.)
     post_7a_invalidation = [
-        (RUN / "02_passes" / "pass7b_smoke_test.json"),
-        (RUN / "02_passes" / "pass7c_negative.json"),
-        (RUN / "02_passes" / "derive.json"),
-        (RUN / "persona_card_assembled.json"),
-        (RUN / "provocateur_profile.json"),
-        (RUN / "evaluation_rubric.json"),
+        _paths.pass_7b(SLUG, PROJECT_ROOT),
+        _paths.pass_7c(SLUG, PROJECT_ROOT),
+        _paths.derive_raw(SLUG, PROJECT_ROOT),
+        _paths.assembled_card(SLUG, PROJECT_ROOT),
+        _paths.provocateur_profile(SLUG, PROJECT_ROOT),
+        _paths.evaluation_rubric(SLUG, PROJECT_ROOT),
     ]
     for cache_path in post_7a_invalidation:
         if cache_path.exists():
@@ -792,15 +816,14 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
     earliest = min((pass_order.index(t) for t in targets), default=0)
     chain_to_run = pass_order[earliest:]
 
+    _pass_path_fns = {
+        "2": _paths.pass_2, "3": _paths.pass_3, "4a": _paths.pass_4a,
+        "4b": _paths.pass_4b, "5": _paths.pass_5, "6": _paths.pass_6,
+    }
     for pass_label in chain_to_run:
         runner_name, var_name = PASS_RUNNERS[pass_label]
         runner_fn = globals()[runner_name]
-        suffix = {
-            "2": "identity_boundaries", "3": "intellectual_core",
-            "4a": "voice", "4b": "artifact",
-            "5": "engagement", "6": "corpus",
-        }[pass_label]
-        cache_path = RUN / "02_passes" / f"pass{pass_label}_{suffix}.json"
+        cache_path = _pass_path_fns[pass_label](SLUG, PROJECT_ROOT)
         result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops})", runner_fn)
         globals()[var_name] = result
         # Update derived combined dicts so downstream reads see fresh fields
@@ -817,13 +840,13 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
             pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 
     # Re-run Pass 7-pre (verifies revised card)
-    pass7pre = call_or_cache(RUN / "02_passes/pass7pre_citation.json",
+    pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
                              f"Pass 7-pre (revision loop {revision_loops})", _pass_7pre)
     verif = pass7pre["result"]
     stamp(f"  verification (loop {revision_loops}): {verif.get('overall', '?')}")
 
     # Re-run Pass 7a (re-validates)
-    pass7a = call_or_cache(RUN / "02_passes/pass7a_cross_model.json",
+    pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
                            f"Pass 7a (revision loop {revision_loops})", _pass_7a)
     stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
@@ -857,7 +880,7 @@ def _pass_7b():
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
 stamp("PASS 7b: Worked Provocations (Opus + thinking)")
-pass7b = call_or_cache(RUN / "02_passes/pass7b_smoke_test.json", "Pass 7b", _pass_7b)
+pass7b = call_or_cache(_paths.pass_7b(SLUG, PROJECT_ROOT), "Pass 7b", _pass_7b)
 n_provs = len(pass7b["fields"].get("smoke_test_chains", []))
 stamp(f"  generated {n_provs} provocation chains")
 
@@ -897,7 +920,7 @@ def _pass_7c():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7c: Negative Constraints (Gemini -> Sonnet fallback)")
-pass7c = call_or_cache(RUN / "02_passes/pass7c_negative.json", "Pass 7c", _pass_7c)
+pass7c = call_or_cache(_paths.pass_7c(SLUG, PROJECT_ROOT), "Pass 7c", _pass_7c)
 add_summary = pass7c["result"].get("additions_summary", {})
 stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_language +{add_summary.get('language_added', 0)} "
@@ -930,7 +953,7 @@ def _derive():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Sonnet)")
-derive = call_or_cache(RUN / "02_passes/derive.json", "Derive", _derive)
+derive = call_or_cache(_paths.derive_raw(SLUG, PROJECT_ROOT), "Derive", _derive)
 prov_profile = derive["result"].get("provocateur_profile", {})
 eval_rubric = derive["result"].get("evaluation_rubric", {})
 stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
@@ -940,9 +963,9 @@ stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
 
 # Save Provocateur Profile as standalone artifact for the runtime ai-assembly
 # repo's council_config.json wiring (per spec — stored separately).
-write_json_atomic(RUN / "provocateur_profile.json", prov_profile)
-write_json_atomic(RUN / "evaluation_rubric.json", eval_rubric)
-stamp(f"  saved: {RUN}/provocateur_profile.json + evaluation_rubric.json")
+write_json_atomic(_paths.provocateur_profile(SLUG, PROJECT_ROOT), prov_profile)
+write_json_atomic(_paths.evaluation_rubric(SLUG, PROJECT_ROOT), eval_rubric)
+stamp(f"  saved: provocateur_profile.json + evaluation_rubric.json → voices/{SLUG}/06_derive/")
 
 
 # ---------- FINAL SUMMARY ----------
@@ -1065,7 +1088,7 @@ stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if r
 stamp(f"  Card saved to:        {_paths.voice_root(SLUG, PROJECT_ROOT)}/")
 stamp("=" * 60)
 
-write_json_atomic(RUN / "persona_card_assembled.json", {
+write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
     # Spec wants 37 card fields flat at root + a metadata block.
     "voice_name": vi["name"],
     "voice_mode": vi["voice_mode"],
@@ -1141,8 +1164,8 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
             "question arrives that's nothing like the test set."
         ),
         "derived_outputs": {
-            "provocateur_profile_path": f"runs/{SLUG}/provocateur_profile.json",
-            "evaluation_rubric_path": f"runs/{SLUG}/evaluation_rubric.json",
+            "provocateur_profile_path": f"voices/{SLUG}/06_derive/01_provocateur_profile.json",
+            "evaluation_rubric_path": f"voices/{SLUG}/06_derive/02_evaluation_rubric.json",
             "note": (
                 "Provocateur Profile is the 8-field council_config.json member "
                 "entry. Evaluation Rubric is 9 test prompts (3 identity + 3 "
@@ -1163,4 +1186,4 @@ write_json_atomic(RUN / "persona_card_assembled.json", {
         "register_violation_details": register_details,
     },
 })
-stamp(f"Assembled card -> {RUN}/persona_card_assembled.json")
+stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
