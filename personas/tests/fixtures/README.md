@@ -1,54 +1,50 @@
-# Test fixtures — Ibn Battuta Phase 0.5 outputs
+# Test fixtures
 
-Per REBUILD_PLAN §"Test material in repo" + decisions log #7 (2026-04-19).
+## synthetic_voice/
 
-## Contents
+A minimal, clearly-fake voice used to exercise pipeline plumbing in unit
+tests. NOT a real research subject. If a test fails content-validation
+(e.g. "Test Subject Alpha not mentioned in §2"), the test is misspecified —
+it is reading the synthetic fixture as if it were a real voice.
 
-- `ibn_battuta/perplexity_dossier.json` — real Perplexity sonar-deep-research
-  output from a live Battuta Phase 0.5 run.
-- `ibn_battuta/gemini_broad_scan.json` — real Gemini broad-scan output from
-  the same run.
+**Do NOT edit synthetic_voice/ files without updating corresponding tests.**
+Content is hand-crafted to exercise specific code paths (heading regex,
+tag markers, section boundary detection).
 
-No Claude Deep Research dossier is pinned — the Battuta DR output lives on the
-curator's Desktop and is intentionally discarded; Phase B regenerates DR via
-the new hybrid-tailored prompt.
+### Layout
 
-## Refresh cost + cadence
-
-- **Regen cost:** ~$5–10 per Perplexity call (sonar-deep-research priced per
-  request + search units). Gemini broad-scan is ~free on the current paid tier
-  but still slow (~3–5 min).
-- **Last refresh:** 2026-04-18 (Battuta Phase 0.5 verification run).
-- **Refresh triggers:**
-  1. Phase 0.5 prompts (`persona_pass_1a_*.md`, `persona_pass_1b_broad_scan.md`)
-     change non-trivially — not typo fixes, real new asks.
-  2. Fixture-content-dependent test failures (shape change in Perplexity /
-     Gemini API response; broken citation format; etc.).
-  3. Annual freshness check (these dossiers cite scholarly sources; refresh
-     once a year to stay within 12 months of current scholarship).
-- **Do not refresh for:** prompt copy-edits, runner code changes, new validator
-  fields — schema evolution should work against the existing fixtures.
-
-## Refresh command
-
-```bash
-cd personas && venv/bin/python run_phase0_1_research.py "Ibn Battuta"
-# then move outputs:
-cp runs/ibn_battuta/01_research/perplexity_dossier.json \
-   tests/fixtures/ibn_battuta/perplexity_dossier.json
-cp runs/ibn_battuta/01_research/gemini_broad_scan.json \
-   tests/fixtures/ibn_battuta/gemini_broad_scan.json
+```
+synthetic_voice/
+  00_intake/
+    02_voice_config.json       — type=human, voice_mode=philosophical
+  01_research/
+    01_perplexity_dossier.json — 6-section dossier, structurally valid
+    02_gemini_broad_scan.json  — flat broad-scan JSON
+    04_dr_dossier/
+      01_section_1.md through 06_section_6.md — per-section DR outputs
 ```
 
-Update the "Last refresh" line above with the new date + commit.
+Each section file contains ~1 KB of obviously synthetic prose about
+"Test Subject Alpha" with appropriate `[primary]`, `[~uncertain]`, and
+`[quote: Test Work, §N]` markers to exercise tag-parsing paths.
 
-## How tests use them
+### Integration fixtures
 
-Pass 1.1 / 1.2 / 1.3 / 1.4 / 1.5 / 1.6 merge runners accept a
-`use_test_fixtures=True` flag that reads from here instead of `runs/<slug>/`.
-The pinned fixtures let merge-mechanics (schema validation, retry-with-critique,
-atomic write) be exercised without a live Phase 0.5 run.
+Unit tests use `synthetic_voice`. Integration tests exercise real project
+data at `$AI_ASSEMBLY_INTEGRATION_PROJECT/voices/<slug>/` and are gated
+via `@pytest.mark.integration` + env var. Default pytest runs skip them.
+Run integration tests with:
 
-Note: fixture content is v3.10-wound-shaped (pre-Boddice). B.4 tests merge
-mechanics only; end-to-end Boddice-shape validation lands with the first real
-voice run in Phase L.
+```
+AI_ASSEMBLY_INTEGRATION_PROJECT=projects/phase-l-dostoevsky pytest -m integration
+```
+
+## ibn_battuta/ (DELETED — see git history)
+
+The `ibn_battuta/` fixture directory was deleted in Phase B restructure
+(commit feat(phase-b/restructure-D)). Ibn Battuta is a production panel
+voice; his actual build regenerates fresh when his Athens queue slot opens.
+The old fixtures predated the Phase B Pass 0b rewrites and would pre-position
+pre-Phase-B biases into his production research.
+
+Regeneration cost (~$10) is worth avoiding that contamination.
