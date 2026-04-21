@@ -67,6 +67,16 @@ def resolve_project_root(
     return root
 
 
+def get_project_root() -> Path:
+    """Resolve PROJECT_ROOT from environment (no CLI arg). Exits loudly if unset.
+
+    Use when there is no CLI arg available (e.g. inside library modules that
+    don't own a parser). For runner entry points use resolve_project_root()
+    with the CLI arg.
+    """
+    return resolve_project_root(None)
+
+
 def add_project_arg(parser: argparse.ArgumentParser) -> None:
     """Attach the standard --project argument to a runner's argparse."""
     parser.add_argument(
