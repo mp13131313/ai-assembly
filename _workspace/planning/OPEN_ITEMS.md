@@ -1,10 +1,32 @@
-# Open Items — post-Phase B aftermath (updated 2026-04-20)
+# Open Items — post-Phase B aftermath (updated 2026-04-21)
 
-**Branch**: `phase-b-rebuild` (42 commits, pushed). HEAD = `4dd58c8`.
+**Branch**: `phase-b-rebuild` (~44 commits, pushed). HEAD = `ae03f80`.
+
+**--- PHASE B RESTRUCTURE COMPLETE (2026-04-21) ---**
+Phases N–P landed: per-voice folder layout migration, per-section manual DR workflow,
+manifest telemetry, runner path updates, E2E testing. Commit range: `c7f3eeb` → `ae03f80`.
+See `_workspace/planning/SONNET_PHASE_B_RESTRUCTURE_TEST_REPORT.md` for test results.
+
+Pending code items 1–5 from §"Pending code changes" below: **SHIPPED** (phases E–O).
+- Item 1 (split_tailored_prompt.py): SHIPPED in phase F (commit `c7f3eeb`)
+- Item 2 (run_phase0_1_research auto-split + NEXT STEPS): SHIPPED in phases G+O
+- Item 3 (chunk_runner per-section DR load): SHIPPED in phase J
+- Item 4 (run_persona_pipeline mode detection + clean resume): SHIPPED in phases K+O
+- Item 5 (dr_validation per-section): SHIPPED in phase I
+- perplexity_split fallback: SHIPPED in phase H
+- _manifest.json telemetry: SHIPPED in phase L
+- migration script + execute: SHIPPED in phase N
+
+**What's still open for Phase L:**
+- Dostoevsky §5–§6 DR sessions (manual operator task — claude.ai)
+- Full Dostoevsky pipeline run after §5–§6 land (Phase L.8 quality gate)
+- Docstring/comment stale paths in 6 files (listed in test report — cosmetic only)
+
+---
 
 **Phases A–K landed + cleanups + deferrals + Position C + bias scrub + 5 quality fixes + Pass 1a Perplexity prompt rewrite + Pass 1a validation (Dostoevsky 17K-word dossier) + two parser/validator catch-up fixes + 2026-04-20 DR-failure-diagnosis commits (see §"Session 2026-04-20" below).**
 
-This doc is a fresh-session recovery point capturing every loose end from the long session that produced commits `7ce1e92` through `7458d9d`, updated 2026-04-20 with the DR-failure-diagnosis session (commits `3ad1e83` through `4dd58c8`). Read top-to-bottom for full context, or jump by section.
+This doc is a fresh-session recovery point capturing every loose end from the long session that produced commits `7ce1e92` through `7458d9d`, updated 2026-04-20 with the DR-failure-diagnosis session (commits `3ad1e83` through `4dd58c8`), and updated 2026-04-21 with the Phase B restructure completion (commits `c7f3eeb` → `ae03f80`). Read top-to-bottom for full context, or jump by section.
 
 ---
 
@@ -183,9 +205,12 @@ venv/bin/python run_persona_pipeline.py "Fyodor Dostoevsky" --project "$PROJ"
 
 Expected: Pass 1.1–1.6 merge ~3-6 min (parallel chunks); Pass 2-6 generation ~45-60 min; Pass 7 validation + Derive ~15-20 min. Total wall ~60-90 min. Cost ~$30-40.
 
-### Pending code changes — ship multi-session support properly
+### ✅ SHIPPED (2026-04-21) — Pending code changes — ship multi-session support properly
 
-For voices 2-12 (and for robust single-command pipeline invocation on all 12), ship these changes after Phase L Dostoevsky validates the manual path:
+All 5 items below shipped in Phase B restructure session (commits `c7f3eeb`→`ae03f80`).
+For the full change log see `_workspace/planning/SONNET_PHASE_B_RESTRUCTURE_TEST_REPORT.md`.
+
+For voices 2-12 (and for robust single-command pipeline invocation on all 12), these changes were shipped after Phase L Dostoevsky §1–§2 (and §3–§4) validated the manual path:
 
 1. **New helper `personas/scripts/split_tailored_prompt.py`** — reads the tailored monolithic `<slug>_dr_prompt.md`, parses section headings, writes 6 per-section prompt files at `inputs/dossiers/_dr_prompts/<slug>_section{1..6}_dr_prompt.md` each containing header + one section + footer. ~30 min to implement.
 
@@ -423,13 +448,13 @@ Self-anchoring is harmless as long as the panel stays at 12. If the panel ever e
 
 `flows/shared/research_validation.py` and `_with_retry()` in `run_phase0_1_research.py` give one retry. Two retries with exponential backoff (15s, 60s) would catch more transient failures. ~10 min.
 
-### `perplexity_split.split_dossier()` per-section fallback
+### ✅ SHIPPED (phase H, commit `5087939`) — `perplexity_split.split_dossier()` per-section fallback
 
 REBUILD_PLAN flagged: today's all-or-nothing returns `None` if any one of the 6 section headings fails to match. Should recover per-section and warn loudly on the missing ones. ~20 min.
 
-### `_manifest.json` per-pass cost telemetry
+### ✅ SHIPPED (phase L, commit `0a3945a`) — `_manifest.json` per-pass cost telemetry
 
-Decisions log #4: "No cost cap; quality-first. Track per-pass cost in `_manifest.json` retrospectively but no alarms." Not implemented. ~30 min — wrap each `call_claude` / `call_perplexity` / `call_gemini` / `call_openai` to append usage to a per-voice manifest. Useful for actual cost analysis after a few real voice runs.
+Decisions log #4: "No cost cap; quality-first. Track per-pass cost in `_manifest.json` retrospectively but no alarms." Implemented in phase L: `flows/shared/manifest.py` + all 4 client wrappers record telemetry to `voices/<slug>/_manifest.json`. ~30 min — wrap each `call_claude` / `call_perplexity` / `call_gemini` / `call_openai` to append usage to a per-voice manifest. Useful for actual cost analysis after a few real voice runs.
 
 ### Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract
 

@@ -1,12 +1,12 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-04-19)
+## Current branch state (2026-04-21)
 
-Active branch: `phase-b-rebuild` (~34 commits ahead of `main`, not yet merged). The v3.10 persona pipeline is being replaced by a chunked Pass 1.1–1.7 architecture with Boddice biocultural rubrics + Pydantic schemas + Position-C DR-prompt tailoring. Pass 1a validated on Dostoevsky; Phase L (first-voice Plato run) is the next gate. `_workspace/planning/OPEN_ITEMS.md` is the authoritative pickup doc.
+Active branch: `phase-b-rebuild` (~44 commits ahead of `main`, not yet merged). The v3.10 persona pipeline is being replaced by a chunked Pass 1.1–1.7 architecture with Boddice biocultural rubrics + Pydantic schemas + Position-C DR-prompt tailoring. Phase B restructure (per-voice folder layout, per-section manual DR workflow, telemetry, migration) is now complete and tested. Phase L (first full Dostoevsky pipeline run) is the next gate — gated on §5–§6 DR completion. `_workspace/planning/OPEN_ITEMS.md` is the authoritative pickup doc.
 
 If you land fresh, read `OPEN_ITEMS.md` before the v3.10 pipeline spec — otherwise you'll build the wrong mental model.
 
-## Filesystem layout (umbrella — 2026-04-20)
+## Filesystem layout (umbrella — 2026-04-21)
 
 Everything lives under `~/Desktop/AI Assembly/`:
 
@@ -21,11 +21,15 @@ Everything lives under `~/Desktop/AI Assembly/`:
 │   └── _workspace/         # planning + doc archive (fix-plans, session-artifacts, specs)
 ├── projects/               # NEVER pushed to GitHub — active project data
 │   ├── test/               # sandbox / experimentation (Dostoevsky lives here)
-│   │   ├── inputs/…        # voices, dossiers, non_human_grounding, JSON configs
-│   │   ├── reference/…     # sessions.json, speakers.json (runtime-side)
-│   │   ├── council_config.json
-│   │   └── runs/           # all pipeline outputs, both pipelines
-│   └── athens-2026/        # production instance
+│   │   ├── voices/         # per-voice folders (NEW — migrated 2026-04-21)
+│   │   │   └── <slug>/     # 00_intake/ 01_research/ 02_merge/ … 06_derive/
+│   │   ├── conference_facts.json  # project-level shared files (at root, not under inputs/)
+│   │   ├── audience_profile.json
+│   │   ├── panel_roster.json
+│   │   └── reference/…     # sessions.json, speakers.json (runtime-side)
+│   ├── phase-l-dostoevsky/ # Dostoevsky Phase L working project
+│   │   └── (same shape as test/)
+│   └── athens-2026/        # production instance (voices migrated 2026-04-21)
 │       └── (same shape as test/)
 └── archive/                # frozen historical runs — NEVER pushed
     └── runs/
@@ -35,6 +39,9 @@ Everything lives under `~/Desktop/AI Assembly/`:
         └── runtime/dev_msc_test/  # rehearsal run, 3 sessions, multiple
                                    # researcher/provocateur versions
 ```
+
+Note: old `inputs/` and `runs/` subdirs remain in projects for non-migrated non-human
+grounding files and residual data. Empty dirs were NOT auto-deleted — operator task.
 
 ## Repo layout (inside `code/`)
 
@@ -66,13 +73,18 @@ Precedence:
 
 Under `PROJECT_ROOT/`:
 
-- **Shared by both pipelines:** `runs/` (personas writes `runs/<voice_slug>/`,
-  runtime writes `runs/<run_id>/...` — different key patterns, same root)
-- **Personas only:** `inputs/voices/`, `inputs/dossiers/`,
-  `inputs/non_human_grounding/`, `inputs/conference_facts.json` +
-  `audience_profile.json` + `panel_roster.json`
+- **Shared by both pipelines:** `runs/` (runtime writes `runs/<run_id>/...`)
+- **Personas only (per-voice):** `voices/<slug>/00_intake/`, `01_research/`,
+  `02_merge/`, `03_corpus/`, `04_generation/`, `05_validation/`, `06_derive/`,
+  `07_persona_card_assembled.json`, `_manifest.json`
+- **Personas only (project-level):** `conference_facts.json`,
+  `audience_profile.json`, `panel_roster.json` (at project root, NOT under `inputs/`)
 - **Runtime only:** `reference/sessions.json` + `speakers.json` +
   `sessions.skipped.json`, `council_config.json`
+
+The per-voice folder layout was migrated from the old flat layout (`inputs/voices/`,
+`inputs/dossiers/`, `runs/<slug>/`) on 2026-04-21 via
+`personas/scripts/migrate_to_per_voice_layout.py`. All three projects migrated.
 
 The code repo holds runners, schemas, prompts, pinned test fixtures,
 `reference/session_template.json` (schema template, not project data), and

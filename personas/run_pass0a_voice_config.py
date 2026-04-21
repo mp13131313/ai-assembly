@@ -3,12 +3,12 @@
 Takes a voice name and optional Wikipedia URL. Produces TWO artifacts a human
 reviews and signs off on before Pass 0b generates the per-voice DR prompt:
 
-  <project_root>/inputs/voices/<slug>.json              — pipeline input
-  <project_root>/inputs/voices/<slug>_pass0a_review.md  — human review doc
+  <project_root>/voices/<slug>/00_intake/02_voice_config.json  — pipeline input
+  <project_root>/voices/<slug>/00_intake/03_review_doc.md      — human review doc
 
 Phase 0.5 (run_phase0_1_research.py) runs AFTER human sign-off: it calls
-Perplexity + Gemini in parallel and produces the customized DR prompt at
-<project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md.
+Perplexity + Gemini in parallel and produces 6 per-section DR prompts at
+<project_root>/voices/<slug>/01_research/03_dr_prompts/0N_section_N_dr_prompt.md.
 
 Per Tier 3 code/project separation, project data (voice configs, panel
 roster, conference facts, non-human grounding) lives under PROJECT_ROOT,

@@ -10,12 +10,12 @@ voice_config has editorial_rationale set. If editorial_rationale is null,
 the tailoring pass is skipped with a warning (the base Jinja prompt is
 still usable; tailoring is optimization, not architectural requirement).
 
-Output (all under PROJECT_ROOT):
-- <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.md — the
-  tailored prompt (overwrites the base Jinja render)
-- <project_root>/inputs/dossiers/_dr_prompts/<slug>_dr_prompt.base.md —
+Output (all under PROJECT_ROOT, per-voice layout):
+- <project_root>/voices/<slug>/01_research/03_dr_prompts/01_monolithic_dr_prompt.md —
+  the tailored prompt (overwrites the base Jinja render)
+- <project_root>/voices/<slug>/01_research/03_dr_prompts/01_monolithic_dr_prompt.base.md —
   preserved base for comparison
-- <project_root>/inputs/dossiers/_dr_prompts/<slug>_tailoring_notes.json —
+- <project_root>/voices/<slug>/01_research/03_dr_prompts/02_tailoring_notes.json —
   the audit log the model produced
 """
 from __future__ import annotations
