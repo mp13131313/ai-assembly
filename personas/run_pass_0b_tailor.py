@@ -32,6 +32,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
+from flows.shared import paths as _paths
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.project_root import add_project_arg, resolve_project_root
@@ -51,14 +52,14 @@ def run_pass_0b_tailor(name: str, project_root: Path | None = None,
         project_root = resolve_project_root(project, repo_root=REPO_ROOT)
     stamp(f"  PROJECT_ROOT={project_root}")
 
-    # Paths — all under PROJECT_ROOT per Tier 3.
-    voice_config_path = project_root / "inputs" / "voices" / f"{slug}.json"
-    perp_path = project_root / "runs" / slug / "01_research" / "perplexity_dossier.json"
-    gemini_path = project_root / "runs" / slug / "01_research" / "gemini_broad_scan.json"
-    base_prompt_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.md"
-    base_preserved_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_dr_prompt.base.md"
+    # Paths — all under PROJECT_ROOT per Tier 3 (new per-voice layout).
+    voice_config_path = _paths.voice_config(slug, project_root)
+    perp_path = _paths.perplexity_dossier(slug, project_root)
+    gemini_path = _paths.gemini_broad_scan(slug, project_root)
+    base_prompt_path = _paths.monolithic_dr_prompt(slug, project_root)
+    base_preserved_path = base_prompt_path.with_suffix(".base.md")
     tailored_prompt_path = base_prompt_path  # overwrite base
-    notes_path = project_root / "inputs/dossiers/_dr_prompts" / f"{slug}_tailoring_notes.json"
+    notes_path = _paths.tailoring_notes(slug, project_root)
 
     for p in (voice_config_path, perp_path, gemini_path, base_prompt_path):
         if not p.exists():

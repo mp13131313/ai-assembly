@@ -36,6 +36,7 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT.parent / ".env")
 
 import anthropic as _anthropic
+from flows.shared import paths as _paths
 from flows.shared.clients import call_claude
 from flows.shared.io import voice_slug, write_json_atomic
 from flows.shared.node0_validation import InputRejected, validate_input
@@ -68,8 +69,8 @@ SYSTEM_PROMPT_PATH = REPO_ROOT / "flows/shared/prompts/pass_0a_voice_config.md"
 
 def _load_pass0a_context(project_root: Path) -> dict:
     """Assemble the conference context dict Pass 0a sees (facts + roster only)."""
-    facts_path = project_root / "inputs/conference_facts.json"
-    roster_path = project_root / "inputs/panel_roster.json"
+    facts_path = _paths.conference_facts(project_root)
+    roster_path = _paths.panel_roster(project_root)
     facts = json.loads(facts_path.read_text())
     roster = json.loads(roster_path.read_text())
     return {**facts, **roster}
@@ -82,13 +83,15 @@ def _resolve_non_human_grounding(name: str, project_root: Path) -> str | None:
     grounding (Godfrey-Smith for Octopus, Te Awa Tupua Act for Whanganui)
     rather than Wikipedia. Returns the file contents if present, else None.
     """
-    grounding_dir = project_root / "inputs/non_human_grounding"
-    if not grounding_dir.exists():
-        return None
     slug = voice_slug(name)
-    path = grounding_dir / f"{slug}.md"
-    if path.exists():
-        return path.read_text()
+    # New canonical path (post-migration)
+    new_path = _paths.non_human_grounding(slug, project_root)
+    if new_path.exists():
+        return new_path.read_text()
+    # Legacy fallback
+    old_path = Path(project_root) / "inputs" / "non_human_grounding" / f"{slug}.md"
+    if old_path.exists():
+        return old_path.read_text()
     return None
 
 
@@ -178,15 +181,13 @@ def main(
     project_root = resolve_project_root(project, repo_root=REPO_ROOT)
     stamp(f"  PROJECT_ROOT={project_root}")
 
-    facts_path = project_root / "inputs/conference_facts.json"
-    roster_path = project_root / "inputs/panel_roster.json"
+    facts_path = _paths.conference_facts(project_root)
+    roster_path = _paths.panel_roster(project_root)
     for p in (facts_path, roster_path):
         if not p.exists():
             sys.exit(f"Missing project config: {p}")
     if not SYSTEM_PROMPT_PATH.exists():
         sys.exit(f"Missing system prompt: {SYSTEM_PROMPT_PATH}")
-
-    voices_dir = project_root / "inputs/voices"
 
     # Resolve grounding: non-human domain file first, then Wikipedia, then hint.
     nh_grounding = _resolve_non_human_grounding(name, project_root)
@@ -276,11 +277,10 @@ def main(
     if editorial_rationale:
         voice_config["editorial_rationale"] = editorial_rationale
 
-    # Write artifacts
-    voices_dir.mkdir(parents=True, exist_ok=True)
-
-    voice_path = voices_dir / f"{slug}.json"
-    review_path = voices_dir / f"{slug}_pass0a_review.md"
+    # Write artifacts (new per-voice layout)
+    voice_path = _paths.voice_config(slug, project_root)
+    review_path = _paths.review_doc(slug, project_root)
+    voice_path.parent.mkdir(parents=True, exist_ok=True)
 
     write_json_atomic(voice_path, voice_config)
     review_path.write_text(review_doc, encoding="utf-8")
