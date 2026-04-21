@@ -121,6 +121,100 @@ Honest estimate: Run 7 DR completion probability 50–65%. Outcome 2 is the most
 
 ---
 
+## Session 2026-04-20 (late evening) — Run 7 outcome: multi-session empirically validated
+
+### The failure of single-session DR on the rewritten prompts
+
+Dostoevsky was re-run on fresh `projects/phase-l-dostoevsky/` with the rewritten prompts:
+
+| Run | Prompt | Model | Runway | Sources | Result |
+|---|---|---|---|---|---|
+| 7-T-46 | Tailored (rewritten) | Opus 4.6 | 1h 30m | **~4,000** | fail |
+| 7-T-47 | Tailored (rewritten) | Opus 4.7 | 1h 30m | (not counted) | fail |
+| 7-B-47 | Untailored base | Opus 4.7 | (user moved past) | — | fail |
+
+**4,000 sources is 7× higher than prior failing runs (~600).** The rewrite widened DR's research surface rather than narrowing it. Every exemplar list item in prose questions (Forms / jinn / whakapapa / res cogitans / Newtonian universe / kenotic Christ; humours / tripartite / nafs / Rasta / śīla / Confucian; Socrates / Nietzsche / Wittgenstein; Maiorova / McReynolds / Marullo; translator names; etc.) became a research dimension DR pursued. Plus 18 tailored follow-up questions × 2-3 scholars each. Total demand surface ≈ ~100 dimensions. Convergence trap from demand-volume, not from shape.
+
+**Previous diagnosis partially wrong.** I had claimed extraction-spec-vs-thematic-question was the lever. The rewrite's content is fine — both models honor thematic questions, `[quote:]` / `[~uncertain]` markers, and citation discipline. The SCALE of simultaneous demands was the killer.
+
+### The empirical breakthrough
+
+User manually extracted Section 1 from the rewritten tailored prompt and pasted just that section (with header, without footer — see "user forgot footer" item) into fresh claude.ai threads for both models.
+
+**Both models completed Section 1 in ~33 min** with substantive, cited, voice-specific narrative. Outputs saved:
+- `~/Desktop/dosto_brief+section1_opus4.7.md` — ~3,700 words, thesis-driven prose ("kenotic Orthodox realist"), tighter argumentation
+- `~/Desktop/dosto_brief+section1_opus4.6.md` — ~6,400 words, cataloguing register, more period vocabulary glossed, more `[~uncertain]` markers honored
+
+This empirically validates meta-research §6.3 multi-session decomposition prescription. Per-section demand surface ≈ 15 dimensions — within DR's tractable envelope. Both 4.6 and 4.7 complete reliably at ~30 min per section.
+
+### Model recommendation for the pipeline
+
+**Default to Opus 4.6 for all 6 sections.** More extractable material (~17 period-vocabulary terms with glosses vs. ~10 in 4.7), more `FormativeCandidate` candidates explicitly framed (Mariinsky Hospital / Semyonov Square / Omsk katorga / Holbein encounter / Alyosha's death / Optina pilgrimage), more `anachronisms_to_avoid` explicitly tagged, more `[~uncertain]` discipline honored. Downstream Pass 1.1–1.6 merge extracts structured fields from the prose — material density matters more than rhetorical tightness. 4.7 is the better standalone read but starves the merge.
+
+Alternative: run both models per section in parallel (same 30-min window, same effort), cherry-pick better output per-section. Best quality ceiling; minor operational overhead.
+
+### Running Dostoevsky to completion (immediate operational path)
+
+User is mid-flight. Continue manually:
+
+1. Extract each remaining section (§2, §3, §4, §5, §6) from `projects/phase-l-dostoevsky/inputs/dossiers/_dr_prompts/fyodor_dostoevsky_dr_prompt.md`
+2. For each section: paste `pass_0b_header.md` content + that single section + `pass_0b_footer.md` content into fresh claude.ai thread
+3. Model: Opus 4.6 + Extended Thinking + Deep Research ON
+4. Wait ~30 min per section. Parallelize via multiple tabs (up to 5 simultaneous sections).
+5. Save each output to Desktop as `dosto_brief+sectionN.md` (or similar)
+
+When all 6 sections are in hand:
+
+```bash
+PROJ="/Users/aienvironment/Desktop/AI Assembly/projects/phase-l-dostoevsky"
+RUN="$PROJ/runs/fyodor_dostoevsky/01_research"
+mkdir -p "$RUN"
+# Concatenate (order matters for clean read; Pass 1.1-1.6 merge doesn't enforce strict headings)
+cat "$HOME/Desktop/dosto_brief+section1.md" \
+    "$HOME/Desktop/dosto_brief+section2.md" \
+    "$HOME/Desktop/dosto_brief+section3.md" \
+    "$HOME/Desktop/dosto_brief+section4.md" \
+    "$HOME/Desktop/dosto_brief+section5.md" \
+    "$HOME/Desktop/dosto_brief+section6.md" > "$RUN/claude_dr_dossier.md"
+cp "$RUN/claude_dr_dossier.md" "$PROJ/inputs/dossiers/fyodor_dostoevsky_claude_dr.md"
+cd "/Users/aienvironment/Desktop/AI Assembly/code/personas"
+venv/bin/python run_persona_pipeline.py "Fyodor Dostoevsky" --project "$PROJ"
+```
+
+Expected: Pass 1.1–1.6 merge ~3-6 min (parallel chunks); Pass 2-6 generation ~45-60 min; Pass 7 validation + Derive ~15-20 min. Total wall ~60-90 min. Cost ~$30-40.
+
+### Pending code changes — ship multi-session support properly
+
+For voices 2-12 (and for robust single-command pipeline invocation on all 12), ship these changes after Phase L Dostoevsky validates the manual path:
+
+1. **New helper `personas/scripts/split_tailored_prompt.py`** — reads the tailored monolithic `<slug>_dr_prompt.md`, parses section headings, writes 6 per-section prompt files at `inputs/dossiers/_dr_prompts/<slug>_section{1..6}_dr_prompt.md` each containing header + one section + footer. ~30 min to implement.
+
+2. **`run_phase0_1_research.py`** — after tailoring completes, automatically invoke the split helper. User then sees 6 prompts instead of 1. Update the stale "60-180 min" NEXT STEPS hardcode to "20-90 min per section, 6 sections in parallel or sequential." ~20 min.
+
+3. **`chunk_runner.py` line 75** — change DR load from single file to per-chunk per-section: `dr_path = research / f"claude_dr_section_{chunk_num}.md"`. Fall back to monolithic `claude_dr_dossier.md` if per-section files absent (backward compat with v3.5-style single-dossier runs). ~15 min.
+
+4. **`run_persona_pipeline.py`** — pre-check: all 6 section files present at `inputs/dossiers/<slug>_section{1..6}.md` OR single `<slug>_claude_dr.md` present. Copy to `runs/<slug>/01_research/` per-section. ~20 min.
+
+5. **`dr_validation.py`** — accept either a directory of 6 section files OR a single monolithic dossier. Validate each section independently against the 8K-word floor (adjusted per-section: ~1,500 words per section minimum). ~15 min.
+
+Total: ~100 min of coding + testing on the completed Dostoevsky outputs. Defer until Phase L Dostoevsky completes so the manual path validates everything first.
+
+### Smaller items flagged this session
+
+- **Stale "Wait 60-180 min" hardcode** in `run_phase0_1_research.py` NEXT STEPS print output. Doesn't match the rewritten header's empirical 20-90 min envelope. Cleanup with #2 above.
+- **Path mismatch**: `run_persona_pipeline.py` reads from `inputs/dossiers/<slug>_claude_dr.md`; `chunk_runner.py` expects `runs/<slug>/01_research/claude_dr_dossier.md`. Operational `cp` required between them, or pipeline should handle automatically. Documented here; fix with #4 above.
+- **Missing footer on Section 1 of Run 7 manual attempt**: user forgot to paste `pass_0b_footer.md` content. No harm done — header carries most of the same discipline (citation per-paragraph, `[quote:]` + `[~uncertain]` markers). Both Section 1 outputs honored the discipline anyway. Future pastes should include footer for reinforcement.
+
+### Sequential-same-thread vs. parallel-separate-threads
+
+User asked whether 6 DR sessions in one thread would help coherence. Answered: marginal upside (DR sees prior section outputs → cross-section consistency at DR level), real downside (thread context accumulation → 200K-per-agent ceiling gets pressured by §4-5, risking return to convergence trap). Pass 1.7 coherence pass is designed to do the cross-section reconciliation downstream. Recommendation: separate threads, parallelizable, localized failures. Optional middle ground: 3 threads × 2 sections each, paired by thematic coherence (§1+§2 biographical+intellectual; §3+§4 reasoning+voice; §5+§6 boundaries+corpus).
+
+### Phase L.8 quality gate (unchanged, still pending)
+
+When the pipeline completes Dostoevsky, compare the assembled card to the 2-week-old v3.7-spec-paste Dostoevsky card on the user's Desktop. Three outcomes (per earlier session's decision framework): dramatic improvement → continue all 12 voices; marginal improvement → reconsider Phase B scope vs. v3.5-style for remaining voices; regression → iterate further or revert.
+
+---
+
 ## CRITICAL — do before Phase L Plato run
 
 ### Code / project separation (Tier 3)
