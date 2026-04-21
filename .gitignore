@@ -35,3 +35,4 @@ scratch/
 # (runtime side — the personas pipeline's runs/ now lives under PROJECT_ROOT,
 # outside this repo; see _workspace/planning/OPEN_ITEMS.md Tier 3)
 runs/*/01_research/primary_texts/raw/
+_workspace/planning/RUNTIME_REVIEW_2026_04_20.md
