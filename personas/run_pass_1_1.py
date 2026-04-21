@@ -123,6 +123,7 @@ def run_pass_1_1(
     output_dir: Path | None = None,
     project_root: Path | None = None,
     project: str | None = None,
+    mode: str = "auto",  # accepted for orchestrator compat; DR load updated in Phase K
 ) -> dict:
     slug = voice_slug(name)
     stamp(f"Pass 1.1 BIOGRAPHICAL merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
