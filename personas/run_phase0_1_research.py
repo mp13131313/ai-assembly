@@ -206,7 +206,7 @@ def main(voice_name: str, project: str | None = None) -> None:
     print_warnings(gem_checks, "Pass 1b", stamp)
 
     perplexity_sections = split_dossier(perplexity_text)
-    if perplexity_sections is None:
+    if not perplexity_sections:
         stamp("  WARN: Perplexity output could not be split by section — falling back to single-block scaffolding")
     else:
         stamp(f"  Perplexity split: {len(perplexity_sections)} sections recognized")
