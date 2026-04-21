@@ -99,16 +99,14 @@ def main(voice_name: str, project: str | None = None) -> None:
     project_root = resolve_project_root(project, repo_root=REPO_ROOT)
     stamp(f"  PROJECT_ROOT={project_root}")
 
-    DR_PROMPTS_DIR = project_root / "inputs/dossiers/_dr_prompts"
-
     # Load and validate voice config
     vi_raw = load_voice_input(voice_name, project_root)
     vi = validate_input(vi_raw)
     SLUG = voice_slug(vi["name"])
     stamp(f"  voice: {vi['name']} | type={vi['type']} | hostile={vi['hostile_sources']}")
 
-    RUN = project_root / "runs" / SLUG
-    (RUN / "01_research").mkdir(parents=True, exist_ok=True)
+    # Research outputs write to new per-voice layout
+    paths.research_dir(SLUG, project_root).mkdir(parents=True, exist_ok=True)
 
     # Phase B: voice-type-specific 1a + 1b prompts per decisions log #7.
     def _pick_template(base: str) -> str:
@@ -152,8 +150,8 @@ def main(voice_name: str, project: str | None = None) -> None:
             "model": r["model"], "usage": r["usage"], "text": r["text"],
         }
 
-    pass1a_path = RUN / "01_research/perplexity_dossier.json"
-    pass1b_path = RUN / "01_research/gemini_broad_scan.json"
+    pass1a_path = paths.perplexity_dossier(SLUG, project_root)
+    pass1b_path = paths.gemini_broad_scan(SLUG, project_root)
 
     pass1a = cached(pass1a_path, "Pass 1a")
     pass1b = cached(pass1b_path, "Pass 1b")
@@ -251,8 +249,8 @@ def main(voice_name: str, project: str | None = None) -> None:
 
     dr_prompt = template.render(**context)
 
-    DR_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
-    dr_prompt_path = DR_PROMPTS_DIR / f"{SLUG}_dr_prompt.md"
+    dr_prompt_path = paths.monolithic_dr_prompt(SLUG, project_root)
+    dr_prompt_path.parent.mkdir(parents=True, exist_ok=True)
     dr_prompt_path.write_text(dr_prompt, encoding="utf-8")
 
     stamp(f"PASS 0b base render complete: {dr_prompt_path.relative_to(project_root)}")
@@ -265,7 +263,7 @@ def main(voice_name: str, project: str | None = None) -> None:
     # SWAP TEST anchors, redirects emphasis based on where Perplexity coverage
     # is thin vs thick. editorial_rationale, if present, is an OPTIONAL
     # amplification signal — not the trigger.
-    # Overwrites the base prompt; preserves the base at <slug>_dr_prompt.base.md.
+    # Overwrites the base prompt; preserves the base at 01_monolithic_dr_prompt.base.md.
     stamp("PASS 0b tailor: hybrid Jinja+LLM tailoring (PB#2)…")
     from run_pass_0b_tailor import run_pass_0b_tailor  # noqa: E402 — deferred
     section_paths: list[Path] = []
@@ -274,11 +272,7 @@ def main(voice_name: str, project: str | None = None) -> None:
         stamp(f"  tailoring: {tailor_result['status']} "
               f"({tailor_result.get('tailoring_notes_count', '?')} edits)")
 
-        # Copy tailored output to new per-voice path, then split into 6 sections.
-        old_tailored_path = DR_PROMPTS_DIR / f"{SLUG}_dr_prompt.md"
         monolithic_path = paths.monolithic_dr_prompt(SLUG, project_root)
-        monolithic_path.parent.mkdir(parents=True, exist_ok=True)
-        monolithic_path.write_text(old_tailored_path.read_text(encoding="utf-8"), encoding="utf-8")
         stamp(f"  monolithic → {monolithic_path.relative_to(project_root)}")
 
         from scripts.split_tailored_prompt import split_tailored_prompt  # noqa: E402

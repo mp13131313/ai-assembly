@@ -61,14 +61,13 @@ def _load_conference_context_string() -> str:
     that still need the short context paragraph (Pass 7b; pipeline metadata)
     read it directly from the split conference_facts.json under PROJECT_ROOT.
     """
-    facts_path = PROJECT_ROOT / "inputs/conference_facts.json"
+    facts_path = _paths.conference_facts(PROJECT_ROOT)
     if facts_path.exists():
         facts = json.loads(facts_path.read_text())
         return facts.get("conference_context_paragraph", "")
     return ""
 
-(RUN / "01_research").mkdir(parents=True, exist_ok=True)
-(RUN / "02_passes").mkdir(parents=True, exist_ok=True)
+_paths.ensure_voice_dirs(SLUG, PROJECT_ROOT)
 
 
 def stamp(msg: str) -> None:
@@ -107,8 +106,8 @@ stamp(f"  type={vi['type']} voice_mode={vi['voice_mode']} hostile={vi['hostile_s
 # ---------- VALIDATE PRE-COMPUTED PASS 1a + 1b OUTPUTS ----------
 # Pass 1a (Perplexity) and Pass 1b (Gemini) must be run BEFORE this script
 # via run_phase0_1_research.py. Check that both outputs exist.
-_pass1a_path = RUN / "01_research/perplexity_dossier.json"
-_pass1b_path = RUN / "01_research/gemini_broad_scan.json"
+_pass1a_path = _paths.perplexity_dossier(SLUG, PROJECT_ROOT)
+_pass1b_path = _paths.gemini_broad_scan(SLUG, PROJECT_ROOT)
 _missing = [str(p.relative_to(PROJECT_ROOT)) for p in [_pass1a_path, _pass1b_path] if not p.exists()]
 if _missing:
     sys.exit(

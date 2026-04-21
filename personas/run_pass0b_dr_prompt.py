@@ -32,6 +32,7 @@ try:
 except ImportError:
     sys.exit("Pass 0b requires jinja2. Install with: pip install jinja2")
 
+from flows.shared import paths as _paths
 from flows.shared.io import voice_slug
 from flows.shared.project_root import add_project_arg, resolve_project_root
 
@@ -46,14 +47,12 @@ def main(name: str, project: str | None = None) -> None:
     stamp(f"Pass 0b DR-prompt: '{name}'")
 
     project_root = resolve_project_root(project, repo_root=REPO_ROOT)
-    voices_dir = project_root / "inputs/voices"
-    dr_prompts_dir = project_root / "inputs/dossiers/_dr_prompts"
 
     if not TEMPLATE_PATH.exists():
         sys.exit(f"Missing template: {TEMPLATE_PATH}")
 
     slug = voice_slug(name)
-    voice_path = voices_dir / f"{slug}.json"
+    voice_path = _paths.voice_config(slug, project_root)
     if not voice_path.exists():
         sys.exit(
             f"Missing voice config at {voice_path}. "
@@ -97,8 +96,8 @@ def main(name: str, project: str | None = None) -> None:
 
     dr_prompt = template.render(**context)
 
-    dr_prompts_dir.mkdir(parents=True, exist_ok=True)
-    dr_prompt_path = dr_prompts_dir / f"{slug}_dr_prompt.md"
+    dr_prompt_path = _paths.monolithic_dr_prompt(slug, project_root)
+    dr_prompt_path.parent.mkdir(parents=True, exist_ok=True)
     dr_prompt_path.write_text(dr_prompt, encoding="utf-8")
 
     stamp(f"Pass 0b complete — review {dr_prompt_path.name} before pasting into claude.ai.")
