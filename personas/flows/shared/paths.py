@@ -66,6 +66,11 @@ def review_doc(slug: str, project_root: Path | None = None) -> Path:
 
 # ==== Research files ====
 
+def primary_text_urls(slug: str, project_root: Path | None = None) -> Path:
+    """Synthetic cache entry written by Pass 1c-extract (URL list from dossier)."""
+    return research_dir(slug, project_root) / "05_primary_text_urls.json"
+
+
 def perplexity_dossier(slug: str, project_root: Path | None = None) -> Path:
     return research_dir(slug, project_root) / "01_perplexity_dossier.json"
 
@@ -139,6 +144,14 @@ def excerpt_selections(slug: str, project_root: Path | None = None) -> Path:
     return corpus_dir(slug, project_root) / "02_excerpt_selections.json"
 
 
+def primary_texts_reviewed_flag(slug: str, project_root: Path | None = None) -> Path:
+    return corpus_dir(slug, project_root) / "03_primary_texts_reviewed.flag"
+
+
+def primary_texts_review(slug: str, project_root: Path | None = None) -> Path:
+    return corpus_dir(slug, project_root) / "04_primary_texts_review.md"
+
+
 # ==== Generation files (Pass 2–6 + CT) ====
 
 def pass_2(slug: str, project_root: Path | None = None) -> Path:
@@ -204,6 +217,11 @@ def pass_7c(slug: str, project_root: Path | None = None) -> Path:
 
 
 # ==== Derive files ====
+
+def derive_raw(slug: str, project_root: Path | None = None) -> Path:
+    """Combined derive call output (cache); split into provocateur_profile + evaluation_rubric."""
+    return derive_dir(slug, project_root) / "00_derive_raw.json"
+
 
 def provocateur_profile(slug: str, project_root: Path | None = None) -> Path:
     return derive_dir(slug, project_root) / "01_provocateur_profile.json"

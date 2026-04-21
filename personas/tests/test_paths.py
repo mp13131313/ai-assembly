@@ -116,6 +116,32 @@ class TestResearchFiles:
         assert p.name == "07_concat_claude_dr.md"
         assert p.parent == paths.dr_dossier_dir(SLUG, FAKE_ROOT)
 
+    def test_primary_text_urls(self):
+        p = paths.primary_text_urls(SLUG, FAKE_ROOT)
+        assert p.name == "05_primary_text_urls.json"
+        assert p.parent == paths.research_dir(SLUG, FAKE_ROOT)
+
+
+class TestCorpusFiles:
+    def test_primary_texts(self):
+        p = paths.primary_texts(SLUG, FAKE_ROOT)
+        assert p.name == "01_primary_texts.json"
+        assert p.parent == paths.corpus_dir(SLUG, FAKE_ROOT)
+
+    def test_excerpt_selections(self):
+        p = paths.excerpt_selections(SLUG, FAKE_ROOT)
+        assert p.name == "02_excerpt_selections.json"
+
+    def test_primary_texts_reviewed_flag(self):
+        p = paths.primary_texts_reviewed_flag(SLUG, FAKE_ROOT)
+        assert p.name == "03_primary_texts_reviewed.flag"
+        assert p.parent == paths.corpus_dir(SLUG, FAKE_ROOT)
+
+    def test_primary_texts_review(self):
+        p = paths.primary_texts_review(SLUG, FAKE_ROOT)
+        assert p.name == "04_primary_texts_review.md"
+        assert p.parent == paths.corpus_dir(SLUG, FAKE_ROOT)
+
 
 class TestMergeFiles:
     def test_merge_chunk_biographical(self):
@@ -160,6 +186,11 @@ class TestValidationFiles:
 
 
 class TestDeriveFiles:
+    def test_derive_raw(self):
+        p = paths.derive_raw(SLUG, FAKE_ROOT)
+        assert p.name == "00_derive_raw.json"
+        assert p.parent == paths.derive_dir(SLUG, FAKE_ROOT)
+
     def test_provocateur_profile(self):
         p = paths.provocateur_profile(SLUG, FAKE_ROOT)
         assert p.name == "01_provocateur_profile.json"
