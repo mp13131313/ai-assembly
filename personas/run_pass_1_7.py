@@ -40,23 +40,42 @@ def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
     base = _paths.merge_dir(slug, project_root)
     out: dict = {}
     # Per-chunk output layout: pass_1_N/<key>.json for each key.
+    # 1-arch-03: analytical_context_reasoning (Pass 1.3) + analytical_context_voice
+    # (Pass 1.4 optional) added as top-level chunk outputs. See plan §3.4 + §3.5.
     layout = {
         "pass_1_1": ["life_scaffold", "formative_candidates"],
         "pass_1_2": ["commitments", "concepts", "tensions"],
-        "pass_1_3": ["reasoning_method", "textures"],
-        "pass_1_4": ["moves", "register", "vocabulary"],
+        "pass_1_3": ["reasoning_method", "textures", "analytical_context_reasoning"],
+        "pass_1_4": ["moves", "register", "vocabulary", "analytical_context_voice"],
         "pass_1_5": ["knowledge_boundary", "sensitive_topics", "hard_limits"],
         "pass_1_6": ["works", "passages", "urls", "reference_only_passages"],
     }
-    # reference_only_passages is optional: default-empty for voices where
-    # Pass 1.6 didn't populate it (public-domain corpora).
-    optional_keys = {"reference_only_passages"}
+    # Optional keys: empty defaults when chunk didn't populate.
+    # - reference_only_passages: empty for public-domain corpora (Plato, Whanganui)
+    # - analytical_context_reasoning: empty for thinly-documented voices
+    # - analytical_context_voice: null for voices without substantive voice-level
+    #   scholarly material (per 1-arch-03 §3.5 optional)
+    optional_keys = {
+        "reference_only_passages",
+        "analytical_context_reasoning",
+        "analytical_context_voice",
+    }
     for chunk_dir, keys in layout.items():
         for key in keys:
             path = base / chunk_dir / f"{key}.json"
             if not path.exists():
                 if key in optional_keys:
-                    out[key] = {"passages": []}  # matches ReferenceOnlyPassages default
+                    # Sensible defaults per key semantics.
+                    if key == "reference_only_passages":
+                        out[key] = {"passages": []}  # ReferenceOnlyPassages default
+                    elif key == "analytical_context_reasoning":
+                        out[key] = {
+                            "structural_patterns": [],
+                            "worked_demonstrations": [],
+                            "scholarly_debates": [],
+                        }  # Empty AnalyticalContext
+                    elif key == "analytical_context_voice":
+                        out[key] = None  # Optional[AnalyticalContext]
                     continue
                 sys.exit(f"Missing chunk output {path}. Run Pass {chunk_dir.replace('pass_','').replace('_','.')} first.")
             out[key] = json.loads(path.read_text())
@@ -90,10 +109,15 @@ def run_pass_1_7(*, name: str, project_root: Path | None = None,
         "coherence_resolutions[]. JSON only."
     )
 
+    # 1-arch-03 max_tokens bump: 64000 → 100000 per plan §5.4. Under additive
+    # merge, merged_dossier grows ~2× (162K → 300-400K) due to preservation of
+    # analytical_context + uncapped counts. Pass 1.7 reads all 6 chunks + emits
+    # full composed MergedDossier — output size scales with input. 100K gives
+    # headroom; Opus 4.7 1M context handles easily.
     call_kwargs = dict(
         system=system,
         model="claude-opus-4-7",
-        max_tokens=64000,
+        max_tokens=100000,
         temperature=1.0,
         thinking=True,
         response_format_json=True,

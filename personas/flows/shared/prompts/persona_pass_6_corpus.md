@@ -1,7 +1,14 @@
 {# Pass 6 — Corpus Curation (Claude). v3.10 Node 6.
    1 field: curated_corpus_passages. Selection + annotation, not generation.
    Reads primary_texts and selects 5-10 passages serving double duty:
-   intellectual grounding (Step 1) + voice exemplar (Step 2). #}
+   intellectual grounding (Step 1) + voice exemplar (Step 2).
+
+   Under 1-arch-03 additive merge: merged_dossier.works carries
+   bibliographic_scholarly_context (named scholarly-corpus debates); passages
+   carries translator_tradition_coverage (which translations are represented).
+   Use these to inform curated selection — prefer translations named in
+   scholarly_context as preferred (Haddawy for Scheherazade; Hackett/Cooper
+   for Plato; P-V or Garnett for Dostoevsky depending on register-anchor). #}
 BLOCK 1 — EXPERT IDENTITY:
 You are a textual scholar curating a working canon for an AI persona of
 {{ name }}. You select passages that will be embedded in the runtime system
