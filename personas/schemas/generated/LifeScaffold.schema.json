@@ -1,57 +1,5 @@
 {
   "$defs": {
-    "AnachronismEntry": {
-      "description": "Structured anachronism: modern term + reason excluded + voice-native\nalternative where available.\n\nRicher than the pre-1-arch-03 list[str] format — captures the reason-why\nand the voice-native term if the voice's tradition has one. Backward-compat\npreserved via `LifeScaffold.anachronisms_to_avoid: list[str | AnachronismEntry]`.",
-      "properties": {
-        "modern_term": {
-          "title": "Modern Term",
-          "type": "string"
-        },
-        "reason_excluded": {
-          "description": "One-line reason the modern term mis-renders the voice.",
-          "title": "Reason Excluded",
-          "type": "string"
-        },
-        "voice_native_alternative": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta).",
-          "title": "Voice Native Alternative"
-        },
-        "evidence_tag": {
-          "default": "scholarly_consensus",
-          "enum": [
-            "stated",
-            "scholarly_consensus",
-            "inference",
-            "experiential_reconstruction",
-            "projection_warning"
-          ],
-          "title": "Evidence Tag",
-          "type": "string"
-        },
-        "citations": {
-          "items": {
-            "$ref": "#/$defs/SourceCitation"
-          },
-          "title": "Citations",
-          "type": "array"
-        }
-      },
-      "required": [
-        "modern_term",
-        "reason_excluded"
-      ],
-      "title": "AnachronismEntry",
-      "type": "object"
-    },
     "ContestedReading": {
       "description": "A scholarly debate surfaced in the merge rather than resolved into false consensus.",
       "properties": {
@@ -324,21 +272,6 @@
       "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly. MUST carry [experiential_reconstruction] tag inline. [projection_warning] on any modern English term used faute de mieux (e.g., 'disease' for pre-clinical moral-theological bolezn'). No length cap.",
       "title": "Model Of Selfhood",
       "type": "string"
-    },
-    "anachronisms_to_avoid": {
-      "description": "Modern terms that would mis-render this voice. MINIMUM 4; uncapped maximum. Prefer AnachronismEntry structured form (modern_term + reason_excluded + voice_native_alternative) for new outputs; list[str] accepted for backward-compat with pre-1-arch-03 Dostoevsky card.",
-      "items": {
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "$ref": "#/$defs/AnachronismEntry"
-          }
-        ]
-      },
-      "title": "Anachronisms To Avoid",
-      "type": "array"
     },
     "scholarly_context": {
       "anyOf": [

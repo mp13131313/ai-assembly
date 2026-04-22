@@ -22,6 +22,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 from ._conventions import EvidenceTag, SourceCitation
+from .pass_1_1 import AnachronismEntry  # 1-arch-08: consolidated home is KnowledgeBoundary
 
 
 class ExclusionEntry(BaseModel):
@@ -96,6 +97,20 @@ class KnowledgeBoundary(BaseModel):
         "Each entry SHOULD be ExclusionEntry (tag the reason excluded) for "
         "downstream Pass 2 translation_protocol synthesis; bare str accepted "
         "for backward-compat.",
+    )
+    anachronism_discipline: list[AnachronismEntry] = Field(
+        default_factory=list,
+        description="**1-arch-08 (2026-04-22): canonical home for anachronism "
+        "discipline.** Each entry carries dual framings — `biographical_framing` "
+        "for Pass 2's `world.anachronisms_to_avoid` card field; `epistemic_framing` "
+        "for Pass 2's `knowledge_boundary.conceptual_exclusions` enrichment. "
+        "Plus `modern_term` (the flagged modern/clinical term), "
+        "`voice_native_alternative` (the voice's own tradition term if any), "
+        "`severity` (hard_ban / use_with_caution / translator_note). "
+        "MINIMUM 4 entries for well-documented voices; uncapped. "
+        "Replaces the removed `LifeScaffold.anachronisms_to_avoid` field — "
+        "single source of truth eliminates drift; Pass 1.7 coherence Check 4 "
+        "becomes obsolete.",
     )
     evidence_tag: EvidenceTag = "scholarly_consensus"
     citations: list[SourceCitation] = Field(default_factory=list)

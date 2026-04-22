@@ -69,9 +69,19 @@ Run these systematically.
    method is perceptual-response but voice register describes "argument with
    counterexamples."
 
-4. **Anachronism boundary cross-check.** Entries in
-   `life_scaffold.anachronisms_to_avoid` should be consistent with
-   `knowledge_boundary.conceptual_exclusions`. Conflicts: flag.
+4. **Anachronism discipline self-consistency (formerly anachronism boundary
+   cross-check; simplified under 1-arch-08, 2026-04-22).** Anachronism
+   discipline now lives in a single canonical source:
+   `knowledge_boundary.anachronism_discipline[]` (AnachronismEntry list
+   with `biographical_framing` + `epistemic_framing` + `severity`). The
+   old cross-check between `life_scaffold.anachronisms_to_avoid` and
+   `knowledge_boundary.conceptual_exclusions` is obsolete — single source
+   can't disagree with itself. Lightweight check remaining: verify each
+   anachronism_discipline entry has BOTH framings populated (not just one),
+   and that `severity` is set appropriately (`hard_ban` for truly clinical
+   / DSM-era terms like "trauma"/"PTSD"; `use_with_caution` for softer
+   cases). Flag entries missing a framing. No cross-chunk reconciliation
+   needed.
 
 5. **Passage / works orphan check.** Every `passage.work_title` must resolve
    to a `works.title`. Orphan passages: flag.

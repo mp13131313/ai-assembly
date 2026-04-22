@@ -123,6 +123,33 @@ Canonical schemas:
 - Three exclusion lists each minimum 4 entries (or justify sparsity); prefer
   `ExclusionEntry` structured form with reason_excluded + voice_native_
   alternative; bare str accepted for backward-compat.
+- **`knowledge_boundary.anachronism_discipline[]` minimum 4 entries** (per
+  1-arch-08, 2026-04-22). Each entry is an `AnachronismEntry` with:
+  - `modern_term`: the modern-English or clinical term to avoid
+    ('trauma', 'depression', 'identity', 'existentialist', 'gender',
+    'ethno-nationalism', etc.)
+  - `biographical_framing` (2-3 sentences): why the term would flatten the
+    voice's lived/biographical experience. Pass 2 plucks this for
+    `world.anachronisms_to_avoid` card field narrative.
+  - `epistemic_framing` (2-3 sentences): when the term entered discourse
+    (Dixon 1820s for "emotions"; post-1980 DSM for "trauma"; Allport 1937
+    for "personality"); why it's outside the voice's knowledge horizon.
+    Pass 2 plucks this for `knowledge_boundary.conceptual_exclusions`
+    enrichment.
+  - `voice_native_alternative`: the voice's own tradition-specific term
+    if any (for Dostoevsky's "trauma" → "nadryv"; for Plato's "personality"
+    → "sōphrosynē / tripartite soul / hexis"). null for fictional voices
+    without tradition terms.
+  - `severity`: `"hard_ban"` (default; never use — trauma, PTSD,
+    existentialist), `"use_with_caution"` (with scare-quotes or scholarly
+    framing — "psychology", "career"), or `"translator_note"` (translator-
+    tradition artifact like Garnett's "conscience" for "sovest'").
+  This consolidates anachronism discipline from the pre-1-arch-08 split
+  between `LifeScaffold.anachronisms_to_avoid` (biographical angle) and
+  `KnowledgeBoundary.conceptual_exclusions` (epistemic angle). Single
+  source eliminates drift; the removed LifeScaffold field no longer
+  produces output. Pass 1.7 coherence Check 4 (anachronism/boundary
+  cross-check) becomes obsolete.
 - `sensitive_topics.topics[]` minimum 3; uncapped. Each with
   what_the_voice_actually_thought (substantive, sourced, NOT sanitised) +
   navigation_guidance + scholarly_reception (when sources provide).

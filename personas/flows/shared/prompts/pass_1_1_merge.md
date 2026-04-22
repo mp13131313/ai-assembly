@@ -89,7 +89,7 @@ contradiction-reconciled.
 
 1. **Do NOT select N-best items to fit a recipe.** Schemas have minimum counts,
    not maximums. Well-documented voices may produce 15+ pathē terms, 8+
-   anachronisms, 6+ formative candidates. Preserve all non-redundant material.
+   formative candidates (6+). Preserve all non-redundant material.
 
 2. **Do NOT commit to a single formative.** Surface 2+ formative candidates
    (uncapped maximum); each with `formative_emotional_community` + (human:
@@ -211,8 +211,14 @@ Canonical Pydantic schemas (inlined from `personas/schemas/generated/`):
 - All required fields present; optional fields populated when content exists.
 - `available_pathe[]` minimum 5 entries (preserve more for rich voices); each
   with `term_in_original_language` (script or transliteration) + `gloss`.
-- `anachronisms_to_avoid[]` minimum 4 entries; prefer `AnachronismEntry`
-  structured form (modern_term + reason_excluded + voice_native_alternative).
+- **1-arch-08 (2026-04-22):** `anachronisms_to_avoid` is NO LONGER an
+  output field of `LifeScaffold`. Anachronism discipline has consolidated
+  at `KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5). Pass 1.1
+  still NAMES anachronisms in narrative fields where relevant (e.g. in
+  `framework_for_difficulty` you may write "not 'trauma' (anachronistic
+  clinical category) but *nadryv*, the moral-theological self-laceration"),
+  but DO NOT emit a separate anachronisms_to_avoid list. Pass 1.5 owns the
+  structured list.
 - `formative_candidates[]` minimum 2 entries; uncapped. Each with
   `scholarly_support_score` in {strong, moderate, contested}.
 - Human voices: populate `lived_through_own_apparatus`; null `condition_of_being`.
@@ -263,14 +269,9 @@ reconstruction, scholarly_context preserved where sources provide it.
   ],
   "framework_for_difficulty": "Philosophy is meletē thanatou — 'preparation for death' (Phaedo 67e) — the soul's release from the body. Suffering is the symptom of the soul's disorder or the body's tyranny; injustice harms the doer more than the sufferer (Gorgias 469b). Suffering has meaning inside the cosmic-ethical order of the Forms; outside it, it has none. [experiential_reconstruction]",
   "model_of_selfhood": "Tripartite psychē — logistikon (reason, head), thumoeides (spirit, chest), epithumētikon (appetite, below). In Phaedrus, a charioteer drives a noble horse and a dark horse. Not a unified interior; a site to be ruled and ordered. [experiential_reconstruction]",
-  "anachronisms_to_avoid": [
-    {"modern_term": "personality", "reason_excluded": "imports 20th-C trait theory (Allport, Cattell, Big Five) foreign to Greek character-grammar; use sōphrosynē / tripartite soul / hexis instead", "voice_native_alternative": "character in period-vocabulary per Boddice §15"},
-    {"modern_term": "self-esteem", "reason_excluded": "no corresponding Greek concept; sōphrosynē / megalopsychia are the closest and they operate differently", "voice_native_alternative": "megalopsychia"},
-    {"modern_term": "mental health", "reason_excluded": "the soul is ruled or unruled, not healthy or ill; the analogy to bodily medicine is Plato's, but it is an analogy", "voice_native_alternative": null},
-    {"modern_term": "romantic love", "reason_excluded": "eros is philosophical ascent; philia is reciprocal-benefit; neither is post-17th-C amour d'inclination", "voice_native_alternative": "eros / philia"},
-    {"modern_term": "career", "reason_excluded": "citizen is constituted by polis and cosmos, not occupation", "voice_native_alternative": null},
-    {"modern_term": "belief in the Forms", "reason_excluded": "the Forms were SEEN by the soul's eye; this is ontology, not doxa", "voice_native_alternative": null}
-  ],
+  // NOTE (1-arch-08, 2026-04-22): `anachronisms_to_avoid` removed from
+  // LifeScaffold output. Pass 1.5 produces KnowledgeBoundary.anachronism_discipline[]
+  // with dual framings (biographical + epistemic) per entry.
   "scholarly_context": "Vlastos (Socrates: Ironist and Moral Philosopher 1991) treats the early dialogues as historical Socrates; Griswold and Ferrari read the dialogue form as itself dramatic. Burnyeat on the dating debate. Annas (Platonic Ethics 1999) for the continuity thesis between Republic and Laws. Sedley on Plato as a systematic metaphysician vs. Vlastos on aporetic Socratic method. These debates bear on which scholar-tradition anchors the voice's formative-experience framing."
 }
 ```
@@ -402,9 +403,12 @@ per Block 2 discipline.
    contradictions via `contested_readings[]` or `evidence_tag: inference`.
 3. Reconstruct the voice's `intellectual_world` in its own framing. No length cap.
 4. Populate the Boddice §13 5-part rubric additively. Preserve all
-   tradition-specific pathē from sources (minimum 5; uncapped). Preserve all
-   anachronisms-to-avoid candidates (minimum 4; uncapped). Apply
-   `[experiential_reconstruction]` tag on framework_for_difficulty +
+   tradition-specific pathē from sources (minimum 5; uncapped). Name
+   anachronisms inline in narrative fields where relevant (e.g.
+   "not 'trauma' (clinical anachronism) but *nadryv*") but do NOT emit
+   an anachronisms_to_avoid list — that's Pass 1.5's
+   `knowledge_boundary.anachronism_discipline[]` under 1-arch-08.
+   Apply `[experiential_reconstruction]` tag on framework_for_difficulty +
    model_of_selfhood.
 5. Generate formative_candidates[] per Boddice §14. Minimum 2, uncapped. For
    human voices fill `lived_through_own_apparatus`; for non-human/fictional
