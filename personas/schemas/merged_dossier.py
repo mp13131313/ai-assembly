@@ -12,6 +12,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ._analytical import AnalyticalContext
+from ._frames import InterpretiveFrame
 from .pass_1_1 import FormativeCandidate, LifeScaffold
 from .pass_1_2 import Commitment, Concept, Tension
 from .pass_1_3 import ReasoningMethod, Textures
@@ -85,6 +86,14 @@ class MergedDossier(BaseModel):
     commitments: list[Commitment]
     concepts: list[Concept]
     tensions: list[Tension]
+    interpretive_frames: list[InterpretiveFrame] = Field(
+        default_factory=list,
+        description="1-arch-06 (2026-04-22): cross-cutting scholarly material "
+        "(interpretive methods, cross-disciplinary re-framings, voice-level "
+        "debates) with frame_type discriminator. Produced at Pass 1.2. "
+        "Empty for thinly-documented voices or voices without cross-"
+        "disciplinary reception.",
+    )
 
     # Chunk 1.3
     reasoning_method: ReasoningMethod
