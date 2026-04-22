@@ -142,10 +142,74 @@ Estimated: 1-2 days focused engineering + testing.
 
 ---
 
-### 1-arch-02 — Gemini's per-chunk role is wrong-lane; re-route to either sectioned-per-chunk or coherence-only
+### 1-arch-03 — Additive merge architecture (supersedes 1-arch-02; reshapes Wave 3)
+
+**Severity:** HIGH architectural — pivot point
+**Status:** PROPOSED → implementation plan at `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md`
+**Scope:** Pass 1.1-1.7 merge layer redesign; modest Pass 2-6 tuning; no Runtime side changes
+**Effort:** ~2-3 days focused engineering + testing
+**Recommended timing:** Before Phase N (avoid running 11 more voices on lossy architecture)
+
+**Problem (2-paragraph summary):**
+
+Current Pass 1.1-1.6 chunk schemas are **tight recipes** (`ReasoningMethod.steps[5-8]`, `Moves[3-6]`, `HardLimits[3-5]`, etc.). The LLM at merge must fit full per-section research (Perplexity §N + Claude DR §N + Gemini full) into these shapes. Content that doesn't fit gets dropped, not compressed-and-stored-elsewhere. Phase L Dostoevsky empirical measurement: 60-70% of Claude DR §3/§4/§5 analytical content is silently lost at merge. Carnivalization analysis, 14-item Menippean checklist, 4-of-5 scandal-scene instances, 3 worked demonstrations connecting life-events to novels, Holbein Basel 1867 formative-pressure-point, Williams-vs-Frank interpretive contrast — all in DR, none in merged_dossier, none surfaced at Pass 2-6.
+
+This is a design error. The merge was positioned as "structure the research as near-card-field shape." It should be "consolidate three source dossiers into one coherent per-section dossier — additively, with redundancies stripped, contradictions reconciled, all unique content preserved." Pass 2-6 should do the synthesis-to-card-field work on rich source material.
+
+**The architectural pivot:**
+
+Two compression points → one compression point.
+
+- **Current:** Raw research (412K) → Pass 1.1-1.6 compress to schema shapes (162K merged, loses 60-70% of §3/§4/§5) → Pass 2-6 synthesize to card fields
+- **1-arch-03:** Raw research (412K) → Pass 1.1-1.6 additive consolidation (~350K merged, preserves all non-redundant content) → Pass 2-6 synthesize to card fields from richer source
+
+Merge becomes: dedupe + reconcile + organize. Not compress-to-recipe. Rich merged_dossier preserves Claude DR investment ($30-60 operator labor × 6 sessions × 12 voices).
+
+**Supersedes 1-arch-02:** the "Gemini lane-filter" concern in 1-arch-02 dissolves under additive merge — Gemini becomes full contributor alongside Perplexity + DR, with no per-chunk-filtering burden. Mark 1-arch-02 as RESOLVED-VIA-1-ARCH-03.
+
+**Preserves 1-arch-01:** curated_corpus_passages routing is orthogonal; 1-arch-01 stays post-Phase-N deferred, composes cleanly.
+
+**Implementation overview (full detail in plan doc):**
+- Redesign Pydantic schemas as permissive containers (Boddice structure preserved, content capacity expanded, new AnalyticalContext containers capture scholarly-interpretive material)
+- Rewrite 6 merge prompts with additive-merge discipline
+- Update Pass 1.7 coherence with preservation-checks
+- Bump Pass 2/3/4a/6 max_tokens to 32K (from 24K); Pass 1.7 to 100K (from 64K)
+- Test on Dostoevsky Phase L fixtures; compare card quality; merge if ≥baseline
+
+**Per-voice cost delta:** +$6-9. **Wall-time delta:** +5-10 min. **Quality hypothesis:** richer card fields (especially voice/engagement/reasoning); Pass 5 Gemini-flagged register drift hypothesized to resolve via richer CT upstream.
+
+**Scope of Wave 3 fix triage under 1-arch-03** (full table at `ARCH_03_ADDITIVE_MERGE_PLAN.md` §9):
+
+- **Wave 1 (53 fixes):** all SURVIVE. Pre-merge research layer unchanged.
+- **Wave 2 (12 fixes + 1d-06 + 1-arch-01):** all SURVIVE. Post-merge primary-text layer unchanged.
+- **Wave 3 (30 fixes + 2 SRIs):**
+  - 6 Gemini-filtering MEDIUMs (1.1-01, 1.2-01, 1.3-01, 1.4-01, 1.5-01, 1.6-01): **OBSOLETE**
+  - SRI-1 Gemini-noise-leakage watch: **OBSOLETE**
+  - SRI-2 corpus-utilisation depth: **ABSORBED** (becomes preservation-rate metric, target ≥85%)
+  - 1.1-05 ContestedReading prompt-schema mismatch: **OBSOLETE** (schema redesign resolves)
+  - 1-arch-02: **SUPERSEDED**
+  - Worked-example additions (1.1-02, 1.2-03, 1.3-02, 1.4-02, 1.4-03, 1.5-02, 1.6-02, 1.6-03, 1.6-04): all **ABSORBED** into 1-arch-03 new Block 4 structures
+  - voice_mode disposition fixes (1.1-03, 1.4-04, 1.5-04, 1.6-06): **SURVIVES** independently
+  - Period-vocabulary gradation (1.1-04, 1.3-03): **SURVIVES** as coordinated patch across 1.1/1.2/1.3
+  - Fictional null-discipline (1.1-06, 1.5-03): **ABSORBED** into 1-arch-03
+  - Pass 1.7 fixes (1.7-01/02/03/04): all **SURVIVES** per §5.3
+- **Step 27 (Pass 2) fixes:**
+  - 2-01 stale user prompt: **SURVIVES** (drift bug independent of architecture)
+  - 2-02 voice_temporal_stance: **SURVIVES** (NEEDS-DECISION still)
+  - 2-03 formative-candidate commit-to-ONE: **RESHAPED** (concern valid; fix reworded to reference 1-arch-03 preserved candidates + cross-refs)
+  - 2-04 max_tokens monitor: **SUPERSEDED** (1-arch-03 bumps to 32K)
+
+**Decisions needed before implementation:**
+1. 2-02 voice_temporal_stance REWRITE/KEEP/DELETE (user call)
+2. Wave 1 + 2 fix landing timing (Option A recommended: Wave 1+2 first on main, 1-arch-03 on branch after)
+3. Implementation-session scope + merge-to-main authority
+
+---
+
+### 1-arch-02 — Gemini's per-chunk role is wrong-lane; re-route to either sectioned-per-chunk or coherence-only [SUPERSEDED by 1-arch-03]
 
 **Severity:** HIGH (quality ceiling, not blocker)
-**Status:** PROPOSED (post-Phase-N revisit; flag for empirical test during voices 2-12)
+**Status:** ~~PROPOSED~~ **RESOLVED-VIA-1-ARCH-03** — the underlying concern (Gemini's per-chunk lane-mismatch) dissolves under additive merge; Gemini becomes full contributor alongside Perplexity + DR without per-chunk-filtering burden.
 **Scope:** `chunk_runner._load_sources()` + `pass_1_b_*.md` prompts (to require section headings if sectioned variant adopted) + Pass 1.7 prompt + token-budget on Pass 1.7 + PB#3 decision-log reversal/refinement
 
 **Problem:**
@@ -705,9 +769,11 @@ The fuzzy-match approach treats Pass 1.6's passages as "seed points," expands co
 
 **By severity:**
 - CRITICAL: 0
-- HIGH: 3 (1d-06 fuzzy-match + 1-arch-01 curated_corpus_passages-from-Pass-1d + 1-arch-02 Gemini re-route architectural proposals)
-- MEDIUM: 31 (no change — 6 Gemini-filtering directives at 1.1-1.6; 1.7 not applicable as no dossier inputs)
-- LOW: 62 (+23: 1.1-02 through 1.1-06 at Pass 1.1 · 1.2-02 + 1.2-03 at Pass 1.2 · 1.3-02 + 1.3-03 at Pass 1.3 · 1.4-02 + 1.4-03 + 1.4-04 at Pass 1.4 · 1.5-02 + 1.5-03 + 1.5-04 at Pass 1.5 · 1.6-02 + 1.6-03 + 1.6-04 + 1.6-06 at Pass 1.6 · 1.7-01 worked examples + 1.7-02 edit-scope + 1.7-03 escalation-pathway + 1.7-04 productive-tension-criteria at Pass 1.7; 1.6-05 resolved-via-1.6-03)
+- HIGH: 3 (1d-06 fuzzy-match · 1-arch-01 curated_corpus_passages-from-Pass-1d · **1-arch-03 additive-merge architecture** — the pivot; supersedes 1-arch-02 which is now RESOLVED-VIA-1-ARCH-03)
+- MEDIUM: 34 (+3 at Pass 2: 2-01 stale user prompt · 2-02 voice_temporal_stance REWRITE NEEDS-DECISION · 2-03 formative-candidate anchor-concentration)
+- LOW: 62 (no change at Pass 2 — 2-04 is MONITOR only, not fix)
+- **NEEDS-DECISION**: 1 (2-02 voice_temporal_stance keep/rewrite/delete — decision-gate before Phase N)
+- **MONITOR**: 1 (2-04 max_tokens=24000 at Pass 2)
 - REJECTED: 1 (1b-01 `GEMINI_MODEL` downgrade — user preference); earlier 1b-R1/R2/R3 elevation proposal retracted after research sanity-check
 
 **By file:**
@@ -737,10 +803,12 @@ The fuzzy-match approach treats Pass 1.6's passages as "seed points," expands co
 - `pass_1_5_merge.md`: 4 fixes (1.5-01 MEDIUM Gemini-filtering mirror; 1.5-02 Cleopatra hostile-source worked example — high-stakes before Cleopatra Phase N build; 1.5-03 fictional-voice general_frame rule; 1.5-04 voice_mode drop — follows 1.1-03 irrelevant-here pattern)
 - `pass_1_6_merge.md`: 5 fixes + 1 merged (1.6-01 MEDIUM Gemini-filtering with strongest positive framing — Gemini actively preferred for URL surfacing; 1.6-02 Octopus non-human organism example; 1.6-03 Scheherazade fictional multi-translator example — also resolves 1.6-05 translation_anchor; 1.6-04 Marley reference_only_passages private-tier demonstration; 1.6-05 resolved-via-1.6-03; 1.6-06 voice_mode drop completing cross-chunk policy). **1-arch-01 architecturally restructures this chunk if adopted post-Phase-N.**
 - `pass_1_7_coherence.md`: 4 fixes, all LOW (1.7-01 add BLOCK 4 WORKED EXAMPLES — pattern-break repair; 1.7-02 edit-scope discipline; 1.7-03 escalation-pathway documentation; 1.7-04 productive-tension criteria). **Genuinely not rubber-stamp** — 7 operational checks + 3-category resolution policy + real chunk-output edits + Phase-L-validated. Wave 3 architecture verdict vindicated at per-prompt level.
+- `persona_pass_2_identity_boundaries.md` + `persona_pass_2_user.md`: 3 MED fixes + 1 MONITOR (2-01 stale user prompt — drift bug, 1-min edit; 2-02 voice_temporal_stance REWRITE as deployment-configurable — NEEDS-DECISION, decision-gate before Phase N; 2-03 formative-candidate commit-to-ONE anchor-concentration reword; 2-04 max_tokens=24K monitor). Phase M learnings baked in; Phase-L-validated on Dostoevsky.
 
 **🎯 WAVE 1 COMPLETE.** All 17 steps reviewed. Phase 0 + Phase 0.5 coverage.
 **Wave 2 complete.** Steps 18-19 reviewed.
 **🎯 WAVE 3 COMPLETE.** Steps 20-26 reviewed. Phase 1 chunked merge + coherence coverage done.
+**Wave 4 in progress.** Step 27 Pass 2 reviewed.
 
 ---
 
@@ -754,9 +822,11 @@ Observations surfaced during Waves 1-3 that can't be resolved at their originati
 - **Zosima-overanchoring at Pass 2 commitment selection.** Pass 1.2 surfaces 10-20 commitments with specificity-rule discipline; Pass 2 then produces a persona card `constitution` with 10-20 principles. 1:1 mapping means selection happens at synthesis, not generation. *Originated at Step 21 (1.2).* **Ask at Pass 2/3 review:** how does the compression actually happen — does Pass 2 preserve breadth or does it silently narrow to anchor-themes?
 - **`coherence_flags[]` + `coherence_resolutions[]` downstream use.** Pass 1.7 emits these as first-class audit fields on `merged_dossier.json`. Do Pass 2-6 prompts actually read and respond to them, or are they ignored at synthesis? *Originated at architecture confirmation (Step 20 preamble).* **Ask at each Pass 2-6 review:** does the prompt reference `coherence_flags` from the merged_dossier or bypass them?
 - **Merged dossier size vs. Pass 2-6 consumption.** Dostoevsky's `merged_dossier.json` is the sole input to Pass 2-6 synthesis (plus `primary_block` to Pass 4a). Whether Pass 2-6 prompts actually read the full dossier or short-circuit on a few fields is the symmetric concern to "is research used well at merge." *Originated at Q5 (architecture preamble).*
-- **`voice_temporal_stance` field — keep/rewrite/delete decision.** Added during Phase M from chat-test learning (Dostoevsky "twenty-eight years after Sonya" error). Athens deployment brief is "impossible participants take the floor while you sleep" — fluid-across-time. The 1881 anchor may be over-specified for runtime. *Originated at task description.* **Decision must land before Phase N voice builds.** Wave 3/4 boundary.
+- **`voice_temporal_stance` field — keep/rewrite/delete decision.** Added during Phase M from chat-test learning (Dostoevsky "twenty-eight years after Sonya" error). Athens deployment brief is "impossible participants take the floor while you sleep" — fluid-across-time. The 1881 anchor may be over-specified for runtime. *Originated at task description.* **Decision must land before Phase N voice builds.** Wave 3/4 boundary. **LANDED AT STEP 27 (2-02)** — recommended REWRITE to deployment-configurable (default=fluid for Voice Pipeline, anchored_override=death-threshold for chat/project). AWAITING USER DECISION.
 - **"Reference, not display" boundary at Pass 4a.** Pass 1.4's guardrails explicitly name the discipline: 1.4 collects vocabulary as reference material; **Pass 4a decides deployment**. Output that reads as scholarly exhibition fails Layer 2 of the provotype test (philosophically literate audience, NOT classics-vocabulary-literate). *Originated at Step 23 (1.4).* **Ask at Pass 4a review:** does the prompt actually respect this boundary, or does it direct period-vocabulary-exhibition in output? If the latter, the 1.4→4a handoff is broken and the Dostoevsky card's gloss-in-parens register ("the lik — the face — of Christ") failure mode will recur.
 - **1.4's guardrail-level voice-type awareness as meta-pattern.** Pass 1.4 names 4 tradition-channelled panel voices directly in Block 1 (not via worked examples). This achieves voice-type coverage more efficiently than the 1.1-02/1.2-03/1.3-02 worked-example additions. *Originated at Step 23; confirmed at Step 24* (1.5 also uses guardrail-level voice-type awareness in general_frame rule). **Consider during implementation pass:** could some worked-example fixes at 1.1/1.2/1.3 be replaced by guardrail-level voice-type callouts following 1.4/1.5's pattern? Would reduce prompt-length growth.
+- **CT prompt carries Boddice-deprecated language.** `persona_coherence_threading.md:5-6` says "Preserve: ...the wound and its lesson..." — Pass 2 Block 2 explicitly DROPS "core wound + lesson" framing per Boddice §14. CT prompt is v3.10-language-stale. *Originated at Step 27 (Pass 2 review).* **Ask at CT review (post-Pass-6):** reword to "Preserve: key identity facts, the formative emotional community + apparatus + engagement (Boddice §14 3-part), the 3 most important constitutional principles, the core reasoning mode, and the dominant voice register." Boddice-align the CT threading summary.
+- **Pass 2 revision-loop behavior on Pass 7a escalation.** `run_persona_pipeline.py:713-715` documents Pass 2/4a/5 as revision-loop targets when Pass 7-anachronism flags `world`-field anachronisms → Pass 2 re-runs with `_critique_suffix("2")`. Behavior of critique-suffix injection + how Pass 2 re-integrates with prior Pass 2 output (replace? merge?) forward-referenced for Wave 5. *Originated at Step 27.* **Ask at Pass 7a review:** verify revision-loop's Pass 2 rerun mechanism (full replace vs. field-patch) and whether multiple revision loops compound critique-suffixes coherently.
 - **Pass 1.5 → Pass 7c handoff — `hard_limits` vs `banned_language` drift risk.** Pass 1.5 explicitly scopes HardLimits as character-level; Pass 7c produces expression-level banned_language. Independent synthesis paths — overlap + drift observed empirically on Dostoevsky (hard_limit "Never speak in the clinical-psychological register" near-mirrors banned_language "clinical-diagnostic vocabulary"). *Originated at Step 24 observation.* **Ask at Pass 7c review:** does Pass 7c's prompt actually read `hard_limits` as input and build banned_language compatibly, or synthesized independently with drift? If independent, drift is real; either cross-wire the two or accept as acceptable belt-and-braces redundancy.
 - **Voice_mode disposition cross-chunk policy (1.1-1.5 mapped).** Voice_mode is: **dead/drop** at 1.1 (biographical) + 1.5 (boundaries); **load-bearing by design** at 1.3 (reasoning); **make-load-bearing** at 1.2 (commitments) + 1.4 (voice). *Originated across Steps 20-24.* **Implementation pass:** apply coherent policy in one coordinated edit across all 6 merge prompts; verify 1.6 disposition at Step 25.
 
@@ -1067,6 +1137,47 @@ Findings inform whether the merge layer is the right size for Pass 2-6 to draw f
 
 ---
 
+# WAVE 4 — Phase 2 Generation (Pass 2-6 + CT)
+
+CT mechanism confirmed from `run_persona_pipeline.py:357-370`: `_ct_compress()` uses **Sonnet 4.6** (max_tokens=2048, temperature=0.0, thinking=False) on `persona_coherence_threading.md` template → ~500-token summary threaded forward into each Pass 3/4a/4b/5 user prompt via `{{ pass_N_summary }}` variable. CT as standalone review fires after Pass 6 (Step TBD).
+
+## Step 27 — Pass 2 Identity & Boundaries
+
+**Mechanism:** LLM call · Anthropic `claude-opus-4-7` · adaptive thinking · streaming · **max_tokens=24000** · temperature=1.0 · response_format_json=True · `_claude_pass()` wrapper in `run_persona_pipeline.py:338`
+**System prompt:** `personas/flows/shared/prompts/persona_pass_2_identity_boundaries.md` (216 lines — Jinja branches on type/subtype/voice_mode/hostile_sources)
+**User prompt:** `personas/flows/shared/prompts/persona_pass_2_user.md` (9 lines — reads merged_dossier)
+**Does:** First generation pass. Reads `merged_dossier.json` → produces 10 persona-card Identity & Boundary fields including Phase-M-added `voice_temporal_stance`. Boddice §13/§14/§15 integration + Card v2 register-compliance + post-Phase-M chat-test learnings (hyphenated-virtue-signaling clause, [experiential_reconstruction] tag mandates, [projection_warning] on modern clinical terms).
+**Verdict:** TUNE (with NEEDS-DECISION inside). 3 MED fixes + 1 LOW observation. **2-02 voice_temporal_stance is decision-gate before Phase N.**
+
+| ID | Severity | File:lines | Change | Status |
+|---|---|---|---|---|
+| 2-01 | MEDIUM | `persona_pass_2_user.md:4-7` | **Stale user prompt — drift bug.** System prompt produces 10 fields (includes `voice_temporal_stance` added Phase M per commit `84e2b6b`); user prompt says "9 Persona Card fields" and lists 9 names. Pipeline contradiction. Phase L Opus 4.7 bridged empirically (Dostoevsky card has field populated) but future voices + model versions may not. **1-minute edit.** Update to "10 Persona Card fields" + add `voice_temporal_stance` to the field-name list. | PROPOSED |
+| 2-02 | MEDIUM · **NEEDS-DECISION** | `persona_pass_2_identity_boundaries.md:139-159` + schema + runtime Voice Pipeline Step 1/2 | **Rewrite `voice_temporal_stance` as deployment-configurable** (Wave 3/4 boundary decision per task description). Current field hardcodes death-threshold anchor — chat-test-driven, **over-specified** for Voice Pipeline Step 2 which needs fluid-across-time framing per Athens brief "impossible participants take the floor while you sleep." **Proposed REWRITE:** `voice_temporal_stance.default` = fluid-across-time (Voice Pipeline artifact generation) + `voice_temporal_stance.anchored_override` = optional death-threshold anchor (chat/project deployments; preserves current Phase M content). Runtime Voice Pipeline Step 1/2 assembly respects override flag per deployment mode. Alternatives: KEEP (hardcoded 1881 anchor — under-serves Voice Pipeline); DELETE (loses chat-test bug fix). **Decision-gate before Phase N voice builds.** | PROPOSED — AWAITING USER DECISION |
+| 2-03 | MEDIUM | `persona_pass_2_identity_boundaries.md:20-22` (Block 2 formative_experience guidance) | **Formative-candidate commit-to-ONE is anchor-concentration at Pass 2** — addresses forward-referenced Zosima-overanchoring concern. Current: "COMMIT to ONE candidate — the one with highest `scholarly_support_score` and cleanest fit to the voice's engagement." For well-documented voices (Dostoevsky: 6 formative candidates in dossier), commits to one and drops the rest — Phase L Dostoevsky card commits to Semenovsky-execution; Petrashevsky/katorga/Optina/Alyosha-death/Snitkina scattered across other fields, absent from `formative_experience`. **Reword:** "Commit to ONE PRIMARY formative candidate for narrative coherence. In `formative_emotional_community` and `engagement_it_drives`, explicitly reference 1-2 SUPPORTING formative candidates as biographical context — the primary formative doesn't exist in isolation. The formative is what drives engagement; the supporting candidates texture the engagement's specific shape." Preserves narrative-clean output while preventing formative-multiplicity loss. | PROPOSED |
+| 2-04 | LOW (monitor) | `run_persona_pipeline.py:338` (`_claude_pass` default `max_tokens=24000`) | 10 fields with Boddice-rich content — Phase L Dostoevsky fit (~12-14K estimated output) but 4K lower than chunk-merge's 32K. **Monitor during voices 2-12.** If any voice hits max_tokens before JSON completes, bump to 32K (align with chunk family). Not fix-now. | MONITOR |
+
+**Review — model + config:** KEEP model. Opus 4.7 + adaptive thinking correct for 10-field Boddice-rich synthesis from merged_dossier. Sonnet would regress on Boddice tag discipline (Phase L showed gaps on Opus itself) and register-compliance (Pass 7a flagged Pass 5 register violations even on Opus). **max_tokens=24K tight but fit** — 2-04 monitors. Streaming + temperature=1.0 + thinking=True SDK-forced.
+
+**Review — prompt (strengths):**
+- **Phase M learnings baked in** — `[experiential_reconstruction]` tag mandates on specific sub-fields (Pass 7-pre flag origin), `[projection_warning]` on modern clinical terms, hyphenated-virtue-signaling clause in `topics_requiring_care` (post-Phase-M chat-test). Prompt evolves with empirical findings.
+- **OUTPUT REGISTER rule** (first/second person never third) stated directly with Card v2 citation. Load-bearing per "register of fields overwhelms register of frame" principle.
+- **Boddice §13/§14/§15 integration thorough** — "DROP 'core wound + lesson' framing" explicit; character-grammar native-to-period explicit; `[projection_warning]` discipline explicit.
+- **Voice-category variant patterns** in epistemic_frame_statement give Opus concrete shape for 7 voice configurations.
+- **Conditional `{% if hostile_sources %}` block** handles Cleopatra-class voices correctly.
+- **Phase-L-validated** on Dostoevsky — world/formative_experience/character Boddice-shaped with tags + register discipline applied.
+
+**Review — research utilisation:**
+- **SRI-1 N/A** — input is merged_dossier, not raw dossiers. SRI-1 locked at 6/6 Pass 1.1-1.6.
+- **SRI-2 mixed.** Per-field specs direct substantive extraction (10-20 anachronisms, 3-6 sensitive topics with full navigation, Boddice-shaped world) — anti-narrowing mechanisms present. **BUT** `formative_experience.commits-to-ONE` is explicit anchor-concentration. **2-03 resolves this.** Zosima-overanchoring at Pass 2 is real and addressable; the prompt names the mechanism.
+
+*Observations (not fixes):*
+- **CT prompt carries Boddice-deprecated language.** `persona_coherence_threading.md:5-6` says "the wound and its lesson" — Pass 2 Block 2 explicitly DROPS this framing. CT review step (post-Pass-6) will land the fix.
+- **Pass 2 → Pass 3 CT handoff** — CT compresses Pass 2 to ~500 tokens for Pass 3. What's preserved vs. dropped affects Pass 3 constitutional extraction. Evaluate during CT review.
+- **`voice_temporal_stance` REWRITE affects Voice Pipeline Step 1/2 assembly** — out of scope per REBUILD_PLAN but field-level change creates implementation debt for that workstream. Flag at REBUILD_PLAN level.
+- **Pass 2 revision-loop target per Pass 7a escalation** — forward-referenced for Wave 5 Pass 7a review: `_critique_suffix("2")` behavior on revision rerun.
+
+---
+
 ## 🎯 Wave 3 summary — Phase 1 chunked merge + coherence, reviewed end-to-end
 
 **Coverage:** 7 steps (20-26). Pass 1.1 BIOGRAPHICAL / 1.2 INTELLECTUAL / 1.3 REASONING / 1.4 VOICE / 1.5 BOUNDARIES / 1.6 CORPUS / 1.7 COHERENCE.
@@ -1131,7 +1242,12 @@ Findings inform whether the merge layer is the right size for Pass 2-6 to draw f
 **Panel composition confirmed (12 voices):** Scheherazade (fictional), Cleopatra (human, hostile_sources=true), Whanganui (non_human, system), Audrey Tang (human), Ibn Battuta (human), Fyodor Dostoevsky (human — Phase L validated), Hannah Arendt (human), Plato (human — Phase N first voice), Ada Lovelace (human), Peter Thiel (human, legal-risk-flagged), Bob Marley (human, corpus_constraint=lyrics_patterns_only), Octopus (non_human, organism).
 
 **By status:**
-- PROPOSED: 96 (incl. 1-arch-01 + 1-arch-02 architectural refactors + 6 Step 20 fixes + 3 Step 21 fixes + 3 Step 22 fixes + 4 Step 23 fixes + 4 Step 24 fixes + 5 Step 25 fixes + 4 Step 26 fixes; 1.6-05 resolved-via-merge)
+- PROPOSED: 99 (Wave 1-3 proposals + 3 Step 27 Pass 2 fixes; 1.6-05 resolved-via-merge; 2-02 awaiting user decision; 2-04 monitor-not-fix)
+- **SUPERSEDED-VIA-1-ARCH-03**: 1 (1-arch-02)
+- **OBSOLETE-UNDER-1-ARCH-03**: 8 (1.1-01, 1.2-01, 1.3-01, 1.4-01, 1.5-01, 1.6-01 Gemini-filtering MEDIUMs; 1.1-05 ContestedReading; SRI-1 Gemini-noise-leakage watch)
+- **ABSORBED-INTO-1-ARCH-03**: 9 (1.1-02, 1.2-03, 1.3-02, 1.4-02, 1.4-03, 1.5-02, 1.6-02, 1.6-03, 1.1-06/1.5-03 fictional null-discipline, SRI-2 corpus-utilisation → preservation-rate metric)
+- **RESHAPED-UNDER-1-ARCH-03**: 1 (2-03 formative-candidate reword)
+- **SURVIVES independently**: Wave 1 (53) + Wave 2 (12) + voice_mode disposition fixes + period-vocabulary gradation + Pass 1.7 fixes + 2-01 + 2-02
 - APPROVED: 0
 - REJECTED: 1
 - RETRACTED: 3 (prior 1b-R1/R2/R3 elevation items — research-misaligned)
