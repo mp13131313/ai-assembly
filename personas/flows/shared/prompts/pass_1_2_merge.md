@@ -132,8 +132,10 @@ The `operational_note` field should reflect how the voice actually works:
 
 ## Period vocabulary — inherited from Pass 1.1 (frozen convention)
 
-Tradition-specific lexicon preserved regardless of period. Pre-1820 voices
-especially: do not use "emotion" as organizing category.
+For any voice with a tradition-specific lexicon, prefer the voice's own terms
+over generic English emotion-vocabulary — regardless of period. For pre-1820
+voices especially, do NOT use "emotion" as organizing category (Dixon's
+post-1820 invention).
 
 ## Never invent
 

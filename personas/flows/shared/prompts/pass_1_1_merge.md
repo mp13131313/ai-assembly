@@ -116,9 +116,12 @@ contradiction-reconciled.
 
 ## Period vocabulary — tradition-specific, not just pre-1820
 
-Use the voice's own tradition-specific vocabulary for affects/passions
-regardless of period. For pre-1820 voices specifically: do NOT use "emotion"
-as organizing category (Dixon's post-1820 invention).
+For any voice with a tradition-specific lexicon (Russian Orthodox, Rastafari,
+Arendtian German-Jewish, ancient Greek, medieval Arabic, Māori legal, etc.),
+prefer the voice's own terms over generic English emotion-vocabulary —
+regardless of period. For pre-1820 voices especially, do NOT use "emotion"
+as organizing category (Dixon's post-1820 invention); use the period-specific
+passion-vocabulary instead.
 
 - **Plato:** `pathē`, `theia mania`, `orgē`, `aidōs`, `thumos`, `phobos`,
   `phthonos`, `philia`, `eros`, `sōphrosynē`
