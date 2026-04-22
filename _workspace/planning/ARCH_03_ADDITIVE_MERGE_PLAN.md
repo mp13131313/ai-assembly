@@ -1450,39 +1450,257 @@ Detailed rollback triggers and procedures per §8.9. Summary:
 
 ---
 
-## 14. Open questions
+## 14. Locked decisions (closed 2026-04-22)
 
-**Q1. Stage-3 manual review — who decides?**
-Stage 3 requires human judgment on card quality delta. Operator (user) reviews. If delegated to operator in their absence, need explicit rubric. Propose: `ARCH_03_MANUAL_REVIEW_CHECKLIST.md` with yes/no criteria + any NO = escalate to user.
+**Q1. Stage-3 manual review — who decides?** **LOCKED** — operator (user) reviews. `ARCH_03_MANUAL_REVIEW_CHECKLIST.md` drafted by Sonnet during implementation; operator signs off before proceeding past Stage 3.
 
-**Q2. Existing Dostoevsky card migration?**
-Phase L Dostoevsky assembled card stays as baseline. Not re-migrating. Phase N voices (including a potential Dostoevsky re-run post-1-arch-03 for comparison) build under new architecture. Dostoevsky stays as-is in `projects/phase-l-dostoevsky/`.
+**Q2. Existing Dostoevsky card migration?** **LOCKED** — Phase L Dostoevsky card stays as baseline at `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json`. Not re-migrating. Stage 3 comparison uses baseline vs. new-architecture-generated card.
 
-**Q3. voice_temporal_stance decision timing?**
-Fix 2-02 (REWRITE deployment-configurable) requires user decision. Decision can land:
-- Before 1-arch-03 implementation: clarifies schema target from Step 17 onward.
-- Concurrent with 1-arch-03: parallel workstream.
-- After 1-arch-03 merge: apply 2-02 as patch on main.
+**Q3. `voice_temporal_stance` decision (fix 2-02).** **LOCKED — REWRITE.**
 
-Recommend **before 1-arch-03 implementation** so Pass 2 schema reflects the decision from Step 17. User decision needed at planning-completion (now).
+Field becomes deployment-configurable with two sub-fields:
+- `voice_temporal_stance.default` — **fluid-across-time framing** appropriate for Voice Pipeline Step 2 artifact generation per Athens brief "impossible participants take the floor while you sleep." Voice speaks from its own world to the reader's; `translation_protocol` handles the bridge. When recalling events, count from the present of the voice's world; do not attempt to speak from the reader's time.
+- `voice_temporal_stance.anchored_override` — **optional death-threshold (or period-specific) anchor** for chat/project deployments that need the drift-prevention the Dostoevsky chat-test exposed. Preserves the current Phase-M content (3-paragraph anchor to 9 Feb 1881 for Dostoevsky) as the override content.
 
-**Q4. 128-test suite coverage?**
-Current 128-test suite exercises path accessors, header/footer, split mechanics, dr_validation, perplexity_split, orchestrator init. Under 1-arch-03:
-- Schema-shape tests need updates (permissive container assertions).
-- Prompt-render tests may need new fixtures for the additive-merge prompts.
-- Integration test (end-to-end with mocked LLMs) becomes more valuable — flagged as Phase L follow-up in OPEN_ITEMS; implement alongside 1-arch-03?
+Runtime Voice Pipeline Step 1/2 assembly respects the override flag per deployment mode: Voice Pipeline = use default; chat/project = use anchored_override if present, else default.
 
-Scope decision: minimum test update for 1-arch-03 is schema-shape + render smoke tests. End-to-end integration test remains Phase L follow-up (separate workstream).
+Schema change:
+```python
+class VoiceTemporalStance(BaseModel):
+    default: str  # Fluid-across-time; required
+    anchored_override: str | None = None  # Optional deployment-specific anchor
+```
 
-**Q5. Preservation-audit metric precision?**
-§7.1 Stage-1 targets ≥85% preservation rate on §3/§4/§5. Measurement: character-level unique-content overlap? Named-entity preservation? Scholarly-citation count? Multiple metrics, no single one decisive.
+Pass 2 prompt spec (Block 3) updated accordingly: produces both sub-fields; default is mandatory per §14 Boddice-shape discipline; anchored_override is mandatory for historical human voices with death-threshold (Dostoevsky, Plato, Cleopatra, etc.) and omitted for non-human/fictional (Octopus, Whanganui, Scheherazade where "fluid" is the only coherent stance).
 
-Propose three complementary metrics:
-- **Character overlap**: sum of unique substrings from source found in merged / total source chars. Target ≥85% on §3/§4/§5.
+This lands during Step 17 of the implementation sequence.
+
+**Q4. 128-test suite coverage.** **LOCKED** — minimum test update for 1-arch-03 is schema-shape tests + render smoke tests. End-to-end integration test with mocked LLMs remains Phase L follow-up (separate workstream, not in 1-arch-03 scope).
+
+**Q5. Preservation-audit metric.** **LOCKED** — three complementary metrics computed by `arch_03_preservation_audit.py`:
+- **Character overlap**: unique substrings from source found in merged / total source chars. Target ≥85% on §3/§4/§5.
 - **Scholarly-citation preservation**: count of citations in source appearing in merged. Target 100%.
-- **Named-structural-pattern preservation**: for §3, count of named patterns (scandal-scene, carnivalization, etc.) preserved as `StructuralPattern` entries. Target 100%.
+- **Named-structural-pattern preservation**: for §3, count of named patterns preserved as `StructuralPattern` entries (scandal-scene, carnivalization, crowning/decrowning, threshold-chronotope, sideshadowing, confession-under-pressure). Target 100%.
 
-Audit script (`arch_03_preservation_audit.py`) computes all three. Report JSON for operator review.
+Audit script outputs JSON report for operator review at Stage 1.
+
+---
+
+## 15. Implementation scope + sequencing (locked)
+
+**Scope: comprehensive single-session implementation** per user decision 2026-04-22:
+
+- **Wave 1 fixes** (53 fixes, research layer) — SURVIVES; apply
+- **Wave 2 fixes** (12 fixes, Pass 1c + 1d) — SURVIVES; apply (including 1d-06 fuzzy-match HIGH architectural, or defer per user call at implementation start)
+- **Wave 3 fixes** — triaged per §9:
+  - 8 OBSOLETE (skip; resolved by arch change)
+  - 9 ABSORBED (fold into arch changes)
+  - 13 SURVIVES (apply independently alongside arch)
+  - 1 RESHAPED (2-03 rewording under new arch)
+- **1-arch-03 architectural changes** (core of this plan) — Pass 1.1-1.7 schemas + prompts
+- **Pass 2-6 downstream tuning** — prompt updates + max_tokens bumps + CT Boddice-align
+
+All in one implementation session on branch `arch-03-additive-merge` from current `main` (HEAD `94672c5`). Estimated 3-4 days focused work.
+
+**Sequencing recommendation (update from plan §10.3 Option A):** single-session over split-session. Rationale: end-to-end testing on Dostoevsky fixture requires all layers be at same architectural state. Cleaner to test whole pipeline once rather than test research-layer changes separately then test merge-layer changes.
+
+**Rerun verification** starts at Pass 1.1 (research layer is frozen fixture from Phase L — not re-run). Exercises Pass 1.1-1.7 on new prompts/schemas + Pass 2-6 under new tuning + Pass 7 validation. Dostoevsky Phase L card stays as baseline for Stage 3 comparison.
+
+**Wave 4 review resumption** happens AFTER 1-arch-03 merges to `main`. Pick up at Step 27 (Pass 2) RE-DONE under new architecture; original Step 27 block in tracker `c67cd73` commit is scrapped (user-approved collateral loss; Pass 2 prompt shape differs post-arch-03).
+
+**Branch-merge authority.** **LOCKED** — user-only. Sonnet executes Steps 1-25 + reports at Stages 1/2/3 gates; user reviews + approves merge-to-main per Step 26.
+
+---
+
+## 16. Sonnet handoff specification
+
+**Entry criteria:** User has locked all 5 decisions in §14 + sequencing in §15. Plan doc + tracker committed to `main` at HEAD `94672c5`. Tree clean.
+
+**Sonnet session prompt template** (user copy-pastes to Sonnet session):
+
+```
+You are executing the 1-arch-03 Additive Merge Architecture implementation
+in the AI Assembly project. This is a comprehensive pipeline refactor:
+research-layer fixes (Wave 1) + post-merge primary-text fixes (Wave 2) +
+merge-layer redesign (1-arch-03 core) + downstream Pass 2-6 tuning.
+
+ORIENTATION READING (in order):
+
+1. `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md` — the plan. Read
+   §1 rationale through §16 handoff. Your execution follows §8 Implementation
+   sequence verbatim.
+
+2. `_workspace/planning/PIPELINE_REVIEW_FIXES.md` — fix tracker. Reference
+   for specific fix IDs; the plan's §9 triage classifies every fix.
+
+3. `code/CLAUDE.md` — repo conventions, venv rules, orientation.
+
+4. `_workspace/planning/OPEN_ITEMS.md` — project state anchor.
+
+5. `_workspace/planning/REBUILD_PLAN.md` — PB#1-9 locked decisions (do
+   NOT re-litigate).
+
+BRANCH SETUP:
+
+Start on `main` at HEAD `94672c5` (verify). Open branch:
+  `git checkout -b arch-03-additive-merge`
+
+EXECUTION:
+
+Follow §8 Implementation sequence Steps 1-25 in order. Do NOT merge to main
+at Step 26 — operator review required first.
+
+CHECKPOINT GATES:
+
+- After Step 9 (schemas done): commit "schemas: permissive containers
+  for 1-arch-03" to branch. Run schema-validation tests. No operator check.
+
+- After Step 16 (merge prompts done): commit "prompts: additive-merge
+  merge prompts (1.1-1.7)". Render all 6 merge prompts + 1.7 coherence
+  against Dostoevsky fixture; verify Jinja renders without errors. No
+  operator check.
+
+- After Step 22 (Pass 2-6 adjustments done): commit "pass 2-6: adjustments
+  + max_tokens bumps + CT Boddice-align". No operator check.
+
+- At Step 23 (Stage 1 merge-layer test): run Pass 1.1-1.7 on Dostoevsky
+  fixture. Run `arch_03_preservation_audit.py`. **STOP AND REPORT TO
+  OPERATOR.** Operator reviews preservation-audit JSON + per-chunk
+  qualitative diffs vs baseline merged_dossier. Operator approves or
+  directs iteration.
+
+- At Step 24 (Stage 2 Pass 2-6 test): run Pass 2-7 + Derive on new
+  merged_dossier. **STOP AND REPORT TO OPERATOR.** Operator reviews new
+  Dostoevsky card vs baseline. Operator approves or directs iteration.
+
+- At Step 25 (Stage 3 manual review): present `ARCH_03_MANUAL_REVIEW_
+  CHECKLIST.md` completed per Stage 3 criteria. **STOP AND REPORT.**
+
+- At Step 26 (merge-to-main): DO NOT EXECUTE. Operator performs merge
+  manually after signing off on Stage 3.
+
+FIX APPLICATION — DETAILED:
+
+Apply every fix marked SURVIVES or RESHAPED in plan §9. Apply every fix
+marked ABSORBED as part of the arch-change itself (they're structural,
+not additive). Do NOT apply fixes marked OBSOLETE or SUPERSEDED.
+
+Wave 1 fixes (research layer) — apply at Steps before schema work starts
+(can land as first commits on branch or intersperse):
+  - 0a-01 through 0a-04: Pass 0a voice_config
+  - 1a-01 through 1a-14: Pass 1a Perplexity family (4 voice-type variants)
+  - 1b-02 through 1b-14: Pass 1b Gemini family (1b-01 REJECTED)
+  - 0b-01 through 0b-23: Pass 0b render + tailor family
+
+Wave 2 fixes (Pass 1c + 1d) — apply before Step 23 test:
+  - 1c-01 through 1c-06: Pass 1c fetch mechanics
+  - 1d-01 through 1d-05: Pass 1d excerpt selection
+  - 1d-06 (HIGH fuzzy-match): DEFER per original plan unless operator
+    calls in-session
+
+Wave 3 SURVIVES fixes — apply as part of merge-prompt rewrites (Steps
+10-16) or coherence update (Step 16):
+  - 1.1-03 (voice_mode drop) + 1.1-04 (period-vocab gradation)
+  - 1.2-02 (voice_mode load-bearing)
+  - 1.3-03 (period-vocab ripple)
+  - 1.4-04 (voice_mode prior)
+  - 1.5-04 (voice_mode drop)
+  - 1.6-04 (Marley reference_only_passages private tier) + 1.6-06 (voice_mode)
+  - 1.7-01 (worked examples) + 1.7-02 (edit-scope) + 1.7-03 (escalation
+    pathway) + 1.7-04 (productive-tension criteria)
+
+Wave 3 ABSORBED fixes — included in arch changes themselves:
+  - 1.1-02 Cleopatra + 1.1-06 fictional null-discipline
+  - 1.2-03 Scheherazade
+  - 1.3-02 Dostoevsky narratival (main arch demonstration)
+  - 1.4-02 Marley moves + 1.4-03 Octopus
+  - 1.5-02 Cleopatra + 1.5-03 fictional general_frame
+  - 1.6-02 Octopus + 1.6-03 Scheherazade
+
+Pass 2 fixes:
+  - 2-01 stale user prompt: apply
+  - 2-02 voice_temporal_stance: apply REWRITE per §14 Q3 LOCKED decision
+  - 2-03 formative-candidate: apply RESHAPED per §9.4
+  - 2-04 max_tokens: subsumed by 1-arch-03 max_tokens bumps per §6.2
+
+COMMIT DISCIPLINE:
+
+One logical commit per major checkpoint (per §CHECKPOINT GATES). Commit
+messages follow repo convention:
+  feat(arch-03/<layer>): <one-line summary>
+
+  <paragraph explaining what + why>
+  <fix IDs covered>
+
+  Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+TEST DISCIPLINE:
+
+At each commit, run:
+  - `venv/bin/python -m pytest tests/ -v` from personas/ — expect passes
+    (128-suite + any new tests you add)
+  - Schema round-trip: Pydantic model(fixture_data).model_dump() == fixture
+  - Jinja render smoke: render each prompt against Dostoevsky fixture,
+    verify no UndefinedError / StrictUndefined issues
+
+If tests fail: diagnose on branch; do NOT push until passing.
+
+AUTONOMY BOUNDARIES:
+
+DO autonomously:
+  - Schema design within plan §3 spec
+  - Prompt wording within plan §4 spec
+  - Backward-compat discriminated-union patterns for breaking schema changes
+  - Test fixture creation under `personas/tests/fixtures/phase_l_dostoevsky/`
+  - Commit + push to branch (not main)
+  - Run Dostoevsky fixture through pipeline
+  - Iterate on prompts if preservation-audit <85% (up to 2 iterations
+    per chunk; escalate if more)
+
+DO NOT autonomously:
+  - Merge to main (Step 26 — operator only)
+  - Modify REBUILD_PLAN PB#1-9 (frozen per PB#7-like discipline)
+  - Modify frozen conventions in _conventions.py (EvidenceTag, SourceCitation,
+    Tier, ContestedReading, ProjectionWarning models)
+  - Change Runtime side (out of scope per §11)
+  - Rewrite Wave 1 fix semantics (apply as specified in tracker)
+  - Add new architectural proposals (1-arch-04+) without operator approval
+
+MODEL ECONOMY:
+
+This implementation is Sonnet-shaped (mechanical execution of specified
+plan). Sonnet 4.6 + medium effort is the right fit. Escalate to Opus 4.7
+only if:
+  - Plan spec is ambiguous and requires architectural judgment
+  - Preservation-audit fails after 2 iteration cycles
+  - Dostoevsky card shows qualitative regression
+
+EXIT CRITERIA:
+
+Branch ready for operator merge-to-main when:
+  - All schema + prompt + runtime changes applied per plan
+  - Dostoevsky fixture passes Stage 1 preservation-audit (≥85% + 100%
+    citation + 100% structural-pattern)
+  - Dostoevsky fixture passes Stage 2 Pass 2-7 (no synthesis failures,
+    no validation regressions)
+  - ARCH_03_MANUAL_REVIEW_CHECKLIST.md populated for operator Stage 3
+    review
+  - All commits pushed to origin/arch-03-additive-merge
+  - Tree clean on branch
+
+Report back to operator with branch state + Stage 1/2 results summary.
+Operator performs Stage 3 review and manual merge.
+```
+
+**Implementation start gate:**
+- Plan doc committed to `main` with decisions locked (this commit)
+- `arch_03_preservation_audit.py` instrumentation script to be drafted by Sonnet as first implementation task (Step 0 — before branch setup)
+- Sonnet session opens with copy-pasted prompt template above
+
+---
+
+*Plan document status: LOCKED — all decisions closed 2026-04-22. Ready for Sonnet implementation session.*
+*Last updated: 2026-04-22.*
 
 ---
 
