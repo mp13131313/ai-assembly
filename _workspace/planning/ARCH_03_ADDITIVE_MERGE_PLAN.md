@@ -1666,14 +1666,62 @@ DO NOT autonomously:
   - Rewrite Wave 1 fix semantics (apply as specified in tracker)
   - Add new architectural proposals (1-arch-04+) without operator approval
 
-MODEL ECONOMY:
+MODEL ECONOMY (locked):
 
-This implementation is Sonnet-shaped (mechanical execution of specified
-plan). Sonnet 4.6 + medium effort is the right fit. Escalate to Opus 4.7
-only if:
-  - Plan spec is ambiguous and requires architectural judgment
-  - Preservation-audit fails after 2 iteration cycles
-  - Dostoevsky card shows qualitative regression
+**Sonnet 4.6 + medium effort** for the bulk (~80% of work):
+  - Step 1 (branch setup)
+  - Steps 2-9 (schema redesign — spec-following Pydantic edits)
+  - Steps 11, 13, 14, 15 (Pass 1.2, 1.4, 1.5, 1.6 merge prompts — follow
+    Step 10's pattern)
+  - Steps 18, 20, 21 (Pass 3/4b/5/6 prompt adjustments)
+  - Step 22 (CT Boddice-align one-liner)
+  - All Wave 1 fixes (53, tracker-specified)
+  - All Wave 2 fixes (12, tracker-specified)
+  - All Wave 3 SURVIVES fixes (13)
+  - Steps 23-24 (running Dostoevsky fixture — deterministic pipeline execution)
+  - Git commits + push operations
+
+**Opus 4.7 + adaptive thinking** for these specific steps/situations:
+
+  - **Step 10 (Pass 1.1 merge prompt)** — first merge-prompt rewrite;
+    establishes pattern for Steps 11-15. Sharp Block 2 additive-merge
+    discipline wording matters because 5 other prompts replicate it.
+
+  - **Step 12 (Pass 1.3 REASONING merge prompt)** — ~150-line Dostoevsky
+    narratival worked example with analytical_context (3
+    worked_demonstrations + 3-5 structural_patterns + 5 scholarly_debates).
+    Requires voice-authoring + Phase-L-card-lifting with accuracy. The
+    architectural demonstration. Sonnet would produce adequate-but-flat;
+    Opus produces template-quality content.
+
+  - **Step 16 (Pass 1.7 coherence)** — adding Check 8 + Check 9 + 3
+    worked examples for resolve-by-edit / accept-productive-tension /
+    escalate categories. Nuanced; worked examples need operational
+    specificity.
+
+  - **Step 17 (Pass 2 voice_temporal_stance 2-02 REWRITE)** — new
+    `VoiceTemporalStance` model + prompt spec for .default (fluid) vs
+    .anchored_override (death-threshold). Novel field shape; wording
+    distinction matters for Voice Pipeline downstream.
+
+  - **Stage 1 post-audit diagnosis** (if preservation-audit <85% on any
+    of §3/§4/§5) — diagnosis-heavy judgment on which prompt tweaks
+    recover preservation without breaking other properties. Opus high effort.
+
+  - **Stage 2 qualitative review** of new Dostoevsky card vs baseline —
+    reading both cards on breadth, register, Boddice-tag compliance,
+    anti-flattening.
+
+  - **Any architectural ambiguity** mid-implementation — escalation per
+    autonomy-bounds policy. Sonnet detects ambiguity, stops, requests
+    Opus handoff (user re-opens session with Opus).
+
+**Estimated split:** ~80% Sonnet (2.5 days at medium effort), ~20% Opus
+(0.5-1 day targeted escalations). Total model cost ~$80-130 for the
+implementation. Small fraction of the DR-investment-preservation value.
+
+**Operator (user)** does: Stage 3 manual review, merge-to-main decision,
+any escalation not resolvable in session.
 
 EXIT CRITERIA:
 
