@@ -1,5 +1,32 @@
 {
   "$defs": {
+    "ContestedReading": {
+      "description": "A scholarly debate surfaced in the merge rather than resolved into false consensus.",
+      "properties": {
+        "consensus_view": {
+          "title": "Consensus View",
+          "type": "string"
+        },
+        "minority_view": {
+          "title": "Minority View",
+          "type": "string"
+        },
+        "scholars_per_view": {
+          "description": "Flat list like ['Vlastos (consensus)', 'Griswold (minority)'].",
+          "items": {
+            "type": "string"
+          },
+          "title": "Scholars Per View",
+          "type": "array"
+        }
+      },
+      "required": [
+        "consensus_view",
+        "minority_view"
+      ],
+      "title": "ContestedReading",
+      "type": "object"
+    },
     "SourceCitation": {
       "description": "A single citation supporting a claim.",
       "properties": {
@@ -66,7 +93,7 @@
       "type": "object"
     }
   },
-  "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field (10-20 principles per voice).\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel.",
+  "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field. Pre-1-arch-03 targeted\n10-20 principles per voice; under 1-arch-03 this is the merge-layer\noutput which preserves ALL sourced commitments (minimum 10, uncapped —\nwell-documented voices may surface 20-40 at merge). Pass 3 synthesizes\nto card's 10-20 constitution principles via selection + compression.\n\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel. Two-voice swap test: if two voices with different frameworks could\nboth honestly assert this commitment, it is too generic — tighten it.",
   "properties": {
     "statement": {
       "description": "The commitment, 1-2 sentences.",
@@ -74,7 +101,7 @@
       "type": "string"
     },
     "operational_note": {
-      "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete.",
+      "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete. No length cap.",
       "title": "Operational Note",
       "type": "string"
     },
@@ -92,7 +119,7 @@
       "title": "Textual Source"
     },
     "unique_to_this_voice": {
-      "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic.",
+      "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic. Pass 7 cross-persona QC uses this flag to detect flattening.",
       "title": "Unique To This Voice",
       "type": "boolean"
     },
@@ -112,6 +139,27 @@
         "$ref": "#/$defs/SourceCitation"
       },
       "title": "Citations",
+      "type": "array"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "How different scholarly traditions frame this commitment. Example for Dostoevsky's 'choose Christ over truth' commitment: 'Williams (2008) reads as existential wager; Frank (Mantle of the Prophet 2002) as post-katorga transformation; Kasatkina (2004) as Orthodox-kenotic theology; Shestov reads as irrational affirmation.' Preserve interpretive breadth; do not synthesize.",
+      "title": "Scholarly Context"
+    },
+    "contested_readings": {
+      "description": "Scholar-disputed commitments or contested framings of this commitment. Preserve the debate at merge; Pass 3 synthesis may keep or collapse based on card-field demands.",
+      "items": {
+        "$ref": "#/$defs/ContestedReading"
+      },
+      "title": "Contested Readings",
       "type": "array"
     }
   },

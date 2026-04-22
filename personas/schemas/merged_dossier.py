@@ -11,6 +11,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ._analytical import AnalyticalContext
 from .pass_1_1 import FormativeCandidate, LifeScaffold
 from .pass_1_2 import Commitment, Concept, Tension
 from .pass_1_3 import ReasoningMethod, Textures
@@ -88,6 +89,13 @@ class MergedDossier(BaseModel):
     # Chunk 1.3
     reasoning_method: ReasoningMethod
     textures: Textures
+    analytical_context_reasoning: AnalyticalContext = Field(
+        default_factory=AnalyticalContext,
+        description="1-arch-03 addition: scholarly-analytical material "
+        "(structural_patterns, worked_demonstrations, scholarly_debates) "
+        "preserved from merge layer. Default empty for voices without "
+        "substantive reasoning-level scholarly context.",
+    )
 
     # Chunk 1.4
     moves: Moves
@@ -96,6 +104,13 @@ class MergedDossier(BaseModel):
         description="Voice register/tone block — aliased to JSON key 'register'.",
     )
     vocabulary: Vocabulary
+    analytical_context_voice: AnalyticalContext | None = Field(
+        default=None,
+        description="1-arch-03 addition: scholarly-analytical material on "
+        "voice-signature (stylistic-reception, translator-tradition "
+        "criticism, metaphor-family scholarly mapping). Optional — null "
+        "for voices without substantive voice-level scholarly context.",
+    )
 
     # Chunk 1.5
     knowledge_boundary: KnowledgeBoundary

@@ -66,10 +66,10 @@
       "type": "object"
     }
   },
-  "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are productive:\nthey mark where the voice's reasoning genuinely divides.",
+  "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are (per 1.7\nproductive-tension criteria): both poles have primary-text or scholarly\nsupport; tension drives rather than derails the voice's thinking;\nscholarly tradition names the tension explicitly. If any criterion unmet,\nit's a real contradiction — Pass 1.7 coherence handles resolution.\n\nUnder 1-arch-03: tension_type classifies for downstream handling;\nscholarly_context preserves interpretive-tradition framing.",
   "properties": {
     "description": {
-      "description": "The tension, named explicitly. 1-2 sentences.",
+      "description": "The tension, named explicitly. 1-2 sentences. Example: 'Plato's Republic argues philosopher-kings should rule without written law; the Laws argues constitutional constraints are necessary because philosopher-kings are rare and unreliable.'",
       "title": "Description",
       "type": "string"
     },
@@ -100,6 +100,30 @@
       ],
       "title": "Evidence Tag",
       "type": "string"
+    },
+    "tension_type": {
+      "default": "productive",
+      "description": "Classification for downstream handling. 'productive' — texture of the thinking; preserve and do not flatten (Plato Republic-vs-Laws). 'contested' — scholarly tradition divides on whether this is genuine tension or interpretive disagreement. 'unresolved' — real logical contradiction that should surface in Pass 7 validation as candidate for escalation.",
+      "enum": [
+        "productive",
+        "contested",
+        "unresolved"
+      ],
+      "title": "Tension Type",
+      "type": "string"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Interpretive-tradition framing of the tension. Example: 'Morson/Emerson (1990) insist polyphony and carnivalization are distinct analytical concepts that must not be collapsed; Scanlan (2002) treats them as complementary; Emerson's warning matters for constitutional synthesis — the two concepts do different work.'",
+      "title": "Scholarly Context"
     }
   },
   "required": [

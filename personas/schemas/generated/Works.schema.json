@@ -83,6 +83,19 @@
       },
       "title": "Works",
       "type": "array"
+    },
+    "bibliographic_scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly framing of the voice's canonical corpus. Example for Dostoevsky: 'PSS (Polnoe sobranie sochinenii, Nauka 1972-90, 30 vols) is scholarly-authoritative for Russian-language primary; Frank's 5-volume biography (Princeton UP 1976-2002) dominant in Anglophone reception; Wasiolek-edited notebooks (Chicago UP 1967-71) preserve compositional-process documents. For Scheherazade: the canonical corpus is multi-translator (Galland 1704 shaped European reception; Burton 1885 orientalized; Haddawy 1990 restored Muhsin Mahdi's critical edition; Lyons 2008 contemporary scholarly). No single canonical source-text.' Preserve for Pass 6 corpus curation decisions.",
+      "title": "Bibliographic Scholarly Context"
     }
   },
   "required": [

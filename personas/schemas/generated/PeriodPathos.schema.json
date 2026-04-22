@@ -66,7 +66,7 @@
       "type": "object"
     }
   },
-  "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: 5-10 terms per voice in original language,\nwith short glosses. No modern English emotion-words as primary vocabulary\nfor pre-1820 voices.",
+  "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: period-specific terms in original language\nwith short glosses. For pre-1820 voices: no modern English emotion-words\nas primary vocabulary. For post-1820 voices with tradition-specific\nlexicons (Russian Orthodox, Rastafari, Arendtian German-Jewish,\nConfucian civic-tech): preserve the voice's own terms regardless of\nperiod. Do NOT use 'emotion' as organizing category for pre-1820 voices\nspecifically (Dixon's post-1820 invention).",
   "properties": {
     "term_in_original_language": {
       "title": "Term In Original Language",

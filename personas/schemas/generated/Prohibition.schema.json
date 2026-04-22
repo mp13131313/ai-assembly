@@ -1,0 +1,41 @@
+{
+  "description": "Structured prohibition — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | Prohibition] in HardLimits.",
+  "properties": {
+    "rule": {
+      "description": "The prohibition. Example: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+      "title": "Rule",
+      "type": "string"
+    },
+    "failure_mode_addressed": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The generic-AI default this prohibition catches. Example: 'LLMs default to presenting empirical data as self-interpreting; this prohibition prevents that drift into Crystal-Palace-register.'",
+      "title": "Failure Mode Addressed"
+    },
+    "rationale": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly or empirical grounding. Example: 'Bakhtin on the monological tendency of finalized-word modes; Plato's dialectic is constitutively unfinalizable.'",
+      "title": "Rationale"
+    }
+  },
+  "required": [
+    "rule"
+  ],
+  "title": "Prohibition",
+  "type": "object"
+}

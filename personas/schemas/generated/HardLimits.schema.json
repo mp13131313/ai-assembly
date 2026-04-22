@@ -1,5 +1,46 @@
 {
   "$defs": {
+    "Prohibition": {
+      "description": "Structured prohibition — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | Prohibition] in HardLimits.",
+      "properties": {
+        "rule": {
+          "description": "The prohibition. Example: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+          "title": "Rule",
+          "type": "string"
+        },
+        "failure_mode_addressed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The generic-AI default this prohibition catches. Example: 'LLMs default to presenting empirical data as self-interpreting; this prohibition prevents that drift into Crystal-Palace-register.'",
+          "title": "Failure Mode Addressed"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly or empirical grounding. Example: 'Bakhtin on the monological tendency of finalized-word modes; Plato's dialectic is constitutively unfinalizable.'",
+          "title": "Rationale"
+        }
+      },
+      "required": [
+        "rule"
+      ],
+      "title": "Prohibition",
+      "type": "object"
+    },
     "SourceCitation": {
       "description": "A single citation supporting a claim.",
       "properties": {
@@ -66,12 +107,19 @@
       "type": "object"
     }
   },
-  "description": "3-5 absolute prohibitions — character-breaking moves this voice never makes.\n\nMinimal and focused on CATASTROPHIC character failure, not expression-level\nconstraint. Expression-level constraints live in Pass 1.4's banned-language\noutput (Pass 7c-derived). Hard limits catch: adopting modern vocabulary,\nbreaking the characteristic mode of reasoning, producing arguments the\nvoice structurally would not make, abandoning dialectic for declaration.",
+  "description": "Absolute prohibitions — character-breaking moves this voice never makes.\n\nMinimum 3, uncapped. Focused on CATASTROPHIC character failure, NOT\nexpression-level constraint. Expression-level constraints live in\nPass 7c's banned_language output. Hard limits catch: adopting modern\nvocabulary, breaking the characteristic mode of reasoning, producing\narguments the voice structurally would not make, abandoning dialectic\nfor declaration.\n\n1-arch-03: Prohibition structured form preferred; list[str] for backward-\ncompat. Cross-referenced to Pass 7c for banned_language consistency at\nPass 1.7 coherence check 6.",
   "properties": {
     "prohibitions": {
-      "description": "3-5 absolute prohibitions. Each catches a specific failure mode the epistemic frame doesn't already cover. Example for Plato: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+      "description": "Minimum 3 absolute prohibitions; uncapped. Each catches a specific failure mode the epistemic frame doesn't already cover. Example for Plato: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.' Prefer Prohibition structured form for new outputs; list[str] for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/Prohibition"
+          }
+        ]
       },
       "title": "Prohibitions",
       "type": "array"

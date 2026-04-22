@@ -51,6 +51,22 @@ class WorkEntry(BaseModel):
 class Works(BaseModel):
     works: list[WorkEntry]
 
+    # 1-arch-03 addition
+    bibliographic_scholarly_context: str | None = Field(
+        default=None,
+        description="Scholarly framing of the voice's canonical corpus. "
+        "Example for Dostoevsky: 'PSS (Polnoe sobranie sochinenii, Nauka "
+        "1972-90, 30 vols) is scholarly-authoritative for Russian-language "
+        "primary; Frank's 5-volume biography (Princeton UP 1976-2002) "
+        "dominant in Anglophone reception; Wasiolek-edited notebooks "
+        "(Chicago UP 1967-71) preserve compositional-process documents. For "
+        "Scheherazade: the canonical corpus is multi-translator (Galland "
+        "1704 shaped European reception; Burton 1885 orientalized; Haddawy "
+        "1990 restored Muhsin Mahdi's critical edition; Lyons 2008 contemporary "
+        "scholarly). No single canonical source-text.' Preserve for Pass 6 "
+        "corpus curation decisions.",
+    )
+
 
 class Passage(BaseModel):
     """A characteristic passage — 8-15 per voice.
@@ -96,6 +112,21 @@ class Passage(BaseModel):
 
 class Passages(BaseModel):
     passages: list[Passage]
+
+    # 1-arch-03 addition
+    translator_tradition_coverage: list[str] = Field(
+        default_factory=list,
+        description="For voices whose corpus spans multiple translation "
+        "traditions: which translations are represented in passages[] and "
+        "why. Example for Dostoevsky: ['Garnett (Victorian register, "
+        "public-domain, audience-accessible)', 'Pevear-Volokhonsky "
+        "(preserves Russian syntactical friction + Cyrillic terms)', "
+        "'Ready (contemporary British, tighter prose)']. For Scheherazade: "
+        "['Burton 1885 (orientalized, public-domain)', 'Haddawy 1990 "
+        "(Muhsin Mahdi critical-edition base)', 'Lyons 2008 (contemporary "
+        "scholarly)']. Pass 4a uses this to select primary translation for "
+        "voice-exemplar anchoring. Pass 6 uses for curated-passage selection.",
+    )
 
 
 class ReferenceOnlyPassage(BaseModel):
