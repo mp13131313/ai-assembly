@@ -209,7 +209,7 @@ Merge becomes: dedupe + reconcile + organize. Not compress-to-recipe. Rich merge
 ### 1-arch-04 — Gemini cross-disciplinary preservation at merge prompts (refines 1-arch-03)
 
 **Severity:** MEDIUM (quality refinement, not blocker; affects interpretive plurality of merged_dossier)
-**Status:** PROPOSED — surfaced empirically from arch-03 Stage 1 Dostoevsky testing (2026-04-22)
+**Status:** **APPLIED 2026-04-23** — coordinated Gemini preservation discipline block added to Block 2 of all 6 merge prompts (pass_1_1_merge.md through pass_1_6_merge.md). Commit `bc3d994`. Empirical effectiveness to be measured at Stage 1 v4 restart.
 **Scope:** Pass 1.1-1.6 merge prompts only; no schema changes, no code changes. Coordinated text patch across all 6 merge prompts.
 **Effort:** ~4-6 hours: prompt edits + render-smoke + re-run Stage 1 on Dostoevsky to verify.
 
@@ -274,7 +274,7 @@ Before Phase N. Empirically measured on Dostoevsky — same measurement applies 
 ### 1-arch-05 — Per-chunk reads at Pass 2-6 + edits-to-chunks at Pass 1.7 (coupled refactor; chunks become source of truth)
 
 **Severity:** MEDIUM-HIGH architectural (quality + cost + legibility; not a blocker but compounds with every downstream change)
-**Status:** **DECIDED 2026-04-22** — operator committed to the architecture after tracing the full data-flow end-to-end. All further pipeline analysis treats this as the target architecture even before implementation.
+**Status:** **APPLIED 2026-04-23** — both Part A (per-chunk reads at Pass 1d/2/3/4a/6 user prompts + runner refactor, commit `3cfaabf`) and Part B (Pass 1.7 Stage C edits-to-chunks + coherence_audit.json separation, commit `f5f2950`) landed. 128/128 tests pass after each. Empirical validation at Stage 1 v4 restart. Scope extension (Pass 1d included) captured in the amended §Part A section.
 **Scope:** Pass 1.7 Stage C write path + six Pass 2-6 prompt templates + `run_persona_pipeline.py` rendering + optional `08_merged_dossier.json` convenience-artifact regeneration. No schema changes, no Runtime side changes.
 **Effort:** ~1 day focused engineering + Stage 1/2 rerun. Prompt editing is the bulk; runner changes are small.
 **Recommended timing:** after arch-03 Stage 2/3 pass-or-iterate decision. If arch-03 PROCEEDS, ship `1-arch-05` as the next cleanup cycle before Phase N. If arch-03 ITERATES, fold `1-arch-05` into the iteration since prompt edits happen anyway.
@@ -420,7 +420,7 @@ Cumulative: total token-input across Pass 1d + 2 + 3 + 4a + 6 drops from ~2.6M t
 ### 1-arch-06 — Top-level `interpretive_frames[]` container for cross-cutting scholarly material
 
 **Severity:** MEDIUM (quality refinement; addresses a real preservation gap surfaced empirically)
-**Status:** PROPOSED 2026-04-22
+**Status:** **APPLIED 2026-04-23** — new `personas/schemas/_frames.py` adds `InterpretiveFrame` + `FrameType` discriminator. Pass 1.2 OUTPUT_KEYS gains `interpretive_frames` (list-typed). MergedDossier composes it. Pass 1.2 merge prompt Block 3 updated with production rule + inlined `{{ interpretive_frame_schema }}`. Downstream consumption wired at Pass 2/3/4a under 1-arch-05 Part A. Commit `6508163`.
 **Scope:** New Pydantic model + new chunk output file + merge-prompt additions to 1.2/1.3/1.4/1.5 + Pass 2-6 user prompts optional read
 **Effort:** ~6-8 hours: schema + prompt text + render wiring + Stage 1 re-run to verify
 
@@ -483,7 +483,7 @@ Pass 3 reads `interpretive_frames[]` where `frame_type ∈ {interpretive_method,
 ### 1-arch-07 — Derive `urls` at render-time, remove as chunk output
 
 **Severity:** LOW (cleanup; removes drift surface)
-**Status:** PROPOSED 2026-04-22
+**Status:** **APPLIED 2026-04-23** — `personas/schemas/pass_1_6.py` drops `URLEntry`/`URLs` models (preserved as comment for migration-audit reference). `merged_dossier.py` drops URLs import + field. `run_pass_1_6.py` drops `urls` from OUTPUT_KEYS. `run_pass_1_7.py` drops `urls` from layout + composition. `run_persona_pipeline.py` Pass 1c-extract now calls new `flows/shared/url_extract.extract_urls()` helper that derives URL inventory from `passages[].citation` + `works[]` fields via regex. `pass_1_6_merge.md` updated: `urls` removed from output spec; embedded-URL guidance added. `arch_03_preservation_audit.py` §6 keys updated. Commit `70dc9d0`.
 **Scope:** Remove `urls` from `pass_1_6` schema output keys + update `run_pass_1_6.py` + update any consumer (Pass 1c-extract) to compute URL inventory from `passages[].citation` + `works[].url` directly
 **Effort:** ~1 hour
 
@@ -529,7 +529,7 @@ Pass 1.6 merge prompt drops the `urls` output instruction. The Pydantic schema f
 ### 1-arch-08 — Consolidate anachronism discipline into one source (remove duplication between §1 and §5)
 
 **Severity:** LOW-MEDIUM (cleanup; removes Pass 1.7 Check 4)
-**Status:** PROPOSED 2026-04-22
+**Status:** **APPLIED 2026-04-23** — `personas/schemas/pass_1_1.py` removes `LifeScaffold.anachronisms_to_avoid`; `AnachronismEntry` expanded with `biographical_framing` + `epistemic_framing` + `severity` discriminator (hard_ban/use_with_caution/translator_note). `personas/schemas/pass_1_5.py` adds `KnowledgeBoundary.anachronism_discipline: list[AnachronismEntry]`. Schemas regenerated. `pass_1_1_merge.md` drops anachronisms_to_avoid output instruction; `pass_1_5_merge.md` adds `anachronism_discipline` production with dual-framings guidance; `pass_1_7_coherence.md` Check 4 simplified from cross-chunk reconciliation to self-consistency verify. Pass 2 consumption (plucking biographical_framing for world.anachronisms_to_avoid vs. epistemic_framing for knowledge_boundary.conceptual_exclusions) handled by 1-arch-05 Part A's new Pass 2 user prompt. Commit `b798c18`.
 **Scope:** Schema change (LifeScaffold drops `anachronisms_to_avoid`; KnowledgeBoundary gains `anachronism_discipline[]` as canonical source); merge prompts 1.1 + 1.5 updated; Pass 2 template variables updated; Pass 1.7 Check 4 removed
 **Effort:** ~3-4 hours including Stage 1 re-run
 
