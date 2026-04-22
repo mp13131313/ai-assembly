@@ -178,9 +178,78 @@ else:
 
 # The template variable Pass 2-6 see. JSON-serialized with indent for
 # readability; Claude parses structured input from this cleanly.
+# Under 1-arch-05 Part A (2026-04-23), Pass 1d/2/3/4a/6 read per-chunk
+# variables instead of the merged_dossier blob. The blob string is kept
+# for any legacy references but the primary rendering path is per-chunk.
 merged_dossier = json.dumps(merged_dossier_dict, ensure_ascii=False, indent=2)
 _n_flags = len(merged_dossier_dict.get("coherence_flags", []))
 stamp(f"  merged_dossier: {len(merged_dossier)} chars; {_n_flags} coherence_flags")
+
+
+# ── 1-arch-05 Part A: per-chunk render variables ────────────────────────────
+# Pass 1d/2/3/4a/6 user prompts declare named template variables for the
+# specific chunks (and sub-slices + filtered interpretive_frames subsets)
+# they consume. This replaces the `{{ merged_dossier }}` blob rendering.
+# Each pass's render call passes a tailored subset of these.
+#
+# Naming convention: chunk keys use their natural names where there is NO
+# collision with a downstream card-field name. Three chunks (`reasoning_method`,
+# `knowledge_boundary`, `hard_limits`) collide with Pass 2/3 card-field names;
+# those chunk reads use `_chunk` suffix (`reasoning_method_chunk`, etc.) in
+# templates to prevent ambiguity when a pass might receive BOTH the chunk
+# AND the card-field value in some future wiring.
+
+def _per_chunk_vars(md: dict) -> dict:
+    """Per-chunk render variables for Pass 1d/2/3/4a/6 user prompts.
+
+    Returns a dict mapping template-variable names to JSON-serialized
+    strings. Each render call picks the subset it needs.
+    """
+    def J(v):
+        return json.dumps(v, ensure_ascii=False, indent=2)
+
+    frames = md.get("interpretive_frames", []) or []
+    return {
+        # Chunk 1.1 — BIOGRAPHICAL
+        "life_scaffold":                J(md.get("life_scaffold", {})),
+        "formative_candidates":         J(md.get("formative_candidates", [])),
+        # Chunk 1.2 — INTELLECTUAL
+        "commitments":                  J(md.get("commitments", [])),
+        "concepts":                     J(md.get("concepts", [])),
+        "tensions":                     J(md.get("tensions", [])),
+        "interpretive_frames":          J(frames),
+        # Chunk 1.3 — REASONING (_chunk suffix: avoids collision with Pass 3's
+        # `reasoning_method` card-field output name when downstream passes
+        # receive BOTH)
+        "reasoning_method_chunk":       J(md.get("reasoning_method", {})),
+        "textures":                     J(md.get("textures", {})),
+        "analytical_context_reasoning": J(md.get("analytical_context_reasoning", {})),
+        # Chunk 1.4 — VOICE
+        "moves":                        J(md.get("moves", {})),
+        "register":                     J(md.get("register", {})),
+        "vocabulary":                   J(md.get("vocabulary", {})),
+        "analytical_context_voice":     J(md.get("analytical_context_voice", None)),
+        # Chunk 1.5 — BOUNDARIES (_chunk suffix: same collision-avoidance
+        # reason for `knowledge_boundary` and `hard_limits` card fields)
+        "knowledge_boundary_chunk":     J(md.get("knowledge_boundary", {})),
+        "sensitive_topics":             J(md.get("sensitive_topics", {})),
+        "hard_limits_chunk":            J(md.get("hard_limits", {})),
+        # Chunk 1.6 — CORPUS (`urls` removed per 1-arch-07; derived at render)
+        "works":                        J(md.get("works", {})),
+        "passages":                     J(md.get("passages", {})),
+        "reference_only_passages":      J(md.get("reference_only_passages", {"passages": []})),
+        # Sub-slice plucks for cross-chunk references (Pass 4a primary user)
+        "available_pathe":              J(md.get("life_scaffold", {}).get("available_pathe", [])),
+        "reasoning_method_summary":     md.get("reasoning_method", {}).get("summary", ""),
+        # Filtered interpretive_frames subsets (consumers filter by frame_type)
+        "voice_level_debate_frames":    J([f for f in frames if f.get("frame_type") == "voice_level_debate"]),
+        "cross_disciplinary_frames":    J([f for f in frames if f.get("frame_type") == "cross_disciplinary_reframing"]),
+        "interpretive_methods":         J([f for f in frames if f.get("frame_type") == "interpretive_method"]),
+    }
+
+
+chunk_vars = _per_chunk_vars(merged_dossier_dict)
+stamp(f"  per-chunk vars ready (1-arch-05 Part A): {len(chunk_vars)} render vars")
 
 
 # ---------- PASS 1c-extract: Extract primary text URLs from merged dossier ----------
@@ -381,7 +450,17 @@ def _pass_2():
     sysp = render("persona_pass_2_identity_boundaries", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
-    userp = render("persona_pass_2_user", merged_dossier=merged_dossier) + _critique_suffix("2")
+    # 1-arch-05 Part A: per-chunk reads. Pass 2 consumes chunks 1.1 + 1.5 +
+    # voice_level_debate subset of interpretive_frames (1.2).
+    userp = render(
+        "persona_pass_2_user",
+        life_scaffold=chunk_vars["life_scaffold"],
+        formative_candidates=chunk_vars["formative_candidates"],
+        knowledge_boundary_chunk=chunk_vars["knowledge_boundary_chunk"],
+        sensitive_topics=chunk_vars["sensitive_topics"],
+        hard_limits_chunk=chunk_vars["hard_limits_chunk"],
+        voice_level_debate_frames=chunk_vars["voice_level_debate_frames"],
+    ) + _critique_suffix("2")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -396,8 +475,20 @@ def _pass_3():
     sysp = render("persona_pass_3_intellectual_core", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"])
-    userp = render("persona_pass_3_user", merged_dossier=merged_dossier,
-                   pass_2_summary=pass_2_summary) + _critique_suffix("3")
+    # 1-arch-05 Part A: per-chunk reads. Pass 3 consumes chunks 1.2 + 1.3 +
+    # interpretive_frames (full list — Pass 3 filters method + cross_disciplinary
+    # internally via frame_type).
+    userp = render(
+        "persona_pass_3_user",
+        commitments=chunk_vars["commitments"],
+        concepts=chunk_vars["concepts"],
+        tensions=chunk_vars["tensions"],
+        interpretive_frames=chunk_vars["interpretive_frames"],
+        reasoning_method_chunk=chunk_vars["reasoning_method_chunk"],
+        textures=chunk_vars["textures"],
+        analytical_context_reasoning=chunk_vars["analytical_context_reasoning"],
+        pass_2_summary=pass_2_summary,
+    ) + _critique_suffix("3")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -424,11 +515,23 @@ def _pass_1d():
                 "status": "SKIPPED", "reason": "No primary_texts to select from",
                 "selections": [], "selected_text": "[NO PRIMARY TEXTS — output will be from training data; flag voice_basis as 'training-data']"}
     structural_index = build_structural_index(pass1c["passages"])
-    user_prompt = render("persona_pass_1d_excerpt_selection",
-                         name=vi["name"], merged_dossier=merged_dossier,
-                         structural_index=structural_index,
-                         type=vi.get("type", "human"),
-                         subtype=vi.get("subtype", ""))
+    # 1-arch-05 Part A: per-chunk reads for Pass 1d. Reads specific chunk
+    # content for selection criteria — passages (index of scholar-flagged
+    # important passages with purpose_tags), works (bibliographic context),
+    # reasoning_method_chunk + register + moves (to identify voice-exemplar
+    # and reasoning-in-action passages).
+    user_prompt = render(
+        "persona_pass_1d_excerpt_selection",
+        name=vi["name"],
+        type=vi.get("type", "human"),
+        subtype=vi.get("subtype", ""),
+        structural_index=structural_index,
+        passages=chunk_vars["passages"],
+        works=chunk_vars["works"],
+        reasoning_method_chunk=chunk_vars["reasoning_method_chunk"],
+        register=chunk_vars["register"],
+        moves=chunk_vars["moves"],
+    )
     # 1d-04: 8192 (up from 4096) — 15+ selections × ~200 JSON tokens each
     # approaches 4096 ceiling; bump eliminates truncation risk at zero cost.
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
@@ -453,8 +556,22 @@ def _pass_4a():
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"],
                   corpus_constraint=vi.get("corpus_constraint", "full"))
-    userp = render("persona_pass_4a_user", merged_dossier=merged_dossier,
-                   primary_texts=primary_block, pass_2_3_summary=pass_2_3_summary) + _critique_suffix("4a")
+    # 1-arch-05 Part A: per-chunk reads. Pass 4a consumes chunk 1.4 (full:
+    # moves + register + vocabulary + analytical_context_voice) + cross-refs
+    # (available_pathe from 1.1, reasoning_method_summary from 1.3) + filtered
+    # cross_disciplinary subset of interpretive_frames + primary_block from 1d.
+    userp = render(
+        "persona_pass_4a_user",
+        moves=chunk_vars["moves"],
+        register=chunk_vars["register"],
+        vocabulary=chunk_vars["vocabulary"],
+        analytical_context_voice=chunk_vars["analytical_context_voice"],
+        available_pathe=chunk_vars["available_pathe"],
+        reasoning_method_summary=chunk_vars["reasoning_method_summary"],
+        cross_disciplinary_frames=chunk_vars["cross_disciplinary_frames"],
+        primary_texts=primary_block,
+        pass_2_3_summary=pass_2_3_summary,
+    ) + _critique_suffix("4a")
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
@@ -518,10 +635,17 @@ def _pass_6():
                 "fields": {"curated_corpus_passages": "BLOCKED — awaiting Node 1c manual provision"}}
     sysp = render("persona_pass_6_corpus", name=vi["name"],
                   corpus_constraint=vi.get("corpus_constraint", "full"))
+    # 1-arch-05 Part A: per-chunk reads for Pass 6. Consumes chunk 1.6 (works,
+    # passages, reference_only_passages) + primary_block from 1d + already-
+    # produced card fields (constitution / concept_lexicon / reasoning_method /
+    # rhetorical_mode / characteristic_moves / register_and_tone) as selection
+    # criteria.
     userp = render(
         "persona_pass_6_user",
         primary_texts=primary_block,
-        merged_dossier=merged_dossier,
+        works=chunk_vars["works"],
+        passages=chunk_vars["passages"],
+        reference_only_passages=chunk_vars["reference_only_passages"],
         pass_2_3_4a_summary=pass_2_3_4a_summary,
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         concept_lexicon=json.dumps(pass3["fields"].get("concept_lexicon", ""), ensure_ascii=False, indent=2),

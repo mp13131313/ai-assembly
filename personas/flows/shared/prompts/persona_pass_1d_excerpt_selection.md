@@ -57,8 +57,37 @@ VOICE-TYPE RULES (fictional / literary / mythological character):
   passage that most clearly shows what THIS translation tradition chose.
 {% endif %}
 
-DOSSIER (use as guide for what matters):
-{{ merged_dossier }}
+{# 1-arch-05 Part A (2026-04-23): per-chunk reads replace the merged_dossier
+blob. Pass 1d consumes specific chunks for selection criteria. #}
+
+SELECTION GUIDANCE FROM MERGE CHUNKS — use these four explicit inputs:
+
+**Chunk 1.6 passages[]** (scholar-flagged important passages with purpose_tags
+— voice_exemplar, intellectual_substance, biographical_ground). Prioritize
+passages matching these tags when selecting from fetched sources:
+
+{{ passages }}
+
+**Chunk 1.6 works[]** (bibliographic catalogue — which work each passage
+belongs to, translator tradition, scholarly tier):
+
+{{ works }}
+
+**Chunk 1.3 reasoning_method** (identify "reasoning-in-action" passages — ones
+that show the voice's reasoning steps at work, not just state results):
+
+{{ reasoning_method_chunk }}
+
+**Chunk 1.4 register** (identify "voice-exemplar" passages — ones that show
+the voice's register and tone distinctively; critical for multi-translator
+voices where register varies across editions):
+
+{{ register }}
+
+**Chunk 1.4 moves** (identify "signature-move-in-action" passages — ones that
+show named voice moves executing in primary text):
+
+{{ moves }}
 
 STRUCTURAL INDEX OF FETCHED SOURCES (peek at every 5K-char chunk, first 200
 chars shown — use this to pick char_start/char_end ranges):
