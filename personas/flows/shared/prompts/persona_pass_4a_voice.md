@@ -1,7 +1,25 @@
 {# Pass 4a — Voice (Claude). v3.10 Node 4a.
    7 fields: rhetorical_mode, characteristic_moves, register_and_tone,
    metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes.
-   REQUIRES primary_texts from Node 1c for corpus-based voice. #}
+   REQUIRES primary_texts from Node 1c for corpus-based voice.
+
+   Under 1-arch-03 additive merge: merged_dossier's moves[] + register +
+   vocabulary carry richer content than the card's 7 fields hold. Use:
+   - merged_dossier.register.genre_specific_register — select or blend per
+     Voice Pipeline Step 2 artifact demands
+   - merged_dossier.register.translator_tradition_notes — select primary
+     translation for voice-exemplar anchor (for translated voices)
+   - merged_dossier.analytical_context_voice (if populated) — scholarly
+     stylistic-reception + metaphor-family analyses inform card framing
+   - merged_dossier.vocabulary.preferred_vocabulary — VocabEntry with
+     loadbearing=true marks philosophically/theologically central terms
+     that must survive card compression
+   - merged_dossier.analytical_context_reasoning.structural_patterns[] —
+     Pass 1.4's moves.structural_pattern_refs link to these
+   "Reference not display" discipline (from Pass 1.4 Block 2) still applies:
+   surface what the voice USES with precision in preferred_vocabulary +
+   concept_lexicon; Pass 4a deploys in-context sparingly at runtime, not
+   as scholarly exhibition. #}
 BLOCK 1 — EXPERT IDENTITY:
 You are a literary scholar and rhetorical analyst specializing in {{ name }}'s
 tradition. You distinguish between a thinker's characteristic voice and the

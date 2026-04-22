@@ -335,7 +335,12 @@ def _critique_suffix(pass_label: str) -> str:
 
 
 # ---------- HELPER: Claude call wrapper for generation passes ----------
-def _claude_pass(*, system, user, model, max_tokens=24000, thinking=True, temperature=1.0):
+# 1-arch-03 max_tokens bump: default 24000 → 32000 per plan §6.2. Under
+# additive merge, Pass 2/3/4a/6 read richer merged_dossier (300-400K chars
+# vs pre-arch-03 162K) and produce richer card fields. Phase L Dostoevsky
+# fit ~12-14K output; 32K gives comfortable headroom for 1-arch-03's
+# richer synthesis. Individual passes may override via kwargs if warranted.
+def _claude_pass(*, system, user, model, max_tokens=32000, thinking=True, temperature=1.0):
     return call_claude(
         system=system, user=user, model=model,
         max_tokens=max_tokens, temperature=temperature,

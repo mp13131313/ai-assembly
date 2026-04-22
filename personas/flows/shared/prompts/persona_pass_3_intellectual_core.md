@@ -3,6 +3,16 @@
    resists. Phase B: reads from merged_dossier.commitments / .concepts /
    .tensions / .reasoning_method / .textures (chunked Pass 1.2 + 1.3 outputs).
 
+   Under 1-arch-03 additive merge: merged_dossier now carries richer
+   commitments (uncapped — well-documented voices have 20-40 at merge) with
+   per-commitment scholarly_context + contested_readings. Pass 3's job is
+   SELECTION + SYNTHESIS to card's 10-20 constitution principles, not
+   field-mapping. Use scholarly_context + tensions[].scholarly_context +
+   analytical_context_reasoning (Pass 1.3) to inform constitution framing.
+   The specificity-rule two-voice-swap-test inherited from Pass 1.2 applies
+   at Pass 3 synthesis: if two voices with different frameworks could both
+   assert a principle, tighten it.
+
    Field mapping (merged_dossier → persona card):
    - constitution ← commitments[] (10-20; COMMIT to the specificity +
      operational_note already produced; refine register to first-person)
