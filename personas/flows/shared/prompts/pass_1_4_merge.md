@@ -122,9 +122,14 @@ Canonical schemas:
 - `vocabulary.preferred_vocabulary[]` minimum 15 entries; uncapped. Prefer
   VocabEntry structured form; bare str accepted for backward-compat.
 - `vocabulary.metaphorical_repertoire` minimum 3 families; uncapped.
-- `analytical_context_voice` optional (null for voices without substantive
-  voice-level scholarly material); populated for richly-scholarly voices
-  (Dostoevsky, Plato, Arendt).
+- `analytical_context_voice` — populated for richly-scholarly voices
+  (Dostoevsky, Plato, Arendt). For voices without substantive voice-level
+  scholarly material, emit an empty AnalyticalContext (all three sub-lists
+  empty: `{"structural_patterns": [], "worked_demonstrations": [],
+  "scholarly_debates": []}`). Do NOT emit null at chunk-output level —
+  chunk_runner Pydantic validation requires the key present. Null coercion
+  happens at merged_dossier composition (Pass 1.7), where the field is
+  declared `AnalyticalContext | None`.
 
 # BLOCK 4 — WORKED EXAMPLES
 
@@ -242,6 +247,9 @@ and worked examples. Additive merge per Block 2.
 4. Build metaphorical_repertoire (minimum 3 families; uncapped).
 5. Populate analytical_context_voice if sources provide substantive voice-
    level scholarly material (stylistic-reception history, translator-tradition
-   criticism, scholarly metaphor-family analyses). Null if not.
+   criticism, scholarly metaphor-family analyses). If no substantive
+   material: emit empty AnalyticalContext (all three sub-lists empty), NOT
+   null — chunk_runner requires the key present; null-coercion happens at
+   Pass 1.7 merged_dossier composition.
 6. Tag everything. Cite everything.
 7. Return JSON only — four top-level keys.
