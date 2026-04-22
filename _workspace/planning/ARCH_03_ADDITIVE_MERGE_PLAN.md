@@ -2037,7 +2037,7 @@ Opus reports at Stage 1/2/3 checkpoints and decides merge-to-main.
 ```
 You are running the 1-arch-03 Additive Merge Architecture SONNET
 IMPLEMENTATION SESSION for the AI Assembly project. Opus 4.7 pre-seed
-is complete on branch `arch-03-additive-merge` (HEAD 38b84c4). Your
+is complete on branch `arch-03-additive-merge` (HEAD 843b974). Your
 job: implement the mechanical parts of the plan — instrumentation
 script, test fixture, Wave 1/2/3-SURVIVES fix applications per tracker.
 STOP BEFORE running Stage 1/2/3 tests — those fire in a separate Opus
@@ -2067,11 +2067,11 @@ ORIENTATION READING (in order):
 
 BRANCH STATE:
 
-You start on `arch-03-additive-merge` at HEAD `38b84c4`. Verify:
+You start on `arch-03-additive-merge` at HEAD `843b974`. Verify:
   cd "/Users/aienvironment/Desktop/AI Assembly/code"
   git status              # clean tree expected
   git checkout arch-03-additive-merge
-  git log --oneline -6    # should show 38b84c4, 0c1fb28, 008ab0c, ceb7b94, f98370c, 05896f8
+  git log --oneline -7    # should show 843b974, 38b84c4, 0c1fb28, 008ab0c, ceb7b94, f98370c, 05896f8
 
 Do NOT start a new branch. Do NOT merge to main.
 
