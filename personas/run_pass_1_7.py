@@ -77,7 +77,7 @@ def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
         "pass_1_3": ["reasoning_method", "textures", "analytical_context_reasoning"],
         "pass_1_4": ["moves", "register", "vocabulary", "analytical_context_voice"],
         "pass_1_5": ["knowledge_boundary", "sensitive_topics", "hard_limits"],
-        "pass_1_6": ["works", "passages", "urls", "reference_only_passages"],
+        "pass_1_6": ["works", "passages", "reference_only_passages"],
     }
     # Optional keys: sensible defaults when chunk didn't populate.
     # - reference_only_passages: empty for public-domain corpora (Plato, Whanganui)
@@ -143,10 +143,9 @@ def _compose_dossier(chunks: dict[str, Any]) -> dict[str, Any]:
         "knowledge_boundary": chunks["knowledge_boundary"],
         "sensitive_topics": chunks["sensitive_topics"],
         "hard_limits": chunks["hard_limits"],
-        # Chunk 1.6 — CORPUS
+        # Chunk 1.6 — CORPUS (`urls` removed per 1-arch-07; derived at render-time)
         "works": chunks["works"],
         "passages": chunks["passages"],
-        "urls": chunks["urls"],
         "reference_only_passages": chunks["reference_only_passages"],
         # Pass 1.7 coherence metadata — populated by Stage B/C.
         "coherence_flags": [],

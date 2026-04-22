@@ -195,20 +195,21 @@ if vi["primary_text_sources"]:
     _extracted_url_items: list = []  # no extraction step, manual override
     stamp(f"PASS 1c-extract: SKIPPED (voice config has {len(primary_text_urls)} manual URLs)")
 else:
-    # Phase B: Pass 1.6 CORPUS chunk already produced structured URLs with
-    # work titles + source + license notes. Read them directly — no Sonnet
-    # call needed (v3.10's URL-extraction pass was necessary because the
-    # 6-section markdown buried URLs in prose; Phase B's chunked output
-    # surfaces them explicitly).
-    stamp("PASS 1c-extract: reading URLs from Phase B chunked dossier (no LLM)")
-    _urls_chunk = merged_dossier_dict.get("urls", {}).get("urls", [])
+    # 1-arch-07 (2026-04-22): URLs derived deterministically at render-time
+    # from passages[].citation and works[] fields via extract_urls(). The
+    # old `urls` chunk was LLM-emitted and invited drift vs. URLs already
+    # embedded in sibling chunks. No LLM call — pure regex extraction.
+    from flows.shared.url_extract import extract_urls as _extract_urls
+    stamp("PASS 1c-extract: deriving URLs from works + passages chunks (no LLM, 1-arch-07)")
+    _works_chunk = merged_dossier_dict.get("works", {})
+    _passages_chunk = merged_dossier_dict.get("passages", {})
     _extracted_url_items = [
-        {"url": u.get("url"), "work": u.get("work_title"), "source": u.get("source"),
+        {"url": u["url"], "work": u["work_title"], "source": u["source"],
          "note": u.get("license_or_access_note", "")}
-        for u in _urls_chunk if u.get("url")
+        for u in _extract_urls(_works_chunk, _passages_chunk)
     ]
     primary_text_urls = [item["url"] for item in _extracted_url_items]
-    stamp(f"  {len(primary_text_urls)} URLs from merged_dossier.urls chunk")
+    stamp(f"  {len(primary_text_urls)} URLs derived from works + passages")
     notes = ""
     # Satisfy the downstream pass1c_extract reference with a synthetic cache entry.
     pass1c_extract = {

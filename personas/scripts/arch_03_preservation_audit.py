@@ -299,7 +299,7 @@ _SECTION_KEYS = {
     3: ["reasoning_method", "textures", "analytical_context_reasoning"],
     4: ["moves", "register", "vocabulary", "analytical_context_voice"],
     5: ["knowledge_boundary", "sensitive_topics", "hard_limits"],
-    6: ["works", "passages", "urls", "reference_only_passages"],
+    6: ["works", "passages", "reference_only_passages"],  # `urls` removed per 1-arch-07
 }
 
 

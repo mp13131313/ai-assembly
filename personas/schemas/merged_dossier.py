@@ -17,7 +17,7 @@ from .pass_1_2 import Commitment, Concept, Tension
 from .pass_1_3 import ReasoningMethod, Textures
 from .pass_1_4 import Moves, Register, Vocabulary
 from .pass_1_5 import HardLimits, KnowledgeBoundary, SensitiveTopics
-from .pass_1_6 import Passages, ReferenceOnlyPassages, URLs, Works
+from .pass_1_6 import Passages, ReferenceOnlyPassages, Works
 
 
 CoherenceSeverity = Literal["minor", "moderate", "major"]
@@ -117,10 +117,10 @@ class MergedDossier(BaseModel):
     sensitive_topics: SensitiveTopics
     hard_limits: HardLimits
 
-    # Chunk 1.6
+    # Chunk 1.6 — `urls` removed per 1-arch-07 (2026-04-22); URL inventory
+    # now derived at render-time via flows/shared/url_extract.extract_urls().
     works: Works
     passages: Passages
-    urls: URLs
     reference_only_passages: ReferenceOnlyPassages = Field(
         default_factory=ReferenceOnlyPassages,
         description="Private-reasoning corpus; Step 1 loads, Step 2 drops. "
