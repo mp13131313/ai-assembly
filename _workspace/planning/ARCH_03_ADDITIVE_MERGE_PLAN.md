@@ -773,15 +773,51 @@ Update prompt text:
 - Block 3 productive-tension criteria: "ALL must hold: (a) both poles have primary-text or scholarly-consensus support; (b) tension drives rather than derails voice's thinking; (c) scholarly tradition names tension explicitly. If ANY unmet, resolve by edit." (1.7-04 fix)
 - Block 4: ADD worked examples (1.7-01 fix; pattern-break repair — 3 examples covering resolve-by-edit, accept-productive-tension, escalate cases)
 
-### 5.4 Pass 1.7 max_tokens calibration
+### 5.4 Pass 1.7 max_tokens calibration (SUPERSEDED 2026-04-22 — see §5.5)
 
-Current max_tokens=64000 post-Bug-5. Under 1-arch-03:
-- Input size: 300-400K chars (expanded chunks) + inlined MergedDossier schema (~20K)
-- Output size: full composed MergedDossier (300-400K) + coherence audit (~10-15K for richer diagnostic trail)
+*Original rationale under the single-call architecture:*
 
-**Proposed max_tokens: 100,000** (bump from 64K). Opus 4.7 supports this comfortably. Rationale: output grows proportionally with input; preserve-don't-compress principle requires output headroom.
+Input size 300-400K chars + inlined MergedDossier schema (~20K); output size full composed MergedDossier (300-400K) + coherence audit (~10-15K). Proposed max_tokens: **100,000** (bump from 64K).
 
-Alternative: keep 64K and let Opus compress output where redundant. Risk: re-introduces loss at coherence layer. Better to bump.
+**This is superseded by §5.5.** Under the split architecture, output is audit-only (~24K) and max_tokens drops to 24000. The 100K-output rationale is no longer load-bearing and exists only as historical context for why the pre-split prompt needed the headroom.
+
+### 5.5 Pass 1.7 split architecture (amendment 2026-04-22)
+
+**Problem with single-call Pass 1.7 (§5.1–5.4 original):** the prompt required the LLM to re-emit the full composed MergedDossier *along with* coherence metadata. This gave the LLM direct authorship of every chunk key in the output, and re-compression risk was fought with prompt-level discipline ("preserve by default, edit-scope minor only"). Correct in principle; structurally weaker than having no surface at all.
+
+**Split architecture (landed 2026-04-22):** composition is moved out of the LLM into deterministic Python. The LLM receives the already-composed dossier and emits only a narrow audit result.
+
+**Three stages in `personas/run_pass_1_7.py`:**
+
+- **Stage A — offline compose (Python).** `_compose_dossier(chunks)` builds a MergedDossier-shaped dict from the six chunk JSONs with empty `coherence_flags` / `coherence_resolutions`. Pydantic-validates against `MergedDossier` (catches Pass 1.1-1.6 schema drift before the LLM sees anything). Pure dict-assembly; no semantic work, no re-compression possible.
+
+- **Stage B — LLM coherence audit (narrow output).** One Opus 4.7 call, thinking enabled, `max_tokens=24000`. System prompt is the composed dossier + the 9 checks + edit-scope discipline. Output conforms to a new Pydantic model `CoherenceAuditResult`:
+
+  ```python
+  class CoherenceAuditResult(BaseModel):
+      coherence_flags: list[CoherenceFlag]
+      coherence_resolutions: list[CoherenceResolution]
+      edits: list[DossierEdit]  # op: "append"|"set", path: dotted, value: Any
+  ```
+
+  The LLM never re-emits dossier content. Its only content contributions are the `value` payload of an `edit` (e.g. a new Concept to append) and the text of flags/resolutions.
+
+- **Stage C — apply edits + re-validate (Python).** `_apply_edit(dossier, edit)` walks the `path` ("commitments[3].operational_note", "concepts", etc.) and performs `append` or `set`. Failed edits are logged-and-skipped (not fatal; final re-validate catches schema-breaking edits). Coherence metadata attached. Full dossier re-validated against `MergedDossier`; any schema break from a malformed edit halts the run.
+
+**Discipline carried from §5.3 original:**
+- Check 8 + Check 9 preservation checks remain (unchanged).
+- Edit-scope discipline (1.7-02): only `append` and `set` available as ops. Anything requiring more must be escalated. The restriction is enforced by the `DossierEdit` schema, not just prompt wording.
+- Productive-tension (1.7-04) and escalation (1.7-03) pathways: unchanged — emit flag + resolution with empty `edits` list.
+- Block 4 worked examples (1.7-01): updated to show edit objects rather than dossier re-writes.
+
+**Why 1.1-1.6 do NOT get an analogous split (reviewed 2026-04-22):** Pass 1.7's compose step is pure dict-assembly — zero cognitive work lost by moving to Python. Pass 1.1-1.6's merge is inherently semantic (cross-source dedupe, reconciliation of conflicting claims, identification of same-concept-different-wording across sources). An analogous split would require either (a) an extract-per-source phase feeding a merge phase — 4 LLM calls per chunk instead of 1, more cost without eliminating any judgment surface; or (b) purely-offline dedupe, which is not well-defined on free-text research sources. Arch-03's existing remedies for 1.1-1.6 preservation — permissive schemas + source-attribution fields + additive-merge prompt discipline — are the right shape for the cognitive work those chunks actually do. If Stage 1 under the split 1.7 still shows 1.1-1.6 dropping content, revisit per-chunk at that point; do not invert a working architecture preemptively.
+
+**Files touched by the amendment:**
+- `personas/run_pass_1_7.py` — full rewrite to three-stage shape.
+- `personas/flows/shared/prompts/pass_1_7_coherence.md` — Block 5 now shows composed dossier (single block), Block 6 output shape is `CoherenceAuditResult`, Block 4 examples updated.
+- `personas/schemas/merged_dossier.py` — unchanged (composition uses existing schema).
+
+No prompt-scope regression: every check, every resolution category, every escalation pathway from §5.1–5.3 is preserved. The structural guard replaces the prompt-level guard against re-compression; both are now in force.
 
 ---
 
@@ -1034,6 +1070,8 @@ Actually — simpler: Pass 2-6 synthesizes to card from merged_dossier. Card's `
 **Step 15.** Rewrite `pass_1_6_merge.md`. Apply 1.6-02 (Octopus), 1.6-03 (Scheherazade multi-translator), 1.6-04 (Marley reference_only_passages), 1.6-06 (voice_mode drop).
 
 **Step 16.** Update `pass_1_7_coherence.md`. Add Block 4 worked examples (1.7-01), edit-scope (1.7-02), escalation pathway (1.7-03), productive-tension criteria (1.7-04). Add Check 8 (source attribution) + Check 9 (analytical context presence) per §5.2.
+
+**Step 16a (landed 2026-04-22 per §5.5 amendment).** Split Pass 1.7 into offline compose + narrow LLM audit + Python edit apply. `personas/run_pass_1_7.py` fully rewritten; `pass_1_7_coherence.md` Block 5 replaced with composed-dossier block; Block 6 output shape now `CoherenceAuditResult` (flags + resolutions + edits[]). max_tokens drops from 100000 → 24000. §5.5 is authoritative; §5.4 is superseded historical context.
 
 **Verification (Step 10-16 each):** template renders; Pydantic-validates fixture output (will do proper validation in Stage 1 test below).
 
@@ -2479,7 +2517,7 @@ Quick reference of schema changes:
 
 **Code touched:**
 - `personas/run_persona_pipeline.py` — Pass 2/3/4a/6 max_tokens bumps (24000 → 32000)
-- `personas/run_pass_1_7.py` — max_tokens bump (64000 → 100000)
+- `personas/run_pass_1_7.py` — full rewrite to split architecture per §5.5 amendment (offline compose + narrow LLM audit + Python edit apply). max_tokens: 64000 → 24000 (audit-only output; composition is offline Python). Adds `_compose_dossier`, `_parse_path`, `_apply_edit`, and Pydantic models `DossierEdit` + `CoherenceAuditResult`.
 - `personas/scripts/arch_03_preservation_audit.py` — **NEW FILE** for Stage 1 verification
 
 ---
