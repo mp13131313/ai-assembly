@@ -580,6 +580,86 @@
       "title": "HardLimits",
       "type": "object"
     },
+    "InterpretiveFrame": {
+      "description": "One scholarly frame for reading the voice.\n\nA frame is not the voice's own claim — it's a lens. The voice doesn't\n\"have\" a postcolonial frame; scholars use postcolonial analysis to\nread the voice. The `relationship_to_voice` field captures how the\nframe relates to the voice's own conceptual apparatus.",
+      "properties": {
+        "name": {
+          "description": "Short label — 'hesychast-numerology reading', 'postcolonial Janus face', 'Kasatkina subject-to-subject method', 'Williams-vs-Frank on Myshkin failure'. Noun phrase, not sentence.",
+          "title": "Name",
+          "type": "string"
+        },
+        "frame_type": {
+          "description": "Discriminator. `interpretive_method` for methodological lenses (close-reading-with-a-needle, hesychast structural reading). `cross_disciplinary_reframing` for second-discipline readings of the same underlying material (postcolonial, feminist, disability studies, etc.). `voice_level_debate` for controversies about the voice as a whole (not about specific claims).",
+          "enum": [
+            "interpretive_method",
+            "cross_disciplinary_reframing",
+            "voice_level_debate"
+          ],
+          "title": "Frame Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "2-4 sentence gloss. What the frame claims; what it re-reads.",
+          "title": "Description",
+          "type": "string"
+        },
+        "primary_scholars": {
+          "description": "Scholar-name + year tags: ['Kasatkina 2022', 'Stepanian-Rumiantseva 2023']. Preserve attribution.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Scholars",
+          "type": "array"
+        },
+        "what_it_re_reads": {
+          "description": "Which commitments / concepts / formative-experiences / works the frame re-reads. Cross-reference strings into other chunk keys: ['commitments.faith_vs_truth', 'concepts.sobornost'', 'formative_candidates.Semenovsky_execution']. Best-effort; use natural language when path references don't fit cleanly.",
+          "items": {
+            "type": "string"
+          },
+          "title": "What It Re Reads",
+          "type": "array"
+        },
+        "relationship_to_voice": {
+          "description": "How does the frame relate to the voice's own self-understanding? `the_voice_invites_this_frame` when the voice's own work signals the frame (Kasatkina's dvusostavnyi obraz argues Dostoevsky's realism ITSELF operates on two-level symbolic-literal; the voice invites the reading). `scholars_impose_this_frame` when the frame is post-hoc disciplinary lens (Rising's disability studies framework is 2020s scholarship, not Dostoevsky's own conceptual apparatus). `frame_contested_among_scholars` when scholars disagree on applicability (is Bakhtin's polyphony actually present, or an interpretive imposition? Vetlovskaya vs. Bakhtin).",
+          "enum": [
+            "the_voice_invites_this_frame",
+            "scholars_impose_this_frame",
+            "frame_contested_among_scholars"
+          ],
+          "title": "Relationship To Voice",
+          "type": "string"
+        },
+        "citations": {
+          "description": "Scholar citations with work + locus where the frame is developed.",
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "description": "Evidence tier for the frame's claim. Most frames are scholarly_consensus or contested; interpretive_reconstruction where a frame is a single scholar's distinctive thesis not yet absorbed into mainstream reception.",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "frame_type",
+        "description",
+        "relationship_to_voice"
+      ],
+      "title": "InterpretiveFrame",
+      "type": "object"
+    },
     "KeyRelationship": {
       "description": "One formative relationship (teacher, student, rival, consort, enemy, etc.).",
       "properties": {
@@ -1791,58 +1871,6 @@
       "title": "Textures",
       "type": "object"
     },
-    "URLEntry": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        },
-        "work_title": {
-          "title": "Work Title",
-          "type": "string"
-        },
-        "source": {
-          "description": "Perseus, Project Gutenberg, Google Books, BAWS-online, etc.",
-          "title": "Source",
-          "type": "string"
-        },
-        "license_or_access_note": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "License Or Access Note"
-        }
-      },
-      "required": [
-        "url",
-        "work_title",
-        "source"
-      ],
-      "title": "URLEntry",
-      "type": "object"
-    },
-    "URLs": {
-      "properties": {
-        "urls": {
-          "items": {
-            "$ref": "#/$defs/URLEntry"
-          },
-          "title": "Urls",
-          "type": "array"
-        }
-      },
-      "required": [
-        "urls"
-      ],
-      "title": "URLs",
-      "type": "object"
-    },
     "VocabEntry": {
       "description": "Structured vocabulary entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via\n`Vocabulary.preferred_vocabulary: list[str | VocabEntry]` discriminated\nunion — existing Dostoevsky card's list[str] still validates.\n\nloadbearing=True marks philosophically/theologically central terms\n(Dostoevsky's `podpol'e`, `nadryv`, `obraz`; Plato's `to agathon`,\n`eidē`, `episteme`). These terms survive downstream card compression\nwith higher priority.",
       "properties": {
@@ -2161,6 +2189,14 @@
       "title": "Tensions",
       "type": "array"
     },
+    "interpretive_frames": {
+      "description": "1-arch-06 (2026-04-22): cross-cutting scholarly material (interpretive methods, cross-disciplinary re-framings, voice-level debates) with frame_type discriminator. Produced at Pass 1.2. Empty for thinly-documented voices or voices without cross-disciplinary reception.",
+      "items": {
+        "$ref": "#/$defs/InterpretiveFrame"
+      },
+      "title": "Interpretive Frames",
+      "type": "array"
+    },
     "reasoning_method": {
       "$ref": "#/$defs/ReasoningMethod"
     },
@@ -2208,9 +2244,6 @@
     "passages": {
       "$ref": "#/$defs/Passages"
     },
-    "urls": {
-      "$ref": "#/$defs/URLs"
-    },
     "reference_only_passages": {
       "$ref": "#/$defs/ReferenceOnlyPassages",
       "description": "Private-reasoning corpus; Step 1 loads, Step 2 drops. Usually empty for public-domain voices."
@@ -2245,8 +2278,7 @@
     "sensitive_topics",
     "hard_limits",
     "works",
-    "passages",
-    "urls"
+    "passages"
   ],
   "title": "MergedDossier",
   "type": "object"

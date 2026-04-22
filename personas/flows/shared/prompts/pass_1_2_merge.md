@@ -157,15 +157,46 @@ scholarly citation.
 
 # BLOCK 3 — OUTPUT SCHEMA
 
-Return a single JSON object with exactly three top-level keys:
+Return a single JSON object with exactly **four** top-level keys:
 
 ```json
 {
-  "commitments": [ { ... Commitment ... }, ... ],
-  "concepts":    [ { ... Concept ... }, ... ],
-  "tensions":    [ { ... Tension ... }, ... ]
+  "commitments":         [ { ... Commitment ... }, ... ],
+  "concepts":            [ { ... Concept ... }, ... ],
+  "tensions":            [ { ... Tension ... }, ... ],
+  "interpretive_frames": [ { ... InterpretiveFrame ... }, ... ]
 }
 ```
+
+**1-arch-06 (2026-04-22):** `interpretive_frames[]` is a NEW top-level
+container for cross-cutting scholarly material — ways scholars read the
+voice that don't fit a specific commitment / concept / tension. Three
+kinds:
+
+1. **Interpretive methods** (`frame_type: "interpretive_method"`) — Kasatkina's
+   subject-to-subject method (dvusostavnyi obraz), Patyk's provocation frame,
+   hesychast structural reading, Vetlovskaya's narrator-as-programmatic-frame.
+   These are methodological lenses for reading the voice.
+
+2. **Cross-disciplinary re-framings** (`frame_type: "cross_disciplinary_reframing"`)
+   — Gemini's signature contribution: postcolonial (McReynolds, Tlostanova),
+   feminist (Berman, Maiorova), affect theory (Sobol), legal-economic (Todd,
+   Murav), disability studies (Rising), ecological (Marullo), gift-economy /
+   Levinasian (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo,
+   Yermolenko, Zabuzhko, Hundorova, Pattison).
+
+3. **Voice-level debates** (`frame_type: "voice_level_debate"`) — controversies
+   about the voice as a whole (Dostoevsky's antisemitism structural-vs-
+   incidental; Myshkin failure intrinsic-vs-character-limitation; Bakhtin
+   polyphony relativism-vs-authorial-guidance). These live at voice level,
+   not at a specific commitment.
+
+**Production rule:** emit at least 3 frames for well-documented voices
+(those with substantial cross-disciplinary reception or multiple named
+interpretive methods). Emit fewer only when sources genuinely don't
+surface this material. An empty `interpretive_frames[]` for a voice
+whose three sources have substantive cross-disciplinary reception is a
+preservation failure — route Gemini's re-framings here per 1-arch-04.
 
 Canonical Pydantic schemas:
 
@@ -179,6 +210,10 @@ Canonical Pydantic schemas:
 
 ```json
 {{ tension_schema }}
+```
+
+```json
+{{ interpretive_frame_schema }}
 ```
 
 **Strict rules:**

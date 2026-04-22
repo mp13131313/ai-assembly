@@ -73,7 +73,7 @@ def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
     out: dict = {}
     layout = {
         "pass_1_1": ["life_scaffold", "formative_candidates"],
-        "pass_1_2": ["commitments", "concepts", "tensions"],
+        "pass_1_2": ["commitments", "concepts", "tensions", "interpretive_frames"],
         "pass_1_3": ["reasoning_method", "textures", "analytical_context_reasoning"],
         "pass_1_4": ["moves", "register", "vocabulary", "analytical_context_voice"],
         "pass_1_5": ["knowledge_boundary", "sensitive_topics", "hard_limits"],
@@ -87,6 +87,7 @@ def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
         "reference_only_passages",
         "analytical_context_reasoning",
         "analytical_context_voice",
+        "interpretive_frames",  # 1-arch-06: empty for thinly-documented voices
     }
     for chunk_dir, keys in layout.items():
         for key in keys:
@@ -103,6 +104,8 @@ def _load_chunk_outputs(project_root: Path, slug: str) -> dict:
                         }
                     elif key == "analytical_context_voice":
                         out[key] = None
+                    elif key == "interpretive_frames":
+                        out[key] = []  # default empty list
                     continue
                 sys.exit(
                     f"Missing chunk output {path}. Run Pass "
@@ -130,6 +133,8 @@ def _compose_dossier(chunks: dict[str, Any]) -> dict[str, Any]:
         "commitments": chunks["commitments"],
         "concepts": chunks["concepts"],
         "tensions": chunks["tensions"],
+        # 1-arch-06: new top-level container for cross-cutting scholarly material
+        "interpretive_frames": chunks.get("interpretive_frames", []),
         # Chunk 1.3 — REASONING
         "reasoning_method": chunks["reasoning_method"],
         "textures": chunks["textures"],
