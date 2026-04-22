@@ -199,10 +199,16 @@ def run_chunk(
     output_subdir: str | None = None,
     use_test_fixtures: bool = False,
     user_prompt: str | None = None,
-    max_tokens: int = 32000,
+    max_tokens: int = 48000,
     mode: str = "auto",  # "per_section", "monolithic", or "auto"
 ) -> dict[str, Any]:
-    """Run a single chunked-merge pass end-to-end. Returns the validated dict."""
+    """Run a single chunked-merge pass end-to-end. Returns the validated dict.
+
+    Under 1-arch-03 additive merge, per-chunk outputs are larger (preservation
+    discipline). max_tokens default raised from 32000 → 48000 after Pass 1.1
+    hit 32000 on rich Dostoevsky biographical output. Downstream chunks with
+    smaller outputs still fit comfortably.
+    """
     slug = voice_slug(name)
     chunk_num = int(chunk_name.split(".")[1])  # "1.2" → 2
     _stamp(f"Pass {chunk_name} merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
@@ -216,12 +222,30 @@ def run_chunk(
     )
     schema_vars = _inline_schemas(output_keys)
 
+    # Load voice_config for hostile_sources + corpus_constraint (referenced
+    # by arch-03 pre-seed prompts 1.1, 1.5, 1.6). Fixtures mode: default
+    # both to falsey/"full" since fixtures don't ship a voice_config.
+    if use_test_fixtures:
+        hostile_sources = False
+        corpus_constraint = "full"
+    else:
+        vc_path = _paths.voice_config(slug, project_root)
+        if vc_path.exists():
+            vc = json.loads(vc_path.read_text())
+            hostile_sources = bool(vc.get("hostile_sources", False))
+            corpus_constraint = vc.get("corpus_constraint", "full") or "full"
+        else:
+            hostile_sources = False
+            corpus_constraint = "full"
+
     system = render(
         template_name,
         name=name,
         type=voice_type,
         subtype=subtype,
         voice_mode=voice_mode,
+        hostile_sources=hostile_sources,
+        corpus_constraint=corpus_constraint,
         perplexity_dossier_text=perp_text,
         claude_dr_dossier_text=dr_text,
         gemini_broad_scan_text=gem_text,
