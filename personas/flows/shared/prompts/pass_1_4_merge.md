@@ -77,6 +77,19 @@ specific lexicons (Rastafari livity/I-and-I/Babylon; Arendtian German-
 Jewish amor mundi/natality; Dostoevskian Russian-Orthodox nadryv/sobornost'):
 preserve regardless of period.
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical voice-characterization claims.
+
+**Do not deduplicate Gemini re-framings as overlap.** A disability-studies reading of a stammer-as-crip-performance (Rising on Golyadkin), or an affect-theoretic reading of lovesickness as 19th-C psycho-physiological condition (Sobol on Myshkin), or a translator-tradition analysis of the Pevear/Volokhonsky vs. Katz register debate, is not a duplicate of the canonical voice-moves — it is a second reading that must survive. Preservation routes, in preference order:
+
+1. **`analytical_context_voice.scholarly_debates[]`** — Pass 1.4's primary home for voice-specific scholarly debates (translator-tradition controversies, stylistic-reception debates, genre-register disputes).
+2. `interpretive_frames[]` (produced at Pass 1.2; cross-chunk) — for voice-relevant frames that cross-cut (e.g. postcolonial reading of the voice's register as both colonizer and colonized).
+3. `register.translator_tradition_notes` / `register.genre_specific_register` — preserve translator-reception scholarship and genre-register analysis here. These arch-03 fields are specifically designed to absorb Gemini's stylistic-reception material.
+4. `scholarly_context` sub-field on specific moves / vocabulary entries with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[affect_theory]`, `[gift_economy]`, `[post_2022_reception]`, `[translator_tradition]` — use when the reframing applies narrowly.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. Route to one of the preservation sites above. A second discipline's reading of a covered topic is not redundant; it is the additive contribution Gemini is designed to provide.
+
 ## Never invent
 
 # BLOCK 3 — OUTPUT SCHEMA

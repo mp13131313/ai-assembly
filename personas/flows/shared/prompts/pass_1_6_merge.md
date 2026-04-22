@@ -70,6 +70,23 @@ doesn't affect works/passages extraction.
 - `translation_anchor` — demonstrates how translator choice shapes voice
   (for voices with multi-translator corpora)
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison).
+
+For Pass 1.6 (corpus), Gemini's relevant distinctives include:
+- **Unusual primary-text passages** Gemini surfaces that Perplexity/DR don't foreground (e.g. Zosima on birds / universal guilt from Karamazov VI.2; Marmeladov on *nishcheta* as social death from C&P I.2; Notebooks self-exhortation on ideological temptation). Add these to `passages[]` with `purpose_tag="voice_exemplar"` or `"intellectual_substance"` as appropriate.
+- **Non-Anglophone scholarly editions + minority-translation traditions** — if Gemini names Russian-language editions (PSS 35-vol Bagno in-progress, Nauka 30-vol 1972-90), non-Anglophone scholar-editors (Kasatkina's Dostoevskaya kollegiya editions), or minority translator-traditions, preserve in `works[].note` or `bibliographic_scholarly_context`.
+- **Post-2022 Ukrainian corpus-adjacent scholarship** — editions + reception scholarship post-Feb-2022 (Kokobobo's Slavic Review essays, Yermolenko on weaponization of canonical works) — preserve in `bibliographic_scholarly_context`.
+
+Preservation routes, in preference order:
+1. **`passages[]`** with appropriate `purpose_tag` — for the unusual primary passages.
+2. **`bibliographic_scholarly_context`** — for non-Anglophone editions + post-2022 corpus reception.
+3. `works[].note` — per-work scholarly-edition notes.
+4. `interpretive_frames[]` (produced at Pass 1.2; cross-chunk reference) — for frame-level reception (not passage-level).
+
+**Default assumption:** if you catch yourself about to drop a Gemini-flagged unusual primary passage because "Perplexity/DR didn't foreground it" — STOP. Gemini surfacing it IS the preservation signal. Add to passages[].
+
 ## Never invent
 
 No fabricated URLs. No fabricated canonical references. No fabricated
