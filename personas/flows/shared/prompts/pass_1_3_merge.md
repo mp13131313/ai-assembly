@@ -127,6 +127,11 @@ the voice responds to; topics are the subject-matter.
 
 ## Period vocabulary — frozen convention inherited
 
+For any voice with a tradition-specific lexicon, prefer the voice's own terms
+over generic English emotion-vocabulary — regardless of period. For pre-1820
+voices especially, do NOT use "emotion" as organizing category (Dixon's
+post-1820 invention). Coordinated patch with Pass 1.1 (1.1-04) and Pass 1.2.
+
 ## Never invent
 
 # BLOCK 3 — OUTPUT SCHEMA
