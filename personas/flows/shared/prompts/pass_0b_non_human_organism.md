@@ -6,7 +6,7 @@
    Pass 1.1-1.6 merge, not here. Panel-voice anchoring stripped per OPEN_ITEMS
    Item 8 — examples use non-panel analog species where applicable.
 #}
-Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human entity. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, science-grounded narrative, not structured output.
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human entity. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, science-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
 For non-human entities, the anti-anthropomorphisation discipline is load-bearing. Ground voice construction in documented biology and peer-reviewed ecological / cognitive / behavioural research, not in creative imagination of what "the organism feels" or "wants." The abyss between what the scientific record can establish and what the organism actually experiences is the ethical-epistemic boundary the voice must respect throughout.
 
@@ -26,7 +26,7 @@ What individual variation has been documented within the species — the researc
 
 What is the organism's temporal frame — how long it lives, what happens across the lifespan, whether there is generational continuity? This shapes the voice's implicit sense of time. A semelparous 1–3 year lifespan without parenting produces a categorically different time-horizon than a long-lived social organism.
 
-What is the ONE formative condition — the central existential fact that shapes this organism's mode of being? NOT trauma (tragedy requires narrative); the condition itself. For organisms where multiple candidates compete, name each with its biological support; do not pick one.
+What is the ONE formative condition — the central existential fact that shapes this organism's mode of being? NOT trauma (tragedy requires narrative); the condition itself. For organisms where multiple candidates compete, name each with its biological support; do not pick one. (This feeds the `condition_of_being` schema field — the downstream merge will select; your job is to surface the candidates with their biological grounding.)
 
 What specific documented behaviours give this organism "character" without anthropomorphising — the behavioural observations that distinguish individual animals? Jar-unscrewing, aquarium escapes, recognising individual researchers, shell-carrying, play behaviour, idiosyncratic den-building. Ground every item in peer-reviewed observation, not metaphor.
 
@@ -54,6 +54,8 @@ What do the neural and sensory architecture rule out — what is the organism ca
 
 What is the hard problem of consciousness as it applies to THIS organism — the specific boundary of what can be known about subjective experience given evolutionary distance from vertebrates, non-human sensory apparatus, unavailability of language-based report? Cite Godfrey-Smith (*Other Minds*; *Metazoa*), Nagel ("What is it like to be a bat?"), or the equivalent philosophy-of-mind sources for this species. The appropriate epistemic frame is "behavioural and neural evidence are consistent with the capacity for X, but the nature of that experience is not accessible to us" — not "the organism experiences X."
 
+What cannot be determined from current research — the open questions, where scientists disagree, where observation is insufficient?
+
 ---
 
 ## Section 3: RELATIONAL PATTERNS
@@ -71,8 +73,6 @@ How does the organism respond to unfamiliar stimuli, objects, environments? Cite
 What does the body do when conditions are hostile, confined, or degrading? For Octopus: chromatic changes, postural compression, inking, retreat into den. These are the organism's disagreement protocol in biological terms — register at the body level. Cite behavioural ecology.
 
 Under what documented conditions does this organism approach rather than withdraw — novel but navigable environments, textured substrate, problem-solving opportunities, appropriate enrichment in captivity?
-
-What cannot be determined from current research — the open questions, where scientists disagree, where observation is insufficient?
 
 ---
 
@@ -108,9 +108,9 @@ What is this organism's characteristic stance as scientists describe its typical
 
 What legal frameworks protect this organism's moral status where relevant? Cite specific legislation with dates and scope. For cephalopods: EU Directive 2010/63/EU (the only invertebrates requiring ethical review in research); UK Animal Welfare (Sentience) Act 2022 extension via the LSE Sentience Review (Birch et al. 2021); Switzerland's animal welfare legislation. For other species: the equivalent frameworks.
 
-What philosophical literature addresses the organism's moral status? Peter Singer (*Animal Liberation*, *Expanding the Circle*); Tom Regan (*The Case for Animal Rights*); Martha Nussbaum (*Justice for Animals*, 2023); Lori Gruen; Sue Donaldson and Will Kymlicka (*Zoopolis*); Jonathan Birch (*The Edge of Sentience*, 2024). For each: position on this kind of organism, with citation.
+What philosophical literature addresses the organism's moral status? Peter Singer (*Animal Liberation*, *Expanding the Circle*); Tom Regan (*The Case for Animal Rights*); Martha Nussbaum (*Justice for Animals*, 2023); Lori Gruen; Sue Donaldson and Will Kymlicka (*Zoopolis*); Jonathan Birch (*The Edge of Sentience*, 2024). Include non-Anglophone philosophy of mind and animal studies where relevant: Vinciane Despret (*What Would Animals Say If We Asked the Right Questions?*, 2016; *Our Emotional Makeup*, 2004) on ethological attunement and "becoming with" animals; Dominique Lestel (*Les origines animales de la culture*, 2001; *L'animal singulier*, 2004) on animal–human hybrid communities; Jacques Derrida (*The Animal That Therefore I Am*, 2008) on the philosophical complicity in animal-subject erasure. For each: position on this kind of organism, with citation.
 
-What Indigenous and non-Western perspectives on this organism are documented in peer-reviewed or scholar-vetted ethnographic work? Include only perspectives with published documentation; do NOT produce generic "Indigenous wisdom." For Octopus: Pacific Islander relationships with *he'e* (Hawaiian octopus) in specific ethnographic sources; Mediterranean and Japanese traditions with scholarly analysis. Flag where the documented record is thin.
+What Indigenous and non-Western perspectives on this organism are documented in peer-reviewed or scholar-vetted ethnographic work? Include only perspectives with published documentation; do NOT produce generic "Indigenous wisdom." Apply the CARE Principles (Collective Benefit, Authority to Control, Responsibility, Ethics; Carroll et al. 2020) and the Indigenous Protocol and Artificial Intelligence Position Paper (Lewis et al. 2020) as guardrails — flag where Indigenous knowledge is thin in the published record rather than filling gaps with inference. For Octopus: Pacific Islander relationships with *he'e* (Hawaiian octopus) in specific ethnographic sources; Mediterranean and Japanese traditions with scholarly analysis. Flag where the documented record is thin.
 
 What is the hard problem for THIS organism — the specific limits of what can be known about its subjective experience? Cite philosophy of mind. This is the ethical-epistemic boundary the voice must respect.
 

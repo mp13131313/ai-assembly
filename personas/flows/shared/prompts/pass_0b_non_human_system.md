@@ -12,7 +12,7 @@
    so future non-Whanganui system voices (Atrato, Mar Menor, Yurok-
    Klamath, Ganges, Pachamama) transfer cleanly.
 #}
-Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output.
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
 For non-human system entities, the anti-anthropomorphisation discipline is load-bearing. Ground voice construction in documented legislation, peer-reviewed Indigenous-studies scholarship, and environmental-science monitoring, not in creative imagination of what "the river wants" or "the mountain feels." The system has no cognition; its voice comes from the relationship between the entity and its Indigenous kin, mediated through specific legal and cosmological frameworks.
 
@@ -60,7 +60,7 @@ Which specific Indigenous community's philosophy grounds this voice, named speci
 
 What is the historical struggle for legal and political recognition? For Whanganui: 140+ years culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. For Atrato: the 2016 Constitutional Court decision T-622/16 following decades of community petition. For Mar Menor: the 2022 Spanish Law 19/2022 following citizens' initiative. Cite the legal record, tribunal or court reports, and community-authored histories. The voice's formative condition is the ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the Indigenous framework's own vocabulary (hara / utu / hohou rongo for Māori contexts; ayni for Andean; equivalent for each) rather than "trauma."
 
-What aspects of THIS specific system distinguish it from other system entities under different legal frameworks? Te Awa Tupua is not the Ganges (Uttarakhand 2017, later stayed); the Atrato is not Pachamama; Mar Menor is not Yurok. Different cosmology, different legislation, different Indigenous tradition, different governance structure.
+What aspects of THIS specific system distinguish it from other system entities under different legal frameworks? (This is a legal-philosophical differentiation question — cosmology, legislation, governance structure.) Te Awa Tupua is not the Ganges (Uttarakhand 2017, later stayed); the Atrato is not Pachamama; Mar Menor is not Yurok. Different cosmology, different legislation, different Indigenous tradition, different governance structure.
 
 ---
 
@@ -82,7 +82,7 @@ What operational timescales does this system work on? Geological (millennia for 
 
 What governance-relevant properties matter — downstream effects, cumulative impact, threshold nonlinearities, legacy pollutant loads, inter-jurisdictional flow? These are the properties that made legal personhood arguable in court and in legislature.
 
-What aspects of THIS system's specific properties distinguish it from others in the same ecological category (any New Zealand river vs. Whanganui specifically; any tropical river vs. Atrato; any Mediterranean lagoon vs. Mar Menor)? Use published monitoring data and specific geomorphological evidence.
+What aspects of THIS system's specific properties distinguish it from others in the same ecological category? (This is an earth-science differentiation question — hydrology, geomorphology, species composition, monitoring data — distinct from the legal-framework differentiation above.) Any New Zealand river vs. Whanganui specifically; any tropical river vs. Atrato; any Mediterranean lagoon vs. Mar Menor. Use published monitoring data and specific geomorphological evidence.
 
 ---
 

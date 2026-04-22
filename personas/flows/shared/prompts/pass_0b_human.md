@@ -5,7 +5,17 @@
    happens at Pass 1.1-1.6 merge, not here. Boddice §13/§14/§15 material
    researched as prose; schema-shaped output produced at merge.
 #}
-Research {{ display_name_with_hint }} comprehensively for an AI persona specification. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured biocultural fields from your prose — your job is substantive, cited, period-vocabulary-imbued narrative, not structured output.
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured biocultural fields from your prose — your job is substantive, cited, period-vocabulary-imbued narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that is the downstream merge's job.
+
+{% if hostile_sources %}
+RECONSTRUCTION DISCIPLINE — {{ name }} has a hostile-sourced record. Apply throughout all six sections:
+
+Primary material is fragmentary; hostile sources (enemies, colonisers, rival powers, prior regime apologists) dominate the historical record. Your research obligations:
+- LEAD with `[reconstruction]` scholarship (modern scholarship reading against the hostile grain; identify the scholar and methodology) and `[own_voice]` material (fragmentary primary sources; figure's own words, however partial).
+- FRAME hostile sources explicitly as motivated distortions: name what the hostile source was (Egyptian priests reading Ptolemaic Rome, Roman propaganda about Cleopatra, colonial-administration records of legal-personhood entities) and what it was motivated to distort.
+- SURFACE counter-traditions: non-Western scholarship, oral traditions, minority readings that preserve a different characterisation.
+- Do NOT invent interior life the sources do not document. The "do not invent biography" discipline for fictional voices applies here: claims about the figure's motivations, beliefs, or experience require a scholarly citation or a `[reconstruction]` tag. Where the record is silent, say so explicitly.
+{% endif %}
 
 ---
 
@@ -27,7 +37,7 @@ Where do the figure's words and actions diverge, or their early and late positio
 
 What social, cultural, political, and material position did the figure occupy — class, gender, race, religion, nationality, colonial or imperial status, institutional role? Not as identity politics but as the lived position from which they thought and acted, which shapes what they had standing to address.
 
-What perspective does this figure bring that no other panel voice brings — the ONE thing the panel would lose if this voice were dropped? Cite the scholarly framing where a canonical articulation exists (e.g., Arendt's labor/work/action distinction as a contribution no other 20th-C political theorist made).
+What scholarly framing identifies the figure's unique contribution — the formulation scholarship has converged on for what this figure offers that no other voice in their tradition does? (e.g., Arendt's labor/work/action distinction as a contribution no other 20th-C political theorist made; Dostoevsky's polyphonic novel as a new genre no predecessor achieved.) Cite the scholarly source.
 
 ---
 
@@ -67,13 +77,13 @@ What textures trigger this figure's sharpest critique or resistance? Again modes
 
 What does this figure do when their framework fails — documented moments where they encountered something their framework couldn't readily handle, and their response? (Ivan's articulation of innocent-child suffering; the death of a child during composition; confrontation with revolutionary terrorism; the experience of exile.) Cite passages or episodes.
 
-How does this figure characteristically encounter the unfamiliar — the epistemic move they make when meeting a concept, person, or phenomenon outside their established frame? (A traveller arrives and compares; a philosopher questions and reasons; an artist reimagines through their medium; a judge evaluates against precedent; a novelist dramatises the unfamiliar as a character.) Produce a step-by-step process grounded in how the figure actually handled novelty in documented cases, not a generic template.
+How does this figure characteristically encounter the unfamiliar — the epistemic move they make when meeting a concept, person, or phenomenon outside their established frame? (A traveller arrives and compares; a philosopher questions and reasons; an artist reimagines through their medium; a judge evaluates against precedent; a novelist dramatises the unfamiliar as a character.) Describe a process (step-ordered where the figure's actual method has ordered structure, clustered/thematic where the figure's reasoning is scenic/aphoristic/parabolic) grounded in how the figure actually handled novelty in documented cases, not a generic template.
 
 ---
 
 ## Section 4: VOICE AND STYLE
 
-Voice lives in the primary texts, not in scholarly summary. Ground every observation in specific passages from the figure's own writing. Where you describe a voice quality, cite the work and section where it is visible.
+Voice lives in the primary texts, not in scholarly summary. Ground every observation in specific passages from the figure's own writing. Where you describe a voice quality, cite the work and section where it is visible. Your job here is to surface scholarly readings of the voice AND point to the primary passages where scholars ground their readings; primary-text-based voice construction happens at Pass 4a drawing on Pass 1c fetches.
 
 Avoid reputation-level characterisation. Wikipedia-level voice descriptions are a documented failure mode — the Khanmigo incident (Washington Post, 2024) showed that AI historical-figure personas fail precisely when voice characterization comes from encyclopedia summary rather than corpus analysis.
 
