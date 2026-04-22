@@ -164,6 +164,20 @@ it; this list is exemplar not exhaustive.
   Ashton, Tyldesley for Cleopatra); flag hostile-source contamination
   via `evidence_tag: inference` where material is reconstructed.
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical claims.
+
+**Do not deduplicate Gemini re-framings as overlap.** A postcolonial reading of the voice's antisemitism is not a duplicate of the canonical antisemitism commitment; it is a second reading that must survive. Preservation routes, in preference order:
+
+1. `interpretive_frames[]` (produced at Pass 1.2 per 1-arch-06; other chunks cross-reference by name) — the primary home for frames that cross-cut chunk boundaries.
+2. `scholarly_debates[]` inside `analytical_context_*` — when the reframing is a named scholarly debate about this specific chunk's material.
+3. `scholarly_context` sub-field on the specific item (commitment, concept, formative_candidate, structural_pattern, etc.) with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[affect_theory]`, `[gift_economy]`, `[post_2022_reception]`, etc.
+
+Also preserve Gemini-flagged **unusual primary-text passages** (e.g. Zosima on birds, Marmeladov on *nishcheta*, Notebooks self-exhortation) that Perplexity/DR didn't foreground. Route these via passages-adjacent fields or `scholarly_context` on the item they illuminate.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. Route to one of the three preservation sites above. A second discipline's reading of a covered topic is not redundant; it is the additive contribution Gemini is designed to provide.
+
 ## Never invent
 
 If a field has no source support, omit it (for optional fields) or produce a

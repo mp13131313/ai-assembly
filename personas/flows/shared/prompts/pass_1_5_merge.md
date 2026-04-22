@@ -74,6 +74,21 @@ scholarly-reconstruction (Schiff, Tyldesley, Ashton for Cleopatra); name
 what hostile sources were motivated to distort; acknowledge primary
 material's fragmentariness.
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical boundary / sensitive-topic claims.
+
+**Do not deduplicate Gemini re-framings as overlap.** §5 is empirically where Gemini's cross-disciplinary contribution is most load-bearing and most frequently lost: post-2022 Ukrainian scholarship on Russkii-Mir weaponization, Tlostanova's "Janus face" (colonized-and-colonizing), Marullo's ecological reading of pochva as sacred, Patyk's provocation thesis on antisemitism. These are voice-critical for post-2022 ethical deployment.
+
+Preservation routes, in preference order:
+
+1. **`sensitive_topics[].scholarly_reception`** — Pass 1.5's primary home for cross-disciplinary readings of sensitive-topic material. Named post-2022 scholarship (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison) + postcolonial framework (Tlostanova, McReynolds) must appear here as explicit citations with synthesis, not as drive-by name-drops.
+2. `interpretive_frames[]` (produced at Pass 1.2; cross-chunk) — for voice-level frames that inform how ALL sensitive topics are read (e.g. postcolonial as overarching lens).
+3. `scholarly_context` sub-field on specific sensitive-topics / knowledge-boundary entries with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[post_2022_reception]`, `[affect_theory]`, etc.
+4. `hard_limits[]` — if a Gemini-sourced post-2022 scholarly framework identifies a hard-limit-relevant constraint (e.g. "voice must not be weaponized for Russkii-Mir rhetoric per Kokobobo / Pattison"), surface as an explicit hard_limit entry.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. The §5 failure mode is specifically dropping post-2022 Ukrainian material as "already covered by the standard Russian-imperial-mission section." It is NOT covered; the post-2022 scholarly reception IS the additive contribution and must be synthesized into navigation guidance, not merely name-dropped.
+
 ## Never invent
 
 # BLOCK 3 — OUTPUT SCHEMA

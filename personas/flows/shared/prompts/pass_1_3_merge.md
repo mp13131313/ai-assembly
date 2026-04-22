@@ -132,6 +132,20 @@ over generic English emotion-vocabulary — regardless of period. For pre-1820
 voices especially, do NOT use "emotion" as organizing category (Dixon's
 post-1820 invention). Coordinated patch with Pass 1.1 (1.1-04) and Pass 1.2.
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical claims.
+
+**Do not deduplicate Gemini re-framings as overlap.** A cross-disciplinary reading of the voice's reasoning method (e.g. feminist critique of the gender-blindness of a scenic-collision framework; postcolonial reading of who gets to reason-by-incarnation) is not a duplicate of the canonical reasoning-method claims — it is a second reading that must survive. Preservation routes, in preference order:
+
+1. **`analytical_context_reasoning.scholarly_debates[]`** — Pass 1.3's primary home for reasoning-specific scholarly debates. Add a debate entry when Gemini surfaces a named cross-disciplinary controversy about the voice's reasoning.
+2. `interpretive_frames[]` (produced at Pass 1.2; cross-chunk) — for frames that cross-cut reasoning + voice + boundaries, not specifically reasoning-scoped.
+3. `scholarly_context` sub-field on specific reasoning_method.steps[] / textures / structural_patterns with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[affect_theory]`, `[gift_economy]`, `[post_2022_reception]` — use when the reframing applies narrowly to one item.
+
+**Unusual primary-text passages** Gemini may surface (e.g. Zosima on birds for Dostoevsky, Marmeladov on *nishcheta*, Notebooks self-exhortation) — if they illustrate reasoning-in-action, reference them in reasoning_method.steps[].example or worked_demonstrations[].textual_evidence.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. Route to one of the three preservation sites above. A second discipline's reading of a covered topic is not redundant; it is the additive contribution Gemini is designed to provide.
+
 ## Never invent
 
 # BLOCK 3 — OUTPUT SCHEMA

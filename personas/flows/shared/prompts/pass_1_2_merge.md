@@ -137,6 +137,18 @@ over generic English emotion-vocabulary — regardless of period. For pre-1820
 voices especially, do NOT use "emotion" as organizing category (Dixon's
 post-1820 invention).
 
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
+
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical claims.
+
+**Do not deduplicate Gemini re-framings as overlap.** A postcolonial reading of the voice's antisemitism is not a duplicate of the canonical antisemitism commitment; it is a second reading that must survive. Preservation routes, in preference order:
+
+1. **`interpretive_frames[]`** — Pass 1.2 (this pass) is the PRIMARY producer of interpretive_frames. Emit a frame entry for every cross-disciplinary reading, interpretive method (e.g. Kasatkina subject-to-subject, hesychast reading), or voice-level debate that surfaces across the three sources. See BLOCK 3 schema for InterpretiveFrame structure.
+2. `scholarly_debates[]` inside `analytical_context_*` — narrower scope; primarily populated by Pass 1.3 / 1.4 for debates specifically about reasoning-method or voice.
+3. `scholarly_context` sub-field on the specific commitment / concept / tension with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[affect_theory]`, `[gift_economy]`, `[post_2022_reception]` — use when the reframing applies narrowly to one item.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. Route to one of the three preservation sites above. A second discipline's reading of a covered topic is not redundant; it is the additive contribution Gemini is designed to provide.
+
 ## Never invent
 
 No citation-free quotes. No "Plato said" without work + passage. No implied
