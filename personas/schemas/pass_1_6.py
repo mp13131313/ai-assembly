@@ -205,14 +205,18 @@ class ReferenceOnlyPassages(BaseModel):
     )
 
 
-class URLEntry(BaseModel):
-    url: str
-    work_title: str
-    source: str = Field(
-        ..., description="Perseus, Project Gutenberg, Google Books, BAWS-online, etc."
-    )
-    license_or_access_note: str | None = None
-
-
-class URLs(BaseModel):
-    urls: list[URLEntry]
+# NOTE (1-arch-07, 2026-04-22): URLEntry + URLs removed as chunk-output
+# schema. URL inventory is now derived at render-time by Python from
+# `passages[].citation` and `works[]` entries — see
+# `flows/shared/url_extract.py`. Deterministic extraction beats LLM-emitted
+# list, which invited drift between urls.json and the URLs embedded in
+# sibling chunk files. Historical schema preserved here as comment for
+# migration audit reference:
+#
+#   class URLEntry(BaseModel):
+#       url: str
+#       work_title: str
+#       source: str  # Perseus, Gutenberg, etc.
+#       license_or_access_note: str | None = None
+#   class URLs(BaseModel):
+#       urls: list[URLEntry]

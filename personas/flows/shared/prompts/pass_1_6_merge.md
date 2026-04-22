@@ -1,7 +1,7 @@
 {# Pass 1.6 CORPUS merge — 1-arch-03 additive.
 
 Claude Opus 4.7, adaptive thinking, streaming. Reads Perplexity §6 + Claude DR
-§6 + full Gemini. Emits Works + Passages + URLs + ReferenceOnlyPassages per
+§6 + full Gemini. Emits Works + Passages + ReferenceOnlyPassages per (`urls` removed per 1-arch-07; derived at render-time)
 pass_1_6.py.
 
 Meta-conventions inherit from Pass 1.1 / 1.2 (frozen).
@@ -61,7 +61,7 @@ success rate under this discipline. Preserve.
 
 Voice_mode not rendered at 1.6 — bibliographic shape determined by
 corpus_constraint + type + subtype + hostile_sources; reasoning-mode
-doesn't affect works/passages/urls extraction.
+doesn't affect works/passages extraction.
 
 ## Purpose-tag trichotomy
 
@@ -77,16 +77,22 @@ passages. If uncertain, omit.
 
 # BLOCK 3 — OUTPUT SCHEMA
 
-Return JSON with FOUR top-level keys:
+Return JSON with THREE top-level keys:
 
 ```json
 {
   "works":                    { ... Works ... },
   "passages":                 { ... Passages ... },
-  "urls":                     { ... URLs ... },
   "reference_only_passages":  { ... ReferenceOnlyPassages ... }
 }
 ```
+
+**1-arch-07 (2026-04-22):** `urls` is NO LONGER an output key. URL inventory
+is derived at render-time by Python from `passages[].citation` and `works[]`
+string fields (via `flows/shared/url_extract.extract_urls()`). When you
+produce works[] and passages[] entries, **embed URLs within the relevant
+string fields** (citation, canonical_reference, note) — the deterministic
+extractor picks them up. Do NOT emit a separate urls[] list.
 
 `reference_only_passages` is OPTIONAL — primarily for musical / translation-
 copyright-sensitive voices. Public-domain voices (Plato, Ibn Battuta,
@@ -100,10 +106,6 @@ Canonical schemas:
 
 ```json
 {{ passages_schema }}
-```
-
-```json
-{{ urls_schema }}
 ```
 
 ```json
@@ -289,7 +291,7 @@ reference_only_passages: empty (public-domain translations available).
 
 # BLOCK 6 — YOUR TASK
 
-Extract works + passages + urls + reference_only_passages per schemas and
+Extract works + passages + reference_only_passages per schemas and
 worked examples. Additive merge per Block 2.
 
 **Order:**
@@ -299,7 +301,7 @@ worked examples. Additive merge per Block 2.
    context for major scholarly-corpus debates.
 2. Extract passages. Minimum 8; uncapped. Purpose-tag each. Populate
    Passages.translator_tradition_coverage for multi-translator voices.
-3. Collect URLs. Never fabricate.
+3. Embed URLs within passages[].citation and works[] string fields. URL inventory is derived deterministically at render-time (1-arch-07); do NOT emit a separate urls[] list. Never fabricate URLs.
 4. For musical / copyright-sensitive voices: populate reference_only_passages.
    Public-domain voices: empty default.
 5. Respect voice-type variants (musical two-tier / hostile-source Tier 2 bias
