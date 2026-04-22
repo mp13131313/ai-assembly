@@ -821,6 +821,67 @@ No prompt-scope regression: every check, every resolution category, every escala
 
 ---
 
+### 5.6 Pass 1.7 Stage C edits-to-chunks (amendment 2026-04-23, per 1-arch-05 Part B)
+
+**Extends §5.5.** Under the 2026-04-22 Pass 1.7 split amendment, Stage C applied audit edits to an in-memory composed copy then wrote `08_merged_dossier.json`. That left the per-chunk source files (`pass_1_N/<key>.json`) un-edited — a two-sources-of-truth problem.
+
+**1-arch-05 Part B lands 2026-04-23:** Stage C now routes each audit edit to its owning chunk file. Each touched chunk file is re-validated against its Pydantic model and atomically written back. Coherence metadata (`coherence_flags[]`, `coherence_resolutions[]`) moves to a separate `02_merge/_coherence_audit.json` file. `08_merged_dossier.json` is rebuilt from post-edit chunk files as a convenience snapshot — it is NO LONGER the source of truth for downstream passes.
+
+**New machinery in `personas/run_pass_1_7.py`:**
+- `_CHUNK_ROUTING`: 19-entry map of chunk_key → (chunk_dir, filename, Pydantic model, is_list) enabling routing by first path token.
+- `_apply_edit_to_chunk_data(chunk_data, within_tokens, op, value)`: applies a single op (append/set) within a loaded chunk data structure; handles both list-root (commitments.json, concepts.json, tensions.json, interpretive_frames.json, formative_candidates.json) and dict-root chunks.
+- `_route_edit_to_chunk_file(edit, project_root, slug)`: end-to-end routing: parse path → look up chunk → load file → apply → Pydantic re-validate → atomic write. Returns a short description for logging.
+- `_COHERENCE_METADATA_KEYS`: defensive skip set for edits that target `coherence_flags` / `coherence_resolutions` (those live in `_coherence_audit.json`, not chunk files).
+
+**Legacy `_apply_edit` (in-memory dict mutation)** retained for migration + testing but marked DEPRECATED; production Stage C exclusively uses `_route_edit_to_chunk_file`.
+
+**Architectural invariant:** chunk files are the source of truth end-to-end. Pass 1.7 edits change them. `08_merged_dossier.json` is a derived snapshot rebuilt after edits — any downstream consumer that reads chunks directly (under §5.7 per-chunk reads) sees post-edit state.
+
+### 5.7 Pass 2-6 + Pass 1d per-chunk reads (amendment 2026-04-23, per 1-arch-05 Part A)
+
+**Couples with §5.6.** Prior to 1-arch-05, each of Pass 2/3/4a/6 (and Pass 1d) rendered `{{ merged_dossier }}` as one 300-450K JSON blob. This carried ~70% irrelevant content per call (Pass 4a needed moves+register+vocabulary+analytical_context_voice ≈ 80K; got 432K blob), diluted attention, and obscured data dependencies.
+
+**1-arch-05 Part A lands 2026-04-23:** five user prompt templates refactored to declare named chunk-content template variables + sub-slice plucks + filtered interpretive_frames subsets. Runner helper `_per_chunk_vars(merged_dossier_dict)` produces 23 named render vars; each pass's render call picks its subset.
+
+**Per-pass consumption (authoritative from 2026-04-23 forward):**
+
+- **Pass 2 (Identity+Boundaries, 10 fields):** `life_scaffold`, `formative_candidates` (chunk 1.1); `knowledge_boundary_chunk`, `sensitive_topics`, `hard_limits_chunk` (chunk 1.5); `voice_level_debate_frames` (filtered subset of chunk 1.2 interpretive_frames).
+- **Pass 3 (Intellectual Core, 5 fields):** `commitments`, `concepts`, `tensions`, `interpretive_frames` (chunk 1.2); `reasoning_method_chunk`, `textures`, `analytical_context_reasoning` (chunk 1.3); `pass_2_summary` (CT).
+- **Pass 4a (Voice, 7 fields):** `moves`, `register`, `vocabulary`, `analytical_context_voice` (chunk 1.4); `available_pathe` (sub-slice of chunk 1.1); `reasoning_method_summary` (sub-slice of chunk 1.3); `cross_disciplinary_frames` (filtered chunk 1.2 subset); `primary_texts` (Pass 1d block); `pass_2_3_summary` (CT).
+- **Pass 4b (Artifact, 8 fields):** unchanged — CT-only + card-field refs.
+- **Pass 5 (Engagement, 4 fields):** unchanged — CT + constitution + reasoning_method card fields.
+- **Pass 6 (Corpus, 1+1 fields):** `works`, `passages`, `reference_only_passages` (chunk 1.6); `primary_texts` (Pass 1d); `pass_2_3_4a_summary` (CT); 6 prior card-field refs for selection criteria.
+- **Pass 1d (Excerpt Selection, no card fields — produces primary_block):** `passages`, `works` (chunk 1.6); `reasoning_method_chunk` (chunk 1.3); `register`, `moves` (chunk 1.4); `structural_index` (from fetched primary texts).
+
+**Variable-naming convention:** 16 chunks use natural names; 3 chunks that collide with downstream card-field names use `_chunk` suffix (`reasoning_method_chunk`, `knowledge_boundary_chunk`, `hard_limits_chunk`) in the template layer.
+
+**Outcome:** cumulative Pass 2-6 input drops from ~2.16M tokens (single-blob × 5 passes) to ~660K tokens (focused per-chunk). ~3.3× reduction per voice. Attention is focused on relevant content. Data dependency graph is now explicit at the template layer.
+
+**Pass 4b/5 chunk reads considered + withdrawn:** during the 2026-04-22 retrospective, I proposed having Pass 4b and Pass 5 read chunks directly to address the baseline Pass 7a register-drift ISSUE on 6 Pass 4b output-characteristics fields. On reconsideration: chunks are third-person scholarly descriptions of the voice (Pass 2-4a's job is specifically the third-person → first-person register shift). Chunk reads at Pass 4b would reintroduce third-person material into an input path that's just been transformed, likely worsening register drift. The fix for Pass 4b drift is prompt-level register discipline at Pass 4b itself (or at Pass 2/3/4a's synthesis — upstream) and/or empirical validation of arch-03's richer-CT-resolves-drift hypothesis at Stage 2. Pass 4b/5 stay CT-based.
+
+### 5.8 Anachronism discipline consolidation (amendment 2026-04-23, per 1-arch-08)
+
+**Independent schema simplification.** Pre-1-arch-08, anachronism-discipline content appeared in two chunk outputs:
+- `pass_1_1/life_scaffold.json` → `anachronisms_to_avoid[]` (biographical angle)
+- `pass_1_5/knowledge_boundary.json` → `conceptual_exclusions[]` (epistemic angle, overlapping content)
+
+Same content, two framings, two sources. Pass 1.7 Coherence Check 4 existed specifically to cross-reconcile them.
+
+**1-arch-08 lands 2026-04-23:** single canonical source at `KnowledgeBoundary.anachronism_discipline[]`. `AnachronismEntry` model expanded with:
+- `modern_term`: the modern/clinical term to avoid
+- `biographical_framing`: why the term flattens biographical experience (Pass 2 plucks for `world.anachronisms_to_avoid` card field)
+- `epistemic_framing`: when the term entered discourse + why it's outside the voice's knowledge horizon (Pass 2 plucks for `knowledge_boundary.conceptual_exclusions` enrichment)
+- `voice_native_alternative`: tradition-specific term if any (nadryv for trauma; ibtilā' for trial)
+- `severity`: `hard_ban` / `use_with_caution` / `translator_note`
+
+`LifeScaffold.anachronisms_to_avoid` REMOVED from schema. Pass 1.1 merge prompt still NAMES anachronisms inline in narrative fields where relevant ("not 'trauma' (clinical anachronism) but *nadryv*") but does NOT emit a separate list. Pass 1.5 merge prompt gains the production instruction with both framings per entry.
+
+**Pass 1.7 Coherence Check 4** simplified from cross-chunk reconciliation to self-consistency verify (both framings populated, severity appropriate) — single source can't disagree with itself.
+
+**Pass 2** consumption under 1-arch-05 Part A: `knowledge_boundary_chunk` carries the `anachronism_discipline[]` list; Pass 2's system prompt directs it to pluck `biographical_framing` for `world.anachronisms_to_avoid` card field and `epistemic_framing` for `knowledge_boundary.conceptual_exclusions` card field.
+
+---
+
 ## 6. Pass 2–6 adjustments
 
 Target: `personas/flows/shared/prompts/persona_pass_2_identity_boundaries.md` through `persona_pass_6_corpus.md` + user prompts + `run_persona_pipeline.py`.
