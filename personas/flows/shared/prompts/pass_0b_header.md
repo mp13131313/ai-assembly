@@ -5,11 +5,14 @@
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI (Section {{ section_index }} of 6)
 
 {% if section_index == 1 %}
-1. Open claude.ai and select **Claude Opus 4.6** (Phase B empirically validated; 4.7 acceptable if 4.6 unavailable).
+1. Open claude.ai and select **Claude Opus 4.6** (Phase B empirically validated for §1–§5).
 2. Enable **Extended Thinking** and **Deep Research** (both must be on).
 3. Paste everything below the dashed line as your user message. Subsequent sections can be pasted in the same thread or in fresh threads — operator's choice.
+{% elif section_index == 6 %}
+1. **Switch to Claude Opus 4.7 for §6** (Phase L empirical finding: Opus 4.6 produced reader's-intro rather than corpus-gateway output on §6; Opus 4.7 required). Extended Thinking and Deep Research remain on.
+2. Paste everything below the dashed line as your user message.
 {% else %}
-1. Continue in the thread of your choice (same thread as prior sections for cross-section coherence, or fresh thread for independent sampling). Model and toggles stay as Section 1.
+1. Continue in the thread of your choice (same thread as prior sections for cross-section coherence, or fresh thread for independent sampling). Model and toggles stay as Section 1 (Opus 4.6).
 2. Paste everything below the dashed line as your user message.
 {% endif %}
 
@@ -22,26 +25,12 @@ PREAMBLE — BEFORE PASTING INTO CLAUDE.AI (Section {{ section_index }} of 6)
 {% if section_index < 6 %}
 {{ (7 if section_index == 1 else 6) }}. **Do NOT run the pipeline yet.** Paste `{{ voice_slug }}_section_{{ section_index + 1 }}_dr_prompt.md` next. The pipeline runs after all 6 sections are saved.
 {% else %}
-{{ (7 if section_index == 1 else 6) }}. All 6 sections now collected. Run the pipeline: `cd personas && venv/bin/python run_persona_pipeline.py "{{ name }}"` (pipeline auto-detects per-section mode).
+{{ (7 if section_index == 1 else 6) }}. All 6 sections now collected. Run the pipeline: `cd personas && venv/bin/python run_persona_pipeline.py "{{ name }}"` (add `--project <path>` to override the env-var default; pipeline auto-detects per-section mode).
 {% endif %}
 
 ---
 
-RESEARCH DISCIPLINE — READ FIRST
-
-This is a research-and-narrate task. You research the figure thoroughly and narrate your findings in prose. You do NOT produce structured extracted output, enumerated lists with quotas, or per-claim evidence tags. Downstream passes extract structured fields from your prose.
-
-- **Synthesis trigger.** When the thematic area below has substantive material sufficient to answer its questions, stop researching and synthesize. A complete narrative with flagged gaps is more valuable than exhaustive verification with incomplete coverage.
-
-- **Gap permission.** If a specific claim cannot be verified in 2 searches, mark it `[~uncertain]` and proceed. Do not chase nonexistent sources. When the public record is thin, say so explicitly — "The scholarly record supports X; Y is contested; Z is not documented" is more valuable than fabricated Y.
-
-- **Citation discipline.** Cite the primary argument of each paragraph. Transitions, restatements, and background scene-setting need no citation. For direct primary-source quotations, use the in-prose marker `[quote: <work>, <section>]`. For speculative or inferential claims, mark `[~uncertain]`. Do NOT produce `[experiential_reconstruction]` / `[projection_warning]` / `[scholarly_consensus]` / `[stated]` / `[inference]` tags — downstream passes apply that convention. Your job is the prose; the tags are the merge's job.
-
-- **Scholars surface naturally.** Where a specific scholar's reading genuinely anchors or redirects the interpretation, name them in the prose. Do not treat scholar-names as a verification checklist. 2–3 authoritative sources per major claim is enough.
-
-- **Non-English scholarship.** Where the figure's primary scholarship exists in a non-English language, include it where it materially shifts the reading. Note gaps rather than exhaustively transliterating.
-
-- **Depth over length.** Produce what the research supports, honestly. The thematic area should receive substantive coverage — but "substantive" is what the record supports, not a padding target.
+{% include "_pass_0b_research_discipline.md" %}
 
 ---
 {% if wikipedia_url and section_index == 1 %}
@@ -50,7 +39,7 @@ Starting point for your research: {{ wikipedia_url }} (verify, expand, find what
 {% else %}
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI
 
-1. Open claude.ai and select **Claude Opus 4.7** (if it fails, retry on **Opus 4.6** — v3.5 mock pipeline runs completed successfully on 4.6 in the 15–90 min band).
+1. Open claude.ai and select **Claude Opus 4.6** (monolithic mode produces one full-voice dossier; Opus 4.6 empirically validated for §1–§5 material; Opus 4.7 acceptable if 4.6 unavailable).
 2. Enable **Extended Thinking** and **Deep Research** (both must be on).
 3. Paste everything below the dashed line as your user message.
 4. Expected runtime: **20–90 minutes**. Successful comparable runs have ranged 538–1046 sources across that window. **If past 2 hours without draft streaming visible, cancel** — that's the convergence-trap signature (DR kept researching, never transitioned to synthesis).
@@ -60,21 +49,7 @@ PREAMBLE — BEFORE PASTING INTO CLAUDE.AI
 
 ---
 
-RESEARCH DISCIPLINE — READ FIRST
-
-This is a research-and-narrate task. You research the figure thoroughly and narrate your findings in prose. You do NOT produce structured extracted output, enumerated lists with quotas, or per-claim evidence tags. Downstream passes extract structured fields from your prose.
-
-- **Synthesis trigger.** When each of the six thematic areas below has substantive material sufficient to answer its questions, stop researching and synthesize. A complete narrative with flagged gaps is more valuable than exhaustive verification with incomplete coverage. Your own §5–§6 failing to arrive would be a worse outcome than §5–§6 with honest gaps named.
-
-- **Gap permission.** If a specific claim cannot be verified in 2 searches, mark it `[~uncertain]` and proceed. Do not chase nonexistent sources. When the public record is thin, say so explicitly — "The scholarly record supports X; Y is contested; Z is not documented" is more valuable than fabricated Y.
-
-- **Citation discipline.** Cite the primary argument of each paragraph. Transitions, restatements, and background scene-setting need no citation. For direct primary-source quotations, use the in-prose marker `[quote: <work>, <section>]`. For speculative or inferential claims, mark `[~uncertain]`. Do NOT produce `[experiential_reconstruction]` / `[projection_warning]` / `[scholarly_consensus]` / `[stated]` / `[inference]` tags — downstream passes apply that convention. Your job is the prose; the tags are the merge's job.
-
-- **Scholars surface naturally.** Where a specific scholar's reading genuinely anchors or redirects the interpretation (Bakhtin on polyphony; Frank on Dostoevsky; Vlastos on Socratic Plato), name them in the prose. Do not treat scholar-names as a verification checklist. Your training covers most of them; trust that. 2–3 authoritative sources per major claim is enough.
-
-- **Non-English scholarship.** Where the figure's primary scholarship exists in a non-English language, include it where it materially shifts the reading. Do not default to Anglophone-only framing. Where non-English scholarship is thin or unverifiable from open-web search, note the gap rather than exhaustively transliterating.
-
-- **Depth over length.** Produce what the research supports, honestly. No word-count floor to hit; no word-count ceiling to stay under. The six thematic areas should each receive substantive coverage — but "substantive" is what the record supports, not a padding target.
+{% include "_pass_0b_research_discipline.md" %}
 
 ---
 {% if wikipedia_url %}

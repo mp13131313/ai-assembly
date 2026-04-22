@@ -77,6 +77,30 @@ Example for Dostoevsky §1 BIOGRAPHICAL FOUNDATION (given Perplexity + Gemini ty
 
 Tight. Specific. Anchored. Answerable. Each question is a tractable finish-line — DR knows when it's addressed.
 
+Example for Octopus §1 ECOLOGICAL FOUNDATION (`type=non_human`, `subtype=organism`; given Perplexity + Gemini typically cover distributed-cognition overview, chromatophore basics, and Godfrey-Smith *Other Minds* summary but often miss the per-arm autonomy research and specific sensory-biology citations):
+
+```
+**Voice-specific follow-up questions for this section** (gaps Perplexity + Gemini left unresolved):
+
+1. What does current arm-level autonomy research establish about the degree to which individual arms act independently vs. centrally modulated? Cite Hochner's group (Weizmann Institute) on the octopus's peripheral nervous system and the specific neuroscience of arm decision-making.
+
+2. What specific sensory-biology studies document the chemoreceptors in the suckers — sensitivity ranges, substance discrimination, comparative data? Godfrey-Smith names the phenomenon; the original biology literature (Sumbre et al., Hanlon & Messenger) should be cited with specific parameters.
+
+3. How does the documented individual-variation research (Mather's personality studies; Sinn et al. on bold-shy axes) ground character-variation claims without anthropomorphising? Name the specific behavioural-consistency metrics used.
+```
+
+Example for Cleopatra §1 BIOGRAPHICAL FOUNDATION (`type=human`, `hostile_sources=true`; given Perplexity + Gemini typically cover the Plutarch / Cassius Dio / Appian narrative, Caesar-Antony relationships, and basic Egyptological context but often miss the reconstruction-vs-hostile-source tension and non-Anglophone scholarship):
+
+```
+**Voice-specific follow-up questions for this section** (gaps Perplexity + Gemini left unresolved):
+
+1. How does current Egyptological and Ptolemaic-studies scholarship reconstruct Cleopatra's administrative and linguistic competence against the grain of Roman sources motivated to feminise and discredit? Cite Duane Roller (*Cleopatra: A Biography*, 2010) and Stacy Schiff's sourcing discussion; flag where reconstruction is inferential.
+
+2. What does the Ptolemaic documentary record (papyri, administrative decrees) establish about Cleopatra's government independent of Roman narrative sources? Cite the specific papyrological evidence.
+
+3. What is the state of scholarship on Cleopatra's ethnic and cultural identity in current Afrocentric vs. mainstream Ptolemaic historiography? Name the historians on each side; this is a contested field where hostile-source framing shapes downstream reception.
+```
+
 # BLOCK 3 — GUARDRAILS
 
 - **Ask unasked questions, do not restate coverage.** Do not produce "Research-to-date: Perplexity covered X, Y, Z. Go DEEPER on A, B, C." That shape pressures DR into avoidance or verification mode. Produce only the questions DR should address.
@@ -95,7 +119,7 @@ Tight. Specific. Anchored. Answerable. Each question is a tractable finish-line 
 
 - **Do NOT invent gaps.** If Perplexity + Gemini cover a section thoroughly and you cannot identify 2–3 genuine gaps, surface fewer questions and say so inline ("Perplexity + Gemini coverage of this section is thorough; one additional question worth pushing on..."). Honest thinness beats fabricated depth.
 
-- **Respect voice_config flags**: for `hostile_sources=true`, your questions may target reconstruction-vs-hostile-source tensions; for `corpus_constraint=lyrics_patterns_only`, questions may target speaking-voice vs. singing-voice sources; for `type=non_human` or `fictional`, questions fit the voice-type thematic-area structure.
+- **Respect voice_config flags**: for `hostile_sources=true`, your questions may target reconstruction-vs-hostile-source tensions; for `corpus_constraint=lyrics_patterns_only`, questions may target speaking-voice vs. singing-voice sources; for `type=non_human` or `fictional`, questions fit the voice-type thematic-area structure; for `voice_mode=narratival`, questions may emphasize narrative-structural dimensions (scenic units, characteristic moves at the level of scene or episode, named structural units like скандальная сцена); for `voice_mode=observational`, questions may emphasize perception-and-description registers over argumentative structure.
 
 **SWAP TEST anchor customization (Section 4 only, optional):**
 
