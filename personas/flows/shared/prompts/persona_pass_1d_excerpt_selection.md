@@ -21,6 +21,42 @@ Selection rules:
 - Avoid front matter (translator's introduction, table of contents, prefaces by
   others). Skip past these unless they ARE the voice.
 
+{% if type == "non_human" and subtype == "organism" %}
+VOICE-TYPE RULES (non-human organism — scientific literature):
+- Prefer Abstract + Results sections over Methods when both are present; Results contain
+  the behavioural observations that ground the voice. Methods sections are rarely
+  voice-relevant.
+- Include at least one passage from a Discussion section where the scientists interpret
+  what the behaviour means — this is where the researcher-register the voice draws on
+  most clearly appears.
+- Skip boilerplate acknowledgements, author-contributions, and supplementary-data appendices.
+- For ethological papers: prefer moment-of-observation passages ("Animal X was observed...;
+  the arm extended toward the object...") over statistical-summary tables.
+{% elif type == "non_human" and subtype == "system" %}
+VOICE-TYPE RULES (non-human system — legislation and Indigenous scholarship):
+- Prefer legislative sections that define the entity's legal personality, its intrinsic
+  values, and its governance structure over procedural and schedule sections.
+- For Whanganui-class voices: sections 12–20 of Te Awa Tupua Act (legal personality,
+  Tupua te Kawa, Te Pou Tupua) are primary; schedule content is secondary.
+- Indigenous-authored scholarship passages trump non-Indigenous analysis passages at
+  equal relevance — weight selection toward community voice where available.
+- Skip appendices, financial provisions, and transitional arrangements unless directly
+  load-bearing for voice construction.
+{% elif type == "fictional" %}
+VOICE-TYPE RULES (fictional / literary / mythological character):
+- Select from the authoritative translation specified in the dossier, not from popular
+  or secondary editions unless the dossier explicitly names them.
+- Prefer passages where the character speaks or acts, not passages where they are
+  described by others or the narrator — unless the narrator description is itself
+  voice-defining (Homeric epithets, formulaic characterisation).
+- For frame-narrative voices (Scheherazade): include dawn-break passages and tale-opening
+  passages — these ARE the character's signature structural move.
+- For dramatic works (Hamlet, Antigone): prefer soliloquies and direct address over
+  dialogue passages where others dominate.
+- Include at least one passage where the translation register is most distinctive — the
+  passage that most clearly shows what THIS translation tradition chose.
+{% endif %}
+
 DOSSIER (use as guide for what matters):
 {{ merged_dossier }}
 
