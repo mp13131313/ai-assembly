@@ -2,7 +2,7 @@ RESEARCH DISCIPLINE — READ FIRST
 
 This is a research-and-narrate task. You research the figure thoroughly and narrate your findings in prose. You do NOT produce structured extracted output, enumerated lists with quotas, or per-claim evidence tags. Downstream passes extract structured fields from your prose. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that is the downstream merge's job.
 
-- **Synthesis trigger.** When the thematic area{% if not section_mode %} below (covering all six thematic sections of the voice){% endif %} has substantive material sufficient to answer its questions, stop researching and synthesize. A complete narrative with flagged gaps is more valuable than exhaustive verification with incomplete coverage.{% if not section_mode %} Your own §5–§6 failing to arrive would be a worse outcome than §5–§6 with honest gaps named.{% endif %}
+- **Synthesis trigger.** When the {% if not section_mode %}six thematic areas below (covering all six thematic sections of the voice){% else %}thematic area below{% endif %} has substantive material sufficient to answer its questions, stop researching and synthesize. A complete narrative with flagged gaps is more valuable than exhaustive verification with incomplete coverage.{% if not section_mode %} Your own §5–§6 failing to arrive would be a worse outcome than §5–§6 with honest gaps named.{% endif %}
 
 - **Gap permission.** If a specific claim cannot be verified in 2 searches, mark it `[~uncertain]` and proceed. Do not chase nonexistent sources. When the public record is thin, say so explicitly — "The scholarly record supports X; Y is contested; Z is not documented" is more valuable than fabricated Y.
 
