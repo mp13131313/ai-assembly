@@ -66,15 +66,15 @@
       "type": "object"
     }
   },
-  "description": "Per Boddice §14 4-part rubric. Multiple candidates possible; Pass 2 commits to one.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.",
+  "description": "Per Boddice §14 4-part rubric. Multiple candidates preserved (minimum 2,\nuncapped); Pass 2 commits to ONE PRIMARY per fix 2-03, referencing\n1-2 supporting candidates inline for narrative-context.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.\n\nUnder 1-arch-03: `scholarly_context` preserves interpretive-tradition\nbreadth per formative candidate; `resonates_with_commitments` provides\ncross-chunk coherence aid for Pass 2's primary-choice reasoning.",
   "properties": {
     "candidate_label": {
-      "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates', 'Semelparous lifespan', '1977 melanoma diagnosis refused as toe-amputation'.",
+      "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates 399 BCE', 'Semenovsky mock execution 1849', 'Semelparous lifespan without parenting', '1977 melanoma diagnosis refused as toe-amputation'.",
       "title": "Candidate Label",
       "type": "string"
     },
     "formative_emotional_community": {
-      "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage).",
+      "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage). MUST carry [experiential_reconstruction] tag. No length cap.",
       "title": "Formative Emotional Community",
       "type": "string"
     },
@@ -88,7 +88,7 @@
         }
       ],
       "default": null,
-      "description": "Per §14 sub-field 2 (HUMAN voices only). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction).",
+      "description": "Per §14 sub-field 2 (HUMAN voices). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction). MUST carry [experiential_reconstruction] tag. If using modern clinical term (e.g., 'trauma') even to flag as anachronistic, carry [projection_warning: <term> <distortion>] tag.",
       "title": "Lived Through Own Apparatus"
     },
     "condition_of_being": {
@@ -101,11 +101,11 @@
         }
       ],
       "default": null,
-      "description": "Per §14 sub-field 4 (NON-HUMAN / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus.",
+      "description": "Per §14 sub-field 4 (NON-HUMAN / FICTIONAL / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus. For fictional voices (Scheherazade): the narratorial/frame-tale condition (speaking under threat of execution within 1001 Nights). MUST carry [experiential_reconstruction] tag per §14 attributed-by-narrative-function discipline.",
       "title": "Condition Of Being"
     },
     "engagement_it_drives": {
-      "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological.",
+      "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological. MUST carry [experiential_reconstruction] tag — claims about what the formative context drives are biocultural reconstruction. No length cap.",
       "title": "Engagement It Drives",
       "type": "string"
     },
@@ -130,7 +130,7 @@
       "type": "array"
     },
     "scholarly_support_score": {
-      "description": "Pass 2 uses this when committing to a candidate.",
+      "description": "Pass 2 uses this when committing to a PRIMARY candidate per fix 2-03. Strong: documented across multiple tier_1_primary + scholarly consensus. Moderate: documented but scholarly reception varies. Contested: sources disagree on interpretation.",
       "enum": [
         "strong",
         "moderate",
@@ -138,6 +138,27 @@
       ],
       "title": "Scholarly Support Score",
       "type": "string"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "How different scholarly traditions frame this candidate. Example for Dostoevsky's mock execution: 'Frank (Seeds of Revolt, 1976 pp. 245-252) treats as decisive threshold-experience marking Dostoevsky's pre-Siberia / post-Siberia break; Jackson (1981) reads as origin of the threshold-chronotope in the fiction; Kasatkina (2004) reads the same-evening letter to Mikhail as the birth of the Christ-over-truth formula.' Preserve interpretive breadth; do not synthesize to one reading.",
+      "title": "Scholarly Context"
+    },
+    "resonates_with_commitments": {
+      "description": "Labels of commitments (Pass 1.2 output) this formative context shapes. Cross-chunk coherence aid — Pass 2 uses when choosing primary formative. Example for Semenovsky mock execution: ['Human freedom is metaphysically radical', 'Suffering accepted in faith is redemptive', 'Every person responsible for all'].",
+      "items": {
+        "type": "string"
+      },
+      "title": "Resonates With Commitments",
+      "type": "array"
     }
   },
   "required": [

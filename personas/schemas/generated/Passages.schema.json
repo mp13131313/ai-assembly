@@ -162,6 +162,14 @@
       },
       "title": "Passages",
       "type": "array"
+    },
+    "translator_tradition_coverage": {
+      "description": "For voices whose corpus spans multiple translation traditions: which translations are represented in passages[] and why. Example for Dostoevsky: ['Garnett (Victorian register, public-domain, audience-accessible)', 'Pevear-Volokhonsky (preserves Russian syntactical friction + Cyrillic terms)', 'Ready (contemporary British, tighter prose)']. For Scheherazade: ['Burton 1885 (orientalized, public-domain)', 'Haddawy 1990 (Muhsin Mahdi critical-edition base)', 'Lyons 2008 (contemporary scholarly)']. Pass 4a uses this to select primary translation for voice-exemplar anchoring. Pass 6 uses for curated-passage selection.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Translator Tradition Coverage",
+      "type": "array"
     }
   },
   "required": [

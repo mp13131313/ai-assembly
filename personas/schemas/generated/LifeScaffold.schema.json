@@ -1,5 +1,84 @@
 {
   "$defs": {
+    "AnachronismEntry": {
+      "description": "Structured anachronism: modern term + reason excluded + voice-native\nalternative where available.\n\nRicher than the pre-1-arch-03 list[str] format — captures the reason-why\nand the voice-native term if the voice's tradition has one. Backward-compat\npreserved via `LifeScaffold.anachronisms_to_avoid: list[str | AnachronismEntry]`.",
+      "properties": {
+        "modern_term": {
+          "title": "Modern Term",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "description": "One-line reason the modern term mis-renders the voice.",
+          "title": "Reason Excluded",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta).",
+          "title": "Voice Native Alternative"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "modern_term",
+        "reason_excluded"
+      ],
+      "title": "AnachronismEntry",
+      "type": "object"
+    },
+    "ContestedReading": {
+      "description": "A scholarly debate surfaced in the merge rather than resolved into false consensus.",
+      "properties": {
+        "consensus_view": {
+          "title": "Consensus View",
+          "type": "string"
+        },
+        "minority_view": {
+          "title": "Minority View",
+          "type": "string"
+        },
+        "scholars_per_view": {
+          "description": "Flat list like ['Vlastos (consensus)', 'Griswold (minority)'].",
+          "items": {
+            "type": "string"
+          },
+          "title": "Scholars Per View",
+          "type": "array"
+        }
+      },
+      "required": [
+        "consensus_view",
+        "minority_view"
+      ],
+      "title": "ContestedReading",
+      "type": "object"
+    },
     "KeyRelationship": {
       "description": "One formative relationship (teacher, student, rival, consort, enemy, etc.).",
       "properties": {
@@ -39,7 +118,7 @@
       "type": "object"
     },
     "PeriodPathos": {
-      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: 5-10 terms per voice in original language,\nwith short glosses. No modern English emotion-words as primary vocabulary\nfor pre-1820 voices.",
+      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: period-specific terms in original language\nwith short glosses. For pre-1820 voices: no modern English emotion-words\nas primary vocabulary. For post-1820 voices with tradition-specific\nlexicons (Russian Orthodox, Rastafari, Arendtian German-Jewish,\nConfucian civic-tech): preserve the voice's own terms regardless of\nperiod. Do NOT use 'emotion' as organizing category for pre-1820 voices\nspecifically (Dixon's post-1820 invention).",
       "properties": {
         "term_in_original_language": {
           "title": "Term In Original Language",
@@ -142,7 +221,7 @@
       "type": "object"
     }
   },
-  "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.",
+  "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.\n\nUnder 1-arch-03 additive merge: permissive container. Counts are\nminimums (preserve all unique content from sources); schema accepts\nscholarly_context + contested_readings to preserve analytical-interpretive\nmaterial that pre-1-arch-03 would have dropped.",
   "properties": {
     "name": {
       "title": "Name",
@@ -219,17 +298,17 @@
       "type": "array"
     },
     "intellectual_world": {
-      "description": "Period intellectual currents in the voice's own framing.",
+      "description": "Period intellectual currents in the voice's own framing. Preserve full scholarly detail from sources; no length cap.",
       "title": "Intellectual World",
       "type": "string"
     },
     "ontological_furniture": {
-      "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture.",
+      "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture. No length cap; preserve source detail.",
       "title": "Ontological Furniture",
       "type": "string"
     },
     "available_pathe": {
-      "description": "5-10 period-specific affects in original language with glosses. Flag any for which no modern equivalent exists. Pre-1820 voices: do not use 'emotions' as organizing category.",
+      "description": "Period-specific affects in original language with glosses. MINIMUM 5; uncapped maximum — preserve all non-redundant terms from sources. Flag terms with no modern equivalent. Tradition-specific lexicons preserved regardless of period (Russian Orthodox, Rastafari, etc.). Pre-1820 voices: do NOT use 'emotions' as organizing category.",
       "items": {
         "$ref": "#/$defs/PeriodPathos"
       },
@@ -237,21 +316,49 @@
       "type": "array"
     },
     "framework_for_difficulty": {
-      "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework.",
+      "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, kenosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework. MUST carry [experiential_reconstruction] tag inline (any claim about what the voice felt suffering to mean is biocultural reconstruction). No length cap.",
       "title": "Framework For Difficulty",
       "type": "string"
     },
     "model_of_selfhood": {
-      "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly.",
+      "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly. MUST carry [experiential_reconstruction] tag inline. [projection_warning] on any modern English term used faute de mieux (e.g., 'disease' for pre-clinical moral-theological bolezn'). No length cap.",
       "title": "Model Of Selfhood",
       "type": "string"
     },
     "anachronisms_to_avoid": {
-      "description": "4-8 modern terms that would mis-render this voice (e.g. 'career', 'self-actualization', 'trauma', 'romance', 'identity'). Each entry: term + 1-line reason.",
+      "description": "Modern terms that would mis-render this voice. MINIMUM 4; uncapped maximum. Prefer AnachronismEntry structured form (modern_term + reason_excluded + voice_native_alternative) for new outputs; list[str] accepted for backward-compat with pre-1-arch-03 Dostoevsky card.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/AnachronismEntry"
+          }
+        ]
       },
       "title": "Anachronisms To Avoid",
+      "type": "array"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly-interpretive context on this voice's biographical reception. Debates about formative-event interpretation, contested biographical readings, interpretive traditions. Example for Dostoevsky: 'Frank (5-vol. biography 1976-2002) treats Dostoevsky's father's death as contested, skeptical of serf-murder; Mochulsky (1967) treats it as historical fact; Freud (1928 'Dostoevsky and Parricide') reads the Oedipal frame onto the uncertainty. Williams (2008) reads Myshkin's failure as intrinsic to the experiment; Frank reads it as limitation of Myshkin's consciousness within the fallen world.' Preserve; do not synthesize to one interpretation.",
+      "title": "Scholarly Context"
+    },
+    "contested_readings": {
+      "description": "Biographical facts or interpretive framings where sources disagree and disagreement is scholarly-real. Each entry: consensus_view + minority_view + scholars_per_view.",
+      "items": {
+        "$ref": "#/$defs/ContestedReading"
+      },
+      "title": "Contested Readings",
       "type": "array"
     }
   },

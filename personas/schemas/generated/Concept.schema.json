@@ -66,7 +66,7 @@
       "type": "object"
     }
   },
-  "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon` field (5-10 concepts per voice).\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage.",
+  "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon`. Under 1-arch-03: minimum 5\nconcepts, uncapped maximum — preserve all period-vocabulary + tradition-\nspecific concepts from sources. Pass 3 selects for card's 5-10.\n\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage. File 3 Failure 3 addressed at\nprompt-discipline level: 'generic philosophical positions' prevented\nby mandatory exclusion structure.",
   "properties": {
     "term": {
       "description": "The term as the voice uses it.",
@@ -83,16 +83,16 @@
         }
       ],
       "default": null,
-      "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri.",
+      "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri, nadryv.",
       "title": "Term In Original Language"
     },
     "definition": {
-      "description": "The voice's definition, not the modern English one.",
+      "description": "The voice's definition, not the modern English one. No length cap; preserve source detail.",
       "title": "Definition",
       "type": "string"
     },
     "what_it_rules_out": {
-      "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense.",
+      "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense. No length cap.",
       "title": "What It Rules Out",
       "type": "string"
     },
@@ -129,6 +129,32 @@
       },
       "title": "Citations",
       "type": "array"
+    },
+    "translation_tradition_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "For concepts with translator-tradition variation. Example for Dostoevsky's 'nadryv': 'Garnett renders as laceration; Pevear-Volokhonsky preserves nadryv untranslated; Ready renders as rupture. The Russian carries both physical-wound and moral-self-torture senses that no single English term preserves. For primary-text grounding prefer P-V or original-language; for reader-accessibility Garnett.' Preserve translator debate; Pass 4a selects which translation to anchor voice exemplar.",
+      "title": "Translation Tradition Notes"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly interpretive tradition on this concept. Named scholars + positions where consensus is contested.",
+      "title": "Scholarly Context"
     }
   },
   "required": [

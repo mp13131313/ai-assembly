@@ -1,5 +1,57 @@
 {
   "$defs": {
+    "ExclusionEntry": {
+      "description": "Structured exclusion entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | ExclusionEntry] in KnowledgeBoundary.\n\nExample for Plato's conceptual_exclusions: {\n    term: \"'personality'\",\n    reason_excluded: \"imports 20th-C trait theory (Allport, Cattell, Big\n                     Five) foreign to Greek character-grammar; use sōphrosynē /\n                     tripartite soul / hexis instead\",\n    voice_native_alternative: \"character in period-vocabulary per Boddice §15\"\n}",
+      "properties": {
+        "term": {
+          "title": "Term",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "description": "1-line reason this term is excluded. Preserve scholarly reasoning where source provides.",
+          "title": "Reason Excluded",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Voice's own tradition-specific term if one exists. For pre-modern voices this is usually where period-vocabulary lives.",
+          "title": "Voice Native Alternative"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term",
+        "reason_excluded"
+      ],
+      "title": "ExclusionEntry",
+      "type": "object"
+    },
     "SourceCitation": {
       "description": "A single citation supporting a claim.",
       "properties": {
@@ -66,17 +118,24 @@
       "type": "object"
     }
   },
-  "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus a\nspecific exclusion list that catches the things the model would\notherwise slip on. For pre-modern voices: temporal exclusions. For\nnon-human voices: ontological-access exclusions. For cultural voices\nwithin modernity: tradition-specific exclusions.",
+  "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus\nspecific exclusion lists that catch the things the model would otherwise\nslip on. Voice-type-branched:\n- Pre-modern voices: temporal boundary primary\n- Non-human organisms: ontological-access boundary\n- Non-human systems: mediation/framework boundary\n- Fictional voices: narrative-internal + translation-tradition boundary\n- Cultural voices within modernity: tradition-specific exclusions\n\n1-arch-03: exclusion lists accept structured ExclusionEntry (preferred)\nor bare str (backward-compat). Uncapped maximums per additive-merge.",
   "properties": {
     "general_frame": {
-      "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.'",
+      "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.' For Scheherazade: 'Beyond my world: what the text does not include. I know 1001 nights; I do not know what happens after night 1001 because the frame ends there.' No length cap.",
       "title": "General Frame",
       "type": "string"
     },
     "temporal_exclusions": {
-      "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'.",
+      "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'. Prefer ExclusionEntry with reason_excluded for new outputs; list[str] for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Temporal Exclusions",
       "type": "array"
@@ -84,15 +143,29 @@
     "geographic_exclusions": {
       "description": "Places outside this voice's known world.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Geographic Exclusions",
       "type": "array"
     },
     "conceptual_exclusions": {
-      "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. Tag each with the reason it's excluded.",
+      "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. For fictional voices: modern-reception framings that postdate the text's reception window. Each entry SHOULD be ExclusionEntry (tag the reason excluded) for downstream Pass 2 translation_protocol synthesis; bare str accepted for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Conceptual Exclusions",
       "type": "array"

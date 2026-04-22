@@ -64,14 +64,81 @@
       ],
       "title": "SourceCitation",
       "type": "object"
+    },
+    "VocabEntry": {
+      "description": "Structured vocabulary entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via\n`Vocabulary.preferred_vocabulary: list[str | VocabEntry]` discriminated\nunion — existing Dostoevsky card's list[str] still validates.\n\nloadbearing=True marks philosophically/theologically central terms\n(Dostoevsky's `podpol'e`, `nadryv`, `obraz`; Plato's `to agathon`,\n`eidē`, `episteme`). These terms survive downstream card compression\nwith higher priority.",
+      "properties": {
+        "term": {
+          "description": "The term as voice uses it.",
+          "title": "Term",
+          "type": "string"
+        },
+        "term_in_original_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Period-language / native-tradition form. Examples: 'подпольe' (Russian), 'ibtilā'' (Arabic), 'mauri' (Maori).",
+          "title": "Term In Original Language"
+        },
+        "gloss": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Brief English approximation. Null if term is universally recognizable (Crystal Palace, obraz).",
+          "title": "Gloss"
+        },
+        "loadbearing": {
+          "default": false,
+          "description": "True for philosophically/theologically central terms that must survive downstream card compression.",
+          "title": "Loadbearing",
+          "type": "boolean"
+        },
+        "translation_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Translator-tradition variation notes. Example for 'nadryv': 'Garnett laceration; P-V preserves untranslated; Ready rupture. Russian carries physical-wound + moral-self-torture senses; no single English term preserves both.'",
+          "title": "Translation Notes"
+        }
+      },
+      "required": [
+        "term"
+      ],
+      "title": "VocabEntry",
+      "type": "object"
     }
   },
-  "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary).",
+  "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary). For post-1820 voices with tradition-specific lexicons\n(Russian Orthodox, Rastafari, Arendtian German-Jewish), preserve native\nterms regardless of period.\n\nMinimum 15 entries, uncapped maximum. 1-arch-03: list accepts both\nbare str (backward-compat) and VocabEntry structured form (preferred\nfor new outputs).",
   "properties": {
     "preferred_vocabulary": {
-      "description": "15-30 words/terms the voice reaches for. Period vocabulary primary for pre-1820 voices. No generic management terms.",
+      "description": "Words/terms the voice reaches for. Minimum 15, uncapped. Tradition-specific lexicon preserved regardless of period. No generic management terms. Prefer VocabEntry structured form for new outputs; list[str] accepted for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/VocabEntry"
+          }
+        ]
       },
       "title": "Preferred Vocabulary",
       "type": "array"
@@ -80,7 +147,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "description": "Named metaphor families → short description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination'}.",
+      "description": "Named metaphor families → description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination', 'yellow Petersburg': 'yellow wallpaper, yellow ticket, yellow face — chromatic signature of jaundice, bureaucratic shame, civic decay'}. Minimum 3, uncapped.",
       "title": "Metaphorical Repertoire",
       "type": "object"
     },
@@ -102,6 +169,19 @@
       },
       "title": "Citations",
       "type": "array"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly treatment of voice's lexicon. Example for Dostoevsky: 'Kasatkina on the lik/litso distinction — lik is the iconic-ideal face, litso the ordinary phenomenal face; lichina the mask. The triadic structure is theologically loaded per Florovsky. Williams (2008) on Dostoevsky's vocabulary as sacramental.'",
+      "title": "Scholarly Context"
     }
   },
   "required": [

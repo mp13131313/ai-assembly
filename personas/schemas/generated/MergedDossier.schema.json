@@ -1,5 +1,88 @@
 {
   "$defs": {
+    "AnachronismEntry": {
+      "description": "Structured anachronism: modern term + reason excluded + voice-native\nalternative where available.\n\nRicher than the pre-1-arch-03 list[str] format — captures the reason-why\nand the voice-native term if the voice's tradition has one. Backward-compat\npreserved via `LifeScaffold.anachronisms_to_avoid: list[str | AnachronismEntry]`.",
+      "properties": {
+        "modern_term": {
+          "title": "Modern Term",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "description": "One-line reason the modern term mis-renders the voice.",
+          "title": "Reason Excluded",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta).",
+          "title": "Voice Native Alternative"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "modern_term",
+        "reason_excluded"
+      ],
+      "title": "AnachronismEntry",
+      "type": "object"
+    },
+    "AnalyticalContext": {
+      "description": "Container for scholarly-interpretive material preserved at merge layer.\n\nUnder 1-arch-03, this container holds material that the pre-arch-03\ntight-recipe chunk schemas silently dropped. Pass 2-6 synthesis reads\nthis container + the primary chunk outputs (reasoning_method, moves,\netc.) to produce richer card fields.\n\nEach list is uncapped — preserve what sources surface. Empty lists are\nacceptable for voices where a given analytical dimension doesn't apply\n(e.g., non-human organisms may have no `worked_demonstrations[]` of the\nlife-event-to-response shape; instead their analytical_context might be\ndominated by `structural_patterns` of behavioral repertoire).",
+      "properties": {
+        "structural_patterns": {
+          "description": "Named recurring structural patterns (scandal-scene, carnivalization, threshold-chronotope, perceptual-response cycle, etc.) with worked instances.",
+          "items": {
+            "$ref": "#/$defs/StructuralPattern"
+          },
+          "title": "Structural Patterns",
+          "type": "array"
+        },
+        "worked_demonstrations": {
+          "description": "Detailed demonstrations connecting historical events to rhetorical-textual responses. For human voices: life-event → novel. For non-human voices: environmental condition → behavioral pattern.",
+          "items": {
+            "$ref": "#/$defs/WorkedDemonstration"
+          },
+          "title": "Worked Demonstrations",
+          "type": "array"
+        },
+        "scholarly_debates": {
+          "description": "Named scholarly debates bearing on this dimension of the voice. Preserve interpretive-tradition breadth; do not flatten.",
+          "items": {
+            "$ref": "#/$defs/ScholarlyDebate"
+          },
+          "title": "Scholarly Debates",
+          "type": "array"
+        }
+      },
+      "title": "AnalyticalContext",
+      "type": "object"
+    },
     "CoherenceFlag": {
       "description": "One cross-chunk consistency issue flagged by Pass 1.7.",
       "properties": {
@@ -88,7 +171,7 @@
       "type": "object"
     },
     "Commitment": {
-      "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field (10-20 principles per voice).\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel.",
+      "description": "A deep commitment the voice reasons FROM (not about).\n\nFills the persona card's `constitution` field. Pre-1-arch-03 targeted\n10-20 principles per voice; under 1-arch-03 this is the merge-layer\noutput which preserves ALL sourced commitments (minimum 10, uncapped —\nwell-documented voices may surface 20-40 at merge). Pass 3 synthesizes\nto card's 10-20 constitution principles via selection + compression.\n\nSpecificity rules: \"Prioritise knowledge over opinion\" is too vague;\n\"Prioritise knowledge of stable universal structures over opinion about\nchanging particulars; when presented with empirical data, always ask what\nunderlying principle the data reveals\" is specific enough to steer the\nmodel. Two-voice swap test: if two voices with different frameworks could\nboth honestly assert this commitment, it is too generic — tighten it.",
       "properties": {
         "statement": {
           "description": "The commitment, 1-2 sentences.",
@@ -96,7 +179,7 @@
           "type": "string"
         },
         "operational_note": {
-          "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete.",
+          "description": "How this principle should shape responses — the if-you-encounter-X-do-Y instruction. Must be concrete. No length cap.",
           "title": "Operational Note",
           "type": "string"
         },
@@ -114,7 +197,7 @@
           "title": "Textual Source"
         },
         "unique_to_this_voice": {
-          "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic.",
+          "description": "True if distinctive — e.g. Plato's 'knowledge requires knowing the Form' is unique; 'value wisdom' is generic. Pass 7 cross-persona QC uses this flag to detect flattening.",
           "title": "Unique To This Voice",
           "type": "boolean"
         },
@@ -135,6 +218,27 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How different scholarly traditions frame this commitment. Example for Dostoevsky's 'choose Christ over truth' commitment: 'Williams (2008) reads as existential wager; Frank (Mantle of the Prophet 2002) as post-katorga transformation; Kasatkina (2004) as Orthodox-kenotic theology; Shestov reads as irrational affirmation.' Preserve interpretive breadth; do not synthesize.",
+          "title": "Scholarly Context"
+        },
+        "contested_readings": {
+          "description": "Scholar-disputed commitments or contested framings of this commitment. Preserve the debate at merge; Pass 3 synthesis may keep or collapse based on card-field demands.",
+          "items": {
+            "$ref": "#/$defs/ContestedReading"
+          },
+          "title": "Contested Readings",
+          "type": "array"
         }
       },
       "required": [
@@ -147,7 +251,7 @@
       "type": "object"
     },
     "Concept": {
-      "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon` field (5-10 concepts per voice).\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage.",
+      "description": "A key term this voice uses with period-specific precision.\n\nFills the persona card's `concept_lexicon`. Under 1-arch-03: minimum 5\nconcepts, uncapped maximum — preserve all period-vocabulary + tradition-\nspecific concepts from sources. Pass 3 selects for card's 5-10.\n\nThe `what_it_rules_out` exclusion is load-bearing — prevents the model\nfrom sliding into common English usage. File 3 Failure 3 addressed at\nprompt-discipline level: 'generic philosophical positions' prevented\nby mandatory exclusion structure.",
       "properties": {
         "term": {
           "description": "The term as the voice uses it.",
@@ -164,16 +268,16 @@
             }
           ],
           "default": null,
-          "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri.",
+          "description": "Period-language form if distinct from the English term. Examples: episteme, ibtilā', sobornost', mauri, nadryv.",
           "title": "Term In Original Language"
         },
         "definition": {
-          "description": "The voice's definition, not the modern English one.",
+          "description": "The voice's definition, not the modern English one. No length cap; preserve source detail.",
           "title": "Definition",
           "type": "string"
         },
         "what_it_rules_out": {
-          "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense.",
+          "description": "The exclusion — what this concept IS NOT. Prevents drift into common usage. Example: episteme rules out treating polling data or majority opinion as knowledge-in-the-full-sense. No length cap.",
           "title": "What It Rules Out",
           "type": "string"
         },
@@ -210,6 +314,32 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "translation_tradition_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "For concepts with translator-tradition variation. Example for Dostoevsky's 'nadryv': 'Garnett renders as laceration; Pevear-Volokhonsky preserves nadryv untranslated; Ready renders as rupture. The Russian carries both physical-wound and moral-self-torture senses that no single English term preserves. For primary-text grounding prefer P-V or original-language; for reader-accessibility Garnett.' Preserve translator debate; Pass 4a selects which translation to anchor voice exemplar.",
+          "title": "Translation Tradition Notes"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly interpretive tradition on this concept. Named scholars + positions where consensus is contested.",
+          "title": "Scholarly Context"
         }
       },
       "required": [
@@ -222,16 +352,95 @@
       "title": "Concept",
       "type": "object"
     },
+    "ContestedReading": {
+      "description": "A scholarly debate surfaced in the merge rather than resolved into false consensus.",
+      "properties": {
+        "consensus_view": {
+          "title": "Consensus View",
+          "type": "string"
+        },
+        "minority_view": {
+          "title": "Minority View",
+          "type": "string"
+        },
+        "scholars_per_view": {
+          "description": "Flat list like ['Vlastos (consensus)', 'Griswold (minority)'].",
+          "items": {
+            "type": "string"
+          },
+          "title": "Scholars Per View",
+          "type": "array"
+        }
+      },
+      "required": [
+        "consensus_view",
+        "minority_view"
+      ],
+      "title": "ContestedReading",
+      "type": "object"
+    },
+    "ExclusionEntry": {
+      "description": "Structured exclusion entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | ExclusionEntry] in KnowledgeBoundary.\n\nExample for Plato's conceptual_exclusions: {\n    term: \"'personality'\",\n    reason_excluded: \"imports 20th-C trait theory (Allport, Cattell, Big\n                     Five) foreign to Greek character-grammar; use sōphrosynē /\n                     tripartite soul / hexis instead\",\n    voice_native_alternative: \"character in period-vocabulary per Boddice §15\"\n}",
+      "properties": {
+        "term": {
+          "title": "Term",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "description": "1-line reason this term is excluded. Preserve scholarly reasoning where source provides.",
+          "title": "Reason Excluded",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Voice's own tradition-specific term if one exists. For pre-modern voices this is usually where period-vocabulary lives.",
+          "title": "Voice Native Alternative"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term",
+        "reason_excluded"
+      ],
+      "title": "ExclusionEntry",
+      "type": "object"
+    },
     "FormativeCandidate": {
-      "description": "Per Boddice §14 4-part rubric. Multiple candidates possible; Pass 2 commits to one.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.",
+      "description": "Per Boddice §14 4-part rubric. Multiple candidates preserved (minimum 2,\nuncapped); Pass 2 commits to ONE PRIMARY per fix 2-03, referencing\n1-2 supporting candidates inline for narrative-context.\n\nFor human voices: 3 active sub-fields (community + lived_through_apparatus +\nengagement). For non-human/system/cosmic voices: 3 active sub-fields\n(community_or_ontogenetic_field + condition_of_being + engagement) —\ncondition_of_being replaces lived_through_apparatus.\n\nDrop \"core wound\" framing. The inner-child/core-wound schema is a specific\n1986-2014 Anglo-American therapeutic sediment (Bradshaw / van der Kolk /\nIFS) shown by Fassin, Furedi, and Illouz to be a local construct, not a\nuniversal. The voice's own framework — Buddhist dukkha, Islamic ibtilā',\nStoic prohairesis, Confucian xiushen, Rastafari sufferation, whakapapa\nrupture, endocrine semelparity — goes here instead.\n\nUnder 1-arch-03: `scholarly_context` preserves interpretive-tradition\nbreadth per formative candidate; `resonates_with_commitments` provides\ncross-chunk coherence aid for Pass 2's primary-choice reasoning.",
       "properties": {
         "candidate_label": {
-          "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates', 'Semelparous lifespan', '1977 melanoma diagnosis refused as toe-amputation'.",
+          "description": "Short name for Pass 2 to reference. Examples: 'Trial of Socrates 399 BCE', 'Semenovsky mock execution 1849', 'Semelparous lifespan without parenting', '1977 melanoma diagnosis refused as toe-amputation'.",
           "title": "Candidate Label",
           "type": "string"
         },
         "formative_emotional_community": {
-          "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage).",
+          "description": "Per §14 sub-field 1. Overlapping Rosenwein-style communities that shaped this voice's lexicon of feeling, norms of expression, and what-could-be-felt. For non-human voices: the analogous ontogenetic/ecological field (taxon, habitat, lineage). MUST carry [experiential_reconstruction] tag. No length cap.",
           "title": "Formative Emotional Community",
           "type": "string"
         },
@@ -245,7 +454,7 @@
             }
           ],
           "default": null,
-          "description": "Per §14 sub-field 2 (HUMAN voices only). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction).",
+          "description": "Per §14 sub-field 2 (HUMAN voices). Describe the formative event AND the framework in which it was meaningful in a single movement, using period-specific vocabulary from the world field. NOT event without framework (modern projection) or framework without event (abstraction). MUST carry [experiential_reconstruction] tag. If using modern clinical term (e.g., 'trauma') even to flag as anachronistic, carry [projection_warning: <term> <distortion>] tag.",
           "title": "Lived Through Own Apparatus"
         },
         "condition_of_being": {
@@ -258,11 +467,11 @@
             }
           ],
           "default": null,
-          "description": "Per §14 sub-field 4 (NON-HUMAN / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus.",
+          "description": "Per §14 sub-field 4 (NON-HUMAN / FICTIONAL / non-event-driven / cosmic voices). Describe the ongoing state of being that structures the voice's standing and stake. Replaces lived_through_own_apparatus. For fictional voices (Scheherazade): the narratorial/frame-tale condition (speaking under threat of execution within 1001 Nights). MUST carry [experiential_reconstruction] tag per §14 attributed-by-narrative-function discipline.",
           "title": "Condition Of Being"
         },
         "engagement_it_drives": {
-          "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological.",
+          "description": "Per §14 sub-field 3. What does this voice enter the panel to *do*? What is it motivated to say, notice, refuse, defend? Functional, not psychological. MUST carry [experiential_reconstruction] tag — claims about what the formative context drives are biocultural reconstruction. No length cap.",
           "title": "Engagement It Drives",
           "type": "string"
         },
@@ -287,7 +496,7 @@
           "type": "array"
         },
         "scholarly_support_score": {
-          "description": "Pass 2 uses this when committing to a candidate.",
+          "description": "Pass 2 uses this when committing to a PRIMARY candidate per fix 2-03. Strong: documented across multiple tier_1_primary + scholarly consensus. Moderate: documented but scholarly reception varies. Contested: sources disagree on interpretation.",
           "enum": [
             "strong",
             "moderate",
@@ -295,6 +504,27 @@
           ],
           "title": "Scholarly Support Score",
           "type": "string"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How different scholarly traditions frame this candidate. Example for Dostoevsky's mock execution: 'Frank (Seeds of Revolt, 1976 pp. 245-252) treats as decisive threshold-experience marking Dostoevsky's pre-Siberia / post-Siberia break; Jackson (1981) reads as origin of the threshold-chronotope in the fiction; Kasatkina (2004) reads the same-evening letter to Mikhail as the birth of the Christ-over-truth formula.' Preserve interpretive breadth; do not synthesize to one reading.",
+          "title": "Scholarly Context"
+        },
+        "resonates_with_commitments": {
+          "description": "Labels of commitments (Pass 1.2 output) this formative context shapes. Cross-chunk coherence aid — Pass 2 uses when choosing primary formative. Example for Semenovsky mock execution: ['Human freedom is metaphysically radical', 'Suffering accepted in faith is redemptive', 'Every person responsible for all'].",
+          "items": {
+            "type": "string"
+          },
+          "title": "Resonates With Commitments",
+          "type": "array"
         }
       },
       "required": [
@@ -307,12 +537,19 @@
       "type": "object"
     },
     "HardLimits": {
-      "description": "3-5 absolute prohibitions — character-breaking moves this voice never makes.\n\nMinimal and focused on CATASTROPHIC character failure, not expression-level\nconstraint. Expression-level constraints live in Pass 1.4's banned-language\noutput (Pass 7c-derived). Hard limits catch: adopting modern vocabulary,\nbreaking the characteristic mode of reasoning, producing arguments the\nvoice structurally would not make, abandoning dialectic for declaration.",
+      "description": "Absolute prohibitions — character-breaking moves this voice never makes.\n\nMinimum 3, uncapped. Focused on CATASTROPHIC character failure, NOT\nexpression-level constraint. Expression-level constraints live in\nPass 7c's banned_language output. Hard limits catch: adopting modern\nvocabulary, breaking the characteristic mode of reasoning, producing\narguments the voice structurally would not make, abandoning dialectic\nfor declaration.\n\n1-arch-03: Prohibition structured form preferred; list[str] for backward-\ncompat. Cross-referenced to Pass 7c for banned_language consistency at\nPass 1.7 coherence check 6.",
       "properties": {
         "prohibitions": {
-          "description": "3-5 absolute prohibitions. Each catches a specific failure mode the epistemic frame doesn't already cover. Example for Plato: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+          "description": "Minimum 3 absolute prohibitions; uncapped. Each catches a specific failure mode the epistemic frame doesn't already cover. Example for Plato: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.' Prefer Prohibition structured form for new outputs; list[str] for backward-compat.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Prohibition"
+              }
+            ]
           },
           "title": "Prohibitions",
           "type": "array"
@@ -382,17 +619,24 @@
       "type": "object"
     },
     "KnowledgeBoundary": {
-      "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus a\nspecific exclusion list that catches the things the model would\notherwise slip on. For pre-modern voices: temporal exclusions. For\nnon-human voices: ontological-access exclusions. For cultural voices\nwithin modernity: tradition-specific exclusions.",
+      "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus\nspecific exclusion lists that catch the things the model would otherwise\nslip on. Voice-type-branched:\n- Pre-modern voices: temporal boundary primary\n- Non-human organisms: ontological-access boundary\n- Non-human systems: mediation/framework boundary\n- Fictional voices: narrative-internal + translation-tradition boundary\n- Cultural voices within modernity: tradition-specific exclusions\n\n1-arch-03: exclusion lists accept structured ExclusionEntry (preferred)\nor bare str (backward-compat). Uncapped maximums per additive-merge.",
       "properties": {
         "general_frame": {
-          "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.'",
+          "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.' For Scheherazade: 'Beyond my world: what the text does not include. I know 1001 nights; I do not know what happens after night 1001 because the frame ends there.' No length cap.",
           "title": "General Frame",
           "type": "string"
         },
         "temporal_exclusions": {
-          "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'.",
+          "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'. Prefer ExclusionEntry with reason_excluded for new outputs; list[str] for backward-compat.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/ExclusionEntry"
+              }
+            ]
           },
           "title": "Temporal Exclusions",
           "type": "array"
@@ -400,15 +644,29 @@
         "geographic_exclusions": {
           "description": "Places outside this voice's known world.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/ExclusionEntry"
+              }
+            ]
           },
           "title": "Geographic Exclusions",
           "type": "array"
         },
         "conceptual_exclusions": {
-          "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. Tag each with the reason it's excluded.",
+          "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. For fictional voices: modern-reception framings that postdate the text's reception window. Each entry SHOULD be ExclusionEntry (tag the reason excluded) for downstream Pass 2 translation_protocol synthesis; bare str accepted for backward-compat.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/ExclusionEntry"
+              }
+            ]
           },
           "title": "Conceptual Exclusions",
           "type": "array"
@@ -440,7 +698,7 @@
       "type": "object"
     },
     "LifeScaffold": {
-      "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.",
+      "description": "Pass 1.1 biographical foundation per Boddice §13.\n\nThis is NOT period-setting. It is the voice's emotional-experiential\nontology: what was real, what could be felt, what gave suffering meaning,\nwhat counted as a self.\n\nUnder 1-arch-03 additive merge: permissive container. Counts are\nminimums (preserve all unique content from sources); schema accepts\nscholarly_context + contested_readings to preserve analytical-interpretive\nmaterial that pre-1-arch-03 would have dropped.",
       "properties": {
         "name": {
           "title": "Name",
@@ -517,17 +775,17 @@
           "type": "array"
         },
         "intellectual_world": {
-          "description": "Period intellectual currents in the voice's own framing.",
+          "description": "Period intellectual currents in the voice's own framing. Preserve full scholarly detail from sources; no length cap.",
           "title": "Intellectual World",
           "type": "string"
         },
         "ontological_furniture": {
-          "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture.",
+          "description": "What was *real* for this voice — not beliefs, but the structure of reality. Gods, Forms, jinn, Jah, whakapapa, distributed embodiment. Do not write 'they believed X' when X was the furniture. No length cap; preserve source detail.",
           "title": "Ontological Furniture",
           "type": "string"
         },
         "available_pathe": {
-          "description": "5-10 period-specific affects in original language with glosses. Flag any for which no modern equivalent exists. Pre-1820 voices: do not use 'emotions' as organizing category.",
+          "description": "Period-specific affects in original language with glosses. MINIMUM 5; uncapped maximum — preserve all non-redundant terms from sources. Flag terms with no modern equivalent. Tradition-specific lexicons preserved regardless of period (Russian Orthodox, Rastafari, etc.). Pre-1820 voices: do NOT use 'emotions' as organizing category.",
           "items": {
             "$ref": "#/$defs/PeriodPathos"
           },
@@ -535,21 +793,49 @@
           "type": "array"
         },
         "framework_for_difficulty": {
-          "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework.",
+          "description": "What gave pain, loss, setback meaning? Afterlife, Forms, divine testing, karma, theosis, kenosis, Babylonian exile, whakapapa rupture, endocrine semelparity. Not 'coping mechanism' — experiential framework. MUST carry [experiential_reconstruction] tag inline (any claim about what the voice felt suffering to mean is biocultural reconstruction). No length cap.",
           "title": "Framework For Difficulty",
           "type": "string"
         },
         "model_of_selfhood": {
-          "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly.",
+          "description": "What counted as an 'I'? Modern introspective interior, tripartite soul, divine-royal corporate body, I-and-I collective-divine indwelling, mountains-to-sea indivisible whole, fluctuating assemblage of semi-autonomous arms. State explicitly. MUST carry [experiential_reconstruction] tag inline. [projection_warning] on any modern English term used faute de mieux (e.g., 'disease' for pre-clinical moral-theological bolezn'). No length cap.",
           "title": "Model Of Selfhood",
           "type": "string"
         },
         "anachronisms_to_avoid": {
-          "description": "4-8 modern terms that would mis-render this voice (e.g. 'career', 'self-actualization', 'trauma', 'romance', 'identity'). Each entry: term + 1-line reason.",
+          "description": "Modern terms that would mis-render this voice. MINIMUM 4; uncapped maximum. Prefer AnachronismEntry structured form (modern_term + reason_excluded + voice_native_alternative) for new outputs; list[str] accepted for backward-compat with pre-1-arch-03 Dostoevsky card.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/AnachronismEntry"
+              }
+            ]
           },
           "title": "Anachronisms To Avoid",
+          "type": "array"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly-interpretive context on this voice's biographical reception. Debates about formative-event interpretation, contested biographical readings, interpretive traditions. Example for Dostoevsky: 'Frank (5-vol. biography 1976-2002) treats Dostoevsky's father's death as contested, skeptical of serf-murder; Mochulsky (1967) treats it as historical fact; Freud (1928 'Dostoevsky and Parricide') reads the Oedipal frame onto the uncertainty. Williams (2008) reads Myshkin's failure as intrinsic to the experiment; Frank reads it as limitation of Myshkin's consciousness within the fallen world.' Preserve; do not synthesize to one interpretation.",
+          "title": "Scholarly Context"
+        },
+        "contested_readings": {
+          "description": "Biographical facts or interpretive framings where sources disagree and disagreement is scholarly-real. Each entry: consensus_view + minority_view + scholars_per_view.",
+          "items": {
+            "$ref": "#/$defs/ContestedReading"
+          },
+          "title": "Contested Readings",
           "type": "array"
         }
       },
@@ -565,7 +851,7 @@
       "type": "object"
     },
     "Move": {
-      "description": "One named rhetorical / characteristic move.\n\n3-6 per voice. These are the fingerprints — things that make a reader\nwho knows this voice say \"that's unmistakably X.\"",
+      "description": "One named rhetorical / characteristic move.\n\nMinimum 3, uncapped. These are the fingerprints — things that make a\nreader who knows this voice say \"that's unmistakably X.\"\n\n1-arch-03: scholarly_context + structural_pattern_refs provide cross-\nchunk coherence with Pass 1.3 analytical_context_reasoning.",
       "properties": {
         "name": {
           "description": "Short name, e.g. 'The definitional challenge'.",
@@ -573,7 +859,7 @@
           "type": "string"
         },
         "description": {
-          "description": "What the move does; when the voice deploys it.",
+          "description": "What the move does; when the voice deploys it. No length cap.",
           "title": "Description",
           "type": "string"
         },
@@ -589,6 +875,27 @@
           "default": null,
           "description": "One concrete example — short phrase or sentence illustrating the move in action.",
           "title": "Example"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly framing of this move. Example for Dostoevsky's 'Scripture read existentially' move: 'Kasatkina (2004) on sacred-in-the-everyday; Jackson on Scripture-as-recognition-scene; Williams (2008) on the non-argumentative answer (kiss, Cana dream).'",
+          "title": "Scholarly Context"
+        },
+        "structural_pattern_refs": {
+          "description": "Cross-ref to StructuralPattern.name values in Pass 1.3 analytical_context_reasoning. Example: ['scandal-scene', 'threshold-chronotope', 'sideshadowing-via-vdrug']. Links moves to their structural-pattern substrate.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Structural Pattern Refs",
+          "type": "array"
         }
       },
       "required": [
@@ -730,6 +1037,14 @@
           },
           "title": "Passages",
           "type": "array"
+        },
+        "translator_tradition_coverage": {
+          "description": "For voices whose corpus spans multiple translation traditions: which translations are represented in passages[] and why. Example for Dostoevsky: ['Garnett (Victorian register, public-domain, audience-accessible)', 'Pevear-Volokhonsky (preserves Russian syntactical friction + Cyrillic terms)', 'Ready (contemporary British, tighter prose)']. For Scheherazade: ['Burton 1885 (orientalized, public-domain)', 'Haddawy 1990 (Muhsin Mahdi critical-edition base)', 'Lyons 2008 (contemporary scholarly)']. Pass 4a uses this to select primary translation for voice-exemplar anchoring. Pass 6 uses for curated-passage selection.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Translator Tradition Coverage",
+          "type": "array"
         }
       },
       "required": [
@@ -739,7 +1054,7 @@
       "type": "object"
     },
     "PeriodPathos": {
-      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: 5-10 terms per voice in original language,\nwith short glosses. No modern English emotion-words as primary vocabulary\nfor pre-1820 voices.",
+      "description": "One period-specific affect/passion in the voice's own language.\n\nPer Boddice §13 sub-field 2: period-specific terms in original language\nwith short glosses. For pre-1820 voices: no modern English emotion-words\nas primary vocabulary. For post-1820 voices with tradition-specific\nlexicons (Russian Orthodox, Rastafari, Arendtian German-Jewish,\nConfucian civic-tech): preserve the voice's own terms regardless of\nperiod. Do NOT use 'emotion' as organizing category for pre-1820 voices\nspecifically (Dixon's post-1820 invention).",
       "properties": {
         "term_in_original_language": {
           "title": "Term In Original Language",
@@ -776,8 +1091,49 @@
       "title": "PeriodPathos",
       "type": "object"
     },
+    "Prohibition": {
+      "description": "Structured prohibition — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | Prohibition] in HardLimits.",
+      "properties": {
+        "rule": {
+          "description": "The prohibition. Example: 'Do not produce arguments from empirical data alone — always ask what principle the data reveals.'",
+          "title": "Rule",
+          "type": "string"
+        },
+        "failure_mode_addressed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The generic-AI default this prohibition catches. Example: 'LLMs default to presenting empirical data as self-interpreting; this prohibition prevents that drift into Crystal-Palace-register.'",
+          "title": "Failure Mode Addressed"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly or empirical grounding. Example: 'Bakhtin on the monological tendency of finalized-word modes; Plato's dialectic is constitutively unfinalizable.'",
+          "title": "Rationale"
+        }
+      },
+      "required": [
+        "rule"
+      ],
+      "title": "Prohibition",
+      "type": "object"
+    },
     "ReasoningMethod": {
-      "description": "Per decisions log + REBUILD_PLAN D.1.\n\n5-8 steps. Includes concluding steps for how the voice evaluates claims\nand how it structures conclusions. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
+      "description": "Per decisions log + REBUILD_PLAN D.1.\n\nMinimum 5 steps, uncapped. Pre-1-arch-03 targeted 5-8; additive merge\naccepts more where sources warrant. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
       "properties": {
         "voice_mode": {
           "anyOf": [
@@ -836,11 +1192,20 @@
       "type": "object"
     },
     "ReasoningStep": {
-      "description": "One step in the voice's characteristic reasoning method.\n\n5-8 steps per voice. For human voices: cognitive moves (dialectic,\nelenchus, etc.). For non-human organisms: perceptual-response cycle.\nFor non-human systems: assessment cycle through the relational framework.\nFor fictional/narratival: story-construction process.",
+      "description": "One step in the voice's characteristic reasoning method.\n\nMinimum 5, uncapped maximum (pre-1-arch-03 cap was 5-8; now lower-bound\nonly). For human voices: cognitive moves (dialectic, elenchus, etc.).\nFor non-human organisms: perceptual-response cycle. For non-human\nsystems: assessment cycle through the relational framework. For\nfictional/narratival: story-construction process.\n\n`step_number` optional — for voices whose reasoning isn't sequential\n(perceptual-response cycles with parallel activation, narratival\nreasoning where steps are simultaneous).",
       "properties": {
         "step_number": {
-          "title": "Step Number",
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sequential ordering if method is ordered. Omit for non-sequential methods (parallel perceptual-response, scenic-collision where multiple moves fire simultaneously).",
+          "title": "Step Number"
         },
         "name": {
           "description": "Short cognitive-move name, e.g. 'Test with counterexamples'.",
@@ -848,18 +1213,30 @@
           "type": "string"
         },
         "description": {
-          "description": "What the step does; what it moves the voice toward.",
+          "description": "What the step does; what it moves the voice toward. No length cap.",
           "title": "Description",
           "type": "string"
         },
         "example": {
-          "description": "One concrete example applying this step to a representative provocation.",
+          "description": "One concrete example applying this step to a representative provocation. Prefer lift-from-primary-text where possible. No length cap.",
           "title": "Example",
           "type": "string"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Named scholarly framing of this step. Example for Dostoevsky's 'Incarnate idea in person' step: 'Bakhtin names this the idea-hero (PDP ch. 5, image of the idea).' For Plato's 'Test with counterexamples' step: 'Vlastos on Socratic elenchus as the structural move of early dialogues; refined by Griswold on mature hypothetical method.' Preserve for Pass 3 synthesis context.",
+          "title": "Scholarly Context"
         }
       },
       "required": [
-        "step_number",
         "name",
         "description",
         "example"
@@ -947,7 +1324,7 @@
       "type": "object"
     },
     "Register": {
-      "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.",
+      "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.\n\n1-arch-03: genre_specific_register captures voices whose register varies\nacross genres they worked in (novel vs. journalism vs. letter for\nDostoevsky; sermon vs. song vs. interview for Marley). translator_\ntradition_notes captures how translator choice shapes voice (for\ntranslated voices).",
       "properties": {
         "rhetorical_mode": {
           "description": "One or two sentences naming the primary mode of expression. Example: 'Dialogic and interrogative; primary mode is the guided question.'",
@@ -955,7 +1332,7 @@
           "type": "string"
         },
         "register_and_tone": {
-          "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.'",
+          "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.' No length cap.",
           "title": "Register And Tone",
           "type": "string"
         },
@@ -990,6 +1367,27 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "genre_specific_register": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "How register varies by genre. Example for Dostoevsky: {'fiction': 'fevered-confessional, half-turned-to-internalized-other, scandalously-exposed', 'journalism (Diary of a Writer)': 'polemic-sharp, directly-addressed, cuttingly-specific on contemporaries', 'letter': 'direct-earnest, debt-apologetic, confiding', 'hagiography (Zosima sections)': 'paratactic, scripture-cadenced, shorn of ellipses'}. Preserve genre-register mapping; Pass 4a may select one primary genre-register for card or may blend.",
+          "title": "Genre Specific Register",
+          "type": "object"
+        },
+        "translator_tradition_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How translator choice shapes voice for translated voices. Example for Dostoevsky: 'Garnett (1912-20) Victorian-English register; Pevear-Volokhonsky (1990-2002) preserves Russian syntactical friction + Cyrillic terms; Ready (2014-18) contemporary British; Katz modernist-austere. For primary-text corpus and voice-exemplar anchor, P-V recommended; for reader-accessibility, Garnett.'",
+          "title": "Translator Tradition Notes"
         }
       },
       "required": [
@@ -999,20 +1397,66 @@
       "title": "Register",
       "type": "object"
     },
+    "ScholarlyDebate": {
+      "description": "A named scholarly debate bearing on the voice's reasoning / voice /\nboundaries. Preserve interpretive-tradition breadth; do not flatten to\none reading.\n\nExample (Dostoevsky §3):\n    name: \"Polyphony vs. carnivalization as distinct analytical concepts\"\n    positions: \"Morson/Emerson (Mikhail Bakhtin: Creation of a Prosaics,\n               1990) insist polyphony (a property of authorial position)\n               and carnivalization (generic inheritance via Socratic\n               dialogue + Menippean satire) must NOT be collapsed. The\n               1929 Bakhtin proposed polyphony; the 1963 revision added\n               carnivalization as separate. Scanlan (2002) treats them\n               as complementary; Emerson et al. (1990) warn against\n               flattening.\"\n    bearing: \"Reasoning-method synthesis should distinguish\n             authorial-position polyphony (voice speaks with others, not\n             over them) from generic-form carnivalization (scandal-scenes,\n             crowning/decrowning, mésalliance). Flattening misses that\n             polyphony-alone does not produce Dostoevsky's form; the\n             carnival substrate is necessary condition.\"",
+      "properties": {
+        "name": {
+          "description": "Short label naming the debate.",
+          "title": "Name",
+          "type": "string"
+        },
+        "positions": {
+          "description": "The debate's structure — named scholarly camps + their positions. Include evidence / works cited.",
+          "title": "Positions",
+          "type": "string"
+        },
+        "bearing": {
+          "description": "What this debate means for synthesizing the voice. Actionable — not just 'scholars disagree' but 'therefore Pass X should do Y'.",
+          "title": "Bearing",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "positions",
+        "bearing"
+      ],
+      "title": "ScholarlyDebate",
+      "type": "object"
+    },
     "SensitiveTopic": {
-      "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (the sanitization paradox per baseline File 3).",
+      "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (File 3 Failure 4 sanitisation paradox).\n\n1-arch-03: scholarly_reception preserves interpretive-tradition breadth\non contested topics — what the voice \"actually thought\" is often itself\ncontested across scholarly traditions.",
       "properties": {
         "topic": {
           "title": "Topic",
           "type": "string"
         },
         "what_the_voice_actually_thought": {
-          "description": "The substantive position, sourced. Do NOT sanitise.",
+          "description": "The substantive position, sourced. Do NOT sanitise. No length cap.",
           "title": "What The Voice Actually Thought",
           "type": "string"
         },
         "navigation_guidance": {
-          "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them.",
+          "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them. Load-bearing field per Pass 1.5's sanitisation-paradox discipline. No length cap.",
           "title": "Navigation Guidance",
           "type": "string"
         },
@@ -1033,6 +1477,19 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "scholarly_reception": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How different scholarly traditions frame this topic. Example for Dostoevsky's Jewish question: 'Morson reads as irreducible contradiction within Dostoevsky's universalism; McReynolds (Redemption and the Merchant God 2008) shows vsechelovechnost' universalism is structurally entangled with xenophobic displacement onto Jews; Patyk (Dostoevsky's Provocateurs 2023) reads as performative rather than sincere; Goldstein (1981) documents Jewish-press response within Dostoevsky's lifetime.' Preserve interpretive breadth.",
+          "title": "Scholarly Reception"
         }
       },
       "required": [
@@ -1125,11 +1582,94 @@
       "title": "SourceCitation",
       "type": "object"
     },
+    "StructuralPattern": {
+      "description": "A named recurring structural pattern in the voice's work — NOT the\nsame as a reasoning step. Patterns are descriptive generic forms\n(scandal-scene, carnivalization, threshold-chronotope) that the voice\nemploys across multiple works. Reasoning steps are the method's\ncognitive moves.\n\nPass 3 may reference structural patterns when synthesizing reasoning_\nmethod operational_notes. Pass 4a may reference them in\ncharacteristic_moves. Preserving them at the merge layer prevents loss\nof scholarly analytical framing.\n\nExample:\n    name: \"scandal-scene\"\n    description: \"A pre-arranged gathering in a high-decorum setting\n                 (salon, monastery cell, name-day party, public fete)\n                 into which a buffoon, provocateur, or self-destructive\n                 catalyst is introduced, until the container breaks and\n                 every character's concealed ideological position is\n                 forced into simultaneous open speech. Bakhtin's\n                 'anacrisis' — the provocation of the word by the word.\"\n    instances: [... 5 named instances ...]\n    scholarly_source: \"Bakhtin (PDP ch. 4); Terras (A Karamazov Companion,\n                      'conclaves'); Grossman (Poetika Dostoevskogo 1925,\n                      edinstvo mesta i vremeni); Jackson (Dialogues with\n                      Dostoevsky, ethical reading of obraz)\"",
+      "properties": {
+        "name": {
+          "description": "Short pattern name as used in scholarship. Example: 'scandal-scene', 'carnivalization', 'threshold-chronotope'.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "What the pattern is, structurally + functionally. Include scholarly vocabulary (anacrisis, crowning/decrowning, etc.) where applicable. No length cap.",
+          "title": "Description",
+          "type": "string"
+        },
+        "instances": {
+          "description": "Concrete instances in the voice's work. For well-documented patterns expect 3-5+ instances; include all that sources surface.",
+          "items": {
+            "$ref": "#/$defs/StructuralPatternInstance"
+          },
+          "title": "Instances",
+          "type": "array"
+        },
+        "scholarly_source": {
+          "description": "Scholar(s) who identified/theorized this pattern. Named attribution matters for downstream citation.",
+          "title": "Scholarly Source",
+          "type": "string"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "scholarly_source"
+      ],
+      "title": "StructuralPattern",
+      "type": "object"
+    },
+    "StructuralPatternInstance": {
+      "description": "One concrete instance of a named structural pattern in the voice's work.\n\nExample for Dostoevsky's scandal-scene pattern:\n    work: \"The Idiot, Part I, chs. 13-16\"\n    brief: \"Nastasya Filippovna's name-day party. Confession-game as\n            carnivalized sacramental-confession; Rogozhin's burst-entry\n            with 100,000 roubles wrapped in Stock Exchange News; Nastasya\n            throws it into the fire — simultaneous crowning (heiress,\n            Myshkin's bride) and decrowning (fallen woman).\"\n    cross_refs: [\"Republic-VII-cave (typological parallel)\", \"Demons-III-1-fete\"]",
+      "properties": {
+        "work": {
+          "description": "Canonical reference for the passage/scene. Example: 'The Brothers Karamazov, Book II, ch. 8 (the Scandalous Scene)'.",
+          "title": "Work",
+          "type": "string"
+        },
+        "brief": {
+          "description": "2-4 sentence description of the instance. Preserve enough detail that Pass 3/4a synthesis can draw from it.",
+          "title": "Brief",
+          "type": "string"
+        },
+        "cross_refs": {
+          "description": "Other instances of this or related patterns. Optional.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Cross Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "work",
+        "brief"
+      ],
+      "title": "StructuralPatternInstance",
+      "type": "object"
+    },
     "Tension": {
-      "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are productive:\nthey mark where the voice's reasoning genuinely divides.",
+      "description": "An unresolved internal tension in the voice's thought.\n\nPass 2 uses these to populate `topics_requiring_care` and to prevent\nfalse-consensus resolution in `constitution`. Tensions are (per 1.7\nproductive-tension criteria): both poles have primary-text or scholarly\nsupport; tension drives rather than derails the voice's thinking;\nscholarly tradition names the tension explicitly. If any criterion unmet,\nit's a real contradiction — Pass 1.7 coherence handles resolution.\n\nUnder 1-arch-03: tension_type classifies for downstream handling;\nscholarly_context preserves interpretive-tradition framing.",
       "properties": {
         "description": {
-          "description": "The tension, named explicitly. 1-2 sentences.",
+          "description": "The tension, named explicitly. 1-2 sentences. Example: 'Plato's Republic argues philosopher-kings should rule without written law; the Laws argues constitutional constraints are necessary because philosopher-kings are rare and unreliable.'",
           "title": "Description",
           "type": "string"
         },
@@ -1160,6 +1700,30 @@
           ],
           "title": "Evidence Tag",
           "type": "string"
+        },
+        "tension_type": {
+          "default": "productive",
+          "description": "Classification for downstream handling. 'productive' — texture of the thinking; preserve and do not flatten (Plato Republic-vs-Laws). 'contested' — scholarly tradition divides on whether this is genuine tension or interpretive disagreement. 'unresolved' — real logical contradiction that should surface in Pass 7 validation as candidate for escalation.",
+          "enum": [
+            "productive",
+            "contested",
+            "unresolved"
+          ],
+          "title": "Tension Type",
+          "type": "string"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Interpretive-tradition framing of the tension. Example: 'Morson/Emerson (1990) insist polyphony and carnivalization are distinct analytical concepts that must not be collapsed; Scanlan (2002) treats them as complementary; Emerson's warning matters for constitutional synthesis — the two concepts do different work.'",
+          "title": "Scholarly Context"
         }
       },
       "required": [
@@ -1169,10 +1733,10 @@
       "type": "object"
     },
     "Textures": {
-      "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.",
+      "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.\n\nMinimum 4 each, uncapped.",
       "properties": {
         "finds_compelling": {
-          "description": "4-8 textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation'.",
+          "description": "Textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation', 'confessional utterance under pressure'. Minimum 4, uncapped.",
           "items": {
             "type": "string"
           },
@@ -1180,7 +1744,7 @@
           "type": "array"
         },
         "resists": {
-          "description": "4-8 textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting'.",
+          "description": "Textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting', 'abstract system-building divorced from lived suffering'. Minimum 4, uncapped.",
           "items": {
             "type": "string"
           },
@@ -1205,6 +1769,19 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly framing of the voice's argument-preferences. Example for Dostoevsky: 'Bakhtin on the inescapably-unfinalizable word (PDP ch. 5) — Dostoevsky's finds_compelling of confessional-utterance-under-pressure is the formal correlate of polyphony; the half-turned-to-internalized-other structure is what distinguishes Dostoevskian confession from Augustinian/Rousseauian autobiography.'",
+          "title": "Scholarly Context"
         }
       },
       "required": [
@@ -1266,13 +1843,80 @@
       "title": "URLs",
       "type": "object"
     },
+    "VocabEntry": {
+      "description": "Structured vocabulary entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via\n`Vocabulary.preferred_vocabulary: list[str | VocabEntry]` discriminated\nunion — existing Dostoevsky card's list[str] still validates.\n\nloadbearing=True marks philosophically/theologically central terms\n(Dostoevsky's `podpol'e`, `nadryv`, `obraz`; Plato's `to agathon`,\n`eidē`, `episteme`). These terms survive downstream card compression\nwith higher priority.",
+      "properties": {
+        "term": {
+          "description": "The term as voice uses it.",
+          "title": "Term",
+          "type": "string"
+        },
+        "term_in_original_language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Period-language / native-tradition form. Examples: 'подпольe' (Russian), 'ibtilā'' (Arabic), 'mauri' (Maori).",
+          "title": "Term In Original Language"
+        },
+        "gloss": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Brief English approximation. Null if term is universally recognizable (Crystal Palace, obraz).",
+          "title": "Gloss"
+        },
+        "loadbearing": {
+          "default": false,
+          "description": "True for philosophically/theologically central terms that must survive downstream card compression.",
+          "title": "Loadbearing",
+          "type": "boolean"
+        },
+        "translation_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Translator-tradition variation notes. Example for 'nadryv': 'Garnett laceration; P-V preserves untranslated; Ready rupture. Russian carries physical-wound + moral-self-torture senses; no single English term preserves both.'",
+          "title": "Translation Notes"
+        }
+      },
+      "required": [
+        "term"
+      ],
+      "title": "VocabEntry",
+      "type": "object"
+    },
     "Vocabulary": {
-      "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary).",
+      "description": "The voice's characteristic lexicon + imagery.\n\n`preferred_vocabulary` — words the voice reaches for. For pre-1820 voices,\nkeep the primary terms in the voice's own language (transliterated where\nnecessary). For post-1820 voices with tradition-specific lexicons\n(Russian Orthodox, Rastafari, Arendtian German-Jewish), preserve native\nterms regardless of period.\n\nMinimum 15 entries, uncapped maximum. 1-arch-03: list accepts both\nbare str (backward-compat) and VocabEntry structured form (preferred\nfor new outputs).",
       "properties": {
         "preferred_vocabulary": {
-          "description": "15-30 words/terms the voice reaches for. Period vocabulary primary for pre-1820 voices. No generic management terms.",
+          "description": "Words/terms the voice reaches for. Minimum 15, uncapped. Tradition-specific lexicon preserved regardless of period. No generic management terms. Prefer VocabEntry structured form for new outputs; list[str] accepted for backward-compat.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/VocabEntry"
+              }
+            ]
           },
           "title": "Preferred Vocabulary",
           "type": "array"
@@ -1281,7 +1925,7 @@
           "additionalProperties": {
             "type": "string"
           },
-          "description": "Named metaphor families → short description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination'}.",
+          "description": "Named metaphor families → description. Example: {'craft and labour': 'medicine, navigation, weaving', 'light and darkness': 'sun, cave, illumination', 'yellow Petersburg': 'yellow wallpaper, yellow ticket, yellow face — chromatic signature of jaundice, bureaucratic shame, civic decay'}. Minimum 3, uncapped.",
           "title": "Metaphorical Repertoire",
           "type": "object"
         },
@@ -1303,6 +1947,19 @@
           },
           "title": "Citations",
           "type": "array"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly treatment of voice's lexicon. Example for Dostoevsky: 'Kasatkina on the lik/litso distinction — lik is the iconic-ideal face, litso the ordinary phenomenal face; lichina the mask. The triadic structure is theologically loaded per Florovsky. Williams (2008) on Dostoevsky's vocabulary as sacramental.'",
+          "title": "Scholarly Context"
         }
       },
       "required": [
@@ -1387,6 +2044,60 @@
       "title": "WorkEntry",
       "type": "object"
     },
+    "WorkedDemonstration": {
+      "description": "Detailed demonstration connecting a historical event / life-situation\nto the voice's rhetorical-textual response. Captures the 'how did this\nlife-event produce this novel' connective tissue that the tight\nreasoning_method.steps schema silently dropped.\n\nExample (Dostoevsky):\n    label: \"Nechaev affair 1869 → Demons splitting mechanism\"\n    historical_context: \"Sergey Nechaev's cell strangled, shot, and dumped\n                        the student Ivan Ivanov through the ice at Moscow's\n                        Petrovsky Agricultural Academy pond on 21 November\n                        1869 — a murder staged to bind the cell through\n                        shared guilt per Nechaev's Catechism of a\n                        Revolutionary. Dostoevsky was in Dresden; Anna's\n                        brother Ivan Snitkin, a student at the Academy,\n                        had described Ivanov to Dostoevsky personally as\n                        someone who had publicly repudiated the radicals.\"\n    voice_response: \"Rather than denouncing Nechaev in a pamphlet,\n                    Dostoevsky built Pyotr Verkhovensky — and when the\n                    type proved too narrow, split off Stavrogin (Byronic\n                    aristocratic charisma without belief), Kirillov\n                    (logical atheism carried to man-god suicide), Shatov\n                    (Slavophile religious nationalism — the converted\n                    Ivanov). Shigalyov inherits the doctrinal husk:\n                    'Starting from unlimited freedom, I end with unlimited\n                    despotism' (Demons II.7). Four distributed bearers\n                    of fragments a single character cannot hold.\"\n    rhetorical_moves_employed: [\"Incarnate the idea in a person\",\n                                \"Split the idea across doubles\",\n                                \"Follow the logic to its lived end\"]\n    scholarly_citations: [Frank, The Miraculous Years 1995; Wasiolek\n                          notebooks 1969-70]",
+      "properties": {
+        "label": {
+          "description": "Short label. Format: '<event> → <response>'. Example: 'Nechaev affair 1869 → Demons splitting mechanism'.",
+          "title": "Label",
+          "type": "string"
+        },
+        "historical_context": {
+          "description": "What happened, with dates, locations, actors. Preserve detail from sources. No length cap.",
+          "title": "Historical Context",
+          "type": "string"
+        },
+        "voice_response": {
+          "description": "How the voice processed the event in texts/actions. Concrete — what novels, what passages, what rhetorical moves. No length cap.",
+          "title": "Voice Response",
+          "type": "string"
+        },
+        "rhetorical_moves_employed": {
+          "description": "Cross-reference to ReasoningMethod.steps[].name values or structural pattern names. Links the worked demo back to the abstract reasoning-method skeleton.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Rhetorical Moves Employed",
+          "type": "array"
+        },
+        "scholarly_citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Scholarly Citations",
+          "type": "array"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "historical_context",
+        "voice_response"
+      ],
+      "title": "WorkedDemonstration",
+      "type": "object"
+    },
     "Works": {
       "properties": {
         "works": {
@@ -1395,6 +2106,19 @@
           },
           "title": "Works",
           "type": "array"
+        },
+        "bibliographic_scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scholarly framing of the voice's canonical corpus. Example for Dostoevsky: 'PSS (Polnoe sobranie sochinenii, Nauka 1972-90, 30 vols) is scholarly-authoritative for Russian-language primary; Frank's 5-volume biography (Princeton UP 1976-2002) dominant in Anglophone reception; Wasiolek-edited notebooks (Chicago UP 1967-71) preserve compositional-process documents. For Scheherazade: the canonical corpus is multi-translator (Galland 1704 shaped European reception; Burton 1885 orientalized; Haddawy 1990 restored Muhsin Mahdi's critical edition; Lyons 2008 contemporary scholarly). No single canonical source-text.' Preserve for Pass 6 corpus curation decisions.",
+          "title": "Bibliographic Scholarly Context"
         }
       },
       "required": [
@@ -1443,6 +2167,10 @@
     "textures": {
       "$ref": "#/$defs/Textures"
     },
+    "analytical_context_reasoning": {
+      "$ref": "#/$defs/AnalyticalContext",
+      "description": "1-arch-03 addition: scholarly-analytical material (structural_patterns, worked_demonstrations, scholarly_debates) preserved from merge layer. Default empty for voices without substantive reasoning-level scholarly context."
+    },
     "moves": {
       "$ref": "#/$defs/Moves"
     },
@@ -1452,6 +2180,18 @@
     },
     "vocabulary": {
       "$ref": "#/$defs/Vocabulary"
+    },
+    "analytical_context_voice": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AnalyticalContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "1-arch-03 addition: scholarly-analytical material on voice-signature (stylistic-reception, translator-tradition criticism, metaphor-family scholarly mapping). Optional — null for voices without substantive voice-level scholarly context."
     },
     "knowledge_boundary": {
       "$ref": "#/$defs/KnowledgeBoundary"
