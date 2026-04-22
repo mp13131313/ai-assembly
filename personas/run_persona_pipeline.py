@@ -412,6 +412,12 @@ pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
 # passages from the fetched primary_texts, guided by the dossier's identification
 # of important works/scenes. Replaces the prior naive first-80K-character slice.
 def _pass_1d():
+    # 1d-05: corpus_constraint=lyrics_patterns_only (e.g. Marley) returns SKIPPED here.
+    # HANDOFF.md specifies a two-tier corpus for such voices: public-domain interview
+    # transcripts / scholarly analyses as the open tier; reference_only_passages[] as
+    # the private tier. The private tier must be supplied externally (not fetched by 1c).
+    # Before Phase N, verify that the Marley voice_config supplies an alternative
+    # public-tier URL set OR that Pass 4a/6 handle the lyrics-constraint path correctly.
     if not pass1c.get("passages"):
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "1d_excerpt_selection",
                 "status": "SKIPPED", "reason": "No primary_texts to select from",
@@ -419,10 +425,14 @@ def _pass_1d():
     structural_index = build_structural_index(pass1c["passages"])
     user_prompt = render("persona_pass_1d_excerpt_selection",
                          name=vi["name"], merged_dossier=merged_dossier,
-                         structural_index=structural_index)
+                         structural_index=structural_index,
+                         type=vi.get("type", "human"),
+                         subtype=vi.get("subtype", ""))
+    # 1d-04: 8192 (up from 4096) — 15+ selections × ~200 JSON tokens each
+    # approaches 4096 ceiling; bump eliminates truncation risk at zero cost.
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
                     user=user_prompt,
-                    model="claude-sonnet-4-6", max_tokens=4096,
+                    model="claude-sonnet-4-6", max_tokens=8192,
                     temperature=0.0, thinking=False,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
