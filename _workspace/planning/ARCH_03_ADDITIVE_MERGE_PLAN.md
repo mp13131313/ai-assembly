@@ -1747,8 +1747,273 @@ Operator performs Stage 3 review and manual merge.
 
 ---
 
-*Plan document status: LOCKED — all decisions closed 2026-04-22. Ready for Sonnet implementation session.*
+*Plan document status: PRE-SEED COMPLETE — 2026-04-22. Opus 4.7 pre-seed delivered on branch `arch-03-additive-merge`. Sonnet session handles remaining Sonnet-shaped work.*
 *Last updated: 2026-04-22.*
+
+---
+
+## 17. Pre-seed completion status (added 2026-04-22)
+
+Per user decision to pre-seed Opus-heavy steps before Sonnet session fires,
+the following deliverables landed on branch `arch-03-additive-merge`:
+
+**Branch state:** `arch-03-additive-merge` opened from `main` HEAD `05896f8`.
+Two pre-seed commits:
+- `f98370c` — schemas (permissive containers)
+- `ceb7b94` — prompts + runner config
+
+### Pre-seed delivered (Opus 4.7 work)
+
+**Schemas (complete per plan §3):**
+
+- `personas/schemas/_analytical.py` — NEW shared models: StructuralPattern
+  + StructuralPatternInstance + WorkedDemonstration + ScholarlyDebate +
+  AnalyticalContext container. Full docstrings + examples.
+- `personas/schemas/pass_1_1.py` — LifeScaffold + FormativeCandidate updated:
+  scholarly_context + contested_readings + resonates_with_commitments cross-
+  ref + AnachronismEntry structured form (backward-compat via discriminated
+  union on list[str | AnachronismEntry]).
+- `personas/schemas/pass_1_2.py` — Commitment + Concept + Tension updated:
+  scholarly_context + contested_readings + tension_type classification +
+  translation_tradition_notes on Concept.
+- `personas/schemas/pass_1_3.py` — ReasoningStep + Textures updated with
+  scholarly_context; step_number optional.
+- `personas/schemas/pass_1_4.py` — Move + Register + Vocabulary updated
+  with scholarly_context + structural_pattern_refs + genre_specific_register
+  + translator_tradition_notes; VocabEntry structured form (backward-compat
+  discriminated union).
+- `personas/schemas/pass_1_5.py` — KnowledgeBoundary + SensitiveTopic +
+  HardLimits updated: ExclusionEntry + Prohibition structured forms
+  (backward-compat); scholarly_reception on SensitiveTopic.
+- `personas/schemas/pass_1_6.py` — Works gains bibliographic_scholarly_
+  context; Passages gains translator_tradition_coverage.
+- `personas/schemas/merged_dossier.py` — analytical_context_reasoning +
+  analytical_context_voice (optional) top-level keys composed.
+
+**Verified backward-compat:** Phase L Dostoevsky `merged_dossier.json`
+validates against new schemas (optional fields default to empty/null;
+existing list[str] fields accept via discriminated union).
+
+**Merge prompts (complete per plan §4):**
+
+All 6 merge prompts rewritten with additive-merge discipline (Block 2
+expanded). Worked examples added per ABSORBED Wave 3 fixes:
+
+- `pass_1_1_merge.md` (28K rendered) — 5 worked examples: Plato + Octopus
+  + Whanganui + Cleopatra hostile-sourced + Scheherazade fictional.
+- `pass_1_2_merge.md` (16K) — Plato + Octopus + Whanganui + Scheherazade.
+- `pass_1_3_merge.md` (51K — architectural demo) — Plato + Octopus +
+  **full Dostoevsky narratival worked example**: 8-step reasoning_method +
+  5 structural_patterns (scandal-scene, carnivalization, threshold-
+  chronotope, sideshadowing, confession-under-pressure) + 3 worked_
+  demonstrations (Nechaev→Demons, Alyosha-death→Karamazov, Pushkin-Speech)
+  + 4 scholarly_debates + rich textures. This IS the architectural
+  demonstration — shows what pre-1-arch-03 would have compressed to 11K
+  instead preserved in ~50K of merged output.
+- `pass_1_4_merge.md` (10K) — Plato + Marley (moves completion per 1.4-02)
+  + Octopus (1.4-03).
+- `pass_1_5_merge.md` (15K) — Plato + Octopus + Cleopatra hostile-source
+  with full 3-topic sensitive_topics demonstration.
+- `pass_1_6_merge.md` (12K) — Plato + Marley with reference_only_passages
+  private-tier demo (1.6-04) + Octopus + Scheherazade multi-translator
+  (1.6-03).
+
+**Pass 1.7 coherence prompt (complete per plan §5):**
+
+- Block 2 checks expanded to 9 (Check 8 source-attribution preservation +
+  Check 9 analytical-context presence per plan §5.2).
+- Block 3 resolution policy: edit-scope discipline (1.7-02), escalation
+  downstream pathway (1.7-03), productive-tension ALL-3-criteria (1.7-04).
+- Block 4 worked examples added (1.7-01 pattern-break repair): 3 examples
+  covering resolve-by-edit / accept-productive-tension / escalate.
+
+**Pass 2 (complete per plan §6):**
+
+- `persona_pass_2_identity_boundaries.md` — voice_temporal_stance REWRITE
+  per fix 2-02 LOCKED: deployment-configurable with `.default` (fluid-
+  across-time, mandatory) + `.anchored_override` (optional death-threshold
+  for chat/project). 3-6 sentence spec per sub-field. Formative-candidate
+  commit-to-ONE-PRIMARY-with-1-2-SUPPORTING-inline reword per 2-03
+  RESHAPED. Selection-discipline line naming richer 1-arch-03 merged_
+  dossier.
+- `persona_pass_2_user.md` — "10 fields" (was 9) per 2-01; voice_temporal_
+  stance added to field-name list + spec-hint line.
+
+**Pass 3/4a/6 (minor per plan §6.1):**
+
+Jinja-comment guidance on reading 1-arch-03 new merged_dossier fields:
+- Pass 3: commitments + scholarly_context + contested_readings + tensions
+- Pass 4a: genre_specific_register + translator_tradition_notes +
+  analytical_context_voice + structural_pattern_refs + reference-not-
+  display discipline naming
+- Pass 6: bibliographic_scholarly_context + translator_tradition_coverage
+
+**Pass 4b + 5 unchanged** (CT-based; no merged_dossier direct read).
+
+**CT prompt (complete per plan §6.3):**
+
+- `persona_coherence_threading.md` — Boddice §14 3-part formative
+  vocabulary replaces v3.10 "wound and lesson" language.
+
+**Runner config (complete per plan §6.2):**
+
+- `run_persona_pipeline.py` — `_claude_pass` default max_tokens 24000 →
+  32000 (Pass 2/3/4a/6 benefit automatically).
+- `run_pass_1_7.py` — max_tokens 64000 → 100000; `_load_chunk_outputs`
+  expanded layout for analytical_context keys + sensible optional defaults.
+- `run_pass_1_3.py` — OUTPUT_KEYS += analytical_context_reasoning.
+- `run_pass_1_4.py` — OUTPUT_KEYS += analytical_context_voice.
+
+### NOT pre-seeded (Sonnet session handles)
+
+Per plan §16 model-economy — Sonnet-shaped work:
+
+- **`personas/scripts/arch_03_preservation_audit.py`** (NEW) —
+  instrumentation script for Stage 1 preservation-audit. Sonnet drafts
+  per plan §7.3 specification (char overlap / citation preservation /
+  named-structural-pattern preservation; JSON audit output).
+- **`personas/tests/fixtures/phase_l_dostoevsky/`** — test fixture
+  directory setup. Sonnet copies Phase L research inputs + baseline
+  card per plan Appendix C.
+- **Wave 1 fixes (53 fixes across Pass 0a / 1a×4 / 1b×4 / 0b family)** —
+  tracker-specified mechanical applications. Sonnet executes per
+  `_workspace/planning/PIPELINE_REVIEW_FIXES.md`.
+- **Wave 2 fixes (12 fixes: Pass 1c + 1d)** — tracker-specified. Sonnet.
+- **Stages 1/2/3 test runs + iteration** — Sonnet runs Dostoevsky fixture
+  through pipeline; operator reviews at Stage 3.
+- **128-test suite updates** — schema-shape assertions for permissive
+  containers; prompt-render smoke tests. Sonnet per plan §14 Q4 minimum
+  coverage.
+- **ARCH_03_MANUAL_REVIEW_CHECKLIST.md** drafting — Sonnet stub-drafts
+  during Stage 3 preparation; operator reviews + signs off.
+
+### Revised Sonnet handoff (supersedes §16 prompt)
+
+Copy-paste for Sonnet session (updated from §16 to reflect pre-seed done):
+
+```
+You are continuing the 1-arch-03 Additive Merge Architecture implementation
+for the AI Assembly project. Opus 4.7 pre-seed is COMPLETE on branch
+`arch-03-additive-merge` (commits f98370c + ceb7b94). Your job: the
+Sonnet-shaped remainder — Wave 1/2/3 mechanical fixes, test fixture
+setup, preservation-audit instrumentation, Stage 1/2 execution +
+operator-review hand-off.
+
+ORIENTATION READING (in order):
+
+1. `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md` — THE plan.
+   Read §1-§17 completely. §17 documents pre-seed completion; you pick up
+   from §17's "NOT pre-seeded" list.
+
+2. `_workspace/planning/PIPELINE_REVIEW_FIXES.md` — fix tracker. Reference
+   for specific fix IDs (Wave 1 + Wave 2 + Wave 3 SURVIVES).
+
+3. `code/CLAUDE.md` — repo conventions.
+
+4. `_workspace/planning/REBUILD_PLAN.md` — PB#1-9 locked decisions.
+
+BRANCH STATE:
+
+You start on `arch-03-additive-merge` at HEAD `ceb7b94`. Verify:
+  git status  # clean tree expected
+  git log --oneline -3  # should show ceb7b94 + f98370c + main merge-base
+
+SCOPE (what you do):
+
+1. **Draft `personas/scripts/arch_03_preservation_audit.py`** per plan
+   §7.3 spec. Three metrics: character overlap (target ≥85% on §3/§4/§5);
+   citation preservation (target 100%); named-structural-pattern
+   preservation (target 100%). JSON output. Run-from-command-line with
+   --voice flag.
+
+2. **Set up `personas/tests/fixtures/phase_l_dostoevsky/`** per plan
+   Appendix C. Copy research inputs (Perplexity + Gemini + Claude DR 6
+   sections) + baseline card from projects/phase-l-dostoevsky/. README
+   documenting fixture purpose.
+
+3. **Apply Wave 1 fixes** — 53 fixes per tracker (Pass 0a, Pass 1a×4,
+   Pass 1b×4, Pass 0b family). Tracker specifies exact change language
+   per fix. Commit logical groups.
+
+4. **Apply Wave 2 fixes** — 12 fixes per tracker (Pass 1c + Pass 1d).
+   1d-06 fuzzy-match HIGH architectural: DEFER unless operator opts in.
+   Commit.
+
+5. **Run Stage 1 merge-layer test** on Dostoevsky fixture:
+   `cd personas && venv/bin/python run_pass_1_all.py "Fyodor Dostoevsky"
+    --project ../../projects/phase-l-dostoevsky --use-test-fixtures`
+   Run `arch_03_preservation_audit.py` on output.
+   **STOP AND REPORT TO OPERATOR** with audit JSON + per-chunk size/content
+   comparison vs. baseline.
+
+6. **Run Stage 2 Pass 2-6 test** on new merged_dossier:
+   `venv/bin/python run_persona_pipeline.py "Fyodor Dostoevsky"
+    --project ../../projects/phase-l-dostoevsky`
+   (Clear 04_generation/ 05_validation/ 06_derive/ caches first.)
+   **STOP AND REPORT TO OPERATOR** with new card vs. baseline comparison.
+
+7. **Draft `ARCH_03_MANUAL_REVIEW_CHECKLIST.md`** stub per plan §14 Q1
+   for operator Stage 3 review. **STOP AND REPORT.**
+
+8. **DO NOT merge to main** — operator-only per plan §15.
+
+MODEL ECONOMY (you):
+
+Sonnet 4.6 + medium effort handles all above. Escalate to Opus 4.7 ONLY if:
+- Audit fails (<70% preservation after 2 iterations on a chunk) — open
+  Opus session for diagnosis + prompt-iteration
+- Stage 2 card shows qualitative regression — Opus qualitative review
+- Plan spec is genuinely ambiguous — Opus judgment
+
+AUTONOMY BOUNDS (inherit from plan §16):
+
+DO autonomously: script drafting, fixture setup, mechanical fix
+application per tracker specs, Stage 1/2 execution, commits + pushes
+to branch, schema-shape test additions.
+
+DO NOT autonomously: merge to main (operator), modify REBUILD_PLAN
+PB#1-9, change Runtime side, rewrite pre-seed deliverables (schemas,
+merge prompts, Pass 2 rewrite, CT Boddice-align — all Opus-authored and
+LOCKED; you extend + test, not rewrite), add new architectural proposals.
+
+EXIT CRITERIA (branch ready for operator):
+- Preservation-audit passes Stage 1 criteria on Dostoevsky fixture
+- Pass 2-6 + Pass 7 validation passes Stage 2 on new merged_dossier
+- ARCH_03_MANUAL_REVIEW_CHECKLIST.md drafted + populated
+- All commits pushed to origin/arch-03-additive-merge
+- Tree clean
+
+Report back to operator with:
+- Preservation-audit JSON
+- Stage 1 + Stage 2 summary
+- Any Opus-escalation events during session
+- Branch head commit hash for operator merge-review
+
+Start with Step 1 (preservation-audit script drafting). Report for
+intermediate check-in after step 4 (Wave 1 + Wave 2 fixes complete +
+branch state clean); then run Stage 1.
+```
+
+### Tracker updates to land with pre-seed commit-to-main
+
+When operator merges `arch-03-additive-merge` → `main`, update tracker:
+- Mark 1-arch-03 status: `APPLIED` (was PROPOSED)
+- Mark Wave 3 ABSORBED fixes: `APPLIED` (resolved via arch change)
+- Mark Wave 3 OBSOLETE fixes: `OBSOLETE-UNDER-1-ARCH-03 LANDED` (no separate
+  implementation)
+- Mark 1-arch-02: `RESOLVED-VIA-1-ARCH-03 LANDED`
+- Mark Wave 3 SURVIVES fixes: update Status from PROPOSED → APPLIED (per
+  commit `ceb7b94` + individual prompt edits)
+- Mark Pass 2 fixes (2-01/2-02/2-03): `APPLIED`
+- Mark Pass 2 fix 2-04: `APPLIED` (max_tokens bump landed in `_claude_pass`)
+- Update Consolidated totals.
+
+Leave Wave 1 + Wave 2 fixes at PROPOSED status — Sonnet session applies
+these post-merge or during Sonnet-handoff session.
+
+---
+
+*End plan document.*
 
 ---
 
