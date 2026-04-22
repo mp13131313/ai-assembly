@@ -32,6 +32,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 import anthropic as _anthropic
+import httpx as _httpx
+import httpcore as _httpcore
 from pydantic import BaseModel
 
 from flows.shared import paths as _paths
@@ -42,7 +44,27 @@ from flows.shared.prompt_render import render
 from schemas._entry import ValidationError, validate_chunk_output, generate_json_schemas
 
 
-_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
+# Streaming calls can drop mid-response on transient network flakes — the
+# peer closing the chunked connection before the JSON body completes surfaces
+# as httpx.RemoteProtocolError (wrapping httpcore.RemoteProtocolError), which
+# the anthropic SDK does not translate into its own APIError hierarchy. A
+# single bounce on these is always the right move; they are independent of
+# prompt content. See first Stage 1 run under arch-03 where Pass 1.4 died on
+# "peer closed connection without sending complete message body".
+_RETRYABLE = (
+    RuntimeError,
+    json.JSONDecodeError,
+    _anthropic.APIError,
+    _anthropic.RateLimitError,
+    _httpx.RemoteProtocolError,
+    _httpx.ReadError,
+    _httpx.ConnectError,
+    _httpx.ReadTimeout,
+    _httpcore.RemoteProtocolError,
+    _httpcore.ReadError,
+    _httpcore.ConnectError,
+    _httpcore.ReadTimeout,
+)
 
 
 def _stamp(msg: str) -> None:
@@ -212,6 +234,28 @@ def run_chunk(
     slug = voice_slug(name)
     chunk_num = int(chunk_name.split(".")[1])  # "1.2" → 2
     _stamp(f"Pass {chunk_name} merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
+
+    # Skip-if-already-run. When all per-key JSON outputs exist under the
+    # chunk directory (from a prior successful run), load + validate them
+    # from disk and return — no LLM call, no cost. This lets restarts after
+    # transient failures (e.g. one chunk's streaming connection drops)
+    # avoid re-running already-completed chunks. Delete the chunk's output
+    # directory to force a re-run.
+    out_dir_preview = _paths.merge_dir(slug, project_root) / (
+        output_subdir or f"pass_{chunk_name.replace('.', '_')}"
+    )
+    existing_files = {k: out_dir_preview / f"{k}.json" for k in output_keys}
+    if all(p.exists() for p in existing_files.values()):
+        _stamp(f"  skip: all outputs present at {out_dir_preview.relative_to(project_root)}")
+        cached = {k: json.loads(p.read_text()) for k, p in existing_files.items()}
+        try:
+            validated = _validate(cached, output_keys)
+        except ValidationError as exc:
+            _stamp(f"  cached outputs failed validation; re-running: {exc}")
+        else:
+            validated["_usage"] = {"input_tokens": 0, "output_tokens": 0, "cached": True}
+            validated["_model"] = "cached"
+            return validated
 
     if not use_test_fixtures and mode == "auto":
         mode = detect_dr_mode(slug, project_root)
