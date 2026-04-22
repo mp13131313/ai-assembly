@@ -12,8 +12,6 @@ OUTPUT REQUIREMENTS — read first, optimize for these throughout:
 - **Minimum 15,000 words total.** Brevity defeats the purpose. If you
   cannot reach 15,000 words on this figure, the figure is under-documented
   and you should say so explicitly per section.
-- **Each of the 6 sections: 2,000+ words.** Do not produce shallow filler
-  to hit a target — but do not summarize away substantive material.
 - **Use these EXACT section heading formats** (the downstream parser
   depends on this): `## 1. BIOGRAPHICAL FOUNDATION`, `## 2. INTELLECTUAL
   FRAMEWORK`, `## 3. REASONING PATTERNS`, `## 4. VOICE AND STYLE`,
@@ -106,11 +104,13 @@ Target: 2,500+ words.
   antisemitism as structural; post-Schiff / Roller on Cleopatra
   reclaimed from hostile sources; post-McReynolds on Russian
   imperial unconscious). Cite author + year + key publication.
-- **Pochvennichestvo-equivalent specificity**: where the figure's
-  intellectual position differs subtly from a movement they're often
-  conflated with (Slavophile vs. pochvennichestvo, post-Kantian vs.
-  pre-Hegelian, Sufi vs. Shi'i, etc.) — surface this differentiation;
-  generic placement loses the figure's specific position.
+- **Tradition-position precision**: where the figure's intellectual
+  position differs subtly from a movement they're often conflated with —
+  surface this differentiation; generic placement loses the figure's
+  specific position. (e.g. Slavophile vs. pochvennichestvo for Dostoevsky;
+  Socratic vs. Platonist vs. Academic for ancient philosophy; Rastafari vs.
+  Garveyite vs. Pan-Africanist for Caribbean tradition; Sufi vs. Shi'i for
+  Islamic figures.)
 
 ---
 
@@ -119,8 +119,11 @@ Target: 2,500+ words.
 Target: 2,000+ words.
 
 - **How this figure characteristically argues** (the METHOD, not the
-  conclusions): 5-8 cognitive / dialectical / narratival / scenic steps in
-  order. Cite a passage where each step is visible.
+  conclusions): 5-8 cognitive moves or reasoning stages, step-ordered where
+  the figure's actual method has ordered structure, else clustered/thematic —
+  prefer the figure's own native structure (scenic/incarnational for
+  narratival reasoners, aphoristic for epigrammatic thinkers, parabolic for
+  scriptural voices). Cite a passage where each move or stage is visible.
 - **Textures of argument the figure finds compelling** (NOT topics —
   textures: definitional questions, etymological excavation, scenic
   dramatization, scriptural exegesis, character-encounter, sideshadowing,
@@ -149,7 +152,20 @@ PRIMARY TEXTS, not summary.
 - **Register and tone**: what the voice IS and what it is NOT (concrete
   contrast, scholar-attributed).
 - **Tradition-note**: if the voice is embedded in oral / ritual /
-  performative tradition, name the tradition; else null.
+  performative tradition, produce a sub-section:
+  - tradition name (e.g. Rastafari, 1001 Nights oral-recension, Islamic
+    *hadith* transmission, Vedic oral-formulaic, Greek symposium)
+  - structural constraints on expression (genre, register, performance
+    context — what the tradition permits, what it prohibits)
+  - how tradition authority sits above individual authorship (does the
+    figure speak *as* tradition or *within* tradition?)
+  - the tradition's own verification rules (what counts as authoritative
+    within the tradition, independent of modern scholarship)
+  - 2-3 named tradition-interlocutors the figure was in dialogue with
+    (scholar or community authority — e.g. Godfrey-Smith for Octopus,
+    Haddawy vs. Burton for Scheherazade, Marley vs. Burning Spear on
+    Rastafari rhetoric)
+  If the voice is NOT tradition-embedded, one sentence confirming null.
 - **3-6 named characteristic moves** (sentence-level + paragraph-level
   patterns, distinct from Section 3's reasoning moves — moves of
   EXPRESSION not REASONING).
@@ -167,8 +183,13 @@ PRIMARY TEXTS, not summary.
 
 Target: 2,000+ words.
 
-- **What was known and available** in the figure's period (intellectual
-  / scientific / political horizons).
+- **Engagement-horizon**: for historical figures, what was known and
+  available in the figure's period (intellectual / scientific / political
+  horizons). For contemporary voices (Audrey Tang, Thiel, Lovelace), frame
+  as: (a) the figure's explicit engagement horizon (what they chose to
+  engage with vs. bracket); (b) what was actively contested in their
+  present and how the figure positioned themselves; (c) what they
+  explicitly placed out of scope or treated as not-yet-answerable.
 - **Concepts / discoveries / traditions that did NOT exist then**: 10-20
   items, each with name + the figure's closest analog (e.g. "Freudian
   unconscious — closest: the *podpol'e*; algorithmic governance — closest:

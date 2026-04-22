@@ -45,7 +45,7 @@ Produce a JSON object with exactly these fields:
 
 - `corpus_constraint` (enum: `"full"` | `"lyrics_patterns_only"` | `"hostile_read_against_grain"`): `"full"` = primary texts can be quoted. `"lyrics_patterns_only"` = copyrighted musical corpus; produce pattern descriptions not excerpts. `"hostile_read_against_grain"` = primary record is hostile accounts requiring reconstruction. Default `"full"`.
 
-- `manual_grounding` (string | null): Echo back the manual_grounding text if provided (verbatim or lightly normalized), else null.
+- `manual_grounding` (string | null): Echo back the manual_grounding text if provided (verbatim — do not normalize or paraphrase), else null.
 
 - `wikipedia_url` (string | null): Echo back if provided; else omit field entirely (do NOT emit `null`).
 
@@ -105,16 +105,16 @@ Then edit `voices/<slug>/00_intake/02_voice_config.json` and replace `"editorial
 
 ## What a domain expert should look at
 
-Bulleted list of decisions where confidence is low or where a specialist might disagree.
+3-5 bullets, one per proposed field where the confidence call was genuinely close. Each bullet names the field, the alternative that was ruled out, and the reason it was ruled out. Do NOT produce a generic checklist — only bullets where the decision was not obvious.
 
 ## To proceed
 
 1. Read this doc.
 2. Fill in `editorial_rationale` in `voices/<slug>/00_intake/02_voice_config.json`.
 3. Run Phase 0.5 research + tailor: `python3 run_phase0_1_research.py "<Display Name>"`.
-4. Paste each of the 6 section prompts into claude.ai (Opus 4.7 + Extended Thinking + Deep Research).
+4. Paste each of the 6 section prompts into claude.ai with Deep Research enabled: §1–§5 use Claude Opus 4.6 + Extended Thinking; §6 uses Claude Opus 4.7 (Phase L empirical finding: 4.6 produced reader's-intro output on §6; 4.7 required).
 5. Save each section result as `voices/<slug>/01_research/04_dr_dossier/0N_section_N.md`.
-6. Run chunked Pass 1: `python3 run_pass_1_all.py "<Display Name>"`.
+6. Run full persona pipeline: `python3 run_persona_pipeline.py "<Display Name>"`.
 ```
 
 ---
