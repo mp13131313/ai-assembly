@@ -206,6 +206,407 @@ Merge becomes: dedupe + reconcile + organize. Not compress-to-recipe. Rich merge
 
 ---
 
+### 1-arch-04 — Gemini cross-disciplinary preservation at merge prompts (refines 1-arch-03)
+
+**Severity:** MEDIUM (quality refinement, not blocker; affects interpretive plurality of merged_dossier)
+**Status:** PROPOSED — surfaced empirically from arch-03 Stage 1 Dostoevsky testing (2026-04-22)
+**Scope:** Pass 1.1-1.6 merge prompts only; no schema changes, no code changes. Coordinated text patch across all 6 merge prompts.
+**Effort:** ~4-6 hours: prompt edits + render-smoke + re-run Stage 1 on Dostoevsky to verify.
+
+**Problem (empirically measured):**
+
+Claim-level audits of Dostoevsky Stage 1 outputs under arch-03 showed a **consistent asymmetry across all 6 merge chunks**:
+
+| Source | Per-chunk preservation rate (range) |
+|---|---|
+| Perplexity §N | **85-100%** |
+| Claude DR §N | 60-98% (95%+ at §3, ~60% at §2) |
+| Gemini full (distinctive contributions) | **17-62%** |
+
+The Perplexity and DR preservation rates are consistent with arch-03's additive-merge hypothesis. **Gemini's distinctive contributions do not make the same transition.** Specifically, across the 6 chunks the following Gemini-flagged material was consistently under-preserved:
+
+1. **Cross-disciplinary re-readings** of the same underlying facts: postcolonial (McReynolds, Tlostanova's "Janus face"), feminist / gender studies (Berman on family-novel, Maiorova on gendered nation), history of emotions / affect theory (Sobol on *febris erotica*), legal-economic theory (Todd on professional-writer precarity, Murav on jury-system critique), disability studies (Rising on stammer as crip performance), ecological Dostoevsky (Marullo on pochva as sacred), gift-economy / Levinasian ethics (Kliger, Vinokur).
+2. **Post-2022 Ukrainian scholarship** (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison's "To Cancel or Not to Cancel?") — name-checked in §5 sensitive_topics but not synthesized into navigation guidance or hard-limits.
+3. **Recent 2020-26 scholarship** (Patyk's provocation thesis on antisemitism; Rising on disability) — partially present at §5 but absent from §1, §4 structural-integration.
+4. **Unusual primary-text passages** Gemini surfaces (Zosima on birds/animal suffering; Marmeladov on *nishcheta* as social death; Notebooks self-exhortation on "the new word").
+
+**Root-cause diagnosis:**
+
+The arch-03 merge prompts are structured around Perplexity's 6-section framework — per-chunk `§N` content from Perplexity maps directly into the chunk's schema buckets. Gemini is designed as a **cross-cutting "alternative framings"** source per baseline File 4 (13-persona pipeline architecture): its value is re-interpretation of existing facts, not new facts to slot into a bucket. When the merge prompt asks "preserve §N content from all 3 sources," Gemini's disciplinary reframing of existing facts falls into one of three holes:
+
+- **Deduplicated as redundant** with the core claim Perplexity/DR already made (Gemini's postcolonial reading of the Jewish-question antisemitism = "same topic, already covered")
+- **Shunted into `scholarly_context`** as a passing citation without operational weight (e.g. McReynolds cited 6× in §5 sensitive_topics but her structural thesis — "merchant-God displaced onto Europe and the Jew, narod reserved for self-sacrifice" — not synthesized)
+- **Dropped entirely** because the re-framing doesn't fit an existing `structural_pattern` / `commitment` / `tension` shape
+
+This is not a claim-dropping failure inside a single-source chunk. It's a **cross-source scope-narrowing** specific to Gemini's kind of contribution. The permissive containers + additive-merge discipline introduced in 1-arch-03 assume sources that fit schema categories directly; they're less equipped to absorb sources whose value is re-interpretation.
+
+**Remedy (prompt-level, no architecture change):**
+
+Add a Gemini-specific preservation discipline block to Block 2 (Additive-merge discipline) of each of the 6 merge prompts `pass_1_1_merge.md` through `pass_1_6_merge.md`:
+
+> **Gemini-specific preservation discipline.** Gemini's distinctive contribution is cross-disciplinary *re-framings* of material that Perplexity + Claude DR cover canonically — postcolonial, feminist, affect-theoretic, legal-economic, disability-studies, ecological, gift-economy / Levinasian readings. These are second readings of the same underlying material, not new facts. **Do not deduplicate these as overlap.** A postcolonial reading of the Jewish-question material is not a duplicate of the canonical antisemitism commitment; it is a second reading that must survive as `scholarly_context` on the commitment, or as a `contested_reading` entry, or as a `scholarly_debates[]` item in analytical_context. When Gemini surfaces an unusual primary passage (e.g., Zosima on birds, Marmeladov on *nishcheta*) that Perplexity + DR didn't foreground, preserve it in `passages[]` even if its angle is unconventional. When Gemini name-checks post-2022 scholarship not in Perplexity/DR (Kokobobo, Yermolenko, Rising, Patyk, Marullo, Kliger, Vinokur), preserve their framings in `sensitive_topics.scholarly_reception`, `commitments.scholarly_context`, or `scholarly_debates[]` with named attribution, not merged away as "background."
+
+Coordinated patch: identical block inserted at the same position in all 6 prompts, with per-chunk examples in Block 4 (Worked examples) showing at least one Gemini-re-framing preservation case.
+
+**Expected outcome (re-run Stage 1 on Dostoevsky):**
+- Gemini preservation rate rises from 17-62% → ≥75% across chunks
+- §5 post-2022 Ukrainian scholarship shows independent synthesis, not verbatim-copy
+- §1 Mauss/Levinas/Rising/Marullo frames appear as named scholarly_context entries
+- §3 cross-disciplinary framings appear as `analytical_context_reasoning.scholarly_debates[]` items
+
+**Relation to other tracker items:**
+
+- **Refines 1-arch-03.** Does not supersede; not a new architecture. Same permissive-container schemas + additive-merge-prompt approach, targeted refinement to handle Gemini's cross-disciplinary category explicitly.
+- **Does NOT resurrect 1-arch-02.** The Gemini-lane-filter concern is still dissolved; Gemini remains full contributor per chunk. This is a preservation-discipline fix, not a routing fix.
+- **Composes cleanly with 1-arch-01.** Orthogonal to curated_corpus_passages routing.
+- **Composes cleanly with the 2026-04-22 Pass 1.7 split amendment** (offline compose + narrow LLM audit). This remedy operates upstream at 1.1-1.6; 1.7 split is unaffected.
+
+**When to implement:**
+
+Before Phase N. Empirically measured on Dostoevsky — same measurement applies to voices 2-12. Not a blocker for the current arch-03 PROCEED decision if Stage 2/3 still produces a materially richer card than Phase L baseline (Gemini's missing material is depth-enrichment, not card-breaking). But ITERATE-worthy because Gemini's post-2022 Ukrainian scholarship vector specifically matters for any post-2022 voice deployment.
+
+**Linked evidence:**
+- Dostoevsky Stage 1 Perplexity+Gemini audit (6 chunks, per-chunk claim-level, 2026-04-22 session)
+- DR→merge audit (earlier same day) showing §2 hesychasm multi-source failure (both Perplexity line 119 and Gemini §2 reference hesychast tradition; Pass 1.2 drops it from both)
+
+---
+
+### 1-arch-05 — Per-chunk reads at Pass 2-6 + edits-to-chunks at Pass 1.7 (coupled refactor; chunks become source of truth)
+
+**Severity:** MEDIUM-HIGH architectural (quality + cost + legibility; not a blocker but compounds with every downstream change)
+**Status:** **DECIDED 2026-04-22** — operator committed to the architecture after tracing the full data-flow end-to-end. All further pipeline analysis treats this as the target architecture even before implementation.
+**Scope:** Pass 1.7 Stage C write path + six Pass 2-6 prompt templates + `run_persona_pipeline.py` rendering + optional `08_merged_dossier.json` convenience-artifact regeneration. No schema changes, no Runtime side changes.
+**Effort:** ~1 day focused engineering + Stage 1/2 rerun. Prompt editing is the bulk; runner changes are small.
+**Recommended timing:** after arch-03 Stage 2/3 pass-or-iterate decision. If arch-03 PROCEEDS, ship `1-arch-05` as the next cleanup cycle before Phase N. If arch-03 ITERATES, fold `1-arch-05` into the iteration since prompt edits happen anyway.
+
+**Problem (empirically surfaced during arch-03 Stage 1 retrospective, 2026-04-22):**
+
+The current pipeline has a data-flow seam that was correct for the v3.10 monolithic merge but is wrong for the arch-03 chunked merge. Tracing every chunk key end-to-end revealed:
+
+1. **Pass 1.1-1.6 produce 19 separate JSON files** under `02_merge/pass_1_N/<key>.json` — each chunk authoritatively holds its top-level content keys.
+2. **Pass 1.7 composes all 19 into `08_merged_dossier.json`** in memory, then runs the narrow LLM audit, then applies edits to the *composed dict*, then writes the composed dict to disk. The source chunk files are never touched.
+3. **Pass 2-6 each render `{{ merged_dossier }}` as one 432K blob** and read from the composed dossier (via the key paths `merged_dossier.commitments`, `merged_dossier.vocabulary`, etc. referenced by each Pass's system prompt).
+
+This seam has four problems:
+
+- **(a) Two sources of truth.** After Pass 1.7 runs, the per-chunk file `pass_1_4/vocabulary.json` disagrees with `08_merged_dossier.json.vocabulary` — the dossier has the audit's 6 vocab-append edits; the chunk file does not. Any tool, test, or diagnostic that reads chunk files directly sees pre-audit state; anything that reads the dossier sees post-audit. Silent data divergence.
+- **(b) 300K of irrelevant content per Pass 2-6 call.** Pass 4a uses 4 of 21 top-level keys semantically but reads all 21. Pass 6 uses 4 of 21. Pass 2 uses 5 of 21. The composed-blob rendering wastes input tokens and dilutes attention. Empirically, LLM instruction-following degrades with input size when most of the input is instruction-irrelevant. For Opus 4.7 streaming with thinking enabled, this also increases wall-time per call.
+- **(c) `{{ merged_dossier }}` obscures data dependencies.** Reading a Pass-N prompt today, you cannot tell which chunks it consumes without re-reading the system prompt's cross-references. Data dependency graph is invisible at the template boundary.
+- **(d) `coherence_flags` + `coherence_resolutions` (Pass 1.7 metadata) are top-level keys in the dossier every Pass 2-6 sees, but no Pass reads them.** They're dead weight in the prompt.
+
+**The decision (operator, 2026-04-22):**
+
+Chunk files become the source of truth end-to-end. Pass 1.7 edits apply directly to chunk files. Pass 2-6 read specific chunk files via named template variables. `08_merged_dossier.json` remains as an optional convenience snapshot for human review, rebuilt deterministically from chunk files — **not on the critical path** for any downstream Pass.
+
+**Rationale:**
+
+- **Source-of-truth discipline.** `pass_1_2/commitments.json` is where commitments live. If Pass 1.7's audit adds a commitment, it goes there. If Pass 4a's behavior depends on vocabulary, it reads `pass_1_4/vocabulary.json` directly. One canonical location per content item. No divergence possible.
+- **Legibility of data flow.** Pass 4a's user prompt becomes `{{ moves }}, {{ register }}, {{ vocabulary }}, {{ analytical_context_voice }}`. Reading the template you know exactly which files fed it. The data dependency graph is printed on the prompt.
+- **Token-cost reduction.** Per-call input shrinks roughly 3-8× at Pass 2-6. Cumulative across the pipeline this is material. Also reduces Pass 7a cross-model validator context (it currently reads the whole card including any chunk-leakage from Pass 2-6 output).
+- **Attention focus.** Each Pass sees the content it actually uses, not the other Passes' material. This empirically helps instruction-following and reduces prompt-injection-style failure modes where the LLM latches onto an irrelevant-but-salient chunk.
+- **Debuggability.** If Pass 3's constitution goes sideways, you diff `pass_1_2/commitments.json` against a baseline. No need to open 432K dossiers and locate keys.
+- **Coherence metadata relocates to its own file.** `coherence_flags[]` + `coherence_resolutions[]` move out of `08_merged_dossier.json` into a separate `02_merge/_coherence_audit.json` file. Operators read that file directly. Pass 2-6 never see it unless we explicitly wire it in (see sub-note below).
+- **Enables future Pass-N-aligned chunk consolidation.** If we later want to merge chunks 1.1+1.5 into a single Pass-1-Identity chunk (because both feed Pass 2), chunks-as-source-of-truth makes the consolidation mechanical. The dossier-as-source model would fight that change.
+- **Matches cognitive reality.** The chunking was designed to parallelize the merge, with boundaries aligned to DR §N. Downstream consumption has different natural boundaries. Making chunks the source of truth lets us evolve chunking later without breaking downstream.
+
+**Remedy — two coupled parts. Must ship together.**
+
+**Part A — Pass 1d, 2, 3, 4a, 6 per-chunk reads.**
+
+For each of Pass 1d, 2, 3, 4a, 6 (plus adjustments to 4b, 5 that read specific card fields, not full dossier):
+
+Replace `{{ merged_dossier }}` in user prompts with named chunk-key variables. Each Pass declares exactly what it needs:
+
+```
+Pass 2 user prompt:
+  life_scaffold: {{ life_scaffold }}
+  formative_candidates: {{ formative_candidates }}
+  knowledge_boundary: {{ knowledge_boundary }}
+  sensitive_topics: {{ sensitive_topics }}
+  hard_limits: {{ hard_limits }}
+
+Pass 3 user prompt:
+  commitments: {{ commitments }}
+  concepts: {{ concepts }}
+  tensions: {{ tensions }}
+  reasoning_method: {{ reasoning_method }}
+  textures: {{ textures }}
+  analytical_context_reasoning: {{ analytical_context_reasoning }}
+
+Pass 4a user prompt:
+  moves: {{ moves }}
+  register: {{ register }}
+  vocabulary: {{ vocabulary }}
+  analytical_context_voice: {{ analytical_context_voice }}
+  (cross-refs) available_pathe: {{ available_pathe_from_1_1 }}
+              reasoning_method_summary: {{ reasoning_method_summary_from_1_3 }}
+
+Pass 6 user prompt:
+  works: {{ works }}
+  passages: {{ passages }}
+  urls: {{ urls }}
+  reference_only_passages: {{ reference_only_passages }}
+  (cross-refs) reasoning_method, characteristic_moves — already passed as card-field values
+  primary_texts: {{ primary_texts }}  (primary_block from Pass 1d — unchanged)
+
+Pass 1d user prompt (selection of representative primary-text excerpts):
+  works: {{ works }}                  — 1.6 bibliographic context
+  passages: {{ passages }}            — 1.6 index of scholar-flagged important passages with purpose_tags
+  reasoning_method: {{ reasoning_method }}  — 1.3, to identify "reasoning-in-action" passages
+  register: {{ register }}            — 1.4, to identify voice-exemplar passages
+  moves: {{ moves }}                  — 1.4, to identify signature-move-in-action passages
+  structural_index: {{ structural_index }}  (built from fetched primary_texts — unchanged)
+```
+
+`run_persona_pipeline.py` is updated to load per-chunk JSONs from `02_merge/pass_1_N/<key>.json` and pass them as named template variables. No more `merged_dossier = json.dumps(merged_dossier_dict, ...)` single-blob render.
+
+Pass 4b stays on CT-based reads (unchanged — it's meta-level, operates on compressed card-in-progress). Pass 5 stays CT + specific card fields (unchanged). Only Pass 1d, 2, 3, 4a, 6 change template shape.
+
+**Part B — Pass 1.7 edits-to-chunks.**
+
+In `run_pass_1_7.py` Stage C, `_apply_edit()` is updated to route each edit to the **chunk file** that owns its path root, not to the in-memory composed dict:
+
+```
+edit.path = "commitments[3].operational_note"  →  pass_1_2/commitments.json
+edit.path = "vocabulary.preferred_vocabulary"  →  pass_1_4/vocabulary.json
+edit.path = "passages[7].citation"             →  pass_1_6/passages.json
+```
+
+A small routing map `{top_level_key: chunk_dir_path}` constructed from the layout dict in `_load_chunk_outputs()`. After applying all edits, each touched chunk file is Pydantic-revalidated against its chunk schema (same Pydantic models used at Pass 1.N), then atomically written back to disk. Schema-breaking edits fail loudly.
+
+Coherence metadata:
+- `coherence_flags[]` + `coherence_resolutions[]` move from the composed dossier into `02_merge/_coherence_audit.json` (new file).
+- `08_merged_dossier.json` either (i) is deleted as obsolete, or (ii) becomes a convenience snapshot rebuilt post-edit by re-composing chunk files (no LLM, pure Python). Decision point: keep (ii) if human-review workflows read the single file; remove (i) if nobody does.
+
+**Coupling requirement — ship both or neither:**
+
+- **Part A without Part B**: Pass 2-6 reads chunk files, but chunks are pre-audit (missing Pass 1.7 edits). Silent regression vs. current state.
+- **Part B without Part A**: Pass 1.7 edits chunk files, but Pass 2-6 still reads the old `08_merged_dossier.json` blob (pre-edit). Edits applied but invisible downstream. Dead work.
+
+Both must land in the same commit sequence.
+
+**Note on coherence_flags downstream consumption (orthogonal decision, flag as sub-item):**
+
+Under current architecture, `coherence_flags[]` are written to the dossier but never read by any Pass. This was flagged in the 2026-04-22 "what is 1.7 for?" retrospective. Under `1-arch-05` they move to a separate file, which makes the "not read" status structurally explicit. Whether to wire flags into Pass 2-6 user prompts as explicit guidance (e.g. `{{ coherence_flags_summary }}` so Pass 3 knows "this commitment has a productive-tension flag — don't flatten it") is a separate decision, tracker-able later. Not coupled to `1-arch-05` itself.
+
+**Concrete consequences for each downstream Pass (authoritative from this point forward — all further analysis assumes `1-arch-05` target state):**
+
+- **Pass 1d (Excerpt Selection, Sonnet)** reads 5 chunk files: `works.json`, `passages.json`, `reasoning_method.json`, `register.json`, `moves.json` + `structural_index` (built from fetched primary_texts). Input ~90K (down from ~432K; ~79% reduction). Produces `primary_block` unchanged, but with tighter selection guidance (passage purpose_tags + register + moves explicitly available as selection criteria rather than floating in a blob).
+- **Pass 2 (Identity+Boundaries)** reads 5 chunk files: `life_scaffold.json`, `formative_candidates.json`, `knowledge_boundary.json`, `sensitive_topics.json`, `hard_limits.json`. Input ~155K (down from 432K; ~64% reduction). Produces same 10 card fields. No cognitive change, just focused input.
+- **Pass 3 (Intellectual Core)** reads 6 chunk files: `commitments.json`, `concepts.json`, `tensions.json`, `reasoning_method.json`, `textures.json`, `analytical_context_reasoning.json` (+ `interpretive_frames.json` per `1-arch-06`). Input ~170-200K (down from 432K; ~55-60% reduction). Produces same 5 card fields. Under `1-arch-03` richer upstream, the arch-03 preservation of `analytical_context_reasoning` now has Pass 3's undivided attention.
+- **Pass 4a (Voice)** reads 4 primary chunk files: `moves.json`, `register.json`, `vocabulary.json`, `analytical_context_voice.json`; plus cross-refs of `life_scaffold.available_pathe` (sub-field pluck from 1.1), `reasoning_method.summary` (sub-field pluck from 1.3), and `interpretive_frames.cross_disciplinary_reframing` subset (per `1-arch-06`); plus `primary_texts` (primary_block from 1d, unchanged path). Input ~110-130K (down from 432K; ~70% reduction). Produces same 7 card fields.
+- **Pass 4b (Artifact)** unchanged — CT-based.
+- **Pass 5 (Engagement)** unchanged — CT-based with specific field reads.
+- **Pass 6 (Corpus)** reads 3 chunk files: `works.json`, `passages.json`, `reference_only_passages.json` (`urls` dropped per `1-arch-07`); plus `primary_texts` (primary_block from 1d, unchanged); plus card-field refs `reasoning_method` + `characteristic_moves`. Input ~90-110K (down from 432K; ~75% reduction). Produces same 2 card fields.
+
+Cumulative: total token-input across Pass 1d + 2 + 3 + 4a + 6 drops from ~2.6M to ~600K (roughly 4-5× fewer input tokens). At Opus/Sonnet streaming pricing this is material per-voice savings; at scale (12+ voices × revisions) it's significant.
+
+**Composes with / relation to other tracker items:**
+
+- **`1-arch-03` (active architecture):** unchanged. Permissive schemas + additive-merge-prompts + Pass 1.7 split all remain exactly as shipped. `1-arch-05` is downstream of arch-03; arch-03's ship-state is the foundation.
+- **`1-arch-04` (Gemini preservation):** unchanged, composes cleanly. Merge-time prompt fix is orthogonal to how downstream consumes the chunk files.
+- **`1-arch-01` (curated_corpus_passages routing):** unchanged, composes cleanly. 1-arch-01 remains post-Phase-N.
+- **Pass 2-6 prompt adjustments (`2-01`, `2-02`, `2-03`, arch-03 §6 max_tokens bumps):** all survive. `1-arch-05` changes the *template shape* (what variables are declared), not the *instructional content* of the prompts.
+- **Future Pass-N-aligned chunk consolidation:** explicitly enabled by `1-arch-05`. Consolidating chunks (e.g. merging 1.1+1.5 into Pass-1-Identity because both feed Pass 2) becomes a mechanical change when chunks are the source of truth. Not scoped here.
+
+**Linked evidence:**
+
+- End-to-end pipeline trace (2026-04-22 session): enumerates all 19 chunk keys + each Pass 2-6's actual vs potential reads
+- Field-by-field consumption audit: confirmed that Pass 2 uses 5 of 21 top-level keys, Pass 3 uses 6, Pass 4a uses 4, Pass 6 uses 4; the other keys are noise in each Pass's prompt
+- 2026-04-22 "what is 1.7 for?" retrospective: identified that `coherence_flags`/`coherence_resolutions` have no downstream consumer under current architecture, motivating their relocation
+
+---
+
+### 1-arch-06 — Top-level `interpretive_frames[]` container for cross-cutting scholarly material
+
+**Severity:** MEDIUM (quality refinement; addresses a real preservation gap surfaced empirically)
+**Status:** PROPOSED 2026-04-22
+**Scope:** New Pydantic model + new chunk output file + merge-prompt additions to 1.2/1.3/1.4/1.5 + Pass 2-6 user prompts optional read
+**Effort:** ~6-8 hours: schema + prompt text + render wiring + Stage 1 re-run to verify
+
+**Problem:**
+
+Empirical finding from the 2026-04-22 end-to-end audit: certain material in the research sources belongs to none of the existing 19 chunk keys cleanly, so the merge LLM either picks a sub-optimal bucket or drops it entirely.
+
+Three categories of orphaned content surfaced:
+
+1. **Interpretive methods** — ways scholars read the voice, not content of the voice itself. Kasatkina's "subject-to-subject method" (dvusostavnyi obraz — reading Dostoevsky's realism on two simultaneous levels, everyday + Gospel-liturgical). Patyk's "provocation frame" (reading Dostoevsky's thought as staged provocation, not confession). Hesychast reading (Kasatkina 2022, reading Raskolnikov's numerology through Orthodox Prayer of the Heart tradition). These aren't commitments the voice *makes* and aren't concepts the voice *uses* — they're *lenses* for engaging the voice. Current structure forces them into `scholarly_context` sub-fields or `scholarly_debates[]` inside `analytical_context_reasoning`, where they fragment or drop entirely (hesychasm was found to be completely absent from Dostoevsky's merged_dossier despite appearing in both Perplexity §2 and Gemini).
+
+2. **Cross-disciplinary re-framings** — Gemini's signature contribution. Postcolonial (McReynolds, Tlostanova "Janus face"), feminist (Berman family-novel, Maiorova gendered nation), affect theory (Sobol *febris erotica*), legal-economic (Todd, Murav), disability studies (Rising), ecological (Marullo pochva), gift-economy (Kliger Mauss), Levinasian ethics (Vinokur). These are second-discipline readings of material Perplexity/DR state canonically. `1-arch-04` adds merge-prompt discipline telling the LLM not to deduplicate them; `1-arch-06` gives them a first-class home so the LLM has somewhere obvious to put them.
+
+3. **Voice-level contested readings** — controversies about the voice as a whole, not about specific claims. Dostoevsky's antisemitism as structural-to-thought vs. incidental-biographical-prejudice. Myshkin's failure as intrinsic-to-experiment vs. character-limitation-within-fallen-world. Bakhtin polyphony as relativism vs. authorial-guidance-within-polyphony. Currently these go into `analytical_context_reasoning.scholarly_debates[]` OR `analytical_context_voice.scholarly_debates[]` depending on the debate's subject, losing the "voice-level" distinction.
+
+**The decision:**
+
+Add a new top-level chunk output key `interpretive_frames[]` at merge-chunk level. Each entry:
+
+```python
+class InterpretiveFrame(BaseModel):
+    name: str  # "hesychast-numerology reading"
+    frame_type: Literal[
+        "interpretive_method",           # Kasatkina subject-to-subject
+        "cross_disciplinary_reframing",  # postcolonial, feminist, etc.
+        "voice_level_debate"             # antisemitism-structural-vs-incidental
+    ]
+    description: str                # 2-4 sentence gloss
+    primary_scholars: list[str]     # ["Kasatkina 2022", "Stepanian-Rumiantseva 2023"]
+    what_it_re_reads: list[str]     # commitments/concepts/formative-experiences affected
+    relationship_to_voice: Literal[
+        "the_voice_invites_this_frame",   # Kasatkina's frame is how the voice's own work invites reading
+        "scholars_impose_this_frame",     # post-hoc disciplinary lens not in voice's own conceptual apparatus
+        "frame_contested_among_scholars"  # debate about whether the frame applies
+    ]
+    citations: list[Citation]
+    evidence_tag: EvidenceTag
+```
+
+Which chunk emits it? Decision point: either (a) one chunk produces one consolidated `interpretive_frames[]`, fed by material from all three sources, OR (b) each of 1.2/1.3/1.4 emits frames relevant to their section, merged at Pass 1.7 composition. Recommend (a): add interpretive-frames production to Pass 1.2 (intellectual is where methodological frames naturally live), with explicit instruction to surface cross-chunk frames (even if they apply to §3 reasoning or §4 voice). Avoids frame-fragmentation across chunks.
+
+**Downstream consumption:**
+
+Pass 3 reads `interpretive_frames[]` where `frame_type ∈ {interpretive_method, cross_disciplinary_reframing}` to inform constitution framing and concept_lexicon scholarly_context. Pass 4a reads `frame_type ∈ {cross_disciplinary_reframing}` to inform register scholarly attribution. Pass 2 optionally reads `frame_type = voice_level_debate` for topics_requiring_care nuance. Consumption is additive — frames enrich existing fields, don't create new card fields.
+
+**Composes with:**
+
+- `1-arch-03`: unchanged. Permissive schemas + additive merge.
+- `1-arch-04`: **complementary**. `1-arch-04`'s prompt-discipline-for-Gemini tells the merge LLM to preserve Gemini's cross-disciplinary material. `1-arch-06` gives it a structural home. Both-or-nothing doesn't apply but they're much stronger together: `1-arch-04` says "don't dedupe these"; `1-arch-06` says "here is where to put them."
+- `1-arch-05`: unchanged. Adds one new chunk file under `02_merge/pass_1_2/interpretive_frames.json` (or wherever the production Pass lands). Pass 3 (and optional Pass 4a, Pass 2) declare `{{ interpretive_frames }}` as a new named template variable.
+
+**Linked evidence:**
+
+- 2026-04-22 DR §2 audit: hesychasm completely missing from merged dossier despite being in both Perplexity §2 and Gemini §2 Kasatkina-2022 framing
+- Perplexity+Gemini Pass 1.1-1.6 audit: Gemini cross-disciplinary preservation at 17-62% across chunks, consistently lower than Perplexity (85-100%)
+- §5 audit: post-2022 Ukrainian scholarship (Kokobobo, Yermolenko, Zabuzhko) name-checked but not synthesized — material has no structural home
+
+---
+
+### 1-arch-07 — Derive `urls` at render-time, remove as chunk output
+
+**Severity:** LOW (cleanup; removes drift surface)
+**Status:** PROPOSED 2026-04-22
+**Scope:** Remove `urls` from `pass_1_6` schema output keys + update `run_pass_1_6.py` + update any consumer (Pass 1c-extract) to compute URL inventory from `passages[].citation` + `works[].url` directly
+**Effort:** ~1 hour
+
+**Problem:**
+
+`pass_1_6/urls.json` (~5K for Dostoevsky) is an LLM-emitted list of URLs referenced in the chunk. But the URLs are already present inside `passages[].citation` fields (e.g. Gutenberg IDs, Archive.org links) and `works[].url` fields. The `urls.json` is redundant — it re-extracts what's already structured in sibling files.
+
+Consequences of keeping `urls` as LLM-emitted:
+- Drift risk: Pass 1.6's urls.json may list a URL that passages.json citation omits, or vice versa. Current pipeline has no cross-check.
+- LLM does deterministic work the LLM doesn't need to do: listing URLs from structured fields is Python's job.
+- Pass 1c-extract (non-LLM) already reads it as if it were the canonical inventory — but urls.json is less canonical than passages.citation + works.url (which are the source-of-truth fields under `1-arch-05`).
+
+**The decision:**
+
+Drop `urls` from chunk-output schema. Compute URL inventory at render-time (or at Pass 1c-extract) via a ~3-line Python function:
+
+```python
+def extract_urls(passages_chunk: dict, works_chunk: dict) -> list[str]:
+    urls = set()
+    for p in passages_chunk.get("passages", []):
+        cit = p.get("citation", "")
+        # extract URLs from citation string via regex
+        urls.update(re.findall(r"https?://\S+", cit))
+    for w in works_chunk.get("works", []):
+        if url := w.get("url"):
+            urls.add(url)
+    return sorted(urls)
+```
+
+Pass 1.6 merge prompt drops the `urls` output instruction. The Pydantic schema for 1.6 loses the `URLs` model. Pass 1c-extract code changes from `merged_dossier_dict.get("urls", {}).get("urls", [])` to calling `extract_urls()` directly.
+
+**Composes with:**
+
+- `1-arch-05`: fits cleanly — fewer chunk files (19 → 18) when `1-arch-05` establishes chunk-files-as-source-of-truth; fewer things to edit at Pass 1.7 edits-to-chunks.
+- `1-arch-03`, `1-arch-04`, `1-arch-06`: orthogonal.
+
+**Linked evidence:**
+
+- 2026-04-22 pipeline trace: identified `urls` as the only chunk key consumed by non-LLM code (Pass 1c-extract), signaling that it's deterministic-not-LLM work
+
+---
+
+### 1-arch-08 — Consolidate anachronism discipline into one source (remove duplication between §1 and §5)
+
+**Severity:** LOW-MEDIUM (cleanup; removes Pass 1.7 Check 4)
+**Status:** PROPOSED 2026-04-22
+**Scope:** Schema change (LifeScaffold drops `anachronisms_to_avoid`; KnowledgeBoundary gains `anachronism_discipline[]` as canonical source); merge prompts 1.1 + 1.5 updated; Pass 2 template variables updated; Pass 1.7 Check 4 removed
+**Effort:** ~3-4 hours including Stage 1 re-run
+
+**Problem:**
+
+Anachronism-discipline content appears in two chunk outputs today:
+- `pass_1_1/life_scaffold.json` → `anachronisms_to_avoid[]` (framing: "modern categories that would distort my lived biographical experience")
+- `pass_1_5/knowledge_boundary.json` → `conceptual_exclusions[]` (framing: "concepts outside my epistemic horizon")
+
+Same content ("trauma", "PTSD", "depression", "existentialism", "identity", "gender", etc.), different framings, two sources. Consequences:
+- Drift risk: the two lists can diverge. Pass 1.7 Coherence Check 4 exists specifically to cross-reconcile them.
+- LLM work duplicated at merge: Pass 1.1 and Pass 1.5 both emit anachronism-adjacent lists, consuming output tokens at each.
+- Downstream confusion: Pass 2 draws from both when synthesizing `world.anachronisms_to_avoid` AND `knowledge_boundary.conceptual_exclusions` — risks either double-counting or mis-matching.
+
+**The decision:**
+
+Single canonical list at one location, two framings at prompt-render time where each is consumed.
+
+Recommended canonical home: `pass_1_5/knowledge_boundary.json` with a new field:
+
+```python
+class KnowledgeBoundary(BaseModel):
+    general_frame: str
+    temporal_exclusions: list[str]
+    geographic_exclusions: list[str]
+    conceptual_exclusions: list[str]
+    anachronism_discipline: list[AnachronismEntry]  # NEW — canonical source
+    # ...
+
+class AnachronismEntry(BaseModel):
+    modern_term: str              # "trauma"
+    voice_native_alternative: str # "nadryv; spiritual suffering"
+    biographical_framing: str     # "this would flatten the katorga + mock-execution threshold experiences"
+    epistemic_framing: str        # "post-1980 clinical-psychological category; didn't exist in voice's lifetime"
+    severity: Literal["hard_ban", "use_with_caution", "translator_note"]
+```
+
+Both framings travel with each entry. Pass 2's `world.anachronisms_to_avoid` prompt plucks `biographical_framing`. Pass 2's `knowledge_boundary` prompt plucks `epistemic_framing`. Downstream consumers read what they need.
+
+`LifeScaffold.anachronisms_to_avoid` is removed from the schema. Pass 1.1 merge prompt drops anachronism-list production instruction (still names anachronisms in narrative text where relevant for biographical framing, but doesn't emit a list). Pass 1.5 merge prompt absorbs full anachronism discipline.
+
+Pass 1.7 Coherence Check 4 (anachronism boundary cross-check) becomes obsolete — single source can't disagree with itself. Remove.
+
+**Composes with:**
+
+- `1-arch-03`: unchanged.
+- `1-arch-04`: unchanged.
+- `1-arch-05`: cleaner under `1-arch-05` — fewer chunk keys, one canonical location for a cross-cutting concern, Pass 2 reads only `knowledge_boundary.json` for anachronism rather than both.
+- `1-arch-06`: orthogonal.
+
+**Linked evidence:**
+
+- 2026-04-22 pipeline trace: identified duplication between `life_scaffold.anachronisms_to_avoid` and `knowledge_boundary.conceptual_exclusions`
+- Pass 1.7 Check 4 currently exists specifically to cross-reconcile — its necessity disappears with consolidation
+
+---
+
+### WATCH-ITEM — `reference_only_passages` scope
+
+**Severity:** OBSERVATION (not a fix yet)
+**Status:** PROPOSED as WATCH, 2026-04-22
+**Scope:** N/A — monitoring until first reference-only-corpus voice exercises the path
+
+**Observation:**
+
+`pass_1_6/reference_only_passages.json` is a key for private-corpus content (modern copyrighted translations, other reference material loaded at Step 1 but dropped at Step 2). Under the current scheme it's a chunk output from Pass 1.6's merge LLM call, direct-pass-through to card at assembly.
+
+For Dostoevsky (public-domain corpus: Garnett/Mayne translations, Gutenberg) the field is empty. The path is never exercised. We don't know whether LLM-merge-emits is the right production path, or whether reference-only content belongs as project-level intake config (analogous to `conference_facts.json` at project root).
+
+**What to watch:**
+
+First voice with a reference-only corpus. Candidates: Whanganui (legal-personhood framework has copyrighted secondary sources), contemporary voices whose work is under copyright. If the LLM-merge-emits path produces garbage (e.g., hallucinated private-corpus references, or empty output because Perplexity/DR don't describe copyrighted material they can't quote), the scheme breaks and we move private-corpus to intake.
+
+Flag escalates to a fix (proposed `1-arch-09`) when that first voice is processed.
+
+---
+
 ### 1-arch-02 — Gemini's per-chunk role is wrong-lane; re-route to either sectioned-per-chunk or coherence-only [SUPERSEDED by 1-arch-03]
 
 **Severity:** HIGH (quality ceiling, not blocker)
