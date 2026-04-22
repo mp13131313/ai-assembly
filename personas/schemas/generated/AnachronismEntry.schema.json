@@ -66,15 +66,21 @@
       "type": "object"
     }
   },
-  "description": "Structured anachronism: modern term + reason excluded + voice-native\nalternative where available.\n\nRicher than the pre-1-arch-03 list[str] format — captures the reason-why\nand the voice-native term if the voice's tradition has one. Backward-compat\npreserved via `LifeScaffold.anachronisms_to_avoid: list[str | AnachronismEntry]`.",
+  "description": "Structured anachronism: modern term + dual framings (biographical +\nepistemic) + voice-native alternative + severity.\n\nUnder 1-arch-08 (2026-04-22), anachronism discipline consolidates into\n`KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5). Each entry\ncarries BOTH framings so Pass 2 can pluck the right one for each card\nfield it populates:\n\n- `biographical_framing` → rendered in Pass 2's `world.anachronisms_to_avoid`\n  card field (\"this would flatten the katorga + mock-execution\n  threshold experiences\")\n- `epistemic_framing` → rendered in Pass 2's `knowledge_boundary.conceptual_exclusions`\n  card field (\"post-1980 clinical-psychological category; didn't exist in\n  voice's lifetime\")\n\nThe pre-1-arch-08 location `LifeScaffold.anachronisms_to_avoid` is\nREMOVED. `reason_excluded` is deprecated in favor of the two framings\nbut kept optional for backward compat during migration.",
   "properties": {
     "modern_term": {
+      "description": "The modern-English or modern-clinical term that would mis-render the voice. Examples: 'trauma', 'depression', 'identity', 'existentialist', 'gender', 'nationalism' (ethno-biological).",
       "title": "Modern Term",
       "type": "string"
     },
-    "reason_excluded": {
-      "description": "One-line reason the modern term mis-renders the voice.",
-      "title": "Reason Excluded",
+    "biographical_framing": {
+      "description": "1-2 sentence reason from the voice's own biographical experience for why this term flattens or distorts. Pass 2 uses for `world.anachronisms_to_avoid` card-field narrative.",
+      "title": "Biographical Framing",
+      "type": "string"
+    },
+    "epistemic_framing": {
+      "description": "1-2 sentence reason from the voice's knowledge horizon (when the term was invented, what it replaced, why it's outside the voice's conceptual apparatus). Pass 2 uses for `knowledge_boundary.conceptual_exclusions` card-field narrative.",
+      "title": "Epistemic Framing",
       "type": "string"
     },
     "voice_native_alternative": {
@@ -87,8 +93,32 @@
         }
       ],
       "default": null,
-      "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta).",
+      "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta). None for fictional / thinly-documented voices.",
       "title": "Voice Native Alternative"
+    },
+    "severity": {
+      "default": "hard_ban",
+      "description": "`hard_ban`: never use, even in scholarly exposition (trauma, PTSD, existentialist). `use_with_caution`: flaggable with explicit scare-quoting or scholarly framing (psychology, career). `translator_note`: translator-tradition artifact that differs in meaning (Garnett's 'conscience' for 'sovest'' — not strictly anachronistic but flattens).",
+      "enum": [
+        "hard_ban",
+        "use_with_caution",
+        "translator_note"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "reason_excluded": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "DEPRECATED under 1-arch-08. Use biographical_framing + epistemic_framing instead. Kept optional for backward compat.",
+      "title": "Reason Excluded"
     },
     "evidence_tag": {
       "default": "scholarly_consensus",
@@ -112,7 +142,8 @@
   },
   "required": [
     "modern_term",
-    "reason_excluded"
+    "biographical_framing",
+    "epistemic_framing"
   ],
   "title": "AnachronismEntry",
   "type": "object"

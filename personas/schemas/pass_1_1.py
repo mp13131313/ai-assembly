@@ -63,23 +63,63 @@ class PeriodPathos(BaseModel):
 
 
 class AnachronismEntry(BaseModel):
-    """Structured anachronism: modern term + reason excluded + voice-native
-    alternative where available.
+    """Structured anachronism: modern term + dual framings (biographical +
+    epistemic) + voice-native alternative + severity.
 
-    Richer than the pre-1-arch-03 list[str] format — captures the reason-why
-    and the voice-native term if the voice's tradition has one. Backward-compat
-    preserved via `LifeScaffold.anachronisms_to_avoid: list[str | AnachronismEntry]`.
+    Under 1-arch-08 (2026-04-22), anachronism discipline consolidates into
+    `KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5). Each entry
+    carries BOTH framings so Pass 2 can pluck the right one for each card
+    field it populates:
+
+    - `biographical_framing` → rendered in Pass 2's `world.anachronisms_to_avoid`
+      card field ("this would flatten the katorga + mock-execution
+      threshold experiences")
+    - `epistemic_framing` → rendered in Pass 2's `knowledge_boundary.conceptual_exclusions`
+      card field ("post-1980 clinical-psychological category; didn't exist in
+      voice's lifetime")
+
+    The pre-1-arch-08 location `LifeScaffold.anachronisms_to_avoid` is
+    REMOVED. `reason_excluded` is deprecated in favor of the two framings
+    but kept optional for backward compat during migration.
     """
 
-    modern_term: str
-    reason_excluded: str = Field(
-        ..., description="One-line reason the modern term mis-renders the voice."
+    modern_term: str = Field(
+        ...,
+        description="The modern-English or modern-clinical term that would "
+        "mis-render the voice. Examples: 'trauma', 'depression', 'identity', "
+        "'existentialist', 'gender', 'nationalism' (ethno-biological).",
+    )
+    biographical_framing: str = Field(
+        ...,
+        description="1-2 sentence reason from the voice's own biographical "
+        "experience for why this term flattens or distorts. Pass 2 uses for "
+        "`world.anachronisms_to_avoid` card-field narrative.",
+    )
+    epistemic_framing: str = Field(
+        ...,
+        description="1-2 sentence reason from the voice's knowledge horizon "
+        "(when the term was invented, what it replaced, why it's outside the "
+        "voice's conceptual apparatus). Pass 2 uses for `knowledge_boundary."
+        "conceptual_exclusions` card-field narrative.",
     )
     voice_native_alternative: str | None = Field(
         default=None,
         description="The voice's own tradition-specific term if one exists. "
         "Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) "
-        "or 'ibtilā'' (Ibn Battuta).",
+        "or 'ibtilā'' (Ibn Battuta). None for fictional / thinly-documented voices.",
+    )
+    severity: Literal["hard_ban", "use_with_caution", "translator_note"] = Field(
+        default="hard_ban",
+        description="`hard_ban`: never use, even in scholarly exposition (trauma, "
+        "PTSD, existentialist). `use_with_caution`: flaggable with explicit scare-"
+        "quoting or scholarly framing (psychology, career). `translator_note`: "
+        "translator-tradition artifact that differs in meaning (Garnett's "
+        "'conscience' for 'sovest'' — not strictly anachronistic but flattens).",
+    )
+    reason_excluded: str | None = Field(
+        default=None,
+        description="DEPRECATED under 1-arch-08. Use biographical_framing + "
+        "epistemic_framing instead. Kept optional for backward compat.",
     )
     evidence_tag: EvidenceTag = Field(default="scholarly_consensus")
     citations: list[SourceCitation] = Field(default_factory=list)
@@ -147,14 +187,13 @@ class LifeScaffold(BaseModel):
         "any modern English term used faute de mieux (e.g., 'disease' for "
         "pre-clinical moral-theological bolezn'). No length cap.",
     )
-    anachronisms_to_avoid: list[str | AnachronismEntry] = Field(
-        default_factory=list,
-        description="Modern terms that would mis-render this voice. "
-        "MINIMUM 4; uncapped maximum. Prefer AnachronismEntry structured "
-        "form (modern_term + reason_excluded + voice_native_alternative) "
-        "for new outputs; list[str] accepted for backward-compat with pre-"
-        "1-arch-03 Dostoevsky card.",
-    )
+    # 1-arch-08 (2026-04-22): `anachronisms_to_avoid` REMOVED from LifeScaffold.
+    # Anachronism discipline consolidates at KnowledgeBoundary.anachronism_discipline[]
+    # (Pass 1.5) with dual framings (biographical + epistemic) per entry. Pass 2
+    # plucks biographical_framing for world.anachronisms_to_avoid card field and
+    # epistemic_framing for knowledge_boundary.conceptual_exclusions card field.
+    # Single canonical source eliminates drift; Pass 1.7 Check 4 (anachronism/
+    # boundary cross-check) becomes obsolete.
 
     # 1-arch-03 additions: preserve analytical-interpretive material.
     scholarly_context: str | None = Field(
