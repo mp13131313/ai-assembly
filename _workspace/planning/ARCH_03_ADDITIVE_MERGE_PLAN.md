@@ -2013,7 +2013,270 @@ these post-merge or during Sonnet-handoff session.
 
 ---
 
-*End plan document.*
+---
+
+## 18. Opus testing session handoff (supersedes §17 Sonnet handoff)
+
+**Scope decision (2026-04-22):** operator opted for Opus 4.7 testing session
+over Sonnet implementation session — quality-first framing. Testing scope is
+narrow: **test arch-03 in isolation** on Dostoevsky fixture; Wave 1/2/3-
+SURVIVES mechanical fix applications are deferred to a separate session
+post-merge-to-main.
+
+Rationale: the Dostoevsky research dossier (Perplexity + Claude DR + Gemini)
+is frozen Phase L output. Wave 1 (research-layer) fixes don't affect re-runs
+on already-generated research. Wave 2 (Pass 1c/1d) fixes are pipeline-neutral
+for a Dostoevsky re-run from Pass 1.1 (not re-fetching). Wave 3 SURVIVES
+fixes (voice_mode disposition, period-vocabulary gradation) could bleed into
+Dostoevsky card output but are narrow prompt tweaks; applying them during
+testing would muddy the arch-03 signal. **Clean test: arch-03 pre-seed +
+nothing else.**
+
+### Opus testing session prompt (copy-paste to fresh Claude Code session)
+
+```
+You are running the 1-arch-03 Additive Merge Architecture TESTING SESSION
+for the AI Assembly project. Opus 4.7 pre-seed is complete on branch
+`arch-03-additive-merge` (4 commits on top of main; HEAD 0c1fb28). Your
+job: test the architectural change in isolation on Dostoevsky Phase L
+fixture. Stages 1/2/3 per plan §7.
+
+Model: You are Opus 4.7 + adaptive thinking. This session is deliberately
+Opus-shaped because testing requires quality judgment when preservation-
+audit fails, when prompt iteration is needed, and when card-quality
+comparison is qualitative.
+
+ORIENTATION READING (in order):
+
+1. `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md` — THE plan. Read
+   §1 through §18 completely. §17 documents pre-seed; §18 (THIS SECTION)
+   specifies your testing scope. §7 is the test plan; §8 Steps 23-25 are
+   your execution sequence.
+
+2. `_workspace/planning/PIPELINE_REVIEW_FIXES.md` — fix tracker. You do
+   NOT apply Wave 1/2/3 mechanical fixes in this testing session. Read
+   §9 for triage context only.
+
+3. `code/CLAUDE.md` — repo conventions.
+
+4. Phase L Dostoevsky baseline card at
+   `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json`
+   (114 KB, 35 fields, pre-arch-03 reference).
+
+5. Phase L Dostoevsky research inputs (frozen fixture):
+   - `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/01_research/`
+     (Perplexity + Gemini + Claude DR 6 sections)
+
+BRANCH STATE:
+
+You start on `arch-03-additive-merge` at HEAD `0c1fb28`. Verify:
+  cd "/Users/aienvironment/Desktop/AI Assembly/code"
+  git status            # clean tree expected
+  git checkout arch-03-additive-merge
+  git log --oneline -5  # 0c1fb28 + 008ab0c + ceb7b94 + f98370c + main merge-base
+
+Do NOT start a new branch. Do NOT merge to main (that's operator's call at
+session end).
+
+SCOPE (what you do):
+
+STEP 1 — Instrumentation: draft `personas/scripts/arch_03_preservation_audit.py`
+
+Per plan §7.3, implement three metrics:
+
+(a) **Character overlap.** For each DR §N (N=1..6), compute unique
+    substring overlap between source section and merged chunk outputs:
+    - Source: content of `01_research/04_dr_dossier/0N_section_N.md`
+    - Merged: concatenated content of `02_merge/pass_1_N/*.json` (all keys)
+    - Extract unique scholarly-named tokens (scholar names, work titles,
+      canonical references, technical terms) from source
+    - Compute: %-of-source-tokens appearing in merged
+    - Target ≥85% for §3/§4/§5 (the pre-1-arch-03 heavy-loss sections)
+
+(b) **Citation preservation.** Extract Bibliography-style citations from
+    source DR §N (pattern matching on "Author (Year)" and "Author, Work,
+    Year" forms). Compute: %-of-source-citations appearing anywhere in
+    merged chunk output (citations[] lists across all schemas).
+    Target 100%.
+
+(c) **Named-structural-pattern preservation** (§3 specific). Extract named
+    scholarly-analytical patterns from DR §3 source: scandal-scene,
+    carnivalization, threshold-chronotope, sideshadowing, crowning/
+    decrowning, Menippean, confession-under-pressure, vdrug, polyphony.
+    Verify each appears as a StructuralPattern entry (or scholarly_debate)
+    in `pass_1_3/analytical_context_reasoning.json`. Target 100%.
+
+Output JSON report to `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/_arch_03_audit.json`.
+
+Command-line interface: `venv/bin/python scripts/arch_03_preservation_audit.py --voice fyodor_dostoevsky --project ../../projects/phase-l-dostoevsky`.
+
+**Do NOT run the pipeline yet — just script + fixture setup.**
+
+STEP 2 — Fixture setup (light)
+
+Copy Phase L Dostoevsky research inputs to
+`personas/tests/fixtures/phase_l_dostoevsky/` per plan Appendix C. Include
+baseline card for Stage 3 comparison. README documenting fixture.
+
+(Alternative: run in place at `projects/phase-l-dostoevsky/` — the research
+inputs are already there frozen. Fixture copy is optional for reproducibility
+but not required for this testing session. Decide at session start.)
+
+STEP 3 — Stage 1 merge-layer test
+
+Run Pass 1.1-1.7 on Dostoevsky fixture:
+
+```bash
+cd personas
+# Optionally clear old merge outputs for clean test
+# rm -rf ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/pass_1_*
+# rm ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/08_merged_dossier.json
+venv/bin/python run_pass_1_all.py "Fyodor Dostoevsky" \
+    --project ../../projects/phase-l-dostoevsky
+```
+
+Expected output: 6 chunk output dirs + merged_dossier.json. Sizes:
+- merged_dossier.json should be 300-400K (vs. baseline 162K)
+- pass_1_3/*.json aggregate should be 40-50K (vs. baseline 11K) — contains
+  analytical_context_reasoning with structural_patterns + worked_demonstrations
+  + scholarly_debates for Dostoevsky narratival
+- pass_1_4/*.json aggregate should be 15-25K (vs. baseline 11K) —
+  analytical_context_voice may be populated or empty
+
+Run preservation-audit script. **Checkpoint 1: report audit JSON to
+operator.**
+
+If audit fails (<70% char overlap on any section, or <100% citation
+preservation, or missing structural patterns):
+- Diagnose specific prompts (likely pass_1_3_merge if analytical_context_
+  reasoning is thin; pass_1_6_merge if translator_tradition_coverage missing)
+- Iterate: edit prompt, commit, rerun affected chunk. Max 2 iterations per
+  chunk — escalate to operator after.
+
+If audit passes (≥85% §3/§4/§5, 100% citations, 100% structural patterns):
+proceed to Stage 2.
+
+STEP 4 — Stage 2 Pass 2-7 test
+
+Clear downstream caches + run full pipeline:
+
+```bash
+rm -rf ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/04_generation/
+rm -rf ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/05_validation/
+rm -rf ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/06_derive/
+rm -f ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json
+rm -rf ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/_ct/
+venv/bin/python run_persona_pipeline.py "Fyodor Dostoevsky" \
+    --project ../../projects/phase-l-dostoevsky
+```
+
+Expected: full 22-pass pipeline completes end-to-end. New
+07_persona_card_assembled.json produced.
+
+Verify:
+- Pass 2-6 complete without Pydantic failures
+- voice_temporal_stance field is dict with .default + optional .anchored_override
+  (per 2-02 REWRITE)
+- character field references multiple formative candidates inline per 2-03
+- Pass 7-pre citation verification: pass rate ≥ baseline
+- Pass 7-anachronism: flag count ≤ baseline
+- Pass 7a cross-model register check: PASS (baseline was ISSUE on Pass 5
+  fields — hypothesis: richer CT upstream under 1-arch-03 resolves)
+
+**Checkpoint 2: report Stage 2 results to operator** with:
+- New card file size + field counts
+- Pass 7 validation summary
+- 3-5 specific field comparisons vs. baseline showing richer content
+
+STEP 5 — Stage 3 qualitative review
+
+Draft `ARCH_03_MANUAL_REVIEW_CHECKLIST.md` per plan §14 Q1 + populate with
+findings from Stage 2. Include:
+
+- Does character reference multiple formative candidates (not just Semenovsky
+  execution)?
+- Does constitution preserve 17+ commitments with richer operational_notes?
+- Does reasoning_method incorporate analytical_context material (scandal-
+  scene references, worked-demonstration call-outs, Williams-vs-Frank
+  framing)?
+- Does curated_corpus_passages draw from translator-tradition-noted corpus?
+- Does topics_requiring_care include scholarly_reception framings?
+- Is voice_temporal_stance dict-shaped + deployment-configurable?
+- Read-aloud test: does the card feel qualitatively richer than baseline?
+
+**Checkpoint 3: report Stage 3 checklist + your qualitative verdict to
+operator.**
+
+STEP 6 — Operator handoff
+
+DO NOT merge to main. Report back to operator with:
+
+- Preservation-audit JSON (Stage 1)
+- Pass 2-7 validation summary + specific field richness comparisons (Stage 2)
+- Filled ARCH_03_MANUAL_REVIEW_CHECKLIST.md (Stage 3)
+- Branch head commit hash
+- Recommendation: PROCEED (merge-to-main) / ITERATE (specific prompt
+  refinements needed) / ROLLBACK (arch-03 did not deliver)
+
+Operator performs manual review + decides merge-to-main.
+
+OUT OF SCOPE:
+
+- DO NOT apply Wave 1 fixes (53)
+- DO NOT apply Wave 2 fixes (12)
+- DO NOT apply Wave 3 SURVIVES fixes (voice_mode disposition, period-
+  vocabulary gradation, Pass 1.7 worked examples additions — those were
+  already done at pre-seed)
+- DO NOT merge to main
+- DO NOT modify REBUILD_PLAN PB#1-9
+- DO NOT modify frozen `_conventions.py` models
+- DO NOT change Runtime side
+
+Those land in a SEPARATE post-merge session, whether Sonnet or Opus per
+operator choice.
+
+MODEL ECONOMY (you):
+
+Opus 4.7 + adaptive thinking. You have full budget for this testing
+session — preservation-audit diagnosis is judgment-heavy; card comparison
+requires qualitative judgment; prompt iteration (if needed) is Opus-shaped.
+
+EXIT CRITERIA:
+
+Branch `arch-03-additive-merge` ready for operator review:
+- `arch_03_preservation_audit.py` script committed
+- Test fixture setup committed (if created)
+- Stage 1 + 2 run outputs at `projects/phase-l-dostoevsky/...`
+- `ARCH_03_MANUAL_REVIEW_CHECKLIST.md` committed with your findings
+- Any prompt iterations committed
+- All commits pushed to origin/arch-03-additive-merge
+- Your recommendation delivered to operator
+
+Start by reading the plan (§1-§18) + acknowledging scope. Then Step 1
+(script drafting).
+```
+
+### What this session handoff supersedes
+
+- §16 Sonnet handoff prompt: OBSOLETE (Sonnet implementation session not
+  happening at this stage)
+- §17 Revised Sonnet handoff prompt: OBSOLETE (Wave 1/2 mechanical fixes
+  deferred)
+
+**§18 Opus testing handoff is the active handoff.** It scopes testing-only
+on current branch state; Wave 1/2/3-SURVIVES applications land in separate
+post-merge session per operator choice.
+
+### Post-merge-to-main session (separate, not scoped here)
+
+Once operator merges `arch-03-additive-merge` → `main`, a separate session
+applies Wave 1 + Wave 2 + Wave 3 SURVIVES fixes per tracker specs. That
+session can be Sonnet (mechanical) with Opus escalation per plan §16 model-
+economy split, or Opus throughout per operator quality preference.
+
+---
+
+*End plan document — LOCKED for Opus testing session.*
 
 ---
 
