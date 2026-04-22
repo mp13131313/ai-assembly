@@ -22,8 +22,6 @@ OUTPUT REQUIREMENTS — read first, optimize for these throughout:
 - **Minimum 15,000 words total.** Brevity defeats the purpose. If the
   scholarly record on this character is genuinely thin, say so
   explicitly per section and produce what the record supports.
-- **Each of the 6 sections: 2,000+ words.** Do not produce shallow
-  filler — but do not summarize away substantive material either.
 - **Use these EXACT section heading formats** (the downstream parser
   depends on this): `## 1. TEXTUAL FOUNDATION`, `## 2. CHARACTER AS
   INTELLECTUAL CONSTRUCT`, `## 3. NARRATIVE STRATEGY`, `## 4. VOICE
@@ -266,14 +264,13 @@ summary.
   characterisation by contrast — what the character "doesn't do"
   vs. other characters in the same tradition. 3-5 items with
   citation.
-- **Translation choice and its implications**: state which
-  translation tradition grounds the voice construction, and why.
-  For Scheherazade: Mahdi's critical Arabic edition (Leiden 1984)
-  in Haddawy's English translation is scholarly-consensus for
-  "earliest documented" voice; Burton is widely read but Victorian-
-  overlaid; Galland is historically load-bearing but heavily
-  adapted. Pass 1c fetches the text Pass 4a will use; your job
-  here is the choice.
+- **Translation choice and its implications** (consolidates with
+  TRANSLATION TRADITION block above — reference that block; do not
+  duplicate): state which translation tradition grounds the voice
+  construction, and why the choice is defensible for voice-construction
+  purposes. Pass 1c fetches the text Pass 4a will use; your job here
+  is naming and justifying the selection, not re-cataloguing all
+  translator traditions.
 - **Emotional and aesthetic register**: the overall feel of
   reading this character in the authoritative translation, as
   reader experience. Cite the critics who characterise the
