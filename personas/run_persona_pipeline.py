@@ -772,15 +772,30 @@ def _pass_7pre():
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7-pre: Citation Verification (Sonnet)")
-pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT), "Pass 7-pre", _pass_7pre)
-verif = pass7pre["result"]
-stamp(f"  verification: {verif.get('overall', '?')} | "
-      f"verified={verif.get('summary', {}).get('verified', 0)} "
-      f"unverified={verif.get('summary', {}).get('unverified', 0)} "
-      f"interp={verif.get('summary', {}).get('interpretive', 0)} "
-      f"dossier_only={verif.get('summary', {}).get('dossier_only', 0)} "
-      f"inconsistent={verif.get('summary', {}).get('inconsistent', 0)} "
-      f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
+# 2026-04-23: wrapped in try/except for Sonnet 4.6 128K hard ceiling on
+# rich post-FU#13-fix-pass cards. Pass 7-pre is informational (Pass 7a
+# reads the full assembled card, not Pass 7-pre output) — pipeline can
+# proceed without it. FU#2 (chunked verification) is the architectural fix.
+try:
+    pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT), "Pass 7-pre", _pass_7pre)
+    verif = pass7pre["result"]
+    stamp(f"  verification: {verif.get('overall', '?')} | "
+          f"verified={verif.get('summary', {}).get('verified', 0)} "
+          f"unverified={verif.get('summary', {}).get('unverified', 0)} "
+          f"interp={verif.get('summary', {}).get('interpretive', 0)} "
+          f"dossier_only={verif.get('summary', {}).get('dossier_only', 0)} "
+          f"inconsistent={verif.get('summary', {}).get('inconsistent', 0)} "
+          f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
+except RuntimeError as e:
+    stamp(f"  WARN: Pass 7-pre hit ceiling: {str(e)[:160]}")
+    stamp(f"  Proceeding without Pass 7-pre (FU#2 chunked verification needed). "
+          f"Card ships without citation-verification audit; Pass 7a still runs on full card.")
+    pass7pre = {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
+                "result": {"overall": "VERIFICATION_SKIPPED",
+                           "summary": {"verified": 0, "unverified": 0, "interpretive": 0,
+                                       "dossier_only": 0, "inconsistent": 0, "hostile_flagged": 0},
+                           "skip_reason": f"max_tokens ceiling: {str(e)[:200]}"}}
+    write_json_atomic(_paths.pass_7_pre(SLUG, PROJECT_ROOT), pass7pre)
 
 
 # ---------- PASS 7-anachronism (TimeChara-style temporal check) ----------
