@@ -34,12 +34,43 @@ BLOCK 2 — GUARDRAILS:
   addressed to the voice. "I hold that governance requires knowledge of the good"
   not "Plato holds that governance requires knowledge of the good." The card is a
   system prompt, not a research document.
-- Only attribute direct quotes from the research dossier or primary source excerpts.
-  Mark paraphrases as "[scholarly consensus]" and inferences as "[inference]."
-  For fictional voices: "[attributed by narrative function]."
-  For system entities (subtype: "system"): "[indigenous law]" / "[legal framework]".
+
+- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+  The merge dossier (Pass 1.2/1.3 chunks) carries STRUCTURED `evidence_tag`
+  data on each commitment, concept, etc. — a Pydantic field with values
+  {stated, scholarly_consensus, contested, inference,
+  experiential_reconstruction, projection_warning}. **Use that structured
+  data to inform synthesis priority** (high-evidence commitments → first-
+  line constitution; contested-evidence commitments → second-tier or
+  marked TENSION). **Do NOT propagate bracket-tag annotations into runtime
+  field values.** Pass 7a (gpt-5.4 cross-model) flagged each of these on
+  the prior Dostoevsky run:
+  * Provenance brackets `[stated]`, `[scholarly_consensus]`, `[inference]`,
+    `[scholarly consensus]`, `[attributed by narrative function]` appearing
+    inside constitution principle text, concept_lexicon entries,
+    reasoning_method steps. STRIP from runtime output. (Voice-honest
+    annotation tags `[experiential_reconstruction]` + `[projection_warning]`
+    on specific Boddice §13/§14 sub-fields ARE different — those stay
+    when carried per Pass 2's instruction; the difference is voice-honest
+    annotation vs. merge-source attribution.)
+  * Sub-fields `curator_note`, `pedagogical_note`, `editorial_note`,
+    `editor_note` — scholarly apparatus, NEVER in runtime card.
+  * Scholar attribution names that the voice would not have known/cited.
+    Apply knowledge_boundary as test: yes if the voice would have cited
+    them (Plato citing Parmenides), no for any post-knowledge-boundary
+    name. Curator-side `scholarly_context` informs your synthesis; it
+    does NOT become field content.
+  * Reception commentary (post-the-voice's-lifetime): belongs in
+    curator-side documentation, not the runtime prompt.
+
+  Test for any field value: would a runtime model reading this as a
+  system prompt receive an INSTRUCTION to act on (good), or read
+  scholarly apparatus ABOUT the voice (bad)? If the latter, rewrite.
+
 - Do not resolve scholarly debates into false consensus. Name contested readings
-  and choose the most generative one — but name that it's a choice.
+  and choose the most generative one — but name that it's a choice. (Use the
+  merge dossier's `contested_readings[]` and `tensions[].scholarly_context`
+  structured data; do NOT propagate scholar-attribution prose into field values.)
 - Constitution: each principle must include an operational note. Specificity is
   everything. Must include 3+ concepts unique to this figure with textual references.
 - Concept_lexicon: every concept must include what it RULES OUT.
@@ -54,13 +85,22 @@ BLOCK 2 — GUARDRAILS:
 
 BLOCK 3 — FIELD SPECIFICATIONS:
 
+{# Per FU#12-A guardrail above: do NOT emit merge-source provenance brackets
+   ([stated]/[scholarly_consensus]/[inference]) in runtime field values.
+   Use the merge dossier's structured `evidence_tag` field on each
+   commitment to inform selection priority + tier judgments. The CATEGORY
+   tags below ([ontological]/[ethical-political]/[unique] etc.) ARE
+   runtime-meaningful and should remain — they tell the runtime model
+   what kind of principle it's reading, which shapes how the principle
+   gets deployed. Differentiate: CATEGORY tags = runtime guidance (keep);
+   PROVENANCE brackets = curator audit (strip). #}
 {% if subtype == "system" %}
 constitution — 10-20 systemic properties, relational commitments, and boundary
 principles drawn from indigenous law, treaty frameworks, and legislative record.
-Each item with: textual evidence tagged [indigenous law] or [legal framework],
-an operational note, and a tag: [stated], [scholarly consensus], or [inference].
-Organise into three groups: systemic properties / relational commitments /
-boundary principles. At least two genuine internal tensions.
+Each item with: textual evidence (the law/treaty/case reference itself),
+an operational note. Organise into three groups: systemic properties /
+relational commitments / boundary principles. At least two genuine internal
+tensions.
 {% elif voice_mode == "philosophical" %}
 constitution — 10-20 explicit principles with operational notes, extracted from
 the figure's stated positions. Tag each principle with its category: [ontological],
@@ -71,13 +111,13 @@ tension should be a cross-principle tension — a conflict between two commitmen
 figure holds simultaneously.
 {% elif voice_mode == "narratival" %}
 constitution — 10-20 principles attributed to the character by their narrative
-function and scholarly reception. Each principle should include: textual evidence,
-an operational note, and a tag: [stated], [scholarly consensus], [inference], or
-[attributed by narrative function]. At least two genuine internal tensions.
+function and scholarly reception. Each principle should include: textual evidence
+(the scene/passage reference itself) and an operational note. At least two genuine
+internal tensions.
 {% else %}
 constitution — 10-20 characteristic commitments inferred from the figure's
 practice, narrative, art, or documented behaviour. Each commitment with:
-evidence, operational note, and tag: [stated], [scholarly consensus], or [inference].
+evidence (the practice/work reference itself) and operational note.
 For non-human voices: organise into perceptual, relational, boundary. For
 observational human voices: tag each with [experiential], [artistic], or
 [ethical-political]. At least two genuine internal tensions.
