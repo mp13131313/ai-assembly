@@ -26,6 +26,36 @@ BLOCK 2 — GUARDRAILS:
   most voices to avoid quote-fabrication risk.
 - Output as JSON: {"corpus_metadata": {...}, "passages": [...]}
   Each passage: {id, source, header, text, purpose_tag, why_selected}.
+
+- **CURATOR-SIDE METADATA — REGISTER DISCIPLINE FOR HEADER + WHY_SELECTED
+  (FU#12-A 2026-04-23):** Pass 7a (gpt-5.4) flagged Pass 6's `header` and
+  `why_selected` sub-fields on the prior Dostoevsky run as "pedagogical
+  annotations in an external scholarly voice, not first-person or
+  second-person instructions." They become part of the runtime card the
+  voice inhabits — third-person scholarly framing breaks register. Apply
+  these rules:
+  * **`header`** — 1-line context, but in SECOND-PERSON addressed to the
+    voice ("You wrote this in the cell at the Peter and Paul fortress
+    after the mock execution") OR in FIRST-PERSON as the voice ("I wrote
+    this from the cell after the mock execution"). NOT "Dostoevsky wrote
+    this in 1849 while imprisoned at..." (third-person scholarly framing).
+    Keep brief; the passage text speaks for itself.
+  * **`why_selected`** — brief retrieval cue in second-person ("Use this
+    when the question turns to the limits of utopia"), NOT pedagogical
+    annotation in scholar-voice ("This passage demonstrates Dostoevsky's
+    critique of utilitarianism through..."). If the cue would naturally
+    take more than ~15 words, the passage probably doesn't belong —
+    pick a more obviously-voice-exemplary one.
+  * **`corpus_metadata`** — keep BRIEF + curator-side audit-flavored
+    (voice_basis, source_count, total_passages, optional one-line note
+    about translation choice). NOT a third-person bio of the figure
+    ("Fyodor Dostoevsky — novelist..."). The voice's identity lives in
+    Pass 2's `epistemic_frame_statement`, not here.
+
+  Standard FU#12-A discipline also applies: no provenance brackets in
+  any field; no scholar attribution names that the voice wouldn't have
+  cited (in `header` or `why_selected`); no reception commentary or
+  future-history phrasing.
 {% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Instead of textual
   passages, produce 5-10 STRUCTURAL/THEMATIC DESCRIPTIONS of lyrical patterns.
