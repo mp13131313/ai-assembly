@@ -143,9 +143,19 @@ KEY FILES:
 
 KNOWN WATCH-ITEMS:
 - extract_urls() now recurses into citations[].url (1-arch-07 follow-up
-  fixed this session). Produces 6 Gutenberg URLs for Dostoevsky — fewer
-  than Phase L's 22 because arch-03 consolidates citations. 01_primary_
-  texts.json cache covers all 22 Phase L URLs so no fetch gap at runtime.
+  fixed this session). Produces 6 direct Gutenberg URLs for Dostoevsky
+  (one per canonical novel/work with curated passages). **These are
+  architecturally disjoint from Phase L's 22 URLs** — Phase L emitted a
+  broad URL inventory (Gutenberg direct-text + archive.org collection
+  pages + scholar portal URLs like rvb.ru/dostoevski/ + fedordostoevsky.ru).
+  Arch-03's citations[].url model only emits per-passage primary-text
+  URLs, so scholar portals / archive aggregators disappear. Likely net
+  quality improvement at Pass 1c-fetch (Gutenberg plaintext vs. Phase L's
+  mix of useful + useless aggregator pages), but narrower work coverage
+  (missing Diary of a Writer, Letters, Notebooks, Adolescent if they
+  weren't represented in curated passages). If Pass 4a Diary-register
+  content thins or Pass 6 letter-passage curation weakens in the report,
+  THAT is a real arch-03 finding worth flagging — not a bug to fix.
 - Pass 7a fallback ladder is gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro.
   gpt-4.1 (1M context) should handle arch-03's rich card. If it also
   hits an org-tier limit, Gemini is the working fallback.
