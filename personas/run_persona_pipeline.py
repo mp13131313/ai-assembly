@@ -1139,13 +1139,27 @@ def _derive():
     sysp = load_prompt("persona_derive")
     userp = render("persona_derive_user",
                    persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
-    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=8192, temperature=0.1, thinking=False,
+    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
+    # ON (quality-tuning checklist). Derive is HIGH-LEVERAGE: provocateur_
+    # profile.system_prompt drives every runtime interaction × sessions ×
+    # turns × voices. Small quality differential here multiplies across
+    # thousands of runtime touchpoints. Despite consuming an Opus-quality
+    # card, derive itself is judgment-bound: selective synthesis (44 fields
+    # → ~5-10K prompt), voice-embedding from word one (Dostoevskian texture
+    # in the prompt voice; non-anthropocentric framing for Octopus), high-
+    # ratio compression with nuance preservation, AND original generation
+    # of evaluation_rubric (voice-specific scoring criteria, not derived).
+    # Sonnet rubric-follows; Opus + thinking deliberates the tradeoffs.
+    # Cost: ~$0.10-0.30 extra per voice (runs once). Quality: meaningful at
+    # every runtime turn. max_tokens 8192 → 24000 (thinking + ~10K output).
+    # temperature 0.1 → 1.0 (required for thinking).
+    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                    max_tokens=24000, temperature=1.0, thinking=True,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
-stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Sonnet)")
+stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Opus + thinking)")
 derive = call_or_cache(_paths.derive_raw(SLUG, PROJECT_ROOT), "Derive", _derive)
 prov_profile = derive["result"].get("provocateur_profile", {})
 eval_rubric = derive["result"].get("evaluation_rubric", {})
