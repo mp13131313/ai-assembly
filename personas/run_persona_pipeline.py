@@ -534,9 +534,16 @@ def _pass_1d():
     )
     # 1d-04: 8192 (up from 4096) — 15+ selections × ~200 JSON tokens each
     # approaches 4096 ceiling; bump eliminates truncation risk at zero cost.
+    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 after
+    # Stage 2 v2 hit Anthropic's output content-filtering policy on a
+    # Sonnet emission (literary-canon corpus includes violent/disturbing
+    # scenes — Dostoevsky's Rebellion, Stavrogin confession, etc. — which
+    # Sonnet's output descriptions reproduced and got blocked). Opus 4.7
+    # handles this material reliably. Modest cost delta; Pass 1d is a
+    # small call (~8K output).
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
                     user=user_prompt,
-                    model="claude-sonnet-4-6", max_tokens=8192,
+                    model="claude-opus-4-7", max_tokens=8192,
                     temperature=0.0, thinking=False,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
