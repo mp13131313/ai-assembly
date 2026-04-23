@@ -736,7 +736,11 @@ def _pass_7_anachronism():
         "field_path + problematic_text + reason + suggested_fix. Emit "
         "overall verdict. JSON only."
     )
-    for openai_model in ("o3", "gpt-4o"):
+    # 2026-04-23: ladder reordered — gpt-4.1 primary (1M context window
+    # handles arch-03's richer card ~60-80K tokens reliably; o3 + gpt-4o
+    # hit org-tier per-request token ceilings on the rich payload).
+    # Reasoning/strict models kept as fallbacks. Gemini last resort.
+    for openai_model in ("gpt-4.1", "o3", "gpt-4o"):
         try:
             r = call_openai(system=sysp, user=userp, model=openai_model,
                             temperature=0.0, max_tokens=8192,
@@ -782,8 +786,12 @@ def _pass_7a():
     sysp = load_prompt("persona_pass_7a_cross_model")
     userp = render("persona_pass_7a_cross_model_user",
                    persona_card_json=json.dumps(full_card_for_validate, ensure_ascii=False, indent=2))
-    # Try o3 first (reasoning-mode for multi-criterion evaluation), then gpt-4o, then Gemini
-    for openai_model in ("o3", "gpt-4o"):
+    # 2026-04-23: ladder reordered — gpt-4.1 primary (1M context window
+    # reliably fits arch-03's richer card ~60-80K tokens; o3 + gpt-4o hit
+    # org-tier per-request token ceilings on rich payloads). Reasoning
+    # model o3 kept as fallback for its multi-criterion evaluation
+    # capability when payload is smaller. Gemini last-resort.
+    for openai_model in ("gpt-4.1", "o3", "gpt-4o"):
         try:
             r = call_openai(system=sysp, user=userp, model=openai_model,
                             temperature=0.0, max_tokens=8192,
