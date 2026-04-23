@@ -1681,6 +1681,29 @@ CT mechanism confirmed from `run_persona_pipeline.py:357-370`: `_ct_compress()` 
 
 **Estimated effort:** ~3-4 hours (script + per-chunk-mapping import + claim-extraction heuristic + run on Dostoevsky baseline + report).
 
+### FU#2 — Chunk Pass 7-pre per-citation verification
+
+**Status:** PROPOSED 2026-04-23 during arch-03 Stage 2 v7 (after fourth max_tokens bump).
+
+**Problem:** Pass 7-pre's max_tokens has been bumped four times in the arch-03 development cycle:
+- 24000 (baseline) → hit ceiling at 78K raw chars (Stage 2 v1)
+- 24000 → 48000 (commit `ec6c3fc`) → hit at 154K (Stage 2 v5 revision loop 2)
+- 48000 → 96000 (commit `2d98dd4`) → "2× headroom" claim
+- 96000 → 128000 (commit `bcd54e8`) → after Stage 2 v7 hit ceiling at 357K raw chars
+
+The arch-03 enrichment (1-arch-04 Gemini preservation + 1-arch-06 interpretive_frames + 1-arch-08 anachronism_discipline + EvidenceTag `contested` enabling more frame entries) created a card with so many citations that linear per-citation verification output blows past Sonnet 4.6's standard output ceiling. Each bump kicks the can — the architectural problem is single-shot verification doesn't scale with citation count.
+
+**Architectural fix:** chunk verification work into N parallel Sonnet calls.
+- Collect all citation-bearing card fields (commitments[].citations, concepts[].citations, tensions[].citations, formative_candidates[].citations, interpretive_frames[].citations, knowledge_boundary.anachronism_discipline[].citations, works[].citations, passages[].citations).
+- Batch into groups of ~20-30 citations each.
+- Fire N parallel Pass 7-pre-chunk Sonnet calls (each with max_tokens=16000-32000 — well under any model ceiling).
+- Aggregate verification results into the unified Pass 7-pre output.
+- Net latency: faster than single-shot (parallel) AND no ceiling risk regardless of citation count.
+
+**Why deferred** (not blocking arch-03 verdict): 128K max_tokens bump should suffice for Dostoevsky + future voices unless citations grow another 33%. Architectural fix is a 4-6 hour code change with new test coverage, parallel-execution coordination, and cache-key design (per-chunk vs aggregated). Land when next voice exceeds 128K — or proactively in next quality cycle.
+
+**Estimated effort:** ~4-6 hours.
+
 ---
 
 **Panel composition confirmed (12 voices):** Scheherazade (fictional), Cleopatra (human, hostile_sources=true), Whanganui (non_human, system), Audrey Tang (human), Ibn Battuta (human), Fyodor Dostoevsky (human — Phase L validated), Hannah Arendt (human), Plato (human — Phase N first voice), Ada Lovelace (human), Peter Thiel (human, legal-risk-flagged), Bob Marley (human, corpus_constraint=lyrics_patterns_only), Octopus (non_human, organism).
