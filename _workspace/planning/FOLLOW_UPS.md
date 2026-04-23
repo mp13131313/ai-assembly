@@ -51,7 +51,7 @@ Fix: systematic prompt-hardening across Pass 2-6 user prompts:
 
 **(B) Audience-aware translation_table generation in Pass 7c** — extend Pass 7c to also produce voice-specific term mappings.
 
-Why Pass 7c (not 7b): Pass 7c runs LAST in the Pass-7 family (after 7-pre / 7-anach / 7a / revision loops / 7b). It already has all card content + Pass 7a's flagged issues + Pass 7b's smoke-test outputs. Translation_table is the POSITIVE complement to Pass 7c's existing negative constraints (`banned_language` + `banned_modes`).
+Why Pass 7c (not 7b): Pass 7c runs LAST in the Pass-7 family. Under FU#13's linear architecture, the order is `7-pre → 7-anach → 7a → [Pass 7a-FIX if needed] → 7b → 7c`. Pass 7c already has all card content + Pass 7a's flagged issues + Pass 7b's smoke-test outputs + any FU#13 fix-pass patches that landed. Translation_table is the POSITIVE complement to Pass 7c's existing negative constraints (`banned_language` + `banned_modes`).
 
 New schema field on Pass 7c output (added to the assembled card):
 ```
