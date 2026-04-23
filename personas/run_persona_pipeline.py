@@ -1005,202 +1005,233 @@ if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
         pass7a["result"]["overall"] = "REVISION_NEEDED"
         stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
-# 2026-04-23 (FU#3 inline, revised): surgical patch on EVERY revision loop.
-# Original implementation (this session, earlier commit) gated surgical mode
-# to loop 2+; operator updated decision after seeing in-flight cost: surgical
-# from loop 1 is the right default. Writer sees prior output + critique +
-# explicit "modify ONLY flagged fields, reproduce all others verbatim"
-# instruction; only the flagged target pass(es) re-run; downstream cascade
-# stays cached. Cost ~$1-2/loop instead of ~$5-10/loop full re-run. Tradeoff:
-# downstream passes (4a/4b/5/6) keep their pre-revision outputs even when
-# Pass 2/3 are patched. Defensible — most cross-model rubric flags are
-# field-local; if a flag genuinely requires cross-pass re-thinking, it'll
-# surface again on the post-revision Pass 7a and trigger another loop.
+# ---------- PASS 7a-FIX — Linear field-level patcher (FU#13, 2026-04-23) ----------
+# Replaces the prior revision loop entirely. If Pass 7a (with merged Pass 7-
+# anachronism flags) returns REVISION_NEEDED, fire ONE patcher call (Sonnet
+# 4.6 + thinking) that emits surgical replacement values for the flagged
+# fields. Apply patches via path-walker into in-memory pass outputs + write
+# patched cache files. Optionally re-fire 7-pre / 7-anach / 7a once for
+# verification. No iteration. No writer re-invocation. Single shot.
 #
-# Operator escape hatch: SKIP_REVISION_LOOPS=1 env var bypasses the loop
-# entirely. For mid-flight runs that hit unrecoverable state — operator
-# accepts current Pass 7a verdict (typically REVISION_NEEDED) and lets
-# the pipeline proceed to 7b/7c/Derive/Assembly, deferring resolution to
-# human review.
-_TARGET_FNAME = {
-    "2": "pass2_identity_boundaries", "3": "pass3_intellectual_core",
-    "4a": "pass4a_voice", "4b": "pass4b_artifact",
-    "5": "pass5_engagement", "6": "pass6_corpus",
+# Why this replaces FU#3 surgical revision loop: writer re-invocation
+# over-corrected on the in-flight Dostoevsky run (Pass 7-pre's REVIEW_NEEDED
+# metrics showed +29 dossier_only and +8 inconsistent citations after
+# surgical loop 1 — Opus + thinking + critique tends toward EXPANSION
+# rather than the TRIM the validator wanted). A focused field-level patcher
+# avoids that pattern: explicit "replace this exact value" with no other
+# changes. Cost ~$0.50-1 vs ~$5-10 per loop. Removed: DOWNSTREAM_CHAIN,
+# _TARGET_FNAME, MAX_REVISION_LOOPS-bounded while loop, SKIP_REVISION_LOOPS
+# env var, REVISION_CRITIQUES dict, surgical-vs-cascade branching, post_7a
+# invalidation list (replaced with simpler post-fix invalidation).
+
+_PATH_TOKEN_RE = re.compile(r"([^.\[\]]+)(?:\[(\d+)\])?")
+
+def _apply_patch_in_place(d: dict, path: str, new_value):
+    """Walk a dot-notation path with optional [N] indices; replace value.
+
+    Examples:
+      "knowledge_boundary"          -> d["knowledge_boundary"] = new_value
+      "constitution[3]"             -> d["constitution"][3] = new_value
+      "constitution[3].principle"   -> d["constitution"][3]["principle"] = new_value
+    """
+    tokens = [(name, int(idx) if idx else None)
+              for name, idx in _PATH_TOKEN_RE.findall(path) if name]
+    if not tokens:
+        raise ValueError(f"Empty path: {path!r}")
+    cur = d
+    for i, (name, idx) in enumerate(tokens):
+        is_last = (i == len(tokens) - 1)
+        if is_last and idx is None:
+            cur[name] = new_value
+            return
+        if is_last and idx is not None:
+            if not isinstance(cur.get(name), list):
+                raise TypeError(f"Path {path!r}: expected list at {name!r}")
+            if idx >= len(cur[name]):
+                raise IndexError(f"Path {path!r}: index {idx} out of range for {name!r}")
+            cur[name][idx] = new_value
+            return
+        if name not in cur:
+            raise KeyError(f"Path {path!r}: missing key {name!r} at depth {i}")
+        cur = cur[name]
+        if idx is not None:
+            if not isinstance(cur, list):
+                raise TypeError(f"Path {path!r}: expected list at {name!r}")
+            if idx >= len(cur):
+                raise IndexError(f"Path {path!r}: index {idx} out of range for {name!r}")
+            cur = cur[idx]
+
+
+_PASS_VAR_LOOKUP = {
+    "2": "pass2", "3": "pass3", "4a": "pass4a", "4b": "pass4b",
+    "5": "pass5", "6": "pass6",
+}
+_PASS_PATH_FNS = {
+    "2": _paths.pass_2, "3": _paths.pass_3, "4a": _paths.pass_4a,
+    "4b": _paths.pass_4b, "5": _paths.pass_5, "6": _paths.pass_6,
 }
 
-_skip_loops = os.environ.get("SKIP_REVISION_LOOPS")
-if _skip_loops:
-    stamp(f"REVISION LOOPS DISABLED via SKIP_REVISION_LOOPS={_skip_loops}; "
-          f"proceeding with current Pass 7a verdict ({pass7a['result'].get('overall', '?')}) "
-          f"to 7b/7c/Derive/Assembly. Operator chose to defer resolution to human review.")
 
-while not _skip_loops and pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
-    targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
-    targets = [t for t in targets if t in PASS_RUNNERS]  # filter to known passes
-    if not targets:
-        stamp(f"REVISION LOOP: 7a flagged REVISION_NEEDED but no actionable target passes; halting loop")
-        break
-
-    revision_loops += 1
-    SURGICAL_MODE = True  # FU#3: surgical on every loop (was loop-2-only earlier this session)
-    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS} (SURGICAL): re-running passes {targets}")
-
-    # SURGICAL prerequisite: read prior pass outputs from cache files BEFORE
-    # they get invalidated, so we can prepend them to the writer's critique.
-    # Writer needs to see prior output to reproduce non-flagged fields verbatim.
-    prior_outputs: dict[str, dict] = {}
-    if SURGICAL_MODE:
-        for t in targets:
-            prior_path = _FNAME_TO_PATH[_TARGET_FNAME[t]]()
-            if prior_path.exists():
-                try:
-                    prior_outputs[t] = json.loads(prior_path.read_text())
-                except json.JSONDecodeError:
-                    pass  # fall back to no-prior-output critique
-
-    # Build per-pass critiques from field_issues
-    REVISION_CRITIQUES.clear()
-    for issue in pass7a["result"].get("field_issues", []):
-        target = str(issue.get("flagged_pass"))
-        if target not in REVISION_CRITIQUES:
-            REVISION_CRITIQUES[target] = ""
-        REVISION_CRITIQUES[target] += (
-            f"- field: {issue.get('field')}\n"
-            f"  issue: {issue.get('issue')}\n"
-            f"  recommended_fix: {issue.get('recommended_fix')}\n"
-        )
-    # Add general check feedback (anachronism, register, etc.) to ALL targets
-    general_notes = []
-    for check_name, check in pass7a["result"].get("checks", {}).items():
-        if check.get("status") == "ISSUE":
-            general_notes.append(f"- [{check_name}] {check.get('notes', '')}")
-    if general_notes:
-        general_block = "GENERAL ISSUES (apply to all fields you produce):\n" + "\n".join(general_notes) + "\n\n"
-        for t in targets:
-            REVISION_CRITIQUES[t] = general_block + REVISION_CRITIQUES.get(t, "")
-
-    # SURGICAL: prepend prior-output block + verbatim instruction to each target's critique
-    if SURGICAL_MODE:
-        for t in targets:
-            prior_fields_json = ""
-            if t in prior_outputs and prior_outputs[t].get("fields"):
-                prior_fields_json = json.dumps(prior_outputs[t]["fields"], ensure_ascii=False, indent=2)
-            surgical_preamble = (
-                f"=== SURGICAL PATCH MODE (revision loop {revision_loops}) ===\n"
-                f"Loop 1 already attempted full re-generation; the cross-model validator "
-                f"still flagged issues. To minimize cost + preserve coherence with downstream "
-                f"passes that are NOT being re-run this loop, address ONLY the specific "
-                f"field-level issues listed below.\n\n"
-                f"INSTRUCTIONS:\n"
-                f"- Modify ONLY the fields named in the FLAGGED ISSUES section.\n"
-                f"- Reproduce ALL other fields VERBATIM from your previous output (shown below).\n"
-                f"- Do not introduce changes to non-flagged fields, even cosmetic ones.\n"
-                f"- Output the COMPLETE pass schema (all fields), not just the patched ones.\n\n"
-            )
-            if prior_fields_json:
-                surgical_preamble += f"=== YOUR PREVIOUS OUTPUT ===\n```json\n{prior_fields_json}\n```\n\n"
-            surgical_preamble += "=== FLAGGED ISSUES ===\n"
-            REVISION_CRITIQUES[t] = surgical_preamble + REVISION_CRITIQUES[t]
-
-    # Compute caches to invalidate: surgical = targets only; full = downstream cascade
-    to_invalidate = set()
-    if SURGICAL_MODE:
-        for t in targets:
-            to_invalidate.add(_TARGET_FNAME[t])
-    else:
-        for t in targets:
-            for fname in DOWNSTREAM_CHAIN.get(t, []):
-                to_invalidate.add(fname)
-
-    # Delete cache files
-    for fname in to_invalidate:
-        cache_path = _FNAME_TO_PATH[fname]()
-        if cache_path.exists():
-            cache_path.unlink()
-
-    # Always invalidate Pass 7-pre + 7a (need to re-validate the revised card) and
-    # post-7a artifacts (re-derive from revised card). DOWNSTREAM_CHAIN covers 7-pre
-    # + 7a in full mode but not surgical; this list ensures both modes invalidate.
-    # Post-7a artifacts (7b/7c/Derive/assembled/provocateur/rubric) all read revised
-    # card fields and must be recomputed on any revision. (Captured as a known bug
-    # in commit 0452a23 during the Plato revision-loop verification.)
-    post_7a_invalidation = [
-        _paths.pass_7_pre(SLUG, PROJECT_ROOT),
-        _paths.pass_7a(SLUG, PROJECT_ROOT),
-        _paths.pass_7b(SLUG, PROJECT_ROOT),
-        _paths.pass_7c(SLUG, PROJECT_ROOT),
-        _paths.derive_raw(SLUG, PROJECT_ROOT),
-        _paths.assembled_card(SLUG, PROJECT_ROOT),
-        _paths.provocateur_profile(SLUG, PROJECT_ROOT),
-        _paths.evaluation_rubric(SLUG, PROJECT_ROOT),
-    ]
-    for cache_path in post_7a_invalidation:
-        if cache_path.exists():
-            cache_path.unlink()
-
-    # Determine which passes to re-run.
-    # Full mode = cascade from earliest target onward (downstream consistency).
-    # Surgical mode = only the specific targets, in execution order (no cascade).
-    pass_order = ["2", "3", "4a", "4b", "5", "6"]
-    if SURGICAL_MODE:
-        chain_to_run = [p for p in pass_order if p in targets]
-    else:
-        earliest = min((pass_order.index(t) for t in targets), default=0)
-        chain_to_run = pass_order[earliest:]
-
-    _pass_path_fns = {
-        "2": _paths.pass_2, "3": _paths.pass_3, "4a": _paths.pass_4a,
-        "4b": _paths.pass_4b, "5": _paths.pass_5, "6": _paths.pass_6,
+def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
+    """Linear field-level patcher. Fires once; applies patches to in-memory
+    pass outputs + cache files. Returns fix_log dict (also written to disk
+    by caller)."""
+    fix_log = {
+        "validator_verdict": pass7a_result.get("overall"),
+        "validator_model": pass7a_result.get("validator", "unknown"),
+        "field_issues_count": len(pass7a_result.get("field_issues", []) or []),
+        "anachronism_flags_count": len(pass7_anach_result.get("anachronism_flags", []) or []),
+        "patches_emitted": 0,
+        "patches_applied": 0,
+        "patches_failed": 0,
+        "patches_skipped": 0,
+        "post_fix_verdict": None,
+        "patches": [],
+        "log": [],
     }
-    for pass_label in chain_to_run:
-        runner_name, var_name = PASS_RUNNERS[pass_label]
-        runner_fn = globals()[runner_name]
-        cache_path = _pass_path_fns[pass_label](SLUG, PROJECT_ROOT)
-        result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops}{' surgical' if SURGICAL_MODE else ''})", runner_fn)
-        globals()[var_name] = result
-        # Full mode: also recompute CT summary as we go (downstream passes need it)
-        # Surgical mode: skip CT recompute (downstream passes don't re-run, no consumer)
-        if not SURGICAL_MODE:
-            if pass_label == "2":
-                pass_2_summary = _ct_compress(result["fields"], "pass2")
-            elif pass_label == "3":
-                combined_2_3 = {**pass2["fields"], **result["fields"]}
-                pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
-            elif pass_label == "4a":
-                combined_2_3_4a = {**combined_2_3, **result["fields"]}
-                pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
-            elif pass_label == "4b":
-                combined_2_3_4 = {**combined_2_3_4a, **result["fields"]}
-                pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 
-    # Refresh cumulative card dicts from current globals — needed for Pass 7-pre/7a
-    # which read full_card_for_verify = {**combined_2_3_4, **pass5["fields"]}.
-    # In full mode the per-iteration updates above already covered chain-internal
-    # passes; this re-bind ensures correctness when only later passes were in
-    # chain_to_run (e.g., targets=["6"] only). In surgical mode this is the only
-    # place cumulative dicts get refreshed for the patched targets.
-    combined_2_3 = {**pass2["fields"], **pass3["fields"]}
-    combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
-    combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
+    field_issues = pass7a_result.get("field_issues", []) or []
+    if not field_issues:
+        fix_log["log"].append("No field_issues to patch — skipping fix-pass entirely")
+        return fix_log
 
-    # Re-run Pass 7-pre (verifies revised card)
-    pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
-                             f"Pass 7-pre (revision loop {revision_loops})", _pass_7pre)
-    verif = pass7pre["result"]
-    stamp(f"  verification (loop {revision_loops}): {verif.get('overall', '?')}")
+    affected = sorted({str(i.get("flagged_pass") or i.get("revision_target_pass") or "")
+                       for i in field_issues})
+    affected = [p for p in affected if p in _PASS_VAR_LOOKUP]
+    if not affected:
+        fix_log["log"].append(f"No actionable passes in field_issues — skipping. "
+                               f"Issues: {len(field_issues)}")
+        return fix_log
 
-    # Re-run Pass 7a (re-validates)
-    pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
-                           f"Pass 7a (revision loop {revision_loops})", _pass_7a)
-    stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
+    pass_outputs = {}
+    for pass_id in affected:
+        var = globals().get(_PASS_VAR_LOOKUP[pass_id])
+        if var and var.get("fields"):
+            pass_outputs[f"pass_{pass_id}"] = var["fields"]
 
-# Clear critiques after loop ends so subsequent passes (7b, 7c, derive) get clean prompts
-REVISION_CRITIQUES.clear()
+    voice_context = {
+        "rhetorical_mode": pass4a["fields"].get("rhetorical_mode", ""),
+        "register_and_tone": pass4a["fields"].get("register_and_tone", ""),
+        "characteristic_moves": pass4a["fields"].get("characteristic_moves", []),
+        "translation_protocol": pass2["fields"].get("translation_protocol", ""),
+        "knowledge_boundary": pass2["fields"].get("knowledge_boundary", ""),
+    }
 
-if pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops >= MAX_REVISION_LOOPS:
-    stamp(f"REVISION LOOP: hit max {MAX_REVISION_LOOPS} loops, still REVISION_NEEDED — flagged for human review")
+    sysp = load_prompt("persona_pass_7a_fix")
+    userp = render(
+        "persona_pass_7a_fix_user",
+        field_issues_json=json.dumps(field_issues, ensure_ascii=False, indent=2),
+        relevant_pass_outputs_json=json.dumps(pass_outputs, ensure_ascii=False, indent=2),
+        rhetorical_mode=str(voice_context["rhetorical_mode"]),
+        register_and_tone=str(voice_context["register_and_tone"]),
+        characteristic_moves_json=json.dumps(voice_context["characteristic_moves"],
+                                              ensure_ascii=False, indent=2),
+        translation_protocol=str(voice_context["translation_protocol"]),
+        knowledge_boundary=str(voice_context["knowledge_boundary"]),
+    )
+
+    stamp(f"PASS 7a-FIX: linear patcher (Sonnet 4.6 + thinking, "
+          f"{len(field_issues)} field issues across passes {affected})")
+    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
+                    max_tokens=16000, temperature=1.0, thinking=True,
+                    response_format_json=True)
+
+    patches = r["json"].get("patches", []) or []
+    fix_log["patches_emitted"] = len(patches)
+
+    for patch in patches:
+        pass_id = str(patch.get("pass_id", ""))
+        field_path = patch.get("field_path", "")
+        new_value = patch.get("new_value")
+        rationale = patch.get("rationale", "")
+
+        if not (pass_id and field_path):
+            fix_log["patches_skipped"] += 1
+            fix_log["log"].append(f"SKIP malformed patch: {patch}")
+            continue
+        if pass_id not in _PASS_VAR_LOOKUP:
+            fix_log["patches_skipped"] += 1
+            fix_log["log"].append(f"SKIP patch: unknown pass_id={pass_id!r}")
+            continue
+
+        try:
+            var_name = _PASS_VAR_LOOKUP[pass_id]
+            pass_var = globals()[var_name]
+            _apply_patch_in_place(pass_var["fields"], field_path, new_value)
+            cache_path = _PASS_PATH_FNS[pass_id](SLUG, PROJECT_ROOT)
+            write_json_atomic(cache_path, pass_var)
+            fix_log["patches_applied"] += 1
+            fix_log["patches"].append({
+                "pass_id": pass_id, "field_path": field_path,
+                "rationale": rationale, "status": "applied",
+            })
+            fix_log["log"].append(f"APPLIED pass_{pass_id}.{field_path}: {rationale[:120]}")
+        except Exception as e:
+            fix_log["patches_failed"] += 1
+            fix_log["patches"].append({
+                "pass_id": pass_id, "field_path": field_path,
+                "rationale": rationale, "status": "failed",
+                "error": f"{type(e).__name__}: {str(e)[:200]}",
+            })
+            fix_log["log"].append(f"FAILED pass_{pass_id}.{field_path}: "
+                                   f"{type(e).__name__}: {str(e)[:120]}")
+
+    return fix_log
+
+
+# ---------- LINEAR FLOW: fire fix-pass once if REVISION_NEEDED ----------
+fix_log_path = _paths.merge_dir(SLUG, PROJECT_ROOT) / "_fix_log.json"
+
+if pass7a["result"].get("overall") == "REVISION_NEEDED":
+    fix_log = _pass_7a_fix(pass7a["result"], pass7_anach["result"])
+    write_json_atomic(fix_log_path, fix_log)
+
+    if fix_log["patches_applied"] > 0:
+        # Patches landed — invalidate downstream + re-fire validators once
+        for p in [_paths.pass_7_pre(SLUG, PROJECT_ROOT),
+                  _paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
+                  _paths.pass_7a(SLUG, PROJECT_ROOT),
+                  _paths.pass_7b(SLUG, PROJECT_ROOT),
+                  _paths.pass_7c(SLUG, PROJECT_ROOT),
+                  _paths.derive_raw(SLUG, PROJECT_ROOT),
+                  _paths.assembled_card(SLUG, PROJECT_ROOT),
+                  _paths.provocateur_profile(SLUG, PROJECT_ROOT),
+                  _paths.evaluation_rubric(SLUG, PROJECT_ROOT)]:
+            if p.exists():
+                p.unlink()
+
+        # Refresh cumulative card dicts (Pass 2-6 may have changed)
+        combined_2_3 = {**pass2["fields"], **pass3["fields"]}
+        combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
+        combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
+
+        # Re-fire Pass 7-pre + Pass 7-anachronism + Pass 7a once for verification
+        pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
+                                 "Pass 7-pre (post-fix)", _pass_7pre)
+        if fix_log["anachronism_flags_count"] > 0:
+            pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
+                                         "Pass 7-anachronism (post-fix)",
+                                         _pass_7_anachronism)
+        pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
+                                "Pass 7a (post-fix)", _pass_7a)
+        fix_log["post_fix_verdict"] = pass7a["result"].get("overall")
+        write_json_atomic(fix_log_path, fix_log)
+
+        stamp(f"PASS 7a-FIX: applied {fix_log['patches_applied']} of "
+              f"{fix_log['patches_emitted']} patches "
+              f"(failed={fix_log['patches_failed']}, skipped={fix_log['patches_skipped']}); "
+              f"post-fix verdict: {fix_log['post_fix_verdict']}")
+    else:
+        stamp(f"PASS 7a-FIX: 0 patches applied (emitted={fix_log['patches_emitted']}, "
+              f"failed={fix_log['patches_failed']}, skipped={fix_log['patches_skipped']}); "
+              f"accepting Pass 7a verdict as-is")
+
+# Final verdict (whether or not fix-pass ran)
+if pass7a["result"].get("overall") == "REVISION_NEEDED":
+    stamp(f"FINAL: post-fix verdict still REVISION_NEEDED — flagged for human review")
 else:
-    stamp(f"REVISION LOOP: complete after {revision_loops} loop(s), final 7a verdict: {pass7a['result'].get('overall', '?')}")
+    stamp(f"FINAL: 7a verdict {pass7a['result'].get('overall', '?')} — "
+          f"proceeding to 7b/7c/Derive/Assembly")
 
 
 # ---------- PASS 7b (Worked Provocations) ----------
