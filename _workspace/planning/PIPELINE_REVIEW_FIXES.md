@@ -1878,6 +1878,75 @@ Examples from the Dostoevsky card:
 
 **Related to FU#3 (surgical revision):** if FU#12 prompt hardening lands, fewer revision loops will trigger — surgical mode catches residuals; prompt hardening prevents them at source.
 
+### FU#13 — Architecture 2: replace revision loop with linear `Pass 7a-fix` step
+
+**Status:** PROPOSED 2026-04-23 (operator request — "fix what 7a finds, then move to 7b").
+
+**Problem:** Current revision loop (FU#3 surgical writer re-invocation) is iterative — re-runs 4-6 writer passes, re-validates, may loop. Per-loop cost ~$5-8, wall ~20-25 min. Across 12-voice panel × ~1.5 trigger events = ~$90-150 + ~6-7 hr panel-wide. Architecturally complex (DOWNSTREAM_CHAIN, surgical-vs-cascade branching, cache invalidation gymnastics, SKIP_REVISION_LOOPS env var).
+
+**Proposed architecture (replaces revision loop entirely):**
+
+```
+Pass 6 → Pass 7-pre → Pass 7-anachronism → Pass 7a → Pass 7a-FIX → Pass 7b
+                                                       ↑
+                                                  new linear step
+```
+
+`Pass 7a-FIX` = single LLM call that takes Pass 7a's `field_issues[]` + relevant card fields + voice register exemplars + per-field Pydantic schemas → emits JSON patches → applied to card with per-field validation. Linear, single-shot, no loops.
+
+**Implementation sketch:**
+```python
+def _pass_7a_fix():
+    if pass7a["result"]["overall"] != "REVISION_NEEDED":
+        return None
+    issues = pass7a["result"]["field_issues"]
+    relevant_fields = extract_card_fields_for_issues(issues, full_card)
+    voice_context = {"register_and_tone": pass4a[...], "rhetorical_mode": pass4a[...]}
+    schemas = {issue["field_path"]: get_pydantic_type(issue["field_path"]) for issue in issues}
+
+    sysp = load_prompt("persona_pass_7a_fix")
+    userp = render("persona_pass_7a_fix_user",
+                   issues_json=..., relevant_fields_json=...,
+                   voice_context_json=..., schemas_json=...)
+    r = call_claude(model="claude-sonnet-4-6", thinking=True, ...)  # or Opus + thinking for harder cases
+
+    fix_log = []
+    for patch in r["json"]["patches"]:
+        try:
+            validate_against_schema(patch["field_path"], patch["new_value"])
+            apply_patch_to_card(patch["field_path"], patch["new_value"])
+            fix_log.append({...applied})
+        except ValidationError:
+            fix_log.append({...validation_failed})
+            # Optional fallback: surgical writer re-run for this field via FU#3 path
+    return {"patches": ..., "fix_log": ...}
+```
+
+**Cost/wall comparison (per trigger event):**
+- Current Option A surgical (FU#3): ~$5-8 + ~20-25 min
+- Proposed Architecture 2 (FU#13): ~$0.50-1 + ~3-5 min
+- Savings panel-wide: ~$80-130 + ~6 hr
+
+**Quality tradeoff:**
+- Cross-field coherence: Architecture 2 sees relevant context but not the whole pass (writer in Option A holds the whole pass schema in mind). Mitigatable by passing nearby fields + voice context.
+- Voice register: Sonnet patcher with voice register exemplars is comparable to writer regen for most cases. Opus + thinking on the patcher available for tougher cases.
+- Schema safety: explicit per-field Pydantic validation; fall back to FU#3 surgical writer re-run on any field that fails validation.
+
+**Code simplification:**
+- Removes: DOWNSTREAM_CHAIN, PASS_RUNNERS revision-mapping, surgical-vs-cascade branching, the entire while-loop, SKIP_REVISION_LOOPS env var, cumulative-dict refresh, post-7a invalidation list
+- Adds: `_pass_7a_fix()` function (~80 lines), patcher prompt (~1 file), JSON-patch applier with Pydantic validation (~20 lines)
+- Net: ~150 lines removed, ~100 lines added, much cleaner conceptually
+
+**Build effort:** ~4-6 hr (patcher prompt design + per-field-type context picker + apply-patch helper + validation fallback to FU#3 + integration replacing the revision loop + tests for FU#10 should cover this too).
+
+**Apply to:** Plato + remaining 10 voices. Dostoevsky shipped under FU#3 (Option A surgical).
+
+**Related FUs:**
+- Supersedes FU#3 (Option A surgical writer re-invocation)
+- Subsumes FU#5 (snapshot directory) — fix_log already captures the audit trail
+- Closes FU#6 (convergence diagnostic) — no loop, no convergence question
+- Combines well with FU#12 (curator-metadata prompt hardening) — fewer trigger events overall
+
 ### FU#11 — Workspace archive cleanup
 
 **Status:** PROPOSED 2026-04-23.
