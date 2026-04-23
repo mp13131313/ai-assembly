@@ -35,7 +35,8 @@ BLOCK 2 — GUARDRAILS:
   not "Plato holds that governance requires knowledge of the good." The card is a
   system prompt, not a research document.
 
-- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):**
   The merge dossier (Pass 1.2/1.3 chunks) carries STRUCTURED `evidence_tag`
   data on each commitment, concept, etc. — a Pydantic field with values
   {stated, scholarly_consensus, contested, inference,
@@ -44,28 +45,75 @@ BLOCK 2 — GUARDRAILS:
   line constitution; contested-evidence commitments → second-tier or
   marked TENSION). **Do NOT propagate bracket-tag annotations into runtime
   field values.** Pass 7a (gpt-5.4 cross-model) flagged each of these on
-  the prior Dostoevsky run:
-  * Provenance brackets `[stated]`, `[scholarly_consensus]`, `[inference]`,
-    `[scholarly consensus]`, `[attributed by narrative function]` appearing
-    inside constitution principle text, concept_lexicon entries,
-    reasoning_method steps. STRIP from runtime output. (Voice-honest
-    annotation tags `[experiential_reconstruction]` + `[projection_warning]`
-    on specific Boddice §13/§14 sub-fields ARE different — those stay
-    when carried per Pass 2's instruction; the difference is voice-honest
-    annotation vs. merge-source attribution.)
-  * Sub-fields `curator_note`, `pedagogical_note`, `editorial_note`,
-    `editor_note` — scholarly apparatus, NEVER in runtime card.
-  * Scholar attribution names that the voice would not have known/cited.
-    Apply knowledge_boundary as test: yes if the voice would have cited
-    them (Plato citing Parmenides), no for any post-knowledge-boundary
-    name. Curator-side `scholarly_context` informs your synthesis; it
-    does NOT become field content.
-  * Reception commentary (post-the-voice's-lifetime): belongs in
-    curator-side documentation, not the runtime prompt.
+  the prior Dostoevsky run.
 
-  Test for any field value: would a runtime model reading this as a
-  system prompt receive an INSTRUCTION to act on (good), or read
+  **FU#32 2026-04-23 — asymmetric failure mode:** stripping without
+  positive compensation produces taxonomic retreat — conservative prose
+  that describes the voice's thought from outside instead of thinking
+  IN the voice's grammar. Each strip below is paired with a DO INSTEAD:
+
+  * STRIP: Provenance brackets `[stated]`, `[scholarly_consensus]`,
+    `[inference]`, `[scholarly consensus]`, `[attributed by narrative
+    function]` appearing inside constitution principle text,
+    concept_lexicon entries, reasoning_method steps. (Voice-honest
+    annotation tags `[experiential_reconstruction]` + `[projection_
+    warning]` on specific Boddice §13/§14 sub-fields ARE different —
+    those stay when carried per Pass 2's instruction; voice-honest
+    annotation vs. merge-source attribution is the difference.)
+    DO INSTEAD: write the principle AS the operational instruction
+    the voice is giving itself, in first or second person. "You
+    treat every threshold as stageable — the moment a soul can shift
+    is the moment worth writing" — not "[scholarly consensus] the
+    voice treats thresholds as stageable moments".
+
+  * STRIP: Sub-fields `curator_note`, `pedagogical_note`,
+    `editorial_note`, `editor_note` — scholarly apparatus, NEVER in
+    runtime card.
+    DO INSTEAD: if the merge dossier's `scholarly_context` on a
+    commitment informs your synthesis, let it shape the principle's
+    own prose. The field IS the synthesis; there is no parallel
+    commentary layer.
+
+  * STRIP: Scholar attribution names that the voice would not have
+    known/cited. Apply knowledge_boundary as test: yes if the voice
+    would have cited them (Plato citing Parmenides), no for any
+    post-knowledge-boundary name. Curator-side `scholarly_context`
+    informs your synthesis; it does NOT become field content.
+    DO INSTEAD: where you would have written "per Bakhtin..." in
+    concept_lexicon, write the voice's own framing of what the
+    scholar saw. "Many voices at once, none singly yours, arguing
+    inside the character as the character argues outside" is a
+    Dostoevskian gloss on polyphony without naming the scholar.
+
+  * STRIP: Reception commentary (post-the-voice's-lifetime) in any
+    field. Belongs in curator-side documentation, not the runtime
+    prompt.
+    DO INSTEAD: where modern reception illuminates WHICH of the
+    voice's commitments to emphasize, let it shape selection
+    priority. The voice does not cite what it could not have read.
+
+  * META-STRIP (across all 5 Pass 3 fields): TAXONOMIC RETREAT.
+    When the merge dossier's scholarly_context is in a modern
+    idiom (existentialism / Christian personalism / proto-
+    psychology), the writer must NOT strip the modern idiom only
+    to NAME the voice's grammar from outside ("you do not think
+    in existentialist categories; your grammar is bolezn' /
+    nadryv / smirenie"). Still a scholar describing the voice.
+    DO INSTEAD: INHABIT the grammar in the principle itself.
+    "Every threshold a person crosses leaves a tear in the soul —
+    nadryv — that must be walked through, not medicated" is in
+    the voice's grammar doing work. 3-5 of the voice's OWN load-
+    bearing lexemes (native language, glossed once) SHOULD appear
+    in USE across constitution + concept_lexicon + reasoning_method
+    prose — not listed separately as vocabulary.
+
+  Test for any field value: would a runtime model reading this as
+  a system prompt receive an INSTRUCTION to act on (good), or read
   scholarly apparatus ABOUT the voice (bad)? If the latter, rewrite.
+  Second test (FU#32): does the field read as the voice THINKING,
+  or as a scholar DESCRIBING how the voice thinks in the voice's
+  preferred vocabulary? If the latter, rewrite into first/second-
+  person operation in the grammar.
 
 - Do not resolve scholarly debates into false consensus. Name contested readings
   and choose the most generative one — but name that it's a choice. (Use the
