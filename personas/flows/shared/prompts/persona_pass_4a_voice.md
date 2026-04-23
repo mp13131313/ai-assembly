@@ -30,23 +30,47 @@ BLOCK 2 — GUARDRAILS:
   through dialogue" not "Plato argues through dialogue." The card is a system
   prompt the voice inhabits.
 
-- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):**
   Pass 7a (gpt-5.4 cross-model) flagged scholarly metadata leaking into
-  voice field values on the prior Dostoevsky run. Apply the same discipline
-  as Pass 2/3:
-  * No provenance brackets `[stated]/[scholarly_consensus]/[inference]` inside
-    field values. (Voice-honest annotation tags like `[experiential_
-    reconstruction]` are NOT used in voice fields — those are Pass 2/3
-    territory; Pass 4a fields should be naked instruction, no brackets.)
-  * No `curator_note`/`pedagogical_note`/`editorial_note` sub-fields.
-  * Scholar attribution names that the voice would not have known/cited
-    do NOT appear in field values. The merge dossier's
-    `analytical_context_voice` (if populated) informs your synthesis but
-    does not become field content. e.g., a Russian translator-tradition
-    note that says "per Garnett's choices..." informs HOW you frame the
-    voice's register, but the resulting register_and_tone field reads as
-    in-voice instruction, not as a translator-comparison commentary.
-  * No reception commentary or future-history phrasing in any field.
+  voice field values on the prior Dostoevsky run. Apply the same
+  STRIP+DO-INSTEAD discipline as Pass 2/3:
+  * STRIP: provenance brackets `[stated]/[scholarly_consensus]/[inference]`
+    inside field values. (Voice-honest annotation tags like
+    `[experiential_reconstruction]` are NOT used in voice fields — those
+    are Pass 2/3 territory; Pass 4a fields should be naked instruction.)
+    DO INSTEAD: write the voice's operational rhetorical habit directly.
+    "I open mid-thought, already addressing you" — not "[stated] the
+    voice opens in medias res".
+  * STRIP: `curator_note`/`pedagogical_note`/`editorial_note` sub-fields.
+    DO INSTEAD: let the analytical context inform the prose; there is
+    no parallel commentary layer.
+  * STRIP: Scholar attribution names that the voice would not have
+    known/cited in field values. The merge dossier's `analytical_
+    context_voice` informs your synthesis but does not become field
+    content. A Russian translator-tradition note that says "per
+    Garnett's choices..." informs HOW you frame the voice's register.
+    DO INSTEAD: the resulting register_and_tone field reads as in-
+    voice instruction ("I write in sentences that pile clause on
+    clause, breath quickening with each"), not as a translator-
+    comparison commentary.
+  * STRIP: reception commentary or future-history phrasing in any
+    field.
+    DO INSTEAD: let modern-reception readings shape which rhetorical
+    moves you foreground, without naming them.
+
+  **META-STRIP (FU#32): TAXONOMIC RETREAT.** When stripping a modern
+  rhetorical category from a voice-field value, do NOT fall back to
+  describing the voice's register from outside ("your register is not
+  academic; it is feverish-confessional"). Still a scholar describing
+  the voice.
+  DO INSTEAD: WRITE the register. "I write at the pitch of confession,
+  sentences crowding each other for air — the mode of a man who has
+  seen the mock-execution and cannot unsee it." First-person in-
+  register IS the register_and_tone field. The test: if the field
+  could be lifted out and read as the voice SPEAKING in its own
+  rhetorical habit, it passes. If it reads as ABOUT the voice's
+  rhetorical habit, rewrite.
 
 - All voice characterization must be GROUNDED in the primary text passages
   provided. If the dossier asserts a voice trait that the corpus does not
@@ -107,6 +131,18 @@ Levinas, Kasatkina, Williams, etc.) — those should never appear in the
 runtime card to begin with; the voice doesn't need to be told not to use
 names it doesn't know exist. (Pass 7a flagged this on the prior Dostoevsky
 run.)
+**FU#32 2026-04-23 — populate as STRIP + USE pairs.** Do NOT emit
+`banned_language` as a bare prohibition list. For EACH banned term,
+pair with the in-voice alternative the runtime should sound like —
+so the runtime model knows what to SAY, not only what to avoid.
+Suggested entry format: `avoid "X" (<why banned>); use "Y" (<voice-
+native idiom>)`. This turns the field from a DON'T list into a SAY-
+THIS-INSTEAD reference the runtime can act on. Example: `avoid
+"process" (therapeutic register); use "reckon with" or "walk through"
+depending on context`. Without the paired alternative, the writer
+strips the modern word but leaves the voice with no idiom for the
+same conceptual territory — voice-tissue regression at the lexicon
+layer.
 
 banned_modes — Framings and registers that break character. Examples: bullet
 lists, corporate language, false certainty, hedging-as-cowardice, etc.
