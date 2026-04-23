@@ -437,9 +437,20 @@ def _ct_compress(prior_pass_output: dict, label: str) -> str:
     stamp(f"  CT compressing {label}...")
     user = render("persona_coherence_threading", name=vi["name"],
                   prior_pass_output_json=json.dumps(prior_pass_output, ensure_ascii=False))
+    # 2026-04-23: thinking=False → True (quality-tuning). CT does heavier
+    # compression than the textbook "summarization" framing suggests:
+    # pass2_3_4a is 22 fields → 2K (25-35× ratio); pass2_3_4 is 30 fields
+    # → 2K (35-50× ratio). At those ratios the model isn't summarizing —
+    # it's selecting which of dozens of voice-defining nuances to surface.
+    # That's deliberation, not compression. Thinking gives Sonnet the
+    # budget to make those tradeoffs. Kept on Sonnet (not Opus) — the task
+    # is still fidelity-bound; Opus + thinking risks injecting interpretive
+    # framing where source-faithful selection is wanted. temperature
+    # 0.0 → 1.0 (required for thinking). max_tokens 2048 → 16000 (thinking
+    # shares budget with output; ~14K thinking + ~2K narrative summary).
     r = call_claude(system="You compress persona fields into a tight summary.",
-                    user=user, model="claude-sonnet-4-6", max_tokens=2048,
-                    temperature=0.0, thinking=False)
+                    user=user, model="claude-sonnet-4-6", max_tokens=16000,
+                    temperature=1.0, thinking=True)
     write_json_atomic(ct_path, {"label": label, "model": r["model"], "usage": r["usage"],
                                 "summary_text": r["text"]})
     return r["text"]
