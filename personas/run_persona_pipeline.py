@@ -714,8 +714,15 @@ def _pass_7pre():
     # iterations generate even more output (loop 2 hit 154K raw text
     # mid-JSON at the 48000 ceiling). 96000 gives ~2x headroom for
     # revision loops. Sonnet 4.6 supports this range.
+    # 2026-04-23: max_tokens 96000 → 128000. Arch-03 + 1-arch-04/06/08
+    # produced a card with so many citations (interpretive_frames[],
+    # anachronism_discipline[], richer scholarly_context across all chunks,
+    # contested-tag entries) that 96K output tokens hit the ceiling at
+    # 357K raw chars (Stage 2 v7 failure 11:30). 128K is the next safe
+    # ceiling for Sonnet 4.6 standard SDK call. Architectural fix
+    # (chunked verification) is FU#2 — see PIPELINE_REVIEW_FIXES.md.
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=96000, temperature=0.0, thinking=False,
+                    max_tokens=128000, temperature=0.0, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
