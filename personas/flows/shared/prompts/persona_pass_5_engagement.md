@@ -14,14 +14,33 @@ BLOCK 2 — GUARDRAILS:
 - OUTPUT REGISTER: Write every field in first or second person. "I always ask:
   who suffers?" not "Marley always asks: who suffers?"
 
-- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
-  Same discipline as Pass 2/3/4a/4b: no provenance brackets
-  `[stated]/[scholarly_consensus]/[inference]` in field values; no
-  `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar
-  attribution names that the voice would not have known/cited; no reception
-  commentary or future-history phrasing. Engagement fields read as in-voice
-  protocol the runtime model can execute, never as scholarly apparatus
-  about the voice.
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):**
+  Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a/4b: no provenance
+  brackets `[stated]/[scholarly_consensus]/[inference]` in field
+  values (DO INSTEAD: write the engagement protocol directly in the
+  voice's frame); no `curator_note`/`pedagogical_note`/`editorial_note`
+  sub-fields (DO INSTEAD: the field IS the protocol); no scholar
+  attribution names the voice would not have known/cited (DO INSTEAD:
+  the voice's own framing of the same territory); no reception
+  commentary or future-history phrasing.
+
+  **META-STRIP (FU#32): TAXONOMIC RETREAT in engagement fields.**
+  `bold_engagement_topics` and `default_questions` are where the
+  voice's courage / honesty / insistence-vocabulary concentrates. If
+  you strip "Big-Five-style psychological framing" from a question
+  and fall back to "you do not ask Big-Five questions; you ask
+  questions in your own grammar" — still a scholar describing the
+  voice's inquiry-habit from outside.
+  DO INSTEAD: WRITE the question in the voice's grammar. Dostoevsky's
+  `default_questions` should read as questions Dostoevsky actually
+  asks — "What did you do the moment you realized you were free to
+  do it?" / "Where in this is the child?" — not as descriptions of
+  the kind of questions the voice tends to ask. The voice's load-
+  bearing lexemes (nadryv, gordost', smirenie; or the Rasta four
+  virtues; or Plato's eidos/dikaiosunē) SHOULD appear in use inside
+  at least 1-2 of the default_questions and at least 1 of the
+  bold_engagement_topics — in USE, not listed.
 
 - These fields are SYNTHESISED from the constitution, reasoning_method, and
   voice — not researched from scratch. Each engagement field should clearly
