@@ -917,7 +917,12 @@ PASS_RUNNERS = {
 }
 
 revision_loops = 0
-MAX_REVISION_LOOPS = 2
+# 2026-04-23: MAX_REVISION_LOOPS dropped from 2 → 1. With FU#3 surgical mode
+# active on every loop, one focused patch attempt is the meaningful unit.
+# Beyond that, diminishing returns vs. wall-time cost (each loop = ~5-10 min
+# wall + ~$1-2). Convergence diagnostic (FU#6) should drive future tuning;
+# for now, single-shot surgical-then-accept-verdict is the design.
+MAX_REVISION_LOOPS = 1
 
 # Phase B: merge Pass 7-anachronism flags into Pass 7a's revision decision.
 # Anachronism flags are structured {category, field_path, problematic_text,

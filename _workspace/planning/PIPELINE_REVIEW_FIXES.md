@@ -1841,6 +1841,43 @@ artifacts:
 
 **Estimated effort:** ~2-3 hours.
 
+### FU#12 — arch-03 curator-metadata leakage (prompt hardening)
+
+**Status:** PROPOSED 2026-04-23 (surfaced by Pass 7a's substantive findings on Dostoevsky un-patched card).
+
+**Problem:** Pass 7a returned REVISION_NEEDED with 9 specific field issues + 1 CRITICAL FAILURE on the `register` check. All 9 issues share one root pattern: **curator-side metadata is leaking into the runtime persona card**, breaking the "second-person to the voice / first-person AS the voice" register the runtime needs.
+
+Examples from the Dostoevsky card:
+- `[stated]` / `[scholarly_consensus]` / `[inference]` provenance tags appearing IN the runtime card
+- `curator_note` fields with scholar attributions inside `reasoning_method.steps`
+- "Modern counters... [curator-note: Toporov]" embedded in concept_lexicon
+- Post-2022 Ukrainian reception commentary inside `vsechelovechnost'` gloss
+- Third-person pedagogical `header` + `why_selected` annotations on cited passages
+- "Fyodor Dostoevsky — novelist..." third-person bio in `corpus_metadata`
+- `banned_language` containing modern theorist names (Levinas, Bakhtin, Eikhenbaum, Kasatkina) — they shouldn't even appear in the runtime card to need banning
+- Future-history phrasing in `knowledge_boundary` ("post-1948", "Anthropocene", "he discovered you in 1886-87")
+
+**Why this is systemic, not Dostoevsky-specific:** the arch-03 enrichment (1-arch-04 Gemini cross-disciplinary preservation, 1-arch-06 interpretive_frames, 1-arch-08 anachronism_discipline) gave Pass 2-6 substantially richer source material to draw from. Pass 2-6's prompts allow some of that scholarly metadata to bleed through into the runtime card output. Will recur for every arch-03 voice we run.
+
+**Fix:** systematic prompt-hardening pass across Pass 2-6 user prompts:
+
+1. Add explicit register block: "You are writing the runtime persona system prompt. Output ALL fields in second person addressed TO the voice or first person AS the voice. Never write fields as a scholar describing the voice from outside."
+
+2. Explicit don'ts:
+   - No `[stated]` / `[scholarly_consensus]` / `[inference]` provenance tags inside card field values (these are merge-layer metadata only)
+   - No `curator_note` / `pedagogical_note` / `editorial_note` style sub-fields
+   - No scholar attribution names in field values unless the voice itself would have cited them (Dostoevsky may cite Belinsky; he won't cite Bakhtin)
+   - No reception-commentary / future-history phrasing
+   - `banned_language` is for terms the voice itself might be tempted to use; never list modern theorist names
+
+3. Voice-specific scoping:
+   - For period voices: scrub all post-knowledge-boundary scholar names + reception terms
+   - For all voices: corpus metadata stays in curator-side files, not in card
+
+**Estimated effort:** ~4-6 hours (audit each of Pass 2-6 prompts; add hardening blocks; test on Plato; iterate if Pass 7a still flags register).
+
+**Related to FU#3 (surgical revision):** if FU#12 prompt hardening lands, fewer revision loops will trigger — surgical mode catches residuals; prompt hardening prevents them at source.
+
 ### FU#11 — Workspace archive cleanup
 
 **Status:** PROPOSED 2026-04-23.
