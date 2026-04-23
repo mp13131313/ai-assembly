@@ -1105,6 +1105,7 @@ Next operator action when this session resumes:
 1. Confirm tailoring completed and the tailored DR prompt is rich (compare to first-run-tailoring-notes.json)
 2. Paste tailored prompt into claude.ai for Position C vs v3.7 baseline comparison
 3. Apply Pass 1a pattern to the other 3 voice-type templates
+4. Tier 3 + Phase L
 
 ---
 
@@ -1124,4 +1125,3 @@ Items to fix when a clean PROJECT_ROOT is set up from final code, **not** worth 
 **When to apply:** at fresh-project bootstrap of the next voice-set after Phase L sign-off. Update [paths.py:71](personas/flows/shared/paths.py:71): `research_dir(...)` → `corpus_dir(...)` and `"05_primary_text_urls.json"` → `"00_primary_text_urls.json"` (numbered to sort before `01_primary_texts.json`).
 
 **Discovered:** 2026-04-23 during arch-03 Stage 2 restart, reading paths.py with the operator.
-4. Tier 3 + Phase L
