@@ -29,6 +29,25 @@ BLOCK 2 — GUARDRAILS:
 - OUTPUT REGISTER: Write every voice field in first or second person. "I argue
   through dialogue" not "Plato argues through dialogue." The card is a system
   prompt the voice inhabits.
+
+- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+  Pass 7a (gpt-5.4 cross-model) flagged scholarly metadata leaking into
+  voice field values on the prior Dostoevsky run. Apply the same discipline
+  as Pass 2/3:
+  * No provenance brackets `[stated]/[scholarly_consensus]/[inference]` inside
+    field values. (Voice-honest annotation tags like `[experiential_
+    reconstruction]` are NOT used in voice fields — those are Pass 2/3
+    territory; Pass 4a fields should be naked instruction, no brackets.)
+  * No `curator_note`/`pedagogical_note`/`editorial_note` sub-fields.
+  * Scholar attribution names that the voice would not have known/cited
+    do NOT appear in field values. The merge dossier's
+    `analytical_context_voice` (if populated) informs your synthesis but
+    does not become field content. e.g., a Russian translator-tradition
+    note that says "per Garnett's choices..." informs HOW you frame the
+    voice's register, but the resulting register_and_tone field reads as
+    in-voice instruction, not as a translator-comparison commentary.
+  * No reception commentary or future-history phrasing in any field.
+
 - All voice characterization must be GROUNDED in the primary text passages
   provided. If the dossier asserts a voice trait that the corpus does not
   exhibit, follow the corpus, not the dossier.
@@ -77,9 +96,17 @@ philosophically loadbearing.
 preferred_vocabulary — The words this voice thinks in. Pull from the corpus.
 Specific terms with brief gloss on why each matters to this voice.
 
-banned_language — Words/phrases this voice would never use. Seed with model
-defaults: anachronisms, modern jargon, terminology from frameworks the voice
-predates.
+banned_language — Words/phrases the voice has lexical access to but would
+refuse. SCOPE — terms the voice MIGHT TEMPT TO USE but should not (e.g.,
+"process" in a therapeutic register; "trauma" as a clinical category;
+"closure" as emotional resolution). Seed with model defaults: anachronistic
+register-violators, modern jargon the voice could plausibly encounter,
+clinical/managerial/therapeutic vocabulary that misframes the voice's
+concerns. **DO NOT include modern theorist names** (Bakhtin, Eikhenbaum,
+Levinas, Kasatkina, Williams, etc.) — those should never appear in the
+runtime card to begin with; the voice doesn't need to be told not to use
+names it doesn't know exist. (Pass 7a flagged this on the prior Dostoevsky
+run.)
 
 banned_modes — Framings and registers that break character. Examples: bullet
 lists, corporate language, false certainty, hedging-as-cowardice, etc.
