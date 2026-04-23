@@ -49,9 +49,17 @@ Fix: systematic prompt-hardening across Pass 2-6 user prompts:
 2. Explicit don'ts: no `[stated]`/`[scholarly_consensus]`/`[inference]` provenance tags in field values; no `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar attribution names in field values unless the voice itself would have cited them; no reception-commentary or future-history phrasing; `banned_language` is for terms the voice itself might be tempted to use, not for modern theorist names.
 3. Voice-specific scoping: for period voices, scrub all post-knowledge-boundary scholar names + reception terms; for all voices, corpus metadata stays in curator-side files.
 
-**(B) Audience-aware translation_table generation in Pass 7c** — extend Pass 7c to also produce voice-specific term mappings.
+**(B) Audience-aware translation_table generation in Pass 5** — extend Pass 5 to also produce voice-specific term mappings.
 
-Why Pass 7c (not 7b): Pass 7c runs LAST in the Pass-7 family. Under FU#13's linear architecture, the order is `7-pre → 7-anach → 7a → [Pass 7a-FIX if needed] → 7b → 7c`. Pass 7c already has all card content + Pass 7a's flagged issues + Pass 7b's smoke-test outputs + any FU#13 fix-pass patches that landed. Translation_table is the POSITIVE complement to Pass 7c's existing negative constraints (`banned_language` + `banned_modes`).
+Why Pass 5 (not Pass 7c — reconsidered 2026-04-23): translation_table is runtime positive vocabulary, not a constraint summary. Pass 5 is the natural home — already produces audience-facing runtime fields (`bold_engagement_topics`, `default_questions`, `disagreement_protocol`, `unique_contribution`). Same Opus + thinking model. Same audience/conference context need.
+
+**Critical advantage: Pass 5 placement means full validator chain catches translation_table issues.** If translation_table were in Pass 7c (last in the Pass-7 family), it would be invisible to Pass 7-pre / Pass 7-anach / Pass 7a — five distinct failure modes (anachronistic native frames, register drift, wrong native frame choices, cross-field inconsistencies, voice-bias leakage) would slip through to runtime unvalidated. Pass 5 placement means:
+- Pass 7-anachronism (gpt-5.4) checks translation_table for temporal anachronisms
+- Pass 7a (gpt-5.4 cross-model) checks translation_table for register + constitutional consistency + distinctiveness
+- Pass 7b bias evaluator (Gemini → Sonnet fallback) checks translation_table for voice-bias leakage in framings
+- If any flag REVISION_NEEDED, Pass 7a-FIX (per FU#13) patches translation_table entries directly
+
+Cost of Pass 5 placement: if audience/conference changes mid-build, Pass 5 + downstream all re-run (vs. just Pass 7c). Acceptable — audience/conference rarely changes mid-build.
 
 New schema field on Pass 7c output (added to the assembled card):
 ```
@@ -73,9 +81,9 @@ Voice-type-specific term lists at minimum:
 - **Non-human** (Whanganui, Octopus): translate human-individualist concepts (selfhood, agency, narrative)
 - **Fictional** (Bob Marley, Scheherazade): corpus-derived idiom
 
-Pass 7c model upgrade likely needed: currently Sonnet 4.6 (no thinking, T=0.1, 8192 tokens). Translation table generation is judgment-bound — needs deliberation about which native frame best maps which modern term. Bump to Sonnet + thinking (or Opus + thinking) + larger max_tokens.
+Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade needed for FU#12-B.
 
-**Effort:** 6-9 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 2-3 hr for (B) Pass 7c extension (schema + prompt + audience/conference loading).
+**Effort:** 6-9 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 2-3 hr for (B) Pass 5 extension (schema + prompt + audience/conference loading).
 
 **Related:**
 - Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source.
