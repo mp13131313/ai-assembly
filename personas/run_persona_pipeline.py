@@ -1097,15 +1097,21 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
         knowledge_boundary=str(voice_context["knowledge_boundary"]),
     )
 
-    stamp(f"PASS 7a-FIX: linear patcher (Sonnet 4.6 + thinking, "
+    stamp(f"PASS 7a-FIX: linear patcher (Opus 4.7 + thinking, "
           f"{len(field_issues)} field issues across passes {affected})")
-    # 2026-04-23: max_tokens 16000 → 48000. With Sonnet + thinking, the
-    # thinking budget is deducted from max_tokens. For 20+ field issues
-    # (Phase 1 first run had 20), 16K wasn't enough — thinking alone can
-    # exceed it, leaving zero for output (raw text len: 0). 48K gives
-    # ~30K thinking + ~15K output for ~20-25 patches each ~700 tokens.
-    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=48000, temperature=1.0, thinking=True,
+    # 2026-04-23 (live test iteration):
+    # - Sonnet 4.6 + thinking + 16K: hit max, raw text 0
+    # - Sonnet 4.6 + thinking + 48K: hit max, raw text 3239 chars (~800 tokens)
+    # - Sonnet adaptive thinking deliberates extensively on 20+ issues, eating
+    #   most of max_tokens. Even 64K (Sonnet's standard ceiling) might not be
+    #   enough for 20+ issues.
+    # Switching model: Opus 4.7 + thinking @ 32K (the established pattern for
+    # Pass 2/3/4a/5/7b — works reliably). FU#13's expansion-risk concern was
+    # about writer re-invocation with critique; the patcher prompt's
+    # "trim don't expand" + "modify ONLY flagged fields" + "schema-preserving"
+    # guardrails counter the Opus expansion tendency.
+    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                    max_tokens=32000, temperature=1.0, thinking=True,
                     response_format_json=True)
 
     patches = r["json"].get("patches", []) or []
