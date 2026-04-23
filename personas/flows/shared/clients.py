@@ -57,7 +57,7 @@ def call_claude(
     user: str,
     model: str | None = None,
     max_tokens: int = 8192,
-    temperature: float = 0.2,
+    temperature: float | None = 0.2,
     thinking: bool = False,
     response_format_json: bool = False,
     slug: str | None = None,
@@ -80,10 +80,15 @@ def call_claude(
     kwargs: dict[str, Any] = {
         "model": model,
         "max_tokens": max_tokens,
-        "temperature": temperature,
         "system": system,
         "messages": [{"role": "user", "content": user}],
     }
+    # Opus 4.7 (and newer models) deprecated the `temperature` parameter.
+    # Passing it yields a 400 BadRequestError. Callers that need to omit
+    # temperature explicitly pass `temperature=None`. Backward-compat
+    # default of 0.2 preserved for older models.
+    if temperature is not None:
+        kwargs["temperature"] = temperature
     if thinking:
         # Anthropic recommends thinking.type="adaptive" over the deprecated
         # "enabled" mode. Adaptive does NOT take budget_tokens — the model

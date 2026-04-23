@@ -541,14 +541,14 @@ def _pass_1d():
     # Sonnet's output descriptions reproduced and got blocked). Opus 4.7
     # handles this material reliably. Modest cost delta; Pass 1d is a
     # small call (~8K output).
-    # Opus 4.7 deprecated `temperature`; omit it. Deterministic selection
-    # behavior comes from the narrow JSON schema + explicit selection rubric
-    # in the user prompt, not temp=0.0. thinking=False keeps latency down
-    # for a selection task that is judgment-light.
+    # Opus 4.7 deprecated `temperature` — pass None to omit from API call.
+    # Deterministic selection behavior comes from the narrow JSON schema +
+    # explicit selection rubric in the user prompt. thinking=False keeps
+    # latency modest for a selection task that is judgment-light.
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
                     user=user_prompt,
                     model="claude-opus-4-7", max_tokens=8192,
-                    thinking=False,
+                    temperature=None, thinking=False,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
     selected_text = apply_selections(pass1c["passages"], selections)
