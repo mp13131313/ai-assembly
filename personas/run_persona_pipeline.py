@@ -957,6 +957,24 @@ if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
         pass7a["result"]["overall"] = "REVISION_NEEDED"
         stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
+# 2026-04-23 (FU#3 inline): revision-loop mode policy.
+# Loop 1 = FULL cascade re-run (writer regenerates flagged passes from scratch
+#   with critique appended; downstream caches invalidated; cascade re-runs).
+#   Maximum coherence repair, expensive (~25-40 min wall, ~$5-10 per voice).
+# Loop 2 = SURGICAL patch (writer sees its prior output + critique + explicit
+#   "modify ONLY flagged fields, reproduce all others verbatim" instruction;
+#   only the flagged target pass(es) re-run; downstream stays cached).
+#   Cheap (~5-10 min wall, ~$1-2 per voice). Tradeoff: stale downstream
+#   context — Pass 4a/4b/5/6 don't see the patched Pass 2/3 fields. Defensible
+#   because if loop 1's full cascade didn't converge, the residual issues are
+#   likely field-local (e.g., swap an anachronistic term, tighten a knowledge-
+#   boundary list) and don't need cross-pass re-thinking.
+_TARGET_FNAME = {
+    "2": "pass2_identity_boundaries", "3": "pass3_intellectual_core",
+    "4a": "pass4a_voice", "4b": "pass4b_artifact",
+    "5": "pass5_engagement", "6": "pass6_corpus",
+}
+
 while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
     targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
     targets = [t for t in targets if t in PASS_RUNNERS]  # filter to known passes
@@ -965,7 +983,22 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         break
 
     revision_loops += 1
-    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS}: re-running passes {targets}")
+    SURGICAL_MODE = revision_loops >= 2  # Loop 2+ uses surgical patch (FU#3)
+    mode_label = "SURGICAL" if SURGICAL_MODE else "FULL"
+    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS} ({mode_label}): re-running passes {targets}")
+
+    # SURGICAL prerequisite: read prior pass outputs from cache files BEFORE
+    # they get invalidated, so we can prepend them to the writer's critique.
+    # Writer needs to see prior output to reproduce non-flagged fields verbatim.
+    prior_outputs: dict[str, dict] = {}
+    if SURGICAL_MODE:
+        for t in targets:
+            prior_path = _FNAME_TO_PATH[_TARGET_FNAME[t]]()
+            if prior_path.exists():
+                try:
+                    prior_outputs[t] = json.loads(prior_path.read_text())
+                except json.JSONDecodeError:
+                    pass  # fall back to no-prior-output critique
 
     # Build per-pass critiques from field_issues
     REVISION_CRITIQUES.clear()
@@ -988,11 +1021,38 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         for t in targets:
             REVISION_CRITIQUES[t] = general_block + REVISION_CRITIQUES.get(t, "")
 
-    # Compute union of all caches to invalidate (target + downstream)
+    # SURGICAL: prepend prior-output block + verbatim instruction to each target's critique
+    if SURGICAL_MODE:
+        for t in targets:
+            prior_fields_json = ""
+            if t in prior_outputs and prior_outputs[t].get("fields"):
+                prior_fields_json = json.dumps(prior_outputs[t]["fields"], ensure_ascii=False, indent=2)
+            surgical_preamble = (
+                f"=== SURGICAL PATCH MODE (revision loop {revision_loops}) ===\n"
+                f"Loop 1 already attempted full re-generation; the cross-model validator "
+                f"still flagged issues. To minimize cost + preserve coherence with downstream "
+                f"passes that are NOT being re-run this loop, address ONLY the specific "
+                f"field-level issues listed below.\n\n"
+                f"INSTRUCTIONS:\n"
+                f"- Modify ONLY the fields named in the FLAGGED ISSUES section.\n"
+                f"- Reproduce ALL other fields VERBATIM from your previous output (shown below).\n"
+                f"- Do not introduce changes to non-flagged fields, even cosmetic ones.\n"
+                f"- Output the COMPLETE pass schema (all fields), not just the patched ones.\n\n"
+            )
+            if prior_fields_json:
+                surgical_preamble += f"=== YOUR PREVIOUS OUTPUT ===\n```json\n{prior_fields_json}\n```\n\n"
+            surgical_preamble += "=== FLAGGED ISSUES ===\n"
+            REVISION_CRITIQUES[t] = surgical_preamble + REVISION_CRITIQUES[t]
+
+    # Compute caches to invalidate: surgical = targets only; full = downstream cascade
     to_invalidate = set()
-    for t in targets:
-        for fname in DOWNSTREAM_CHAIN.get(t, []):
-            to_invalidate.add(fname)
+    if SURGICAL_MODE:
+        for t in targets:
+            to_invalidate.add(_TARGET_FNAME[t])
+    else:
+        for t in targets:
+            for fname in DOWNSTREAM_CHAIN.get(t, []):
+                to_invalidate.add(fname)
 
     # Delete cache files
     for fname in to_invalidate:
@@ -1000,15 +1060,15 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         if cache_path.exists():
             cache_path.unlink()
 
-    # Also invalidate everything computed AFTER Pass 7a. DOWNSTREAM_CHAIN
-    # only covers through 7a (the loop's last step); but 7b, 7c, Derive,
-    # and the assembled card / provocateur_profile / evaluation_rubric
-    # all read the revised card fields and must be re-computed on any
-    # revision. Without this step, a prior run's stale downstream outputs
-    # would cache-hit on the next invocation even though the card has
-    # changed. (Captured as a known bug in commit 0452a23 during the
-    # Plato revision-loop verification.)
+    # Always invalidate Pass 7-pre + 7a (need to re-validate the revised card) and
+    # post-7a artifacts (re-derive from revised card). DOWNSTREAM_CHAIN covers 7-pre
+    # + 7a in full mode but not surgical; this list ensures both modes invalidate.
+    # Post-7a artifacts (7b/7c/Derive/assembled/provocateur/rubric) all read revised
+    # card fields and must be recomputed on any revision. (Captured as a known bug
+    # in commit 0452a23 during the Plato revision-loop verification.)
     post_7a_invalidation = [
+        _paths.pass_7_pre(SLUG, PROJECT_ROOT),
+        _paths.pass_7a(SLUG, PROJECT_ROOT),
         _paths.pass_7b(SLUG, PROJECT_ROOT),
         _paths.pass_7c(SLUG, PROJECT_ROOT),
         _paths.derive_raw(SLUG, PROJECT_ROOT),
@@ -1020,12 +1080,15 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         if cache_path.exists():
             cache_path.unlink()
 
-    # Re-run target passes + downstream + Pass 7a in sequence
-    # We re-execute pass functions in order. Each function reads outer-scope
-    # state (pass2["fields"], etc.) so we re-bind those globals as we go.
+    # Determine which passes to re-run.
+    # Full mode = cascade from earliest target onward (downstream consistency).
+    # Surgical mode = only the specific targets, in execution order (no cascade).
     pass_order = ["2", "3", "4a", "4b", "5", "6"]
-    earliest = min((pass_order.index(t) for t in targets), default=0)
-    chain_to_run = pass_order[earliest:]
+    if SURGICAL_MODE:
+        chain_to_run = [p for p in pass_order if p in targets]
+    else:
+        earliest = min((pass_order.index(t) for t in targets), default=0)
+        chain_to_run = pass_order[earliest:]
 
     _pass_path_fns = {
         "2": _paths.pass_2, "3": _paths.pass_3, "4a": _paths.pass_4a,
@@ -1035,20 +1098,32 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         runner_name, var_name = PASS_RUNNERS[pass_label]
         runner_fn = globals()[runner_name]
         cache_path = _pass_path_fns[pass_label](SLUG, PROJECT_ROOT)
-        result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops})", runner_fn)
+        result = call_or_cache(cache_path, f"Pass {pass_label} (revision loop {revision_loops}{' surgical' if SURGICAL_MODE else ''})", runner_fn)
         globals()[var_name] = result
-        # Update derived combined dicts so downstream reads see fresh fields
-        if pass_label == "2":
-            pass_2_summary = _ct_compress(result["fields"], "pass2")
-        elif pass_label == "3":
-            combined_2_3 = {**pass2["fields"], **result["fields"]}
-            pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
-        elif pass_label == "4a":
-            combined_2_3_4a = {**combined_2_3, **result["fields"]}
-            pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
-        elif pass_label == "4b":
-            combined_2_3_4 = {**combined_2_3_4a, **result["fields"]}
-            pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
+        # Full mode: also recompute CT summary as we go (downstream passes need it)
+        # Surgical mode: skip CT recompute (downstream passes don't re-run, no consumer)
+        if not SURGICAL_MODE:
+            if pass_label == "2":
+                pass_2_summary = _ct_compress(result["fields"], "pass2")
+            elif pass_label == "3":
+                combined_2_3 = {**pass2["fields"], **result["fields"]}
+                pass_2_3_summary = _ct_compress(combined_2_3, "pass2_3")
+            elif pass_label == "4a":
+                combined_2_3_4a = {**combined_2_3, **result["fields"]}
+                pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
+            elif pass_label == "4b":
+                combined_2_3_4 = {**combined_2_3_4a, **result["fields"]}
+                pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
+
+    # Refresh cumulative card dicts from current globals — needed for Pass 7-pre/7a
+    # which read full_card_for_verify = {**combined_2_3_4, **pass5["fields"]}.
+    # In full mode the per-iteration updates above already covered chain-internal
+    # passes; this re-bind ensures correctness when only later passes were in
+    # chain_to_run (e.g., targets=["6"] only). In surgical mode this is the only
+    # place cumulative dicts get refreshed for the patched targets.
+    combined_2_3 = {**pass2["fields"], **pass3["fields"]}
+    combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
+    combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
 
     # Re-run Pass 7-pre (verifies revised card)
     pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
