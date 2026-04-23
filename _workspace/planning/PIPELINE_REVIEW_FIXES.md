@@ -484,6 +484,20 @@ Pass 3 reads `interpretive_frames[]` where `frame_type ∈ {interpretive_method,
 
 **Severity:** LOW (cleanup; removes drift surface)
 **Status:** **APPLIED 2026-04-23** — `personas/schemas/pass_1_6.py` drops `URLEntry`/`URLs` models (preserved as comment for migration-audit reference). `merged_dossier.py` drops URLs import + field. `run_pass_1_6.py` drops `urls` from OUTPUT_KEYS. `run_pass_1_7.py` drops `urls` from layout + composition. `run_persona_pipeline.py` Pass 1c-extract now calls new `flows/shared/url_extract.extract_urls()` helper that derives URL inventory from `passages[].citation` + `works[]` fields via regex. `pass_1_6_merge.md` updated: `urls` removed from output spec; embedded-URL guidance added. `arch_03_preservation_audit.py` §6 keys updated. Commit `70dc9d0`.
+
+**Post-test follow-up needed (noted 2026-04-23 during Stage 2 launch):**
+
+Empirical check against arch-03 Stage 1 v4 Dostoevsky merge revealed **`extract_urls()` returns 0 URLs** from the new merge's `works.json` + `passages.json`, vs. 22 URLs in Phase L's LLM-emitted chunk. Root cause: two regex / schema assumptions don't hold against the actual arch-03 merge output shape:
+
+1. **URLs live in `passages[].citations[].url`** (nested list-of-dicts inside passage entries), but `extract_urls_from_passages()` only iterates top-level string fields of each passage. The `citations` field is a list, not a string, so the extractor skips it entirely.
+
+2. **`works[].note` references URLs by shorthand** ("rvb.ru/dostoevski/", "Project Gutenberg") without `https://` prefix, but the `_URL_RE` regex requires `https?://`.
+
+**Impact on arch-03 Stage 2 run (2026-04-23):** non-blocking for Dostoevsky specifically because `03_corpus/01_primary_texts.json` exists from Phase L fetch (22 URLs, pre-1-arch-07) → Pass 1c-fetch cache-hits → primary_block populated from Phase L content. But for Voices 2-12 (no prior fetch cache), this would break: Pass 1c-fetch receives 0 URLs → empty primary_texts → Pass 1d skipped → Pass 4a/6 fall back to `voice_basis="training-data"`.
+
+**Fix (deferred to post-arch-03-verdict cleanup):** extend `extract_urls_from_passages()` to recurse into `citations[].url` fields of each passage; optionally relax `_URL_RE` to catch bare-domain shorthand via a second pass that prepends `https://` to matches like `rvb.ru/...`. Alternative: require merge prompts to always emit `https://`-prefixed URLs in citation strings (prompt-level fix, less robust). Trivial code change, ~10 lines.
+
+Recommend running a tiny unit test against fixture chunk shapes (1-2 voices) before re-verifying. Blocking: no — for arch-03 PROCEED decision. Load-bearing: yes — before voices 2-12.
 **Scope:** Remove `urls` from `pass_1_6` schema output keys + update `run_pass_1_6.py` + update any consumer (Pass 1c-extract) to compute URL inventory from `passages[].citation` + `works[].url` directly
 **Effort:** ~1 hour
 
