@@ -402,18 +402,46 @@ and three-quarters of a Diary of a Writer entry."
 1. **FU#32** — positive-compensation prompt refinement. Pair every
    "strip X" in FU#12-A with "do Y" positive compensation. Most direct
    fix. ~2-3 hr.
-2. **FU#37** — declarative preserve-verbatim load-bearing-sentence
+2. **🔁 Pass 2 isolation re-run (~5 min)** — FAST SIGNAL before
+   committing to FU#37. Clear only Pass 2 cache, re-run Pass 2 alone
+   on Dostoevsky. If `character` field regains gordost'-style
+   incarnate self-description, FU#32 is working. Decide FU#37 scope
+   based on what still leaks.
+3. **FU#37** — declarative preserve-verbatim load-bearing-sentence
    markers. Primary backstop (prevents regression at source regardless
-   of mechanism). ~4-5 hr.
-3. **FU#1** — Layer 2 audit. Now measures: does FU#32 + FU#37 close
-   the voice-tissue gap? ~3-4 hr.
-4. **🔴 FU#2** — chunked Pass 7-pre verification. BLOCKING for richer
-   cards. ~4-6 hr.
-5. **FU#31** — voice-tissue validator. Only build if data after
-   FU#32/37 shows residual regression.
-6. **FU#33** — patcher scope extensions (mechanical lint + INCONSISTENT
+   of mechanism). ~4-5 hr. Build if Pass 2 isolation signal shows
+   FU#32 alone isn't sufficient.
+4. **🔁 Full Dostoevsky re-run from Pass 2 onward (~60-90 min wall)** —
+   produces the A/B baseline card for FU#1. Cache preservation:
+   KEEP `01_research/`, `02_merge/pass_1_*/` (merge chunks), `03_corpus/
+   01_primary_texts.json` + `03_primary_texts_reviewed.flag`, `03_corpus/
+   02_excerpt_selections.json` (Pass 1d), `04_generation/_snapshots/
+   pre_fix_pass/` (FU#5 archive). CLEAR `04_generation/*.json`,
+   `05_validation/*.json`, `06_derive/*.json`, `07_persona_card_
+   assembled.json`, `02_merge/_fix_log.json`.
+5. **FU#1** — Layer 2 audit. Now measures: does FU#32 + FU#37 close
+   the voice-tissue gap on the fresh Dostoevsky card? ~3-4 hr.
+6. **🔴 FU#2** — chunked Pass 7-pre verification. BLOCKING for richer
+   cards (Sonnet 4.6 hard 128K output ceiling). ~4-6 hr.
+7. **FU#31** — voice-tissue validator. Only build if post-FU#32/37
+   audit shows residual voice-tissue regression.
+8. **FU#33** — patcher scope extensions (mechanical lint + INCONSISTENT
    flags + transliteration + bracket residue). Orthogonal to voice-
    tissue work.
+
+**Why Dostoevsky for the test (not Plato):** we're measuring
+improvement on the SPECIFIC regression observed on Dostoevsky. Same
+voice, same chunks, different prompts = clean A/B. Plato would
+introduce too many variables (different voice-type patterns, different
+scholarly context density, different corpus). Use Dostoevsky as the
+architectural test-bed; ship Plato only after the architecture is
+proven.
+
+**Staged vs combined FU#32/37 building** — the sequence above is
+STAGED (FU#32 alone → measure → FU#37 only if needed). Cleaner for
+diagnosing what did the work. Combined alternative (build both,
+one re-run) is faster but muddier signal. Default to staged;
+operator may override if wall-time pressure.
 
 **Verification experiment (optional, 5 min)** to confirm prompt-
 version (not critique) is the variable: regenerate Pass 2 with the
