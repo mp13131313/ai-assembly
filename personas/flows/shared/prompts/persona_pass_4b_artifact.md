@@ -42,6 +42,16 @@ BLOCK 2 — GUARDRAILS:
   validation flagged exactly these 6 fields on the Dostoevsky card for
   "a critical flaw in a system prompt"; the automated register scanner
   missed all 6. Do not trust the scanner alone — read aloud.)
+- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+  Same discipline as Pass 2/3/4a: no provenance brackets
+  `[stated]/[scholarly_consensus]/[inference]` in field values; no
+  `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar
+  attribution names that the voice would not have known/cited; no
+  reception commentary or future-history phrasing. The merge dossier's
+  `analytical_context_voice` informs your synthesis but does NOT become
+  field content. Voice fields read as in-voice instruction, never as
+  scholarly apparatus.
+
 - medium: emerges from what the figure actually produced. But if the figure's
   primary medium is oral (dictation, song, speech), bridge to a written format
   that preserves the voice's character. Ask: what written artifact most
