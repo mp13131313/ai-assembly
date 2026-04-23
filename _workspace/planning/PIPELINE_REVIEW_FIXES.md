@@ -1704,6 +1704,56 @@ The arch-03 enrichment (1-arch-04 Gemini preservation + 1-arch-06 interpretive_f
 
 **Estimated effort:** ~4-6 hours.
 
+### LLM-config quality-tuning assessment (2026-04-23)
+
+End-of-session reasoning pass on whether the pipeline LLM choices are nailed, after the round of upgrades committed this session (Pass 1d/4b/6/Derive/CT compress + Pass 7-anachronism/7a gpt-5.4 ladder + Pass 7-pre 128K bump).
+
+**Verdict: Mostly nailed it. Three known unfinished items + one live empirical unknown (resolved during this session — see item 4).**
+
+**Where the configuration is genuinely well-resolved**
+
+✓ **Big-picture allocation logic is sound:** Opus + thinking for synthesis-bound passes, Sonnet + thinking for compression-bound passes, cross-family + reasoning for validation, Python for mechanical steps. The pattern matches the underlying task taxonomy cleanly.
+
+✓ **Highest-leverage passes have the right tools:** Pass 1.1-1.6 merge (most reasoning-bound), Pass 1.7 coherence, Pass 2/3/4a — all on Opus + thinking. Pass 7b smoke chains (creative scenario generation) on Opus + thinking. Pass 7-anachronism + 7a on cross-family reasoning model.
+
+✓ **Recent upgrades address real gaps:** Pass 4b (register-drift hypothesis), Pass 6 (cited_passages quality matters at runtime), Pass 1d (judgment task without thinking budget), Derive (multiplier across runtime), CT compress (heavier compression than the textbook framing).
+
+**Where it's NOT fully nailed**
+
+1. **Pass 7-pre is a ceiling-bump, not a fix (FU#2 outstanding)**
+We've gone 24K → 48K → 96K → 128K across the arch-03 development cycle. As voices get richer (Plato, Cleopatra, etc.) we'll hit it again. The architectural fix — chunk per-citation verification into N parallel Sonnet calls — is documented as FU#2 but not built. This is technical debt the model choice can't paper over.
+
+2. **Pass 1a-DR §1-§5 still on manual Opus 4.6**
+Phase L locked policy was "4.6 fine for §1-§5, 4.7 needed for §6." But §6's evidence (4.7 picks up strict-instruction-following better) should generalize at least somewhat to §1-§5. Worth migrating to 4.7 for next voice (Plato), but currently not done. Operator-controlled (manual claude.ai sessions), so not a code change — just a policy update for the operator's workflow.
+
+3. **Merge chunk max_tokens haven't been audited**
+Each of Pass 1.1-1.6 has its own max_tokens setting in chunk_runner.py. With arch-03 enrichment + new contested evidence_tag enabling more InterpretiveFrame entries, Pass 1.2 specifically had a VALIDATION FAIL → retry pattern in the first run (recovered after schema fix, but symptomatic). I haven't checked whether per-chunk max_tokens are appropriately sized for the new content density. Could surface as future failures.
+
+4. **Live empirical unknown — gpt-5.4 — RESOLVED 2026-04-23 11:55 + 11:57**
+Was: Pass 7-anachronism started at 11:52:17 with gpt-5.4 + reasoning_effort=high; no prior evidence the model ID was correct, that reasoning_effort=high was the right param shape, or that it was available on this org tier.
+**Outcome:** both Pass 7-anachronism (3 min wall time) AND Pass 7a (2.7 min) returned cleanly with `validator: openai:gpt-5.4`. No fallback needed. **Ladder fully validated end-to-end on the live arch-03 Dostoevsky payload.** Both verdicts were REVISION_NEEDED (5 anachronism flags + cross-model rubric flags), demonstrating gpt-5.4 high is actively doing the strict cross-model evaluation the design called for. **Item resolved; ladder is production-ready.**
+
+5. **Empirical validation of all quality upgrades is pending**
+The reasoning behind upgrading Pass 4b/6/1d/Derive/CT to Opus + thinking (or Sonnet + thinking) is well-grounded but unproven in this domain. Plato will be the first voice produced with the full upgrade stack. Possible we discover:
+- Pass 4b + thinking actually doesn't resolve register-drift (in which case the issue is prompt-hardening, not model)
+- CT + thinking on Sonnet over-deliberates and produces worse summaries than no-thinking Sonnet
+- Pass 6 + thinking takes substantially longer without proportional quality gain
+
+These are reasonable design bets, not certainties.
+
+6. **One borderline judgment that could go either way**
+Pass 5 Engagement: kept Opus + thinking under quality lean (downstream-feeds-7b argument). Honest assessment: only 4 fields, leverage chain is real but not as clear-cut as Derive's. Could test Sonnet + thinking on a low-stakes voice (Plato is high-stakes, so not Plato — maybe Cleopatra or Ada Lovelace) and compare.
+
+**Honest summary**
+
+Configuration: well-reasoned, tightly aligned with task taxonomy, addresses prior pain points (register-drift, content-filter, output-ceiling, citation-richness, Provocateur-quality multiplier).
+
+Three deferred items (FU#2 + DR §1-§5 policy + merge chunk audit) are real but non-blocking.
+
+Empirical validation = next voice (Plato). Until then, this is theory + reasoning, not proof.
+
+Not "perfectly nailed forever" — but as good as theory + this session's evidence supports. Plato's run is the first real test.
+
 ---
 
 **Panel composition confirmed (12 voices):** Scheherazade (fictional), Cleopatra (human, hostile_sources=true), Whanganui (non_human, system), Audrey Tang (human), Ibn Battuta (human), Fyodor Dostoevsky (human — Phase L validated), Hannah Arendt (human), Plato (human — Phase N first voice), Ada Lovelace (human), Peter Thiel (human, legal-risk-flagged), Bob Marley (human, corpus_constraint=lyrics_patterns_only), Octopus (non_human, organism).
