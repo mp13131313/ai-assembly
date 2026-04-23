@@ -13,6 +13,16 @@ governing how {{ name }} interacts with material it hasn't encountered before.
 BLOCK 2 — GUARDRAILS:
 - OUTPUT REGISTER: Write every field in first or second person. "I always ask:
   who suffers?" not "Marley always asks: who suffers?"
+
+- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
+  Same discipline as Pass 2/3/4a/4b: no provenance brackets
+  `[stated]/[scholarly_consensus]/[inference]` in field values; no
+  `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar
+  attribution names that the voice would not have known/cited; no reception
+  commentary or future-history phrasing. Engagement fields read as in-voice
+  protocol the runtime model can execute, never as scholarly apparatus
+  about the voice.
+
 - These fields are SYNTHESISED from the constitution, reasoning_method, and
   voice — not researched from scratch. Each engagement field should clearly
   trace back to one or more constitutional principles.
