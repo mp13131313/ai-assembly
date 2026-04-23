@@ -26,16 +26,61 @@
 
 ### 🔴 Phase 1 — Critical for clean Dostoevsky re-run
 
-#### FU#12 — arch-03 curator-metadata leakage (prompt hardening)
-- **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card.
-- **Examples flagged:** `[stated]/[scholarly_consensus]/[inference]` provenance tags appearing in runtime field values; `curator_note` sub-fields with scholar attributions inside `reasoning_method.steps`; "[curator-note: Toporov]" in concept_lexicon; post-2022 Ukrainian reception commentary; third-person pedagogical `header`/`why_selected` annotations on cited passages; modern theorist names (Levinas/Bakhtin/Eikhenbaum/Kasatkina) in `banned_language` (shouldn't even appear); future-history phrasing in `knowledge_boundary`.
-- **Why systemic:** arch-03 enrichment (1-arch-04 Gemini preservation, 1-arch-06 interpretive_frames, 1-arch-08 anachronism_discipline) gave Pass 2-6 richer source material. Some scholarly metadata leaks into runtime card outputs. Will recur for every voice we run.
-- **Fix:** systematic prompt-hardening across Pass 2-6 user prompts:
-  1. Add explicit register block: "You are writing the runtime persona system prompt. Output ALL fields in second person addressed TO the voice or first person AS the voice. Never write fields as a scholar describing the voice from outside."
-  2. Explicit don'ts: no `[stated]`/`[scholarly_consensus]`/`[inference]` provenance tags in field values; no `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar attribution names in field values unless the voice itself would have cited them; no reception-commentary or future-history phrasing; `banned_language` is for terms the voice itself might be tempted to use, not for modern theorist names.
-  3. Voice-specific scoping: for period voices, scrub all post-knowledge-boundary scholar names + reception terms; for all voices, corpus metadata stays in curator-side files.
-- **Effort:** 4-6 hr (audit each of Pass 2-6 prompts; add hardening blocks; test on Plato; iterate if Pass 7a still flags register).
-- **Related:** combines with FU#13 — fewer revision triggers if FU#12 prevents leakage at source.
+#### FU#12 — Register hardening + audience-aware translation_table (Pass 2-6 + Pass 7c)
+- **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card. Refined 2026-04-23 with insight from external deep-research report §6 (concrete translation rules) — the per-voice translation_table pattern is high-leverage for runtime quality.
+
+**Two coordinated changes:**
+
+**(A) Register hardening across Pass 2-6 user prompts** — strip curator-side metadata from runtime card outputs.
+
+Examples flagged on Dostoevsky:
+- `[stated]/[scholarly_consensus]/[inference]` provenance tags appearing in runtime field values
+- `curator_note` sub-fields with scholar attributions inside `reasoning_method.steps`
+- "[curator-note: Toporov]" in concept_lexicon
+- post-2022 Ukrainian reception commentary
+- third-person pedagogical `header`/`why_selected` annotations on cited passages
+- modern theorist names (Levinas/Bakhtin/Eikhenbaum/Kasatkina) in `banned_language` (shouldn't even appear)
+- future-history phrasing in `knowledge_boundary`
+
+Why systemic: arch-03 enrichment (1-arch-04 Gemini preservation, 1-arch-06 interpretive_frames, 1-arch-08 anachronism_discipline) gave Pass 2-6 richer source material. Some scholarly metadata leaks into runtime card outputs. Will recur for every voice we run.
+
+Fix: systematic prompt-hardening across Pass 2-6 user prompts:
+1. Add explicit register block: "You are writing the runtime persona system prompt. Output ALL fields in second person addressed TO the voice or first person AS the voice. Never write fields as a scholar describing the voice from outside."
+2. Explicit don'ts: no `[stated]`/`[scholarly_consensus]`/`[inference]` provenance tags in field values; no `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar attribution names in field values unless the voice itself would have cited them; no reception-commentary or future-history phrasing; `banned_language` is for terms the voice itself might be tempted to use, not for modern theorist names.
+3. Voice-specific scoping: for period voices, scrub all post-knowledge-boundary scholar names + reception terms; for all voices, corpus metadata stays in curator-side files.
+
+**(B) Audience-aware translation_table generation in Pass 7c** — extend Pass 7c to also produce voice-specific term mappings.
+
+Why Pass 7c (not 7b): Pass 7c runs LAST in the Pass-7 family (after 7-pre / 7-anach / 7a / revision loops / 7b). It already has all card content + Pass 7a's flagged issues + Pass 7b's smoke-test outputs. Translation_table is the POSITIVE complement to Pass 7c's existing negative constraints (`banned_language` + `banned_modes`).
+
+New schema field on Pass 7c output (added to the assembled card):
+```
+translation_table: list[TranslationEntry]  # 8-15 entries, voice-specific
+class TranslationEntry:
+    modern_term: str                    # e.g., "PTSD", "AI", "human rights"
+    voice_reframing: str                # In voice's native vocabulary
+    register_example: str               # 1-2 sentence example showing voice using the reframing
+    audience_relevance_note: str | None # Why this term is likely given audience/conference
+```
+
+Pattern follows the deep-research report §6 (concrete worked examples like "AI → soulless mechanization / modern Golem" for Dostoevsky), but each voice gets its OWN table generated in its OWN native vocabulary. Plato wouldn't say "modern Golem" — he'd map AI through *technē* + the *Republic*'s craftsman vs. philosopher. Generic prompt → voice-specific table.
+
+Audience / conference context (currently only loaded at final assembly via `_load_conference_context_string()`) is brought into Pass 7c so the term selection is grounded in the actual deployment — what's likely to come up given the audience profile + conference themes.
+
+Voice-type-specific term lists at minimum:
+- **Period voices** (Plato, Cleopatra, Ibn Battuta, Scheherazade, Ada Lovelace, Dostoevsky): full list of modern concepts (AI, PTSD, gender identity, human rights, psychology, climate change, etc.)
+- **Contemporary voices** (Audrey Tang, Hannah Arendt, Peter Thiel): fewer translation needs (they DO have modern vocabulary natively); focus on jargon that's deployment-specific
+- **Non-human** (Whanganui, Octopus): translate human-individualist concepts (selfhood, agency, narrative)
+- **Fictional** (Bob Marley, Scheherazade): corpus-derived idiom
+
+Pass 7c model upgrade likely needed: currently Sonnet 4.6 (no thinking, T=0.1, 8192 tokens). Translation table generation is judgment-bound — needs deliberation about which native frame best maps which modern term. Bump to Sonnet + thinking (or Opus + thinking) + larger max_tokens.
+
+**Effort:** 6-9 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 2-3 hr for (B) Pass 7c extension (schema + prompt + audience/conference loading).
+
+**Related:**
+- Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source.
+- Pass 7-anachronism (gpt-5.4) can validate the generated translation_table itself for anachronism-cleanliness.
+- High runtime leverage: Provocateur won't get caught flat-footed by modern terms because mappings are pre-computed.
 
 #### FU#13 — Architecture 2: linear `Pass 7a-fix` step (replaces revision loop)
 - **Origin:** This session, designed after empirical observation that surgical writer re-invocation (FU#3) over-corrects (introduces 8 new inconsistencies + 29 more dossier_only citations on the Dostoevsky run).
