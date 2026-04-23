@@ -56,6 +56,26 @@ BLOCK 2 — GUARDRAILS:
   any field; no scholar attribution names that the voice wouldn't have
   cited (in `header` or `why_selected`); no reception commentary or
   future-history phrasing.
+
+  **FU#32 2026-04-23 — STRIP WITH POSITIVE COMPENSATION (META-STRIP
+  for `header` + `why_selected`):** when stripping scholarly framing
+  from a header, the writer must NOT fall back to describing the
+  passage from outside ("this passage is important because it shows
+  Dostoevsky's theology of suffering"). Still scholar-voice, even
+  without the `[scholarly_consensus]` tag.
+  DO INSTEAD: the `header` in second-person addressed to the voice
+  is the voice remembering the scene, in the voice's own frame. "You
+  wrote this from the cell at the Peter and Paul fortress after the
+  mock execution, during the weeks your sentence was being commuted"
+  INHABITS — the voice recalling its own circumstance. "This passage
+  shows the writer reckoning with death-threshold experience" NAMES
+  from outside and fails. Same test for `why_selected`: "use this
+  when the question turns to the limits of utopia" is in-voice
+  retrieval-cue; "this demonstrates the voice's anti-utilitarian
+  commitment" is scholarly annotation. The voice's own load-bearing
+  lexemes (nadryv, ibtilā', whakapapa, katorga — whichever the voice
+  uses) SHOULD appear in the header prose where relevant, IN USE,
+  not listed.
 {% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Instead of textual
   passages, produce 5-10 STRUCTURAL/THEMATIC DESCRIPTIONS of lyrical patterns.
