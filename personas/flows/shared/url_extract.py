@@ -21,12 +21,53 @@ _URL_RE = re.compile(r"https?://[^\s\])}>,\"']+", re.IGNORECASE)
 # Strip common trailing punctuation that isn't part of the URL itself.
 _TRAILING_STRIP = ".,;:!?)]}'\"\u2019\u201d"
 
+# 2026-04-23: canonicalize archive landing-page URLs to raw-text URLs.
+# Pass 1.6 merge frequently emits human-friendly catalogue URLs (cite-style)
+# rather than raw-text download URLs. Fetching the catalogue returns ~5KB of
+# HTML metadata instead of the actual literary content; downstream Pass 1d
+# excerpt selection then has nothing to select from. Canonicalize at extract
+# time so the works/passages chunks retain the cite-friendly URL while the
+# fetcher gets the raw text. Affects all voices with public-domain corpora
+# (Plato, Cleopatra, Ibn Battuta, Scheherazade, Ada Lovelace, Dostoevsky).
+_GUTENBERG_LANDING_RE = re.compile(
+    r"^(https?://)(?:www\.)?gutenberg\.org/ebooks/(\d+)(?:[/?#].*)?$",
+    re.IGNORECASE,
+)
+_ARCHIVE_LANDING_RE = re.compile(
+    r"^(https?://)(?:www\.)?archive\.org/details/([^/?#]+)/?(?:[?#].*)?$",
+    re.IGNORECASE,
+)
+
+
+def _canonicalize_to_text_url(url: str) -> str:
+    """Rewrite known landing-page URLs to their raw-text equivalents.
+
+    Gutenberg: https://www.gutenberg.org/ebooks/<id>
+            -> https://www.gutenberg.org/files/<id>/<id>-0.txt
+    Archive.org: https://archive.org/details/<id>
+              -> https://archive.org/download/<id>/<id>_djvu.txt
+
+    Returns the original URL unchanged if no pattern matches. Best-effort:
+    not every archive.org item has a `_djvu.txt` derivative (some have
+    `_text.txt`, some have neither — a fetch returning HTML will surface in
+    the Pass 1c REVIEW GATE artifact for operator inspection).
+    """
+    m = _GUTENBERG_LANDING_RE.match(url)
+    if m:
+        ebook_id = m.group(2)
+        return f"https://www.gutenberg.org/files/{ebook_id}/{ebook_id}-0.txt"
+    m = _ARCHIVE_LANDING_RE.match(url)
+    if m:
+        item_id = m.group(2)
+        return f"https://archive.org/download/{item_id}/{item_id}_djvu.txt"
+    return url
+
 
 def _clean(url: str) -> str:
-    """Strip trailing punctuation noise that regex captured."""
+    """Strip trailing punctuation, then canonicalize landing-page URLs."""
     while url and url[-1] in _TRAILING_STRIP:
         url = url[:-1]
-    return url
+    return _canonicalize_to_text_url(url)
 
 
 def _extract_from_text(text: str) -> list[str]:
