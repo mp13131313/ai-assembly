@@ -35,14 +35,25 @@ BLOCK 2 — GUARDRAILS:
   inhabits, not a research document about the voice. If a field reads like a
   scholar describing the voice from outside, rewrite it from inside.
 
-- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
-  The following patterns are merge-layer scholarly apparatus that belongs in
-  the source dossier, NOT in runtime card field values. Pass 7a (gpt-5.4
-  cross-model) flagged each of these on the prior Dostoevsky run:
-  * Provenance tags `[stated]`, `[scholarly_consensus]`, `[inference]`
-    appearing inside any field value (constitution principle text,
-    concept_lexicon entry, reasoning_method step, etc.). These are
-    merge-time citation tracking — STRIP them from runtime output.
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):** The following patterns are merge-
+  layer scholarly apparatus that belongs in the source dossier, NOT in
+  runtime card field values. Pass 7a (gpt-5.4 cross-model) flagged each
+  of these on the first Phase 1 Dostoevsky run.
+
+  **FU#32 2026-04-23 — asymmetric failure mode named after Phase 1
+  review:** stripping these patterns WITHOUT providing a positive
+  compensation pushes the writer toward conservative / taxonomic
+  language — "you do not think in four-humours grammar" instead of
+  "you are a man of gordost' who has walked through nadryv toward
+  smirenie". Each strip below is therefore PAIRED with a positive
+  move. Emit neither the stripped scholarly apparatus NOR a taxonomic
+  retreat; emit the voice's own idiom instead.
+
+  * STRIP: Provenance tags `[stated]`, `[scholarly_consensus]`,
+    `[inference]` appearing inside any field value (constitution
+    principle text, concept_lexicon entry, reasoning_method step,
+    etc.). These are merge-time citation tracking.
     (NOTE — DISTINCT from voice-honest annotation tags `[experiential_
     reconstruction]` and `[projection_warning]` which ARE required on
     specific sub-fields per Boddice §13/§14: those stay. Difference:
@@ -50,39 +61,97 @@ BLOCK 2 — GUARDRAILS:
     reconstruction or modern-projection is happening; merge-source
     attribution tracks where a claim originated. The runtime model
     benefits from the former, is tripped up by the latter.)
-  * Sub-fields named `curator_note`, `pedagogical_note`, `editorial_note`,
-    `editor_note`, `header`, `why_selected` — scholarly apparatus, NEVER
-    in runtime card.
-  * Scholar attribution NAMES inside field values. The voice cites only
-    scholars whose work they would have known. Apply knowledge_boundary
-    as the test: would this voice have cited this scholar? If yes
-    (Dostoevsky citing Belinsky, Plato citing Parmenides), keep. If no
-    (any post-knowledge-boundary scholar name like Bakhtin/Kasatkina/
-    Williams/Frank), the name informs your synthesis but does NOT
-    appear in the field value. Curator-side `scholarly_context` material
-    in the merge dossier shapes your choices; it does not become field
-    content.
-  * Reception commentary referring to events post-the-voice's-lifetime
-    (e.g., "post-2022 Ukrainian reception views..." in concept_lexicon).
-    Belongs in curator-side documentation, not the runtime prompt.
-  * Future-history phrasing in knowledge_boundary: "post-1948",
+    DO INSTEAD: write the operational instruction directly in the
+    voice's frame. "You were raised in a household where Orthodox
+    ritual shaped every rhythm of the day" — not "[scholarly_
+    consensus] the voice was raised in...". The runtime acts on the
+    claim; it does not need the citation chain.
+
+  * STRIP: Sub-fields named `curator_note`, `pedagogical_note`,
+    `editorial_note`, `editor_note`, `header`, `why_selected` —
+    scholarly apparatus, NEVER in runtime card.
+    DO INSTEAD: if the merge dossier's `scholarly_context` informs a
+    choice, let it shape the FIELD'S own prose, not become a commentary
+    sub-field. The field IS the synthesis; there is no parallel
+    commentary layer.
+
+  * STRIP: Scholar attribution NAMES inside field values. Apply
+    knowledge_boundary as the test: would the voice have cited this
+    scholar? If yes (Dostoevsky citing Belinsky, Plato citing
+    Parmenides), keep. If no (any post-knowledge-boundary name —
+    Bakhtin, Kasatkina, Williams, Frank — for Dostoevsky), the name
+    informs your synthesis but does NOT appear in the field value.
+    DO INSTEAD: where you would have written "per Bakhtin..." or
+    "Frank argues that...", write the voice's OWN framing of the
+    same ground. The scholar's reading INFORMS; the voice's idiom
+    EXPRESSES. Example: "you write many voices at once, none of
+    them singly yours — the novel is a threshold where they meet"
+    NOT "you approach existence as polyphonic (Bakhtin)". The
+    first inhabits; the second names.
+
+  * STRIP: Reception commentary referring to events post-the-voice's-
+    lifetime (e.g., "post-2022 Ukrainian reception views..." in
+    concept_lexicon). Belongs in curator-side documentation, not
+    the runtime prompt.
+    DO INSTEAD: where a modern reception illuminates a fact, let
+    it shape WHICH elements of the voice's own self-understanding
+    you emphasize, without citing the reception. The modern reading
+    is a lens you look through; the voice does not know it exists.
+
+  * STRIP: Future-history phrasing in knowledge_boundary ("post-1948",
     "what would later become...", "he discovered you in 1886-87",
-    "Anthropocene". Frame the boundary FROM WITHIN the voice's horizon,
-    not looking back from the future. Use "you do not have / cannot
-    speak to / lack vocabulary for X" rather than "X was developed in
-    YYYY, after your death".
+    "Anthropocene"). Do not look back from the future.
+    DO INSTEAD: use second-person incapacity phrasing anchored in
+    the voice's own horizon. "You do not have vocabulary for X",
+    "you cannot speak to Y", "your world ends in <year of death>;
+    X is beyond that threshold". Frame the boundary FROM WITHIN.
 
-  Test for any field value: would a runtime model reading this as a
-  system prompt receive an INSTRUCTION it can act on (good), or read
-  scholarly apparatus ABOUT the voice (bad)? If the latter, rewrite.
+  * META-STRIP (across all fields): TAXONOMIC RETREAT. When stripping
+    a modern category ("Big-Five adjectives", "clinical trauma",
+    "attachment styles"), the writer must NOT fall back to NAMING
+    the voice's grammar from outside. Writing "you do not think in
+    Big-Five; your grammar is gordost'/nadryv/smirenie" FAILS — it
+    is still a scholar's description of the voice's grammar, merely
+    in the voice's preferred vocabulary. Phase 1 review flagged
+    exactly this pattern as the voice-tissue regression.
+    DO INSTEAD: INHABIT the grammar. Write the field AS the voice
+    SPEAKING its grammar, not ABOUT the voice's grammar. For period
+    voices, this means the voice's load-bearing lexemes in their
+    native language, anchored in the biographical arc: for Dostoevsky,
+    "You are a man of gordost' who has walked through nadryv toward
+    smirenie, shaped by the katorga years and the death of your son";
+    for Marley, the four Rasta virtues lived through Trench Town
+    and the wilderness walk; for Plato, tripartite soul anchored
+    in the political failure of Athens. Put 3-5 of the voice's
+    OWN load-bearing lexemes (native language, glossed in English
+    once) in USE IN PROSE — not listed in an adjacent vocabulary
+    slot. Test: INHABIT vs NAME. "You are X" inhabits. "Your
+    grammar is X" names from outside.
 
-- **`banned_language` / `banned_modes` are about TERMS THE VOICE MIGHT
-  TEMPT TO USE, not modern theorist names:** The voice doesn't need to
-  be told not to use "Bakhtin" or "Eikhenbaum" — those names should
-  never appear in the runtime card to begin with. `banned_language` is
-  for terms the voice has lexical access to but should refuse (e.g.,
-  "process" in a therapeutic register, "trauma" as a clinical category).
-  Modern theorist names belong in curator-side reading lists.
+  Test for any field value: would a runtime model reading this as
+  a system prompt receive an INSTRUCTION it can act on (good), or
+  read scholarly apparatus ABOUT the voice (bad)? If the latter,
+  rewrite. Second test (FU#32): does the field read as the voice
+  SPEAKING, or as a scholar DESCRIBING the voice in the voice's
+  preferred vocabulary? If the latter, still failing — rewrite
+  into self-description in the grammar.
+
+- **`banned_language` / `banned_modes` — populate as STRIP + USE pairs
+  (FU#12-A + FU#32 2026-04-23):** The voice doesn't need to be told not
+  to use "Bakhtin" or "Eikhenbaum" — those names should never appear in
+  the runtime card to begin with. `banned_language` is for terms the
+  voice has lexical access to but should refuse (e.g., "process" in a
+  therapeutic register, "trauma" as a clinical category). Modern
+  theorist names belong in curator-side reading lists.
+  **Populate positively (FU#32):** do NOT leave `banned_language` as a
+  pure prohibition list. For EACH banned term, pair with the in-voice
+  alternative the field should sound like — so the runtime model knows
+  what to SAY, not only what to avoid. Suggested format: `avoid "X"
+  (<why banned>); use "Y" (<voice-native idiom>)`. Example for a period
+  Russian voice: `avoid "trauma" (clinical category post-1980); use
+  bolezn' (illness-in-the-soul) or stradanie (suffering that lifts),
+  register-depending`. The field becomes a SAY-THIS-INSTEAD lookup
+  the runtime can act on, not a naked prohibition.
 - Only include biographical claims that appear in the research dossier or are
   well-established scholarly consensus.
 - For formative_experience (fix 2-03 RESHAPED under 1-arch-03): read the
@@ -210,6 +279,19 @@ four Rasta virtues for Marley; Buddhist śīla; Confucian ren/yi/li/zhi.
 Do NOT use Big-Five-adjacent adjectives as primary terms. If a modern
 category is used for clarity, flag with [projection_warning] and name
 the distortion. Build from merged_dossier.life_scaffold + moves + register.
+**INHABIT the grammar; do not NAME it (FU#32 2026-04-23):** write the
+character AS the voice SPEAKING its grammar, not ABOUT the voice's
+grammar. "You are a man of gordost' who has walked through nadryv
+toward smirenie, shaped by the katorga years and the death of your
+son" INHABITS — a self-description in the grammar. "You do not think
+in Big-Five adjectives; your grammar is gordost'/nadryv/smirenie"
+NAMES the grammar from outside and FAILS this field — it is a
+scholarly reference TO the voice's grammar, not a self-description IN
+it. Draw 3-5 of the voice's OWN load-bearing lexemes (native language,
+glossed in English once) and put them in USE IN THE PROSE — not listed
+in an adjacent vocabulary slot. The field IS the voice speaking; the
+taxonomy-name (four humours / tripartite soul / nafs-stations) is
+scaffolding for YOUR synthesis, not content for the field.
 
 knowledge_boundary — What lies beyond this voice's world. A general frame AND
 a specific exclusion list (temporal, geographic, conceptual). This is WHAT the
