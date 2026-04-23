@@ -1704,6 +1704,28 @@ The arch-03 enrichment (1-arch-04 Gemini preservation + 1-arch-06 interpretive_f
 
 **Estimated effort:** ~4-6 hours.
 
+### FU#3 — Surgical-patch revision loop on loop 2+
+
+**Status:** APPLIED 2026-04-23 (commit pending).
+
+**Problem:** Revision loop currently re-runs ALL flagged passes + downstream cascade on every iteration. For 5 anachronism flags + a few cross-model rubric issues, that's ~25-40 min wall + ~$5-10 per voice — wildly disproportionate to what's usually field-local fixes (swap an anachronistic term, tighten a knowledge-boundary list, replace a Kantian-sounding phrasing with the voice's native grammar).
+
+**Fix:** Loop-2-onwards uses surgical patch:
+- Reads each target pass's prior output from cache before invalidating
+- Builds critique with prior output + explicit "modify ONLY flagged fields, reproduce all others verbatim" instruction
+- Invalidates only the flagged target pass's own cache (no downstream cascade invalidation)
+- Re-runs only the flagged passes (not downstream cascade)
+- Skips CT recompute (downstream passes don't re-run, no consumer)
+- Refreshes cumulative card dicts for Pass 7-pre/7a verification reads
+
+**Loop 1 stays as full re-run** because: holistic critique-driven regeneration may legitimately resolve issues a surgical patch can't (cross-pass coherence problems). If loop 1's full cascade didn't converge, the residual issues are likely field-local — surgical mode is the right escalation.
+
+**Tradeoff accepted:** in surgical mode, downstream passes don't see the patched fields. Pass 4a/4b/5/6 keep their loop-1-revised outputs even if Pass 2's knowledge_boundary changes in the surgical patch. Defensible because most loop-2 residual issues are scoped to the field being patched.
+
+**Cost reduction:** ~70-80% on loop-2-and-beyond iterations. Per-voice savings: ~$3-7 when revision loops trigger (most voices will hit at least 1 loop given gpt-5.4's strict cross-model evaluation).
+
+**Test coverage gap:** no automated test for revision-loop branching. Manual verification on next voice with REVISION_NEEDED loop-2 trigger.
+
 ### LLM-config quality-tuning assessment (2026-04-23)
 
 End-of-session reasoning pass on whether the pipeline LLM choices are nailed, after the round of upgrades committed this session (Pass 1d/4b/6/Derive/CT compress + Pass 7-anachronism/7a gpt-5.4 ladder + Pass 7-pre 128K bump).
