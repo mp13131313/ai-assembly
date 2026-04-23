@@ -736,14 +736,19 @@ def _pass_7_anachronism():
         "field_path + problematic_text + reason + suggested_fix. Emit "
         "overall verdict. JSON only."
     )
-    # 2026-04-23: ladder reordered — gpt-4.1 primary (1M context window
-    # handles arch-03's richer card ~60-80K tokens reliably; o3 + gpt-4o
-    # hit org-tier per-request token ceilings on the rich payload).
-    # Reasoning/strict models kept as fallbacks. Gemini last resort.
-    for openai_model in ("gpt-4.1", "o3", "gpt-4o"):
+    # 2026-04-23: ladder updated — gpt-5.4 primary with reasoning_effort=high
+    # (1M context + unified reasoning model; supersedes gpt-4.1/o3/gpt-4o
+    # which were retired from ChatGPT on 2026-02-13 but remain API-available
+    # as fallbacks). Reasoning mode is essential for multi-criterion
+    # anachronism evaluation. Gemini 2.5 Pro last resort.
+    # max_tokens bumped 8192→16384 because reasoning tokens count against
+    # max_completion_tokens budget for gpt-5.x high-effort calls.
+    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
         try:
+            _effort = "high" if openai_model.startswith("gpt-5") else None
             r = call_openai(system=sysp, user=userp, model=openai_model,
-                            temperature=0.0, max_tokens=8192,
+                            temperature=0.0, max_tokens=16384,
+                            reasoning_effort=_effort,
                             response_format_json=True)
             return {"voice_name": vi["name"], "voice_slug": SLUG,
                     "pass": "7_anachronism_check",
@@ -768,7 +773,7 @@ def _pass_7_anachronism():
                 "result": {"overall": "SKIPPED",
                            "summary": "No cross-model evaluator available."}}
 
-stamp("PASS 7-anachronism: TimeChara temporal check (o3 → Gemini fallback)")
+stamp("PASS 7-anachronism: TimeChara temporal check (gpt-5.4 high → Gemini fallback)")
 pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
                             "Pass 7-anachronism", _pass_7_anachronism)
 _anach_flags = pass7_anach["result"].get("anachronism_flags", [])
@@ -786,15 +791,19 @@ def _pass_7a():
     sysp = load_prompt("persona_pass_7a_cross_model")
     userp = render("persona_pass_7a_cross_model_user",
                    persona_card_json=json.dumps(full_card_for_validate, ensure_ascii=False, indent=2))
-    # 2026-04-23: ladder reordered — gpt-4.1 primary (1M context window
-    # reliably fits arch-03's richer card ~60-80K tokens; o3 + gpt-4o hit
-    # org-tier per-request token ceilings on rich payloads). Reasoning
-    # model o3 kept as fallback for its multi-criterion evaluation
-    # capability when payload is smaller. Gemini last-resort.
-    for openai_model in ("gpt-4.1", "o3", "gpt-4o"):
+    # 2026-04-23: ladder updated — gpt-5.4 primary with reasoning_effort=high
+    # (1M context + unified reasoning model; supersedes gpt-4.1/o3/gpt-4o
+    # which were retired from ChatGPT on 2026-02-13 but remain API-available
+    # as fallbacks). Reasoning mode is essential for the multi-criterion
+    # rubric evaluation Pass 7a performs. Gemini 2.5 Pro last resort.
+    # max_tokens bumped 8192→16384 because reasoning tokens count against
+    # max_completion_tokens budget for gpt-5.x high-effort calls.
+    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
         try:
+            _effort = "high" if openai_model.startswith("gpt-5") else None
             r = call_openai(system=sysp, user=userp, model=openai_model,
-                            temperature=0.0, max_tokens=8192,
+                            temperature=0.0, max_tokens=16384,
+                            reasoning_effort=_effort,
                             response_format_json=True)
             return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
                     "validator": f"openai:{openai_model}", "model": r["model"],
@@ -818,7 +827,7 @@ def _pass_7a():
                 "validator": "skipped", "result": {"overall": "SKIPPED",
                 "summary": "No cross-model validator available."}}
 
-stamp("PASS 7a: Cross-Model Validation (gpt-4o -> Gemini fallback)")
+stamp("PASS 7a: Cross-Model Validation (gpt-5.4 high -> Gemini fallback)")
 pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT), "Pass 7a", _pass_7a)
 stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
@@ -1294,7 +1303,7 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
         "revision_loops": revision_loops,
-        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-4o", "gutenberg:web_fetch"],
+        "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-5.4", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
         "corpus_constraint": vi.get("corpus_constraint", "full"),

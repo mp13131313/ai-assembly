@@ -1,9 +1,11 @@
 {# Pass 7-anachronism — TimeChara-style temporal-anachronism check.
    Phase B NEW sub-pass, runs between Pass 7-pre and Pass 7a.
-   Cross-model (OpenAI o3 or Gemini; different family from Claude writer per
-   self-preference-bias argument in baseline File 2 §4). Reads the assembled
-   card; checks every concept, reference, and framing for period-access
-   + indigenous-framework anachronism. #}
+   Cross-model (OpenAI gpt-5.4 with reasoning_effort=high preferred, gpt-4.1
+   / o3 / gpt-4o API-available fallbacks, Gemini 2.5-pro last-resort; all
+   different family from the Claude writer per self-preference-bias argument
+   in baseline File 2 §4). Reads the assembled card; checks every concept,
+   reference, and framing for period-access + indigenous-framework
+   anachronism. #}
 
 # BLOCK 1 — ROLE
 
