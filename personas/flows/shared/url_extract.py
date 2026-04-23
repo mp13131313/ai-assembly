@@ -33,6 +33,63 @@ def _extract_from_text(text: str) -> list[str]:
     return [_clean(u) for u in _URL_RE.findall(text or "")]
 
 
+def _walk_for_urls(obj: Any, work_title: str = "") -> list[dict[str, Any]]:
+    """Recursively walk a JSON-like structure and extract URL entries.
+
+    Added 2026-04-23 per 1-arch-07 post-test follow-up: URLs in arch-03
+    merge output live at `passages[].citations[].url` (nested list-of-dicts),
+    which the flat field-iteration in extract_urls_from_{works,passages}()
+    misses. This walker handles any nesting depth and also recognizes the
+    convention where a dict has a `url` key whose string value IS the URL
+    (no regex extraction needed).
+
+    `work_title` propagates the last-known title attribution down the tree.
+    """
+    out: list[dict[str, Any]] = []
+    if isinstance(obj, dict):
+        # Update title context if this dict carries one
+        local_title = obj.get("work_title") or obj.get("title") or obj.get("work") or work_title
+        # Shortcut: if this dict has a url field pointing at a string, treat it as a URL directly
+        if isinstance(obj.get("url"), str) and obj["url"].strip():
+            u = _clean(obj["url"].strip())
+            # Accept if looks URL-ish (has scheme or domain dot)
+            if u and ("://" in u or "." in u):
+                out.append({
+                    "url": u,
+                    "work_title": local_title or "",
+                    "source": _source_for_url(u),
+                    "license_or_access_note": obj.get("license_or_access_note")
+                        or obj.get("access_note")
+                        or obj.get("license"),
+                })
+        # Recurse through all fields (including string fields scanned for URLs)
+        for k, v in obj.items():
+            if k == "url":
+                continue  # handled above
+            if isinstance(v, str):
+                for u in _extract_from_text(v):
+                    out.append({
+                        "url": u,
+                        "work_title": local_title or "",
+                        "source": _source_for_url(u),
+                        "license_or_access_note": None,
+                    })
+            else:
+                out.extend(_walk_for_urls(v, local_title))
+    elif isinstance(obj, list):
+        for item in obj:
+            out.extend(_walk_for_urls(item, work_title))
+    elif isinstance(obj, str):
+        for u in _extract_from_text(obj):
+            out.append({
+                "url": u,
+                "work_title": work_title or "",
+                "source": _source_for_url(u),
+                "license_or_access_note": None,
+            })
+    return out
+
+
 def extract_urls_from_works(works_chunk: dict[str, Any]) -> list[dict[str, Any]]:
     """Extract URL entries from the Pass 1.6 `works` chunk output.
 
@@ -97,13 +154,17 @@ def extract_urls(
 
     Returns a list of URLEntry-shaped dicts (url, work_title, source,
     license_or_access_note) in stable order: first-seen wins for dedup.
+
+    2026-04-23: uses _walk_for_urls() for full recursion into nested
+    structures. Handles both conventions: (1) URLs embedded in string
+    fields (regex-extracted), (2) dicts with explicit `url` key whose
+    value IS the URL (common in passages[].citations[].url shape under
+    arch-03 merge). Flat-iteration extract_urls_from_* helpers retained
+    for backward compatibility.
     """
     seen: dict[str, dict[str, Any]] = {}
-    for src_fn, src_chunk in (
-        (extract_urls_from_works, works_chunk or {}),
-        (extract_urls_from_passages, passages_chunk or {}),
-    ):
-        for entry in src_fn(src_chunk):
+    for chunk in (works_chunk or {}, passages_chunk or {}):
+        for entry in _walk_for_urls(chunk):
             if entry["url"] not in seen:
                 seen[entry["url"]] = entry
     return list(seen.values())
