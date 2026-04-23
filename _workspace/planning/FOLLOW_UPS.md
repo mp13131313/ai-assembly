@@ -297,11 +297,13 @@ When historical context is needed, read those. For active tracking + implementat
 
 ### Important note on PIPELINE_REVIEW_FIXES.md scope
 
-That doc tracks **two layers** of work:
-1. **Architectural follow-ups (FU#1-13)** — consolidated here in FOLLOW_UPS.md as authoritative.
-2. **Wave 1/2/3 step-level prompt-review fixes (~99 PROPOSED items)** — these are tactical per-prompt audits from the 2026-04-21 pipeline review session. PIPELINE_REVIEW_FIXES.md remains authoritative for these.
+That doc retains historical/design context for the architectural follow-ups (FU#1-13 — now consolidated here as authoritative) and for the pipeline review session's wave structure.
 
-**Wave 4 prompt review (Pass 2/3/4a/4b/5/6 + CT threading)** is forward-referenced in PIPELINE_REVIEW_FIXES.md but not started. **FU#12 (curator-metadata prompt hardening) will overlap with Wave 4 scope** for Pass 2-6 prompts. When implementing FU#12, audit Wave 4 PROPOSED items for those passes and address them inline if cheap.
+**Wave 1/2/3 SURVIVES items: APPLIED days ago** via commits `bcf77ad` (wave-1/pass-0a, 4 fixes), `abdb13b` (wave-1/pass-1b, 13 fixes), `1fd43f2` (wave-1/pass-0b, 23 fixes), `cf25a79` (wave-2/pass-1c-1d, 11 fixes; 1d-06 deferred), `5975531` (wave-3/merge-prompts, period-vocab + pre-seed verify). ~51 fixes applied total. The "PROPOSED: 99 / APPLIED: 0" status counts at the bottom of PIPELINE_REVIEW_FIXES.md (line 2015-2024) are STALE — never updated when the Wave commits landed. The body of the doc shows individual `APPLIED` markers per item.
+
+**Wave 4 (Pass 2/3/4a/4b/5/6 + CT threading prompt review)** was forward-referenced in PIPELINE_REVIEW_FIXES.md but never formally started. arch-03 (1-arch-04 + 1-arch-05) already modified these prompts substantially. **FU#12 (curator-metadata prompt hardening) is a SPECIFIC fix for a newly-discovered issue** (gpt-5.4's complaint about curator-metadata leakage in this session's run). It's not in Wave 4's original scope but lands on the same prompt files. If you want a "Wave 4 review" pass on these prompts in addition to FU#12, that would be a separate item — not currently tracked because the FU#12 audit is likely sufficient.
+
+**Other orphan items in PIPELINE_REVIEW_FIXES.md:** 2-01 (Pass 2 stale user prompt) and 2-04 (monitor-not-fix). These are minor/already-handled. Not promoted to FU# items here.
 
 ---
 
