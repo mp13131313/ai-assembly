@@ -67,6 +67,37 @@ def _load_conference_context_string() -> str:
         return facts.get("conference_context_paragraph", "")
     return ""
 
+
+def _load_deployment_priming() -> dict[str, str]:
+    """Load audience + conference context for Pass 5 audience-priming (FU#12-B).
+
+    Returns a dict with three string fields:
+      - conference_summary: 1-paragraph context for the deployment
+      - audience_profile: rich participant description
+      - programming_tracks: comma-joined track list
+
+    Each field defaults to "" if its source file is missing — Pass 5's
+    prompt branches on emptiness and skips the priming block. So the
+    pipeline still works on projects without these files.
+    """
+    out = {"conference_summary": "", "audience_profile": "",
+           "programming_tracks": ""}
+    facts_path = _paths.conference_facts(PROJECT_ROOT)
+    if facts_path.exists():
+        facts = json.loads(facts_path.read_text())
+        out["conference_summary"] = facts.get("conference_context_paragraph", "")
+        role = facts.get("session_role_for_ai_assembly", "")
+        if role:
+            out["conference_summary"] = (out["conference_summary"]
+                                         + " " + role).strip()
+    aud_path = _paths.audience_profile(PROJECT_ROOT)
+    if aud_path.exists():
+        aud = json.loads(aud_path.read_text())
+        out["audience_profile"] = aud.get("participant_profile", "")
+        tracks = aud.get("programming_tracks_representative", []) or []
+        out["programming_tracks"] = ", ".join(tracks)
+    return out
+
 _paths.ensure_voice_dirs(SLUG, PROJECT_ROOT)
 
 
@@ -644,11 +675,22 @@ pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 def _pass_5():
     sysp = render("persona_pass_5_engagement", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"])
+    # FU#12-B (2026-04-23): audience + conference context primes Pass 5's
+    # audience-facing fields (bold_engagement_topics, default_questions). Voice
+    # arrives "ready" for the deployment context. NO new schema field — uses
+    # existing fields, just better-grounded. translation_table lookup proposal
+    # was withdrawn (would have foreclosed contextual richness + risked
+    # ventriloquism); translation_protocol method already encodes generative
+    # handling per Pass 2.
+    deployment = _load_deployment_priming()
     userp = render(
         "persona_pass_5_user",
         pass_2_3_4_summary=pass_2_3_4_summary,
         constitution=json.dumps(pass3["fields"].get("constitution", ""), ensure_ascii=False, indent=2),
         reasoning_method=json.dumps(pass3["fields"].get("reasoning_method", ""), ensure_ascii=False, indent=2),
+        conference_summary=deployment["conference_summary"],
+        audience_profile=deployment["audience_profile"],
+        programming_tracks=deployment["programming_tracks"],
     ) + _critique_suffix("5")
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=16000, thinking=True, temperature=1.0)
