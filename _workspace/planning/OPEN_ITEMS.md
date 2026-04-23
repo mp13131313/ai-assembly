@@ -1105,4 +1105,23 @@ Next operator action when this session resumes:
 1. Confirm tailoring completed and the tailored DR prompt is rich (compare to first-run-tailoring-notes.json)
 2. Paste tailored prompt into claude.ai for Position C vs v3.7 baseline comparison
 3. Apply Pass 1a pattern to the other 3 voice-type templates
+
+---
+
+## Code-cleanup-on-fresh-project (no retroactive migration)
+
+Items to fix when a clean PROJECT_ROOT is set up from final code, **not** worth migrating existing test / phase-l-dostoevsky / athens-2026 projects for. Apply when bootstrapping the next project from final code.
+
+### CC#1 — Move `05_primary_text_urls.json` out of `01_research/`
+
+**Current path:** `voices/<slug>/01_research/05_primary_text_urls.json`
+**Better path:** `voices/<slug>/03_corpus/00_primary_text_urls.json`
+
+**Why current location is wrong:** historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs are now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json` via `extract_urls()` ([run_persona_pipeline.py:271-288](personas/run_persona_pipeline.py:271)). The destination path was kept for backward-compat, but the file is no longer a research output. It's the input to corpus fetch, so it belongs alongside `03_corpus/01_primary_texts.json`.
+
+**Why not migrate now:** path API change with cross-project ripple (test, phase-l-dostoevsky, athens-2026 all carry the file in the old location). Cosmetic, not functional. No code reads from a hard-coded path — everything goes through `_paths.primary_text_urls(...)`, so the change is one line in [paths.py:69-71](personas/flows/shared/paths.py:69) plus a directory move on fresh project setup.
+
+**When to apply:** at fresh-project bootstrap of the next voice-set after Phase L sign-off. Update [paths.py:71](personas/flows/shared/paths.py:71): `research_dir(...)` → `corpus_dir(...)` and `"05_primary_text_urls.json"` → `"00_primary_text_urls.json"` (numbered to sort before `01_primary_texts.json`).
+
+**Discovered:** 2026-04-23 during arch-03 Stage 2 restart, reading paths.py with the operator.
 4. Tier 3 + Phase L
