@@ -415,25 +415,14 @@ if not _review_flag.exists():
 stamp("PASS 1c gate: review flag present — continuing to Pass 1d")
 
 
-# ---------- REVISION LOOP STATE ----------
-# Per v3.7 spec: when Pass 7a returns REVISION_NEEDED, re-run flagged passes
-# with critique appended to user prompt. Max 2 loops before flagging for
-# human review. Critiques are populated from Pass 7a's field_issues array.
-REVISION_CRITIQUES = {}  # pass_label (str) -> critique block (str)
-
-def _critique_suffix(pass_label: str) -> str:
-    """Return revision critique block appended to a generation pass's user
-    prompt when set. Empty string when not in a revision loop."""
-    crit = REVISION_CRITIQUES.get(pass_label)
-    if not crit:
-        return ""
-    return (
-        f"\n\n=== REVISION REQUEST (Pass 7a flagged this pass) ===\n"
-        f"A cross-model validator reviewed your previous output and flagged "
-        f"the following issues. Address each one in your revised output:\n\n"
-        f"{crit}\n"
-        f"=== END REVISION REQUEST ===\n"
-    )
+# ---------- REVISION LOOP STATE — REMOVED FU#13 (2026-04-23) ----------
+# The revision loop is replaced by the linear Pass 7a-FIX step (FU#13).
+# REVISION_CRITIQUES are no longer needed; writers
+# are not re-invoked. The `+ _critique_suffix("N")` call sites in
+# Pass 2/3/4a/4b/5/6 user-prompt rendering have been removed.
+# (Kept this comment block as a tombstone so a fresh reader knows where
+# the old infrastructure was; remove entirely after Plato run validates
+# the new architecture.)
 
 
 # ---------- HELPER: Claude call wrapper for generation passes ----------
@@ -503,7 +492,7 @@ def _pass_2():
         sensitive_topics=chunk_vars["sensitive_topics"],
         hard_limits_chunk=chunk_vars["hard_limits_chunk"],
         voice_level_debate_frames=chunk_vars["voice_level_debate_frames"],
-    ) + _critique_suffix("2")
+    )
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -531,7 +520,7 @@ def _pass_3():
         textures=chunk_vars["textures"],
         analytical_context_reasoning=chunk_vars["analytical_context_reasoning"],
         pass_2_summary=pass_2_summary,
-    ) + _critique_suffix("3")
+    )
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
@@ -629,7 +618,7 @@ def _pass_4a():
         cross_disciplinary_frames=chunk_vars["cross_disciplinary_frames"],
         primary_texts=primary_block,
         pass_2_3_summary=pass_2_3_summary,
-    ) + _critique_suffix("4a")
+    )
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
@@ -651,7 +640,7 @@ def _pass_4b():
                    pass_2_3_4a_summary=pass_2_3_4a_summary,
                    rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", "")),
                    characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", [])),
-                   register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""))) + _critique_suffix("4b")
+                   register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", "")))
     # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
     # ON (quality-tuning checklist). Pass 4b owns 8 output_characteristics
     # fields and is CT-only (no chunk reads); baseline Pass 7a flagged 6 of
@@ -691,7 +680,7 @@ def _pass_5():
         conference_summary=deployment["conference_summary"],
         audience_profile=deployment["audience_profile"],
         programming_tracks=deployment["programming_tracks"],
-    ) + _critique_suffix("5")
+    )
     r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
                      max_tokens=16000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
@@ -730,7 +719,7 @@ def _pass_6():
         rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", ""), ensure_ascii=False),
         characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", []), ensure_ascii=False, indent=2),
         register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""), ensure_ascii=False),
-    ) + _critique_suffix("6")
+    )
     # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
     # ON (quality-tuning checklist). Pass 6 owns the cited_passages field
     # that runtime Provocateur literally quotes. Literary-canon passage
@@ -916,55 +905,12 @@ stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result']
 # Pass 7a may return REVISION_NEEDED with revision_target_passes + field_issues.
 # Re-run flagged passes with critique appended; invalidate downstream caches;
 # re-run Pass 7a. Loop max 2 times.
-DOWNSTREAM_CHAIN = {
-    "2":  ["pass2_identity_boundaries", "_ct_pass2", "pass3_intellectual_core", "_ct_pass2_3",
-           "pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
-           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-    "3":  ["pass3_intellectual_core", "_ct_pass2_3",
-           "pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
-           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-    "4a": ["pass4a_voice", "_ct_pass2_3_4a", "pass4b_artifact", "_ct_pass2_3_4",
-           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-    "4b": ["pass4b_artifact", "_ct_pass2_3_4",
-           "pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-    "5":  ["pass5_engagement", "pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-    "6":  ["pass6_corpus", "pass7pre_citation", "pass7a_cross_model"],
-}
-
-# fname string → paths accessor (used to invalidate downstream caches in revision loop)
-_FNAME_TO_PATH = {
-    "pass2_identity_boundaries": lambda: _paths.pass_2(SLUG, PROJECT_ROOT),
-    "_ct_pass2":                 lambda: _paths.ct_after_pass_2(SLUG, PROJECT_ROOT),
-    "pass3_intellectual_core":   lambda: _paths.pass_3(SLUG, PROJECT_ROOT),
-    "_ct_pass2_3":               lambda: _paths.ct_after_pass_3(SLUG, PROJECT_ROOT),
-    "pass4a_voice":              lambda: _paths.pass_4a(SLUG, PROJECT_ROOT),
-    "_ct_pass2_3_4a":            lambda: _paths.ct_after_pass_4a(SLUG, PROJECT_ROOT),
-    "pass4b_artifact":           lambda: _paths.pass_4b(SLUG, PROJECT_ROOT),
-    "_ct_pass2_3_4":             lambda: _paths.ct_after_pass_4b(SLUG, PROJECT_ROOT),
-    "pass5_engagement":          lambda: _paths.pass_5(SLUG, PROJECT_ROOT),
-    "pass6_corpus":              lambda: _paths.pass_6(SLUG, PROJECT_ROOT),
-    "pass7pre_citation":         lambda: _paths.pass_7_pre(SLUG, PROJECT_ROOT),
-    "pass7a_cross_model":        lambda: _paths.pass_7a(SLUG, PROJECT_ROOT),
-}
-
-# Map from spec target labels (2, 3, 4a, ...) to the runner's pass function +
-# its result variable name. Used to re-bind after re-running.
-PASS_RUNNERS = {
-    "2": ("_pass_2", "pass2"),
-    "3": ("_pass_3", "pass3"),
-    "4a": ("_pass_4a", "pass4a"),
-    "4b": ("_pass_4b", "pass4b"),
-    "5": ("_pass_5", "pass5"),
-    "6": ("_pass_6", "pass6"),
-}
-
-revision_loops = 0
-# 2026-04-23: MAX_REVISION_LOOPS dropped from 2 → 1. With FU#3 surgical mode
-# active on every loop, one focused patch attempt is the meaningful unit.
-# Beyond that, diminishing returns vs. wall-time cost (each loop = ~5-10 min
-# wall + ~$1-2). Convergence diagnostic (FU#6) should drive future tuning;
-# for now, single-shot surgical-then-accept-verdict is the design.
-MAX_REVISION_LOOPS = 1
+# DOWNSTREAM_CHAIN, _FNAME_TO_PATH, PASS_RUNNERS, revision_loops counter +
+# MAX_REVISION_LOOPS — REMOVED FU#13 (2026-04-23). The linear Pass 7a-FIX
+# step replaces all of this. Cache invalidation under FU#13 is a small
+# inline list (Pass 7-pre, 7-anach, 7a + post-7a artifacts); pass-runner
+# lookup not needed because writers are not re-invoked. See _pass_7a_fix()
+# below for the new architecture.
 
 # Phase B: merge Pass 7-anachronism flags into Pass 7a's revision decision.
 # Anachronism flags are structured {category, field_path, problematic_text,
@@ -1466,8 +1412,13 @@ stamp(f"  Pass 4b fields:       {len(pass4b['fields'])}")
 stamp(f"  Pass 5 fields:        {len(pass5['fields'])}")
 stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
 stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
+_fix_log_summary = (
+    "no fix needed" if not fix_log_path.exists()
+    else f"fix-pass applied {json.loads(fix_log_path.read_text()).get('patches_applied', 0)} "
+         f"of {json.loads(fix_log_path.read_text()).get('patches_emitted', 0)} patches"
+)
 stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
-      f"after {revision_loops} revision loop(s)")
+      f"— {_fix_log_summary}")
 stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('smoke_test_chains', []))} chains")
 stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
       f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
@@ -1512,12 +1463,13 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
             "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
             "7pre_citation_verification",
             "7a_cross_model_validation",
+            *(["7a_fix_linear_patcher"] if fix_log_path.exists() else []),
             "7b_smoke_test_chains",
             "7c_negative_constraints",
             "derive_provocateur_profile_and_rubric",
         ],
         "validation_status": pass7a["result"].get("overall", "unknown"),
-        "revision_loops": revision_loops,
+        "fix_pass_log": (json.loads(fix_log_path.read_text()) if fix_log_path.exists() else None),
         "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-5.4", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
         "hostile_sources": vi["hostile_sources"],
