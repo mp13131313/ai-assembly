@@ -541,14 +541,18 @@ def _pass_1d():
     # Sonnet's output descriptions reproduced and got blocked). Opus 4.7
     # handles this material reliably. Modest cost delta; Pass 1d is a
     # small call (~8K output).
-    # Opus 4.7 deprecated `temperature` — pass None to omit from API call.
-    # Deterministic selection behavior comes from the narrow JSON schema +
-    # explicit selection rubric in the user prompt. thinking=False keeps
-    # latency modest for a selection task that is judgment-light.
+    # Opus 4.7 deprecated `temperature` — pass None to omit from API call
+    # (model defaults to 1.0, which is what extended-thinking mode requires).
+    # 2026-04-23: thinking=False → True (quality-tuning checklist). Excerpt
+    # selection IS a judgment task — what's representative? voice-exemplar?
+    # reasoning-in-action? Thinking lets Opus deliberate between candidates
+    # rather than greedy-picking. Latency cost ~30s; quality upside flows
+    # downstream into Pass 4a voice modeling + Pass 6 corpus curation.
+    # max_tokens 8192 → 16000 — thinking budget shares the output ceiling.
     r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
                     user=user_prompt,
-                    model="claude-opus-4-7", max_tokens=8192,
-                    temperature=None, thinking=False,
+                    model="claude-opus-4-7", max_tokens=16000,
+                    temperature=None, thinking=True,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
     selected_text = apply_selections(pass1c["passages"], selections)
@@ -557,7 +561,7 @@ def _pass_1d():
             "selection_count": len(selections), "selected_chars": len(selected_text),
             "selections": selections, "selected_text": selected_text}
 
-stamp("PASS 1d: Excerpt Selection (Sonnet, curated subset)")
+stamp("PASS 1d: Excerpt Selection (Opus + thinking, curated subset)")
 pass1d = call_or_cache(_paths.excerpt_selections(SLUG, PROJECT_ROOT), "Pass 1d", _pass_1d)
 primary_block = pass1d["selected_text"]
 stamp(f"  primary_texts block: {len(primary_block)} chars from {pass1d.get('selection_count', 0)} curated selections")
@@ -605,12 +609,20 @@ def _pass_4b():
                    rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", "")),
                    characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", [])),
                    register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""))) + _critique_suffix("4b")
-    r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
-                     max_tokens=6144, thinking=False, temperature=0.2)
+    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
+    # ON (quality-tuning checklist). Pass 4b owns 8 output_characteristics
+    # fields and is CT-only (no chunk reads); baseline Pass 7a flagged 6 of
+    # those fields for register-drift. Hypothesis: the issue is model
+    # underspec, not just upstream context. Opus + thinking gives the
+    # nuanced first-/second-person register discipline that artifact
+    # generation requires. max_tokens 6144 → 24000 (thinking-budget +
+    # richer output headroom).
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
+                     max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4b_artifact",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
-stamp("PASS 4b: Artifact (Sonnet)")
+stamp("PASS 4b: Artifact (Opus + thinking)")
 pass4b = call_or_cache(_paths.pass_4b(SLUG, PROJECT_ROOT), "Pass 4b", _pass_4b)
 combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
 pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
@@ -665,12 +677,19 @@ def _pass_6():
         characteristic_moves=json.dumps(pass4a["fields"].get("characteristic_moves", []), ensure_ascii=False, indent=2),
         register_and_tone=json.dumps(pass4a["fields"].get("register_and_tone", ""), ensure_ascii=False),
     ) + _critique_suffix("6")
-    r = _claude_pass(system=sysp, user=userp, model="claude-sonnet-4-6",
-                     max_tokens=8000, thinking=False, temperature=0.1)
+    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
+    # ON (quality-tuning checklist). Pass 6 owns the cited_passages field
+    # that runtime Provocateur literally quotes. Literary-canon passage
+    # selection requires inter-passage judgment: which scene best shows
+    # polyphony? which monologue exemplifies sobornost? Sonnet can rubric-
+    # follow but Opus + thinking deliberates the tradeoffs. max_tokens
+    # 8000 → 24000 (thinking-budget + 1+1 fields can include long passages).
+    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
+                     max_tokens=24000, thinking=True, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "6_corpus_curation",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
-stamp("PASS 6: Corpus Curation (Sonnet, selection task)")
+stamp("PASS 6: Corpus Curation (Opus + thinking, literary judgment)")
 pass6 = call_or_cache(_paths.pass_6(SLUG, PROJECT_ROOT), "Pass 6", _pass_6)
 
 
