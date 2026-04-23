@@ -292,7 +292,7 @@ def call_gemini(
     return out_gem
 
 
-# --- OpenAI (GPT-4o for cross-model validation) -------------------------
+# --- OpenAI (gpt-5.4 primary for cross-model validation) ----------------
 
 def call_openai(
     *,
@@ -302,20 +302,31 @@ def call_openai(
     temperature: float = 0.0,
     max_tokens: int = 8192,
     response_format_json: bool = False,
+    reasoning_effort: str | None = None,
     slug: str | None = None,
     pass_name: str | None = None,
     project_root: Path | None = None,
 ) -> dict[str, Any]:
-    """One OpenAI call. Uses openai SDK."""
+    """One OpenAI call. Uses openai SDK.
+
+    reasoning_effort: 'none' | 'low' | 'medium' | 'high' | 'xhigh'. When set
+    (or when model is o-series), the call uses the reasoning-API path:
+    max_completion_tokens, no temperature, and the reasoning_effort kwarg is
+    forwarded. GPT-5.x accepts reasoning_effort; older o1/o3/o4 models set it
+    implicitly by model choice.
+    """
     from openai import OpenAI
 
     client = OpenAI()
-    model = model or os.environ.get("OPENAI_MODEL", "gpt-4o")
+    model = model or os.environ.get("OPENAI_MODEL", "gpt-5.4")
 
-    # OpenAI reasoning models (o1, o3, o4-mini, etc.) require:
-    #   - max_completion_tokens (not max_tokens)
-    #   - temperature must be omitted or = 1.0 (default)
-    is_reasoning_model = any(model.startswith(p) for p in ("o1", "o3", "o4"))
+    # Reasoning path applies when:
+    #   - model is an o-series reasoning model (o1/o3/o4), OR
+    #   - caller explicitly requested reasoning_effort (e.g. gpt-5.4 high)
+    # Both require max_completion_tokens instead of max_tokens and drop
+    # temperature (reasoning models reject non-default temperature).
+    is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))
+    use_reasoning_path = is_o_series or reasoning_effort is not None
 
     kwargs: dict[str, Any] = {
         "model": model,
@@ -324,8 +335,10 @@ def call_openai(
             {"role": "user", "content": user},
         ],
     }
-    if is_reasoning_model:
+    if use_reasoning_path:
         kwargs["max_completion_tokens"] = max_tokens
+        if reasoning_effort is not None:
+            kwargs["reasoning_effort"] = reasoning_effort
     else:
         kwargs["temperature"] = temperature
         kwargs["max_tokens"] = max_tokens
