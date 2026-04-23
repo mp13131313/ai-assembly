@@ -377,19 +377,61 @@ See FOLLOW_UPS.md "RECOMMENDED IMPLEMENTATION ORDER" section.
 
 ## Next session: brief
 
-1. Start with FU#1 (Layer 2 preservation audit)
-2. After FU#1 lands, decide whether to build FU#2 (chunked Pass 7-pre)
-   immediately OR proceed to Plato run with the try/except wraps as
-   stop-gap. FU#2 is genuinely blocking for cards above ~120K output
-   tokens — Plato may or may not hit that.
-3. Read FOLLOW_UPS.md for full active items list (30 items, 4 priority
-   tiers).
+**UPDATED 2026-04-23 session-end after 4 independent card reviews.**
 
-If you want a comparison-by-content of the three Dostoevsky cards
-(Phase L baseline / post-surgical / Phase 1), the files are listed
-above. A `diff -r` won't be clean (they're 100K+ JSON each); a small
-helper script that extracts and diffs the constitution + concept_lexicon
-+ reasoning_method fields specifically would be more readable.
+The post-Phase-1 Dostoevsky card was reviewed by 4 independent analyses.
+All four agreed: structural quality improved (period-consciousness,
+hard limits, anachronism cleanup), but **voice-tissue regressed** —
+load-bearing incarnate prose ("man of gordost' who has walked through
+nadryv toward smirenie") replaced by taxonomic framing ("you do not
+think in four-humours grammar"). Diagnosed cause: FU#12-A's hardening
+is **asymmetric** — "strip X" without "compensate with Y" — making
+writer produce conservative/taxonomic language across fields, not
+just where stripping was needed.
+
+**Named failure mode (Review 4):** "What improved is mostly structural,
+verifiable, lint-able. What regressed is incarnated, unverifiable,
+voice-side. The pipeline has developed strong reflexes for the first
+kind of quality and no reflexes yet for the second. Over iteration,
+that asymmetry compounds: each pass gets technically tighter and
+rhetorically slightly flatter, until the card is perfectly engineered
+and three-quarters of a Diary of a Writer entry."
+
+**Revised next-session order** (replaces FU#1-first plan above):
+
+1. **FU#32** — positive-compensation prompt refinement. Pair every
+   "strip X" in FU#12-A with "do Y" positive compensation. Most direct
+   fix. ~2-3 hr.
+2. **FU#37** — declarative preserve-verbatim load-bearing-sentence
+   markers. Primary backstop (prevents regression at source regardless
+   of mechanism). ~4-5 hr.
+3. **FU#1** — Layer 2 audit. Now measures: does FU#32 + FU#37 close
+   the voice-tissue gap? ~3-4 hr.
+4. **🔴 FU#2** — chunked Pass 7-pre verification. BLOCKING for richer
+   cards. ~4-6 hr.
+5. **FU#31** — voice-tissue validator. Only build if data after
+   FU#32/37 shows residual regression.
+6. **FU#33** — patcher scope extensions (mechanical lint + INCONSISTENT
+   flags + transliteration + bracket residue). Orthogonal to voice-
+   tissue work.
+
+**Verification experiment (optional, 5 min)** to confirm prompt-
+version (not critique) is the variable: regenerate Pass 2 with the
+ORIGINAL un-hardened prompt, fresh, no critique. If output contains
+the gordost' sentence, FU#32 is definitely the right priority.
+If not, critique had some role and FU#35 may still be needed.
+
+**Dostoevsky-specific fixes are intentionally NOT in this list.**
+The operator's session-end direction: architectural changes, not
+instance patches. The first_test card at `_workspace/arch_03_baseline_snapshot/pre_phase1_run_20260423_1452/07_persona_card_assembled.json`
+is the voice-tissue reference (strongest voice-tissue produced
+across 3 runs) if a ship-ready Dostoevsky card is needed before
+architectural work lands.
+
+If you want a comparison-by-content helper script for the three cards
+(Phase L baseline / first_test v6 / Phase 1 current), build it quickly
+as diagnostic — but don't let instance-debugging override architectural
+work per operator direction.
 
 ---
 

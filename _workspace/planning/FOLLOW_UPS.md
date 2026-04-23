@@ -207,6 +207,45 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** team-size growth or pre-deployment hardening.
 - **Effort:** unknown (significant).
 
+#### FU#31 — Voice-tissue validator (new Pass 7-family member)
+- **Origin:** 2026-04-23 session-end. Four independent reviewers of the Phase 1 Dostoevsky card identified a gap: the validator family (Pass 7-pre / 7-anachronism / 7a) optimizes structural/verifiable quality (citations, anachronism, rubric) but has NO test for "voice-incarnate-ness" (does this field speak IN the voice's grammar, or ABOUT the voice's grammar).
+- **Empirical evidence:** current Phase 1 card regressed on voice-tissue vs v6 first_test card (load-bearing sentences like "man of gordost' who has walked through nadryv toward smirenie" dropped; taxonomic framing "against Big-Five adjectives" replaced it). Unmeasured axis → silently traded away while optimizing measured axes.
+- **Proposed:** new Pass 7 family member, cross-family model (not Claude — avoid self-preference), reads assembled card + voice-specific load-bearing-lexeme list (auto-derived from `chunk 1.4 vocabulary.preferred_vocabulary` where `loadbearing=true`). Checks per-field: incarnate self-description vs taxonomic comparison; voice-specific lexeme in-prose usage (not just listed in concept_lexicon); scholarly-annotation leakage not caught by Pass 7a. Emits `field_issues[]` in same shape Pass 7a emits → flows into Pass 7a-FIX patcher naturally.
+- **Effort:** 4-5 hr (prompt design + cross-family model integration + schema).
+- **Relation:** **backstop** — catches what FU#32 / FU#37 don't prevent at source.
+
+#### FU#32 — Positive-compensation prompt refinement (Pass 2-6)
+- **Origin:** 2026-04-23 session-end review synthesis. Diagnosed as **the most direct fix** for the voice-tissue regression observed in Phase 1.
+- **Problem:** FU#12-A's hardening is asymmetric — it tells the writer "strip X" (curator metadata, scholar attribution, provenance brackets) without "compensate with Y" (use the voice's own incarnate grammar instead). Writer responds by producing conservative/taxonomic language ACROSS the board, not just where stripping was needed. Empirical: `character` field regressed from incarnate ("You are a man of gordost'...") to taxonomic ("you do not think in four-humours grammar").
+- **Proposed:** pair every "don't do X" instruction in FU#12-A with explicit "do Y" positive compensation:
+  - "Don't use scholar attribution names" → "where you would have written 'per Bakhtin...', write the voice's own framing"
+  - "Don't use `[stated]`/`[scholarly_consensus]` tags" → "where you would have tagged provenance, write the operational instruction that follows"
+  - "Avoid Big-Five taxonomic grammar" → **"use the voice's own lived grammar — for period voices, gordost'/nadryv/smirenie-style self-description anchored in biographical arc; for contemporary voices, equivalent in-tradition lexicons"**
+  - "banned_language is for terms the voice might tempt to use" → "seed with positive in-voice vocabulary examples that the field should sound like"
+- **Effort:** 2-3 hr prompt-file audit across Pass 2-6 (same files FU#12-A touched).
+- **Priority:** **most direct fix for the observed regression.** Land before FU#31/37 — if successful, reduces reliance on backstop mechanisms.
+
+#### FU#33 — Patcher scope extensions
+- **Origin:** 2026-04-23 session reviews (multiple).
+- **Extensions needed:**
+  - Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input (Phase 1 card has Christ-over-truth attribution error — Pass 7-pre flagged it INCONSISTENT; FU#13 patcher didn't see it because only Pass 7a's field_issues flow in currently)
+  - Universal bracket-tag residue scan across live prose fields (not per-field — current implementation left 2 `[projection_warning:]` brackets in `character` + `topics_requiring_care[6].navigation`)
+  - Transliteration-consistency check across concept_lexicon entries (Phase 1 has `padachaya` vs `paduchaya` inconsistency; first_test was consistent)
+  - Simple spell-check pass with voice-vocabulary allowlist (Phase 1 has `doubented` typo)
+- **Effort:** 3-4 hr.
+- **Relation:** orthogonal to voice-tissue work — addresses mechanical-defect class of issues the patcher missed.
+
+#### FU#37 — Declarative preserve-verbatim load-bearing-sentence markers
+- **Origin:** 2026-04-23 Review 4 (synthesized with FU#31 voice-tissue validator): validator-after-the-fact catches regressions; declarative preservation prevents them.
+- **Mechanism stronger than FU#31 alone:** voice config OR Pass 4a output gains `load_bearing_sentences: []` field. Sources:
+  - Auto-derived: sentences from `merged_dossier.<chunk>.scholarly_context` that appear verbatim in the card (empirical signal the sentence is load-bearing and working)
+  - Operator-curated: specific sentences the operator wants preserved across iterations (gordost' sentence for Dostoevsky; equivalents per voice)
+- **Constraint fed to every pipeline stage** that rewrites content (patcher, hardened re-gen, future rewrite passes):
+  > *"If any of these sentences appears in the field you are operating on, the new_value MUST include it verbatim. Any rewrite that drops one of these sentences is a FAILURE regardless of what else it accomplishes."*
+- **Advantage over FU#31 validator:** prevents regression at source (constraint) instead of catching it post-hoc (flag). Catches regressions regardless of mechanism (patcher rewrite, prompt-driven fresh regen, future pipeline changes).
+- **Effort:** 4-5 hr (schema field + auto-derivation logic + constraint injection into patcher + Pass 2-6 prompt integration + validator check).
+- **Priority:** **primary backstop under the voice-tissue axis.** Lands after FU#32 (if FU#32 + FU#37 combined don't close the gap, FU#31 validator catches residuals).
+
 #### FU#28 — Pipeline pass-numbering renumbering
 - **Origin:** HANDOFF_PIPELINE_REVIEW.md (deferred during pipeline review session).
 - **Problem:** `1a/1b/1c/1d` family vs. `1.1-1.7` merge family naming is confusing for new readers. Pipeline-step-map legend in PIPELINE_REVIEW_FIXES.md was added as a workaround.
@@ -334,8 +373,14 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 
 ### Phase 2 — Next (starting point for next session)
 
-5. **FU#1** (Layer 2 audit) — validates that FU#12 didn't lose chunk content during synthesis. **START HERE next session.**
-6. **🔴 FU#2** (chunked Pass 7-pre verification) — BLOCKING for richer cards. Build before Plato if next voice will have comparable citation density.
+**⚠ SCOPE UPDATED 2026-04-23 session-end by 4 independent card reviews.** The reviewers identified a regression in Phase 1: voice-tissue (incarnate in-voice prose) degraded while structural quality (citations, anachronism, rubric) improved. **Asymmetric failure mode: what gets measured gets optimized, voice-tissue was unmeasured.** See FU#31/32/37 for proposed architectural response.
+
+5. **FU#32** (positive-compensation prompt refinement) — most direct fix. Pair every "strip X" in FU#12-A hardened prompts with "do Y" positive compensation. Prevents the regression at source. ~2-3 hr.
+6. **FU#37** (declarative preserve-verbatim load-bearing-sentence markers) — primary backstop. Prevents voice-tissue loss regardless of mechanism. ~4-5 hr.
+7. **FU#1** (Layer 2 audit) — empirical measurement of preservation patterns. Now has sharper scope: does FU#32 + FU#37 close the voice-tissue gap? ~3-4 hr.
+8. **🔴 FU#2** (chunked Pass 7-pre verification) — BLOCKING for richer cards. Sonnet 4.6 128K hard ceiling hit this session. ~4-6 hr.
+9. **FU#31** (voice-tissue validator) — backstop for whatever FU#32/37 miss. Only build if empirical data after FU#32+37 shows residual regression. ~4-5 hr.
+10. **FU#33** (patcher scope extensions — INCONSISTENT flags, lint, transliteration, bracket residue) — orthogonal mechanical-defect fix. ~3-4 hr.
 
 ### Phase 3 — Before Plato
 
