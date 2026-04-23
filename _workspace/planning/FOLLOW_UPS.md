@@ -26,8 +26,9 @@
 
 ### 🔴 Phase 1 — Critical for clean Dostoevsky re-run
 
-#### FU#12 — Register hardening + audience-aware translation_table (Pass 2-6 + Pass 5)
-- **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card. Refined 2026-04-23 with insight from external deep-research report §6 (concrete translation rules) — the per-voice translation_table pattern is high-leverage for runtime quality.
+#### FU#12 — Register hardening (Pass 2-6) + audience-aware engagement_topics (Pass 5)
+- **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card.
+- **Scope evolution 2026-04-23:** initially proposed adding a per-voice `translation_table` lookup (modern term → voice native re-framing) inspired by external deep-research report §6. **Withdrawn** after critic feedback: pre-computed translations are exactly the "voice as costume of stock phrases rather than mode of reasoning" failure pattern FU#12-A is trying to prevent. Method (`translation_protocol`) is generative — runtime applies it contextually per query. A lookup table replaces method with substitution, foreclosing contextual richness and risking ventriloquism (e.g., the report's example "feminism → wrath of a wounded soul demanding rights against God's order" launders Dostoevsky's reactionary instincts as if they were the correct mapping). The audience-priming insight is preserved differently — see (B).
 
 **Two coordinated changes:**
 
@@ -49,45 +50,23 @@ Fix: systematic prompt-hardening across Pass 2-6 user prompts:
 2. Explicit don'ts: no `[stated]`/`[scholarly_consensus]`/`[inference]` provenance tags in field values; no `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar attribution names in field values unless the voice itself would have cited them; no reception-commentary or future-history phrasing; `banned_language` is for terms the voice itself might be tempted to use, not for modern theorist names.
 3. Voice-specific scoping: for period voices, scrub all post-knowledge-boundary scholar names + reception terms; for all voices, corpus metadata stays in curator-side files.
 
-**(B) Audience-aware translation_table generation in Pass 5** — extend Pass 5 to also produce voice-specific term mappings.
+**(B) Audience-prime existing Pass 5 fields** — minimal extension, no new lookup table.
 
-Why Pass 5 (not Pass 7c — reconsidered 2026-04-23): translation_table is runtime positive vocabulary, not a constraint summary. Pass 5 is the natural home — already produces audience-facing runtime fields (`bold_engagement_topics`, `default_questions`, `disagreement_protocol`, `unique_contribution`). Same Opus + thinking model. Same audience/conference context need.
+Pass 5 currently produces `bold_engagement_topics`, `default_questions`, `disagreement_protocol`, `unique_contribution` — all audience-shaped fields, but currently audience-BLIND (Pass 5 doesn't read deployment context). Extension:
 
-**Critical advantage: Pass 5 placement means full validator chain catches translation_table issues.** If translation_table were in Pass 7c (last in the Pass-7 family), it would be invisible to Pass 7-pre / Pass 7-anach / Pass 7a — five distinct failure modes (anachronistic native frames, register drift, wrong native frame choices, cross-field inconsistencies, voice-bias leakage) would slip through to runtime unvalidated. Pass 5 placement means:
-- Pass 7-anachronism (gpt-5.4) checks translation_table for temporal anachronisms
-- Pass 7a (gpt-5.4 cross-model) checks translation_table for register + constitutional consistency + distinctiveness
-- Pass 7b bias evaluator (Gemini → Sonnet fallback) checks translation_table for voice-bias leakage in framings
-- If any flag REVISION_NEEDED, Pass 7a-FIX (per FU#13) patches translation_table entries directly
+1. Load `audience_profile.json` + `conference_facts.json` into Pass 5 (currently only loaded at final-assembly via `_load_conference_context_string()`).
+2. Pass 5 user prompt addition: "Given the audience [...] and conference themes [...], populate `bold_engagement_topics` with topics likely to surface in this deployment. Populate `default_questions` with the voice's actual phrasings for engaging those topics in the voice's MODE OF REASONING (apply translation_protocol method generatively — do not pre-compute substitution phrases)."
+3. **Critically: do NOT add a translation_table lookup.** The existing `translation_protocol` field encodes the voice's METHOD for handling modern queries. The runtime applies that method contextually per query. Pre-computing translations would replace generative method with substitution lookup, foreclosing contextual richness and risking ventriloquism (encoding voice's political bias as canonical mapping).
 
-Cost of Pass 5 placement: if audience/conference changes mid-build, Pass 5 + downstream all re-run (vs. just Pass 7c). Acceptable — audience/conference rarely changes mid-build.
+Strengthening `translation_protocol` itself happens via FU#12-A (Pass 2 prompt hardening) — ensure the field is articulated GENERATIVELY ("for any modern term, ask: who bears it, what scene stages it, how does the threshold pressure it") with worked example METHOD demonstrations rather than substitutions.
 
-New schema field on Pass 5 output (added to the assembled card):
-```
-translation_table: list[TranslationEntry]  # 8-15 entries, voice-specific
-class TranslationEntry:
-    modern_term: str                    # e.g., "PTSD", "AI", "human rights"
-    voice_reframing: str                # In voice's native vocabulary
-    register_example: str               # 1-2 sentence example showing voice using the reframing
-    audience_relevance_note: str | None # Why this term is likely given audience/conference
-```
+Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade needed.
 
-Pattern follows the deep-research report §6 (concrete worked examples like "AI → soulless mechanization / modern Golem" for Dostoevsky), but each voice gets its OWN table generated in its OWN native vocabulary. Plato wouldn't say "modern Golem" — he'd map AI through *technē* + the *Republic*'s craftsman vs. philosopher. Generic prompt → voice-specific table.
-
-Audience / conference context (currently only loaded at final assembly via `_load_conference_context_string()`) is brought into Pass 5 so the term selection is grounded in the actual deployment — what's likely to come up given the audience profile + conference themes.
-
-Voice-type-specific term lists at minimum:
-- **Period voices** (Plato, Cleopatra, Ibn Battuta, Scheherazade, Ada Lovelace, Dostoevsky): full list of modern concepts (AI, PTSD, gender identity, human rights, psychology, climate change, etc.)
-- **Contemporary voices** (Audrey Tang, Hannah Arendt, Peter Thiel): fewer translation needs (they DO have modern vocabulary natively); focus on jargon that's deployment-specific
-- **Non-human** (Whanganui, Octopus): translate human-individualist concepts (selfhood, agency, narrative)
-- **Fictional** (Bob Marley, Scheherazade): corpus-derived idiom
-
-Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade needed for FU#12-B.
-
-**Effort:** 6-9 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 2-3 hr for (B) Pass 5 extension (schema + prompt + audience/conference loading).
+**Effort:** 5-7 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 1 hr for (B) Pass 5 audience/conference loading + prompt enhancement.
 
 **Related:**
-- Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source. If Pass 7a flags translation_table issues post-Pass-5, Pass 7a-FIX (FU#13) patches them directly.
-- High runtime leverage: Provocateur won't get caught flat-footed by modern terms because mappings are pre-computed.
+- Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source.
+- Audience-priming is a small-but-meaningful runtime quality lift: voice arrives "ready" for the deployment context without sacrificing generative flexibility.
 
 #### FU#13 — Architecture 2: linear `Pass 7a-fix` step (replaces revision loop)
 - **Origin:** This session, designed after empirical observation that surgical writer re-invocation (FU#3) over-corrects (introduces 8 new inconsistencies + 29 more dossier_only citations on the Dostoevsky run).
