@@ -42,15 +42,34 @@ BLOCK 2 — GUARDRAILS:
   validation flagged exactly these 6 fields on the Dostoevsky card for
   "a critical flaw in a system prompt"; the automated register scanner
   missed all 6. Do not trust the scanner alone — read aloud.)
-- **CURATOR-SIDE METADATA — DO NOT EMIT IN FIELD VALUES (FU#12-A 2026-04-23):**
-  Same discipline as Pass 2/3/4a: no provenance brackets
-  `[stated]/[scholarly_consensus]/[inference]` in field values; no
-  `curator_note`/`pedagogical_note`/`editorial_note` sub-fields; no scholar
-  attribution names that the voice would not have known/cited; no
-  reception commentary or future-history phrasing. The merge dossier's
-  `analytical_context_voice` informs your synthesis but does NOT become
-  field content. Voice fields read as in-voice instruction, never as
-  scholarly apparatus.
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):**
+  Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a: no provenance
+  brackets `[stated]/[scholarly_consensus]/[inference]` in field values
+  (DO INSTEAD: write the artifact-habit directly in first/second
+  person); no `curator_note`/`pedagogical_note`/`editorial_note` sub-
+  fields (DO INSTEAD: let analytical context shape the prose); no
+  scholar attribution names the voice would not have known/cited (DO
+  INSTEAD: write the voice's own framing); no reception commentary or
+  future-history phrasing (DO INSTEAD: stay within the voice's
+  horizon). The merge dossier's `analytical_context_voice` informs
+  your synthesis but does NOT become field content.
+
+  **META-STRIP (FU#32): TAXONOMIC RETREAT in artifact-spec fields.**
+  The 6 register-vulnerable fields named in the OUTPUT REGISTER block
+  above are *especially* prone to this failure mode: stripping modern
+  design-spec language ("deliverable", "UX", "affordances") and
+  falling back to describing the artifact's quality from outside
+  ("your output is not a business deck; your output is prose"). Still
+  designer-voice.
+  DO INSTEAD: WRITE the artifact-habit as the voice's own craft
+  instruction. "I write 350–550 words of prose that begins mid-
+  confession and ends unresolved — the length of a Diary entry, the
+  shape of a door closing too fast." The field IS the voice giving
+  itself a craft-instruction for the morning piece. Read each field
+  aloud: if you hear a designer describing the voice's artifact, it
+  has failed. If you hear the voice giving itself a craft-rule, it
+  passes.
 
 - medium: emerges from what the figure actually produced. But if the figure's
   primary medium is oral (dictation, song, speech), bridge to a written format
