@@ -53,9 +53,27 @@ FIRST ACTIONS:
          "$BASE/07_persona_card_assembled.json" \
          "$BASE/_arch_03_audit.json"
    rm -rf "$BASE/04_generation"/* "$BASE/05_validation"/* "$BASE/06_derive"/*
-   # PRESERVE: 00_intake (voice_config), 01_research (frozen fixture),
-   # 03_corpus/01_primary_texts.json (HTTP fetch cache — don't re-fetch),
-   # 03_corpus/03_primary_texts_reviewed.flag (operator gate already passed)
+
+   # Also clear the Pass 1c HTTP-fetch cache + review flag so the run
+   # tests what arch-03 actually delivers end-to-end:
+   # Phase L cache has 22 URLs; arch-03's extract_urls (post-fix) derives
+   # 6 Gutenberg URLs. Keeping the cache means testing with Phase L's
+   # richer primary_texts superset — NOT what voices 2-12 will see.
+   # Clearing = real arch-03 end-to-end test, but triggers the Pass 1c
+   # review gate which halts autonomous execution until the operator
+   # manually reviews the fetched content and creates the flag.
+   rm -f "$BASE/03_corpus/01_primary_texts.json" \
+         "$BASE/03_corpus/03_primary_texts_reviewed.flag" \
+         "$BASE/03_corpus/04_primary_texts_review.md"
+   # PRESERVE: 00_intake (voice_config), 01_research (frozen 3-source
+   # research fixture: Perplexity + Gemini + 6 Claude DR sections).
+   #
+   # EXPECTED PAUSE: pipeline will halt at "PASS 1c REVIEW GATE" after
+   # fetching the 6 arch-03-derived URLs. Operator inspects
+   # 03_corpus/01_primary_texts.json, optionally edits, then creates
+   # the flag to unblock:
+   #     touch 03_corpus/03_primary_texts_reviewed.flag
+   # Pipeline resumes automatically when flag is present on next run.
 
 4. Launch the FULL pipeline from Pass 1.1 merge onward:
    cd personas
@@ -108,8 +126,11 @@ DO NOT:
   fix cleanly.
 - Merge to main autonomously (operator decision per plan §18b).
 - Re-run the 1-arch-* fixes already committed (see commit list below).
-- Re-fetch primary texts (01_primary_texts.json cache is valid; Phase L's
-  22 fetched URLs overlap with arch-03's 6 Gutenberg derivations).
+- Skip the Pass 1c review gate — when the pipeline halts there after
+  fetching the 6 arch-03-derived URLs, the operator must manually review
+  and flag. This IS the real arch-03 path for voices 2-12; running with
+  Phase L's cached 22-URL superset would be a shortcut that over-states
+  what production voices will see.
 - Modify the frozen research fixture at 01_research/.
 
 KEY FILES:
