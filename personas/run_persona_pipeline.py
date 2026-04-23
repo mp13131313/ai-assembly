@@ -1049,6 +1049,27 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
                                f"Issues: {len(field_issues)}")
         return fix_log
 
+    # FU#5 (2026-04-23): snapshot pre-fix state of 04_generation + 05_validation
+    # so operator can diff post-fix vs pre-fix card. Single snapshot per voice
+    # (no per-loop directories — there are no loops under FU#13). Triggered
+    # before patches land + cache files get overwritten.
+    import shutil
+    snapshot_root = _paths.voice_root(SLUG, PROJECT_ROOT) / "04_generation" / "_snapshots" / "pre_fix_pass"
+    snapshot_root.mkdir(parents=True, exist_ok=True)
+    for src_subdir in ("04_generation", "05_validation"):
+        src = _paths.voice_root(SLUG, PROJECT_ROOT) / src_subdir
+        if not src.exists():
+            continue
+        dst = _paths.voice_root(SLUG, PROJECT_ROOT) / src_subdir / "_snapshots" / "pre_fix_pass"
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in src.glob("*.json"):
+            try:
+                shutil.copy2(f, dst / f.name)
+            except OSError as e:
+                fix_log["log"].append(f"WARN snapshot {f.name}: {type(e).__name__}: {e}")
+    fix_log["snapshot_dir_pre_fix"] = "04_generation/_snapshots/pre_fix_pass + 05_validation/_snapshots/pre_fix_pass"
+    fix_log["log"].append(f"Snapshotted pre-fix state to {fix_log['snapshot_dir_pre_fix']}")
+
     pass_outputs = {}
     for pass_id in affected:
         var = globals().get(_PASS_VAR_LOOKUP[pass_id])
