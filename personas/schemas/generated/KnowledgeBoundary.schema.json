@@ -60,6 +60,7 @@
           "enum": [
             "stated",
             "scholarly_consensus",
+            "contested",
             "inference",
             "experiential_reconstruction",
             "projection_warning"
@@ -113,6 +114,7 @@
           "enum": [
             "stated",
             "scholarly_consensus",
+            "contested",
             "inference",
             "experiential_reconstruction",
             "projection_warning"
@@ -266,6 +268,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"
