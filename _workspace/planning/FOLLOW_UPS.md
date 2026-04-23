@@ -26,7 +26,7 @@
 
 ### 🔴 Phase 1 — Critical for clean Dostoevsky re-run
 
-#### FU#12 — Register hardening + audience-aware translation_table (Pass 2-6 + Pass 7c)
+#### FU#12 — Register hardening + audience-aware translation_table (Pass 2-6 + Pass 5)
 - **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card. Refined 2026-04-23 with insight from external deep-research report §6 (concrete translation rules) — the per-voice translation_table pattern is high-leverage for runtime quality.
 
 **Two coordinated changes:**
@@ -61,7 +61,7 @@ Why Pass 5 (not Pass 7c — reconsidered 2026-04-23): translation_table is runti
 
 Cost of Pass 5 placement: if audience/conference changes mid-build, Pass 5 + downstream all re-run (vs. just Pass 7c). Acceptable — audience/conference rarely changes mid-build.
 
-New schema field on Pass 7c output (added to the assembled card):
+New schema field on Pass 5 output (added to the assembled card):
 ```
 translation_table: list[TranslationEntry]  # 8-15 entries, voice-specific
 class TranslationEntry:
@@ -73,7 +73,7 @@ class TranslationEntry:
 
 Pattern follows the deep-research report §6 (concrete worked examples like "AI → soulless mechanization / modern Golem" for Dostoevsky), but each voice gets its OWN table generated in its OWN native vocabulary. Plato wouldn't say "modern Golem" — he'd map AI through *technē* + the *Republic*'s craftsman vs. philosopher. Generic prompt → voice-specific table.
 
-Audience / conference context (currently only loaded at final assembly via `_load_conference_context_string()`) is brought into Pass 7c so the term selection is grounded in the actual deployment — what's likely to come up given the audience profile + conference themes.
+Audience / conference context (currently only loaded at final assembly via `_load_conference_context_string()`) is brought into Pass 5 so the term selection is grounded in the actual deployment — what's likely to come up given the audience profile + conference themes.
 
 Voice-type-specific term lists at minimum:
 - **Period voices** (Plato, Cleopatra, Ibn Battuta, Scheherazade, Ada Lovelace, Dostoevsky): full list of modern concepts (AI, PTSD, gender identity, human rights, psychology, climate change, etc.)
@@ -86,8 +86,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 **Effort:** 6-9 hr total — 4-6 hr for (A) Pass 2-6 register hardening + 2-3 hr for (B) Pass 5 extension (schema + prompt + audience/conference loading).
 
 **Related:**
-- Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source.
-- Pass 7-anachronism (gpt-5.4) can validate the generated translation_table itself for anachronism-cleanliness.
+- Combines with FU#13 — fewer revision triggers if FU#12-A prevents leakage at source. If Pass 7a flags translation_table issues post-Pass-5, Pass 7a-FIX (FU#13) patches them directly.
 - High runtime leverage: Provocateur won't get caught flat-footed by modern terms because mappings are pre-computed.
 
 #### FU#13 — Architecture 2: linear `Pass 7a-fix` step (replaces revision loop)
