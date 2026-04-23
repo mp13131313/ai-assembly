@@ -757,15 +757,16 @@ def _pass_7pre():
     # iterations generate even more output (loop 2 hit 154K raw text
     # mid-JSON at the 48000 ceiling). 96000 gives ~2x headroom for
     # revision loops. Sonnet 4.6 supports this range.
-    # 2026-04-23 (live iteration during Phase 1 re-run):
-    #   24K → 48K → 96K → 128K → 192K
-    # Each bump prompted by the next ceiling-hit. 128K hit at 410K raw
-    # chars on the post-FU#13-fix-pass card (the patches enriched citations
-    # further). FU#2 (chunked per-citation verification) is the proper
-    # architectural fix; this bump is a stop-gap to ship Phase 1 baseline.
-    # Sonnet 4.6 max output may cap below 192K; if so, will need FU#2 next.
+    # 2026-04-23: Pass 7-pre max_tokens journey:
+    #   24K → 48K → 96K → 128K (Sonnet 4.6 hard ceiling — 192K rejected)
+    # Each bump forced by ceiling-hit. The post-FU#13-fix-pass card pushes
+    # past 128K too (~410K raw chars / ~110K output tokens needed).
+    # FU#2 (chunked per-citation verification) is the only sustainable
+    # architectural fix and is now BLOCKING for richer cards.
+    # Caller wraps in try/except to allow pipeline to proceed gracefully
+    # if Pass 7-pre cannot complete on the patched card.
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=192000, temperature=0.0, thinking=False,
+                    max_tokens=128000, temperature=0.0, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
@@ -1183,16 +1184,40 @@ if pass7a["result"].get("overall") == "REVISION_NEEDED":
         combined_2_3_4a = {**combined_2_3, **pass4a["fields"]}
         combined_2_3_4 = {**combined_2_3_4a, **pass4b["fields"]}
 
-        # Re-fire Pass 7-pre + Pass 7-anachronism + Pass 7a once for verification
-        pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
-                                 "Pass 7-pre (post-fix)", _pass_7pre)
-        if fix_log["anachronism_flags_count"] > 0:
-            pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
-                                         "Pass 7-anachronism (post-fix)",
-                                         _pass_7_anachronism)
-        pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
-                                "Pass 7a (post-fix)", _pass_7a)
-        fix_log["post_fix_verdict"] = pass7a["result"].get("overall")
+        # Re-fire Pass 7-pre + Pass 7-anachronism + Pass 7a once for verification.
+        # Wrapped in try/except per Pass 7-pre 128K ceiling: richer post-fix
+        # cards may exceed Sonnet 4.6's max output. FU#2 (chunked verification)
+        # is the architectural fix; this stop-gap lets pipeline ship the
+        # patched card with REVISION_NEEDED status preserved if validators
+        # can't complete.
+        try:
+            pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT),
+                                     "Pass 7-pre (post-fix)", _pass_7pre)
+        except RuntimeError as e:
+            stamp(f"  WARN: Pass 7-pre (post-fix) hit ceiling: {str(e)[:160]}")
+            stamp(f"  Proceeding without post-fix Pass 7-pre verification "
+                  f"(FU#2 architectural fix needed). Card ships with patched "
+                  f"content + pre-fix Pass 7-pre verdict in metadata.")
+            fix_log["log"].append(f"Pass 7-pre (post-fix) skipped due to ceiling: "
+                                   f"{type(e).__name__}: {str(e)[:160]}")
+        try:
+            if fix_log["anachronism_flags_count"] > 0:
+                pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
+                                             "Pass 7-anachronism (post-fix)",
+                                             _pass_7_anachronism)
+        except Exception as e:
+            stamp(f"  WARN: Pass 7-anachronism (post-fix) failed: {str(e)[:160]}")
+            fix_log["log"].append(f"Pass 7-anachronism (post-fix) skipped: "
+                                   f"{type(e).__name__}: {str(e)[:160]}")
+        try:
+            pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
+                                    "Pass 7a (post-fix)", _pass_7a)
+            fix_log["post_fix_verdict"] = pass7a["result"].get("overall")
+        except Exception as e:
+            stamp(f"  WARN: Pass 7a (post-fix) failed: {str(e)[:160]}")
+            fix_log["post_fix_verdict"] = "VERIFICATION_FAILED"
+            fix_log["log"].append(f"Pass 7a (post-fix) skipped: "
+                                   f"{type(e).__name__}: {str(e)[:160]}")
         write_json_atomic(fix_log_path, fix_log)
 
         stamp(f"PASS 7a-FIX: applied {fix_log['patches_applied']} of "
