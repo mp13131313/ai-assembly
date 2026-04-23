@@ -12,26 +12,99 @@
 ```
 You are resuming the arch-03 / Phase 1 follow-up work on the AI Assembly
 project. The previous session (2026-04-23) landed FU#12 + FU#13 + FU#5
-and produced the first card under the new architecture. Read in order:
+and produced the first card under the new architecture. Next item: FU#1
+(Layer 2 preservation audit).
 
-1. _workspace/planning/HANDOFF_2026_04_23_PHASE_1_COMPLETE.md (this doc)
-2. _workspace/planning/FOLLOW_UPS.md (authoritative tracker — single
-   source of truth for all open follow-ups; supersedes the older
-   PIPELINE_REVIEW_FIXES FU sections + OPEN_ITEMS punch list)
+Model: Opus 4.7 + adaptive thinking. High effort. Judgment-bound audit
+work + design follow-ups.
 
-The next item is FU#1 (Layer 2 preservation audit). After that, FU#2
-(chunked Pass 7-pre verification) is BLOCKING for richer cards —
-Sonnet 4.6 hard 128K output ceiling now binds.
+FIRST ACTIONS:
+
+1. Read _workspace/planning/HANDOFF_2026_04_23_PHASE_1_COMPLETE.md
+   in full. It has: LLM model assignments per pass (table), Phase 1
+   first card metrics, empirical signals, known issues, and next-
+   session brief.
+
+2. Read _workspace/planning/FOLLOW_UPS.md (authoritative tracker —
+   single source of truth for all open follow-ups; supersedes older
+   PIPELINE_REVIEW_FIXES FU sections + OPEN_ITEMS punch list). 23
+   active items, dependency-ordered, Phase 1 marked ✅.
+
+3. Verify branch + tests:
+   cd "/Users/aienvironment/Desktop/AI Assembly/code"
+   git log --oneline origin/main..HEAD | head -10
+   cd personas && venv/bin/python -m pytest tests/ -x -q
+   (Expect 128/128 tests pass, branch ~84 commits ahead of main,
+    HEAD is a `2ed0a0b` or later commit.)
+
+4. Verify Phase 1 first card is on disk:
+   ls -la ../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json
+   (Expect: ~150KB, validation_status=REVISION_NEEDED, human_review_pending)
+
+5. BUILD FU#1 (Layer 2 preservation audit — starting point per
+   Phase 2 of implementation order in FOLLOW_UPS.md):
+
+   - Create personas/scripts/arch_03_synthesis_audit.py
+   - Source: 19 chunk files in 02_merge/pass_1_*/ (authoritative)
+   - Target: per-pass outputs in 04_generation/pass{2,3,4a,4b,5,6,7b,7c}_*.json
+   - Import _per_chunk_vars() from run_persona_pipeline.py for
+     authoritative pass-consumption mapping (don't hardcode)
+   - Metrics: density (out_chars / chunk_chars), claim survival,
+     citation survival, per-frame-type survival (1-arch-06 specific)
+   - Output: projects/<project>/voices/<slug>/_synthesis_audit.json
+   - Compare Phase L baseline card vs Phase 1 card — does FU#12-A
+     change the preservation pattern?
+   - Effort: 3-4 hr
+
+6. After FU#1 lands, decide: build FU#2 (chunked Pass 7-pre —
+   🔴 BLOCKING for Plato due to Sonnet 4.6 128K hard ceiling hit
+   empirically last session) OR proceed to Plato with try/except
+   wraps as stop-gap.
 
 DO NOT:
-- Re-implement FU#12 / FU#13 / FU#5 (all landed, see commits below)
-- Touch the revision-loop code (replaced by linear Pass 7a-FIX)
-- Skip the FU#1 audit — it validates that FU#12-A's hardened prompts
-  didn't lose chunk content during synthesis (the only empirical check)
+- Re-implement FU#12 / FU#13 / FU#5 (all landed, see commits in
+  handoff doc). Working tree should be clean.
+- Touch the revision-loop code (replaced by linear Pass 7a-FIX
+  in commits a37e4fc + b34f2cb)
+- Skip the FU#1 audit — it's the only empirical check that FU#12-A's
+  hardened prompts didn't lose chunk content during synthesis
+- Re-fire fix-pass on in-flight Dostoevsky run (idempotency guard
+  now caps at 1 fix-pass per pipeline-completion via _fix_log.json
+  existence check)
 
-If you are unsure about an architectural decision, FOLLOW_UPS.md
-captures the reasoning trail (translation_table withdrawal, pass-7c
-vs pass-5 placement, FU#3 → FU#13 supersedure, etc.).
+KEY FILES:
+- Handoff: _workspace/planning/HANDOFF_2026_04_23_PHASE_1_COMPLETE.md
+- Tracker: _workspace/planning/FOLLOW_UPS.md
+- Pipeline orchestrator: personas/run_persona_pipeline.py
+- Patcher prompts (FU#13): personas/flows/shared/prompts/persona_pass_7a_fix{,_user}.md
+- Path-walker (FU#13): _apply_patch_in_place() in run_persona_pipeline.py
+- Snapshot helper (FU#5): inline in _pass_7a_fix() in run_persona_pipeline.py
+- Existing preservation audit (Layer 1): personas/scripts/arch_03_preservation_audit.py
+
+REPO STATE AT HANDOFF:
+- Branch: arch-03-additive-merge
+- HEAD: 2ed0a0b (or later, if any post-handoff commits)
+- 84 commits ahead of origin/main
+- All commits pushed to origin
+- Tests: 128/128 passing
+- Working tree: clean except _workspace/arch_03_baseline_snapshot/ (FU#11 cleanup item)
+
+REASONING TRAIL (for architectural decisions):
+FOLLOW_UPS.md captures the full trail, but in brief:
+- translation_table lookup WITHDRAWN per critic feedback (pre-computed
+  substitutions are the "voice as costume" failure pattern FU#12-A
+  prevents). translation_protocol stays as METHOD ONLY.
+- Pass 5 (not Pass 7c) is the right home for audience-priming because
+  validators downstream catch issues for free.
+- FU#3 superseded by FU#13 linear patcher. FU#4/6/10-original
+  subsumed. FU#14 (Pass 1a-DR §1-§5 → 4.7) rejected by operator:
+  stay on 4.6.
+- Phase M punch list (D1-D6) closed: resolved by arch-03 + this
+  session's work.
+
+If unsure about anything, FOLLOW_UPS.md CROSS-REFERENCE section
+points to specific historical docs. Default to reading the doc
+before guessing.
 ```
 
 ---
