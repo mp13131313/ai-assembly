@@ -100,23 +100,12 @@
 
 ### 🟢 Polish
 
-#### FU#18 — Pass 0b DR template field-name reframe
-- **Origin:** OPEN_ITEMS.md "Item 6", deferred from prior session.
-- **Problem:** Each section in `pass_0b_*` templates opens with `- world (...)` `- formative_experience (...)` etc. — internal Pydantic field names DR doesn't need to see.
-- **Fix:** Reframe as plain English. Cosmetic, not blocking.
-- **Effort:** ~30 min.
-
 #### FU#19 — Clean panel-voice anchoring in non-human/fictional Pass 0b templates
 - **Origin:** OPEN_ITEMS.md "Item 8", deferred from prior session.
 - **Problem:** `pass_0b_non_human_organism.md` uses Octopus + Hochner + Godfrey-Smith + Mather as worked examples (22 mentions). `pass_0b_non_human_system.md` uses Whanganui + Te Pou Tupua + iwi-specific scholars (22 mentions). `pass_0b_fictional.md` uses Scheherazade extensively (20 mentions).
 - **Why defer-able:** self-anchoring is harmless as long as panel stays at 12. If panel ever expands with a second non-human-organism / non-human-system / fictional voice, those new voices' DR runs would be subtly anchored to the existing panel voice.
 - **Fix:** Swap each panel-voice example for a parallel non-panel exemplar.
 - **Effort:** ~1 hr per template = ~3 hr total.
-
-#### FU#20 — Perplexity retry x2 with exponential backoff
-- **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
-- **Problem:** `flows/shared/research_validation.py` and `_with_retry()` in `run_phase0_1_research.py` give one retry. Two retries with exponential backoff (15s, 60s) would catch more transient failures.
-- **Effort:** ~10 min.
 
 #### FU#22 — MergedDossier.register / voice_register Pydantic alias audit
 - **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
@@ -236,6 +225,8 @@
 | ⚫ FU#6 (revision-loop convergence diagnostic) | Slimmed under FU#13 — no loops, no convergence question. Effectiveness metric becomes part of `_fix_log.json` field. | Design decision |
 | ⚫ FU#10 original (revision-loop test coverage) | Replaced by FU#10-modified (fix-pass test coverage) | Design decision |
 | ⚫ FU#14 (Pass 1a-DR §1-§5 → Opus 4.7 migration) | Operator decision 2026-04-23: stay on 4.6 | Operator call |
+| ⚫ FU#18 (Pass 0b DR template field-name reframe) | Verified 2026-04-23: no `world (...)` patterns in current pass_0b prompts. Likely fixed by Wave 1 commit `1fd43f2` (Pass 0b 23 fixes). | Code audit |
+| ⚫ FU#20 (Perplexity retry x2 with backoff) | Verified 2026-04-23: `_with_retry()` in run_phase0_1_research.py:64 already retries twice (15s, 60s). Note in OPEN_ITEMS.md was stale. | Code audit |
 
 ### Closed before this session (historical reference)
 
@@ -257,8 +248,8 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 | 🔴 Phase 1 (re-run blockers) | FU#12 + FU#13 + FU#5 | **10-15 hr** | Before re-run |
 | 🟡 Phase 2 (before Plato) | FU#7 + FU#10-mod + FU#9 | 4-7 hr | Before Plato run |
 | 🟡 Phase 3 (after re-run, diagnostic) | FU#1 + FU#8 | 3-5 hr | After re-run, optional |
-| 🟢 Polish | FU#18 + FU#19 + FU#20 + FU#22 + FU#15 | 5-7 hr + 2 hr A/B | Anytime |
-| 🔵 Deferred (trigger-based) | FU#2 + FU#21 + FU#23 + FU#24 + FU#11 + CC#1 | trigger-dependent | Various |
+| 🟢 Polish | FU#19 + FU#22 + FU#15 | 4-6 hr + 2 hr A/B | Anytime |
+| 🔵 Deferred (trigger-based) | FU#2 + FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 | trigger-dependent | Various |
 | **Critical-path** | FU#12 → FU#13 → FU#5 → re-run | **~12-18 hr + ~60-90 min run** | Now |
 
 ---
@@ -273,12 +264,14 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 6. **FU#7** (operator summary) — UX, independent
 7. **FU#10-modified** (fix-pass tests)
 8. **FU#9** (merge chunk audit) + **FU#8** (bias evaluator audit) — independent
-9. **FU#18 + FU#19 + FU#20 + FU#22** (polish, anytime)
+9. **FU#19 + FU#22** (polish, anytime)
 10. **FU#15** (Pass 5 A/B) — opportunistic on a low-stakes voice
 11. **FU#2** when 128K hit again
 12. **FU#11 + CC#1** after Phase L verdict
 13. **FU#21 + FU#23** when runtime workstream begins
 14. **FU#24** when active development settles
+15. **FU#25 + FU#28** at branch merge / fresh project bootstrap
+16. **FU#26 + FU#27** general code-hardening / pre-deployment
 
 ---
 
