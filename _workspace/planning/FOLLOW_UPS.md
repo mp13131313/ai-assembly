@@ -24,7 +24,9 @@
 
 ## ACTIVE FOLLOW-UPS
 
-### 🔴 Phase 1 — Critical for clean Dostoevsky re-run
+### ✅ Phase 1 — COMPLETE 2026-04-23 (definitions kept for historical reference)
+
+**Status:** FU#12 + FU#13 + FU#5 all landed. See RECENTLY COMPLETED table below for commits. The definitions below are kept as design context for future reference / re-application if a regression is ever discovered.
 
 #### FU#12 — Register hardening (Pass 2-6) + audience-aware engagement_topics (Pass 5)
 - **Origin:** This session, surfaced empirically by Pass 7a's findings on the Dostoevsky un-patched card (9 specific field issues + 1 CRITICAL FAILURE on `register` check). All 9 issues share one pattern: scholarly metadata leaking into runtime card.
@@ -313,29 +315,51 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 | 🟡 Phase 2 (before Plato) | FU#7 + FU#10-mod + FU#9 | 4-7 hr | Before Plato run |
 | 🟡 Phase 3 (after re-run, diagnostic) | FU#1 + FU#8 | 3-5 hr | After re-run, optional |
 | 🟢 Polish | FU#19 + FU#22 + FU#15 | 4-6 hr + 2 hr A/B | Anytime |
-| 🔵 Deferred (trigger-based) | FU#2 + FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 | trigger-dependent | Various |
-| **Critical-path** | FU#12 → FU#13 → FU#5 → re-run | **~12-18 hr + ~60-90 min run** | Now |
+| 🔵 Deferred (trigger-based) | FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 + FU#29 + FU#30 | trigger-dependent | Various |
+| **🔴 BLOCKING for Plato** | FU#2 (chunked Pass 7-pre) | ~4-6 hr | See note below |
+| **Phase 1 critical-path** | FU#12 → FU#13 → FU#5 → re-run | **✅ COMPLETE 2026-04-23** | Landed in 2026-04-23 session |
+
+**FU#2 status upgraded:** was "when 128K hit again"; 128K hit empirically this session (Sonnet 4.6 hard ceiling, API rejected 192K). Stop-gap try/except wraps now in place, but FU#2 is genuinely blocking for richer cards. Before Plato.
 
 ---
 
 ## RECOMMENDED IMPLEMENTATION ORDER
 
-1. **FU#12** (prompt hardening) — root-cause fix, produces cleaner Pass 2-6 outputs that FU#13 will operate on
-2. **FU#13** (Architecture 2 fix-pass) — needs prompt-hardened outputs to test against; supersedes FU#3 code; subsumes FU#4 + FU#6
-3. **FU#5** (snapshot directory + revision log) — needs FU#13 to know where the snapshot point is
-4. **Re-run from after Pass 1.7** (clear Pass 2 onward; pipeline re-runs Pass 2-6 with hardened prompts → fix-pass → final card)
-5. **FU#1** (Layer 2 audit) — validates that FU#12 didn't lose chunk content during synthesis
-6. **FU#7** (operator summary) — UX, independent
-7. **FU#10-modified** (fix-pass tests)
-8. **FU#9** (merge chunk audit) + **FU#8** (bias evaluator audit) — independent
-9. **FU#19 + FU#22** (polish, anytime)
-10. **FU#15** (Pass 5 A/B) — opportunistic on a low-stakes voice
-11. **FU#2** when 128K hit again
-12. **FU#11 + CC#1** after Phase L verdict
-13. **FU#21 + FU#23** when runtime workstream begins
-14. **FU#24** when active development settles
-15. **FU#25 + FU#28** at branch merge / fresh project bootstrap
-16. **FU#26 + FU#27** general code-hardening / pre-deployment
+### Phase 1 — COMPLETE 2026-04-23 ✅
+
+1. ✅ **FU#12** (Pass 2-6 register hardening + Pass 5 audience-priming) — commits `3d9eb94`/`ffa0b75`/`4d258e4`/`f34eb30`/`8378546`/`92fc487`/`66017c4`
+2. ✅ **FU#13** (Architecture 2 linear Pass 7a-FIX) — commits `a37e4fc`/`b34f2cb` + 5 live iteration fixes
+3. ✅ **FU#5** (pre-fix snapshot directory) — commit `d4d9baa`
+4. ✅ **Re-run from after Pass 1.7** — completed; first card on disk under new architecture
+
+### Phase 2 — Next (starting point for next session)
+
+5. **FU#1** (Layer 2 audit) — validates that FU#12 didn't lose chunk content during synthesis. **START HERE next session.**
+6. **🔴 FU#2** (chunked Pass 7-pre verification) — BLOCKING for richer cards. Build before Plato if next voice will have comparable citation density.
+
+### Phase 3 — Before Plato
+
+7. **FU#7** (operator summary) — UX, independent
+8. **FU#10-modified** (fix-pass tests — tests the Pass 7a-FIX architecture)
+9. **FU#9** (merge chunk max_tokens audit) + **FU#8** (bias evaluator audit) — independent
+
+### Phase 4 — Polish (anytime)
+
+10. **FU#19 + FU#22** (panel-voice anchoring + Pydantic alias audit)
+11. **FU#15** (Pass 5 A/B test) — opportunistic on a low-stakes voice
+
+### Phase 5 — Post-Plato
+
+12. **FU#29** (smoke regeneration on prompt-touch + cross-voice variance) — needs Plato as first diff baseline
+13. **FU#30** (card-richness vs runtime-quality chat-test comparison) — Plato + Dostoevsky side-by-side
+
+### Phase 6 — Trigger-based
+
+14. **FU#11 + CC#1** — after Phase L verdict
+15. **FU#21 + FU#23** — when runtime workstream begins
+16. **FU#24** — when active development settles
+17. **FU#25 + FU#28** — at branch merge / fresh-project bootstrap
+18. **FU#26 + FU#27** — general code-hardening / pre-deployment
 
 ---
 
