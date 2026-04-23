@@ -1099,8 +1099,13 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
 
     stamp(f"PASS 7a-FIX: linear patcher (Sonnet 4.6 + thinking, "
           f"{len(field_issues)} field issues across passes {affected})")
+    # 2026-04-23: max_tokens 16000 → 48000. With Sonnet + thinking, the
+    # thinking budget is deducted from max_tokens. For 20+ field issues
+    # (Phase 1 first run had 20), 16K wasn't enough — thinking alone can
+    # exceed it, leaving zero for output (raw text len: 0). 48K gives
+    # ~30K thinking + ~15K output for ~20-25 patches each ~700 tokens.
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=16000, temperature=1.0, thinking=True,
+                    max_tokens=48000, temperature=1.0, thinking=True,
                     response_format_json=True)
 
     patches = r["json"].get("patches", []) or []
