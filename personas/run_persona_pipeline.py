@@ -1176,7 +1176,11 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
 # ---------- LINEAR FLOW: fire fix-pass once if REVISION_NEEDED ----------
 fix_log_path = _paths.merge_dir(SLUG, PROJECT_ROOT) / "_fix_log.json"
 
-if pass7a["result"].get("overall") == "REVISION_NEEDED":
+if pass7a["result"].get("overall") == "REVISION_NEEDED" and not fix_log_path.exists():
+    # Skip if fix-pass already ran on this card (single-shot per FU#13 design;
+    # without this guard, every pipeline restart re-fires fix-pass since Pass 7a
+    # cache stays REVISION_NEEDED. Operator deletes _fix_log.json + downstream
+    # caches manually if a re-fix is desired.)
     fix_log = _pass_7a_fix(pass7a["result"], pass7_anach["result"])
     write_json_atomic(fix_log_path, fix_log)
 
