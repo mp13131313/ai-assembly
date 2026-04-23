@@ -689,13 +689,14 @@ def _pass_7pre():
                    persona_card_json=json.dumps(full_card_for_verify, ensure_ascii=False, indent=2),
                    primary_texts=primary_block,
                    merged_dossier=merged_dossier)
-    # 2026-04-23: max_tokens bumped 24000 → 48000. Under arch-03 richer
-    # merge + preserved interpretive_frames + scholarly_context, the card
-    # now carries materially more citations to verify, and Pass 7-pre's
-    # verification-item JSON output grew proportionally. Hit 24000 ceiling
-    # at 78K raw text mid-JSON on first Stage 2 run under full fix stack.
+    # 2026-04-23: max_tokens bumped 24000 → 48000 → 96000. Under arch-03
+    # richer merge + preserved interpretive_frames + scholarly_context, the
+    # card carries materially more citations to verify; revision-loop
+    # iterations generate even more output (loop 2 hit 154K raw text
+    # mid-JSON at the 48000 ceiling). 96000 gives ~2x headroom for
+    # revision loops. Sonnet 4.6 supports this range.
     r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=48000, temperature=0.0, thinking=False,
+                    max_tokens=96000, temperature=0.0, thinking=False,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
