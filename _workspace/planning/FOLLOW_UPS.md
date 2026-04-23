@@ -212,6 +212,31 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** rare opportunity — needs to land alongside other naming changes to avoid mid-stream confusion. Maybe at fresh-project bootstrap.
 - **Effort:** ~2-3 hr (renaming + cross-doc references).
 
+#### FU#29 — Smoke regeneration on prompt-touch + cross-voice variance baseline
+- **Origin:** External deep-research report critique (2026-04-23) — at 12-voice scale, formal regeneration-on-commit becomes worth doing for variance management.
+- **Problem:** When a shared prompt changes (Pass 2-6 user prompts, chunk_runner system, etc.), all 12 voices' affected outputs are silently stale until manual re-run. No CI workflow detects which voices need regeneration. No cross-voice diff/baseline tooling answers "did this change affect Plato + Dostoevsky + Ada Lovelace consistently?"
+- **Fix:** Lighter-than-full-regen approach:
+  - GitHub Actions / Make target that detects which prompts changed in a commit
+  - For each affected prompt → regenerate just that pass for 2 sentinel voices (Plato + Dostoevsky)
+  - Diff outputs against baseline; surface deltas in a comment/report
+  - Cost: ~$3-5 per change, ~10 min wall (vs. ~$216 + ~12 hr for full 12-voice regen)
+  - Use `_manifest.json` cost telemetry for budget tracking
+- **Trigger:** after Plato builds (needs first comparison voice for diff baselines).
+- **Effort:** ~3-4 hr (CI workflow + diff tooling + sentinel-voice config).
+
+#### FU#30 — Card-richness vs runtime-quality empirical check
+- **Origin:** External deep-research report critique (2026-04-23) — "elaborate specs can under-perform simple ones at runtime." Speculative warning, not diagnosis. Worth measuring empirically.
+- **Problem:** Card has been progressively enriched (arch-03 + 1-arch-04/06/08 + Pass 7 family). FU#12 trims curator metadata but adds register hardening. There's a point where MORE constraints → WORSE runtime behavior (model has to prioritize across too many instructions; field interactions create unpredictable behavior; over-specified = less generative latitude). We don't currently know if we've crossed that point.
+- **Fix:** Comparative chat-test:
+  - After Plato builds, chat-test BOTH Plato (clean baseline under FU#12+13 architecture) AND Dostoevsky (current arch-03 card) on the SAME 5-10 prompts
+  - Score for voice authenticity, response quality, conversational flow, period-vocabulary deployment, refusal of modern terms
+  - If Plato outperforms Dostoevsky on conversational flow despite same architecture → elaboration isn't paying off; consider trimming card schema
+  - If Dostoevsky outperforms Plato → richness pays off; keep current direction
+  - Adjacent to existing PHASE L CHAT-TEST VALIDATION (OPEN_ITEMS.md §"PHASE L CHAT-TEST VALIDATION") which only tested Dostoevsky in isolation
+- **Trigger:** immediately after Plato build completes.
+- **Effort:** ~1-2 hr chat-testing + ~30 min scoring.
+- **Why high-value despite low-priority:** only empirical check on whether Phase 1 work + arch-03 enrichment pays off at RUNTIME (not just at validation passes).
+
 #### CC#1 — Move `05_primary_text_urls.json` out of `01_research/`
 - **Origin:** This session, surfaced reading `paths.py`.
 - **Problem:** Historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json`. Destination path kept for backward-compat but file is no longer a research output.
