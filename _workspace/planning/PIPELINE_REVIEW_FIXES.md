@@ -1726,6 +1726,131 @@ The arch-03 enrichment (1-arch-04 Gemini preservation + 1-arch-06 interpretive_f
 
 **Test coverage gap:** no automated test for revision-loop branching or env-var gate. Manual verification on next voice with REVISION_NEEDED loop trigger.
 
+### FU#4 — Pass 7-anachronism re-fire inside revision loop
+
+**Status:** PROPOSED 2026-04-23 (bug discovered during in-flight Dostoevsky run).
+
+**Bug:** Pass 7-anachronism is computed ONCE before the while loop ([run_persona_pipeline.py:772](personas/run_persona_pipeline.py:772)) and NEVER re-fires inside the loop. The loop only re-runs Pass 7-pre + Pass 7a after revisions land. This means:
+
+- Loop 1's verdict combines: fresh post-revision Pass 7a + STALE pre-revision Pass 7-anachronism flags merged into `field_issues[]`
+- If the writer's revision actually resolved the original anachronism issues, gpt-5.4's fresh Pass 7a evaluation might say PASS — but the stale anachronism flags get re-merged at the start of the loop iteration and force REVISION_NEEDED
+- Loop iteration is partly chasing ghosts of issues already fixed
+
+**Fix:** Move pass7_anach into the loop iteration. After Pass 6 completes (in cascade or surgical mode), re-fire pass7_anach on the revised card alongside pass7_pre + pass7a. Re-merge the FRESH anachronism flags into pass7a's revision targets if pass7_anach still says REVISION_NEEDED.
+
+**Estimated effort:** ~1-2 hours (move the merging logic inside the while body; ensure cache invalidation includes pass7_anach).
+
+**Why important:** likely the reason in-flight Dostoevsky's loop 1 returned REVISION_NEEDED — gpt-5.4 may have approved the revised card on rubric grounds, but stale anachronism flags forced a no-vote.
+
+### FU#5 — Pre-revision snapshot directory + revision log
+
+**Status:** PROPOSED 2026-04-23 (operator request after seeing in-flight loop kill).
+
+**Problem:** Revision loop's cache invalidation DELETES pre-revision outputs. After the run completes, there's no way to:
+- See the original Pass 4b/6 output before the validator nudged it
+- A/B compare pre vs post revision quality
+- Audit which fields the validator pushed back on
+- Diagnose whether revision improved or regressed (operator review needs this signal)
+
+This becomes more important at panel scale (12 voices) where operator triage requires knowing which revisions actually helped.
+
+**Design:**
+- Before each revision loop fires, snapshot `04_generation/*.json` + `05_validation/*.json` into `04_generation/_snapshots/pre_loop_N/` and `05_validation/_snapshots/pre_loop_N/`
+- Write `_revision_log.json` with one entry per loop: `{loop_index, validator_verdict, validator_model, revision_target_passes, field_issues_count, anachronism_flags_count, snapshot_dir, started_at, completed_at, post_loop_verdict, issues_resolved, issues_remaining, issues_introduced}`
+- Latest files stay at canonical paths (zero downstream code changes)
+- Snapshots isolated in `_snapshots/` (easy to gitignore + bloat trivial — ~200-300K per snapshot × ~3 snapshots × 12 voices = ~10MB total)
+
+**Cross-voice analysis benefit:** filesystem-grep across `projects/*/voices/*/04_generation/_snapshots/pre_loop_1/` to compare loop-1-trigger frequency, identify voice types most prone to revision, etc. No central metadata service needed.
+
+**Estimated effort:** ~3-4 hours (snapshot helper function + revision-log writer + integration into revision loop + tests).
+
+### FU#6 — Revision-loop convergence diagnostic
+
+**Status:** PROPOSED 2026-04-23.
+
+**Problem:** Revision loop has no measurement of whether revisions actually improve the card. Operator currently sees only binary PASS/REVISION_NEEDED at the end. Doesn't know if:
+- Loop 1 fixed 8 of 10 issues but introduced 2 new ones (net improvement)
+- Loop 1 fixed 0 issues, just shuffled language (no improvement)
+- Loop 2 made things worse (regression)
+
+**Fix:** Each loop's Pass 7a result includes a convergence delta: `{issues_resolved_from_prior, issues_carried_forward, issues_newly_introduced}`. Compute by intersecting `field_issues[]` across loops by `field_path`. Surface in operator-facing summary.
+
+Helps decide whether MAX_REVISION_LOOPS should escalate to 3 (if convergent), drop to 1 (if non-convergent), or trigger early-exit when issues_introduced > issues_resolved.
+
+**Estimated effort:** ~2 hours.
+
+### FU#7 — Operator-facing pipeline summary
+
+**Status:** PROPOSED 2026-04-23.
+
+**Problem:** End-of-pipeline stdout is verbose progress logging. No compact "this card needs human attention because X" summary.
+
+**Fix:** Final stdout block before exit prints:
+```
+=== CARD COMPLETE ===
+voice: Fyodor Dostoevsky
+validation_status: REVISION_NEEDED
+human_review_status: pending
+revision_loops: 2 (max 2)
+flagged_fields_remaining: 4
+top_concerns:
+  - constitution[3]: Kantian framing residue (severity: moderate)
+  - knowledge_boundary: vaccine/germ_theory overstatement (severity: moderate)
+  - reasoning_method.steps[6]: sideshadowing anachronism (severity: major)
+recommended_action: spot-edit flagged fields, then mark human_review_status: approved
+artifacts:
+  card: voices/fyodor_dostoevsky/07_persona_card_assembled.json
+  revision_log: voices/fyodor_dostoevsky/04_generation/_snapshots/_revision_log.json
+```
+
+**Estimated effort:** ~1-2 hours.
+
+### FU#8 — Pass 7b bias evaluator audit
+
+**Status:** PROPOSED 2026-04-23.
+
+**Problem:** [run_persona_pipeline.py:1083+](personas/run_persona_pipeline.py:1083) has a "bias evaluator" that uses Gemini primary + Sonnet fallback. Purpose isn't clearly documented; doesn't appear in the spec writeups I've reviewed. May be evaluating Pass 7b smoke-test-chains for bias. Need to:
+- Read the prompt + understand what's being evaluated
+- Verify model choice is correct
+- Document in the LLM call inventory
+
+**Estimated effort:** ~30 min audit + doc update.
+
+### FU#9 — Merge chunk max_tokens audit
+
+**Status:** PROPOSED 2026-04-23 (flagged in this session's quality-tuning assessment).
+
+**Problem:** Each of Pass 1.1-1.6 has its own max_tokens setting in [chunk_runner.py:307+](personas/flows/shared/chunk_runner.py:307). With arch-03 enrichment + the new `contested` evidence_tag enabling more InterpretiveFrame entries, Pass 1.2 specifically had a VALIDATION FAIL → retry pattern in the first arch-03 Stage 2 v7 run (recovered after schema fix, but symptomatic). Per-chunk max_tokens haven't been audited for the new content density.
+
+**Fix:** Read each chunk's max_tokens setting; spot-check actual output token counts from recent runs; bump where heading toward ceiling. Possibly add stop_reason monitoring to surface chunks operating near their ceiling.
+
+**Estimated effort:** ~1-2 hours.
+
+### FU#10 — Revision-loop test coverage
+
+**Status:** PROPOSED 2026-04-23 (acknowledged gap in FU#3 commit).
+
+**Problem:** No automated tests for the revision loop. Surgical-mode branching, env-var gate, cache invalidation logic, post-revision cumulative-dict refresh — all only manually verifiable. Risk: future refactors silently break revision behavior.
+
+**Fix:** Add `tests/test_revision_loop.py` with mocked Pass 7a returning REVISION_NEEDED, verify:
+- Loop 1 surgical (per FU#3 revised) re-runs only flagged passes, not cascade
+- SKIP_REVISION_LOOPS=1 bypasses the loop entirely
+- Cache invalidation only touches the right files
+- Cumulative card dicts refresh correctly post-revision
+- MAX_REVISION_LOOPS cap is honored
+
+**Estimated effort:** ~2-3 hours.
+
+### FU#11 — Workspace archive cleanup
+
+**Status:** PROPOSED 2026-04-23.
+
+**Problem:** `_workspace/arch_03_baseline_snapshot/` has accumulated archives from multiple Stage 2 attempts this session: `pre_full_rerun_20260423_1011/`, `pre_full_rerun_20260423_1011/v2_landing_pages/`, multiple v* failed-partial directories. Useful while debugging; bloat after Phase L sign-off.
+
+**Fix:** After Phase L verdict, prune the snapshot directory to: `baseline_*` (Phase L pre-arch-03 reference) + `stage1_v4_run/` (final Stage 1 output) + `final_dostoevsky_arch_03_card.json` (whatever the operator ships). Delete intermediate failed-partials.
+
+**Estimated effort:** ~15 min (manual + judgment about what's worth keeping).
+
 ### LLM-config quality-tuning assessment (2026-04-23)
 
 End-of-session reasoning pass on whether the pipeline LLM choices are nailed, after the round of upgrades committed this session (Pass 1d/4b/6/Derive/CT compress + Pass 7-anachronism/7a gpt-5.4 ladder + Pass 7-pre 128K bump).
