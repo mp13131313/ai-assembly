@@ -220,6 +220,69 @@ If Stage 1 preservation confirms 1-arch-04 + 1-arch-06 closed the Gemini gap (in
 
 ---
 
+## Stage 2 execution findings (2026-04-23, in progress)
+
+After Stage 1 v4 completed cleanly, operator directed autonomous proceed to Stage 2 (full pipeline to card). Full pipeline surfaced 5 runtime issues in sequence. All are fixed + committed. Findings:
+
+### Fix 1: `url_extract` didn't recurse into `citations[].url` (1-arch-07 follow-up)
+
+**Surfaced:** Stage 2 v1. Pass 1c-extract returned 0 URLs from arch-03 merge (vs. 22 from Phase L). Pass 1c-fetch short-circuited `pass1c={"passages":[]}` → Pass 1d skipped → Pass 4a ran with empty primary_block (`voice_basis=training-data`) → Pass 6 halted.
+
+**Root cause:** Arch-03 merge emits URLs at `passages[].citations[].url` (nested list-of-dicts). Original `extract_urls_from_passages()` iterated top-level string fields only. Separately, `works[].note` references use shorthand ("Project Gutenberg", "rvb.ru/...") without `https://` prefix.
+
+**Fix:** `_walk_for_urls()` recursive walker in `personas/flows/shared/url_extract.py`. Handles both conventions (regex-extracted URL-in-string + explicit `url` keys in dicts). Smoke-test on Stage 1 v4 merge returns 6 Gutenberg URLs. Commit `ec6c3fc`.
+
+### Fix 2: Pass 7-pre max_tokens ceiling hit on verification output
+
+**Surfaced:** Stage 2 v1 + Stage 2 v5. Sonnet 4.6 hit `max_tokens=24000` ceiling at 78K raw text mid-JSON (v1), then `max_tokens=48000` ceiling at 154K mid-JSON (v5 revision loop 2).
+
+**Root cause:** Arch-03 preserved richer scholarly citations (interpretive_frames + scholarly_context populated) → more citations in the card → Pass 7-pre's per-item verification output grew proportionally. Revision loops on bigger cards push this further.
+
+**Fix:** `max_tokens` 24000 → 48000 (commit `ec6c3fc`) → 96000 (commit `2d98dd4`). 96K gives ~2× headroom even for revision-loop iterations.
+
+### Fix 3: Pass 1d Sonnet 4.6 content-filter block
+
+**Surfaced:** Stage 2 v2. Sonnet 4.6's JSON selection output (selection rubric for Dostoevsky's corpus) tripped Anthropic's output content-filtering policy — likely because descriptive `why`/`label` fields paraphrased violent/disturbing scenes (Karamazov Rebellion, Stavrogin-Matryosha confession, Svidrigailov suicide).
+
+**Fix:** Pass 1d model upgraded claude-sonnet-4-6 → claude-opus-4-7 (commit `0c8da09`). Opus 4.7 handles canonical literary material reliably in our testing. Pass 1d is a small call (~8K output); modest cost delta.
+
+### Fix 4: Opus 4.7 deprecated `temperature` parameter
+
+**Surfaced:** Stage 2 v3. After model swap (Fix 3), Opus 4.7 rejected the call with `temperature is deprecated for this model`.
+
+**Fix:** `call_claude(temperature=...)` now accepts `None` to omit the parameter from API kwargs (commit `4f92610`). Pass 1d passes `temperature=None` explicitly. Backward-compat default of 0.2 preserved for older models.
+
+### Fix 5: (not actually a fix, a finding) Pass 7a uses Gemini fallback because o3 + gpt-4o hit rate limits
+
+**Surfaced:** Stage 2 v5/v6. Pass 7a's primary validator is o3, fallback gpt-4o, second fallback Gemini 2.5 Pro. Both OpenAI models hit RateLimitError ("Request too large for o3/gpt-4o in organization"). Gemini succeeds.
+
+**Not a fix needed:** the cross-model fallback ladder is designed for this. Pass 7a runs cleanly under Gemini 2.5 Pro. Noting for the record — if OpenAI org-level rate limits are materially reached, can adjust primary selection.
+
+### Stage 2 progress at context-budget pause point
+
+| Stage | Status |
+|---|---|
+| Pass 2, 3, 4a, 4b, 5, 6 | ✅ all complete (each run ~30s-5min) |
+| Pass 7-pre loop 1 | ✅ PASS (112 citations verified, 35 dossier_only, 3 inconsistent, 5 interpretive — verdict REVIEW_NEEDED, non-blocking) |
+| Pass 7-anachronism | ⚠️ REVISION_NEEDED, 4 flags (loop 1) |
+| Pass 7a loop 1 | ⚠️ REVISION_NEEDED (Gemini validator) |
+| Revision loop 1/2 | 🔄 running (Pass 2 re-done, Pass 3 in progress as of doc write) |
+| Pass 7b (smoke_test_chains) | pending |
+| Pass 7c (banned_lang/modes refine) | pending |
+| Derive | pending |
+| Assembly → 07_persona_card_assembled.json | pending |
+
+### Commit sequence this Stage 2 cycle
+
+- `ec6c3fc` — url_extract recursion + Pass 7-pre 24K→48K
+- `7335696` — docs note 1-arch-07 follow-up
+- `0c8da09` — Pass 1d Sonnet → Opus
+- `8609c60` — Pass 1d Opus temperature handling (first attempt, incomplete)
+- `4f92610` — call_claude honors temperature=None (completes fix)
+- `2d98dd4` — Pass 7-pre 48K → 96K for revision loops
+
+All pushed to `origin/arch-03-additive-merge`.
+
 ## Known issues / watch items carried forward
 
 1. **Preservation audit script false-positive rate** — the `citation preservation` metric extracts names via regex that catches fictional character names (Alyosha, Mitya, Zosima), first names, country names (France), and epithets ("Younger" from "Holbein the Younger") as "missing authors." Script needs recalibration as a post-Stage-1 improvement task. Run the manual verification queries in step 4 above for authoritative readings.
