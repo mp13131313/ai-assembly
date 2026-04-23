@@ -165,6 +165,33 @@
 - **Trigger:** Phase L verdict.
 - **Effort:** ~15 min judgment + manual.
 
+#### FU#25 — Split `provocateur_flow.py` into 5 stage files
+- **Origin:** RUNTIME_REVIEW_2026_04_20.md "Deferred considerations".
+- **Problem:** `provocateur_flow.py` is 1368 lines covering 5 stages (triage, selection, formulation, packaging, ...). Splitting into `triage_flow.py`, `selection.py`, `formulation_flow.py`, `packaging.py` would match the spec's shape.
+- **Why deferred:** churn risk on `phase-b-rebuild` branch (~50+ commits ahead of main).
+- **Trigger:** after Phase L sign-off + branch merged to main.
+- **Effort:** ~3-4 hr (mechanical split + import updates + test runs).
+
+#### FU#26 — Typed `PROMPTS` registry for `load_prompt(name)`
+- **Origin:** RUNTIME_REVIEW_2026_04_20.md.
+- **Problem:** `load_prompt(name)` in `flows/shared/io.py:95` takes a string name (`{name}.md` under `_PROMPTS_DIR`). A filename rename surfaces only at runtime as `FileNotFoundError` — not silent, but not caught by static checks either.
+- **Fix:** Typed `PROMPTS` registry that hardens the coupling.
+- **Trigger:** general code-hardening pass.
+- **Effort:** ~1-2 hr.
+
+#### FU#27 — Runtime flow-level unit tests
+- **Origin:** RUNTIME_REVIEW_2026_04_20.md.
+- **Problem:** No flow-level unit tests. Convention is roster-integration against `~/Desktop/AI Assembly/archive/runs/runtime/dev_msc_test/`. Works for current team size; would need restating before growing the contributor set.
+- **Trigger:** team-size growth or pre-deployment hardening.
+- **Effort:** unknown (significant).
+
+#### FU#28 — Pipeline pass-numbering renumbering
+- **Origin:** HANDOFF_PIPELINE_REVIEW.md (deferred during pipeline review session).
+- **Problem:** `1a/1b/1c/1d` family vs. `1.1-1.7` merge family naming is confusing for new readers. Pipeline-step-map legend in PIPELINE_REVIEW_FIXES.md was added as a workaround.
+- **Fix:** rationalize naming (e.g., 1.0a/1.0b/1.0c/1.0d for research family vs. 1.1-1.7 for merge family, or another scheme).
+- **Trigger:** rare opportunity — needs to land alongside other naming changes to avoid mid-stream confusion. Maybe at fresh-project bootstrap.
+- **Effort:** ~2-3 hr (renaming + cross-doc references).
+
 #### CC#1 — Move `05_primary_text_urls.json` out of `01_research/`
 - **Origin:** This session, surfaced reading `paths.py`.
 - **Problem:** Historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json`. Destination path kept for backward-compat but file is no longer a research output.
@@ -267,6 +294,14 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 - **Pipeline review handoff:** `HANDOFF_PIPELINE_REVIEW.md`
 
 When historical context is needed, read those. For active tracking + implementation order, **this doc is authoritative**.
+
+### Important note on PIPELINE_REVIEW_FIXES.md scope
+
+That doc tracks **two layers** of work:
+1. **Architectural follow-ups (FU#1-13)** — consolidated here in FOLLOW_UPS.md as authoritative.
+2. **Wave 1/2/3 step-level prompt-review fixes (~99 PROPOSED items)** — these are tactical per-prompt audits from the 2026-04-21 pipeline review session. PIPELINE_REVIEW_FIXES.md remains authoritative for these.
+
+**Wave 4 prompt review (Pass 2/3/4a/4b/5/6 + CT threading)** is forward-referenced in PIPELINE_REVIEW_FIXES.md but not started. **FU#12 (curator-metadata prompt hardening) will overlap with Wave 4 scope** for Pass 2-6 prompts. When implementing FU#12, audit Wave 4 PROPOSED items for those passes and address them inline if cheap.
 
 ---
 
