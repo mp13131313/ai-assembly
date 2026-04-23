@@ -957,25 +957,36 @@ if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
         pass7a["result"]["overall"] = "REVISION_NEEDED"
         stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
-# 2026-04-23 (FU#3 inline): revision-loop mode policy.
-# Loop 1 = FULL cascade re-run (writer regenerates flagged passes from scratch
-#   with critique appended; downstream caches invalidated; cascade re-runs).
-#   Maximum coherence repair, expensive (~25-40 min wall, ~$5-10 per voice).
-# Loop 2 = SURGICAL patch (writer sees its prior output + critique + explicit
-#   "modify ONLY flagged fields, reproduce all others verbatim" instruction;
-#   only the flagged target pass(es) re-run; downstream stays cached).
-#   Cheap (~5-10 min wall, ~$1-2 per voice). Tradeoff: stale downstream
-#   context — Pass 4a/4b/5/6 don't see the patched Pass 2/3 fields. Defensible
-#   because if loop 1's full cascade didn't converge, the residual issues are
-#   likely field-local (e.g., swap an anachronistic term, tighten a knowledge-
-#   boundary list) and don't need cross-pass re-thinking.
+# 2026-04-23 (FU#3 inline, revised): surgical patch on EVERY revision loop.
+# Original implementation (this session, earlier commit) gated surgical mode
+# to loop 2+; operator updated decision after seeing in-flight cost: surgical
+# from loop 1 is the right default. Writer sees prior output + critique +
+# explicit "modify ONLY flagged fields, reproduce all others verbatim"
+# instruction; only the flagged target pass(es) re-run; downstream cascade
+# stays cached. Cost ~$1-2/loop instead of ~$5-10/loop full re-run. Tradeoff:
+# downstream passes (4a/4b/5/6) keep their pre-revision outputs even when
+# Pass 2/3 are patched. Defensible — most cross-model rubric flags are
+# field-local; if a flag genuinely requires cross-pass re-thinking, it'll
+# surface again on the post-revision Pass 7a and trigger another loop.
+#
+# Operator escape hatch: SKIP_REVISION_LOOPS=1 env var bypasses the loop
+# entirely. For mid-flight runs that hit unrecoverable state — operator
+# accepts current Pass 7a verdict (typically REVISION_NEEDED) and lets
+# the pipeline proceed to 7b/7c/Derive/Assembly, deferring resolution to
+# human review.
 _TARGET_FNAME = {
     "2": "pass2_identity_boundaries", "3": "pass3_intellectual_core",
     "4a": "pass4a_voice", "4b": "pass4b_artifact",
     "5": "pass5_engagement", "6": "pass6_corpus",
 }
 
-while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
+_skip_loops = os.environ.get("SKIP_REVISION_LOOPS")
+if _skip_loops:
+    stamp(f"REVISION LOOPS DISABLED via SKIP_REVISION_LOOPS={_skip_loops}; "
+          f"proceeding with current Pass 7a verdict ({pass7a['result'].get('overall', '?')}) "
+          f"to 7b/7c/Derive/Assembly. Operator chose to defer resolution to human review.")
+
+while not _skip_loops and pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < MAX_REVISION_LOOPS:
     targets = [str(t) for t in pass7a["result"].get("revision_target_passes", [])]
     targets = [t for t in targets if t in PASS_RUNNERS]  # filter to known passes
     if not targets:
@@ -983,9 +994,8 @@ while pass7a["result"].get("overall") == "REVISION_NEEDED" and revision_loops < 
         break
 
     revision_loops += 1
-    SURGICAL_MODE = revision_loops >= 2  # Loop 2+ uses surgical patch (FU#3)
-    mode_label = "SURGICAL" if SURGICAL_MODE else "FULL"
-    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS} ({mode_label}): re-running passes {targets}")
+    SURGICAL_MODE = True  # FU#3: surgical on every loop (was loop-2-only earlier this session)
+    stamp(f"REVISION LOOP {revision_loops}/{MAX_REVISION_LOOPS} (SURGICAL): re-running passes {targets}")
 
     # SURGICAL prerequisite: read prior pass outputs from cache files BEFORE
     # they get invalidated, so we can prepend them to the writer's critique.
