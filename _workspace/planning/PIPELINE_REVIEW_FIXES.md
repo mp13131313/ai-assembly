@@ -1654,6 +1654,35 @@ CT mechanism confirmed from `run_persona_pipeline.py:357-370`: `_ct_compress()` 
 
 ---
 
+## arch-03 follow-up items (post-Stage-2)
+
+### FU#1 — Layer 2 preservation audit (chunks → 04_generation synthesis)
+
+**Status:** PROPOSED 2026-04-23 during arch-03 Stage 2 restart.
+
+**Problem:** `personas/scripts/arch_03_preservation_audit.py` only audits Layer 1 — DR-research sources (§1-§6) → merge-output chunks (`02_merge/pass_1_*/*.json`). The synthesis layer is unaudited: there is no instrumentation that measures how much of each chunk's content survives into `04_generation/pass{2,3,4a,4b,5,6,7b,7c}_*.json`. Empirical question for arch-03 — does Pass 2-6's compression preserve the merge layer's enriched content (interpretive_frames, anachronism_discipline, contested-tag claims, Gemini cross-disciplinary frames), or does it silently drop content the merge gained?
+
+**Verdict on right artifact base** (decided 2026-04-23 with operator):
+- **Source side**: read the 19 chunk files in `02_merge/pass_1_1/` through `02_merge/pass_1_6/` directly (chunks are authoritative per source-of-truth invariant; `08_merged_dossier.json` is a snapshot that could theoretically drift).
+- **Target side (primary)**: per-pass outputs in `04_generation/pass{2,3,4a,4b,5,6,7b,7c}_*.json`. Pass-level granularity isolates which pass dropped what; final `07_persona_card_assembled.json` mixes contributions and revision-loop edits.
+- **Target side (secondary, holistic)**: `07_persona_card_assembled.json` for one-number "X% of merge content survived to card" summary.
+- **NOT** `05_validation/*` — those are audit outputs, not synthesis outputs.
+
+**Mapping authority:** the per-pass chunk consumption is encoded in `_per_chunk_vars()` in `personas/run_persona_pipeline.py` (1-arch-05 Part A). A new audit script should import that helper rather than hard-code the mapping — keeps audit and orchestrator in sync as the consumption table evolves.
+
+**Recommended audit metrics:**
+- **Density**: out_chars / chunk_chars per (chunk, declared-consumer-pass) pair
+- **Claim survival**: matched_claims / chunk_claims
+- **Citation survival**: matched_authors / chunk_authors per chunk
+- **Per-chunk red flag**: any chunk with 0% survival in its declared consumer (= silently dropped content)
+- **Per-frame-type survival** (specific to 1-arch-06): did Pass 2 consume `voice_level_debate` frames? Pass 3 consume `interpretive_method` + `cross_disciplinary_reframing`? Pass 4a consume `cross_disciplinary_reframing`?
+
+**Why deferred** (not blocking arch-03 verdict): existing Layer 1 audit + manual verification queries (handoff §4) may be sufficient to make the PROCEED/ITERATE/ROLLBACK call. Build instrumentation only if the existing metrics prove ambiguous. If built, would slot as `personas/scripts/arch_03_synthesis_audit.py` alongside the existing audit script.
+
+**Estimated effort:** ~3-4 hours (script + per-chunk-mapping import + claim-extraction heuristic + run on Dostoevsky baseline + report).
+
+---
+
 **Panel composition confirmed (12 voices):** Scheherazade (fictional), Cleopatra (human, hostile_sources=true), Whanganui (non_human, system), Audrey Tang (human), Ibn Battuta (human), Fyodor Dostoevsky (human — Phase L validated), Hannah Arendt (human), Plato (human — Phase N first voice), Ada Lovelace (human), Peter Thiel (human, legal-risk-flagged), Bob Marley (human, corpus_constraint=lyrics_patterns_only), Octopus (non_human, organism).
 
 **By status:**
