@@ -363,3 +363,69 @@ Would speculate on scope without empirical data. **Not recommended.** Plato data
 ---
 
 *Authoritative planning doc. If this diverges from FOLLOW_UPS.md's RECOMMENDED IMPLEMENTATION ORDER, this doc wins for the 2026-04-24+ next-session scope. FOLLOW_UPS.md remains authoritative for per-FU# definitions + history.*
+
+---
+
+## ADDENDUM — Athens-piece review revises task-register interpretation (2026-04-24 late)
+
+Operator tested the chat v2 card on a second probe: the forum program `index.html` + *"Soon, you'll be on the road to Athens, to attend this forum. How do you feel about it?"*
+
+The piece produced reads — per third-party reviewer — as *"the first piece I've seen in this whole iteration cycle that would make me stop and look if I encountered it attributed to Dostoevsky in a collection of his occasional writings."*
+
+### The revised interpretation
+
+The reviewer's insight, worth pinning: **the card's output quality is task-register-dependent, not only content-dependent.**
+
+- **Philosophical-meditation register** (the earlier love-and-beauty probe) pulls the voice toward Karamazov-speaker mode — the failure-zone where greatest-hits playlist + narrator-unification + kenotic-class leaks manifest.
+- **Publitsist-letter / pre-travel-letter register** (this Athens probe) pulls the voice toward Dostoevsky-at-desk — a single historical speaker writing about a concrete present situation. The voice operates at its full ceiling here.
+
+The Athens piece produced **zero Karamazov citations**, deployed Shigalyov/Grand Inquisitor/Kirillov functionally (as diagnostic categories applied to machine-deliberation sessions), used *deyatelnaya lyubov'* tagged and glossed in the speaker's own idiom, and landed on *"a man who refuses every invitation is not humble, only proud in a colder way"* — a moral-psychological observation the reviewer calls *"the best single sentence the voice has produced across any of the outputs I've seen."*
+
+### Pipeline implication — supports Plato-now without revision
+
+The Provocateur Pipeline is architecturally built to generate **concrete-situation prompts** ("respond to this theme / this delegate / this session") — precisely the task register the Athens probe exercised. The Assembly's actual runtime provocations will be in this register, not in the philosophical-meditation register.
+
+**The card is in better shape than the love-and-beauty reviews alone suggested.**
+
+### Implications for landed work in Phase 4.5
+
+| Item | Prior framing | Revised framing post-Athens |
+|---|---|---|
+| FU#38 voice-self-reference vocab strip | "pipeline leak fix" | **"belt-and-braces"** — the leak exists in the pipeline card (8× `kenotic`, 8× `polyphonic` etc.), but the voice doesn't reach for these terms under Provocateur-register tasks. Strip retained because it prevents the leak under edge-case task registers (like love-and-beauty) at zero runtime cost. |
+| FU#39 character-distribution | Deferred conditional on Plato signal | Still deferred; Athens piece *confirms* narrator-unification is task-dependent, not card-defect |
+| FU#40 digression-permission | Deferred as speculative | Still deferred; Athens piece sprawls at *lower amplitude* than love-and-beauty without any card change |
+| FU#2 retry + FU#41 chat artifact | Operational | Unaffected; operational value is task-independent |
+
+**None of the Phase 4.5 work needs revisiting.** If we'd seen the Athens piece first, we'd have landed the same FU#38 + FU#41 at same scope, with less urgency in framing. The artifacts are the same.
+
+### One more catch worth carrying forward: the "stop-and-look" sentence
+
+> *"a man who refuses every invitation is not humble, only proud in a colder way"*
+
+Reviewer says: *"That sentence is doing real moral work the voice earned. It's not on any playlist."*
+
+This is the signal that the card can produce voice-tissue beyond pastiche when the task is in-register. It's also evidence that the `translation_protocol` + `characteristic_moves` are operating correctly — pulling the voice through concrete situation → diagnostic observation → moral implication without falling into the Karamazov-playlist trap.
+
+For Plato's chat-test: design the probing question in Provocateur-register, not philosophical-meditation register. Example: *"You've just received the program for the AIssembly panel in Athens. The program mentions 'citizen assembly with AI' and a nightwalk on 'the rule of one.' What's your first reaction?"* rather than *"What is justice?"*. The Dostoevsky Athens-piece shows the former gets stronger voice-tissue output than the latter.
+
+### Scope note for FU#30 (post-Plato card-richness vs runtime-quality chat-test)
+
+FU#30's chat-test comparison protocol (Plato + Dostoevsky on same 5-10 prompts) should **deliberately stress both registers**:
+- 2-3 Provocateur-register prompts (concrete situation) — expected operating condition
+- 2-3 philosophical-meditation prompts (abstract question) — stress-test the ceiling
+- 2-3 mixed-register prompts
+
+If the card performs materially better on Provocateur-register than on philosophical-meditation, that's the card operating within scope. Not a defect. Report honestly in the FU#30 summary.
+
+### What would revise this verdict
+
+The Athens piece is still a single probe. Confidence would grow with:
+- A second voice (Plato) producing comparable-quality Athens-register output — validates generalization
+- A hostile-source voice (Cleopatra) producing comparable output on her specific probe — validates hostile-source branch + reconstruction discipline
+- A non-human voice (Octopus or Whanganui) producing comparable output — validates voice-type branching
+
+Any of these materially underperforming would reopen FU#39/FU#40 consideration. For now: proceed with Plato, chat-test in Provocateur-register, assess.
+
+---
+
+*End addendum. Plato is the next operational step; the Athens piece is the strongest pre-Plato validation signal we have.*
