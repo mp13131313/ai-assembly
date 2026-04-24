@@ -24,6 +24,18 @@
 
 ## ACTIVE FOLLOW-UPS
 
+### ✅ Phase 4.5 — COMPLETE 2026-04-24 (pre-Plato pipeline finalization)
+
+**Status:** FU#2-retry-bug + FU#38 + FU#41 all landed post-review-analysis. Commits: `de623bd` (FU#2 retry), `22a2e54` (FU#38 vocab strip across 6 prompts), `b9c1eb2` (FU#41 chat-ready artifact + 13 tests).
+
+**Empirical origin:**
+Two external reviewers of the chat v2 Dostoevsky output (2026-04-24) identified:
+1. "Kenotic beauty" class vocabulary leak — post-voice-lifetime critical vocabulary entering voice's own mouth despite FU#12-A scholar-attribution strip. Verified against pipeline card: polyphonic (8×), kenotic (8×), chronotope (2×), dialogic embodiment (1×), dialogical (1×) all present. FU#13 patcher caught "sideshadowing" but missed these. → **FU#38** extends FU#12-A/FU#32 pattern with voice-self-reference vocabulary STRIP+DO-INSTEAD.
+2. Narrator-unification problem + too-composed architecture ceiling — deemed architectural per first reviewer ("base-model + persona-card tops out at high pastiche"). → FU#39/40 deferred pending Plato signal; FU#31 already deferred.
+3. **Chat v2 card is pure strip-out of assembled card** (27 of 35 shared fields byte-identical; 8 differ only by operator polish). → **FU#41** bakes the strip-out into the pipeline as 4th Derive artifact.
+
+Plus the FU#2 retry bug fix closes the 3-spurious-UNVERIFIED issue on Dostoevsky that the reviews indirectly surfaced.
+
 ### ✅ Phase 2 — COMPLETE 2026-04-24 (definitions kept; see RECENTLY COMPLETED for commits)
 
 **Status:** FU#32 + FU#1 landed. FU#37 DEFERRED (FU#32 alone empirically sufficient). FU#31 DEFERRED (no residual voice-tissue regression to validate). **FU#2 now confirmed blocking: Pass 7-pre hit 128K ceiling TWICE during 2026-04-24 full re-run.**
@@ -321,10 +333,13 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 ## RECENTLY COMPLETED
 
-### 2026-04-24 session (Phases 2 + 3 + 4)
+### 2026-04-24 session (Phases 2 + 3 + 4 + 4.5)
 
 | Item | Commit | Notes |
 |---|---|---|
+| ✅ FU#41 chat-ready system prompt as 4th Derive artifact | `b9c1eb2` | `flows/shared/chat_prompt_builder.py` (new, 99 lines) + `tests/test_chat_prompt_builder.py` (new, 13 tests) + orchestrator integration. Verified against operator's chat v2: 34 fields match exactly; 25/34 byte-identical. Suite 149→162. |
+| ✅ FU#38 voice-self-reference vocabulary strip (Pass 2-6 prompts) | `22a2e54` | Empirical root cause: external reviewers flagged "kenotic beauty" class leak; verified polyphonic/kenotic/chronotope/dialogic embodiment in pipeline card. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern. Per-voice test: would voice IN LIFETIME reach for this English adjective? Generalizes to all 12 voices. 6 files +120 lines. |
+| ✅ FU#2 retry-on-JSONDecodeError (1-retry with backoff) | `de623bd` | Transient JSON parse error on single batch (observed: 3 spurious UNVERIFIED items on Dostoevsky). `_verify_batch_with_retry` helper; 5s backoff; evidence preserves both error traces on fallback. |
 | ✅ FU#10-mod fix-pass test coverage (21 tests; patch_walker extract) | `3cb0a02` | `flows/shared/patch_walker.py` (new) + `tests/test_fix_pass.py` (new, 21 tests). Suite 128→149. |
 | ✅ FU#7 CARD COMPLETE operator triage summary | `87f7794` | Additive block after PIPELINE COMPLETE. Top concerns severity-ordered; recommended action synthesized; artifact paths. |
 | ✅ FU#9 merge chunk max_tokens audit + stop_reason warning | `2aee7aa` | Current 48K adequate (Dostoevsky chunks use 32-50% of ceiling). Proactive stop_reason=="max_tokens" warning added to `call_claude` — catches future voices before content loss. |
@@ -445,23 +460,35 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 13. ✅ **FU#9** (merge chunk max_tokens audit — adequate; proactive stop_reason warning added) — landed commit `2aee7aa`
 14. ✅ **FU#8** (bias evaluator audit) — AUDITED, KEEP AS-IS (already well-designed + documented)
 
-### Phase 5 — Polish (anytime)
+### Phase 4.5 — COMPLETE 2026-04-24 ✅ (pre-Plato pipeline finalization after review analysis)
 
-14. **FU#19 + FU#22** (panel-voice anchoring + Pydantic alias audit)
-15. **FU#15** (Pass 5 A/B test) — opportunistic on a low-stakes voice
+15. ✅ **FU#2 retry-on-JSONDecodeError** (transient JSON parse failure in batch verify stage) — landed commit `de623bd`
+16. ✅ **FU#38** (voice-self-reference vocabulary strip — kenotic/polyphonic/chronotope/dialogical class across all 12 voices) — landed commit `22a2e54`
+17. ✅ **FU#41** (chat-ready system prompt as 4th Derive artifact — paste-target for Claude project custom instructions) — landed commit `b9c1eb2`
 
-### Phase 6 — Post-Plato
+### Phase 5 — Next (start Plato build, then conditional fixes based on signal)
 
-16. **FU#29** (smoke regeneration on prompt-touch + cross-voice variance) — needs Plato as first diff baseline
-17. **FU#30** (card-richness vs runtime-quality chat-test comparison) — Plato + Dostoevsky side-by-side
+18. **Plato build** (operational) — tests whether FU#32/FU#38 generalize to philosophical-human voice_mode; FU#2 chunked on second voice; per-section DR policy holds. Expected ~$18-22 + 2h pipeline + 60-90 min manual DR. Chat-test validation via FU#41 artifact.
+19. 🔵 **FU#39** (character-distribution stage-quoting) — CONDITIONAL on Plato narrator-unification signal. Applies to Plato, Scheherazade, Dostoevsky, Ibn Battuta (distributed voices).
+20. 🔵 **FU#33** (patcher scope extensions — INCONSISTENT flags + bracket residue + transliteration + spell-check) — CONDITIONAL on Plato mechanical-defect signal. Orthogonal; ~3-4 hr.
 
-### Phase 7 — Trigger-based
+### Phase 6 — Polish (anytime)
 
-18. **FU#11 + CC#1** — after Phase L verdict
-19. **FU#21 + FU#23** — when runtime workstream begins
-20. **FU#24** — when active development settles
-21. **FU#25 + FU#28** — at branch merge / fresh-project bootstrap
-22. **FU#26 + FU#27** — general code-hardening / pre-deployment
+21. **FU#19 + FU#22** (panel-voice anchoring + Pydantic alias audit)
+22. **FU#15** (Pass 5 A/B test) — opportunistic on a low-stakes voice
+
+### Phase 7 — Post-Plato
+
+23. **FU#29** (smoke regeneration on prompt-touch + cross-voice variance) — needs Plato as first diff baseline
+24. **FU#30** (card-richness vs runtime-quality chat-test comparison) — Plato + Dostoevsky side-by-side
+
+### Phase 8 — Trigger-based
+
+25. **FU#11 + CC#1** — after Phase L verdict
+26. **FU#21 + FU#23** — when runtime workstream begins
+27. **FU#24** — when active development settles
+28. **FU#25 + FU#28** — at branch merge / fresh-project bootstrap
+29. **FU#26 + FU#27** — general code-hardening / pre-deployment
 
 ---
 
