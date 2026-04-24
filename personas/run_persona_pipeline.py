@@ -42,6 +42,7 @@ from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 from flows.shared.pass_7pre_chunked import run_chunked_pass_7pre
+from flows.shared.patch_walker import apply_patch_in_place as _apply_patch_in_place
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
@@ -983,42 +984,8 @@ if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
 # env var, REVISION_CRITIQUES dict, surgical-vs-cascade branching, post_7a
 # invalidation list (replaced with simpler post-fix invalidation).
 
-_PATH_TOKEN_RE = re.compile(r"([^.\[\]]+)(?:\[(\d+)\])?")
-
-def _apply_patch_in_place(d: dict, path: str, new_value):
-    """Walk a dot-notation path with optional [N] indices; replace value.
-
-    Examples:
-      "knowledge_boundary"          -> d["knowledge_boundary"] = new_value
-      "constitution[3]"             -> d["constitution"][3] = new_value
-      "constitution[3].principle"   -> d["constitution"][3]["principle"] = new_value
-    """
-    tokens = [(name, int(idx) if idx else None)
-              for name, idx in _PATH_TOKEN_RE.findall(path) if name]
-    if not tokens:
-        raise ValueError(f"Empty path: {path!r}")
-    cur = d
-    for i, (name, idx) in enumerate(tokens):
-        is_last = (i == len(tokens) - 1)
-        if is_last and idx is None:
-            cur[name] = new_value
-            return
-        if is_last and idx is not None:
-            if not isinstance(cur.get(name), list):
-                raise TypeError(f"Path {path!r}: expected list at {name!r}")
-            if idx >= len(cur[name]):
-                raise IndexError(f"Path {path!r}: index {idx} out of range for {name!r}")
-            cur[name][idx] = new_value
-            return
-        if name not in cur:
-            raise KeyError(f"Path {path!r}: missing key {name!r} at depth {i}")
-        cur = cur[name]
-        if idx is not None:
-            if not isinstance(cur, list):
-                raise TypeError(f"Path {path!r}: expected list at {name!r}")
-            if idx >= len(cur):
-                raise IndexError(f"Path {path!r}: index {idx} out of range for {name!r}")
-            cur = cur[idx]
+# _apply_patch_in_place moved to flows/shared/patch_walker.py (FU#10-mod
+# 2026-04-24) for testability. Imported above as alias.
 
 
 _PASS_VAR_LOOKUP = {
@@ -1601,3 +1568,139 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
     },
 })
 stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
+
+
+# ---------- FU#7 2026-04-24: Operator-facing CARD COMPLETE summary ----------
+# Compact end-of-pipeline decision helper — surfaces validation_status,
+# human_review_status, fix-pass effectiveness, top concerns (severity-
+# ordered), recommended action, and artifact paths. Operators skim this
+# to triage 12 voices at panel scale without opening each card.
+
+def _compose_top_concerns(
+    pass7a_result: dict,
+    pass7pre_result: dict,
+    fix_log: dict | None,
+    register_violations: int,
+) -> list[str]:
+    """Severity-ordered top-concerns list for operator triage."""
+    concerns: list[tuple[str, str]] = []  # (severity, description)
+    if register_violations > 0:
+        concerns.append(("HIGH", f"Register violations: {register_violations} field(s) — see metadata.register_violation_details"))
+    pass7a_issues = pass7a_result.get("field_issues", []) or []
+    if len(pass7a_issues) > 0:
+        concerns.append(("HIGH", f"Pass 7a field_issues: {len(pass7a_issues)} flagged — see metadata.cross_model_validation"))
+    summary = pass7pre_result.get("summary", {}) or {}
+    unverified = summary.get("unverified", 0)
+    inconsistent = summary.get("inconsistent", 0)
+    if inconsistent > 0:
+        concerns.append(("HIGH", f"Pass 7-pre INCONSISTENT claims: {inconsistent}"))
+    if unverified > 0:
+        concerns.append(("MED", f"Pass 7-pre UNVERIFIED claims: {unverified}"))
+    if pass7pre_result.get("overall") == "VERIFICATION_SKIPPED":
+        concerns.append(("MED", "Pass 7-pre skipped (likely ceiling hit pre-FU#2, or chunked pipeline failure)"))
+    boddice_count = len(pass7pre_result.get("boddice_tag_flags", []) or [])
+    if boddice_count > 0:
+        concerns.append(("MED", f"Boddice tag flags: {boddice_count} missing tag(s)"))
+    if fix_log:
+        remaining_issues = fix_log.get("field_issues_count", 0) - fix_log.get("patches_applied", 0)
+        if remaining_issues > 0:
+            concerns.append(("LOW", f"Fix-pass residual: {remaining_issues} field_issues not resolved by patches"))
+        failed = fix_log.get("patches_failed", 0) or 0
+        if failed > 0:
+            concerns.append(("HIGH", f"Fix-pass failures: {failed} patch(es) failed validation"))
+    severity_order = {"HIGH": 0, "MED": 1, "LOW": 2}
+    concerns.sort(key=lambda c: severity_order.get(c[0], 99))
+    return [f"[{sev}] {desc}" for sev, desc in concerns[:8]]
+
+
+def _compose_recommended_action(
+    pass7a_result: dict,
+    pass7pre_result: dict,
+    register_violations: int,
+    fix_log: dict | None,
+) -> str:
+    overall_a = (pass7a_result.get("overall") or "").upper()
+    overall_pre = (pass7pre_result.get("overall") or "").upper()
+    if overall_a == "PASS" and overall_pre == "PASS" and register_violations == 0:
+        return "Card ready for human review + sign-off."
+    actions: list[str] = []
+    if overall_a == "REVISION_NEEDED":
+        actions.append("Pass 7a flagged REVISION_NEEDED; review top concerns above.")
+    if overall_pre == "VERIFICATION_SKIPPED":
+        actions.append("Pass 7-pre skipped — confirm FU#2 chunked pipeline status or manually review citations.")
+    elif overall_pre == "REVIEW_NEEDED":
+        actions.append("Pass 7-pre flagged REVIEW_NEEDED; inspect _pass_7_pre_citation.json for per-item verdicts.")
+    if register_violations > 0:
+        actions.append(f"{register_violations} register violation(s) — rewrite flagged fields into first/second person.")
+    if fix_log and (fix_log.get("patches_failed", 0) or 0) > 0:
+        actions.append("Patch validation failures — inspect _fix_log.json for error traces.")
+    if not actions:
+        actions.append("Review flagged items above; manual spot-check may resolve.")
+    return " | ".join(actions)
+
+
+_card_path = _paths.assembled_card(SLUG, PROJECT_ROOT)
+_provocateur_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "01_provocateur_profile.json"
+_rubric_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "02_evaluation_rubric.json"
+_fix_log_for_summary = json.loads(fix_log_path.read_text()) if fix_log_path.exists() else None
+_top_concerns = _compose_top_concerns(
+    pass7a["result"], pass7pre["result"], _fix_log_for_summary, register_violations
+)
+_recommended = _compose_recommended_action(
+    pass7a["result"], pass7pre["result"], register_violations, _fix_log_for_summary
+)
+_card_size_bytes = _card_path.stat().st_size if _card_path.exists() else 0
+
+print()
+stamp("=" * 60)
+stamp(f"CARD COMPLETE — operator triage summary")
+stamp("=" * 60)
+stamp(f"  voice:                 {vi['name']} ({SLUG})")
+stamp(f"  card size:             {_card_size_bytes:,} bytes ({len(full_card)} fields)")
+stamp(f"  validation_status:     {pass7a['result'].get('overall', 'unknown')}")
+stamp(f"  human_review_status:   pending")
+stamp("")
+if _fix_log_for_summary:
+    stamp(f"  Fix-pass effectiveness:")
+    stamp(f"    patches:             {_fix_log_for_summary.get('patches_applied', 0)} applied / "
+          f"{_fix_log_for_summary.get('patches_emitted', 0)} emitted "
+          f"(failed: {_fix_log_for_summary.get('patches_failed', 0) or 0}, "
+          f"skipped: {_fix_log_for_summary.get('patches_skipped', 0) or 0})")
+    stamp(f"    anachronism_flags:   {_fix_log_for_summary.get('anachronism_flags_count', 0)} initial")
+    stamp(f"    field_issues:        {_fix_log_for_summary.get('field_issues_count', 0)} initial")
+    stamp(f"    post_fix_verdict:    {_fix_log_for_summary.get('post_fix_verdict', '?')}")
+else:
+    stamp(f"  Fix-pass effectiveness: no fix needed (Pass 7a PASSED, or verdict was SKIPPED)")
+stamp("")
+_pass7pre_summary = pass7pre["result"].get("summary", {}) or {}
+_items_count = len(pass7pre["result"].get("items", []) or [])
+stamp(f"  Pass 7-pre citation audit:")
+stamp(f"    items:               {_items_count}")
+stamp(f"    verified:            {_pass7pre_summary.get('verified', 0)}")
+stamp(f"    unverified:          {_pass7pre_summary.get('unverified', 0)}")
+stamp(f"    dossier_only:        {_pass7pre_summary.get('dossier_only', 0)}")
+stamp(f"    interpretive:        {_pass7pre_summary.get('interpretive', 0)}")
+stamp(f"    inconsistent:        {_pass7pre_summary.get('inconsistent', 0)}")
+stamp(f"    boddice_tag_flags:   {len(pass7pre['result'].get('boddice_tag_flags', []) or [])}")
+stamp("")
+if _top_concerns:
+    stamp(f"  Top concerns (severity-ordered):")
+    for concern in _top_concerns:
+        stamp(f"    {concern}")
+    stamp("")
+stamp(f"  Recommended action:")
+for _line in _recommended.split(" | "):
+    stamp(f"    → {_line}")
+stamp("")
+stamp(f"  Artifacts:")
+stamp(f"    card:                {_card_path.relative_to(PROJECT_ROOT)}")
+if _provocateur_path.exists():
+    stamp(f"    provocateur_profile: {_provocateur_path.relative_to(PROJECT_ROOT)}")
+if _rubric_path.exists():
+    stamp(f"    evaluation_rubric:   {_rubric_path.relative_to(PROJECT_ROOT)}")
+if fix_log_path.exists():
+    stamp(f"    fix_log:             {fix_log_path.relative_to(PROJECT_ROOT)}")
+_synthesis_audit_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "_synthesis_audit.json"
+if _synthesis_audit_path.exists():
+    stamp(f"    synthesis_audit:     {_synthesis_audit_path.relative_to(PROJECT_ROOT)}")
+stamp("=" * 60)
