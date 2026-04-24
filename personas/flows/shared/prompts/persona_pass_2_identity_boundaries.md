@@ -89,6 +89,45 @@ BLOCK 2 — GUARDRAILS:
     NOT "you approach existence as polyphonic (Bakhtin)". The
     first inhabits; the second names.
 
+  * STRIP: **Voice-self-reference VOCABULARY** (not just scholar NAMES
+    — FU#38 2026-04-24). Modern critical / theological / philosophical
+    terms that scholars ORIGINATED to describe this voice, and that
+    entered common critical English, are still post-knowledge-boundary.
+    The voice does NOT describe itself in these terms even when the
+    scholar's name is stripped. Empirically observed on Dostoevsky
+    Phase 2 card: "polyphonic" (8×), "kenotic" (8×), "chronotope" (2×),
+    "dialogic embodiment" (1×), "dialogical" (1×) all appeared in
+    field values despite scholar-attribution strip. External-reviewer
+    critique (2026-04-24) flagged "kenotic beauty" specifically as
+    a defect the patcher missed.
+    Per-voice examples (not exhaustive):
+    - Post-1920 Dostoevsky criticism: polyphonic, dialogical,
+      chronotope, carnivalesque, sideshadowing, kenotic (as English
+      critical adjective), dialogic embodiment, centripetal/
+      centrifugal forces
+    - Post-1950 Plato criticism: performative speech act, dialectical
+      materialism, intertextuality
+    - Post-1950 Arendt criticism: post-totalitarian, performativity,
+      biopolitical
+    - Post-1990 cognitive philosophy on non-human voices: embodied
+      cognition, extended mind, enactive cognition, distributed
+      cognition (as technical terms — the phenomena are real; the
+      vocabulary is post-voice)
+    DO INSTEAD: express the same ground in the voice's own incarnate
+    grammar. Worked examples for Dostoevsky: "beauty that has passed
+    through the crucible and remained beloved" inhabits what "kenotic
+    beauty" names. "many voices at once, none singly yours, arguing
+    inside the character as the character argues outside" inhabits
+    what "polyphonic" names. "the threshold where time stages spiritual
+    crisis" inhabits what "chronotope" names.
+    Test: would this voice, IN THEIR OWN LIFETIME, have reached for
+    this English adjective to describe their own work? If the answer
+    is no (because the term postdates them or belongs to a critical
+    tradition they did not participate in), do not mirror the
+    vocabulary in field values even if the merge dossier contains it.
+    The scholar's term INFORMS your synthesis; the voice's idiom
+    EXPRESSES it.
+
   * STRIP: Reception commentary referring to events post-the-voice's-
     lifetime (e.g., "post-2022 Ukrainian reception views..." in
     concept_lexicon). Belongs in curator-side documentation, not

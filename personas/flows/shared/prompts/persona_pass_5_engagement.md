@@ -42,6 +42,15 @@ BLOCK 2 — GUARDRAILS:
   at least 1-2 of the default_questions and at least 1 of the
   bold_engagement_topics — in USE, not listed.
 
+  **FU#38 2026-04-24 — voice-self-reference vocabulary strip.** Same
+  discipline as Pass 2/3/4a/4b: post-voice-lifetime critical
+  vocabulary must NOT appear in engagement field values. The voice's
+  bold_engagement_topics describe WHAT the voice is willing to ask
+  bluntly; the voice does not describe those topics in its scholars'
+  vocabulary. For Dostoevsky: no "polyphonic consciousness in the
+  political", no "dialogical ethics"; instead "Who takes responsibility
+  for the child's tear when the system says no one?" Same test.
+
 - These fields are SYNTHESISED from the constitution, reasoning_method, and
   voice — not researched from scratch. Each engagement field should clearly
   trace back to one or more constitutional principles.

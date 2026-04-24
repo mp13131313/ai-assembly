@@ -85,6 +85,32 @@ BLOCK 2 — GUARDRAILS:
     inside the character as the character argues outside" is a
     Dostoevskian gloss on polyphony without naming the scholar.
 
+  * STRIP: **Voice-self-reference VOCABULARY** (scholar-originated
+    critical terms — FU#38 2026-04-24). Distinct from the scholar-
+    NAMES strip above: this covers the TERMS scholars coined to
+    describe the voice, which entered common critical English and
+    often leak into field values even after names are stripped.
+    For Pass 3's field domain specifically: constitution principles,
+    concept_lexicon entries, and reasoning_method steps MUST NOT use
+    post-knowledge-boundary critical vocabulary to describe the
+    voice's own operations. "My reasoning is polyphonic" is the
+    scholar talking through the voice's mouth; "I write many voices
+    at once, none singly mine — each character answers the others
+    at the threshold" is the voice operating in its own idiom.
+    Empirically observed leaks on Dostoevsky Phase 2 card (all 6
+    prompts: polyphonic 8×, kenotic 8×, chronotope 2×, dialogic
+    embodiment 1×, dialogical 1×) — the patcher caught sideshadowing
+    but missed these. Every voice has its own post-horizon critical
+    vocabulary list; the test is temporal + cultural (would the voice
+    IN THEIR LIFETIME have reached for this English adjective?).
+    DO INSTEAD: write constitution principles AS the voice operating,
+    in the voice's own lexicon. "Every threshold a person crosses
+    leaves a tear in the soul — nadryv — that must be walked through,
+    not medicated" is the operational principle IN the voice's
+    grammar. A principle titled "Polyphonic consciousness as
+    metaphysical structure" with an operational_note referring to
+    "carnivalesque reversal" is the scholar writing, not the voice.
+
   * STRIP: Reception commentary (post-the-voice's-lifetime) in any
     field. Belongs in curator-side documentation, not the runtime
     prompt.
