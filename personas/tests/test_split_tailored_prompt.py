@@ -208,3 +208,70 @@ class TestWrapSection:
         body = "## Section 4: VOICE AND STYLE\n\nMy specific content here.\n"
         result = wrap_section(body, 4, "test_voice", _VOICE_CONFIG, None)
         assert "My specific content here." in result
+
+    def test_section_1_has_research_comprehensively_intro(self):
+        """§1 header includes the 'Research [name] comprehensively...' intro.
+
+        Regression for Plato 2026-04-24: intro lives in per-type files before
+        `## Section 1:` in monolithic, so splitter drops it. Header template
+        now injects it type-conditionally for §1.
+        """
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="test_voice",
+            voice_config=_VOICE_CONFIG,
+            wikipedia_url=None,
+        )
+        assert "Research Test Voice comprehensively for an AI persona specification" in result
+        assert "biocultural fields" in result  # human voice-type wording
+
+    def test_section_2_through_6_no_research_intro(self):
+        """Intro only in §1 to match monolithic semantics (single preamble)."""
+        for n in range(2, 7):
+            result = wrap_section(
+                f"## Section {n}: TEST\n\nContent.\n",
+                section_index=n,
+                slug="test_voice",
+                voice_config=_VOICE_CONFIG,
+                wikipedia_url=None,
+            )
+            assert "comprehensively for an AI persona specification" not in result, (
+                f"§{n} should NOT have the §1-only intro line"
+            )
+
+    def test_non_human_organism_intro_uses_type_specific_wording(self):
+        """Non-human organism §1 uses 'science-grounded' framing, not biocultural."""
+        nh_config = {
+            **_VOICE_CONFIG,
+            "name": "Octopus",
+            "type": "non_human",
+            "subtype": "organism",
+            "voice_mode": None,
+        }
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="octopus",
+            voice_config=nh_config,
+            wikipedia_url=None,
+        )
+        assert "Research Octopus comprehensively for an AI persona specification based on this non-human entity" in result
+        assert "science-grounded narrative" in result
+        assert "biocultural" not in result
+
+    def test_disambiguation_hint_in_intro(self):
+        """display_name_with_hint renders with disambiguation when provided."""
+        config_with_hint = {
+            **_VOICE_CONFIG,
+            "name": "Plato",
+            "wikipedia_disambiguation_hint": "ancient Greek philosopher",
+        }
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="plato",
+            voice_config=config_with_hint,
+            wikipedia_url=None,
+        )
+        assert "Research Plato (ancient Greek philosopher) comprehensively" in result
