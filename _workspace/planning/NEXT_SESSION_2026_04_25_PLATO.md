@@ -311,7 +311,8 @@ None blocking. Worth doing if the operator wants a clean slate before Plato. All
 - `venv/bin/python run_persona_pipeline.py "Plato" --project "<athens-or-new-project>"`
 - ~$18-22 + 2h pipeline + 60-90 min manual DR
 - Chat-test validation: paste `03_chat_system_prompt.json` into Claude project → probing question → assess
-- **Validates:** FU#32 generalization to philosophical-human voice_mode / FU#2 on second voice / per-section DR policy on non-narratival voice
+- **Chat-test must exercise BOTH model-modes** — paste into one Opus project and one Sonnet project. The Sonnet/Opus housing-panel pair (2026-04-24) showed the card has two performance modes: Sonnet → Dnevnik-Pisatelya essayistic; Opus → philosophical-extension (compositional work with canonical primitives, not retrieval). Testing only one mode measures the floor or the ceiling, not both.
+- **Validates:** FU#32 generalization to philosophical-human voice_mode / FU#2 on second voice / per-section DR policy on non-narratival voice / card's two-mode behavior under Plato
 
 **Plato tests four hypotheses:**
 1. FU#32 voice-tissue discipline generalizes beyond narratival (Plato is philosophical)
@@ -452,10 +453,11 @@ For Plato's chat-test: design the probing question in Provocateur-register, not 
 
 ### Scope note for FU#30 (post-Plato card-richness vs runtime-quality chat-test)
 
-FU#30's chat-test comparison protocol (Plato + Dostoevsky on same 5-10 prompts) should **deliberately stress both registers**:
+FU#30's chat-test comparison protocol (Plato + Dostoevsky on same 5-10 prompts) should **deliberately stress both registers AND both model-modes**:
 - 2-3 Provocateur-register prompts (concrete situation) — expected operating condition
 - 2-3 philosophical-meditation prompts (abstract question) — stress-test the ceiling
 - 2-3 mixed-register prompts
+- Each prompt run in **Sonnet-mode AND Opus-mode** Claude projects. The 2026-04-24 housing-panel pair showed the card has two distinct performance modes (essayistic vs philosophical-extension); FU#30 without the model axis measures only one.
 
 If the card performs materially better on Provocateur-register than on philosophical-meditation, that's the card operating within scope. Not a defect. Report honestly in the FU#30 summary.
 
