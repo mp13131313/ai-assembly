@@ -164,13 +164,21 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 ### 🔵 Deferred (waiting on trigger)
 
-#### FU#2 — Chunk Pass 7-pre per-citation verification (parallel batches) 🔴 CONFIRMED BLOCKING 2026-04-24
+#### FU#2 — Chunk Pass 7-pre per-citation verification (parallel batches) ✅ APPLIED 2026-04-24
 - **Origin:** This session (2026-04-23), after Pass 7-pre max_tokens bumped 4× during arch-03 development.
-- **Empirically blocking as of 2026-04-24:** full Dostoevsky re-run on FU#32 prompts hit 128K ceiling TWICE (initial Pass 7-pre + post-fix re-verification). Card grew to 418,019 raw chars of citation verification output. Try/except wraps shipped gracefully but skipped verification both times — card ships WITHOUT citation-verification audit. This was already happening in Phase 1; richer FU#32 prose density makes it worse.
-- **Problem:** Linear per-citation verification output blows past Sonnet 4.6's standard output ceiling as cards grow richer. Architectural fix is chunked verification.
-- **Fix:** Collect all citation-bearing card fields → batch into groups of ~20-30 → fire N parallel Pass 7-pre-chunk Sonnet calls (max_tokens 16-32K each, well under model ceiling) → aggregate.
-- **Effort:** ~4-6 hr.
-- **Priority:** next architectural work. Blocking Plato — every post-arch-03 voice will hit this, and without it we ship voices with unaudited citations.
+- **Empirically blocked Dostoevsky 2026-04-24:** full re-run on FU#32 prompts hit 128K ceiling TWICE (initial Pass 7-pre + post-fix re-verification). Card grew to 418,019 raw chars of citation verification output. Try/except wraps shipped gracefully but skipped verification both times — card shipped WITHOUT citation-verification audit.
+- **Landed:** three-stage architecture in `personas/flows/shared/pass_7pre_chunked.py` (commit `3d09aff`, 675 lines + 7 new prompt files):
+  - Stage 1 (extract): 1 Sonnet call reads card-only → emits `{claim, source_fields, claim_type}` items. Small output, well under ceiling. max_tokens=32000.
+  - Stage 2 (verify): N parallel Sonnet calls (ThreadPoolExecutor, max_workers=4), each ~25 claim items + primary_texts + merged_dossier. max_tokens=16000 per batch. Defensive: LLM-dropped items padded UNVERIFIED; batch failures caught and wrapped.
+  - Stage 3 (boddice): small Sonnet call for `[experiential_reconstruction]` + `[projection_warning]` tag check. Runs in parallel with Stage 2. max_tokens=8000.
+  - Aggregation: pure Python (summary counts, overall verdict, review_notes composition).
+- **Schema preserved:** output matches exactly the fields Pass 7a reads (verification_mode, hostile_source_check, items[], summary, overall, review_notes, boddice_tag_flags[]). Drop-in replacement at `_pass_7pre()` in `run_persona_pipeline.py`.
+- **Empirical test (Dostoevsky FU#32 card, Pass 7-pre isolation re-run 2026-04-24):**
+  - Pre-FU#2 single-shot: hit ceiling twice → VERIFICATION_SKIPPED both times, 25+ min wasted each attempt
+  - FU#2 chunked: completed in ~8 min wall, 153 items verified (100 VERIFIED / 45 DOSSIER_ONLY / 5 INTERPRETIVE / 3 UNVERIFIED / 0 INCONSISTENT), 12 boddice_tag_flags caught, actionable review_notes
+  - Cost: ~$3 (8 Sonnet calls: 1 extract + 6 verify + 1 boddice) vs. ~$3 wasted on ceiling timeout
+  - Wall savings: 25+ min per pipeline run
+- **Plato unblocked.** Post-arch-03 voices no longer ship without citation verification audit.
 
 #### FU#21 — Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract
 - **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
@@ -308,10 +316,11 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 ## RECENTLY COMPLETED
 
-### 2026-04-24 session (Phase 2)
+### 2026-04-24 session (Phase 2 + Phase 3)
 
 | Item | Commit | Notes |
 |---|---|---|
+| ✅ FU#2 chunked Pass 7-pre verification (3-stage: extract + parallel verify + boddice) | `3d09aff` | `personas/flows/shared/pass_7pre_chunked.py` + 7 new prompt files + orchestrator swap. Empirical test: ~8 min wall, 153 items verified, no ceiling hit (vs pre-FU#2 twice-ceiling-hit skip). Unblocks Plato. 675/-40 lines. |
 | ✅ FU#32 Pass 2 positive-compensation (STRIP+DO pairs + META-STRIP + banned_language STRIP+USE + character INHABIT-vs-NAME) | `b19a640` | CURATOR-SIDE block rewritten into 5 STRIP+DO-INSTEAD pairs + 6th META-STRIP against taxonomic retreat. +122/-40 lines. |
 | ✅ FU#32 Pass 3 positive-compensation (constitution/concept_lexicon/reasoning_method) | `b853972` | Meta-strip specific to principle-in-operational-voice. +70/-22 lines. |
 | ✅ FU#32 Pass 4a positive-compensation (voice-field META-STRIP + banned_language STRIP+USE pairs) | `479f5c9` | Voice-register META-STRIP + positive-seed format `avoid "X" (why); use "Y" (native)`. +52/-16 lines. |
@@ -386,16 +395,16 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 |---|---|---|---|
 | 🔴 Phase 1 (re-run blockers) | FU#12 + FU#13 + FU#5 | **10-15 hr** | Before re-run |
 | 🟡 Phase 2 (voice-tissue + Layer 2 audit) | FU#32 + FU#1 | **~6-8 hr** | 2026-04-24 session |
-| 🔴 Phase 3 (next blocker before Plato) | FU#2 (chunked Pass 7-pre) | ~4-6 hr | Current priority |
+| ✅ Phase 3 (Plato unblocker) | FU#2 chunked Pass 7-pre | **DONE 2026-04-24** | Landed commit `3d09aff` |
 | 🟡 Phase 4 (before Plato) | FU#7 + FU#10-mod + FU#9 + FU#8 | 4-7 hr | Before Plato run |
 | 🟢 Polish | FU#19 + FU#22 + FU#15 | 4-6 hr + 2 hr A/B | Anytime |
 | 🔵 Deferred (voice-tissue backstops — re-activate on regression) | FU#31 + FU#37 | ~9-10 hr total | ONLY if future voice regresses |
 | 🔵 Deferred (trigger-based) | FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 + FU#29 + FU#30 | trigger-dependent | Various |
 | **Phase 1 critical-path** | FU#12 → FU#13 → FU#5 → re-run | **✅ COMPLETE 2026-04-23** | |
 | **Phase 2 critical-path** | FU#32 → Pass 2 isolation → full re-run → FU#1 audit | **✅ COMPLETE 2026-04-24** | |
-| **Phase 3 critical-path** | FU#2 → Plato build | 🔴 IN PROGRESS | |
+| **Phase 3 critical-path** | FU#2 → Plato build | ✅ FU#2 DONE — Plato unblocked | |
 
-**FU#2 confirmed empirically blocking (2026-04-24):** 128K ceiling hit TWICE during full Dostoevsky re-run on FU#32 prompts. Card ships without citation verification when ceiling hit (try/except wraps graceful but skip audit). Richer FU#32 prose density compounds the problem. Next architectural work.
+**FU#2 landed 2026-04-24 (commit `3d09aff`):** three-stage chunked architecture (extract → parallel verify → boddice). Pass 7-pre isolation test on Dostoevsky FU#32 card: 8 min wall, 153 items verified, 12 boddice flags caught, no ceiling hit. Pre-FU#2 behavior (twice-ceiling-hit + skip) is now gone. Plato is unblocked; all post-arch-03 voices now ship with citation verification audit.
 
 ---
 
@@ -414,9 +423,9 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 6. 🔵 **FU#37** (declarative preserve-verbatim load-bearing-sentence markers) — DEFERRED. FU#32 alone closed the gap empirically; re-activate only if a future voice shows residual regression.
 7. ✅ **FU#1** (Layer 2 audit) — landed commit `4f9e23a`. Script + A/B compare-snapshot. First result: FU#32 caused no preservation regression + Pass 4a +9.4% recall / +6.2% cite / +26.1% density vs Phase 1 baseline.
 
-### Phase 3 — Next (starting point post-Phase-2)
+### Phase 3 — COMPLETE 2026-04-24 ✅
 
-8. **🔴 FU#2** (chunked Pass 7-pre verification) — CONFIRMED BLOCKING. Sonnet 4.6 128K hard ceiling hit TWICE during 2026-04-24 full re-run (richer FU#32 prose density compounds the problem). Card ships without citation-verification audit when ceiling hit. ~4-6 hr. **This is the next architectural work.**
+8. ✅ **FU#2** (chunked Pass 7-pre verification) — landed commit `3d09aff`. Three-stage architecture (extract → parallel verify → boddice) unblocks post-arch-03 voices. Pass 7-pre isolation test on Dostoevsky: 8 min wall, 153 verified items, no ceiling hit. Plato unblocked.
 9. 🔵 **FU#31** (voice-tissue validator) — DEFERRED. FU#32 closed the voice-tissue gap; backstop not needed unless a Phase N voice regresses.
 10. **FU#33** (patcher scope extensions — INCONSISTENT flags, lint, transliteration, bracket residue) — orthogonal mechanical-defect fix. ~3-4 hr.
 
