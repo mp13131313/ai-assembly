@@ -105,21 +105,24 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 ### 🟡 Phase 2 — Important quality-of-life before Plato
 
-#### FU#7 — Operator-facing pipeline summary
-- **Origin:** This session, after observing verbose progress logging without a compact end-of-pipeline status.
-- **Fix:** Final stdout block before exit prints compact `=== CARD COMPLETE ===` summary with: voice, validation_status, human_review_status, fix-pass effectiveness (issues_resolved / remaining), top concerns (severity-ordered), recommended_action, artifact paths.
-- **Effort:** 1-2 hr.
+#### FU#7 — Operator-facing pipeline summary ✅ APPLIED 2026-04-24
+- **Landed:** commit `87f7794`. Additive `CARD COMPLETE` block after the existing PIPELINE COMPLETE output in `run_persona_pipeline.py`. Surfaces voice name + slug + card size, validation_status + human_review_status, fix-pass effectiveness (patches applied/emitted/failed/skipped + anachronism_flags + field_issues + post_fix_verdict), Pass 7-pre audit (per-status breakdown + boddice flag count), top concerns (severity-ordered HIGH/MED/LOW), recommended action (synthesized from verdicts), artifact paths (card + provocateur_profile + evaluation_rubric + fix_log + synthesis_audit). Two helper functions: `_compose_top_concerns` and `_compose_recommended_action`.
 
-#### FU#10-modified — Fix-pass test coverage
-- **Origin:** This session, acknowledged gap in FU#3 commit. Modified to test new Architecture 2 (FU#13) instead of old revision loop.
-- **Fix:** `tests/test_fix_pass.py` covering: schema validation success/failure paths, fallback to surgical writer re-run on validation failure, snapshot directory writing, `_fix_log.json` content correctness.
-- **Effort:** 2-3 hr.
+#### FU#10-modified — Fix-pass test coverage ✅ APPLIED 2026-04-24
+- **Landed:** commit `3cb0a02`. Extracted `apply_patch_in_place` from `run_persona_pipeline.py` to new module `flows/shared/patch_walker.py` (enabling unit testing without triggering orchestrator top-level execution). New `tests/test_fix_pass.py` with 21 tests: 8 path-walker happy paths (top-level string/dict, list index, nested field, deeply nested, multi-level, sibling-no-mutation), 6 error paths (empty, missing mid-key, non-list index terminal/mid, out-of-range terminal/mid), 7 `_fix_log.json` schema tests (required keys, int counters, invariant `applied + failed + skipped <= emitted`, patches list, patch entry keys, status enum, Phase 2 regression fixture). Suite: 128 → 149 tests (+21). NOT covered: integration test with mocked Claude (deferred, ~2 hr scaffolding), snapshot directory creation (tested manually), idempotency guard (requires orchestrator).
+- **Note on spec drift:** FOLLOW_UPS description referenced "fallback to surgical writer re-run on validation failure" from FU#3; that path was superseded by FU#13 linear patcher, so the test scope is the FU#13 contract (schema + path-walker + patch-apply semantics).
 
-#### FU#9 — Merge chunk max_tokens audit
-- **Origin:** This session, surfaced by Pass 1.2 VALIDATION FAIL → retry pattern in first arch-03 Stage 2 v7 run.
-- **Problem:** Each Pass 1.1-1.6 has its own max_tokens setting in `chunk_runner.py`. With arch-03 enrichment + new `contested` evidence_tag enabling more InterpretiveFrame entries, per-chunk max_tokens haven't been audited for new content density.
-- **Fix:** Audit each chunk's max_tokens; spot-check actual output token counts from recent runs; bump where heading toward ceiling. Possibly add stop_reason monitoring.
-- **Effort:** 1-2 hr.
+#### FU#9 — Merge chunk max_tokens audit ✅ APPLIED 2026-04-24
+- **Landed:** commit `2aee7aa` (code) + this audit (no code change needed on chunks). Verdict: current `max_tokens=48000` default in `chunk_runner.py` is adequate for Dostoevsky-class rich voices.
+- **Empirical audit (Dostoevsky Phase 2 chunks):**
+  - Pass 1.1 biographical: 24,238 tokens (50% of 48K, 23,762 headroom)
+  - Pass 1.2 intellectual: 23,748 tokens (49%, 24,252 headroom)
+  - Pass 1.3 reasoning: 15,184 tokens (32%)
+  - Pass 1.4 voice: 17,917 tokens (37%)
+  - Pass 1.5 boundaries: 16,494 tokens (34%)
+  - Pass 1.6 corpus: 16,769 tokens (35%)
+  - All ≥50% headroom — no bump needed for current voices.
+- **Added:** proactive `stop_reason=="max_tokens"` warning to `call_claude` in `clients.py` (all call sites benefit: chunk_runner, _claude_pass, pass_7pre_chunked). Fires stderr warning when truncation occurs regardless of whether JSON parses. Catches future voices (Plato rich primary-text corpus; Cleopatra hostile-source reconstructions) before content-loss manifests downstream.
 
 ### 🟡 Phase 3 — Diagnostic + future-proofing (after re-run)
 
@@ -134,11 +137,13 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Effort:** 3-4 hr.
 - **When to build:** after FU#12 lands, so the audit runs on hardened-prompt outputs.
 
-#### FU#8 — Pass 7b bias evaluator audit
-- **Origin:** This session.
-- **Problem:** `run_persona_pipeline.py:1083+` has a "bias evaluator" that uses Gemini primary + Sonnet fallback. Purpose isn't clearly documented; doesn't appear in spec writeups.
-- **Fix:** Read the prompt; understand what's evaluated; verify model choice; document in LLM call inventory.
-- **Effort:** 30 min audit + doc update.
+#### FU#8 — Pass 7b bias evaluator audit ✅ AUDITED 2026-04-24 — KEEP AS-IS
+- **Audit finding:** concern was overly cautious. The "bias evaluator" is Pass 7c (not 7b); the Gemini-primary + Sonnet-bias-aware-fallback mechanism is well-designed and already documented.
+  - **Purpose** (documented at `persona_pass_7c_negative.md` header lines 1-6): reads Pass 7b worked provocations, identifies moments where generic AI voice bleeds through; refines `banned_language`, `banned_modes`, and Phase-B-new `projection_warnings` list per Boddice §12.
+  - **Model choice correct:** Gemini 2.5-pro primary (avoids self-preference bias — Claude-evaluating-Claude inflates ratings 10-25% per baseline research File 2 §4). Sonnet 4.6 fallback gets explicit BIAS-AWARENESS instruction at prompt-top when Gemini fails.
+  - **Already in LLM_CALL_INVENTORY.md** as entries 32a (Gemini primary) + 32b (Sonnet fallback).
+  - **Phase L chat-test sensitizers already integrated** in the prompt (tidy-three-part-arc + postmodern-self-consciousness anti-patterns added 2026-04-21).
+- **No code change needed.** Close as AUDITED.
 
 ### 🟢 Polish
 
@@ -316,10 +321,14 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 ## RECENTLY COMPLETED
 
-### 2026-04-24 session (Phase 2 + Phase 3)
+### 2026-04-24 session (Phases 2 + 3 + 4)
 
 | Item | Commit | Notes |
 |---|---|---|
+| ✅ FU#10-mod fix-pass test coverage (21 tests; patch_walker extract) | `3cb0a02` | `flows/shared/patch_walker.py` (new) + `tests/test_fix_pass.py` (new, 21 tests). Suite 128→149. |
+| ✅ FU#7 CARD COMPLETE operator triage summary | `87f7794` | Additive block after PIPELINE COMPLETE. Top concerns severity-ordered; recommended action synthesized; artifact paths. |
+| ✅ FU#9 merge chunk max_tokens audit + stop_reason warning | `2aee7aa` | Current 48K adequate (Dostoevsky chunks use 32-50% of ceiling). Proactive stop_reason=="max_tokens" warning added to `call_claude` — catches future voices before content loss. |
+| ✅ FU#8 Pass 7b bias evaluator audit | (no code) | AUDITED, KEEP AS-IS. Already well-designed + documented in LLM_CALL_INVENTORY.md §32a/32b. |
 | ✅ FU#2 chunked Pass 7-pre verification (3-stage: extract + parallel verify + boddice) | `3d09aff` | `personas/flows/shared/pass_7pre_chunked.py` + 7 new prompt files + orchestrator swap. Empirical test: ~8 min wall, 153 items verified, no ceiling hit (vs pre-FU#2 twice-ceiling-hit skip). Unblocks Plato. 675/-40 lines. |
 | ✅ FU#32 Pass 2 positive-compensation (STRIP+DO pairs + META-STRIP + banned_language STRIP+USE + character INHABIT-vs-NAME) | `b19a640` | CURATOR-SIDE block rewritten into 5 STRIP+DO-INSTEAD pairs + 6th META-STRIP against taxonomic retreat. +122/-40 lines. |
 | ✅ FU#32 Pass 3 positive-compensation (constitution/concept_lexicon/reasoning_method) | `b853972` | Meta-strip specific to principle-in-operational-voice. +70/-22 lines. |
@@ -396,7 +405,7 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 | 🔴 Phase 1 (re-run blockers) | FU#12 + FU#13 + FU#5 | **10-15 hr** | Before re-run |
 | 🟡 Phase 2 (voice-tissue + Layer 2 audit) | FU#32 + FU#1 | **~6-8 hr** | 2026-04-24 session |
 | ✅ Phase 3 (Plato unblocker) | FU#2 chunked Pass 7-pre | **DONE 2026-04-24** | Landed commit `3d09aff` |
-| 🟡 Phase 4 (before Plato) | FU#7 + FU#10-mod + FU#9 + FU#8 | 4-7 hr | Before Plato run |
+| ✅ Phase 4 (pre-Plato hygiene) | FU#7 + FU#10-mod + FU#9 + FU#8 | **DONE 2026-04-24** | Commits `87f7794`/`3cb0a02`/`2aee7aa` + FU#8 audited-no-code-change |
 | 🟢 Polish | FU#19 + FU#22 + FU#15 | 4-6 hr + 2 hr A/B | Anytime |
 | 🔵 Deferred (voice-tissue backstops — re-activate on regression) | FU#31 + FU#37 | ~9-10 hr total | ONLY if future voice regresses |
 | 🔵 Deferred (trigger-based) | FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 + FU#29 + FU#30 | trigger-dependent | Various |
@@ -429,11 +438,12 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 9. 🔵 **FU#31** (voice-tissue validator) — DEFERRED. FU#32 closed the voice-tissue gap; backstop not needed unless a Phase N voice regresses.
 10. **FU#33** (patcher scope extensions — INCONSISTENT flags, lint, transliteration, bracket residue) — orthogonal mechanical-defect fix. ~3-4 hr.
 
-### Phase 4 — Before Plato
+### Phase 4 — COMPLETE 2026-04-24 ✅
 
-11. **FU#7** (operator summary) — UX, independent
-12. **FU#10-modified** (fix-pass tests — tests the Pass 7a-FIX architecture)
-13. **FU#9** (merge chunk max_tokens audit) + **FU#8** (bias evaluator audit) — independent
+11. ✅ **FU#7** (CARD COMPLETE operator summary) — landed commit `87f7794`
+12. ✅ **FU#10-modified** (fix-pass test coverage — 21 tests, suite 128→149) — landed commit `3cb0a02`
+13. ✅ **FU#9** (merge chunk max_tokens audit — adequate; proactive stop_reason warning added) — landed commit `2aee7aa`
+14. ✅ **FU#8** (bias evaluator audit) — AUDITED, KEEP AS-IS (already well-designed + documented)
 
 ### Phase 5 — Polish (anytime)
 
