@@ -158,6 +158,48 @@ def verify_batch(
     return verified_items
 
 
+def _verify_batch_with_retry(
+    batch: list[dict[str, Any]],
+    primary_texts: str,
+    merged_dossier: str,
+    verification_mode: str,
+    hostile_source_check: bool,
+) -> list[dict[str, Any]]:
+    """Wraps verify_batch with 1 retry on transient JSON/API failures.
+
+    FU#2 follow-up 2026-04-24: Sonnet occasionally emits partially-invalid JSON
+    on a batch (observed on Dostoevsky FU#32 re-run: 1 batch of 3 items got a
+    missing-comma JSON parse error). Retry once with a short backoff before
+    falling back to UNVERIFIED-with-error-explanation.
+    """
+    import time as _time
+    try:
+        return verify_batch(
+            batch, primary_texts, merged_dossier, verification_mode, hostile_source_check
+        )
+    except RuntimeError as first_err:
+        # Transient JSON parse / API error — retry after brief backoff.
+        _time.sleep(5)
+        try:
+            return verify_batch(
+                batch, primary_texts, merged_dossier, verification_mode, hostile_source_check
+            )
+        except Exception as retry_err:
+            # Preserve batch with UNVERIFIED fallback + both error traces.
+            return [
+                {
+                    **item,
+                    "status": "UNVERIFIED",
+                    "evidence": (
+                        f"Batch verification failed after 1 retry: "
+                        f"{type(retry_err).__name__}: {str(retry_err)[:150]} "
+                        f"(first attempt: {type(first_err).__name__}: {str(first_err)[:100]})"
+                    ),
+                }
+                for item in batch
+            ]
+
+
 def verify_all_batches(
     claim_items: list[dict[str, Any]],
     primary_texts: str,
@@ -172,12 +214,13 @@ def verify_all_batches(
         return []
     batches = _batch(claim_items, batch_size)
 
-    # Execute in parallel, preserving original order.
+    # Execute in parallel, preserving original order. Each batch wrapped with
+    # 1-retry on transient JSON/API failures (FU#2 follow-up 2026-04-24).
     results_by_idx: dict[int, list[dict[str, Any]]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_idx = {
             executor.submit(
-                verify_batch,
+                _verify_batch_with_retry,
                 batch,
                 primary_texts,
                 merged_dossier,
@@ -191,13 +234,15 @@ def verify_all_batches(
             try:
                 results_by_idx[idx] = future.result()
             except Exception as exc:
-                # Preserve batch with UNVERIFIED fallback so aggregate stays honest.
+                # Belt-and-braces: _verify_batch_with_retry should not raise,
+                # but if something unexpected escapes (e.g. ExecutorError),
+                # still pad items with UNVERIFIED so aggregate stays honest.
                 batch = batches[idx]
                 results_by_idx[idx] = [
                     {
                         **item,
                         "status": "UNVERIFIED",
-                        "evidence": f"Batch verification failed: {type(exc).__name__}: {str(exc)[:200]}",
+                        "evidence": f"Batch future raised: {type(exc).__name__}: {str(exc)[:200]}",
                     }
                     for item in batch
                 ]
