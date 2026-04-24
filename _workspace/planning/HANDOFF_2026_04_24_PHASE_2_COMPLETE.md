@@ -628,3 +628,34 @@ Repo state at FU#2 landing:
 - Dostoevsky card: `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json` (165KB, post-FU#32 content + post-FU#2 Pass 7-pre audit)
 
 *End postscript. Phase 3 (FU#2) landed same session.*
+
+---
+
+## POSTSCRIPT 2 — Phase 4 + 4.5 landed same session (2026-04-24)
+
+After this handoff was written, the session continued further:
+
+**Phase 4 (pre-Plato hygiene)** — landed in commits `2aee7aa` (FU#9 stop_reason warning + max_tokens audit), `87f7794` (FU#7 CARD COMPLETE summary), `3cb0a02` (FU#10-mod patch_walker extract + 21 tests). FU#8 audited, KEEP AS-IS. Suite: 128 → 149 tests.
+
+**Phase 4.5 (post-review pipeline finalization)** — after two external reviewers of the chat v2 Dostoevsky output identified three pipeline-general failure modes, landed three targeted fixes:
+- `de623bd` **FU#2 retry bug fix**: 1-retry on batch JSONDecodeError (eliminates 3 spurious UNVERIFIEDs observed on the Dostoevsky Pass 7-pre test run)
+- `22a2e54` **FU#38 voice-self-reference vocabulary strip**: extends FU#12-A/FU#32 pattern to post-voice-lifetime critical vocabulary (kenotic/polyphonic/chronotope/dialogic class) that scholars coined to describe the voice and that leaks back into voice-native prose. Applied across 6 Pass 2-6 prompts. Generalizes to all 12 voices.
+- `b9c1eb2` **FU#41 chat-ready artifact**: new `flows/shared/chat_prompt_builder.py` + 13 tests. After Derive, writes `voices/<slug>/06_derive/03_chat_system_prompt.json` — mechanical strip of 10 Voice-Pipeline-only fields from the assembled card. Verified against operator's Dostoevsky chat v2: same 34-field set; 25/34 byte-identical (9 differ only by operator polish). Operator workflow: pipeline run → paste artifact into Claude project custom instructions → ask probing question → assess voice quality.
+
+**Deferred per empirical signal** (per reviewers' architectural-ceiling argument):
+- FU#39 (character-distribution stage-quoting) — conditional on Plato narrator-unification signal
+- FU#40 (digression-permission) — speculative; architectural ceiling per first reviewer
+- FU#31 (voice-tissue validator) — already deferred; FU#32/FU#38 close the voice-tissue gap
+
+**Final repo state (2026-04-24 end of session):**
+- Branch `arch-03-additive-merge`, **~107 commits** ahead of origin (NOT pushed)
+- Tests: **162 passing** (128 → 149 → 162 across Phases 4 + 4.5)
+- Working tree: clean except `_workspace/arch_03_baseline_snapshot/` (3 snapshot dirs)
+- 4 Dostoevsky artifacts in 06_derive/: provocateur_profile + evaluation_rubric + chat_system_prompt (after next re-run, as current Dosto 06_derive/ was written pre-FU#41)
+- **All architectural blockers + pre-Plato hygiene resolved. Plato run is the next operational step.**
+
+**Revised next-session starting point:**
+
+Plato build. Manual DR §1-6 on claude.ai per the model-per-section policy (Opus 4.6 §1-5, Opus 4.7 §6). Then pipeline run with `venv/bin/python run_persona_pipeline.py "Plato" --project "../../projects/athens-2026"` (or `projects/phase-l-plato` if fresh). Then chat-test the generated `03_chat_system_prompt.json` via a Claude project. If voice quality matches Dostoevsky chat v2 ceiling (high pastiche per reviewers), sign off and continue to voices 3-12. If narrator-unification is pronounced, execute FU#39 before voice 3.
+
+*End postscript 2. Phases 4 + 4.5 landed same session. Plato is the next operational step.*
