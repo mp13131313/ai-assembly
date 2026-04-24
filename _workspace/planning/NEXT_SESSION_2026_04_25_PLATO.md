@@ -8,6 +8,48 @@
 
 ---
 
+## READING ORDER — `_workspace/planning/` contains 17 files; you need 1
+
+**Required (read in full for next-session pickup):**
+
+1. **THIS doc (NEXT_SESSION_2026_04_25_PLATO.md)** — authoritative; self-contained for operational pickup.
+
+**Load-bearing backup references (consult only if needed, no proactive read):**
+
+2. **FOLLOW_UPS.md** — per-FU# tracker. Consult when this doc references a specific FU# (e.g., "FU#13") and you need the definition/history.
+3. **REBUILD_PLAN.md** — PB#1-9 locked architectural decisions. Consult only if you intend to modify pipeline architecture (do not re-litigate the locked decisions without explicit reason).
+
+**Historical-only — SAFELY IGNORE unless investigating WHY something was done:**
+
+The remaining 14 files are archival in function:
+
+- `HANDOFF_2026_04_23_PHASE_1_COMPLETE.md` — Phase 1 handoff, superseded
+- `HANDOFF_2026_04_24_PHASE_2_COMPLETE.md` — Phase 2 handoff, superseded by this doc (its onboarding prompt is stale)
+- `HANDOFF_ARCH_03_STAGE_1_RESTART.md` — arch-03 Stage 1 restart handoff, superseded
+- `HANDOFF_PHASE_B_RESTRUCTURE.md` — Phase B restructure handoff (landed)
+- `HANDOFF_PHASE_M.md` — Phase M merge handoff (landed)
+- `HANDOFF_PIPELINE_REVIEW.md` — pipeline review session handoff (landed)
+- `EXECUTION_PLAN_phase_b.md` — Phase B execution plan (landed)
+- `OPEN_ITEMS.md` — older open-items tracker, superseded by FOLLOW_UPS.md
+- `PHASE_L8_QUALITY_REPORT.md` — Phase L.8 quality gate comparison (landed; reference if doing a similar comparison on Plato)
+- `PIPELINE_REVIEW_FIXES.md` — pipeline review findings (FU#1-13 history; active items migrated to FOLLOW_UPS.md)
+- `RUNTIME_REVIEW_2026_04_20.md` — runtime-side audit (reference-only)
+- `SONNET_PATH_INVENTORY.md` — Phase B path-migration inventory (landed)
+- `SONNET_PHASE_B_RESTRUCTURE_TEST_REPORT.md` — Phase B restructure tests (landed)
+- `ARCH_03_ADDITIVE_MERGE_PLAN.md` — arch-03 design + amendments 04/05/06/07/08 (all applied; reference if investigating arch-03 rationale)
+
+**None of the historical files need reading for next-session pickup.** Archival cleanup (move to `_workspace/archive/planning/`) is gated by FU#11's "after Phase L sign-off" trigger — per operator policy, done after the first ship-ready Dostoevsky card is signed off.
+
+### Definition — Phase L
+
+**Phase L = first full Dostoevsky end-to-end pipeline build.** Completed 2026-04-21 under the Phase B/arch-03 architecture; was the validation gate that proved the rebuilt pipeline produces working persona cards. Phase L.8 was the quality-comparison checkpoint (Phase B-rebuilt vs v3.7 baseline; verdict: Phase B vindicated).
+
+**"Phase L sign-off"** = operator confirmation that the Phase L Dostoevsky card is ship-ready. Still pending as of 2026-04-24 — none of the three Dostoevsky cards produced (Phase 1 / Phase 2 / Phase 2 + FU#2) have been signed-off as final; all carry `validation_status: REVISION_NEEDED` + `human_review_status: pending`. That sign-off triggers FU#11 (snapshot archive cleanup), CC#1 (primary-text-URLs relocation), and merges this branch to `main`.
+
+**Phase L ≠ any of the phases listed in this doc** (Phase 1/2/3/4/4.5). Those are work-phases within the current branch; Phase L is the voice-level validation gate that gates branch merge.
+
+---
+
 ## ONBOARDING PROMPT (copy-paste into fresh session)
 
 ```
