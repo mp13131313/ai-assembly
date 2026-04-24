@@ -43,6 +43,7 @@ from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 from flows.shared.pass_7pre_chunked import run_chunked_pass_7pre
 from flows.shared.patch_walker import apply_patch_in_place as _apply_patch_in_place
+from flows.shared.chat_prompt_builder import write_chat_system_prompt
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
@@ -1570,6 +1571,23 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
 stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
 
 
+# ---------- FU#41 2026-04-24: chat-ready system prompt artifact ----------
+# Writes a 4th Derive artifact (alongside provocateur_profile + evaluation_
+# rubric): a chat-ready persona-card JSON suitable for direct paste into
+# Claude project custom instructions. Mechanical field-strip transform of
+# the assembled card — drops Voice-Pipeline-only fields (metadata,
+# smoke_test_chains, reference_only_passages, artifact-spec fields,
+# continuity blocks). No content modification; editorial polish is operator
+# territory. Enables fast chat-test validation: pipeline run -> paste
+# artifact -> ask probing question -> assess voice quality. See
+# flows/shared/chat_prompt_builder.py for the transformation spec + the
+# list of Voice-Pipeline-only fields dropped.
+_assembled_card_dict = json.loads(_paths.assembled_card(SLUG, PROJECT_ROOT).read_text())
+_chat_prompt_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "03_chat_system_prompt.json"
+write_chat_system_prompt(_assembled_card_dict, _chat_prompt_path)
+stamp(f"Chat-ready system prompt -> {_chat_prompt_path.relative_to(PROJECT_ROOT)}")
+
+
 # ---------- FU#7 2026-04-24: Operator-facing CARD COMPLETE summary ----------
 # Compact end-of-pipeline decision helper — surfaces validation_status,
 # human_review_status, fix-pass effectiveness, top concerns (severity-
@@ -1703,4 +1721,7 @@ if fix_log_path.exists():
 _synthesis_audit_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "_synthesis_audit.json"
 if _synthesis_audit_path.exists():
     stamp(f"    synthesis_audit:     {_synthesis_audit_path.relative_to(PROJECT_ROOT)}")
+if _chat_prompt_path.exists():
+    stamp(f"    chat_system_prompt:  {_chat_prompt_path.relative_to(PROJECT_ROOT)}")
+    stamp(f"                         (paste into Claude project custom instructions)")
 stamp("=" * 60)
