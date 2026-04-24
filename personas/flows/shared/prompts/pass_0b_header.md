@@ -1,6 +1,9 @@
 {# Guard: default section_mode to false so monolithic renders don't need to pass it. #}
 {% set section_mode = section_mode | default(false) %}
 {% set section_index = section_index | default(0) %}
+{# display_name_with_hint defaults to name when disambiguation hint absent — keeps
+   direct renderers (tests, callers that only pass `name`) working under StrictUndefined. #}
+{% set display_name_with_hint = display_name_with_hint | default(name) %}
 {% if section_mode %}
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI (Section {{ section_index }} of 6)
 
@@ -35,6 +38,17 @@ PREAMBLE — BEFORE PASTING INTO CLAUDE.AI (Section {{ section_index }} of 6)
 ---
 {% if wikipedia_url and section_index == 1 %}
 Starting point for your research: {{ wikipedia_url }} (verify, expand, find what Wikipedia misses or oversimplifies).
+{% endif %}
+{% if section_index == 1 %}
+{% if type == "human" %}
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured biocultural fields from your prose — your job is substantive, cited, period-vocabulary-imbued narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that is the downstream merge's job.
+{% elif type == "non_human" and subtype == "organism" %}
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human entity. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, science-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
+{% elif type == "non_human" and subtype == "system" %}
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
+{% elif type == "fictional" %}
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this fictional, literary, or mythological character. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, textually-grounded, scholarship-anchored narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
+{% endif %}
 {% endif %}
 {% else %}
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI

@@ -86,10 +86,16 @@ def wrap_section(
     wikipedia_url: str | None,
 ) -> str:
     """Wrap a section body with mode-aware header + footer via Jinja."""
+    _display_name_with_hint = (
+        f"{voice_config['name']} ({voice_config['wikipedia_disambiguation_hint']})"
+        if voice_config.get("wikipedia_disambiguation_hint")
+        else voice_config["name"]
+    )
     header = render(
         "pass_0b_header.md",
         voice_slug=slug,
         name=voice_config["name"],
+        display_name_with_hint=_display_name_with_hint,
         type=voice_config["type"],
         subtype=voice_config.get("subtype"),
         voice_mode=voice_config.get("voice_mode"),
