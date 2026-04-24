@@ -141,7 +141,8 @@ def main(voice_name: str, project: str | None = None) -> None:
 
     # ---------- PASS 1b (Gemini) ----------
     def _pass_1b():
-        prompt = render(_pick_template("persona_pass_1b"), name=vi["name"])
+        prompt = render(_pick_template("persona_pass_1b"),
+                        name=vi["name"], hostile_sources=vi["hostile_sources"])
         r = _with_retry(
             lambda: call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384),
             label="Pass 1b (Gemini)",
