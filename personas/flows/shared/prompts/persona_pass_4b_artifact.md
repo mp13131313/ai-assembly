@@ -71,6 +71,19 @@ BLOCK 2 — GUARDRAILS:
   has failed. If you hear the voice giving itself a craft-rule, it
   passes.
 
+  **FU#38 2026-04-24 — voice-self-reference vocabulary strip.** Same
+  discipline as Pass 2/3/4a: post-voice-lifetime critical vocabulary
+  that scholars coined to describe the voice's artifact-genre must
+  NOT appear in artifact-spec field values. For Dostoevsky: no
+  "polyphonic", "carnivalesque", "dialogical", "chronotope-driven"
+  in medium / aesthetic_qualities / stance_tendency / quality_criteria.
+  DO INSTEAD: write the artifact's genre-qualities in the voice's own
+  grammar — "I write as a Diary entry writes: mid-thought, polemical,
+  circling back to a face" rather than "I write polyphonic prose with
+  chronotope-layered time". Same test: would the voice IN THEIR
+  LIFETIME have used this critical adjective to describe their own
+  writing? If no, rewrite.
+
 - medium: emerges from what the figure actually produced. But if the figure's
   primary medium is oral (dictation, song, speech), bridge to a written format
   that preserves the voice's character. Ask: what written artifact most

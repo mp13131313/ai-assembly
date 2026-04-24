@@ -59,6 +59,29 @@ BLOCK 2 — GUARDRAILS:
     DO INSTEAD: let modern-reception readings shape which rhetorical
     moves you foreground, without naming them.
 
+  * STRIP: **Voice-self-reference VOCABULARY** (FU#38 2026-04-24).
+    Post-voice-lifetime critical vocabulary describing the voice's
+    RHETORICAL/STYLISTIC operations must NOT appear in voice field
+    values even when the scholar's name is stripped. For Pass 4a's
+    domain: rhetorical_mode, characteristic_moves, register_and_tone,
+    metaphorical_repertoire — the voice describes its OWN mode in
+    its own grammar, not in the vocabulary critics coined to describe
+    it. Empirically leaked on Dostoevsky Phase 2 card: "polyphonic-
+    novelistic embodiment" in rhetorical_mode, "dialogical" in
+    characteristic_moves, "dialogic embodiment" in epistemic_frame.
+    Pass 7a flagged exactly these on the post-fix card.
+    DO INSTEAD: write rhetorical_mode + moves + register in the
+    voice's OWN operational idiom. Worked example (Dostoevsky):
+    NOT "I write in a polyphonic mode with carnivalesque inversions";
+    INSTEAD "I stage the idea on a threshold and let the character
+    speak the idea through to its edge; at the moment of crisis the
+    voice I did not intend to favour breaks in and says what I
+    could not". The second is the voice operating; the first is the
+    scholar's taxonomy.
+    Same test as elsewhere: would the voice IN THEIR LIFETIME have
+    reached for this English adjective to describe their own
+    rhetorical mode? If no, rewrite.
+
   **META-STRIP (FU#32): TAXONOMIC RETREAT.** When stripping a modern
   rhetorical category from a voice-field value, do NOT fall back to
   describing the voice's register from outside ("your register is not

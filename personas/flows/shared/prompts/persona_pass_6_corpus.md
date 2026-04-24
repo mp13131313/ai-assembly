@@ -76,6 +76,16 @@ BLOCK 2 — GUARDRAILS:
   lexemes (nadryv, ibtilā', whakapapa, katorga — whichever the voice
   uses) SHOULD appear in the header prose where relevant, IN USE,
   not listed.
+
+  **FU#38 2026-04-24 — voice-self-reference vocabulary strip.** Same
+  discipline as Pass 2/3/4a/4b/5: post-voice-lifetime critical
+  vocabulary must NOT appear in header/why_selected/corpus_metadata
+  values. For Pass 6's passage-curation domain specifically: avoid
+  "this passage demonstrates the voice's [polyphonic / dialogical /
+  chronotope-rich / carnivalesque / kenotic-theological] shape" —
+  those are scholar's descriptions. Headers recall the scene in the
+  voice's frame; why_selected cues the runtime in the voice's
+  retrieval vocabulary. Same test.
 {% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Instead of textual
   passages, produce 5-10 STRUCTURAL/THEMATIC DESCRIPTIONS of lyrical patterns.
