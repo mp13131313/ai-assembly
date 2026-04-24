@@ -30,9 +30,19 @@ SECTION_HEADING_RE = re.compile(
     re.MULTILINE,
 )
 
+# The monolithic wrapper appends pass_0b_footer.md after §6, which starts
+# with an "OUTPUT FORMAT" heading. Without this boundary, §6's slice would
+# include the footer — wrap_section then attaches ANOTHER footer per-section
+# and the output has duplicated OUTPUT FORMAT blocks. Fix 2026-04-24.
+_FOOTER_BOUNDARY_RE = re.compile(r"^OUTPUT FORMAT\s*$", re.MULTILINE)
+
 
 def split_monolithic(monolithic_text: str) -> dict[int, str]:
     """Return {section_number: section_body_including_heading}.
+
+    §6's slice ends at the monolithic footer boundary (first `OUTPUT FORMAT`
+    line after the §6 heading) rather than at end-of-document, so that
+    wrap_section's per-section footer is not doubled.
 
     Raises ValueError if fewer or more than 6 sections found, or if
     section numbering is non-contiguous.
@@ -50,10 +60,20 @@ def split_monolithic(monolithic_text: str) -> dict[int, str]:
             f"Section numbering must be 1..6 contiguous, got {numbers}"
         )
 
+    # Identify the footer boundary for §6. Look for `OUTPUT FORMAT` on a line
+    # by itself, searched only AFTER the last section heading to avoid
+    # false-positive matches from occurrences within section bodies.
+    last_section_start = matches[-1].start()
+    footer_match = _FOOTER_BOUNDARY_RE.search(monolithic_text, pos=last_section_start)
+    footer_boundary = footer_match.start() if footer_match else len(monolithic_text)
+
     sections = {}
     for i, m in enumerate(matches):
         start = m.start()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(monolithic_text)
+        if i + 1 < len(matches):
+            end = matches[i + 1].start()
+        else:
+            end = footer_boundary
         sections[i + 1] = monolithic_text[start:end].strip() + "\n"
     return sections
 
