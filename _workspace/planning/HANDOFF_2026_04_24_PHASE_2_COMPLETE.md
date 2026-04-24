@@ -571,3 +571,60 @@ been inspected and documented above.
 ---
 
 *End handoff. Phase 2 landed. Next: FU#2 chunked Pass 7-pre verification.*
+
+---
+
+## POSTSCRIPT — FU#2 landed same session (2026-04-24)
+
+After the handoff above was written, the session continued and **FU#2
+landed** (commits `3d09aff` + `7d2179e`). Phase 3 is now complete as well.
+
+**Summary of FU#2 landing:**
+
+- Three-stage architecture in `personas/flows/shared/pass_7pre_chunked.py`:
+  - Stage 1 (extract): 1 Sonnet call on card-only → emits claim items
+  - Stage 2 (verify): N parallel Sonnet calls (ThreadPoolExecutor,
+    max_workers=4), each ~25 items + primary_texts + dossier
+  - Stage 3 (boddice): 1 small Sonnet call for tag-check, parallel with Stage 2
+  - Aggregation: pure Python
+- Three new prompt pairs: `persona_pass_7pre_extract{,_user}.md`,
+  `persona_pass_7pre_verify_batch{,_user}.md`,
+  `persona_pass_7pre_boddice_check{,_user}.md`
+- Orchestrator swap: `run_persona_pipeline.py:_pass_7pre()` now calls
+  `run_chunked_pass_7pre()` helper. Output schema preserved — Pass 7a
+  consumes the same fields.
+- Empirical test on Dostoevsky FU#32 card (Pass 7-pre isolation re-run):
+  - Pre-FU#2: hit 128K ceiling twice → VERIFICATION_SKIPPED, 25+ min wall
+  - FU#2: ~8 min wall, **153 items verified** (100 VERIFIED / 45
+    DOSSIER_ONLY / 5 INTERPRETIVE / 3 UNVERIFIED / 0 INCONSISTENT),
+    12 boddice_tag_flags caught, actionable review_notes.
+
+**Next-session starting point (revised post-FU#2):**
+
+Phase 4 per RECOMMENDED IMPLEMENTATION ORDER — pre-Plato hygiene:
+
+- FU#7 (operator-facing pipeline summary — compact end-of-stdout status
+  block; ~1-2 hr)
+- FU#10-mod (fix-pass test coverage — tests for Pass 7a-FIX; ~2-3 hr)
+- FU#9 (merge chunk max_tokens audit; ~1-2 hr)
+- FU#8 (Pass 7b bias evaluator audit; ~30 min)
+- FU#33 (patcher scope extensions — mechanical defects; ~3-4 hr)
+
+Or skip pre-Plato hygiene and **proceed directly to Plato build** —
+all architectural blockers (FU#32 voice-tissue, FU#1 audit, FU#2
+citation ceiling) are resolved. Plato tests whether:
+(a) FU#32 positive-compensation generalizes to philosophical-human
+    voice_mode
+(b) FU#2 chunked verification produces actionable audit on a different
+    voice
+(c) Model-per-section DR policy (§1-5 Opus 4.6, §6 Opus 4.7) holds on
+    a second voice
+
+Repo state at FU#2 landing:
+- Branch `arch-03-additive-merge`, 97 commits ahead of origin/main
+- HEAD: `7d2179e` (FU#2 tracker update)
+- Tests: 128/128 passing
+- Working tree: clean except `_workspace/arch_03_baseline_snapshot/`
+- Dostoevsky card: `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/07_persona_card_assembled.json` (165KB, post-FU#32 content + post-FU#2 Pass 7-pre audit)
+
+*End postscript. Phase 3 (FU#2) landed same session.*
