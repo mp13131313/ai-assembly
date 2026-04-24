@@ -41,6 +41,7 @@ from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_gemini, call_openai
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
+from flows.shared.pass_7pre_chunked import run_chunked_pass_7pre
 
 
 _parser = argparse.ArgumentParser(description="End-to-end Persona Pipeline for a single voice")
@@ -736,46 +737,36 @@ stamp("PASS 6: Corpus Curation (Opus + thinking, literary judgment)")
 pass6 = call_or_cache(_paths.pass_6(SLUG, PROJECT_ROOT), "Pass 6", _pass_6)
 
 
-# ---------- PASS 7-pre (Citation Verification) ----------
-# Spec: Sonnet 4.6, temp 0.0, max_tokens 4096. Verifies card claims against
-# (a) primary texts from Node 1c — strongest anchor, and (b) merged dossier.
-# Branches by voice_mode and hostile_sources for verification approach.
+# ---------- PASS 7-pre (Citation Verification) — FU#2 chunked 2026-04-24 ----
+# FU#2 2026-04-24: replaced single-shot call that hit Sonnet 4.6's 128K
+# output ceiling on rich cards (empirically hit twice on 2026-04-24
+# Dostoevsky re-run). Now a three-stage pipeline in
+# flows/shared/pass_7pre_chunked.py:
+#   Stage 1: extract verifiable claims from card (1 Sonnet call, card-only
+#            input, ~20-40K output; well under ceiling)
+#   Stage 2: verify batches of ~25 claims in parallel (N Sonnet calls,
+#            primary_texts + dossier input, 16K max_tokens each)
+#   Stage 3: check boddice_tag_flags (1 small Sonnet call, parallel with
+#            Stage 2)
+# Python aggregates: summary counts, overall verdict, review_notes.
+# Output schema preserved — Pass 7a reads the same fields as before.
+# Try/except wrap retained for graceful degradation (API overload, etc.).
 def _pass_7pre():
     full_card_for_verify = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):
         full_card_for_verify.update(pass6["fields"])
-    sysp = render("persona_pass_7pre_citation",
-                  type=vi["type"], voice_mode=vi["voice_mode"],
-                  hostile_sources=vi["hostile_sources"])
-    userp = render("persona_pass_7pre_citation_user",
-                   persona_card_json=json.dumps(full_card_for_verify, ensure_ascii=False, indent=2),
-                   primary_texts=primary_block,
-                   merged_dossier=merged_dossier)
-    # 2026-04-23: max_tokens bumped 24000 → 48000 → 96000. Under arch-03
-    # richer merge + preserved interpretive_frames + scholarly_context, the
-    # card carries materially more citations to verify; revision-loop
-    # iterations generate even more output (loop 2 hit 154K raw text
-    # mid-JSON at the 48000 ceiling). 96000 gives ~2x headroom for
-    # revision loops. Sonnet 4.6 supports this range.
-    # 2026-04-23: Pass 7-pre max_tokens journey:
-    #   24K → 48K → 96K → 128K (Sonnet 4.6 hard ceiling — 192K rejected)
-    # Each bump forced by ceiling-hit. The post-FU#13-fix-pass card pushes
-    # past 128K too (~410K raw chars / ~110K output tokens needed).
-    # FU#2 (chunked per-citation verification) is the only sustainable
-    # architectural fix and is now BLOCKING for richer cards.
-    # Caller wraps in try/except to allow pipeline to proceed gracefully
-    # if Pass 7-pre cannot complete on the patched card.
-    r = call_claude(system=sysp, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=128000, temperature=0.0, thinking=False,
-                    response_format_json=True)
+    result = run_chunked_pass_7pre(
+        persona_card=full_card_for_verify,
+        primary_texts=primary_block,
+        merged_dossier=merged_dossier,
+        voice_type=vi["type"],
+        voice_mode=vi["voice_mode"],
+        hostile_sources=vi["hostile_sources"],
+    )
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
-            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+            "model": "claude-sonnet-4-6-chunked", "usage": {}, "result": result}
 
-stamp("PASS 7-pre: Citation Verification (Sonnet)")
-# 2026-04-23: wrapped in try/except for Sonnet 4.6 128K hard ceiling on
-# rich post-FU#13-fix-pass cards. Pass 7-pre is informational (Pass 7a
-# reads the full assembled card, not Pass 7-pre output) — pipeline can
-# proceed without it. FU#2 (chunked verification) is the architectural fix.
+stamp("PASS 7-pre: Citation Verification (Sonnet, FU#2 chunked)")
 try:
     pass7pre = call_or_cache(_paths.pass_7_pre(SLUG, PROJECT_ROOT), "Pass 7-pre", _pass_7pre)
     verif = pass7pre["result"]
@@ -785,16 +776,22 @@ try:
           f"interp={verif.get('summary', {}).get('interpretive', 0)} "
           f"dossier_only={verif.get('summary', {}).get('dossier_only', 0)} "
           f"inconsistent={verif.get('summary', {}).get('inconsistent', 0)} "
-          f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)}")
-except RuntimeError as e:
-    stamp(f"  WARN: Pass 7-pre hit ceiling: {str(e)[:160]}")
-    stamp(f"  Proceeding without Pass 7-pre (FU#2 chunked verification needed). "
-          f"Card ships without citation-verification audit; Pass 7a still runs on full card.")
+          f"hostile={verif.get('summary', {}).get('hostile_flagged', 0)} | "
+          f"boddice_tag_flags={len(verif.get('boddice_tag_flags', []))} | "
+          f"items={len(verif.get('items', []))}")
+except (RuntimeError, Exception) as e:
+    # FU#2 dramatically reduces the chance of ceiling-hit failures, but
+    # retain graceful-degradation wrap for API overload / batch-call
+    # failures. Each verify batch is already defensively wrapped in
+    # pass_7pre_chunked.py — this catches the (rare) top-level failure.
+    stamp(f"  WARN: Pass 7-pre (chunked) failed at top level: {type(e).__name__}: {str(e)[:160]}")
+    stamp(f"  Proceeding without Pass 7-pre. Card ships without citation-verification audit; "
+          f"Pass 7a still runs on full card.")
     pass7pre = {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
                 "result": {"overall": "VERIFICATION_SKIPPED",
                            "summary": {"verified": 0, "unverified": 0, "interpretive": 0,
                                        "dossier_only": 0, "inconsistent": 0, "hostile_flagged": 0},
-                           "skip_reason": f"max_tokens ceiling: {str(e)[:200]}"}}
+                           "skip_reason": f"chunked pipeline failure: {type(e).__name__}: {str(e)[:200]}"}}
     write_json_atomic(_paths.pass_7_pre(SLUG, PROJECT_ROOT), pass7pre)
 
 
