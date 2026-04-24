@@ -137,6 +137,19 @@ def call_claude(
             "model": model,
             "stop_reason": msg.stop_reason,
         }
+    # FU#9 2026-04-24: proactive max_tokens monitoring. `stop_reason == "max_tokens"`
+    # means output was truncated. If JSON parsing fails we raise immediately
+    # (existing behaviour below); if JSON happens to parse (rare — usually
+    # truncation produces invalid JSON — but can happen with partial lists),
+    # print a warning so operators see the ceiling issue before it manifests
+    # as missing content downstream.
+    if out.get("stop_reason") == "max_tokens":
+        import sys as _sys
+        _sys.stderr.write(
+            f"[call_claude WARN] stop_reason=max_tokens on {model} "
+            f"(max_tokens={max_tokens}, output_tokens={out['usage']['output_tokens']}). "
+            f"Output was truncated — consider bumping max_tokens for this call site.\n"
+        )
     if response_format_json:
         # Trim ```json fences if present
         cleaned = text.strip()
