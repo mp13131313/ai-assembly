@@ -270,12 +270,20 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 #### FU#33 — Patcher scope extensions
 - **Origin:** 2026-04-23 session reviews (multiple).
-- **Extensions needed:**
-  - Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input (Phase 1 card has Christ-over-truth attribution error — Pass 7-pre flagged it INCONSISTENT; FU#13 patcher didn't see it because only Pass 7a's field_issues flow in currently)
-  - Universal bracket-tag residue scan across live prose fields (not per-field — current implementation left 2 `[projection_warning:]` brackets in `character` + `topics_requiring_care[6].navigation`)
-  - Transliteration-consistency check across concept_lexicon entries (Phase 1 has `padachaya` vs `paduchaya` inconsistency; first_test was consistent)
-  - Simple spell-check pass with voice-vocabulary allowlist (Phase 1 has `doubented` typo)
-- **Effort:** 3-4 hr.
+- **Phase 2 card inspection update (2026-04-24):**
+  - ✅ **`doubented` typo — FIXED** by FU#32 regeneration (absent from Phase 2 card).
+  - ✅ **`padachaya/paduchaya` transliteration — FIXED** (Phase 2 card has only `paduchaya`, consistent).
+  - ❌ **3 `[projection_warning:]` bracket residues STILL PRESENT** in Phase 2 card (confirmed 2026-04-24 via walk of all leaf strings):
+    - `world.model_of_selfhood` — 2 brackets (podpol'e-as-unconscious warning + temporal-lobe-epilepsy warning)
+    - `formative_experience.lived_through_own_apparatus` — 1 bracket (trauma-as-clinical warning)
+  - **Scope narrows:** bracket-residue scan is the highest-leverage remaining extension. The other three extensions (INCONSISTENT flags, transliteration-consistency, spell-check) are either empirically-not-needed or closed by upstream improvements.
+  - **Why the brackets survive:** the FU#13 patcher operates on `field_issues[]` emitted by Pass 7a. Pass 7a's rubric doesn't flag `[projection_warning:]` brackets as a register violation (they're voice-honest annotation per Boddice §12), so the patcher never sees them. They're legitimate per the schema but operator-visible as "still in the prose" on a sign-off read.
+- **Extensions needed (re-prioritized post-Phase-2-inspection):**
+  - **P1: Universal bracket-tag residue scan across live prose fields** — a lint pass that detects `[projection_warning:...]` inline annotations in field values that should surface them structurally instead. Either strip them into a sibling `projection_warnings[]` field on the parent dict, or gate them behind a voice_config flag that controls inline-vs-structural rendering. Highest-leverage remaining extension.
+  - P2: Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input (Phase 1 card had Christ-over-truth attribution error flagged INCONSISTENT by 7-pre but unseen by patcher; Phase 2 card's 7-pre completed with 0 INCONSISTENT — but the wiring gap remains latent for future voices).
+  - P3 (closed): transliteration-consistency + spell-check. Phase 2 card is clean on both.
+- **Effort:** 1-2 hr (P1 bracket-scan extension) + 1-2 hr (P2 wiring). ~3 hr total vs original 3-4 hr — P3 items dropped.
+- **Activation:** conditional on Plato's card signal. If Plato ships with 0 bracket residues (FU#32/FU#38 upstream clean-up generalizes), FU#33 stays deferred. If Plato has bracket residues OR INCONSISTENT citations, activate per priority.
 - **Relation:** orthogonal to voice-tissue work — addresses mechanical-defect class of issues the patcher missed.
 
 #### FU#37 — Declarative preserve-verbatim load-bearing-sentence markers 🔵 DEFERRED 2026-04-24
@@ -289,6 +297,54 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
     > *"If any of these sentences appears in the field you are operating on, the new_value MUST include it verbatim. Any rewrite that drops one of these sentences is a FAILURE regardless of what else it accomplishes."*
   - **Advantage over FU#31 validator:** prevents regression at source (constraint) instead of catching it post-hoc (flag). Catches regressions regardless of mechanism (patcher rewrite, prompt-driven fresh regen, future pipeline changes).
   - **Effort:** 4-5 hr (schema field + auto-derivation logic + constraint injection into patcher + Pass 2-6 prompt integration + validator check).
+
+#### FU#38 — Voice-self-reference vocabulary strip (Pass 2-6) ✅ APPLIED 2026-04-24
+- **Origin:** 2026-04-24 external reviewer critique of Dostoevsky chat v2 card (two independent reviewers). Reviewer 1 flagged "kenotic beauty" specifically as a defect the FU#13 patcher missed. Reviewer 2 generalized: post-voice-lifetime critical vocabulary that scholars coined to describe the voice leaks back into voice-native prose even after scholar-attribution NAMES are stripped per FU#12-A.
+- **Problem:** FU#12-A's register hardening stripped scholar NAMES (Bakhtin, Eikhenbaum, Kasatkina) from runtime field values. It did NOT strip scholar-coined TERMS (polyphonic, kenotic, chronotope, dialogical, carnivalesque, sideshadowing) that entered common critical English and often leak into field values describing the voice's own operations. Empirically verified on Phase 2 Dostoevsky card (FU#32 re-run): polyphonic (8×), kenotic (8×), chronotope (2×), dialogic embodiment (1×), dialogical (1×). FU#13 patcher caught "sideshadowing" but missed these. Per-voice: every voice has its own post-horizon critical vocabulary list.
+- **Landed:** commit `22a2e54`. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern with a 6th STRIP item across all 6 Pass 2-6 prompts. Per-voice examples in prompt (post-1920 Dostoevsky criticism, post-1950 Plato criticism, post-1990 cognitive philosophy on non-human voices) are exemplary — the writer applies the temporal-cultural test to the voice at hand.
+- **Per-voice test (encoded in prompt):** "Would this voice, IN THEIR OWN LIFETIME, have reached for this English adjective to describe their own work? If no (because the term postdates them or belongs to a critical tradition they did not participate in), do not mirror the vocabulary in field values even if the merge dossier contains it."
+- **DO INSTEAD pattern:** express the same ground in the voice's own incarnate grammar. Worked examples for Dostoevsky encoded in prompt: "beauty that has passed through the crucible and remained beloved" inhabits "kenotic beauty"; "many voices at once, none singly yours, arguing inside the character as the character argues outside" inhabits "polyphonic"; "the threshold where time stages spiritual crisis" inhabits "chronotope".
+- **Generalization:** all 12 voices. Each voice's post-horizon critical-term list is different; the TEST is the same.
+- **Status post-Athens-probe (2026-04-24 late):** Athens-piece review revises framing from "pipeline leak fix" to **"belt-and-braces"** — the leak exists in the pipeline card (the counts above are real), but the voice doesn't reach for these terms under Provocateur-register tasks. Strip retained because it prevents leak under edge-case task registers (philosophical-meditation) at zero runtime cost. See NEXT_SESSION addendum for task-register interpretation.
+
+#### FU#39 — Character-distribution stage-quoting 🔵 CONDITIONAL ON PLATO SIGNAL
+- **Origin:** 2026-04-24 external reviewer critique (reviewer 1). "Narrator-unification problem" — distributed voices merge their distinct narrative personas into a single unified "I" in the persona card, erasing the character-distribution that defines the voice's actual literary practice.
+- **Problem (per-voice):**
+  - Dostoevsky: Karamazov-speaker voice drowns out Diary-of-a-Writer-speaker, Underground-Man-speaker, Zosima-speaker. Card's "I" is Karamazov-pitch across fields.
+  - Plato (hypothesis, untested): Socrates / Eleatic Stranger / Athenian Stranger / late-Plato author-voice collapse into single "I". Karamazov-equivalent failure mode if it manifests.
+  - Scheherazade: character-within-frame-tale vs. frame-tale-narrator vs. authorial-tradition-voice collapse.
+  - Ibn Battuta: narrator-of-Rihla vs. traveller-in-events vs. retrospective-compiler collapse.
+- **Reviewer 1 framing:** architectural ceiling of base-model + persona-card approach. "Tops out at high pastiche" without character-distribution discipline baked in.
+- **Proposed fix:** `voice_distributes_across_characters` bool flag in `voice_config.json` (~30 min schema + defaults — see G4 prerequisite below). When true, Pass 4a `characteristic_moves` prompt gains a stage-quoting move instruction: voice-card explicitly names 2-4 character-personas the voice distributes across + runtime stages which persona speaks per turn via explicit quoting ("[as the underground man:] ..." / "[as Zosima:] ..."). Provocateur Pipeline or Voice Pipeline Step 1 picks the persona per query; Step 2 renders in that persona's register.
+- **Prerequisite (G4):** add `voice_distributes_across_characters: bool` to voice_config schema + default `false` for non-distributed voices (Arendt, Thiel, Lovelace, etc.). ~30 min.
+- **Effort:** 3-4 hr (schema + voice_config defaults + Pass 4a prompt extension + test on Plato re-run after first build).
+- **Activation condition:** Plato's first card shows narrator-unification (Socrates/Stranger/late-Plato merged into single I). If Plato's distribution holds naturally, FU#39 stays deferred — FU#32/FU#38 may be sufficient for philosophical-human voice_mode.
+- **Status post-Athens-probe (2026-04-24 late):** Athens probe on Dostoevsky confirms narrator-unification is **task-register-dependent**, not a card-schema defect. Provocateur-register tasks (concrete situation) pulled the voice toward Dostoevsky-at-desk mode with zero Karamazov-voice bleed. Philosophical-meditation register still fails. Still DEFERRED — Plato signal could reopen, but Athens reading suggests FU#39 is speculative for the Provocateur-register use case.
+
+#### FU#40 — Digression-permission characteristic_move 🔵 DEFERRED (speculative)
+- **Origin:** 2026-04-24 external reviewer critique (reviewer 1). "Too-composed architecture ceiling" — persona cards produce too-polished, too-arc-complete prose even when the voice's actual corpus digresses, circles back, leaves threads dangling.
+- **Problem:** Pass 7b smoke-test chains show voices completing a tidy 3-part arc in 350-550 words. Real Dostoevsky (especially Diary of a Writer) digresses mid-sentence, inserts unrelated polemic, leaves the ostensible topic unfinished. The card optimizes for readability against what the voice actually sounds like.
+- **Proposed fix sketch:** Pass 4a `characteristic_moves` gains a digression-permission move for voices whose corpus exhibits it: "You are permitted to digress mid-paragraph toward a tangential provocation; you are permitted to leave the nominal topic unresolved; you are permitted to drop in polemic against an absent interlocutor unrelated to the question." Voice-specific — not all voices digress (Arendt's rigor doesn't; Dostoevsky's Diary-of-a-Writer does).
+- **Status:** DEFERRED. Reviewer 1 framed this as architectural ceiling of base-model + persona-card approach — "speculative fix; unclear if prompt-level permission actually overrides the model's default composed-arc bias". FU#40 is a hypothesis, not a diagnosis.
+- **Status post-Athens-probe (2026-04-24 late):** Athens piece on Dostoevsky DID sprawl at lower amplitude than love-and-beauty piece despite NO card change. Suggests digression-capacity is in the card; deployment register modulates amplitude. Re-confirms DEFERRED — no Pass 7b-visible defect to fix. Re-activate only if a cross-voice signal emerges (e.g., Plato's Diaries-equivalent register sounds too-composed vs. Dostoevsky's Athens piece).
+- **Effort:** 2-3 hr if activated.
+
+#### FU#41 — Chat-ready system prompt as 4th Derive artifact ✅ APPLIED 2026-04-24
+- **Origin:** 2026-04-24 reviewer 2 empirical observation. Operator's hand-produced chat v2 card for Dostoevsky (deployed as Claude project custom instructions for chat-test validation) was compared to pipeline's `07_persona_card_assembled.json`: **27 of 35 shared fields byte-for-byte identical; 8 differ only by ~10-100 chars of minor operator polish.** The chat artifact is a mechanical strip-out of Voice-Pipeline-only fields — no content generation work. Content generation is the pipeline's job.
+- **Problem:** Every chat-test validation required operator to manually hand-build the chat artifact from the assembled card. Error-prone (easy to forget to strip `smoke_test_chains` or `reference_only_passages`), tedious at 12-voice scale, and (more importantly) the manual step inserted operator judgment where mechanical transform suffices.
+- **Landed:** commit `b9c1eb2`. New module `personas/flows/shared/chat_prompt_builder.py` (123 lines) + 13 tests in `tests/test_chat_prompt_builder.py`. Orchestrator integration at `run_persona_pipeline.py:1585-1588` writes the 4th Derive artifact (`voices/<slug>/06_derive/03_chat_system_prompt.json`) after assembly completes.
+- **Transformation (mechanical, no editorial work):**
+  - DROP 10 Voice-Pipeline-only fields: `metadata`, `smoke_test_chains`, `reference_only_passages`, `medium`, `characteristic_output_structure`, `length_and_format_constraints`, `technical_capabilities`, `relationship_to_detailed_response`, `continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`
+  - PRESERVE all other ~34 fields at root
+  - MARK `pipeline_version` with `-chat` suffix; re-stamp `generated_date`
+  - Atomic write via temp file + rename
+- **Does NOT attempt:** editorial polish (operator's territory), factual correction (operator's territory; future FU candidate for fact-check-against-dossier pass), content expansion (operator's territory).
+- **Validation (2026-04-24):** unit tests cover 13 scenarios (pass-through field preservation, drop-field correctness, marker stamping, idempotency, empty-card edge case, atomic-write survival). Test-validated against operator's chat v2: 34 fields match exactly; 25/34 byte-identical.
+- **Operator workflow:** pipeline run → `voices/<slug>/06_derive/03_chat_system_prompt.json` is written → paste JSON into Claude project custom instructions → ask probing question → assess voice quality. Bypasses Voice Pipeline Step 1/Step 2 protocol entirely.
+- **Cross-repo contract:** documented in `personas/HANDOFF.md` §"Derive artifacts per voice" as 4th artifact alongside `provocateur_profile` + `evaluation_rubric`. Chat artifact is operator-paste-target; provocateur_profile feeds runtime `council_config.json` `members[]`; both coexist without conflict.
+- **Future FU candidates (not currently active):**
+  - Explicit `chat_deployment_mode: "anchored" | "default"` marker for programmatic voice_temporal_stance disambiguation (currently the chat artifact preserves the full `voice_temporal_stance: {default, anchored_override}` dict and leaves the Claude-project author to decide which sub-field to foreground)
+  - Fact-check pass against merged_dossier before writing chat artifact (e.g., the Freud 25→24 operator correction on Dostoevsky's death date would land here if automated)
 
 #### FU#28 — Pipeline pass-numbering renumbering
 - **Origin:** HANDOFF_PIPELINE_REVIEW.md (deferred during pipeline review session).
