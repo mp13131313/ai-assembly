@@ -1,13 +1,21 @@
 """test_chat_prompt_builder.py — Tests for FU#41 chat-ready artifact.
 
+Amended 2026-04-25: chat is a TEST of the configured deployment (e.g.
+Athens 2026), not a separate deployment surface. Strip set is now 5
+fields (was 10) — see module docstring for the architectural shift.
+
 Covers:
-  1. Voice-Pipeline-only field strip — correct 10 fields dropped
+  1. Strip set — 5 fields dropped (chat-structurally-incompatible only)
   2. Preserved fields — all other fields pass through byte-identical
   3. Marker fields — pipeline_version gets "-chat" suffix; generated_date
      re-stamped
   4. voice_temporal_stance preserved intact (chat deployment reads whichever
      sub-field it needs)
-  5. write_chat_system_prompt atomic — temp-file + rename pattern
+  5. Voice-constitutional / deployment-aware fields (medium,
+     characteristic_output_structure, length_and_format_constraints,
+     technical_capabilities, relationship_to_detailed_response) ARE preserved
+     — regression check against the prior over-strip pattern
+  6. write_chat_system_prompt atomic — temp-file + rename pattern
 """
 from __future__ import annotations
 
@@ -25,18 +33,22 @@ from flows.shared.chat_prompt_builder import (
 def _minimal_assembled_card() -> dict:
     """Return a minimal assembled card fixture covering each kind of field."""
     return {
-        # Voice-Pipeline-only fields (should be dropped):
+        # Strip set — chat-structurally-incompatible fields (should be dropped):
         "metadata": {"passes_completed": ["2", "3"], "validation_status": "PASS"},
         "smoke_test_chains": [{"chain_1": "..."}],
         "reference_only_passages": {"passages": []},
-        "medium": "prose",
-        "characteristic_output_structure": "…",
+        "continuity_block_if_night_2": None,
+        "continuity_block_artifact_if_night_2": None,
+        # Voice-constitutional / deployment-aware fields (PRESERVED under
+        # 2026-04-25 amendment — these were stripped under the original
+        # FU#41 framing but are kept now since chat is testing the configured
+        # deployment, not running a separate one):
+        "medium": "I write what I have always written: a short conversation.",
+        "characteristic_output_structure": "I open in the middle of life…",
         "length_and_format_constraints": "350-550 words",
         "technical_capabilities": "Text only.",
         "relationship_to_detailed_response": "…",
-        "continuity_block_if_night_2": None,
-        "continuity_block_artifact_if_night_2": None,
-        # Preserved fields:
+        # Other preserved fields:
         "voice_name": "Test Voice",
         "voice_mode": "philosophical",
         "pipeline_version": "3.10",
@@ -86,23 +98,37 @@ def test_all_voice_pipeline_only_fields_are_dropped():
         assert field not in chat, f"Voice-Pipeline-only field {field!r} leaked into chat prompt"
 
 
-def test_voice_pipeline_only_fields_list_matches_empirical_diff():
-    """The 10 fields documented as Voice-Pipeline-only should match the
-    actual set dropped during the transformation. This is a regression
-    check — if the FU#41 spec changes, this test flags it."""
+def test_strip_set_matches_chat_incompatible_fields():
+    """Strip set is the 5 chat-structurally-incompatible fields per the
+    2026-04-25 amendment. Was 10 fields under original FU#41 framing.
+    Regression check — if the spec changes, this test flags it."""
     expected = {
         "metadata",
         "smoke_test_chains",
         "reference_only_passages",
+        "continuity_block_if_night_2",
+        "continuity_block_artifact_if_night_2",
+    }
+    assert set(_VOICE_PIPELINE_ONLY_FIELDS) == expected
+
+
+def test_voice_constitutional_fields_preserved():
+    """The 5 voice-constitutional / deployment-aware fields stripped under
+    the original FU#41 framing must NOT be in the strip set after the
+    2026-04-25 amendment. Regression check against the over-strip pattern."""
+    must_be_preserved = {
         "medium",
         "characteristic_output_structure",
         "length_and_format_constraints",
         "technical_capabilities",
         "relationship_to_detailed_response",
-        "continuity_block_if_night_2",
-        "continuity_block_artifact_if_night_2",
     }
-    assert set(_VOICE_PIPELINE_ONLY_FIELDS) == expected
+    leaks = must_be_preserved & set(_VOICE_PIPELINE_ONLY_FIELDS)
+    assert leaks == set(), (
+        f"Voice-constitutional fields leaked into strip set: {leaks}. "
+        f"This regresses the 2026-04-25 amendment — chat is a TEST of "
+        f"the configured deployment, so these must be preserved."
+    )
 
 
 def test_preserved_fields_pass_through_identical():
@@ -203,15 +229,16 @@ def test_write_chat_system_prompt_cleans_tmp_file(tmp_path: Path):
     assert stray == [], f"Temp files left behind: {stray}"
 
 
-# ── empirical regression: chat v2 shape ─────────────────────────────────────
+# ── architectural-amendment historical note ─────────────────────────────────
 
-def test_chat_v2_shape_from_empirical_diff():
-    """Regression check against the 2026-04-24 operator-produced chat v2
-    Dostoevsky card. Fields in the pipeline-generated card that were NOT
-    in the chat v2 are the VOICE_PIPELINE_ONLY_FIELDS set."""
-    # These were empirically observed as the chat v2 strip set (diff of
-    # Dostoevsky assembled_card vs dostoevsky_chat_system_prompt_v2.json)
-    pipeline_only_from_empirical_diff = {
+def test_amendment_diff_vs_2026_04_24_baseline():
+    """Document the 2026-04-25 amendment delta vs the original 2026-04-24
+    baseline. The 2026-04-24 strip was 10 fields, derived from operator's
+    hand-produced Dostoevsky chat v2. The 2026-04-25 amendment shrinks the
+    strip to 5 by recognizing chat as a test of the configured deployment
+    rather than as a separate deployment surface; the 5 voice-constitutional
+    / deployment-aware fields are now preserved."""
+    original_2026_04_24_strip = {
         "metadata",
         "smoke_test_chains",
         "reference_only_passages",
@@ -223,4 +250,23 @@ def test_chat_v2_shape_from_empirical_diff():
         "continuity_block_if_night_2",
         "continuity_block_artifact_if_night_2",
     }
-    assert set(_VOICE_PIPELINE_ONLY_FIELDS) == pipeline_only_from_empirical_diff
+    current_2026_04_25_strip = set(_VOICE_PIPELINE_ONLY_FIELDS)
+    fields_promoted_to_preserve = original_2026_04_24_strip - current_2026_04_25_strip
+    fields_still_stripped = original_2026_04_24_strip & current_2026_04_25_strip
+
+    assert fields_promoted_to_preserve == {
+        "medium",
+        "characteristic_output_structure",
+        "length_and_format_constraints",
+        "technical_capabilities",
+        "relationship_to_detailed_response",
+    }
+    assert fields_still_stripped == {
+        "metadata",
+        "smoke_test_chains",
+        "reference_only_passages",
+        "continuity_block_if_night_2",
+        "continuity_block_artifact_if_night_2",
+    }
+    # No NEW fields added to the strip beyond the original baseline.
+    assert current_2026_04_25_strip <= original_2026_04_24_strip
