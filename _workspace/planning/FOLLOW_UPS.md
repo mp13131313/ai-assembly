@@ -410,6 +410,49 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Effort:** ~1-2 hr chat-testing + ~30 min scoring.
 - **Why high-value despite low-priority:** only empirical check on whether Phase 1 work + arch-03 enrichment pays off at RUNTIME (not just at validation passes).
 
+#### FU#42 — Split-card architecture (voice-card / deployment-card)
+- **Origin:** 2026-04-25 emerged across multiple architectural debates: FU#41 chat-strip blacklist over-strips for Plato (Amendment A), Pass 7a vs Pass 7-pre conflict on biocultural tags (FU#33 P1 amendment), audience-iteration cost vs deployment-flexibility tension. Common diagnosis: the assembled card conflates two structurally different layers.
+- **Problem:** the 44-field card mixes:
+  1. **Voice-card** (constitutional, stable across deployments): identity, world, character, knowledge_boundary, voice_temporal_stance, translation_protocol, constitution, concept_lexicon, reasoning_method, characteristic_moves, register_and_tone, metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes, the constitutional core of `medium`/`characteristic_output_structure`/`technical_capabilities`/`relationship_to_detailed_response`/`aesthetic_qualities`/`stance_tendency`, `curated_corpus_passages`, `reference_only_passages`, `topics_requiring_care` (constitutional core), `hard_limits` — ~32 fields.
+  2. **Deployment-card** (this-occasion-specific, swappable per deployment): `length_and_format_constraints` (Athens-specific 350–550-word window), `bold_engagement_topics` (audience-aware), `default_questions` (audience-primed), `disagreement_protocol` (deployment overlay), `unique_contribution`, `continuity_block_if_night_2` + `continuity_block_artifact_if_night_2`, `quality_criteria` — ~8 fields.
+  3. Hybrid (constitutional core + deployment overlay): `topics_requiring_care`, `disagreement_protocol`.
+- **Operational benefits:**
+  - **Cheap deployment swapping.** Plato-for-Athens-2026 vs Plato-for-2027-event = same voice_card, swap deployment_card. Today: ~12 × ($18-22, 2h) = $240+/24h to redeploy 12-voice panel; with split-card: ~12 × ($1-3, 5min) = $30/1h. ~5-8× cheaper per deployment iteration.
+  - **Voice consistency across deployments.** voice_card generated once, locked. Deployment_card swaps. Voice stays byte-identical across deployments (today's pipeline cannot guarantee this).
+  - **Cheap audience-brief iteration.** Edit `audience_profile.json` / `conference_facts.json` → regenerate deployment_card only. Today's `scripts/invalidate_cache.py --from-pass 5` does this partially ($60-96 + 5h for 12-voice panel); split-card reduces to $15-25 + 1h.
+  - **Pass 7a vs Pass 7-pre boddice-tag conflict structurally resolved.** Boddice tags become explicit `experiential_reconstructions[]` / `projection_warnings[]` sibling fields in voice_card (structural, not inline). Pass 7a doesn't see them in voice prose; Pass 7-pre reads from sibling fields. Both validators happy.
+  - **Diagnostic clarity.** When something's wrong with runtime, "voice problem or deployment problem" answers itself by which card the issue traces to.
+  - **FU#41 chat artifact becomes principled.** Chat artifact = voice_card directly (no mechanical strip-by-blacklist). Today: blacklist of 11 fields calibrated voice-by-voice (Amendment A + Amendment B history). With split-card: structural distinction means the chat-test target is just voice_card, no per-voice tuning.
+- **What the half I retracted addressed:** "voice_card prose-flatten" (eliminate JSON wrapper as spec-shape signal in chat-test thinking traces) — chat-only motivation, no Voice Pipeline runtime benefit. Voice Pipeline cherry-picks specific fields via API, never reads card as one document. Retracted from this FU's scope.
+- **Effort:** ~1-2 weeks of architectural work. Schema migration (Dostoevsky + Plato into v3 shape). Pass 4b prompt splits (constitutional medium/structure → voice-card; deployment length/audience-format → deployment-card). Card assembly + chat builder rewritten as voice+deployment merge instead of strip-by-blacklist.
+- **Trigger options:**
+  1. Post-Athens (May 11+): voices 3-12 ship under Card v2; migrated to v3 alongside Dosto + Plato.
+  2. Pre-Athens IF audience-brief or conference-context iteration becomes substantive (5+ iterations between now and May 7 would justify the architectural cost).
+  3. Partial-slice pre-Athens: just the audience-aware regeneration path (Pass 5 + Pass 4b-deployment + Pass 6-deployment) ≈ 3-4 days; defers full split.
+
+#### FU#43 — Pass 6 `corpus_metadata` source-side hardening ✅ APPLIED 2026-04-25
+- **Origin:** Plato 2026-04-25 first run had Pass 7a flag `curated_corpus_passages.corpus_metadata` as "production metadata leaked into prose" (issue #7); patcher trimmed it (patch #6 in `_fix_log.json`). Pattern recurs across voices.
+- **Landed:** `bf49a0a`. Edited `persona_pass_6_corpus.md` to explicitly tell Pass 6: keep `corpus_metadata.notes` EMPTY or one short translation-tradition line ("Cooper-Hackett ed. 1997"; "Jowett 1892"). Forbid voice biography, voice-instruction prose, public-domain disclaimers, curator essays, passage summaries. Cross-references FU#41 Amendment B nested-strip as source-of-truth intent.
+- **Effect for voices 3-12:** Pass 6 emits minimal corpus_metadata at source; patcher doesn't need to re-trim per voice. Saves ~$0.20-0.50 patcher work per voice + cycle time.
+
+#### FU#44 — Patcher prompt register-drift extension ✅ APPLIED 2026-04-25
+- **Origin:** Plato 2026-04-25 Pass 7a flagged 7 field_issues post-fix. Two recurring patterns the patcher missed:
+  1. **Third-person scholarly diction** — "the corpus", "the [Voice]ian person", "[Voice] held that...", "reticence in the corpus".
+  2. **Internal contradictions** — `topics_requiring_care.guidance` instructing voice to acknowledge facts that `knowledge_boundary` says voice cannot know (Plato + Popper-eugenics-history).
+- **Landed:** `bf49a0a`. Edited `persona_pass_7a_fix.md` with worked-example patterns under rule 3 (register-drift rewrites: "the corpus" → second-person possessive, "the [Voice]ian person" → first/second-person, "[Voice] held that..." → first/second-person rewrite). Added new rule 4: internal-contradiction patches (rewrite cross-knowledge_boundary guidance into voice-native terms). Renumbered subsequent rules 4→5, 5→6, 6→7.
+- **Effect for voices 3-12:** patcher catches register-drift specifically, reducing residual REVISION_NEEDED flags after fix-pass. Lower operator-triage friction at every CARD COMPLETE step.
+
+#### FU#45 — Cache-invalidation helper script ✅ APPLIED 2026-04-25
+- **Origin:** Plato 2026-04-25 re-run cycles cost an extra ~$5 + 30min when the operator (and Claude) targeted `04_generation/02_excerpt_selections.json` for Pass 1d cache invalidation; the actual path is `03_corpus/02_excerpt_selections.json`. `rm -f` failed silently; the pipeline cache-hit; the wider Pass 1d budget didn't apply.
+- **Landed:** `bf49a0a`. New `personas/scripts/invalidate_cache.py` knows the path map for every pass + handles composite paths (chat artifact, fix log) that don't have their own helper function. Supports `--pass <name>` (single), `--from-pass <name>` (cascade), `--list`, `--dry-run`.
+- **Usage:** `venv/bin/python scripts/invalidate_cache.py --voice plato --project /path/to/project --from-pass 1d`
+- **Effect for voices 3-12:** operator iteration cycles use the helper instead of manual `rm -f`. No more silent path-mismatch failures.
+
+#### FU#46 — Pass 1d excerpt budget bump (30K → 60K) ✅ APPLIED 2026-04-25
+- **Origin:** Plato 2026-04-25 first run had 25/151 Pass 7-pre claims UNVERIFIED at 30K budget. Well-attested Platonic doctrines (anamnēsis, divided line, meletē thanatou, etc.) lived in merged_dossier but Pass 1d's 6 selections couldn't anchor them in 30K of curated excerpts.
+- **Landed:** `cba8fc5`. Edited `persona_pass_1d_excerpt_selection.md`: budget 30K → 60K, per-source 10K → 15K. Per-source cap keeps single-source dominance in check.
+- **Effect for voices 3-12:** richer-corpus voices (Plato, Arendt, possibly Scheherazade) anchor more claims to primary text. Smaller-corpus voices not affected (per-source cap + LLM judgement still bounds selection).
+
 #### CC#1 — Move `05_primary_text_urls.json` out of `01_research/`
 - **Origin:** This session, surfaced reading `paths.py`.
 - **Problem:** Historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json`. Destination path kept for backward-compat but file is no longer a research output.
