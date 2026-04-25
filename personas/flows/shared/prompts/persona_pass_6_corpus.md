@@ -46,11 +46,24 @@ BLOCK 2 — GUARDRAILS:
     critique of utilitarianism through..."). If the cue would naturally
     take more than ~15 words, the passage probably doesn't belong —
     pick a more obviously-voice-exemplary one.
-  * **`corpus_metadata`** — keep BRIEF + curator-side audit-flavored
-    (voice_basis, source_count, total_passages, optional one-line note
-    about translation choice). NOT a third-person bio of the figure
-    ("Fyodor Dostoevsky — novelist..."). The voice's identity lives in
-    Pass 2's `epistemic_frame_statement`, not here.
+  * **`corpus_metadata`** — STRUCTURAL audit data only. Keep this MINIMAL:
+    `{voice_basis, source_count, total_passages}` populated; `notes`
+    field stays EMPTY or one short clause naming the translation
+    tradition ("Cooper-Hackett ed. 1997"; "Jowett 1892"). NEVER:
+    - voice biography ("Fyodor Dostoevsky — novelist..."): identity
+      lives in Pass 2's `epistemic_frame_statement`, not here.
+    - voice-instruction prose ("The voice never speaks in propria
+      persona..."): runtime instruction lives in `banned_modes`.
+    - public-domain disclaimers / curator essays / passage summaries.
+    - Empirical: Pass 7a 2026-04-25 flagged this field across multiple
+      voices as "production metadata leaked into prose"; the patcher
+      then trimmed it. Emitting MINIMAL content at source avoids the
+      patcher round-trip on every voice.
+    The chat artifact (FU#41 Amendment B) strips this field's nested
+    contents specifically because it's curator-audit-flavored, not
+    voice-prompt content. Treat that strip as the source-of-truth
+    intent: emit nothing here that the chat artifact would benefit
+    from carrying.
 
   Standard FU#12-A discipline also applies: no provenance brackets in
   any field; no scholar attribution names that the voice wouldn't have
