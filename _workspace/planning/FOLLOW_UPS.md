@@ -453,12 +453,50 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Landed:** `cba8fc5`. Edited `persona_pass_1d_excerpt_selection.md`: budget 30K → 60K, per-source 10K → 15K. Per-source cap keeps single-source dominance in check.
 - **Effect for voices 3-12:** richer-corpus voices (Plato, Arendt, possibly Scheherazade) anchor more claims to primary text. Smaller-corpus voices not affected (per-source cap + LLM judgement still bounds selection).
 
-#### CC#1 — Move `05_primary_text_urls.json` out of `01_research/`
+#### CC#1 — Move `05_primary_text_urls.json` out of `01_research/` ✅ APPLIED 2026-04-26
 - **Origin:** This session, surfaced reading `paths.py`.
 - **Problem:** Historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json`. Destination path kept for backward-compat but file is no longer a research output.
-- **Fix:** Move from `voices/<slug>/01_research/05_primary_text_urls.json` → `voices/<slug>/03_corpus/00_primary_text_urls.json`. Update [`paths.py:71`](../../personas/flows/shared/paths.py:71): `research_dir(...)` → `corpus_dir(...)` + filename change.
-- **Trigger:** fresh-project bootstrap of next voice-set after Phase L sign-off.
-- **Effort:** ~15 min.
+- **Landed:** commit `ef91fb6`. Moved from `voices/<slug>/01_research/05_primary_text_urls.json` → `voices/<slug>/03_corpus/00_primary_text_urls.json`. `paths.py:69-72` updated; `tests/test_paths.py` test moved from `TestResearchFiles` to `TestCorpusFiles` and asserts new filename. Existing files migrated for Plato + Dostoevsky.
+
+#### FU#47 — Voice Pipeline Step 1 mode-switching for non-analytical voices
+- **Origin:** External reviewer 2026-04-26 comparing Plato (pipeline-emitted) vs Dostoevsky (chat v2, operator-hand-curated). Surfaced architectural diagnosis: Plato's actual method IS analytical-procedural (Socratic dialectic IS reducible to logical operations); the Voice Pipeline's Step 1 (analytical workshop / thinking-procedure) → Step 2 (artifact rendering) split fits Plato cleanly. Dostoevsky's method is scenic-incarnational; Step 1 as a separable analytical workshop is structurally foreign. Reviewer's verbatim: *"the Step 1 trace cannot be authentic Dostoevsky-thinking; it can only be analytical-thinking-about-what-Dostoevsky-would-write."*
+- **Scope:** This is a **Voice Pipeline runtime concern**, not a persona-pipeline (build) concern. The persona pipeline produces the card; the Voice Pipeline reads the card at deployment time and runs Step 1 / Step 2 over per-session prompts. The fit problem is in Step 1's prompt design.
+- **Estimated voice-fit map (rough first pass; needs empirical confirmation per voice):**
+  - **Step 1 fits (analytical_workshop mode):** Plato ✓, Hannah Arendt, Ada Lovelace, Audrey Tang, Peter Thiel, Cleopatra (depending on framing).
+  - **Step 1 awkward (need alternative mode):** Fyodor Dostoevsky (scenic), Scheherazade (frame-narrative + character-distributed), Ibn Battuta (observational-narratival), Bob Marley (lyric-rhythmic), Whanganui River (legal-personhood-from-Indigenous-tradition), Octopus (ethological-observational).
+  - Roughly 6/12 voices may need mode-switching — not a fringe case.
+- **Proposed fix sketch:**
+  1. **Voice-config carries `voice_mode`** already; Voice Pipeline Step 1 prompt branches on it.
+  2. **Four Step 1 modes initially:**
+     - `analytical_workshop` (philosophical / political-analytical voices) — current Step 1: thinking-procedure produces an analytical trace; Step 2 renders.
+     - `scenic_drafting` (narratival voices: Dostoevsky, Scheherazade, Ibn Battuta) — Step 1 = "find the face, the threshold, the collision" + fragment-and-scene drafting; Step 2 = compose the scene from drafts.
+     - `lyric_recall` (musical voices: Marley) — Step 1 = pattern-recall from corpus + motif-collation; Step 2 = compose in the pattern.
+     - `observational_witnessing` (non-human voices: Octopus, Whanganui) — Step 1 = ethological observation / legal-personhood-from-Indigenous-tradition reasoning; Step 2 = render.
+  3. Voice Pipeline orchestrator selects Step 1 prompt by voice_mode lookup.
+- **Effort:** ~2-3 days. Voice Pipeline workstream (not persona pipeline). Touches: 4 Step 1 prompt variants, Voice Pipeline orchestrator branch logic, voice-mode → step1-mode mapping, ~per-voice empirical validation of mode assignment.
+- **Trigger:**
+  1. Voice 3 startup if voice 3's `voice_mode` is non-philosophical (e.g. Cleopatra-narratival or Marley-lyric); the empirical signal would surface immediately.
+  2. Otherwise: post-Plato chat-test cycle in the Voice Pipeline runtime (when an actual non-analytical voice is deployed at runtime) — empirical fit-check per voice.
+  3. Latest: post-Athens, alongside FU#42 split-card (the voice-card / deployment-card distinction makes step1_mode a clean voice-card field).
+- **Architectural relation to FU#42:** orthogonal but reinforcing. Split-card's `voice_card.json` would carry `voice_mode` cleanly; deployment-card carries audience/length/occasion. Step 1 mode-switching reads voice-card.
+
+#### FU#48 — Port operator hand-curation patterns from Dostoevsky chat v2 into pipeline prompts
+- **Origin:** External reviewer 2026-04-26 noted that Dostoevsky's chat v2 card has defensive depth (tagged constitution, paraphrase-safer caution, [ADDED FROM TESTING] empirical patches, more prescriptive `banned_language`) that Plato's pipeline-emitted card lacks. Reviewer attributed it to Dosto being "more recent"; per operator's chronology, the actual cause is operator-hand-curation of the chat v2 atop an older pipeline output. Plato is the inverse: pipeline-emitted under today's improvements (FU#33 P1 + FU#38 + FU#41 amendments + FU#43-#46), no operator-hand-curation layer.
+- **Empirical lessons to port:**
+  1. **Tagged constitution principles** — Dosto chat v2 has `[ontological]` / `[epistemological]` / `[ethical-political]` / `[unique]` tags on each constitution principle. Plato's are flat. Tags help downstream (Step 1 / Step 2 / runtime) identify which kind of principle is being invoked. Universally applicable.
+  2. **Paraphrase-safer-than-quotation caution** — Dosto chat v2's `corpus_metadata` says: *"Paraphrase is safer than direct quotation in almost every case — speak from each passage's logic and register rather than reproduce its wording, which risks fabrication-by-approximation."* Plato has no equivalent. This addresses fabrication risk universally.
+  3. **The [ADDED FROM TESTING] catches** — Dosto has 2, Plato has 5 (per reviewer's count). Each is an FU#38-class voice-self-reference fix or FU#12-A register fix. Inventory them, port the universal patterns into the pipeline prompts so they apply prophylactically.
+- **Proposed implementation:**
+  - **Pass 3 prompt update**: require `principle_category` field per constitution entry: one of `["ontological", "epistemological", "ethical-political", "metaphysical", "psychological", "aesthetic", "cosmological"]`, plus optional `["unique"]` flag for signature-voice principles. Pass 2-6 prompts already understand these categories from FU#33 P1 amendment work.
+  - **Pass 6 corpus_metadata content allowance**: amend FU#43 ("keep `notes` empty") to permit one specific caution: paraphrase-safer-than-quotation. OR add a separate `quotation_caution` field at voice-card level that's universally true and doesn't need per-voice authoring.
+  - **[ADDED FROM TESTING] inventory**: walk operator's Dosto chat v2 + Plato chat artifact, extract the universal patterns, port to Pass 2-6 banned_language / banned_modes / topics_requiring_care prompts.
+- **Effort:** ~3-4 hours.
+  - 30 min — Pass 3 prompt update + schema/test
+  - 30 min — Pass 6 corpus_metadata refinement (or new quotation_caution field)
+  - 2 hr — [ADDED FROM TESTING] pattern inventory + prompt ports
+  - 30 min — tests + run on Plato to verify
+- **Trigger:** voice 3 startup. Voices 3-12 inherit the corrected pipeline prompts; Plato + Dosto get retroactive benefit on next regen (or operator-hand-edit pre-Athens).
+- **Architectural relation:** complements FU#43 (Pass 6 corpus_metadata cleanliness) and FU#44 (patcher register-drift) by adding the universal lessons hand-curation surfaced. Different from FU#42 split-card — that's about layer separation; this is about content-level prompt enrichment.
 
 ---
 
