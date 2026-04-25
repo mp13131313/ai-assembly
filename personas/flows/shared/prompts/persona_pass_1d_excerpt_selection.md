@@ -9,8 +9,14 @@ The dossier names the most important works, scenes, arguments, and stylistic
 moves. Use this as your guide.
 
 Selection rules:
-- Total budget: approximately 30,000 characters across all selections combined.
-- Per source: at most ~10,000 chars from any single source. Better to span
+- Total budget: approximately 60,000 characters across all selections combined.
+  Bumped from 30K (2026-04-25) — empirical signal from Plato showed 25/151
+  Pass 7-pre claims went UNVERIFIED at 30K because well-attested doctrines
+  (anamnēsis, divided line, meletē thanatou, etc.) lived in the merged
+  dossier but weren't anchored to a curated excerpt. 60K covers richer-
+  corpus voices (Plato, Arendt) without bloating smaller-corpus voices —
+  the per-source cap keeps single-source dominance in check.
+- Per source: at most ~15,000 chars from any single source. Better to span
   multiple sources than to over-sample one.
 - Prefer passages where SUBSTANCE and VOICE coincide — material that exemplifies
   both what the voice argues and how the voice sounds.
