@@ -1289,6 +1289,43 @@ stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_modes +{add_summary.get('modes_added', 0)}")
 
 
+# ---------- PASS 7d-clean: bracket-tag residue strip (FU#33 P1) ----------
+# Deterministic regex pass: walks 04_generation/*.json and strips inline
+# scaffolding tags ([ontological], [experiential_reconstruction],
+# [projection_warning:...], [stated], etc.) from string fields. Pass 2-6
+# prompts (FU#12-A + FU#32 + FU#38) prohibit these but the patcher (FU#13)
+# only addresses per-field flagged issues; systemic-pattern cleanup is
+# its scope-gap. Empirical motivation: Plato 2026-04-25 had 42 bracket
+# residues post-Pass 7a-FIX (33 in constitution[] alone). Runs after
+# Pass 7c so validators have already seen the un-stripped state, before
+# Derive so derive products + assembled card + chat artifact see clean
+# prose. No LLM call; cost ~milliseconds.
+from flows.shared.bracket_strip import strip_chunks_in_place
+stamp("PASS 7d-clean: stripping inline scaffolding tags (FU#33 P1)")
+_clean_summary = strip_chunks_in_place(_paths.generation_dir(SLUG, PROJECT_ROOT))
+stamp(f"  stripped {_clean_summary['tags_removed']} inline tags across "
+      f"{_clean_summary['files_touched']}/{_clean_summary['files_scanned']} files")
+# Re-load any pass2-6 outputs that were rewritten so subsequent code (Derive
+# input assembly) sees the cleaned content.
+if _clean_summary['files_touched'] > 0:
+    _re_pass2 = json.loads(_paths.pass_2(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass3 = json.loads(_paths.pass_3(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass4a = json.loads(_paths.pass_4a(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass4b = json.loads(_paths.pass_4b(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass5 = json.loads(_paths.pass_5(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass6 = json.loads(_paths.pass_6(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    # Merge cleaned pass2/3/4a fields back into combined_2_3_4 and pass5/6.
+    # The orchestrator's in-memory dicts must reflect the cleaned chunks so
+    # Derive's full_card_for_derive (which reads combined_2_3_4 + pass5 +
+    # pass6 + pass7b + pass7c) sees clean prose.
+    combined_2_3_4 = {**_re_pass2.get("fields", {}),
+                       **_re_pass3.get("fields", {}),
+                       **_re_pass4a.get("fields", {}),
+                       **_re_pass4b.get("fields", {})}
+    pass5 = _re_pass5
+    pass6 = _re_pass6
+
+
 # ---------- DERIVE (Provocateur Profile + Evaluation Rubric) ----------
 # Spec Node Derive: Sonnet 4.6, temp 0.1, max 4096. Single call producing
 # 8-field Provocateur Profile (becomes a council_config.json member entry)
