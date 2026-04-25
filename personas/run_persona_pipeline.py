@@ -1010,6 +1010,73 @@ if pass7_anach["result"].get("overall") == "REVISION_NEEDED":
         pass7a["result"]["overall"] = "REVISION_NEEDED"
         stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_anach_issues)} anachronism flags")
 
+# FU#33 P2 (2026-04-26): merge Pass 7-pre INCONSISTENT citation flags into
+# Pass 7a's revision decision. INCONSISTENT items are citations where Pass 7-
+# pre's verifier found contradiction between the card's claim and primary text
+# / dossier evidence (different from UNVERIFIED, which is just unanchored).
+# These are content-level errors that the patcher can rewrite. Empirical
+# motivation: Plato 2026-04-25 surfaced 1 INCONSISTENT (the Statesman /
+# Republic / Laws conflation in reasoning_method[7].worked_demonstration);
+# Phase 1 Dostoevsky had similar (Christ-over-truth attribution flagged
+# INCONSISTENT but unseen by patcher per FU#33 design history). Pre-FU#33-P2:
+# patcher never saw these. Post-: they merge into field_issues like
+# anachronism flags do.
+_pass7pre_items = pass7pre.get("result", {}).get("items", []) or []
+_inconsistent_items = [it for it in _pass7pre_items if it.get("status") == "INCONSISTENT"]
+if _inconsistent_items:
+    _inconsistent_issues = []
+    for item in _inconsistent_items:
+        # source_fields may be string or comma/slash-separated list; pick first
+        # (patcher rewrites one field per issue; if multiple fields share the
+        # claim, multiple issues will reference it but each patch is targeted).
+        _raw = item.get("source_fields") or item.get("source_field") or ""
+        _path = _raw.split("/")[0].split(",")[0].strip() if isinstance(_raw, str) else (_raw[0] if _raw else "")
+        if not _path:
+            continue
+        # Map field path to pass (same logic as anachronism merge).
+        _target = "2"  # default
+        if _path.startswith(("constitution", "concept_lexicon", "reasoning_method",
+                              "finds_compelling", "resists")):
+            _target = "3"
+        elif _path.startswith(("rhetorical_mode", "characteristic_moves",
+                                "register_and_tone", "metaphorical_repertoire",
+                                "preferred_vocabulary", "banned_language",
+                                "banned_modes")):
+            _target = "4a"
+        elif _path.startswith(("medium", "characteristic_output_structure",
+                                "length_and_format_constraints", "technical_capabilities",
+                                "relationship_to_detailed_response", "aesthetic_qualities",
+                                "stance_tendency", "quality_criteria")):
+            _target = "4b"
+        elif _path.startswith(("bold_engagement", "default_questions",
+                                "disagreement_protocol", "unique_contribution")):
+            _target = "5"
+        elif _path.startswith(("curated_corpus_passages", "reference_only_passages")):
+            _target = "6"
+        _claim = item.get("claim", "")
+        _evidence = item.get("evidence", "") or item.get("note", "")
+        _inconsistent_issues.append({
+            "flagged_pass": _target,
+            "field": _path,
+            "issue": f"[citation_inconsistent] {_claim}",
+            "recommended_fix": (
+                f"Resolve contradiction with primary-text/dossier evidence: {_evidence[:300]}"
+                if _evidence else
+                "Rewrite the claim to match what primary text or dossier actually supports."
+            ),
+        })
+    if _inconsistent_issues:
+        pass7a["result"].setdefault("field_issues", []).extend(_inconsistent_issues)
+        pass7a["result"].setdefault("revision_target_passes", [])
+        for issue in _inconsistent_issues:
+            if issue["flagged_pass"] not in pass7a["result"]["revision_target_passes"]:
+                pass7a["result"]["revision_target_passes"].append(issue["flagged_pass"])
+        if pass7a["result"].get("overall") != "REVISION_NEEDED":
+            pass7a["result"]["overall"] = "REVISION_NEEDED"
+            stamp(f"  Pass 7a overall escalated to REVISION_NEEDED by {len(_inconsistent_issues)} INCONSISTENT citation flags (FU#33 P2)")
+        else:
+            stamp(f"  Merged {len(_inconsistent_issues)} INCONSISTENT citation flags from Pass 7-pre into Pass 7a field_issues (FU#33 P2)")
+
 # ---------- PASS 7a-FIX — Linear field-level patcher (FU#13, 2026-04-23) ----------
 # Replaces the prior revision loop entirely. If Pass 7a (with merged Pass 7-
 # anachronism flags) returns REVISION_NEEDED, fire ONE patcher call (Sonnet
