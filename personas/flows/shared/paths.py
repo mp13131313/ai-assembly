@@ -67,8 +67,16 @@ def review_doc(slug: str, project_root: Path | None = None) -> Path:
 # ==== Research files ====
 
 def primary_text_urls(slug: str, project_root: Path | None = None) -> Path:
-    """Synthetic cache entry written by Pass 1c-extract (URL list from dossier)."""
-    return research_dir(slug, project_root) / "05_primary_text_urls.json"
+    """Synthetic cache entry written by Pass 1c-extract (URL list from dossier).
+
+    CC#1 2026-04-26: relocated from `01_research/05_primary_text_urls.json` to
+    `03_corpus/00_primary_text_urls.json`. Historical-layout vestige: in v3.10
+    the URL list came directly from Perplexity research; 1-arch-07 (2026-04-22)
+    changed the source — URLs are now derived post-merge from `02_merge/pass_1_6/
+    works.json` + `passages.json`. The file is no longer a research output.
+    Belongs in `03_corpus/` alongside the fetched primary texts.
+    """
+    return corpus_dir(slug, project_root) / "00_primary_text_urls.json"
 
 
 def perplexity_dossier(slug: str, project_root: Path | None = None) -> Path:
