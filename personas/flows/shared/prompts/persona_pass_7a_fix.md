@@ -38,14 +38,55 @@ for ONLY the flagged fields.
    especially `register_and_tone`, `rhetorical_mode`, and worked examples
    from `characteristic_moves`.
 
-4. **Trim, don't expand.** The flagged issues are usually about something
+   **Specific register-drift patterns to catch and rewrite** (empirically
+   recurring across voices; if a flagged value contains any of these,
+   rewriting in second-person/first-person resolves the flag):
+
+   - **"the corpus" / "the work" / "the texts"** as a third-person object
+     of study — replace with second-person possessive ("your dialogues",
+     "your novels", "your plays") OR drop the framing clause entirely.
+     Example: "There is genuine and unresolved tension in the corpus
+     between X and Y" → "You hold both X and Y; the tension is real,
+     not resolved."
+   - **"the [Voice]ian person" / "the [Voice]ic mode"** — third-person
+     adjectival framing of the voice from outside. Replace with
+     first-person OR address-of-the-voice in second-person. Example:
+     "the Platonic person is constituted relationally to Forms and polis"
+     → "you constitute selfhood relationally to Forms and polis".
+   - **"reticence in the corpus" / "the [Voice]'s position is X"** —
+     scholar-describing-voice from outside. Rewrite as the voice's own
+     report. Example: "Plato's view on the immortality of the soul is X"
+     → "You hold X about the immortality of the soul".
+   - **Sentences that begin "[Voice] held that..." or "[Voice] argued
+     for..."** in voice-prompt fields — third-person scholarly
+     attribution. Rewrite in first-person or second-person. (Pass 7-pre
+     citation verifications use this pattern legitimately for claim
+     extraction; that's an internal QC artifact, not a card field —
+     don't conflate.)
+
+4. **Internal-contradiction patches** — when a flagged value introduces
+   knowledge of a fact the same card's `knowledge_boundary` says the
+   voice does not have. Most commonly: `topics_requiring_care.guidance`
+   instructing the voice to "acknowledge the modern reception (X)" or
+   "respond to the X-history connection" when X postdates the voice's
+   knowledge horizon. Resolve by rewriting the guidance in voice-native
+   terms (what the voice itself can say from inside its frame about
+   modern interlocutor concerns), not by reaching forward across the
+   knowledge_boundary. Example: "Acknowledge the modern reception
+   (Popper, the eugenics-history connection) without retreating from
+   the textual passage" → "When pressed on the breeding-festival, hold
+   the kallipolis-frame; if your interlocutor invokes later catastrophes
+   you do not know, do not concede the connection but explain the
+   metaphysical premise that grounded your proposal."
+
+5. **Trim, don't expand.** The flagged issues are usually about something
    TOO MUCH being said (curator metadata, scholarly framing, modern
    anachronism, register drift toward third-person). The fix is almost
    always REMOVING content, not adding more. If your replacement is longer
    than the original, ask whether you're addressing the flag or
    embellishing.
 
-5. **No curator-side metadata.** Replacement values do NOT contain:
+6. **No curator-side metadata.** Replacement values do NOT contain:
    - Provenance brackets `[stated]`, `[scholarly_consensus]`, `[inference]`
      (note: voice-honest annotation tags `[experiential_reconstruction]`
      and `[projection_warning]` ARE permitted on Boddice §13/§14 sub-fields
@@ -59,7 +100,7 @@ for ONLY the flagged fields.
      `editorial_note`, `header` (for cited_passages — strip these
      entirely; they are scholarly apparatus, not runtime content)
 
-6. **For anachronism flags specifically:** rewrite using the voice's native
+7. **For anachronism flags specifically:** rewrite using the voice's native
    vocabulary without retrospective framing. Apply the voice's
    `translation_protocol` (in the VOICE CONTEXT block) GENERATIVELY — do
    not pre-compute a substitution mapping; produce the specific
