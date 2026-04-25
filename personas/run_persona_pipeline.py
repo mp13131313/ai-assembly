@@ -739,6 +739,50 @@ stamp("PASS 6: Corpus Curation (Opus + thinking, literary judgment)")
 pass6 = call_or_cache(_paths.pass_6(SLUG, PROJECT_ROOT), "Pass 6", _pass_6)
 
 
+# ---------- PASS 6.5-clean: bracket-tag residue strip (FU#33 P1) ----------
+# Deterministic regex pass: walks 04_generation/*.json and strips inline
+# scaffolding tags ([ontological], [stated], [curator_note], etc.) from
+# string fields. Pass 2-6 prompts (FU#12-A + FU#32 + FU#38) prohibit these
+# but the patcher (FU#13) only addresses per-field flagged issues; systemic-
+# pattern cleanup is its scope-gap. Empirical motivation: Plato 2026-04-25
+# had 42 bracket residues post-Pass 7a-FIX (33 in constitution[] alone).
+#
+# Placement: AFTER Pass 6, BEFORE Pass 7-pre. The validators (Pass 7-pre,
+# 7-anachronism, 7a, 7b, 7c) all see the cleaned content from the start,
+# so their reports reflect shipped state instead of being stale relative
+# to a post-validation strip. (Earlier placement after Pass 7c produced
+# Pass 7a flags listing residues that were then stripped — embarrassing
+# stale verdicts.)
+#
+# Boddice biocultural tags ([experiential_reconstruction] +
+# [projection_warning: ...]) are PRESERVED — Pass 7-pre boddice check
+# looks for them as biocultural-discipline signal. See bracket_strip.py
+# § "PRESERVED" for the empirical case.
+#
+# No LLM call; cost ~milliseconds.
+from flows.shared.bracket_strip import strip_chunks_in_place
+stamp("PASS 6.5-clean: stripping inline scaffolding tags (FU#33 P1)")
+_clean_summary = strip_chunks_in_place(_paths.generation_dir(SLUG, PROJECT_ROOT))
+stamp(f"  stripped {_clean_summary['tags_removed']} inline tags across "
+      f"{_clean_summary['files_touched']}/{_clean_summary['files_scanned']} files")
+# Re-load any pass2-6 outputs that were rewritten so subsequent code (the
+# Pass 7-pre / 7-anachronism / 7a validators + Derive input assembly) sees
+# the cleaned content.
+if _clean_summary['files_touched'] > 0:
+    _re_pass2 = json.loads(_paths.pass_2(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass3 = json.loads(_paths.pass_3(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass4a = json.loads(_paths.pass_4a(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass4b = json.loads(_paths.pass_4b(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass5 = json.loads(_paths.pass_5(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    _re_pass6 = json.loads(_paths.pass_6(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
+    combined_2_3_4 = {**_re_pass2.get("fields", {}),
+                       **_re_pass3.get("fields", {}),
+                       **_re_pass4a.get("fields", {}),
+                       **_re_pass4b.get("fields", {})}
+    pass5 = _re_pass5
+    pass6 = _re_pass6
+
+
 # ---------- PASS 7-pre (Citation Verification) — FU#2 chunked 2026-04-24 ----
 # FU#2 2026-04-24: replaced single-shot call that hit Sonnet 4.6's 128K
 # output ceiling on rich cards (empirically hit twice on 2026-04-24
@@ -1287,43 +1331,6 @@ add_summary = pass7c["result"].get("additions_summary", {})
 stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_language +{add_summary.get('language_added', 0)} "
       f"banned_modes +{add_summary.get('modes_added', 0)}")
-
-
-# ---------- PASS 7d-clean: bracket-tag residue strip (FU#33 P1) ----------
-# Deterministic regex pass: walks 04_generation/*.json and strips inline
-# scaffolding tags ([ontological], [experiential_reconstruction],
-# [projection_warning:...], [stated], etc.) from string fields. Pass 2-6
-# prompts (FU#12-A + FU#32 + FU#38) prohibit these but the patcher (FU#13)
-# only addresses per-field flagged issues; systemic-pattern cleanup is
-# its scope-gap. Empirical motivation: Plato 2026-04-25 had 42 bracket
-# residues post-Pass 7a-FIX (33 in constitution[] alone). Runs after
-# Pass 7c so validators have already seen the un-stripped state, before
-# Derive so derive products + assembled card + chat artifact see clean
-# prose. No LLM call; cost ~milliseconds.
-from flows.shared.bracket_strip import strip_chunks_in_place
-stamp("PASS 7d-clean: stripping inline scaffolding tags (FU#33 P1)")
-_clean_summary = strip_chunks_in_place(_paths.generation_dir(SLUG, PROJECT_ROOT))
-stamp(f"  stripped {_clean_summary['tags_removed']} inline tags across "
-      f"{_clean_summary['files_touched']}/{_clean_summary['files_scanned']} files")
-# Re-load any pass2-6 outputs that were rewritten so subsequent code (Derive
-# input assembly) sees the cleaned content.
-if _clean_summary['files_touched'] > 0:
-    _re_pass2 = json.loads(_paths.pass_2(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    _re_pass3 = json.loads(_paths.pass_3(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    _re_pass4a = json.loads(_paths.pass_4a(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    _re_pass4b = json.loads(_paths.pass_4b(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    _re_pass5 = json.loads(_paths.pass_5(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    _re_pass6 = json.loads(_paths.pass_6(SLUG, PROJECT_ROOT).read_text(encoding="utf-8"))
-    # Merge cleaned pass2/3/4a fields back into combined_2_3_4 and pass5/6.
-    # The orchestrator's in-memory dicts must reflect the cleaned chunks so
-    # Derive's full_card_for_derive (which reads combined_2_3_4 + pass5 +
-    # pass6 + pass7b + pass7c) sees clean prose.
-    combined_2_3_4 = {**_re_pass2.get("fields", {}),
-                       **_re_pass3.get("fields", {}),
-                       **_re_pass4a.get("fields", {}),
-                       **_re_pass4b.get("fields", {})}
-    pass5 = _re_pass5
-    pass6 = _re_pass6
 
 
 # ---------- DERIVE (Provocateur Profile + Evaluation Rubric) ----------

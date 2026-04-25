@@ -2,22 +2,21 @@
 
 Walks all string fields in the per-pass generation outputs (Pass 2-6
 artifacts under 04_generation/) and strips inline scaffolding tags that
-leaked from curator-side merge dossiers / Pass 7-pre annotations into
-runtime prose. Pass 2-6 prompts (FU#12-A + FU#32 + FU#38) explicitly
-prohibit these tags but the patcher (FU#13) only rewrites flagged
-issues per-field; systemic-pattern cleanup is out of scope.
+leaked from curator-side merge dossiers into runtime prose. Pass 2-6
+prompts (FU#12-A + FU#32 + FU#38) explicitly prohibit these tags but
+the patcher (FU#13) only rewrites flagged issues per-field; systemic-
+pattern cleanup is out of scope.
 
-This is a deterministic regex pass — no LLM call — intended to run after
-Pass 7c (so the validators have already checked the un-stripped state)
-and before Derive (so derive products + assembled card + chat artifact
-all see clean prose).
+This is a deterministic regex pass — no LLM call — intended to run AFTER
+Pass 6 (last generation step) and BEFORE Pass 7-pre (citation +
+boddice check). Placement rationale (amended 2026-04-25 after Plato run):
+the validators must see the cleaned content so their reports reflect
+shipped state. The earlier placement (after Pass 7c, before Derive)
+produced stale validation reports flagging bracket residues that the
+strip then removed.
 
 Tag allowlist (only these names are stripped; any other bracketed text
 in the prose is preserved):
-
-  Boddice biocultural tags (per Pass 7-pre boddice schema):
-    [experiential_reconstruction]
-    [projection_warning: ...]
 
   Schema taxonomy markers (Pass 4a constitution categorization):
     [ontological] [epistemological] [ethical-political] [ethical_political]
@@ -31,14 +30,32 @@ in the prose is preserved):
   Curator-side annotations (Pass 6 corpus passages):
     [curator_note] [curator-note] [pedagogical_note] [editorial_note]
 
+PRESERVED (NOT stripped — Boddice biocultural-discipline annotations):
+    [experiential_reconstruction]
+    [projection_warning: <term> <distortion>]
+
+  Empirical motivation: Plato 2026-04-25 first run stripped these
+  tags as scaffolding noise. Pass 7-pre boddice_tag_flags then went
+  0→9 because Pass 7-pre's boddice check looks FOR these tags as the
+  biocultural-discipline signal (per Pass 7-pre boddice prompt:
+  "`[experiential_reconstruction]` must accompany any claim about what
+  the voice felt/lived/witnessed... `[projection_warning]` must
+  accompany any modern English term used faute de mieux"). They are
+  content-meaningful biocultural annotations, not pipeline scaffolding.
+  Pass 7a's complaint about them ("annotation scaffolding inside the
+  prose") is a register-vs-content trade-off the post-Athens split-
+  card direction resolves architecturally. For now: keep them inline
+  so Pass 7-pre's QC works.
+
 What this module does NOT touch:
   - Anything outside the tag allowlist (legitimate bracketed text:
-    "[Plato 427-347 BCE]", "[Republic, 327a]", etc.)
+    "[Plato 427-347 BCE]", "[Republic, 327a]", "[experiential_
+    reconstruction]", "[projection_warning: ...]")
   - Fields outside 04_generation/ (the merge chunks at 02_merge/ keep
     their evidence_tags as legitimate metadata; the corpus at 03_corpus/
     is raw fetched text)
   - Provocateur Profile / Evaluation Rubric / Chat artifact (those are
-    Derive-side outputs; Derive will see cleaned prose by virtue of
+    Derive-side outputs; Derive sees cleaned prose by virtue of
     consuming cleaned chunks)
 """
 from __future__ import annotations
@@ -51,10 +68,13 @@ from typing import Any
 
 # Tag-name allowlist. Order does not matter; the regex constructor builds
 # a single alternation from this tuple.
+#
+# IMPORTANT: Boddice biocultural tags ([experiential_reconstruction],
+# [projection_warning: ...]) are deliberately NOT in this list. They are
+# content-meaningful annotations that Pass 7-pre's boddice check looks
+# for; stripping them would break biocultural QC. See module docstring
+# § "PRESERVED" for the empirical case.
 _SCAFFOLDING_TAG_NAMES = (
-    # Boddice biocultural tags
-    "experiential_reconstruction",
-    "projection_warning",
     # Schema taxonomy markers
     "ontological",
     "epistemological",
