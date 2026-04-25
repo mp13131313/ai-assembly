@@ -29,12 +29,30 @@ def test_strip_simple_tag():
     assert n == 1
 
 
+def test_boddice_tags_preserved_inline():
+    """Amendment 2026-04-25: Boddice biocultural tags (experiential_
+    reconstruction + projection_warning) are content-meaningful, not
+    scaffolding. They must NOT be stripped. Pass 7-pre's boddice check
+    looks for them inline."""
+    text = "The body is sōma-sēma [projection_warning: avoid clinical-trauma framing]; the soul"
+    cleaned, n = strip_inline_tags(text)
+    assert "[projection_warning" in cleaned
+    assert n == 0
+
+    text2 = "[experiential_reconstruction] You felt the loss as a wound to the soul"
+    cleaned2, n2 = strip_inline_tags(text2)
+    assert "[experiential_reconstruction]" in cleaned2
+    assert n2 == 0
+
+
 def test_strip_tag_with_content():
+    """Tags with `: <inner content>` (e.g. curator notes) ARE stripped if
+    they're in the scaffolding allowlist."""
     cleaned, n = strip_inline_tags(
-        "The body is sōma-sēma [projection_warning: avoid clinical-trauma framing]; the soul"
+        "Plato held this [curator_note: Frank 1979] and developed it further"
     )
-    assert "[projection_warning" not in cleaned
-    assert "sōma-sēma; the soul" in cleaned
+    assert "[curator_note" not in cleaned
+    assert "Plato held this and developed it further" in cleaned
     assert n == 1
 
 
@@ -137,10 +155,9 @@ def test_recursion_count_aggregates_across_branches():
 # ── allowlist coverage ──────────────────────────────────────────────────────
 
 def test_allowlist_covers_known_scaffolding():
-    """Known scaffolding tag families should all be stripped."""
+    """Schema-taxonomy + EvidenceTag + curator-note tag families should all
+    be stripped. Boddice biocultural tags are deliberately excluded."""
     families = [
-        "[experiential_reconstruction]",
-        "[projection_warning: any inner text]",
         "[ontological]",
         "[epistemological]",
         "[ethical-political]",
@@ -159,12 +176,19 @@ def test_allowlist_covers_known_scaffolding():
         assert n == 1, f"Tag {tag!r} expected 1 strip, got {n}"
 
 
+def test_boddice_tags_excluded_from_allowlist():
+    """Regression check: Boddice tags must NOT be in the scaffolding
+    allowlist (Amendment 2026-04-25)."""
+    assert "experiential_reconstruction" not in _SCAFFOLDING_TAG_NAMES
+    assert "projection_warning" not in _SCAFFOLDING_TAG_NAMES
+
+
 def test_allowlist_size_matches_constant():
     """Sanity: the constant tuple in the module matches what tests assume."""
-    assert "experiential_reconstruction" in _SCAFFOLDING_TAG_NAMES
-    assert "projection_warning" in _SCAFFOLDING_TAG_NAMES
     assert "stated" in _SCAFFOLDING_TAG_NAMES
-    assert len(_SCAFFOLDING_TAG_NAMES) >= 20  # current spec; extensible upward
+    assert "ontological" in _SCAFFOLDING_TAG_NAMES
+    assert "curator_note" in _SCAFFOLDING_TAG_NAMES
+    assert len(_SCAFFOLDING_TAG_NAMES) >= 18  # schema-taxonomy + evidence + curator
 
 
 # ── file-level strip ────────────────────────────────────────────────────────
