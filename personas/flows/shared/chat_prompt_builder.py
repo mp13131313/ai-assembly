@@ -1,49 +1,67 @@
 """chat_prompt_builder.py — Build chat-ready system prompt from assembled card.
 
-FU#41 2026-04-24, amended 2026-04-25 (deployment-test reframing).
+FU#41 2026-04-24, amended 2026-04-25 (twice):
+  - Amendment A (deployment-test reframing): strip 10→5
+  - Amendment B (spec-shell suppression): strip 5→11 (5 + 5 + 1 nested)
 
 After Derive completes, writes a 4th artifact alongside provocateur_profile
 .json + evaluation_rubric.json: a chat-ready persona-card JSON for direct
 paste into Claude project custom instructions.
 
-Architectural framing (amended 2026-04-25):
-  Chat deployment is treated as a **test of the configured deployment**
-  (e.g., the Athens 2026 Voice Pipeline run), NOT as a separate deployment
-  surface. The chat artifact should produce the same shape of output the
-  Voice Pipeline runtime will produce — same length window, same artifact
-  structure, same audience-aware priming. Differences from a fresh hand-
-  produced chat card are intentional: chat output IS the deployment-test.
+Architectural framing (amendments A + B):
+  Chat deployment is a **test of the configured deployment** (e.g., the
+  Athens 2026 Voice Pipeline run), NOT a separate deployment surface.
+  The chat artifact should produce the same shape of output the Voice
+  Pipeline runtime will produce — same length window, same artifact
+  structure, same audience-aware priming. Voice-constitutional fields
+  (medium, characteristic_output_structure, etc.) MUST be preserved for
+  the voice to deploy faithfully.
 
-  This was a correction of the prior framing, which treated chat as a
-  separate deployment and stripped deployment-format-shaped fields like
-  `medium` and `length_and_format_constraints`. That over-stripped voice-
-  constitutional content (e.g. Plato's "I write what I have always written:
-  a short conversation"). See FOLLOW_UPS.md FU#41 amendment note for the
-  empirical case.
+  At the same time, fields that label the artifact AS a specification —
+  `voice_mode`, `pipeline_version`, `voice_name`, `council_member_name`,
+  `corpus_metadata` — make the model reason ABOUT being given a persona
+  spec rather than reason FROM WITHIN the voice. Empirically observed
+  in Plato chat-test thinking traces 2026-04-25 ("metadata points to a
+  test environment for a Plato-voice mode... legitimate philosophical
+  voice exercise rather than something problematic"). These spec-shell
+  meta-fields are stripped to reduce that meta-reasoning mode.
 
-Strip set (necessary only — what chat structurally cannot process):
-  - Pipeline-internal metadata (validation flags, fix-pass log, audit trail)
-  - Pipeline-internal QC artifacts (Pass 7b smoke_test_chains, which would
-    be misread by the model as examples-to-follow)
-  - Voice-Pipeline-Step-1-only constraints (reference_only_passages, which
-    rely on Step 1/Step 2 separation chat doesn't enforce — the model would
-    quote them at runtime)
-  - Multi-prompt-context fields (continuity_blocks for Night 2, which can't
-    be maintained across a single chat deployment's stateless paste)
+Strip set (11 items total):
 
-PRESERVED (vs prior strip):
+A — Chat-structurally-incompatible (5):
+  - metadata (pipeline-internal validation/audit)
+  - smoke_test_chains (Pass 7b QC; misread as exemplars-to-follow)
+  - reference_only_passages (Step-1-only constraint chat can't enforce)
+  - continuity_block_if_night_2 (multi-prompt context absent in single chat)
+  - continuity_block_artifact_if_night_2 (same)
+
+B — Spec-shell meta (5 top-level + 1 nested):
+  - voice_name (third-person identity scaffold; identity should live in
+    epistemic_frame_statement first/second-person prose)
+  - voice_mode (schema label — "philosophical"/"narrative" reads as mode-
+    selection signal)
+  - pipeline_version (provenance — "3.10-chat" reads as test/dev pipeline)
+  - generated_date (provenance)
+  - council_member_name (Voice-Pipeline scaffolding announcing council role)
+  - curated_corpus_passages.corpus_metadata (NESTED — production metadata:
+    "Public-domain translations...", source counts, passage counts. The
+    rest of curated_corpus_passages.passages[] survives.)
+
+PRESERVED (voice-constitutional + deployment-aware):
   - medium, characteristic_output_structure, length_and_format_constraints,
-    technical_capabilities, relationship_to_detailed_response.
-  These are voice-constitutional + deployment-aware. For voices like Plato
-  whose `medium` is constitutional (dialogue commitment per Phaedrus's
-  refusal of treatise form), stripping them was the over-strip pattern the
-  amendment corrects.
+    technical_capabilities, relationship_to_detailed_response. For voices
+    whose `medium` is constitutional (Plato's dialogue commitment per
+    Phaedrus's refusal of treatise form), these encode who the voice IS.
 
 Transformation (mechanical, no editorial work):
-  - DROP 5 chat-incompatible fields (listed below)
-  - PRESERVE all other fields at root level (~39 fields)
-  - MARK pipeline_version with "-chat" suffix
-  - RE-STAMP generated_date for the chat artifact
+  - DROP 5 chat-incompatible top-level fields (Strip A)
+  - DROP 5 spec-shell meta top-level fields (Strip B)
+  - DROP curated_corpus_passages.corpus_metadata sub-field (Strip B nested)
+  - PRESERVE all other fields at root level (~33-34 fields)
+  - NO marker re-stamp (the prior `-chat` suffix and `generated_date` re-
+    stamp behavior is removed; pipeline_version is now in the strip set,
+    and operators identify chat artifacts by filename — `03_chat_system
+    _prompt.json` — not by in-artifact marker)
 
 Paste target: Claude project custom instructions (or a Claude API system
 prompt for an agentic-chat deployment).
@@ -62,18 +80,13 @@ contexts per voice (Plato-for-Athens vs Plato-for-future-event etc.).
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 from typing import Any
 
 
-# Fields dropped from assembled card when building chat-ready artifact.
-# Strip set is "what chat structurally cannot process" — not "what chat
-# doesn't need." Chat is a test of the configured deployment, so deployment-
-# spec fields (medium, length_and_format_constraints, etc.) are PRESERVED
-# so the chat output matches what the Voice Pipeline runtime will produce.
-# See module docstring for the architectural framing.
-_VOICE_PIPELINE_ONLY_FIELDS = (
+# Strip set A — fields chat structurally cannot process. See module
+# docstring for full architectural framing.
+_CHAT_INCOMPATIBLE_FIELDS = (
     # Pipeline-generation metadata (passes_completed, fix_pass_log,
     # tools_used, derived_outputs, field_counts, register_violations,
     # cross_model_validation, etc.) — pure pipeline-internal; would not
@@ -95,11 +108,54 @@ _VOICE_PIPELINE_ONLY_FIELDS = (
     "continuity_block_artifact_if_night_2",
 )
 
+# Strip set B — spec-shell meta fields. These label the artifact AS a
+# persona specification (rather than letting it read as the voice itself),
+# triggering the model to reason ABOUT being given a spec instead of FROM
+# WITHIN the voice. Empirically observed in Plato chat-test thinking
+# traces 2026-04-25.
+_SPEC_SHELL_META_FIELDS = (
+    # Third-person identity scaffold; identity should live in
+    # epistemic_frame_statement as first/second-person prose.
+    "voice_name",
+    # Schema label — "philosophical"/"narrative" reads as mode-selection signal.
+    "voice_mode",
+    # Provenance — "3.10-chat" reads to the model as test/dev pipeline marker.
+    "pipeline_version",
+    # Provenance — date stamp adds nothing to runtime behavior.
+    "generated_date",
+    # Voice-Pipeline scaffolding announcing council-member role.
+    "council_member_name",
+)
+
+# Combined top-level strip set (10 items; nested production metadata
+# stripped separately — see _strip_nested below).
+_VOICE_PIPELINE_ONLY_FIELDS = _CHAT_INCOMPATIBLE_FIELDS + _SPEC_SHELL_META_FIELDS
+
+# Nested sub-fields to strip (path: parent_field, child_key).
+# curated_corpus_passages.corpus_metadata = production metadata
+# ("Public-domain translations...", source counts, passage counts).
+# The rest of curated_corpus_passages (passages[] etc.) is preserved.
+_NESTED_STRIPS = (
+    ("curated_corpus_passages", "corpus_metadata"),
+)
+
+
+def _strip_nested(chat: dict[str, Any]) -> None:
+    """Remove nested sub-fields per _NESTED_STRIPS, in place. Tolerant of
+    parent-field absence (parent already top-level-stripped) and child-key
+    absence (already missing on this voice). Only operates if parent is a
+    dict — list/scalar parents are left alone."""
+    for parent, child in _NESTED_STRIPS:
+        node = chat.get(parent)
+        if isinstance(node, dict) and child in node:
+            del node[child]
+
 
 def build_chat_system_prompt(assembled_card: dict[str, Any]) -> dict[str, Any]:
     """Transform an assembled_card dict into a chat-ready system-prompt dict.
 
-    Mechanical field-strip + marker re-stamp. No content modification.
+    Mechanical field-strip. No content modification. No marker re-stamp
+    (pipeline_version is in the strip set under amendment B).
 
     Returns a new dict; input is not mutated.
     """
@@ -108,12 +164,13 @@ def build_chat_system_prompt(assembled_card: dict[str, Any]) -> dict[str, Any]:
         for k, v in assembled_card.items()
         if k not in _VOICE_PIPELINE_ONLY_FIELDS
     }
-
-    # Marker fields: identify as chat-ready variant of the pipeline card.
-    orig_version = chat.get("pipeline_version", "unknown")
-    if not str(orig_version).endswith("-chat"):
-        chat["pipeline_version"] = f"{orig_version}-chat"
-    chat["generated_date"] = time.strftime("%Y-%m-%d")
+    # Deep-copy nested-strip parents so we mutate our local copy, not the
+    # caller's input. (Top-level strips already produce a new dict above;
+    # nested strips need their parents copied before we mutate.)
+    for parent, _ in _NESTED_STRIPS:
+        if parent in chat and isinstance(chat[parent], dict):
+            chat[parent] = dict(chat[parent])
+    _strip_nested(chat)
 
     # Note on voice_temporal_stance: the pipeline card carries the full
     # {default, anchored_override} dict. Chat deployments can read either
