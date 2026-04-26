@@ -1,9 +1,10 @@
 # Next session — voices 3-12 buildout (2026-04-26 evening)
 
 **Supersedes for next-session pickup:** `NEXT_SESSION_2026_04_26_PLATO_SHIPPED.md` (this morning's pickup, pre-FU#19/29/40/31 work).
-**Branch:** `arch-03-additive-merge` at HEAD `620d410` (pushed to `origin/arch-03-additive-merge`).
-**PR:** [#2](https://github.com/mp13131313/ai-assembly/pull/2) open against `main`, awaiting operator review/merge.
-**Status:** Plato shipped + chat-test validated. Pipeline at its cleanest state across the project. Voice 3-12 buildout is the next operational step. Operator has stated workflow plan (see SECTION 2).
+**Code repo branch:** `arch-03-additive-merge` at HEAD `228bd5b` (pushed to `origin/arch-03-additive-merge`).
+**Code repo PR:** [#2](https://github.com/mp13131313/ai-assembly/pull/2) open against `main`, awaiting operator review/merge.
+**Athens-2026 data backup repo:** [`mp13131313/ai-assembly-athens2026-voices`](https://github.com/mp13131313/ai-assembly-athens2026-voices) (PRIVATE) at HEAD `092ff5b` — clean pre-buildout state pushed 2026-04-26. **NEW**: post-cleanup setup; per-voice card data lives here going forward.
+**Status:** Plato shipped + chat-test validated. Pipeline at its cleanest state. Athens-2026 folder cleaned + backup repo live. Voice 3-12 buildout is the next operational step. Operator has stated workflow plan (see SECTION 2).
 **Tests:** 212/212 passing. ~133 commits ahead of `origin/main`.
 
 ---
@@ -76,8 +77,8 @@ Pass 0a → Pass 1a (Perplexity) + Pass 1b (Gemini) parallel
 
 | Phase | Step | Description |
 |---|---|---|
-| **0** | Backup decision | (See SECTION 5 below) |
-| **1** | Athens-2026 cleanup | Clean legacy v3.10 content from `projects/athens-2026/` (5 stale voice dirs + council_config.json + partial runs etc.) |
+| **0** ✅ DONE 2026-04-26 | Backup repo setup | **Option B landed** — separate private GitHub repo `mp13131313/ai-assembly-athens2026-voices` (private). Local `.git/` initialized inside `projects/athens-2026/`; remote `origin` configured; first commit (`092ff5b`) captures cleaned pre-buildout state. **Going-forward workflow:** after each voice CARD COMPLETE, `cd projects/athens-2026 && git add . && git commit -m "voice <slug> shipped" && git push`. |
+| **1** ✅ DONE 2026-04-26 | Athens-2026 cleanup | **Executed.** Legacy v3.10 content moved to `~/Desktop/AI Assembly/archive/runs/personas/athens-2026-legacy/`: `voices/` (5 stale voice dirs) → `voices_v3.10/`, `inputs/` → `inputs_v3.10/`, `runs/ibn_battuta/` → `runs_partial_ibn_battuta/`. `.DS_Store` deleted. Athens-2026 now 224 KB; contains: 3 deployment-context JSONs (still need operator update), `council_config.json` + `reference/` (runtime-team-owned, kept), `_migration_manifest.json` (provenance), `voices_batch.txt` (small legacy reference, kept), `.gitignore` (added by backup-repo init). |
 | **2** | Deployment-context finalization | Lock `audience_profile.json` + `conference_facts.json` + `panel_roster.json` at `projects/athens-2026/` root. Operator finalizes `docs/AUDIENCE_BRIEF.md` first (canonical source per `_canonical_source` annotation), then re-render JSON. **Be rigorous** — these prime Pass 5 + Derive across all 12 voices |
 | **3** | Voice intake authoring | For each of the 11 remaining voices (Cleopatra, Ibn Battuta, Scheherazade, Ada Lovelace, Fyodor Dostoevsky, Hannah Arendt, Bob Marley, Audrey Tang, Peter Thiel, Whanganui River, Octopus), author `voices/<slug>/00_intake/02_voice_config.json` |
 | **4** | **Phase 0.5 batch — DR prompts ready** | For each voice: run Pass 0a + Pass 1a (Perplexity) + Pass 1b (Gemini) + Pass 0b render + tailor + split. Output: 6 per-section DR prompts at `voices/<slug>/01_research/03_dr_prompts/0N_section_N_dr_prompt.md`. **All 11 voices' Phase 0.5 done in batch** so operator has 11 × 6 = 66 DR prompts ready. |
@@ -120,9 +121,9 @@ After lock-in: copy all three JSONs to `projects/athens-2026/` (overwrite existi
 
 ---
 
-## SECTION 4 — ATHENS-2026 FOLDER CLEANUP
+## SECTION 4 — ATHENS-2026 FOLDER CLEANUP ✅ LANDED 2026-04-26
 
-Currently at `/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026/` (456 KB total) holds legacy v3.10 content from pre-arch-03 era:
+**Cleanup executed 2026-04-26 evening.** What was at `/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026/` (was 456 KB legacy):
 
 ```
 .DS_Store               (cosmetic)
@@ -139,60 +140,83 @@ voices/                     (5 stale voice dirs: cleopatra, hannah_arendt, ibn_b
 voices_batch.txt            (1 KB — legacy batch script reference; check + KEEP or DELETE)
 ```
 
-### Recommended cleanup order (execute with operator)
+### Cleanup actions taken (post-execution)
 
-1. **DELETE `.DS_Store`** (cosmetic)
-2. **DELETE `voices/`** (5 stale pre-arch-03 voice dirs; these are not the Phase B / arch-03 cards). Operator should confirm these are deletable — they may have artifacts the operator wants to archive elsewhere first
-3. **DELETE `inputs/`** (legacy v3.10 dossiers); same caveat
-4. **MOVE `runs/ibn_battuta/`** to `archive/runs/personas/athens-2026-legacy-ibn_battuta/` (preserve) OR delete
-5. **KEEP `council_config.json`** (runtime artifact; runtime team owns it; persona pipeline doesn't write to it)
-6. **KEEP `reference/`** (runtime artifact; runtime team owns)
-7. **KEEP `_migration_manifest.json`** (Phase B migration provenance)
-8. **UPDATE `audience_profile.json` + `conference_facts.json` + `panel_roster.json`** per SECTION 3
-9. **OPTIONAL: copy Plato over.** Decision: do you want Plato to live at `projects/athens-2026/voices/plato/` for unified panel layout, or keep it at `projects/phase-l-plato/voices/plato/` per the per-voice-project pattern? Recommendation: **copy Plato to athens-2026/** for unified panel layout. Voice Pipeline runtime expects all 12 voices in one project.
+1. ✅ **Deleted `.DS_Store`**
+2. ✅ **Archived `voices/`** (5 stale pre-arch-03 voice dirs) → `~/Desktop/AI Assembly/archive/runs/personas/athens-2026-legacy/voices_v3.10/`
+3. ✅ **Archived `inputs/`** (legacy v3.10 dossiers) → `~/Desktop/AI Assembly/archive/runs/personas/athens-2026-legacy/inputs_v3.10/`
+4. ✅ **Archived `runs/ibn_battuta/`** (partial runtime run) → `~/Desktop/AI Assembly/archive/runs/personas/athens-2026-legacy/runs_partial_ibn_battuta/`. Empty `runs/` dir then removed
+5. **KEPT `council_config.json`** (runtime artifact; runtime team owns it; persona pipeline doesn't write to it)
+6. **KEPT `reference/`** (runtime artifact; runtime team owns; sessions.json + speakers.json + sessions.skipped.json)
+7. **KEPT `_migration_manifest.json`** (Phase B migration provenance)
+8. **KEPT `voices_batch.txt`** (1 KB; legacy reference; harmless)
+9. ✅ **`.gitignore` added** by backup-repo init (covers `.DS_Store`, `__pycache__/`, etc.)
+10. **Pending operator action — UPDATE `audience_profile.json` + `conference_facts.json` + `panel_roster.json`** per SECTION 3 once `docs/AUDIENCE_BRIEF.md` is finalized.
+11. **Open decision: copy Plato over from `projects/phase-l-plato/`?** For unified panel layout (Voice Pipeline runtime expects all 12 voices in one project), recommend yes. Per-voice project pattern was prototype; production deployment wants all voices in `athens-2026/voices/`.
 
-**This is operator-action, not auto-execute.** Ask before destructive deletes.
+### Final inventory
+
+`projects/athens-2026/` (224 KB):
+- `_migration_manifest.json` (3.3 KB; provenance)
+- `audience_profile.json` (1.6 KB; pending update)
+- `conference_facts.json` (1.1 KB; pending update)
+- `council_config.json` (25.7 KB; runtime artifact)
+- `panel_roster.json` (263 B; pending update)
+- `reference/` (3 files; runtime artifacts)
+- `voices_batch.txt` (1.2 KB; legacy reference)
+- `.gitignore` (245 B)
+- `.git/` (initialized; remote → `mp13131313/ai-assembly-athens2026-voices`)
 
 ---
 
-## SECTION 5 — BACKUP STRATEGY (operator question)
+## SECTION 5 — BACKUP STRATEGY ✅ LANDED 2026-04-26
 
 > *"I'm wondering whether I should somehow create this in a separate repo or create a new git place so that there is a backup."*
 
-### What's at risk
+### What was at risk
 
-`projects/athens-2026/` is OUTSIDE git per Tier 3 separation rule. If your MacBook fails / hard drive dies BEFORE Athens (May 7-10), you lose all 12 voice cards + intermediate artifacts. ~600 MB total when full.
+`projects/athens-2026/` is OUTSIDE the main code git repo per Tier 3 separation rule. If MacBook fails / hard drive dies BEFORE Athens (May 7-10), all 12 voice cards + intermediate artifacts would be lost. ~600 MB total when full.
 
-### Three options
+### Decision: Option B — separate private GitHub repo
 
-| Option | Effort | Recovery if disk fails | Workflow friction |
-|---|---|---|---|
-| **A. Periodic zip + cloud upload** | 5 min one-time + 2 min per snapshot | Restore from cloud | Manual; operator-paced |
-| **B. Separate private GitHub repo** for `projects/athens-2026/` (init `.git` inside the project, push to a separate GitHub repo `mp13131313/ai-assembly-athens2026-data` or similar) | 30 min one-time setup; auto-commit hooks possible | `git clone` from GitHub | Low; commits feel natural |
-| **C. Time Machine / external drive sync** | Whatever you already have configured | Time Machine restore | None |
+**Repo:** [`mp13131313/ai-assembly-athens2026-voices`](https://github.com/mp13131313/ai-assembly-athens2026-voices) (PRIVATE)
 
-### My recommendation
+**Setup completed 2026-04-26:**
+- `.git/` initialized inside `projects/athens-2026/`
+- `.gitignore` covers `.DS_Store`, `__pycache__/`, `venv/`, `voices/*/_run_logs/`, `*.tmp` etc.
+- Initial commit `092ff5b` captures the cleaned pre-buildout state
+- Remote `origin` → `https://github.com/mp13131313/ai-assembly-athens2026-voices.git`, branch `main` tracking
+- First push successful
 
-**Option B** (separate private GitHub repo for athens-2026 data). Reasoning:
-- Tier 3 separation preserved — main `code/` repo doesn't carry persona-card data
-- Off-site backup automatically (GitHub)
-- Audit trail of changes (when each voice's card was generated, intermediate iterations, etc.)
-- Can clone to a different machine if MacBook fails
-- Doesn't add friction — `git add . && git commit && git push` after each voice CARD COMPLETE
+### Going-forward workflow
 
-**Setup steps:**
+After each voice CARD COMPLETE in athens-2026:
+
 ```bash
 cd "/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026"
-git init
-echo ".DS_Store" > .gitignore
-git add .
-git commit -m "Initial commit — pre-buildout state"
-gh repo create mp13131313/ai-assembly-athens2026-data --private --source=. --push
+git add voices/<slug>/
+git commit -m "voice <slug> shipped: <one-line note>"
+git push
 ```
 
-After each voice CARD COMPLETE: `git add voices/<slug>/ && git commit -m "voice <slug> shipped" && git push`.
+Backup updated automatically. Disk failure recovery: `git clone https://github.com/mp13131313/ai-assembly-athens2026-voices.git` to a fresh location.
 
-**Option C is also fine** if Time Machine is reliable on this machine. Option A is cheapest but requires discipline.
+### Auth note
+
+Push uses fine-grained PAT in macOS Keychain. PAT scope must include both:
+- **Repository access:** `ai-assembly` AND `ai-assembly-athens2026-voices` selected
+- **Repository permissions:** `Contents: Read and write` + `Metadata: Read`
+
+If push 403s with "Write access not granted," verify PAT scope at https://github.com/settings/tokens?type=beta. Or push from operator's own terminal session if their personal credentials have broader scope.
+
+### Tier 3 separation preserved
+
+The main code repo (`mp13131313/ai-assembly`) carries persona pipeline CODE only. The voices DATA repo (`mp13131313/ai-assembly-athens2026-voices`) carries per-project DATA only. Two repos, two purposes, never crossed.
+
+### Options A + C (rejected, for record)
+
+- **Option A** — periodic zip + cloud upload. Manual + requires discipline.
+- **Option C** — Time Machine / external drive. Fine but no off-site replication.
 
 ---
 
@@ -429,10 +453,13 @@ If picking this up cold:
 ## SECTION 10 — ACTUALLY OPEN ITEMS (not blocking voice 3-12 buildout)
 
 🟢 Active operator decisions (not blocking):
-- AUDIENCE_BRIEF.md finalization (operator)
-- Backup strategy decision (Option A/B/C — SECTION 5)
+- **AUDIENCE_BRIEF.md finalization (operator) — gates voice 3 startup**
 - G8 PR #2 merge timing decision (operator review)
-- Athens-2026 folder cleanup confirmation (per-item)
+- Whether to copy Plato over to `athens-2026/voices/plato/` (unified panel layout vs per-voice project)
+
+✅ **Done 2026-04-26:**
+- Backup strategy: Option B landed (separate private repo `ai-assembly-athens2026-voices`)
+- Athens-2026 folder cleanup: 5 stale voice dirs + legacy inputs + partial runs archived; folder ready for buildout
 
 🟡 Trigger-based (post-voice-3 or later):
 - FU#11 — further snapshot cleanup gated on Phase L sign-off
