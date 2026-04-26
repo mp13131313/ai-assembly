@@ -1,7 +1,7 @@
 # Next session — voices 3-12 buildout (2026-04-26 evening)
 
 **Supersedes for next-session pickup:** `NEXT_SESSION_2026_04_26_PLATO_SHIPPED.md` (this morning's pickup, pre-FU#19/29/40/31 work).
-**Code repo branch:** `arch-03-additive-merge` at HEAD `228bd5b` (pushed to `origin/arch-03-additive-merge`).
+**Code repo branch:** `arch-03-additive-merge` at HEAD `4a07258` (pushed to `origin/arch-03-additive-merge`).
 **Code repo PR:** [#2](https://github.com/mp13131313/ai-assembly/pull/2) open against `main`, awaiting operator review/merge.
 **Athens-2026 data backup repo:** [`mp13131313/ai-assembly-athens2026-voices`](https://github.com/mp13131313/ai-assembly-athens2026-voices) (PRIVATE) at HEAD `092ff5b` — clean pre-buildout state pushed 2026-04-26. **NEW**: post-cleanup setup; per-voice card data lives here going forward.
 **Status:** Plato shipped + chat-test validated. Pipeline at its cleanest state. Athens-2026 folder cleaned + backup repo live. Voice 3-12 buildout is the next operational step. Operator has stated workflow plan (see SECTION 2).
@@ -452,14 +452,23 @@ If picking this up cold:
 
 ## SECTION 10 — ACTUALLY OPEN ITEMS (not blocking voice 3-12 buildout)
 
-🟢 Active operator decisions (not blocking):
+🟢 Active operator decisions (not blocking voice 3 startup):
 - **AUDIENCE_BRIEF.md finalization (operator) — gates voice 3 startup**
 - G8 PR #2 merge timing decision (operator review)
 - Whether to copy Plato over to `athens-2026/voices/plato/` (unified panel layout vs per-voice project)
+- **FU#49C** — `conference_facts.json` `session_role_for_ai_assembly` rewording from "breakfast reading" to "what the conference might still need to think after the sessions have closed" (cross-cuts WBBF coordination; operator decision)
+- **FU#49D** — voice-specific hard_limits calibration (corpus-internal self-criticism permitted; e.g., Plato's *Parmenides* 130-135d Forms regress). Position B (corpus-accurate softening), NOT framework-lifting. ~30 min Pass 2 prompt update if pre-voice-3 desired
+- **FU#49G** — pre-Athens Greek-scholar calibration check (Quarch / Tsinorema / Erinakis with provotype-test question, not pastiche-test)
 
 ✅ **Done 2026-04-26:**
 - Backup strategy: Option B landed (separate private repo `ai-assembly-athens2026-voices`)
 - Athens-2026 folder cleanup: 5 stale voice dirs + legacy inputs + partial runs archived; folder ready for buildout
+- **FU#49A** — Pass 4b prompt updates: generativity criterion in `quality_criteria` + preserve-trace-tensions in `relationship_to_detailed_response` + length variance 350-1500. Voices 3-12 inherit. (External reviewer revision 2026-04-26 evening reframed FU#49 as provotype-execution-critical — load-bearing for Layer 2 + Layer 3 tests, not just artifact polish. See FOLLOW_UPS.md FU#49 for full scope including 49B/E/F runtime workstream items.)
+
+🔴 **Deferred to Voice Pipeline workstream (post-Athens):**
+- **FU#49B** — Step 2 generativity teeth (anti-premature-closure; "the published artifact should not feel more settled than the thinking that produced it"). Runtime prompt change.
+- **FU#49E** — Step 3 specification (currently UNSPECIFIED in Assembly architecture per reviewer). Reviewer-drafted framework-collision instruction available in FOLLOW_UPS.md FU#49 entry. Highest-impact item per reviewer pass 2.
+- **FU#49F** — Per-voice framework-strain log on micro-site (paragraph per voice per night). Feeds matrix-mapping pass at closing show. Could be operator-authored ad-hoc pre-Athens if time allows.
 
 🟡 Trigger-based (post-voice-3 or later):
 - FU#11 — further snapshot cleanup gated on Phase L sign-off
