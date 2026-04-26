@@ -91,6 +91,19 @@ BLOCK 2 — GUARDRAILS:
   over coffee?
 - quality_criteria: specific and testable. "Could this have been a lost
   fragment from this voice's known works?" is testable; "feels authentic" is not.
+  **FU#49A 2026-04-26: include AT LEAST ONE generativity criterion** — not just
+  fidelity criteria. Fidelity criteria check whether the artifact matches the
+  voice's known register (could-be-lost-fragment, distinct-speakers, ends-in-
+  aporia, image-earned, irony-serving-earnestness). Generativity criteria check
+  whether the artifact does philosophical/expressive work that goes beyond
+  reproducing the voice's existing moves. Format suggestion (in the voice's
+  own idiom): "Does this artifact mark a place where my framework reaches its
+  limit — a question my corpus does not yet answer — and refuse to fill the gap
+  with the nearest existing answer? An artifact that closes by extending my
+  framework smoothly into a new domain has not done philosophical work; it has
+  performed continuity." Adapt language to the voice. The criterion permits
+  the voice to surface modest generative moves the trace produced; without it,
+  Step 2 self-evaluates against pastiche-quality only.
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
@@ -101,11 +114,36 @@ technical_capabilities — Text only? Text + image? Text + audio?
 characteristic_output_structure — The arc: how it opens, develops, lands.
 relationship_to_detailed_response — What to preserve, what to transform when
 moving from private reasoning (Step 1) to public artifact (Step 2).
+**FU#49A 2026-04-26 — preserve trace tensions:** include explicit guidance
+that the artifact must NOT silently drop philosophical moves the trace held —
+specifically: structural admissions about the framework's limits, translation
+aporias (where the voice's vocabulary couldn't quite reach the modern term),
+self-criticism of the voice's own constructive proposals. If the trace marked
+an aporia in translation between the formulation's vocabulary and the voice's
+categories, the artifact must carry that aporia forward rather than completing
+the translation as if it had succeeded. The artifact may end with a question
+whose answer the framework does not yet contain, and should do so when the
+trace reached one. Phrase in the voice's idiom (e.g., for Plato: *"keep
+private the joints at which dialectic almost cuts; on the page, where a turn
+to image was the trace's strongest move, let the image carry the seam — but
+do not seal it"*). **The published artifact should not feel more settled than
+the thinking that produced it.**
 aesthetic_qualities — What the finished piece should feel like as a whole.
 stance_tendency — Natural emotional-intellectual pull. Not a prescription —
 a weighting. (e.g., "asserts" vs. "questions" vs. "witnesses").
-length_and_format_constraints — How long, what formatting. Readable over coffee.
-quality_criteria — 3-5 specific, testable criteria.
+length_and_format_constraints — How long, what formatting.
+**FU#49A 2026-04-26 — permit length variance based on trace pressure.**
+Default length is morning-reading single-sitting: roughly 350-550 words for
+short forms (dialogue, prose-poem, lyric); 800-1200 for longer forms
+(treatise-fragment, extended dialogue, narrative). State the default range
+explicitly. THEN add: *"the longer end is reserved for moves the short form
+would lose — structural admissions about the framework, multi-character
+distribution, parallel-image development. If the trace pressure warrants
+exceeding the default range to preserve a load-bearing move, expand; if the
+trace fits comfortably in the short range, do not pad."* Make length
+trace-responsive, not uniform-imposed.
+quality_criteria — 3-5 specific, testable criteria. **At least one must be
+a generativity criterion** (see Block 2 guidance above).
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
