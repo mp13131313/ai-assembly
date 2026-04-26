@@ -485,6 +485,35 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   3. Latest: post-Athens, alongside FU#42 split-card (the voice-card / deployment-card distinction makes step1_mode a clean voice-card field).
 - **Architectural relation to FU#42:** orthogonal but reinforcing. Split-card's `voice_card.json` would carry `voice_mode` cleanly; deployment-card carries audience/length/occasion. Step 1 mode-switching reads voice-card.
 
+#### FU#49 — Fidelity-generativity gap: Step 2 compression dynamics + voice-card calibration
+- **Origin:** External reviewer 2026-04-26 evening, after running Plato chat artifact through Voice Pipeline-style two-step deployment (3 thinking-pass traces on algorithmic-governance formulations + synthesis pass + final breakfast-reading dialogue). Reviewer's diagnosis: **fidelity-generativity gap** — thinking layer (Step 1) produces moves with genuine philosophical novelty (regime-typology challenges, customized-cave image, *logon didonai* bundle analysis); synthesis layer (Step 2) reliably softens or drops those moves in service of voice and form. Pattern is consistent across all three trace-to-artifact comparisons. Cuts are not random: Step 2 selects against philosophical moves that don't fit comfortably into Socratic register at the prescribed length.
+- **Five locations engineering the gap (reviewer's diagnosis, mapped to our pipeline architecture):**
+  1. **Step 1 / Step 2 instructional asymmetry** — Step 1 has anti-polish teeth ("longer, rougher, more uncertain than anything you would show an audience"; failure mode named as premature polish). Step 2 has no comparable teeth — asks for focus + stance + artifact per medium/structure/length, no instruction like "the artifact should not feel more settled than the thinking that produced it." Result: Step 1 fights polish; Step 2 takes whatever Step 1 produced and finishes it.
+  2. **Breakfast-reader frame** — `length_and_format_constraints` field + `conference_facts.json` `session_role_for_ai_assembly` cue "polished, digestible, single-sitting, conclusive" — selects against trace's "I cannot dispense with this discomfort"-class material.
+  3. **`quality_criteria` are all fidelity criteria** — could-a-careful-reader-mistake-for-fragment, distinct-speakers, ends-in-aporia, image-earned, irony-serving-earnestness. None is a generativity criterion.
+  4. **Uniform 350–550 word length** — opening-fragment genre is least able to carry structural admissions about the framework itself. Plato wrote in lengths from ~4,000 (Crito) to 30,000+ (Republic).
+  5. **Singular-artifact requirement** — synthesis of N traces into one piece forces 2 of 3 traces to reduce to echoes.
+- **Scope split — three workstreams:**
+  - **49A — Build layer (persona pipeline, this session's territory):** Pass 4b prompt updates to address Recs 2 + 4 + relationship_to_detailed_response language. Card-side. Voices 3-12 inherit.
+  - **49B — Runtime layer (Voice Pipeline workstream, separate):** Step 2 generativity teeth (Rec 1) + triptych output (Rec 5). Different repo / team / timeline.
+  - **49C — Deployment layer (operator-side):** breakfast-reader frame replacement (Rec 3) — `conference_facts.json` `session_role_for_ai_assembly` rewording. Cross-cuts conference design with WBBF.
+  - **49D — Voice-specific hard_limits calibration:** for each voice, identify what self-criticism IS in the corpus (Plato's Parmenides 130-135d Forms regress; Arendt's public/private revisions; Marley's interpretive evolution within Rastafari) and update hard_limits to permit corpus-internal self-criticism while preserving framework-fidelity. NOT framework-lifting (Position C in operator's review thread); position B (corpus-accurate softening). Voice-specific calibration; per-voice voice_config flag possible.
+- **Effort:**
+  - 49A: ~1-1.5 hr (Pass 4b prompt edit: add generativity quality_criterion, allow length variance, add "preserve trace tensions" to relationship_to_detailed_response language)
+  - 49B: ~2-3 days (Voice Pipeline workstream — separate)
+  - 49C: ~30 min operator + WBBF coordination (deployment design)
+  - 49D: ~30 min per voice × 12 voices = ~6 hr; OR ~2 hr per voice if voice-config flag-driven Pass 2 prompt update is worth the structural work
+- **Trigger:**
+  - 49A: pre-voice-3 startup (lands cleanly into voices 3-12 buildout)
+  - 49B: post-Athens (Voice Pipeline workstream)
+  - 49C: operator decision before Athens
+  - 49D: pre-voice-3 OR post-Athens depending on operator's appetite for self-criticism-permitting voices in the Athens panel
+- **Caveat the reviewer makes (and is right about):** these changes will increase generative content of the artifact but won't produce framework-revising original philosophy. Plato-the-persona is right for diagnosing contemporary phenomena through a recovered framework; wrong for extending or modifying the framework itself. If operator eventually wants framework-revising voices, that is a different persona-design problem (voice permitted to disagree with itself across pieces; mark commitments as candidates not positions; framework treated as in-progress) — NOT recommended for the Athens panel format ("12 historical figures speaking from their frameworks").
+- **Architectural relation:**
+  - **49 / FU#42 split-card:** 49A's Pass 4b prompt updates would adjust voice_card content (`length_and_format_constraints`, `quality_criteria`, `relationship_to_detailed_response`); split-card would carry these in the voice_card layer cleanly.
+  - **49 / FU#47 Step 1 mode-switching:** 49B's Step 2 work could ALSO be voice-mode-conditional. Analytical voices may want fidelity-focused Step 2; narratival/lyric voices may benefit from generativity-pressured Step 2.
+  - **49D / FU#39 character-distribution:** orthogonal; FU#39 handles within-voice character-distribution, 49D handles within-voice self-criticism scope.
+
 #### FU#48 — Port operator hand-curation patterns from Dostoevsky chat v2 ⚫ WITHDRAWN 2026-04-26 (already done)
 - **Withdrawn rationale:** Operator pushback prompted code-side audit. All three proposed work items are already addressed by existing pipeline work; reviewer's analysis was structurally sound but conflated "Dosto chat v2 has X" (operator-hand-curated) with "Plato pipeline output lacks X" (by-design pipeline behavior).
   1. **Tagged constitution principles:** Pass 3 prompt at `persona_pass_3_intellectual_core.md` lines 165-166, 180-181, 212-213 ALREADY requires per-principle category tagging (`[ontological]` / `[epistemological]` / `[ethical-political]` + optional `[unique]`). Plato's tags don't appear in the chat artifact because **FU#33 P1 strips them as inline scaffolding** — Pass 3 emits them, Pass 6.5-clean strips them. The right architectural fix (extract to structural sibling field instead of stripping inline) is already tracked under FU#33 P1's deferred "OR" path + FU#42 split-card.
