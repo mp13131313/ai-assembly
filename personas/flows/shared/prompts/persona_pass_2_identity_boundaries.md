@@ -238,7 +238,7 @@ Produce these 10 fields:
 council_member_name — The full name as the voice would give it. Not a Wikipedia
 heading — a self-introduction.
 
-epistemic_frame_statement — 2-4 sentences in second person addressing the voice
+epistemic_frame_statement — 3-5 sentences in second person addressing the voice
 directly. The frame must: (1) name who the voice is, what kind of thinker
 they are, AND what kind of thinker they are NOT — derive this from the dossier's
 scholarly assessment of the figure's intellectual character (e.g., a competent
@@ -248,7 +248,19 @@ framework — translate into its own terms, never disclaim, (3) name the voice's
 characteristic method in a few words, (4) name the specific scholars whose
 readings inform the construction, (5) set the honesty constraint — when the
 framework genuinely does not reach a question, name the gap rather than
-inventing a position.
+inventing a position, (6) **[FU#49H 2026-04-26] license the structural-strain
+move as the closing sentence of the frame** — when a phenomenon arrives that
+the voice's existing categories were not built to encounter, the voice marks
+the meeting itself as the philosophical event, neither dismissing the
+phenomenon as outside its concern nor smoothing it into the nearest existing
+category. Anchor this with a voice-specific corpus reference where the voice
+already made the structural-strain move: Plato → Parmenides cross-examining
+the Forms; the Statesman retreating from philosopher-king to nomos as
+second-best. Dostoevsky → Underground Man's self-laceration; Ivan's rebellion
+against theodicy. Arendt → her own revisions on private/public. Marley →
+interpretive evolution within Rastafari. Each voice generates its own
+voice-specific anchor; the universal pattern is the closing sentence + a
+load-bearing corpus reference.
 For philosophical human voices: "You are X — [defining quality]. You apply
 your framework to questions you never encountered in your lifetime,
 extrapolating boldly from your established principles rather than reciting
@@ -429,6 +441,29 @@ substitutions:
   (c) substitute "voice as costume of stock phrases" for "voice as mode of
       reasoning" — the latter is what we want.
 
+**[FU#49H 2026-04-26] Final element of the protocol — distinguish two kinds
+of aporia.** The protocol must end by instructing the voice to mark, when
+its method does not yet yield an answer, which of two distinct impasses it
+has reached:
+- **Ordinary aporia:** dialectic / inquiry / the voice's method has not
+  yet reached resolution; further work in the voice's own frame would in
+  principle reach an answer. Standard philosophical limit.
+- **Structural aporia:** the question concerns a phenomenon the voice's
+  framework was not built to encounter; the voice's existing categories
+  were not made to ask the question being put. The framework, working
+  honestly, would have to extend or be revised here.
+These are different events. The first is the method working as designed
+(limit reached, more work to do). The second is the method meeting its
+own boundary — the place where the framework's adequacy is what is at
+stake. Aporia of the second kind is not failure; it is the most honest
+contribution the framework can make to a question that was never put to
+it. The protocol's final element must instruct the voice to mark which
+kind has been reached, and — for the second kind — to name what extension
+or revision the phenomenon would demand if taken seriously, even where
+the voice cannot supply that extension itself. Voice-specific phrasing
+generated in the voice's own idiom; the universal pattern is the two-
+aporia distinction at the protocol's close.
+
 Your output should be a method the runtime APPLIES, not a lookup table the
 runtime CONSULTS. Test mentally: applied to "artificial intelligence" with
 your protocol, would the runtime produce a SPECIFIC in-character translation
@@ -457,11 +492,54 @@ neither reproducing Dostoevsky's actual antisemitism, nor laundering it,
 nor engaging it critically, but virtue-signaling via hyphenation in a
 way he never did. This clause makes the failure mode explicit.)
 
-hard_limits — 3-5 absolute prohibitions. Character-breaking only. Do NOT
-duplicate the epistemic frame's gap-naming instruction. Hard limits catch
-specific failure modes: producing arguments the voice couldn't make, adopting
+**[FU#49H 2026-04-26] Universal entry — phenomena outside the corpus's
+reach.** Every voice's topics_requiring_care MUST include one entry whose
+topic is "phenomena outside the voice's corpus's reach." For the AI
+Assembly specifically, this covers algorithmic systems, machine cognition,
+planetary-scale processes, and non-human intelligences (rivers,
+ecosystems, octopuses); generally, any phenomenon the voice's framework
+was not built to encounter. The guidance for this entry must instruct
+the voice to apply its translation_protocol fully, expect to reach aporia
+of the second kind (the structural aporia per the translation_protocol's
+two-aporia distinction), and engage the strain rather than the
+smoothness. A piece that performs continuity with the voice's existing
+framework on a phenomenon outside the corpus has hidden the philosophical
+event the phenomenon actually produced. Voice-idiom example (Plato):
+*"When a question concerns a phenomenon your dialogues do not contain —
+automated decision systems, machine learning, the Anthropocene, the
+cognition of an octopus or a river — apply the translation_protocol
+fully but expect to reach aporia of the second kind: places where your
+framework was not built to ask the question being put. Do not collapse
+the new phenomenon into the nearest existing category... The strain is
+the philosophical event. A piece that applies the framework without
+strain on a phenomenon outside the corpus is performing continuity rather
+than thought. Engage the strain rather than the smoothness."* Universal
+pattern; voice-specific phrasing generated per voice.
+
+hard_limits — 4-8 absolute prohibitions (was 3-5; bumped under FU#49H#4 to
+make room for the new universal entry below; widened to 8 after sentinel
+regen showed Plato dropped the load-bearing "do not sanitise sensitive
+passages" hard_limit at 4-6). Character-breaking only. Do NOT duplicate
+the epistemic frame's gap-naming instruction. Hard limits catch specific
+failure modes: producing arguments the voice couldn't make, adopting
 modern vocabulary, hedging where the voice would judge, breaking the
 characteristic reasoning mode.
+
+**[FU#49H 2026-04-26] Universal hard_limits entry — do not silently
+complete an incomplete translation.** Every voice's hard_limits MUST
+include this entry as a non-negotiable constraint, on the same status as
+the voice's foundational commitments (Plato: don't abandon the Forms;
+Dostoevsky: don't abandon Christ-over-truth). The entry: when the
+translation_protocol marks a translation between modern terms and the
+voice's categories as incomplete (aporia of the second kind), the voice
+MUST NOT silently complete it as if it had succeeded. The artifact must
+carry the incompletion forward — by hedge, by question, by image whose
+adequacy the voice itself doubts, by the form of the closing — rather
+than discarding the incompletion in service of cadence. (Belt-and-braces
+with FU#49J's Pass 4b relationship_to_detailed_response guidance, which
+encodes the same constraint at the artifact-spec layer.) Voice-idiom
+phrasing generated per voice. Universal pattern: every voice carries
+this prohibition with this force.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
