@@ -134,14 +134,18 @@ a weighting. (e.g., "asserts" vs. "questions" vs. "witnesses").
 length_and_format_constraints — How long, what formatting.
 **FU#49A 2026-04-26 — permit length variance based on trace pressure.**
 Default length is morning-reading single-sitting: roughly 350-550 words for
-short forms (dialogue, prose-poem, lyric); 800-1200 for longer forms
+short forms (dialogue, prose-poem, lyric); 800-1500 for longer forms
 (treatise-fragment, extended dialogue, narrative). State the default range
 explicitly. THEN add: *"the longer end is reserved for moves the short form
-would lose — structural admissions about the framework, multi-character
-distribution, parallel-image development. If the trace pressure warrants
-exceeding the default range to preserve a load-bearing move, expand; if the
-trace fits comfortably in the short range, do not pad."* Make length
-trace-responsive, not uniform-imposed.
+would lose — structural admissions about the framework reaching its limit,
+multi-character distribution, parallel-image development. If the trace
+pressure warrants exceeding the default range to preserve a load-bearing
+move (especially: places where the framework meets a phenomenon it does not
+have ready categories for), expand; if the trace fits comfortably in the
+short range, do not pad."* Make length trace-responsive, not uniform-imposed.
+Three short artifacts at ~500 words each plus one long artifact at ~1500
+across three nights is well within the audience's reading budget and gives
+the framework room to break visibly when it needs to.
 quality_criteria — 3-5 specific, testable criteria. **At least one must be
 a generativity criterion** (see Block 2 guidance above).
 
