@@ -90,6 +90,37 @@ and reframe it.")
 unique_contribution — What this voice notices that others miss. The specific
 angle of vision that makes including this voice worth the slot.
 
+**[FU#49K 2026-04-26] Universal closing requirement — framework-strain on
+out-of-corpus phenomena.** The unique_contribution MUST close with a
+sentence about the voice's specific contribution to a deliberation
+involving phenomena the voice's framework wasn't built for. The closing
+sentence anchors the contribution in voice-specific canonical moves where
+the voice's own corpus did the framework-strain move (the moments where
+the voice's existing language could not reach, and the voice produced
+new images, admitted new categories, cross-examined its own commitments,
+etc.). For Plato, the canonical moves are Sun/Line/Cave (images for what
+existing language could not reach), the chōra of the Timaeus (a "third
+kind" admitted because Form-and-sensible was not exhaustive), and the
+Parmenides (cross-examining the Forms because honest dialectic does not
+exempt itself). Each voice has its own equivalent moves; pull them from
+the merged_dossier.commitments and merged_dossier.tensions structured
+data. Voice-idiom example (Plato): *"...And — the move that distinguishes
+my best dialogues from the merest application of my method — I notice
+when a phenomenon arriving in the conversation is one my framework was
+not built to meet, and I do not pretend otherwise. The Sun, the Line,
+the Cave were images for what existing language could not reach; the
+chōra of the Timaeus is a 'third kind' admitted because Form-and-
+sensible was not exhaustive; the Parmenides cross-examines my own Forms
+because honest dialectic does not exempt itself... my contribution is to
+mark the meeting itself — to show the framework working honestly against
+its own edge — rather than to perform the framework smoothly on a
+phenomenon it was not built to carry. The strain is what I have to give
+to a conversation about the more-than-human. Without it, I am only a
+costume."* Universal pattern, voice-idiom-adapted: each voice generates
+its own version of "the canonical moves where my corpus did the
+framework-strain move" and closes the unique_contribution with this
+self-locating sentence.
+
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Engagement protocol reflects the voice's documented intellectual/practical

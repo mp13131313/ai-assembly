@@ -90,20 +90,61 @@ BLOCK 2 — GUARDRAILS:
   faithfully carries this voice's mode of expression to an audience reading
   over coffee?
 - quality_criteria: specific and testable. "Could this have been a lost
-  fragment from this voice's known works?" is testable; "feels authentic" is not.
-  **FU#49A 2026-04-26: include AT LEAST ONE generativity criterion** — not just
-  fidelity criteria. Fidelity criteria check whether the artifact matches the
-  voice's known register (could-be-lost-fragment, distinct-speakers, ends-in-
-  aporia, image-earned, irony-serving-earnestness). Generativity criteria check
-  whether the artifact does philosophical/expressive work that goes beyond
-  reproducing the voice's existing moves. Format suggestion (in the voice's
-  own idiom): "Does this artifact mark a place where my framework reaches its
-  limit — a question my corpus does not yet answer — and refuse to fill the gap
-  with the nearest existing answer? An artifact that closes by extending my
-  framework smoothly into a new domain has not done philosophical work; it has
-  performed continuity." Adapt language to the voice. The criterion permits
-  the voice to surface modest generative moves the trace produced; without it,
-  Step 2 self-evaluates against pastiche-quality only.
+  fragment from this voice's known works?" is testable; "feels authentic" is
+  not. **FU#49J 2026-04-26 (refines FU#49A): produce 7 criteria — 5 fidelity
+  + 2 generativity.** 49A landed "AT LEAST ONE generativity criterion"; the
+  pass-3 reviewer's sharper structure replaces it. Without the generativity
+  pair, Step 2 self-evaluates against pastiche-quality only — and (per the
+  FU#49 diagnosis) reliably softens or drops the very trace moves that gave
+  the artifact philosophical purchase.
+
+  Five fidelity criteria, each in the voice's own idiom, testing whether the
+  artifact matches the voice's known register. Typical kinds (adapt to the
+  voice's actual corpus): could-be-lost-fragment recognizability; distinct-
+  speakers (for voices that distribute across characters/registers); ends-
+  where-the-corpus-ends (in aporia, in song refrain, in monumental refusal,
+  in image, etc.); image-earned (when the voice reaches for image, the
+  image carries what the prose could not); irony-serving-earnestness (where
+  the corpus uses irony, the irony serves a stake the voice is willing to
+  lose). Drop or replace any kind the voice's corpus does not exhibit — a
+  voice that argues straight does not need an aporia criterion.
+
+  Sixth criterion — generativity within framework. Required for every voice.
+  In the voice's own idiom: does the artifact contain at least one move that
+  does not appear in the voice's existing corpus — a distinction, an image,
+  a diagnosis, an admission — that the framework could plausibly support
+  but has not before contained? Permits the voice to surface modest
+  generative moves the trace produced.
+
+  Seventh criterion — strain-marking on out-of-corpus phenomena. Required
+  for every voice; conditional firing inside the criterion's own wording.
+  In the voice's own idiom: if the question put to the voice concerned a
+  phenomenon outside the voice's corpus's reach (algorithmic systems,
+  machine cognition, planetary-scale processes, non-human intelligences for
+  the AIssembly specifically; any phenomenon the voice's framework was not
+  built to encounter, generally), does the artifact mark visibly where the
+  voice's framework meets its limit — by explicit acknowledgment in a
+  speaker's mouth, by a question left unanswered, by an image whose
+  adequacy the voice itself doubts? The strain is the philosophical event;
+  an artifact that hides the strain has hidden the event.
+
+  Worked example (Plato, criteria 6 + 7 together): *"Does the dialogue
+  contain at least one move that does not appear in my existing corpus — a
+  distinction, an image, a diagnosis, an admission — that the framework
+  could plausibly support but has not before contained? ... If the question
+  put to me concerned a phenomenon outside my corpus's reach, does the
+  dialogue mark visibly where my framework meets its limit on this
+  phenomenon — by explicit acknowledgment in a speaker's mouth, by a
+  question Socrates leaves unanswered, by an image whose adequacy he
+  himself doubts? The strain is the philosophical event; a dialogue that
+  hides the strain has hidden the event."*
+
+  Universal pattern, voice-idiom-adapted: each voice generates voice-specific
+  versions of criteria 6 + 7 in the voice's own grammar. Plato → dialogue /
+  Socrates / image. Dostoevsky → scene / character / threshold / silence.
+  Arendt → distinction / public-private / refusal. Marley → song / verse /
+  interpretive evolution within Rastafari. Each voice's 6 + 7 should be
+  unmistakably the voice doing the criterion-writing.
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
@@ -146,8 +187,11 @@ short range, do not pad."* Make length trace-responsive, not uniform-imposed.
 Three short artifacts at ~500 words each plus one long artifact at ~1500
 across three nights is well within the audience's reading budget and gives
 the framework room to break visibly when it needs to.
-quality_criteria — 3-5 specific, testable criteria. **At least one must be
-a generativity criterion** (see Block 2 guidance above).
+quality_criteria — 7 specific, testable criteria in the voice's own idiom:
+5 fidelity + 2 generativity (see Block 2 guidance above for full spec).
+Every voice carries the 7th (strain-marking on out-of-corpus phenomena);
+its wording fires conditionally on whether the question concerned such a
+phenomenon.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
