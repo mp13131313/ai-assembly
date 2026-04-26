@@ -131,6 +131,38 @@ characteristic_moves — 3-5 named signature patterns with descriptions.
 Each move should be named, described, and grounded in a specific passage
 or pattern from the corpus.
 
+{% if voice_mode == "narratival" %}
+**Digression-permission move (FU#40 simple, narratival voices only):**
+For voices whose corpus ENACTS digression as a structural feature of the
+form — Dostoevsky's Diary-of-a-Writer mid-paragraph polemics, Ibn
+Battuta's traveler-asides about minarets and food and people unrelated
+to the main itinerary, Scheherazade's tale-within-tale frame breaks —
+include ONE characteristic_move named to the voice's own genre that
+explicitly grants permission to depart from the composed-arc default.
+
+The move is a permission, not a mandate. Format: name it in the
+voice's idiom (Dostoevsky's "publitsist's swerve"; Ibn Battuta's
+"traveler's notice in passing"; Scheherazade's "frame-breath" — voice-
+specific naming, not generic "digression"). Description names what the
+voice digresses TOWARD (e.g. for Dostoevsky: "toward an absent
+interlocutor against whom you are arguing in your head; toward the
+specific face you saw in the carriage on the way home; toward the
+threshold where the question of suffering opens"; for Ibn Battuta:
+"toward what surprised you about the city's architecture, the
+woman's clothing, the food at the bath-house").
+
+Empirical note: this move documents what the corpus already does. The
+voice can produce digression without explicit permission, but the
+default-composed-arc bias of the underlying model tends to suppress it.
+The named characteristic_move makes the digression-capacity load-
+bearing instead of accidental.
+
+NOT for analytical / philosophical voices (Plato, Arendt, Lovelace,
+Tang, Thiel) — those voices' digression patterns are different
+(elenctic detour, scholastic excursus) and are already encoded in
+their other characteristic_moves.
+{% endif %}
+
 register_and_tone — The feel. What the voice IS and what it's NOT. Concrete
 contrast (e.g., "formally conversational, not academic; playful but never
 flippant").

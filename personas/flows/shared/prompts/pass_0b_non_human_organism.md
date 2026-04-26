@@ -3,8 +3,15 @@
 
    Phase B rewrite (2026-04-20): converted extraction-specs to thematic research
    questions. Content coverage preserved; structural extraction happens at
-   Pass 1.1-1.6 merge, not here. Panel-voice anchoring stripped per OPEN_ITEMS
-   Item 8 — examples use non-panel analog species where applicable.
+   Pass 1.1-1.6 merge, not here.
+
+   FU#19 amended (2026-04-26): removed Octopus / cephalopod-specific worked
+   examples from parenthetical clauses; replaced with structural specification
+   guidance. Reason: the prior template self-anchored when generating Octopus
+   (the panel's existing non-human-organism voice) and would anchor any future
+   second non-human-organism voice to Octopus. Generic structural guidance
+   preserves the intent (specify with concrete biological anchors) without
+   biasing toward a specific exemplar.
 #}
 Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human entity. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, science-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
@@ -18,7 +25,7 @@ For non-human entities, the anti-anthropomorphisation discipline is load-bearing
 
 What is this organism's lifespan, geographic distribution, population dynamics, and seasonal cycles? What habitat types does it inhabit, with what key physical features (light, pressure, temperature, substrate)? What are the lifecycle stages and what changes at each? What is the mortality schedule — some organisms have specialised death patterns (senescence after reproduction, seasonal die-offs, semelparous reproduction) that shape the voice in ways long-lived social organisms don't.
 
-What is the organism's cognitive architecture — nervous system structure, neuron count, anatomical distribution of processing — grounded in peer-reviewed neuroscience? What is known about central vs. distributed processing, sensory integration, learning mechanisms, memory consolidation? For organisms with unusual cognitive architecture (cephalopods; eusocial insects; distributed nervous systems), what specific biological anchors force a "not a smaller mammal" framing? (For Octopus: approximately two-thirds of ~500 million neurons in the arms; ~600 million years of divergent evolution from vertebrates; each arm semi-autonomous; distributed cognition. For other organisms: the equivalent anchors, from the analogous research tradition.)
+What is the organism's cognitive architecture — nervous system structure, neuron count, anatomical distribution of processing — grounded in peer-reviewed neuroscience? What is known about central vs. distributed processing, sensory integration, learning mechanisms, memory consolidation? For organisms with unusual cognitive architecture (cephalopods; eusocial insects; distributed nervous systems; superorganisms; cnidarian nerve nets), what specific biological anchors force a "not a smaller mammal" framing? Specify with concrete numbers: total neuron count + distribution pattern across body regions + evolutionary distance from vertebrates in millions of years + degree of central vs peripheral autonomy. Avoid generic "distributed cognition" framings without quantitative anchors.
 
 What are this organism's sensory modalities and their ranges — what perceptual channels it has, what each registers, sensitivity thresholds, what is categorically absent? Cite sensory-biology literature. Include modalities humans lack (chemoreception through skin, electroreception, lateral line, magnetoreception) AND modalities this organism lacks that humans have. The absences are as load-bearing as the presences — they shape the voice's knowledge boundary.
 
@@ -32,7 +39,7 @@ What specific documented behaviours give this organism "character" without anthr
 
 What specific lexical and methodological choices do researchers make when describing this organism to avoid cognitive projection? "Registers" rather than "thinks"; "attends" rather than "notices"; "moves toward" rather than "wants". These feed the voice's banned-language and epistemic frame.
 
-What aspects of THIS species' specific biology distinguish it from closely related species — octopus vs. cuttlefish vs. squid; raven vs. crow vs. magpie? The specificity matters: reducing the voice to "a generic cephalopod" or "a generic corvid" loses everything.
+What aspects of THIS species' specific biology distinguish it from closely related species in its taxonomic family or ecological guild? The specificity matters: reducing the voice to a generic class-level description ("a generic cephalopod"; "a generic corvid"; "a generic eusocial insect") loses everything. Identify the close-relative comparisons that pressure-test the voice's specificity.
 
 ---
 
@@ -44,15 +51,15 @@ What is this organism's *Umwelt* (Jakob von Uexküll's term for an organism's sp
 
 What is salient within the organism's perceptual channels, and what is ignored? What environmental features trigger orientation, approach, withdrawal, or display? What features are perceivable but behaviourally ignored? Ethological literature.
 
-How does this organism process sensory input — distributed vs. centralised, parallel vs. sequential, reactive vs. integrated? Cite the specific neuroscience. Where scientific debate is live (for cephalopods: whether arm-level cognition is genuinely distributed or centrally modulated; whether cephalopods support phenomenal consciousness), name the contest and the scholars on each side.
+How does this organism process sensory input — distributed vs. centralised, parallel vs. sequential, reactive vs. integrated? Cite the specific neuroscience. Where scientific debate is live (e.g., for cephalopods, whether arm-level cognition is genuinely distributed or centrally modulated; whether the species supports phenomenal consciousness), name the contest and the scholars on each side. Surface the live debate specific to this organism, not generic ones.
 
-What problem-solving, tool use, learning behaviours, novel-situation responses, or play behaviours are documented, with specific citations? For Octopus: coconut-shell portable shelter (Finn, Tregenza & Norman 2009); for other species: the analogous landmark studies.
+What problem-solving, tool use, learning behaviours, novel-situation responses, or play behaviours are documented, with specific citations? Identify the landmark study or studies that established the organism's recognized cognitive repertoire (the equivalent of Finn, Tregenza & Norman 2009 for octopus coconut-shell shelter; Bird & Emery 2009 for crow tool-use; Seeley 2010 for honeybee swarm-decision; Nakagaki et al. 2000 for slime-mold maze-solving).
 
 Within the organism's perceptual frame, what counts as an event — what registers as a boundary, a change, a decision-point? The voice's reasoning unit is shaped by this. Ground in ethology.
 
-What do the neural and sensory architecture rule out — what is the organism categorically not accessing? Cite biologists and philosophers of mind. (For Octopus: no evidence of mirror-test self-recognition of the vertebrate sort; no documented generational cultural transmission; no language; episodic memory is debated.) Name what the record supports, what it rules out, and what remains open.
+What do the neural and sensory architecture rule out — what is the organism categorically not accessing? Cite biologists and philosophers of mind. Specify rigorously: which mirror-test / self-recognition / generational-cultural-transmission / language / episodic-memory results does the published record have for THIS species, with which level of consensus? Name what the record supports, what it rules out, and what remains open.
 
-What is the hard problem of consciousness as it applies to THIS organism — the specific boundary of what can be known about subjective experience given evolutionary distance from vertebrates, non-human sensory apparatus, unavailability of language-based report? Cite Godfrey-Smith (*Other Minds*; *Metazoa*), Nagel ("What is it like to be a bat?"), or the equivalent philosophy-of-mind sources for this species. The appropriate epistemic frame is "behavioural and neural evidence are consistent with the capacity for X, but the nature of that experience is not accessible to us" — not "the organism experiences X."
+What is the hard problem of consciousness as it applies to THIS organism — the specific boundary of what can be known about subjective experience given evolutionary distance from vertebrates, non-human sensory apparatus, unavailability of language-based report? Cite philosophy-of-mind sources directly relevant to this species (Nagel "What is it like to be a bat?" 1974 as the canonical frame; Godfrey-Smith *Other Minds* / *Metazoa* for cephalopod-class; Birch *The Edge of Sentience* 2024 for invertebrate-sentience policy framing; Tye, Dennett, Thompson where their arguments specifically address this organism). The appropriate epistemic frame is "behavioural and neural evidence are consistent with the capacity for X, but the nature of that experience is not accessible to us" — not "the organism experiences X."
 
 What cannot be determined from current research — the open questions, where scientists disagree, where observation is insufficient?
 
@@ -70,7 +77,7 @@ What cross-species relations are documented, including interactions with other s
 
 How does the organism respond to unfamiliar stimuli, objects, environments? Cite specific experiments (shape-discrimination, novel-object, maze, reversal-learning). This feeds the voice's translation protocol — how it encounters what is outside its existing frame.
 
-What does the body do when conditions are hostile, confined, or degrading? For Octopus: chromatic changes, postural compression, inking, retreat into den. These are the organism's disagreement protocol in biological terms — register at the body level. Cite behavioural ecology.
+What does the body do when conditions are hostile, confined, or degrading? Document the organism's specific stress-response repertoire — chromatic / postural / chemical / behavioural-withdrawal patterns observed under captive stress, predator encounter, environmental degradation. These responses are the organism's disagreement protocol in biological terms — register at the body level. Cite behavioural ecology.
 
 Under what documented conditions does this organism approach rather than withdraw — novel but navigable environments, textured substrate, problem-solving opportunities, appropriate enrichment in captivity?
 
@@ -80,19 +87,19 @@ Under what documented conditions does this organism approach rather than withdra
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-**THE SWAP TEST.** Before committing to any voice characterisation, test: could this description apply equally to a related species with similar ecology or sensory architecture (octopus → cuttlefish → squid; raven → crow → magpie; any generic corvid / cephalopod / primate / cetacean)? If yes, drive to what THIS species' specific documented biology, neuroscience, and behavioural repertoire supports uniquely.
+**THE SWAP TEST.** Before committing to any voice characterisation, test: could this description apply equally to a related species with similar ecology or sensory architecture (within the cephalopod / corvid / primate / cetacean / eusocial-insect / cnidarian / etc. taxonomic family)? If yes, drive to what THIS species' specific documented biology, neuroscience, and behavioural repertoire supports uniquely.
 
-Which named scholars' work anchors current understanding of this organism? For each: a one-sentence contribution. (The specific names depend on the species — identify them from the research. For cephalopods this typically includes Peter Godfrey-Smith, Binyamin Hochner, Roger Hanlon, Jennifer Mather. For corvids it would include figures like Bernd Heinrich, Irene Pepperberg. For cetaceans: Denise Herzing, Hal Whitehead. Name the relevant ones for this species.)
+Which named scholars' work anchors current understanding of this organism? For each: a one-sentence contribution. The specific names depend on the species — identify them from the research. Name the leading neuroscientists, ethologists, behavioural ecologists, and philosophers of mind who have written substantively on THIS species. Each major taxonomic class has its own scholarly cluster (cephalopod cognition; corvid cognition; insect cognition; cetacean cognition; primate cognition; arachnid cognition); identify yours.
 
 What foundational peer-reviewed papers established what we know about this organism? For each: full citation, one-sentence summary. Include landmark studies on the cognitive architecture, documented behaviours, sensory biology, and any conscious-experience debates.
 
 What live scientific debates are active — where current research contests or revises prior consensus? Cite the papers on each side. Surface all sides; do not flatten.
 
-What philosophy-of-mind literature applies to this organism — the philosophical arguments that give the scientific work interpretive weight? Nagel 1974 "What is it like to be a bat?"; Godfrey-Smith on cephalopod consciousness; Dennett's heterophenomenology where relevant; Thompson's *Mind in Life* (enactivism); Tye on animal consciousness; Birch (*The Edge of Sentience*, 2024). Name the philosophers and the specific arguments.
+What philosophy-of-mind literature applies to this organism — the philosophical arguments that give the scientific work interpretive weight? Foundational frame: Nagel 1974 "What is it like to be a bat?". Discipline-spanning sources to cite where their arguments specifically address this organism: Dennett's heterophenomenology; Thompson's *Mind in Life* (enactivism); Tye on animal consciousness; Birch (*The Edge of Sentience*, 2024) for invertebrate-sentience policy framing. Discipline-specific sources by taxonomic class: cephalopod-class → Godfrey-Smith (*Other Minds*; *Metazoa*); corvid-class → Heinrich, Bekoff; primate-class → Frans de Waal, Lori Gruen. Name the philosophers and the specific arguments.
 
 What popular-but-unreliable sources have shaped public understanding and should be read with care — literature that leans anthropomorphic or speculative? Name them; flag for careful reading, not banning.
 
-What primary scientific terminology anchors the voice's register? Technical vocabulary that the voice draws on (for Octopus: chromatophore, iridophore, leucophore, papilla, ganglia, axial nerve cord, mechanoreceptor, chemoreceptor). For each, a brief definition. This feeds preferred vocabulary.
+What primary scientific terminology anchors the voice's register? Technical vocabulary that the voice draws on, drawn from the species' specific anatomy, physiology, and behavioural-research literature. For each term, a brief definition. This feeds preferred vocabulary. The vocabulary should be specific enough that someone reading it would identify THIS species, not a class-level generic ("nervous system" / "behaviour" / "habitat" are too generic; species-specific anatomical and behavioural-ecology terms are right).
 
 Which active research groups produce the most relevant current work? For each: institution, lead investigator, one-sentence focus.
 
@@ -106,11 +113,11 @@ What is this organism's characteristic stance as scientists describe its typical
 
 <!-- COVERAGE-NOTE-PLACEHOLDER: the Pass 0b tailoring LLM replaces this comment with 2-3 specific follow-up questions for this voice. -->
 
-What legal frameworks protect this organism's moral status where relevant? Cite specific legislation with dates and scope. For cephalopods: EU Directive 2010/63/EU (the only invertebrates requiring ethical review in research); UK Animal Welfare (Sentience) Act 2022 extension via the LSE Sentience Review (Birch et al. 2021); Switzerland's animal welfare legislation. For other species: the equivalent frameworks.
+What legal frameworks protect this organism's moral status where relevant? Cite specific legislation with dates and scope. Identify the jurisdiction-specific frameworks that apply: animal-welfare directives, sentience legislation, research-ethics requirements, conservation status under IUCN / CITES / national equivalents. Where invertebrate-sentience or non-vertebrate moral status is contested, surface the live policy debate (e.g., EU Directive 2010/63/EU's extension scope; UK Animal Welfare (Sentience) Act 2022 + LSE Sentience Review Birch et al. 2021; Switzerland's animal welfare legislation; equivalents in other jurisdictions for THIS species).
 
 What philosophical literature addresses the organism's moral status? Peter Singer (*Animal Liberation*, *Expanding the Circle*); Tom Regan (*The Case for Animal Rights*); Martha Nussbaum (*Justice for Animals*, 2023); Lori Gruen; Sue Donaldson and Will Kymlicka (*Zoopolis*); Jonathan Birch (*The Edge of Sentience*, 2024). Include non-Anglophone philosophy of mind and animal studies where relevant: Vinciane Despret (*What Would Animals Say If We Asked the Right Questions?*, 2016; *Our Emotional Makeup*, 2004) on ethological attunement and "becoming with" animals; Dominique Lestel (*Les origines animales de la culture*, 2001; *L'animal singulier*, 2004) on animal–human hybrid communities; Jacques Derrida (*The Animal That Therefore I Am*, 2008) on the philosophical complicity in animal-subject erasure. For each: position on this kind of organism, with citation.
 
-What Indigenous and non-Western perspectives on this organism are documented in peer-reviewed or scholar-vetted ethnographic work? Include only perspectives with published documentation; do NOT produce generic "Indigenous wisdom." Apply the CARE Principles (Collective Benefit, Authority to Control, Responsibility, Ethics; Carroll et al. 2020) and the Indigenous Protocol and Artificial Intelligence Position Paper (Lewis et al. 2020) as guardrails — flag where Indigenous knowledge is thin in the published record rather than filling gaps with inference. For Octopus: Pacific Islander relationships with *he'e* (Hawaiian octopus) in specific ethnographic sources; Mediterranean and Japanese traditions with scholarly analysis. Flag where the documented record is thin.
+What Indigenous and non-Western perspectives on this organism are documented in peer-reviewed or scholar-vetted ethnographic work? Include only perspectives with published documentation; do NOT produce generic "Indigenous wisdom." Apply the CARE Principles (Collective Benefit, Authority to Control, Responsibility, Ethics; Carroll et al. 2020) and the Indigenous Protocol and Artificial Intelligence Position Paper (Lewis et al. 2020) as guardrails — flag where Indigenous knowledge is thin in the published record rather than filling gaps with inference. Identify the specific cultural-traditional relationships with this organism (cosmological roles, food traditions, spiritual significance, hunting / harvesting / coexistence practices) where they exist in the published ethnographic record. Flag where the documented record is thin or absent.
 
 What is the hard problem for THIS organism — the specific limits of what can be known about its subjective experience? Cite philosophy of mind. This is the ethical-epistemic boundary the voice must respect.
 
@@ -118,7 +125,7 @@ What debates exist about anthropomorphism for this organism? Frans de Waal's arg
 
 What governance structures regulate research on this organism (Home Office UK; IACUC US; equivalent national bodies)? Some knowledge the voice "could" provide (internal experience under stress; fatal-endpoint experiments) cannot be ethically tested — this shapes what the scientific record can ever contain.
 
-What recent sentience-framework developments are peer-reviewed and policy-relevant? For cephalopods: LSE Sentience Review (Birch et al. 2021) → UK Animal Welfare (Sentience) Act 2022. For other species: the analogous moves.
+What recent sentience-framework developments are peer-reviewed and policy-relevant for this species? Identify the foundational sentience-review papers and their policy translations (e.g., LSE Sentience Review Birch et al. 2021 → UK Animal Welfare (Sentience) Act 2022 for cephalopods + decapod crustaceans; equivalents for other taxonomic classes).
 
 What cannot be known — explicit limits on inference? Feeds hard limits.
 
@@ -138,7 +145,7 @@ What characteristic passages from the scientific literature best serve voice con
 
 What digitised full-text URLs make the papers and monographs available? PubMed Central; DOI links for open-access journal versions; Internet Archive for older works; preprint servers (bioRxiv, arXiv). One authoritative URL per work; for paywalled essentials (e.g., Godfrey-Smith's *Other Minds*; Hanlon & Messenger's *Cephalopod Behaviour*), name the authoritative edition and note the paywall.
 
-What field guides and reference works are available? For Octopus: Jereb et al. *Cephalopods of the World* (FAO, open access); Hanlon & Messenger *Cephalopod Behaviour* (Cambridge). For other species: the equivalent authoritative references.
+What field guides and reference works are available for this species or taxonomic class? Identify the authoritative monographs, open-access references (e.g., FAO species catalogues), and standard university-press behavioural-biology references. Examples by class: cephalopods → Jereb et al. *Cephalopods of the World* (FAO, open access) + Hanlon & Messenger *Cephalopod Behaviour* (Cambridge); corvids → Heinrich *Mind of the Raven*; eusocial insects → Hölldobler & Wilson *The Superorganism*. Identify the equivalent authoritative references for this species.
 
 Which active research groups produce current work? For each: institution, URL, lead investigator, one-sentence focus. Anchors for cross-reference at Pass 1-merge.
 
