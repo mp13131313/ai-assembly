@@ -8,6 +8,14 @@
    parenthetical alternatives (Hamlet, Don Quixote, Antigone, Aeneas,
    Anansi, Sun Wukong, Ariadne) so future non-Scheherazade fictional
    voices transfer cleanly.
+
+   FU#19 review (2026-04-26): audited template thoroughly; found that most
+   Scheherazade mentions are already paired with parallel exemplars (Hamlet,
+   Antigone, Aeneas, Anansi, Sun Wukong, Achilles, Don Quixote, Ariadne)
+   throughout. Multi-exemplar pattern was rigorous from the 2026-04-20
+   rewrite. No additional parallel-exemplar additions made; high mention
+   count is structural (Scheherazade + parallel siblings in worked-example
+   lists) rather than single-anchor self-reference.
 #}
 Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this fictional, literary, or mythological character. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, textually-grounded, scholarship-anchored narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
