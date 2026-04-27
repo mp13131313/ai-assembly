@@ -1584,7 +1584,7 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
     # Spec wants 37 card fields flat at root + a metadata block.
     "voice_name": vi["name"],
     "voice_mode": vi["voice_mode"],
-    "pipeline_version": "3.10",
+    "pipeline_version": "4.0",
     "generated_date": time.strftime("%Y-%m-%d"),
 
     # All 35 generated card fields, flat at root level
