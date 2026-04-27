@@ -1133,6 +1133,38 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
         fix_log["log"].append("No field_issues to patch — skipping fix-pass entirely")
         return fix_log
 
+    # FU#51 (2026-04-27) — Pass 7a routing-reliability guard. Pass 7a's
+    # validator labels `flagged_pass` by topical/domain category rather
+    # than by which pass file the field actually lives in (e.g. tags
+    # `epistemic_frame_statement` as flagged_pass=5 when it lives in
+    # pass_2). Build a {pass_id: fields_dict} map from all pass files on
+    # disk + rewrite each field_issue's flagged_pass to where the field
+    # actually lives. The patcher LLM had been self-correcting routing in
+    # flight (15/15 patches landed correctly on prior Cleopatra run despite
+    # validator drift), but the misrouted labels persist into post-fix
+    # operator-facing CARD COMPLETE summary if not corrected.
+    from flows.shared.patch_walker import resolve_field_to_pass
+    all_pass_outputs = {}
+    for pass_id, var_name in _PASS_VAR_LOOKUP.items():
+        var = globals().get(var_name)
+        if var and var.get("fields"):
+            all_pass_outputs[pass_id] = var["fields"]
+    routing_corrections = 0
+    for issue in field_issues:
+        original_pass = str(issue.get("flagged_pass") or issue.get("revision_target_pass") or "")
+        field_path = issue.get("field", "") or issue.get("field_path", "")
+        actual_pass = resolve_field_to_pass(field_path, all_pass_outputs, fallback=None)
+        if actual_pass and actual_pass != original_pass:
+            issue["flagged_pass"] = actual_pass
+            issue["_fu51_original_flagged_pass"] = original_pass
+            routing_corrections += 1
+    if routing_corrections:
+        fix_log["log"].append(
+            f"FU#51 routing guard: corrected flagged_pass on {routing_corrections} of "
+            f"{len(field_issues)} field_issues (validator labeled by topic, "
+            f"actual home found by walking pass files)"
+        )
+
     affected = sorted({str(i.get("flagged_pass") or i.get("revision_target_pass") or "")
                        for i in field_issues})
     affected = [p for p in affected if p in _PASS_VAR_LOOKUP]

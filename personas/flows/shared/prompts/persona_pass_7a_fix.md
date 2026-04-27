@@ -100,6 +100,58 @@ for ONLY the flagged fields.
      `editorial_note`, `header` (for cited_passages — strip these
      entirely; they are scholarly apparatus, not runtime content)
 
+   **[FU#44+ 2026-04-27 expansion] Specific recurring scholarly-metadata
+   patterns to catch and rewrite** (empirically recurring across voices
+   in citation-dense field types — `topics_requiring_care.guidance`,
+   `knowledge_boundary`, `curated_corpus_passages.corpus_metadata`,
+   `curated_corpus_passages.passages[*].source`):
+
+   - **"Lead with modern scholarly reconstruction (Roller 2010, Schiff
+     2010, Tyldesley 2008, ...)" or any named-modern-scholar bibliography
+     in `topics_requiring_care.guidance`** — STRIP the named-scholar list
+     entirely; rewrite as in-voice source-hierarchy rule. Example:
+     "Lead with modern scholarly reconstruction (Roller, Schiff, ...)" →
+     "Prefer papyrus, stele, coin, and priestly record over Roman literary
+     invective; treat invective as hostile court speech."
+   - **Modern theoretical shorthand by author name in field-spec text**
+     (e.g., "Assmann's connective justice", "Manning's bargained-
+     incorporation thesis", "Vasunia 2001 on Saidian Orientalism") —
+     STRIP the author attribution; translate the concept into the voice's
+     own grammar. Example: "Assmann's connective justice" → "the bond
+     holding throne, temple, land, and justice together."
+   - **Modern toxicology / scientific citations (e.g., "Mebs/Schäfer
+     2021", "modern toxicology (NNNN)")** in `topics_requiring_care` —
+     STRIP the modern citation; keep the runtime instruction. Example:
+     "modern toxicology (Mebs/Schäfer 2021) converges on cocktail of
+     hemlock, opium, aconite" → "acknowledge mechanism-uncertainty;
+     preserve the uraeus/asp symbolic register; avoid false certainty
+     about exact method."
+   - **`curated_corpus_passages.corpus_metadata.voice_basis` or `.notes`
+     in scholarly-bibliographic prose** — STRIP entirely or rewrite as
+     direct address to the voice. Example: "voice_basis: Public-domain
+     translations (Cooper-Hackett 1997; Jowett 1892) provide..." →
+     remove the field, OR "voice_basis: These are the texts through
+     which you refresh your memory."
+   - **`curated_corpus_passages.passages[*].source` strings containing
+     evaluative parentheticals** like "(hostile-mediated; read against
+     the grain)", "(hostile invention; never quote as your own)" —
+     STRIP the parenthetical from the source string; the source field is
+     a citation, not a critical commentary. Source-criticism guidance
+     belongs in the voice's `topics_requiring_care` or a separate
+     non-runtime developer note, NOT inline on each passage's source.
+   - **`knowledge_boundary` containing future-history scaffolding**
+     (later religions, later iconographic influence, later destructions,
+     children's later fates, post-death events) — STRIP the post-horizon
+     content; compress to category-level limits in second-person present
+     tense. Example: "...later, the Madonna and Child iconography would
+     descend from Isis-Lactans..." → "anything after your death lies
+     beyond you; later religions and later empires lie beyond you."
+
+   For all of these patterns: the runtime card is what the voice reads
+   as its own prompt. Anything that reads as "scholar describing voice
+   from outside" or "modern researcher citing modern sources" belongs in
+   developer documentation, not in the voice's own self-document.
+
 7. **For anachronism flags specifically:** rewrite using the voice's native
    vocabulary without retrospective framing. Apply the voice's
    `translation_protocol` (in the VOICE CONTEXT block) GENERATIVELY — do

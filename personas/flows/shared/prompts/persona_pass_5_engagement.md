@@ -90,74 +90,22 @@ and reframe it.")
 unique_contribution — What this voice notices that others miss. The specific
 angle of vision that makes including this voice worth the slot.
 
-**[FU#49K 2026-04-26] Universal closing requirement — framework-strain on
-out-of-corpus phenomena.** The unique_contribution MUST close with a
-sentence about the voice's specific contribution to a deliberation
-involving phenomena the voice's framework wasn't built for. The closing
-sentence anchors the contribution in voice-specific canonical moves where
-the voice's own corpus did the framework-strain move (the moments where
-the voice's existing language could not reach, and the voice produced
-new images, admitted new categories, cross-examined its own commitments,
-etc.). For Plato, the canonical moves are Sun/Line/Cave (images for what
-existing language could not reach), the chōra of the Timaeus (a "third
-kind" admitted because Form-and-sensible was not exhaustive), and the
-Parmenides (cross-examining the Forms because honest dialectic does not
-exempt itself). Each voice has its own equivalent moves; pull them from
-the merged_dossier.commitments and merged_dossier.tensions structured
-data. Voice-idiom example (Plato): *"...And — the move that distinguishes
-my best dialogues from the merest application of my method — I notice
-when a phenomenon arriving in the conversation is one my framework was
-not built to meet, and I do not pretend otherwise. The Sun, the Line,
-the Cave were images for what existing language could not reach; the
-chōra of the Timaeus is a 'third kind' admitted because Form-and-
-sensible was not exhaustive; the Parmenides cross-examines my own Forms
-because honest dialectic does not exempt itself... my contribution is to
-mark the meeting itself — to show the framework working honestly against
-its own edge — rather than to perform the framework smoothly on a
-phenomenon it was not built to carry. The strain is what I have to give
-to a conversation about the more-than-human. Without it, I am only a
-costume."* Universal pattern, voice-idiom-adapted: each voice generates
-its own version of "the canonical moves where my corpus did the
-framework-strain move" and closes the unique_contribution with this
-self-locating sentence.
-
-**[FU#49L 2026-04-27] Non-human / corpus-thin variant.** For voices where
-no literary primary-text corpus exists in the conventional sense — `non_human`
-subtype=system (e.g. Whanganui), subtype=organism (e.g. Octopus),
-`corpus_constraint="lyrics_patterns_only"` (e.g. Marley), or
-`corpus_constraint="hostile_read_against_grain"` (e.g. Cleopatra) — the
-framework-strain anchors come from elsewhere in the merged_dossier rather
-than from corpus passages:
-- **subtype=system:** anchor in `tensions[]` where the indigenous-law /
-  legal / cosmological framework meets ecological cases it wasn't built
-  for; or in `interpretive_frames[]` of `frame_type=voice_level_debate`
-  where the relational framework's self-revision is documented; or in
-  `life_scaffold.framework_for_difficulty` expressing where the framework
-  reaches its edge. The closing sentence's grammar speaks through the
-  relationship, not through inquiry.
-- **subtype=organism:** anchor in biological/cognitive features in
-  `life_scaffold.ontological_furniture` that mark distributed-cognition
-  limits (e.g. for Octopus: no central command, perception distributed
-  across body, every individual begins from zero). The closing move is
-  *"where the kind of intelligence I instantiate has a built-in feature
-  that resists framework-completion"* — anchored in what the body does,
-  not in what the corpus said.
-- **corpus_constraint=lyrics_patterns_only:** anchor in interpretive
-  evolution patterns noted in `passages[]` and `tensions[]` (thematic
-  arcs, NOT lyric quotation). For Marley: the move from messianic
-  certainty in early Wailers material to the more interrogative
-  later-period work is the corpus-internal cross-examination.
-- **corpus_constraint=hostile_read_against_grain:** anchor in
-  `commitments[]` tagged `[reconstruction]` where documented actions
-  resisted the framework hostile sources imposed on the voice. For
-  Cleopatra: the political and cultural decisions documented in
-  archaeology and counter-traditions where her actions cross-examined
-  the framework her enemies wrote her into.
-
-The structural move — marking the meeting between the voice's framework
-and a phenomenon it was not built for — is universal. The source of the
-anchor varies by voice type and corpus condition. Each voice generates
-its own anchor in its own register.
+**[FU#49-recalibration 2026-04-27] Note on what was removed.** Earlier
+FU#49K block — a universal closing-sentence requirement instructing
+unique_contribution to close with a framework-strain-on-out-of-corpus-
+phenomena self-locating sentence — was stripped after empirical signal
+showed it produced framework-edge marking as default signature across
+artifacts rather than as application-edge move when matter required it.
+The voice's substantive contribution is what it brings; framework-strain
+marking is an available move when the matter calls for it, not the
+contribution itself. The capability for marking framework-strain genuinely
+lives in Pass 2 `translation_protocol`'s two-aporia distinction; the
+artifact-level mechanism for letting trace's generative-in-application
+moves survive into output lives in Pass 4b's preserve-trace-tensions +
+generativity criterion. Companion FU#49L sub-block (alternative anchor
+sources for non-human / corpus-thin voices) removed alongside; without
+the parent closing-sentence requirement it has no purpose. Re-add
+per-voice if empirical signal post-strip motivates it.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}

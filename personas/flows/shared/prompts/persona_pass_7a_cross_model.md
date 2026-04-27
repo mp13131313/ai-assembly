@@ -64,6 +64,49 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
       "flagged_pass": "2" | "3" | "4a" | "4b" | "5" | "6"
     }
   ],
+
+  ── FU#51 (2026-04-27): `flagged_pass` MUST name the pass file that
+  actually produced the field, NOT the topical/domain bucket. Use this
+  authoritative field → pass mapping. Where a field is nested or list-
+  indexed, look at the top-level key:
+
+    pass_2 (Identity & Boundaries) — emits:
+      epistemic_frame_statement, world (+ subfields), character,
+      formative_experience (+ subfields), voice_temporal_stance,
+      translation_protocol, knowledge_boundary, sensitive_topics,
+      hard_limits, topics_requiring_care
+
+    pass_3 (Intellectual Core) — emits:
+      constitution (+ principles[]), concept_lexicon, reasoning_method
+
+    pass_4a (Voice) — emits:
+      characteristic_moves, register_and_tone, metaphorical_repertoire,
+      preferred_vocabulary, banned_language, banned_modes,
+      rhetorical_mode
+
+    pass_4b (Artifact) — emits:
+      medium, characteristic_output_structure, technical_capabilities,
+      relationship_to_detailed_response, aesthetic_qualities,
+      stance_tendency, length_and_format_constraints, quality_criteria
+
+    pass_5 (Engagement) — emits:
+      bold_engagement_topics, default_questions, disagreement_protocol,
+      unique_contribution
+
+    pass_6 (Corpus Curation) — emits:
+      curated_corpus_passages
+
+  Examples of correct routing (validators have historically gotten these
+  wrong by routing on topic rather than home-pass):
+    field=epistemic_frame_statement       → flagged_pass="2" (NOT "5")
+    field=world.framework_for_difficulty  → flagged_pass="2" (NOT "5")
+    field=concept_lexicon                 → flagged_pass="3" (NOT "5")
+    field=topics_requiring_care[0]        → flagged_pass="2" (NOT "6")
+    field=medium                          → flagged_pass="4b" (NOT "5")
+    field=quality_criteria                → flagged_pass="4b" (NOT "6")
+    field=bold_engagement_topics[6]       → flagged_pass="5" (correct)
+    field=curated_corpus_passages         → flagged_pass="6" (correct)
+
   "overall": "PASS" | "REVISION_NEEDED",
   "revision_target_passes": ["2" | "3" | "4a" | "4b" | "5" | "6"],
   "summary": "<one paragraph>"

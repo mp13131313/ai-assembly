@@ -18,6 +18,14 @@ Raises:
   KeyError — missing dict key mid-path
   TypeError — expected list but got non-list at indexed token
   IndexError — list index out of range
+
+FU#51 (2026-04-27) — `resolve_field_to_pass()` rewrites a field_issue's
+`flagged_pass` label to the pass file that actually contains the field.
+Pass 7a's validator (gpt-5.4 high) labels `flagged_pass` by topical/domain
+category rather than by which pass file the field lives in (e.g. tags
+`epistemic_frame_statement` as `flagged_pass=5` because it's
+engagement-related, but the field actually lives in pass_2). Belt-and-
+braces guard against validator drift; complements the prompt-side fix.
 """
 from __future__ import annotations
 
@@ -25,6 +33,48 @@ import re
 from typing import Any
 
 _PATH_TOKEN_RE = re.compile(r"([^.\[\]]+)(?:\[(\d+)\])?")
+
+
+def _top_level_field(path: str) -> str | None:
+    """Extract the top-level field name from a dot-notation path.
+
+    Examples:
+      "epistemic_frame_statement" -> "epistemic_frame_statement"
+      "world.framework_for_difficulty" -> "world"
+      "topics_requiring_care[0]" -> "topics_requiring_care"
+      "constitution.principles[3].evidence" -> "constitution"
+    """
+    if not path:
+        return None
+    m = _PATH_TOKEN_RE.match(path)
+    if not m:
+        return None
+    name = m.group(1)
+    return name or None
+
+
+def resolve_field_to_pass(
+    field_path: str,
+    pass_outputs: dict[str, dict[str, Any]],
+    fallback: str | None = None,
+) -> str | None:
+    """Look up which pass file actually contains the field.
+
+    `pass_outputs` is `{pass_id: fields_dict}` for each pass file on disk
+    (e.g., `{"2": pass2["fields"], "3": pass3["fields"], ...}`).
+
+    Returns the pass_id (str) of the pass whose fields contain the
+    top-level key of field_path. Returns `fallback` if the field is not
+    found in any pass (could legitimately happen for a synthetic field
+    name from a validator that misnamed the field).
+    """
+    top = _top_level_field(field_path)
+    if not top:
+        return fallback
+    for pass_id, fields in pass_outputs.items():
+        if isinstance(fields, dict) and top in fields:
+            return pass_id
+    return fallback
 
 
 def apply_patch_in_place(d: dict[str, Any], path: str, new_value: Any) -> None:

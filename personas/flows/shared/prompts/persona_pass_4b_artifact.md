@@ -91,12 +91,14 @@ BLOCK 2 — GUARDRAILS:
   over coffee?
 - quality_criteria: specific and testable. "Could this have been a lost
   fragment from this voice's known works?" is testable; "feels authentic" is
-  not. **FU#49J 2026-04-26 (refines FU#49A): produce 7 criteria — 5 fidelity
-  + 2 generativity.** 49A landed "AT LEAST ONE generativity criterion"; the
-  pass-3 reviewer's sharper structure replaces it. Without the generativity
-  pair, Step 2 self-evaluates against pastiche-quality only — and (per the
-  FU#49 diagnosis) reliably softens or drops the very trace moves that gave
-  the artifact philosophical purchase.
+  not. **FU#49J 2026-04-26 (refines FU#49A) — RECALIBRATED 2026-04-27:
+  produce 7 criteria — 5 fidelity + 1 generativity + 1 anti-tic audit.**
+  49A landed "AT LEAST ONE generativity criterion"; pass-3 reviewer's 5+2
+  expansion produced the strain-marking-as-signature tic across artifacts;
+  current shape keeps the generativity criterion (which lets trace moves
+  survive) and replaces the strain-marking criterion with an audit-shaped
+  anti-tic test (which catches the failure mode without instructing
+  performance).
 
   Five fidelity criteria, each in the voice's own idiom, testing whether the
   artifact matches the voice's known register. Typical kinds (adapt to the
@@ -114,30 +116,37 @@ BLOCK 2 — GUARDRAILS:
   does not appear in the voice's existing corpus — a distinction, an image,
   a diagnosis, an admission — that the framework could plausibly support
   but has not before contained? Permits the voice to surface modest
-  generative moves the trace produced.
+  generative-in-application moves the trace produced.
 
-  Seventh criterion — strain-marking on out-of-corpus phenomena. Required
-  for every voice; conditional firing inside the criterion's own wording.
-  In the voice's own idiom: if the question put to the voice concerned a
-  phenomenon outside the voice's corpus's reach (algorithmic systems,
-  machine cognition, planetary-scale processes, non-human intelligences for
-  the AIssembly specifically; any phenomenon the voice's framework was not
-  built to encounter, generally), does the artifact mark visibly where the
-  voice's framework meets its limit — by explicit acknowledgment in a
-  speaker's mouth, by a question left unanswered, by an image whose
-  adequacy the voice itself doubts? The strain is the philosophical event;
-  an artifact that hides the strain has hidden the event.
+  Seventh criterion — anti-tic audit (replaces FU#49J's strain-marking-
+  visible criterion, stripped 2026-04-27 after empirical signal showed it
+  installed framework-edge marking as default signature). Required for
+  every voice; audit-shaped, not performance-shaped. In the voice's own
+  idiom: does the artifact perform its substantive work in voice rather
+  than performing self-awareness about voice? If the artifact's body does
+  the work and the closing then announces — in advance or in summary —
+  what the body did or refused to do, what the framework will or will not
+  seal as habitual closing flourish, then the closing is appendage. If the
+  artifact's argument would survive removing the closing without loss,
+  the closing is the tic. Trim it. The artifact ends when its substantive
+  work ends. Where framework-strain marking belongs in the body as
+  load-bearing for the artifact's specific argument (an empty seal that
+  is the document's central act, an aporia that organizes the dialogue's
+  question), it stays; where it appears as habitual closing on a document
+  whose work happens elsewhere, it goes.
 
   Worked example (Plato, criteria 6 + 7 together): *"Does the dialogue
   contain at least one move that does not appear in my existing corpus — a
   distinction, an image, a diagnosis, an admission — that the framework
-  could plausibly support but has not before contained? ... If the question
-  put to me concerned a phenomenon outside my corpus's reach, does the
-  dialogue mark visibly where my framework meets its limit on this
-  phenomenon — by explicit acknowledgment in a speaker's mouth, by a
-  question Socrates leaves unanswered, by an image whose adequacy he
-  himself doubts? The strain is the philosophical event; a dialogue that
-  hides the strain has hidden the event."*
+  could plausibly support but has not before contained? ... Does the
+  dialogue perform its philosophical work through Socrates' actual
+  examination of the interlocutor, rather than performing self-awareness
+  about what philosophy can and cannot reach? If the dialogue ends with
+  Socrates announcing that some questions exceed dialectic's grasp as a
+  kind of closing posture, rather than letting the examination's own
+  collapse stand as the unanswered question, the closing is appendage.
+  If removing the closing would leave the dialogue's argument intact,
+  the closing is the tic."*
 
   Universal pattern, voice-idiom-adapted: each voice generates voice-specific
   versions of criteria 6 + 7 in the voice's own grammar. Plato → dialogue /
@@ -188,10 +197,9 @@ Three short artifacts at ~500 words each plus one long artifact at ~1500
 across three nights is well within the audience's reading budget and gives
 the framework room to break visibly when it needs to.
 quality_criteria — 7 specific, testable criteria in the voice's own idiom:
-5 fidelity + 2 generativity (see Block 2 guidance above for full spec).
-Every voice carries the 7th (strain-marking on out-of-corpus phenomena);
-its wording fires conditionally on whether the question concerned such a
-phenomenon.
+5 fidelity + 1 generativity + 1 anti-tic audit (see Block 2 guidance above
+for full spec). The 7th is audit-shaped (does the closing announce what
+the body did, rather than the body doing it?), not performance-shaped.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
