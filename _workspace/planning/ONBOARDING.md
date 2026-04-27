@@ -10,6 +10,19 @@ A provotype for the **World Beautiful Business Forum** AI Democracy Marathon, At
 
 This is a **civic-design artifact**, not a product. Visible construction is a feature. The voices are honest constructions; the audience encounters them alongside their construction notes.
 
+## What "ready for Athens" means (operator priority, 2026-04-27)
+
+**Athens needs the full runtime stack ready, not just the 12 persona cards.** The cards are necessary inputs but not sufficient. When planning work or recommending what's next, weigh runtime workstreams as equally critical to Athens, not "post-Athens deferred." Specifically the Athens-blockers beyond cards:
+
+- **Voice Pipeline Steps 1+2** — NOT BUILT. Without it, no card produces overnight artifacts. Highest single Athens blocker after voice cards complete.
+- **Voice Pipeline Step 3 Amendment** — UNSPECIFIED (FU#49E). Reviewer-flagged as conceptually load-bearing for the deliberative-character claim. Spec needed pre-Athens; build can be post-Athens IF Steps 1+2 ship and operator accepts a Step-3-less Athens.
+- **Downstream pipeline** (Render → Publish → Curate → Deliver) — UNBUILT. Marley artifact → Suno API; Octopus → client-side shader params; Substack delivery via HoBB newsletter blurb.
+- **Microsite** — UNBUILT. What 750 attendees actually see.
+- **Admin console** — UNBUILT. Operator infrastructure for orchestrating overnight pipelines + council sync + log tail.
+- **Closing-show pipelines** (theme ID + Matrix A/B mapping + video) — UNSPECIFIED, UNBUILT. Day 3 afternoon.
+
+Don't frame "12 voice cards complete" as the Athens completion line. When recommending build-side improvements (LLM-as-judge, FU#50(1) Pydantic enforcement, FU#42 split-card, etc.), check whether they delay runtime work that's already on the critical path. Surface runtime gaps proactively in "what's next" recommendations.
+
 ---
 
 ## First 30 minutes
