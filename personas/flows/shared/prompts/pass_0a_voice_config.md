@@ -39,7 +39,15 @@ Produce a JSON object with exactly these fields:
 
 - `subtype` (string | null): For non-human voices: `"organism"` (has neurons, perceives, responds — e.g., an octopus) or `"system"` (no cognition — a geographical, legal, or cosmological entity whose voice comes through mediation with human/indigenous kin, e.g., a river with legal personhood). Null for human and fictional.
 
-- `voice_mode` (enum: `"philosophical"` | `"observational"` | `"narratival"` | null): The dominant mode this voice speaks in. `null` required for `subtype=="system"`. Justify in review_doc with alternatives considered.
+- `voice_mode` (enum: `"philosophical"` | `"observational"` | `"narratival"` | null): The voice's relationship to its own framework — NOT a description of the voice's cognitive style ("they observe well") and NOT a pipeline-side methodology ("we reconstruct by observing them"). The canonical question is: *how does this voice reason about questions it never encountered in its lifetime?* Per Card v2 spec:
+    - `"philosophical"` — voice with explicit theoretical positions; reasons FROM a written framework. Extrapolates by APPLYING method to new questions ("If I held X, then on Y I would reason..."). Examples: Plato, Arendt, Kant, Marx.
+    - `"observational"` — voice whose framework must be **extrapolated from practice / experience / artistic output**; reasons FROM embodied or practical knowledge, NOT from written theory. Extrapolates by APPLYING the mode-of-engagement that produced the corpus to new questions ("From what I did, I would..."). When experience does not reach a question, says so — names the gap rather than inventing an observation never made. Examples: Cleopatra (working sovereign, not theorist), Bob Marley (lyricist-prophet, not philosopher), Audrey Tang (practitioner, not author of canonical theory).
+    - `"narratival"` — voice whose primary engagement is storytelling itself; reasons THROUGH the form of the tale rather than through argument. Extrapolates by producing new tales / fragments / narrative moves. When the tradition does not reach a question, responds through silence, refusal, or a new tale. Examples: Scheherazade, Ibn Battuta (wayfarer-narrator), Dostoevsky (polyphonic novelist).
+    - `null` — required for `subtype=="system"` (a system entity speaks through its relationship + indigenous/legal framework, not through any of the three voice-modes). Forbidden for any other subtype.
+
+  **Disambiguation guide:** philosophical-vs-observational hinges on whether the voice produced systematic theoretical positions (philosophical) or reasoned from accumulated practice (observational). Observational-vs-narratival hinges on whether the primary mode is reasoning-from-practice (observational) or producing tales (narratival). When narratival and observational compete, ask: did the voice's stories function as instruments of practice (observational — e.g. Cleopatra's Isis-pageantry serving statecraft), or were stories themselves the engagement (narratival — e.g. Scheherazade telling stories TO survive)?
+
+  Justify in review_doc with alternatives considered.
 
 - `hostile_sources` (boolean): TRUE if the historical record is dominated by enemies, colonisers, rival powers, or hostile press. Cleopatra: TRUE (Roman sources). Plato: FALSE (internal scholarly debate is not hostile witnesses). Justify in review_doc.
 
