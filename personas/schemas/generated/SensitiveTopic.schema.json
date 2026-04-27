@@ -66,19 +66,19 @@
       "type": "object"
     }
   },
-  "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (the sanitization paradox per baseline File 3).",
+  "description": "One topic where this voice's historical views require careful navigation.\n\nNot avoidance — engagement with care. Pass 2 uses these to build\n`topics_requiring_care`. Each entry: what the voice actually thought,\nand the framing that makes that thinking productive rather than\noffensive or sanitised (File 3 Failure 4 sanitisation paradox).\n\n1-arch-03: scholarly_reception preserves interpretive-tradition breadth\non contested topics — what the voice \"actually thought\" is often itself\ncontested across scholarly traditions.",
   "properties": {
     "topic": {
       "title": "Topic",
       "type": "string"
     },
     "what_the_voice_actually_thought": {
-      "description": "The substantive position, sourced. Do NOT sanitise.",
+      "description": "The substantive position, sourced. Do NOT sanitise. No length cap.",
       "title": "What The Voice Actually Thought",
       "type": "string"
     },
     "navigation_guidance": {
-      "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them.",
+      "description": "How to engage productively. Frame the thinking in the voice's own apparatus; acknowledge historical limitations where present; surface contradictions without resolving them. Load-bearing field per Pass 1.5's sanitisation-paradox discipline. No length cap.",
       "title": "Navigation Guidance",
       "type": "string"
     },
@@ -86,6 +86,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"
@@ -99,6 +100,19 @@
       },
       "title": "Citations",
       "type": "array"
+    },
+    "scholarly_reception": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "How different scholarly traditions frame this topic. Example for Dostoevsky's Jewish question: 'Morson reads as irreducible contradiction within Dostoevsky's universalism; McReynolds (Redemption and the Merchant God 2008) shows vsechelovechnost' universalism is structurally entangled with xenophobic displacement onto Jews; Patyk (Dostoevsky's Provocateurs 2023) reads as performative rather than sincere; Goldstein (1981) documents Jewish-press response within Dostoevsky's lifetime.' Preserve interpretive breadth.",
+      "title": "Scholarly Reception"
     }
   },
   "required": [

@@ -116,13 +116,14 @@ class TestResearchFiles:
         assert p.name == "07_concat_claude_dr.md"
         assert p.parent == paths.dr_dossier_dir(SLUG, FAKE_ROOT)
 
-    def test_primary_text_urls(self):
-        p = paths.primary_text_urls(SLUG, FAKE_ROOT)
-        assert p.name == "05_primary_text_urls.json"
-        assert p.parent == paths.research_dir(SLUG, FAKE_ROOT)
-
 
 class TestCorpusFiles:
+    def test_primary_text_urls(self):
+        """CC#1 2026-04-26: relocated from research_dir to corpus_dir."""
+        p = paths.primary_text_urls(SLUG, FAKE_ROOT)
+        assert p.name == "00_primary_text_urls.json"
+        assert p.parent == paths.corpus_dir(SLUG, FAKE_ROOT)
+
     def test_primary_texts(self):
         p = paths.primary_texts(SLUG, FAKE_ROOT)
         assert p.name == "01_primary_texts.json"

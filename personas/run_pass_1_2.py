@@ -20,12 +20,19 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 from flows.shared.chunk_runner import run_chunk
 from flows.shared.project_root import add_project_arg, resolve_project_root
 from schemas.pass_1_2 import Commitment, Concept, Tension
+from schemas._frames import InterpretiveFrame
 
 
+# 1-arch-06 (2026-04-22): Pass 1.2 is the primary producer of
+# interpretive_frames[], the top-level chunk-output container for
+# cross-cutting scholarly material (interpretive methods, cross-
+# disciplinary re-framings, voice-level debates). See
+# _workspace/planning/PIPELINE_REVIEW_FIXES.md § 1-arch-06.
 OUTPUT_KEYS = {
     "commitments": (Commitment, True),
     "concepts": (Concept, True),
     "tensions": (Tension, True),
+    "interpretive_frames": (InterpretiveFrame, True),
 }
 
 

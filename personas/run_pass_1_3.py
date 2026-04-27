@@ -13,10 +13,18 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.chunk_runner import run_chunk
 from flows.shared.project_root import add_project_arg, resolve_project_root
+from schemas._analytical import AnalyticalContext
 from schemas.pass_1_3 import ReasoningMethod, Textures
 
 
-OUTPUT_KEYS = {"reasoning_method": ReasoningMethod, "textures": Textures}
+# 1-arch-03: analytical_context_reasoning added as top-level output key
+# per plan §3.4. Preserves structural_patterns + worked_demonstrations +
+# scholarly_debates that pre-1-arch-03 tight schema would drop.
+OUTPUT_KEYS = {
+    "reasoning_method": ReasoningMethod,
+    "textures": Textures,
+    "analytical_context_reasoning": AnalyticalContext,
+}
 
 
 def run_pass_1_3(project_root=None, project=None, **kwargs) -> dict:

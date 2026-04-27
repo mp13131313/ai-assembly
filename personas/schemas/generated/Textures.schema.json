@@ -66,10 +66,10 @@
       "type": "object"
     }
   },
-  "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.",
+  "description": "Textures-of-argument the voice leans into vs. pushes back against.\n\nFills persona card's `finds_compelling` + `resists`. These are TEXTURES,\nnot topics — the kinds of argument, evidence, or rhetorical moves the\nvoice is drawn to / triggered by, regardless of subject.\n\nMinimum 4 each, uncapped.",
   "properties": {
     "finds_compelling": {
-      "description": "4-8 textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation'.",
+      "description": "Textures of argument this voice leans into. Not topics — textures. Example: 'definitional questions', 'craft analogies', 'etymological excavation', 'confessional utterance under pressure'. Minimum 4, uncapped.",
       "items": {
         "type": "string"
       },
@@ -77,7 +77,7 @@
       "type": "array"
     },
     "resists": {
-      "description": "4-8 textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting'.",
+      "description": "Textures of argument that trigger this voice's sharpest pushback. Not positions — modes. Example: 'arguments from popular opinion', 'empirical data presented as self-interpreting', 'abstract system-building divorced from lived suffering'. Minimum 4, uncapped.",
       "items": {
         "type": "string"
       },
@@ -89,6 +89,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"
@@ -102,6 +103,19 @@
       },
       "title": "Citations",
       "type": "array"
+    },
+    "scholarly_context": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scholarly framing of the voice's argument-preferences. Example for Dostoevsky: 'Bakhtin on the inescapably-unfinalizable word (PDP ch. 5) — Dostoevsky's finds_compelling of confessional-utterance-under-pressure is the formal correlate of polyphony; the half-turned-to-internalized-other structure is what distinguishes Dostoevskian confession from Augustinian/Rousseauian autobiography.'",
+      "title": "Scholarly Context"
     }
   },
   "required": [

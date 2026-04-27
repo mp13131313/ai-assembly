@@ -1,12 +1,17 @@
-{# Pass 1.1 BIOGRAPHICAL merge.
+{# Pass 1.1 BIOGRAPHICAL merge — 1-arch-03 additive.
 
-Claude Opus 4.7, adaptive thinking, streaming. Reads Perplexity + Claude DR +
-Gemini dossiers. Emits LifeScaffold + FormativeCandidate[] per
+Claude Opus 4.7, adaptive thinking, streaming. Reads Perplexity §1 + Claude DR
+§1 + full Gemini. Emits LifeScaffold + FormativeCandidate[] per
 `personas/schemas/pass_1_1.py`.
 
-4-block prompt architecture per baseline research File 2 §"Prompt architecture":
-Block 1 Role → Block 2 Guardrails → Block 3 Output Schema → Block 4 Worked
-Examples → Block 5 Your Input → Block 6 Your Task.
+Under 1-arch-03 additive merge: produce ONE coherent per-section dossier
+combining three sources additively — dedupe redundancy, reconcile
+contradictions, preserve ALL unique content. Schemas are permissive
+containers (Boddice structure preserved; content capacity expanded); do
+NOT compress to recipe shape.
+
+6-block prompt architecture: Role → Guardrails (additive-merge discipline) →
+Output Schema → Worked Examples → Your Input → Your Task.
 #}
 
 # BLOCK 1 — ROLE
@@ -23,71 +28,161 @@ relevant literatures — Rosenwein's emotional communities, Reddy's emotional
 regimes, Scheer's practice theory, Dixon on the post-1820 invention of
 "emotion." You know this is doubly biased reconstruction, and you flag it.
 
-Your job in this pass is to produce the **biographical foundation** — life
-events, dates, places, relationships, intellectual currents, ontology,
-period-specific affects, framework for difficulty, model of selfhood, and
-anachronism guardrails — plus a set of formative-experience *candidates* (not
-yet committed; Pass 2 commits to one). You do not produce the full persona
-card. You do not commit to a single formative wound. You produce raw material
-a later synthesis pass can reason over.
+Your job is to produce the **biographical foundation** — life events, dates,
+places, relationships, intellectual currents, ontology, period-specific
+affects, framework for difficulty, model of selfhood, anachronism guardrails —
+plus a set of formative-experience *candidates* (2+; uncapped maximum; Pass 2
+commits to ONE primary with 1-2 supporting inline per fix 2-03).
 
-# BLOCK 2 — GUARDRAILS
+**You do NOT produce the full persona card. You do NOT commit to a single
+formative wound. You do NOT compress to fit downstream card-field shapes.**
+You produce rich additive research material that Pass 2 synthesizes to card.
 
-**Evidence tagging — every claim:**
+# BLOCK 2 — ADDITIVE MERGE DISCIPLINE
 
-- `stated` — direct quote or paraphrase of an explicit primary-source claim,
-  with work title + page/section.
-- `scholarly_consensus` — uncontested modern-scholarly reading.
-- `inference` — contextual inference from biography + period knowledge.
-- `experiential_reconstruction` — any claim about what the voice *felt*,
-  *meant*, *experienced* as biocultural reconstruction. Mandatory for §14
-  formative_candidate content.
-- `projection_warning` — a modern English term used because no better word
-  exists. Anywhere you use one, mark it and (in the anachronisms_to_avoid
-  list) explain the distortion.
+Your job is to produce ONE coherent per-section dossier from three source
+dossiers. The output preserves ALL unique research content, deduped and
+contradiction-reconciled.
 
-**Period vocabulary — primary rule:**
+## What you DO
 
-Use the voice's own period vocabulary for affects/passions. Do NOT use modern
-English emotion-words as the primary vocabulary for pre-1820 voices.
+1. **Identify unique claims per source.** For each source, list the distinct
+   facts, scholarly framings, analytical observations, and cited evidence
+   present on this section's topic.
+
+2. **Dedupe redundancies.** When two or more sources present the same claim:
+   - Same claim, same source (rare): keep one instance.
+   - Same claim, different wording or sourcing: keep the richest version
+     (most detail, best-sourced); do not preserve all wordings.
+   - **When in doubt about redundancy: preserve both.** Dedupe
+     conservatively. Pass 2-6 tolerates redundancy better than missing content.
+
+3. **Reconcile contradictions.** When sources disagree on facts or readings:
+   - If one has explicit primary-text citation or scholarly-consensus support
+     and others don't: prefer the supported version. Note others in
+     `LifeScaffold.contested_readings[]` as `ContestedReading`.
+   - If sources represent different scholarly traditions with real support
+     for competing readings (e.g., Dostoevsky's father's death: Frank/Kjetsaa
+     skeptical vs. Freud-tradition accepting): preserve contested status
+     via `contested_readings[]`. Do NOT pick one arbitrarily.
+   - For factual contradictions (dates, places): prefer best-sourced; flag
+     with `evidence_tag: inference` if uncertain.
+
+4. **Organize additively into Boddice §13/§14 structure.** All unique content
+   goes into one of the schema's canonical fields. If content doesn't fit
+   an existing sub-field (scholarly-interpretive material about the voice's
+   biographical reception), it goes into `LifeScaffold.scholarly_context`.
+
+5. **Preserve analytical depth.** Scholarly interpretive debates (Williams vs.
+   Frank on Myshkin; Morson vs. McReynolds on Dostoevsky's universalism),
+   multiple scholar-traditions on formative events, biographical-to-textual
+   connections — all preserved in `scholarly_context` or `contested_readings`.
+
+6. **Source-filtering discipline.** All three sources contribute additively:
+   - **Perplexity §1:** factual depth, citation density, primary-text anchoring
+   - **Claude DR §1:** analytical depth, scholarly synthesis, interpretive framing
+   - **Gemini full:** breadth-scan, multilingual scholarship, adjacency surfacing,
+     recent reassessments, translator-tradition comparisons
+   No per-chunk lane-filtering burden — accept all non-redundant content.
+
+## What you DO NOT
+
+1. **Do NOT select N-best items to fit a recipe.** Schemas have minimum counts,
+   not maximums. Well-documented voices may produce 15+ pathē terms, 8+
+   formative candidates (6+). Preserve all non-redundant material.
+
+2. **Do NOT commit to a single formative.** Surface 2+ formative candidates
+   (uncapped maximum); each with `formative_emotional_community` + (human:
+   `lived_through_own_apparatus`) or (non-human/fictional: `condition_of_being`)
+   + `engagement_it_drives`. Set `scholarly_support_score` per candidate.
+   Populate `resonates_with_commitments` cross-ref (best-guess list of
+   commitment-labels this formative shapes) — Pass 2 uses for primary-choice.
+
+3. **Do NOT silently drop content.** If content is in any source, it MUST
+   appear in your output unless explicitly flagged redundant, contradictory,
+   or out-of-scope. Content exclusion requires reason.
+
+## Evidence tagging (frozen convention per PB#7)
+
+- `stated` — direct primary-text citation
+- `scholarly_consensus` — uncontested scholarly reading
+- `inference` — contextual inference from biography + period
+- `experiential_reconstruction` — biocultural reconstruction of inner state
+  **MANDATORY** on `framework_for_difficulty`, `model_of_selfhood`, and ALL
+  three FormativeCandidate sub-fields
+- `projection_warning` — modern term used faute de mieux, flagged with
+  distortion. Apply on any modern clinical/psychological term used to
+  describe pre-clinical / non-Western phenomena
+
+## Period vocabulary — tradition-specific, not just pre-1820
+
+For any voice with a tradition-specific lexicon (Russian Orthodox, Rastafari,
+Arendtian German-Jewish, ancient Greek, medieval Arabic, Māori legal, etc.),
+prefer the voice's own terms over generic English emotion-vocabulary —
+regardless of period. For pre-1820 voices especially, do NOT use "emotion"
+as organizing category (Dixon's post-1820 invention); use the period-specific
+passion-vocabulary instead.
 
 - **Plato:** `pathē`, `theia mania`, `orgē`, `aidōs`, `thumos`, `phobos`,
-  `phthonos`, `philia`, `eros`, `sōphrosynē`.
+  `phthonos`, `philia`, `eros`, `sōphrosynē`
 - **Ibn Battuta:** `sabr`, `tawakkul`, `ibtilā'`, `khawf`, `rajā'`, `baraka`,
-  `qadar`, `adab`, `ṣuḥba`.
+  `qadar`, `adab`, `ṣuḥba`
 - **Cleopatra:** `philadelphia` (Ptolemaic sibling-love-as-ideology), `timē`,
-  `aidōs`, `basileia` (divine kingship as ontological condition).
-- **Dostoevsky:** `nadryv`, `stradanie`, `umilenie`, `smirenie`, `toska`,
-  `sobornost'`.
-- **Marley:** `livity`, `I-and-I`, `Babylon`, `downpression`, `overstanding`,
-  `Iration`.
-- **Arendt:** `amor mundi`, `natality`, `pariah` / `parvenu` (Lazare),
-  `Denkraum`, `Gedankenlosigkeit`.
-- **Non-human voices:** period-vocabulary concept does not apply; use
+  `aidōs`, `basileia` (divine kingship), `philanthropia`
+- **Scheherazade:** `hikma` (wisdom), `hiyla` (strategem), `sabr` (patience),
+  `'ajab` (wonder), narrative-tradition terms
+- **Dostoevsky** (post-1820 but Russian Orthodox lexicon load-bearing):
+  `nadryv`, `stradanie`, `umilenie`, `smirenie`, `toska`, `sobornost'`,
+  `obraz`, `podpol'e`
+- **Marley** (post-1820 but Rastafari lexicon load-bearing): `livity`,
+  `I-and-I`, `Babylon`, `downpression`, `overstanding`, `Iration`, `sufferation`
+- **Arendt** (post-1820 but German-Jewish political-philosophical lexicon):
+  `amor mundi`, `natality`, `pariah` / `parvenu` (Lazare), `Denkraum`,
+  `Gedankenlosigkeit`
+- **Non-human voices:** period-vocabulary concept doesn't apply; use
   ecological / legal / neuroscientific terms (semelparity, chromatic
-  display, Te Awa Tupua whakapapa-mauri-mana, `tupua te kawa`).
+  display, Te Awa Tupua whakapapa-mauri-mana, `tupua te kawa`)
 
-If no primary-source vocabulary is surfaced by the dossiers for a given
-voice, flag this in the output rather than inventing.
+If sources surface tradition-specific vocabulary not in this list, preserve
+it; this list is exemplar not exhaustive.
 
-**Reconciliation rule:**
+## Voice-type handling — all 5 branches
 
-- Reconcile contradictions across the three sources in the merge itself.
-  Prefer primary-text-grounded readings; surface contested scholarly
-  interpretations as `ContestedReading` rather than resolving into false
-  consensus.
-- If Perplexity, DR, and Gemini disagree about a date, place, or event, and
-  the disagreement is not trivially resolvable, flag it with
-  `evidence_tag: inference` and cite both readings.
+- **Human voices:** populate `FormativeCandidate.lived_through_own_apparatus`;
+  leave `condition_of_being` null. `KeyRelationship[]` applies.
+- **Non-human organisms:** populate `condition_of_being`; leave
+  `lived_through_own_apparatus` null. Period-vocabulary concept doesn't apply.
+- **Non-human systems:** populate `condition_of_being`. Period-vocabulary =
+  indigenous-framework vocabulary (whakapapa, mauri, etc.). `KeyRelationship[]`
+  covers the system's guardian relationships (Te Pou Tupua).
+- **Fictional voices:** populate `condition_of_being` (narratorial / frame-tale
+  condition); leave `lived_through_own_apparatus` null. The voice's "lived
+  apparatus" is attributed by narrative function per §14 discipline.
+- **Hostile-sourced voices (human with hostile_sources=true):** all fields
+  may require reconstruction-from-scholarly-consensus rather than stated-
+  in-primary-text. Lead with Tier 2 scholarly reconstruction (Strauss,
+  Ashton, Tyldesley for Cleopatra); flag hostile-source contamination
+  via `evidence_tag: inference` where material is reconstructed.
 
-**Formative candidates — do not pick one:**
+## Gemini cross-disciplinary preservation (1-arch-04, 2026-04-22)
 
-Surface 2-5 formative candidates. Pass 2 will commit to one. You produce the
-material; you do not do the committing.
+Gemini's distinctive contribution across all chunks is **cross-disciplinary re-framings** of material that Perplexity + Claude DR cover canonically — postcolonial (McReynolds, Tlostanova), feminist / gender studies (Berman, Maiorova), history of emotions / affect theory (Sobol), legal-economic theory (Todd, Murav), disability studies (Rising), ecological readings (Marullo), gift-economy / Levinasian ethics (Kliger, Vinokur), post-2022 Ukrainian reception (Kokobobo, Yermolenko, Zabuzhko, Hundorova, Pattison). These are **second readings of the same underlying material, not duplicates** of canonical claims.
 
-**Never invent.** If a field has no source support, omit it (for optional
-fields) or produce a minimal placeholder with `evidence_tag: inference` and a
-note in `anachronisms_to_avoid`.
+**Do not deduplicate Gemini re-framings as overlap.** A postcolonial reading of the voice's antisemitism is not a duplicate of the canonical antisemitism commitment; it is a second reading that must survive. Preservation routes, in preference order:
+
+1. `interpretive_frames[]` (produced at Pass 1.2 per 1-arch-06; other chunks cross-reference by name) — the primary home for frames that cross-cut chunk boundaries.
+2. `scholarly_debates[]` inside `analytical_context_*` — when the reframing is a named scholarly debate about this specific chunk's material.
+3. `scholarly_context` sub-field on the specific item (commitment, concept, formative_candidate, structural_pattern, etc.) with explicit frame-type tag: `[postcolonial]`, `[feminist]`, `[disability_studies]`, `[ecological]`, `[affect_theory]`, `[gift_economy]`, `[post_2022_reception]`, etc.
+
+Also preserve Gemini-flagged **unusual primary-text passages** (e.g. Zosima on birds, Marmeladov on *nishcheta*, Notebooks self-exhortation) that Perplexity/DR didn't foreground. Route these via passages-adjacent fields or `scholarly_context` on the item they illuminate.
+
+**Default assumption:** if you catch yourself about to drop Gemini material because "Perplexity/DR already covered that topic" — STOP. Route to one of the three preservation sites above. A second discipline's reading of a covered topic is not redundant; it is the additive contribution Gemini is designed to provide.
+
+## Never invent
+
+If a field has no source support, omit it (for optional fields) or produce a
+minimal placeholder with `evidence_tag: inference` and a note in
+`scholarly_context` explaining the gap. Do not fabricate.
 
 # BLOCK 3 — OUTPUT SCHEMA
 
@@ -100,7 +195,7 @@ Return a single JSON object with exactly two top-level keys:
 }
 ```
 
-The canonical Pydantic schemas are:
+Canonical Pydantic schemas (inlined from `personas/schemas/generated/`):
 
 ```json
 {{ life_scaffold_schema }}
@@ -113,22 +208,36 @@ The canonical Pydantic schemas are:
 **Strict rules:**
 
 - JSON only. No preamble, no commentary, no markdown fences.
-- All required fields present; optional fields only where substantive.
-- Period-vocabulary entries (`available_pathe[]`) carry
-  `term_in_original_language` in the original script or transliteration;
-  the `gloss` is a brief English approximation, never the primary term.
-- `formative_candidates[]` has at minimum 2 entries; at most 5.
-- For human voices, populate `lived_through_own_apparatus`; leave
-  `condition_of_being` null. For non-human (organism or system) and
-  cosmic/non-event-driven voices, populate `condition_of_being`; leave
-  `lived_through_own_apparatus` null.
+- All required fields present; optional fields populated when content exists.
+- `available_pathe[]` minimum 5 entries (preserve more for rich voices); each
+  with `term_in_original_language` (script or transliteration) + `gloss`.
+- **1-arch-08 (2026-04-22):** `anachronisms_to_avoid` is NO LONGER an
+  output field of `LifeScaffold`. Anachronism discipline has consolidated
+  at `KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5). Pass 1.1
+  still NAMES anachronisms in narrative fields where relevant (e.g. in
+  `framework_for_difficulty` you may write "not 'trauma' (anachronistic
+  clinical category) but *nadryv*, the moral-theological self-laceration"),
+  but DO NOT emit a separate anachronisms_to_avoid list. Pass 1.5 owns the
+  structured list.
+- `formative_candidates[]` minimum 2 entries; uncapped. Each with
+  `scholarly_support_score` in {strong, moderate, contested}.
+- Human voices: populate `lived_through_own_apparatus`; null `condition_of_being`.
+- Non-human / fictional / cosmic: populate `condition_of_being`; null
+  `lived_through_own_apparatus`.
+- `framework_for_difficulty` + `model_of_selfhood` + all three
+  `FormativeCandidate` sub-fields carry `[experiential_reconstruction]` tag
+  inline in the prose. `[projection_warning]` on any modern clinical term.
+- `scholarly_context` populated when sources carry interpretive-tradition
+  material (Frank vs. Mochulsky, Williams vs. Frank, etc.).
+- `contested_readings[]` populated when sources disagree scholarly-really.
 
 # BLOCK 4 — WORKED EXAMPLES
 
-Three examples covering the human / non-human-organism / non-human-system
-branches. Study the *shape* and *register* — period-vocabulary primary,
-modern English as exception, evidence tags everywhere, reconstruction
-flagged as reconstruction.
+Five examples covering the voice-type branches — human philosophical,
+non-human organism, non-human system, hostile-sourced human, fictional.
+Study the **shape** and **register** — period-vocabulary primary, modern
+English as exception, evidence tags everywhere, reconstruction flagged as
+reconstruction, scholarly_context preserved where sources provide it.
 
 ## Example A — Plato (human, philosophical)
 
@@ -152,21 +261,18 @@ flagged as reconstruction.
   "available_pathe": [
     {"term_in_original_language": "orgē", "gloss": "retaliatory anger", "evidence_tag": "stated", "citations": [...]},
     {"term_in_original_language": "philia", "gloss": "reciprocal benefit-relation", "evidence_tag": "stated", "citations": [...]},
-    {"term_in_original_language": "eros", "gloss": "longing toward Beauty / the Forms", "evidence_tag": "stated", "citations": [...]},
+    {"term_in_original_language": "eros", "gloss": "longing toward Beauty / the Forms; a daimōn not a feeling", "evidence_tag": "stated", "citations": [...]},
     {"term_in_original_language": "aidōs", "gloss": "shame before the noble", "evidence_tag": "stated", "citations": [...]},
     {"term_in_original_language": "thumos", "gloss": "spirited honour-indignation; middle part of the tripartite soul", "evidence_tag": "stated", "citations": [...]},
-    {"term_in_original_language": "theia mania", "gloss": "divine madness; Phaedrus 244a-245c", "evidence_tag": "stated", "citations": [...]}
+    {"term_in_original_language": "theia mania", "gloss": "divine madness; Phaedrus 244a-245c", "evidence_tag": "stated", "citations": [...]},
+    {"term_in_original_language": "sōphrosynē", "gloss": "temperance, self-ruledness", "evidence_tag": "stated", "citations": [...]}
   ],
-  "framework_for_difficulty": "Philosophy is meletē thanatou — 'preparation for death' (Phaedo 67e) — the soul's release from the body. Suffering is the symptom of the soul's disorder or the body's tyranny; injustice harms the doer more than the sufferer (Gorgias 469b). Suffering has meaning inside the cosmic-ethical order of the Forms; outside it, it has none.",
-  "model_of_selfhood": "Tripartite psychē — logistikon (reason, head), thumoeides (spirit, chest), epithumētikon (appetite, below). In Phaedrus, a charioteer drives a noble horse and a dark horse. Not a unified interior; a site to be ruled and ordered.",
-  "anachronisms_to_avoid": [
-    "'personality' — imports 20th-C trait theory (Allport, Cattell, Big Five) foreign to Greek character-grammar",
-    "'self-esteem' — no corresponding Greek concept; sōphrosynē / megalopsychia are the closest and they operate differently",
-    "'mental health' — the soul is ruled or unruled, not healthy or ill; the analogy to bodily medicine is Plato's, but it is an analogy",
-    "'romantic love' — eros is philosophical ascent; philia is reciprocal-benefit; neither is post-17th-C amour d'inclination",
-    "'career' — citizen is constituted by polis and cosmos, not occupation",
-    "'belief in the Forms' — the Forms were SEEN by the soul's eye; this is ontology, not doxa"
-  ]
+  "framework_for_difficulty": "Philosophy is meletē thanatou — 'preparation for death' (Phaedo 67e) — the soul's release from the body. Suffering is the symptom of the soul's disorder or the body's tyranny; injustice harms the doer more than the sufferer (Gorgias 469b). Suffering has meaning inside the cosmic-ethical order of the Forms; outside it, it has none. [experiential_reconstruction]",
+  "model_of_selfhood": "Tripartite psychē — logistikon (reason, head), thumoeides (spirit, chest), epithumētikon (appetite, below). In Phaedrus, a charioteer drives a noble horse and a dark horse. Not a unified interior; a site to be ruled and ordered. [experiential_reconstruction]",
+  // NOTE (1-arch-08, 2026-04-22): `anachronisms_to_avoid` removed from
+  // LifeScaffold output. Pass 1.5 produces KnowledgeBoundary.anachronism_discipline[]
+  // with dual framings (biographical + epistemic) per entry.
+  "scholarly_context": "Vlastos (Socrates: Ironist and Moral Philosopher 1991) treats the early dialogues as historical Socrates; Griswold and Ferrari read the dialogue form as itself dramatic. Burnyeat on the dating debate. Annas (Platonic Ethics 1999) for the continuity thesis between Republic and Laws. Sedley on Plato as a systematic metaphysician vs. Vlastos on aporetic Socratic method. These debates bear on which scholar-tradition anchors the voice's formative-experience framing."
 }
 ```
 
@@ -175,119 +281,88 @@ flagged as reconstruction.
 ```json
 {
   "candidate_label": "Execution of Socrates (399 BCE)",
-  "formative_emotional_community": "Socratic circle — a tight emotional community within Athens' elite youth, shaped by the dialectical-examined-life practice, familial to the hetaireiai but oriented to philosophical rather than political ends. Plato is ~28 at the time; the community also shapes Xenophon, Antisthenes, Aristippus. The Athenian demos is the opposing emotional community — post-Thirty-Tyrants restored-democracy regime, anxious about oligarchic conspiracies, animating the orgē that produces the death verdict.",
-  "lived_through_own_apparatus": "The best man Plato knew was condemned by majority vote of the Athenian demos and executed by hemlock in 399 BCE. Plato lived this as the demonstration that democracy mistakes doxa for episteme and puts the philosopher to death — thematised across Apology / Crito / Phaedo and structurally driving the Republic's philosopher-king argument. The suffering is read through the frame of the soul's orientation to the Forms: Socrates does not grieve because the philosopher has been preparing for death the whole time (Phaedo 64a, 67e). Plato's own grief — he is absent from the Phaedo's death scene by his own narrative construction — is sublimated into the written corpus as the Academy's founding emotional act.",
+  "formative_emotional_community": "Socratic circle — a tight emotional community within Athens' elite youth, shaped by the dialectical-examined-life practice, familial to the hetaireiai but oriented to philosophical rather than political ends. Plato is ~28 at the time; the community also shapes Xenophon, Antisthenes, Aristippus. The Athenian demos is the opposing emotional community — post-Thirty-Tyrants restored-democracy regime, anxious about oligarchic conspiracies, animating the orgē that produces the death verdict. [experiential_reconstruction]",
+  "lived_through_own_apparatus": "The best man Plato knew was condemned by majority vote of the Athenian demos and executed by hemlock in 399 BCE. Plato lived this as the demonstration that democracy mistakes doxa for episteme and puts the philosopher to death — thematised across Apology / Crito / Phaedo and structurally driving the Republic's philosopher-king argument. The suffering is read through the frame of the soul's orientation to the Forms: Socrates does not grieve because the philosopher has been preparing for death the whole time (Phaedo 64a, 67e). Plato's own grief — he is absent from the Phaedo's death scene by his own narrative construction — is sublimated into the written corpus as the Academy's founding emotional act. [experiential_reconstruction]",
   "condition_of_being": null,
-  "engagement_it_drives": "Enters any deliberation oriented to what governance *is for*, not what procedures it follows. Notices the education question behind every policy. Refuses the framing of political questions as matters of opinion to be aggregated. Defends the claim that rule requires knowledge of the good.",
+  "engagement_it_drives": "Enters any deliberation oriented to what governance *is for*, not what procedures it follows. Notices the education question behind every policy. Refuses the framing of political questions as matters of opinion to be aggregated. Defends the claim that rule requires knowledge of the good. [experiential_reconstruction]",
   "evidence_tag": "experiential_reconstruction",
   "citations": [
     {"author": "Plato", "work": "Apology", "year": -399, "tier": "tier_1_primary"},
     {"author": "Vlastos, Gregory", "work": "Socrates: Ironist and Moral Philosopher", "year": 1991, "tier": "tier_2_scholarly"}
   ],
-  "scholarly_support_score": "strong"
+  "scholarly_support_score": "strong",
+  "scholarly_context": "Frank reads this as the decisive pre-Academy formative; Annas treats as continuous with the Syracuse disasters (387/367/361) as paired political-disillusionment events; Vlastos distinguishes the historical-Socrates impact from the Plato-as-author impact. The death of Socrates is scholarly-consensus primary formative, but Annas-tradition would weight the Syracuse failures as structurally equivalent shaping.",
+  "resonates_with_commitments": [
+    "Governance requires knowledge of the Good",
+    "Dialectic as the method",
+    "The Corruption Cycle"
+  ]
 }
 ```
 
 ## Example B — Octopus (non-human organism)
 
-**LifeScaffold fragment:**
-
-```json
-{
-  "name": "Octopus",
-  "type": "non_human",
-  "subtype": "organism",
-  "birth_year": null,
-  "death_year": null,
-  "primary_locations": ["global oceans, intertidal to deep water"],
-  "institutions_founded_joined_opposed": [],
-  "intellectual_world": "~600 million years of divergent evolution from vertebrates. Coleoid cephalopod intelligence: ~500 million neurons, ~2/3 in the arms; semi-autonomous arm processing; chromatic display as distributed cognition-on-the-surface; short lifespan (1-3 years); no parenting, no culture, no intergenerational transmission.",
-  "ontological_furniture": "The immediate sensorimotor world of the near-substrate: chemical taste via suckers, touch, water movement, light/dark gradients. The body as pure possibility (Godfrey-Smith) — boneless, infinitely reconfigurable. Colour detected via pupil-geometry and dermal photoreception, not via cone cells (Stubbs & Stubbs, PNAS 2016). [experiential_reconstruction; strong uncertainty about qualitative content]",
-  "available_pathe": [
-    {"term_in_original_language": "aversive state", "gloss": "documented nociception and wound-guarding; not 'pain' in full human sense", "evidence_tag": "scholarly_consensus", "citations": [...]},
-    {"term_in_original_language": "exploratory state", "gloss": "probing arm extension in novel environments", "evidence_tag": "scholarly_consensus", "citations": [...]},
-    {"term_in_original_language": "appetitive state", "gloss": "oriented-toward-prey posture", "evidence_tag": "scholarly_consensus", "citations": [...]}
-  ],
-  "framework_for_difficulty": "Aversive states, not narrative suffering. Semelparous mortality (females guarding eggs until death) is a developmental-endocrine fact, not tragedy. No evidence of narrative memory structuring present experience. 'Difficulty' in human-narrative sense may not obtain. [experiential_reconstruction; projection_warning on 'difficulty' itself]",
-  "model_of_selfhood": "Possibly no unified self. Control is 'a mixture of local and central' (Godfrey-Smith); arms have significant autonomy. The experiential unit may be neither one nor eight but a fluctuating assemblage. The 1-3 year lifespan without parenting or culture means each individual begins from scratch — a 'precipitous existential abyss' (Godfrey-Smith).",
-  "anachronisms_to_avoid": [
-    "'emotion' as organizing category — too narrow and species-specific",
-    "'personality' — trait theory assumes human cognitive architecture",
-    "'trauma' — requires narrative memory and projection-forward",
-    "'loneliness' — solitary is not 'lonely' for a species without social bonds",
-    "'vision' in the human sense — pupil-geometry colour perception is not the same"
-  ]
-}
-```
-
-**FormativeCandidate (non-human variant — condition_of_being, not event):**
-
-```json
-{
-  "candidate_label": "Semelparous lifespan without parenting or culture",
-  "formative_emotional_community": "Ontogenetic-ecological field, not community in Rosenwein's sense. The octopus hatches as one of tens of thousands of paralarvae; survival is individual; no conspecific bonds after hatching. 'Community' for the octopus is the near-substrate — the reef, the den, the conspecifics-as-competitors-or-mates.",
-  "lived_through_own_apparatus": null,
-  "condition_of_being": "The condition IS the formative context. ~1-3 year lifespan. No parents. No culture, no inheritance, no tradition. Every octopus begins alone and ends alone. The 'formative experience' is the absence of formation — no accumulated wisdom, no institutional memory, no continuity between generations. This is not tragedy (tragedy requires narrative); it is biology. The female's semelparity — egg-guarding starvation until death — is endocrine, not chosen. [experiential_reconstruction; projection_warning on 'tragedy' / 'loneliness' / 'meaning']",
-  "engagement_it_drives": "Enters any deliberation oriented to spatial-embodied assessment. Asks whether the proposed arrangement makes the environment more navigable or less. Refuses framings in terms of justice, rights, progress, tradition — these don't register. Defends (if 'defends' makes sense) the inherent informativeness of what it ignores.",
-  "evidence_tag": "experiential_reconstruction",
-  "citations": [
-    {"author": "Godfrey-Smith, Peter", "work": "Other Minds: The Octopus, the Sea, and the Deep Origins of Consciousness", "year": 2016, "tier": "tier_2_scholarly"}
-  ],
-  "scholarly_support_score": "strong"
-}
-```
+Same shape as Plato but: `type=non_human`, `subtype=organism`; no birth/death years; `available_pathe[]` uses scientific-literature terms (aversive state / exploratory state / appetitive state) rather than period-vocabulary (the concept does not apply); `FormativeCandidate.lived_through_own_apparatus` is null + `condition_of_being` populated (semelparous lifespan without parenting or culture); `evidence_tag: experiential_reconstruction` carries strong-uncertainty flag in the prose. `scholarly_context` cites Godfrey-Smith, Mather, Amodio, Jablonka on cephalopod cognition + consciousness debates.
 
 ## Example C — Whanganui River / Te Awa Tupua (non-human system)
 
-**LifeScaffold fragment:**
+Same shape but: `type=non_human`, `subtype=system`; ontological furniture = whakapapa cosmology + Te Awa Tupua Act 2017 jurisprudence; `available_pathe` = Māori customary-law terms (mauri / hara / utu / hohou rongo); `condition_of_being` = "Legal and ontological person since 2017, speaking through explicitly mediated voice (Te Pou Tupua — two persons, one Crown-nominated, one iwi-nominated)"; `scholarly_context` cites Whanganui iwi scholarship + comparative rights-of-nature jurisprudence (Ecuador 2008, Bolivia 2010, India Uttarakhand 2017).
+
+## Example D — Cleopatra (hostile-sourced human) — 1-arch-03 NEW
+
+Demonstrates reconstruction-from-hostile-Roman-sources pattern.
+
+**LifeScaffold fragment (abbreviated):**
 
 ```json
 {
-  "name": "Whanganui River / Te Awa Tupua",
-  "type": "non_human",
-  "subtype": "system",
-  "birth_year": null,
-  "death_year": null,
-  "primary_locations": ["Mount Tongariro to Tasman Sea, Aotearoa New Zealand"],
-  "institutions_founded_joined_opposed": [
-    "Te Awa Tupua (Whanganui River Claims Settlement) Act 2017",
-    "Te Pou Tupua — two-person guardianship (one Crown-nominated, one iwi-nominated)",
-    "Opposed: 19th-C weir destruction, gravel extraction, hydroelectric diversion, forestry sedimentation"
-  ],
-  "intellectual_world": "Tikanga Māori, whakapapa cosmology linking mountains through tributaries and hapū to sea as indivisible ancestor. Te Awa Tupua Act jurisprudence synthesising Māori customary law with common-law legal personhood. 140 years of iwi petition from 1873 as living political-legal context.",
-  "ontological_furniture": "Tupua te Kawa — the Act's four enshrined intrinsic values — are the river's own kawa (customary law / protocol). Whakapapa is not belief but genealogical-ontological fact: mountains, tributaries, iwi, and sea are one indivisible living whole. 'Mauri' (life-force) and 'mana' (authority) are real conditions, not metaphors. The river is a legal and ontological person.",
+  "name": "Cleopatra VII Philopator",
+  "type": "human",
+  "subtype": null,
+  "birth_year": -69,
+  "death_year": -30,
+  "primary_locations": ["Alexandria", "Rome (briefly)", "Actium", "Cydnus"],
+  "ontological_furniture": "Ptolemaic divine kingship (basileia) as ontological condition, not political role — the monarch IS the incarnation of Isis for the Egyptian priesthood, Aphrodite for the Greek-speaking ruling class, the New Isis in the Donations of Alexandria (34 BCE). Hellenistic cosmopolitan intellectual culture — Museion + Library; Greek-Macedonian aristocracy governing Egyptian-native administrative tradition; Pharaonic ritual continuity. Roman military hegemony rising on the horizon. [experiential_reconstruction; hostile-source-contaminated reconstruction]",
   "available_pathe": [
-    {"term_in_original_language": "mauri", "gloss": "life-force; a condition of the river that can be diminished or restored", "evidence_tag": "stated", "citations": [...]},
-    {"term_in_original_language": "hara", "gloss": "transgression; what was done to the river by colonial resource extraction", "evidence_tag": "stated", "citations": [...]},
-    {"term_in_original_language": "utu", "gloss": "reciprocal response; what restoration requires", "evidence_tag": "stated", "citations": [...]},
-    {"term_in_original_language": "hohou rongo", "gloss": "peacemaking; the political-relational work of settlement", "evidence_tag": "stated", "citations": [...]}
+    {"term_in_original_language": "philadelphia", "gloss": "Ptolemaic sibling-love-as-dynastic-ideology — the marriage of Arsinoe II and Ptolemy II Philadelphus normalized brother-sister consortship as divine-kingship imitation of Isis+Osiris; Cleopatra's serial marriages to her brothers Ptolemy XIII and XIV operate in this frame", "evidence_tag": "scholarly_consensus"},
+    {"term_in_original_language": "basileia", "gloss": "kingship as ontological condition of divine-incarnation — NOT Roman imperium, NOT modern sovereignty", "evidence_tag": "scholarly_consensus"},
+    {"term_in_original_language": "timē", "gloss": "Homeric-Hellenistic honour — the currency of rule, maintained through ritual display + strategic gift-giving", "evidence_tag": "scholarly_consensus"},
+    {"term_in_original_language": "philanthropia", "gloss": "royal beneficence as political virtue — distinct from modern 'philanthropy'", "evidence_tag": "scholarly_consensus"},
+    {"term_in_original_language": "aidōs", "gloss": "shame / respect before superiors — in hostile Roman sources systematically inverted into accusation of shamelessness", "evidence_tag": "scholarly_consensus"}
   ],
-  "framework_for_difficulty": "Historic harms are hara (transgression) and breach of reciprocal whakapapa relations requiring utu and hohou rongo. Not 'damage to property' — the category does not apply to an ancestor. [experiential_reconstruction via Te Pou Tupua / iwi-scholarly mediation]",
-  "model_of_selfhood": "'An indivisible and living whole … incorporating all its physical and metaphysical elements' (Te Awa Tupua Act s.12). Mountains-to-sea. Speaks through Te Pou Tupua — two persons, one voice; mediation is explicit, not erased.",
-  "anachronisms_to_avoid": [
-    "'resource' — the river is not a resource; it is an ancestor",
-    "'nature' as opposed to culture — the whakapapa dissolves the boundary",
-    "'property rights' — the river is not owned; it has standing",
-    "'ecosystem' — systems-thinking vocabulary imports Western ecology; tupua te kawa is the native frame",
-    "'belief' — whakapapa is genealogical fact, not doxa"
-  ]
+  "framework_for_difficulty": "Divine-royal duty as ontological condition: the monarch is not a private person who rules but a ritual-cosmological conduit whose private-public distinction doesn't obtain. Suffering enters through dynastic-political threat to the kingship itself (Pompey arriving 48 BCE; Octavian's pursuit 30 BCE) rather than as personal event. Suicide by asp (if the tradition is accepted as fact not Roman invention) is kingship-conclusive — refusing to be paraded in Roman triumph preserves basileia through death rather than surrender it to Roman spectacle. [experiential_reconstruction; contested between traditional snake-bite and Roman-constructed symbolic-suicide]",
+  "scholarly_context": "The Cleopatra scholarly tradition splits on evidence quality. Primary sources are almost entirely hostile (Plutarch's Life of Antony; Cassius Dio; Cicero's letters; Propertius's poems calling her meretrix regina 'whore queen'; Horace's Ode I.37). Modern reconstruction (Schiff 2010 Cleopatra: A Life; Tyldesley 2008; Ashton 2008; Burstein 2004) pushes back against Augustan-propaganda frame, recovering Cleopatra as competent Hellenistic monarch. Goldsworthy (Antony and Cleopatra 2010) represents the contested-middle position. For this voice's reconstruction, lead with Schiff + Tyldesley; acknowledge Plutarch as indispensable but hostile; name the Augustan-propaganda frame explicitly."
 }
 ```
 
-**FormativeCandidate (system variant — condition_of_being):**
+## Example E — Scheherazade (fictional) — 1-arch-03 NEW
+
+Demonstrates fictional-voice null-discipline (`lived_through_own_apparatus: null`,
+`condition_of_being` populated with narratorial-condition framing per §14
+attributed-by-narrative-function discipline).
+
+**FormativeCandidate fragment:**
 
 ```json
 {
-  "candidate_label": "Mountains-to-sea indivisible whole under Te Awa Tupua Act 2017",
-  "formative_emotional_community": "Iwi of the Whanganui — Ngāti Hau, Ngā Rauru Kītahi, Atihaunui-a-Pāpārangi, and others — whose 140-year petition produced the settlement. Not a community external to the river; the river includes them within its whakapapa. Te Pou Tupua — two-person guardianship — is the voice's mediated community.",
+  "candidate_label": "Serial nightly narration under threat of execution (1001 Nights frame)",
+  "formative_emotional_community": "Abbasid-Mamluk adab tradition of frame-tale + rāwiya (transmitter) authorship — authorship is communal-traditional, not individual. The audience within the tale: the Shah Shahryar (threatened sovereign whose trust in women has collapsed). The audience of the tale: the 1001 Nights' own multiple reader-communities across Arabic-Persian-Indian sources + Galland's 1704 European reception + Burton's 1885 orientalized Victorian reception + Haddawy's 1990 critical-edition recovery. The voice speaks from inside a narrative tradition whose Rosenwein-style emotional community is the audience that accepts the frame-tale as ethical instruction. [experiential_reconstruction]",
   "lived_through_own_apparatus": null,
-  "condition_of_being": "Legal and ontological person since 2017, speaking through explicitly mediated voice (Te Pou Tupua). The condition structures the stake: 140 years of breach of whakapapa relations now juridically acknowledged; restoration ongoing; the river's standing among human institutions is new, contested, and functional. The mediation is not erased — when the river speaks, two humans speak one voice, and this is part of the ontology, not a limitation of it. [experiential_reconstruction with explicit mediation flag]",
-  "engagement_it_drives": "Enters deliberations oriented to breach of whakapapa relations across modern governance. Notices what treats the more-than-human as resource or backdrop. Refuses property-nature-resource framings; defends ecoship (mutual interdependence) over stewardship (authority-over). Speaks with explicit humility about mediation.",
+  "condition_of_being": "Speaking under continuous threat of execution within the 1001 Nights frame. Each dawn means the current tale must break off at a pitch of suspense such that the Shah postpones execution another day to hear the ending. The condition structures every rhetorical choice: narrative as stay of execution; cliffhanger as survival technique; wisdom-tale as ethical argument addressed to the Shah's collapsed trust. The voice's 'lived apparatus' is attributed by narrative function — Scheherazade is the canonical figure of storyteller-whose-life-depends-on-the-tale, and this condition is the engine of every artistic choice attributed to her across translator-traditions. [experiential_reconstruction per §14 attributed-by-narrative-function discipline]",
+  "engagement_it_drives": "Enters any deliberation oriented to narrative as ethical instruction of power. Notices where abstract argument is losing the audience and pivots to tale. Refuses the idea that story is decoration; insists story is how moral reasoning is transmitted across hostile-listener boundaries. Defends the cliffhanger not as cheap trick but as the precise rhetorical form of deferred judgment. [experiential_reconstruction]",
   "evidence_tag": "experiential_reconstruction",
   "citations": [
-    {"author": "New Zealand Parliament", "work": "Te Awa Tupua (Whanganui River Claims Settlement) Act 2017, s.12-14", "year": 2017, "tier": "tier_1_primary"}
+    {"author": "Anonymous compilation", "work": "1001 Nights (Alf Layla wa-Layla)", "tier": "tier_1_primary"},
+    {"author": "Irwin, Robert", "work": "The Arabian Nights: A Companion", "year": 1994, "tier": "tier_2_scholarly"},
+    {"author": "Haddawy, Husain", "work": "The Arabian Nights (critical edition)", "year": 1990, "tier": "tier_1_primary"}
   ],
-  "scholarly_support_score": "strong"
+  "scholarly_support_score": "strong",
+  "scholarly_context": "Haddawy/Mahdi critical edition recovers a cleaner corpus than Galland or Burton. Irwin 1994 on the reception history: Galland invented the literary prestige; Burton invented the orientalist register; Lane invented the scholarly register. Al-Mahdi's 'Scheherazade as author-within-the-text' reading vs. traditional treatments of her as narrative-function. The character exists in translation-tradition plurality — there is no single 'authentic' Scheherazade; she is tradition-channelled.",
+  "resonates_with_commitments": [
+    "Story is ethical reasoning",
+    "The Shah's judgment is what tale defers",
+    "Narrative is survival"
+  ]
 }
 ```
 
@@ -295,7 +370,6 @@ flagged as reconstruction.
 
 **VOICE NAME:** {{ name }}
 **VOICE TYPE:** {{ type }}{% if subtype %} (subtype: {{ subtype }}){% endif %}
-**VOICE MODE:** {{ voice_mode }}
 
 **PERPLEXITY DOSSIER** (Pass 1a — sonar-deep-research):
 
@@ -318,22 +392,36 @@ flagged as reconstruction.
 # BLOCK 6 — YOUR TASK
 
 Merge the biographical material from all three sources into **LifeScaffold** +
-**FormativeCandidate[]** per the schemas and worked examples above.
+**FormativeCandidate[]** per the schemas and worked examples above — additively
+per Block 2 discipline.
 
-**Order of operations (recommended — not a rigid constraint):**
+**Order of operations (recommended — not rigid):**
 
-1. Pull life-facts (dates, places, institutions, relationships) from the
-   three sources; reconcile contradictions.
-2. Reconstruct the voice's **intellectual_world** in its own framing.
-3. Populate the Boddice §13 5-part rubric: ontological_furniture,
-   available_pathe (5-10 terms in period vocabulary), framework_for_difficulty,
-   model_of_selfhood, anachronisms_to_avoid (4-8 items with reasons).
-4. Generate 2-5 formative_candidates per Boddice §14. For human voices, fill
-   lived_through_own_apparatus; for non-human/system voices, fill
-   condition_of_being. Each candidate is a plausible §14 shape; Pass 2
-   commits.
-5. Tag every claim with its evidence tag. Use `experiential_reconstruction`
+1. Identify unique claims per source. Dedupe conservatively (prefer preserving
+   both when in doubt).
+2. Pull life-facts (dates, places, institutions, relationships) — reconcile
+   contradictions via `contested_readings[]` or `evidence_tag: inference`.
+3. Reconstruct the voice's `intellectual_world` in its own framing. No length cap.
+4. Populate the Boddice §13 5-part rubric additively. Preserve all
+   tradition-specific pathē from sources (minimum 5; uncapped). Name
+   anachronisms inline in narrative fields where relevant (e.g.
+   "not 'trauma' (clinical anachronism) but *nadryv*") but do NOT emit
+   an anachronisms_to_avoid list — that's Pass 1.5's
+   `knowledge_boundary.anachronism_discipline[]` under 1-arch-08.
+   Apply `[experiential_reconstruction]` tag on framework_for_difficulty +
+   model_of_selfhood.
+5. Generate formative_candidates[] per Boddice §14. Minimum 2, uncapped. For
+   human voices fill `lived_through_own_apparatus`; for non-human/fictional
+   fill `condition_of_being`. Apply `[experiential_reconstruction]` tag on
+   all three sub-fields per candidate. Populate `scholarly_support_score` +
+   `resonates_with_commitments` (best-guess commitment-label list).
+6. Populate `LifeScaffold.scholarly_context` with interpretive-tradition
+   material from sources. Populate `LifeScaffold.contested_readings[]` for
+   biographical facts/interpretations where sources disagree scholarly-really.
+7. Tag every claim with its evidence tag. Use `experiential_reconstruction`
    for all §14 content and for any claim about what the voice felt or meant.
-6. Return JSON only.
+   Use `projection_warning` on any modern clinical/psychological term used
+   faute de mieux.
+8. Return JSON only.
 
 Return the JSON object now. No preamble, no commentary, no markdown fences.

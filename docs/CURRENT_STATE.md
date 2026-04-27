@@ -1,196 +1,199 @@
 # AI Assembly — Current State
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-27
 **Purpose:** Gap analysis and project-state snapshot. What's built, what's specified-but-not-built, what's not-yet-specified, key decisions, known bugs, pre-Athens critical path. Complements the briefing docs (which describe the target state) and the pipeline specs (which describe individual components). This doc describes **what exists now** and **what's next**.
 
 > When something lands, update this doc in the same commit. When the system drifts from the briefing, update the briefing and this doc together.
+
+> **Major rewrite 2026-04-27.** Reflects Phase B per-voice folder layout (2026-04-21), arch-03 chunked merge architecture (2026-04-22), Tier 3 code/project separation (2026-04-20), and the FU#1–50 follow-up family (2026-04-22 through 2026-04-27). Pipeline-version string still `3.10` per code, but the pipeline implementation is materially v4 — see §5.16–5.23 and the v4 spec doc for the architectural shift.
 
 ---
 
 ## 0. Quick map
 
 ```
-ai-assembly/  (monorepo; four-category layout as of 2026-04-19)
-├── docs/                      # PRODUCTION: current specs + this file
-│   ├── CURRENT_STATE.md                   # you are here
-│   ├── README.md                          # staleness banner for the other specs
-│   ├── references.md                      # pointer into research/ and _workspace/planning/
-│   ├── AI_Assembly_Briefing_v3_1.md       # project briefing (current)
-│   ├── AI_Assembly_Persona_Card_v2.md
-│   ├── AI_Assembly_Persona_Pipeline_v3_10.md
-│   ├── AI_Assembly_Provocateur_Pipeline.md
-│   ├── AI_Assembly_Researcher_Pipeline.md
-│   ├── AI_Assembly_Transcription_Pipeline.md
-│   ├── AI_Assembly_Voice_Pipeline.md      # Steps 1+2 only; Step 3 unspecified
-│   ├── AUDIENCE_BRIEF.md
-│   ├── LLM_CALL_INVENTORY.md
-│   └── design/
-├── runtime/                   # PRODUCTION code: FastAPI ingest + Prefect flows
-│   ├── ingest/                            # FastAPI upload app (built, tested)
-│   ├── flows/
-│   │   ├── transcription_flow.py          # built, 5-pass Speaker ID, 3 MSC test sessions
-│   │   ├── researcher_flow.py             # built, Opus + adaptive thinking, validated
-│   │   ├── provocateur_flow.py            # built, 5-stage, validated on dev_msc_test
-│   │   ├── voice_flow.py                  # NOT BUILT
-│   │   └── shared/
-│   │       ├── council/council_config.json# dev_stub_v2 (hand-written, not derived)
-│   │       └── prompts/                   # 8 active + 4 archived
-│   ├── reference/                         # runtime data: sessions.json, speakers.json
-│   └── scripts/                           # sessions/speakers regeneration
-├── personas/                  # PRODUCTION code: pre-conference voice card build
-│   ├── run_pass0a_voice_config.py         # Pass 0a: voice config + review doc
-│   ├── run_phase0_1_research.py           # Phase 0.5: Perplexity + Gemini → DR prompt
-│   ├── run_pass0b_dr_prompt.py            # Pass 0b: DR prompt only (no research)
-│   ├── run_persona_pipeline.py            # main pipeline (Pass 1-merge → Derive)
-│   ├── flows/shared/                      # io, clients, node0_validation, wikipedia, dr_validation, node1c_fetch, node1d_excerpt_selection, prompt_render
-│   ├── inputs/
-│   │   ├── conference_facts.json          # Phase B split — conference metadata (Pass 0a + Pass 7b)
-│   │   ├── audience_profile.json          # Phase B split — audience profile (Pass 7b only)
-│   │   ├── panel_roster.json              # Phase B split — 12-voice panel list (Pass 0a)
-│   │   ├── non_human_grounding/           # Phase B — curated Octopus + Whanganui grounding for Pass 0a
-│   │   ├── voices/                        # voice configs (v3.10 configs archaeology; rebuild under Phase B)
-│   │   └── dossiers/                      # Claude DR dossiers (manually produced)
-│   └── HANDOFF.md                         # cross-repo contract (production, active)
-├── research/                  # PRESERVED: grounding material, not deletable
-│   └── baseline_research/                 # 5 Deep Research compass artifacts
-├── _workspace/                # Out of scope for code reviews + VM deploys
-│   ├── planning/                          # forward-looking: REBUILD_PLAN (single source of truth post-merge 2026-04-19)
-│   └── archive/                           # eligible for pruning: specs, fix-plans, session-artifacts, runs
-└── .env, .env.example, .gitignore, README.md, CLAUDE.md
+~/Desktop/AI Assembly/                  # umbrella (Tier 3, separating code from project data)
+├── code/                               # THE GIT REPO — `mp13131313/ai-assembly`
+│   ├── docs/                           # PRODUCTION specs + this file
+│   │   ├── CURRENT_STATE.md            # you are here
+│   │   ├── README.md                   # staleness banner for the spec set
+│   │   ├── AI_Assembly_Briefing_v3_1.md
+│   │   ├── AI_Assembly_Persona_Card_v2.md         # 35 generated + 2 continuity null
+│   │   │                                            (+ v2.1 amendments section, 2026-04-27)
+│   │   ├── AI_Assembly_Persona_Pipeline_v4.md     # current pipeline (2026-04-27)
+│   │   ├── _archive/AI_Assembly_Persona_Pipeline_v3_10.md  # historical (2026-04-17 spec)
+│   │   ├── AI_Assembly_Provocateur_Pipeline.md
+│   │   ├── AI_Assembly_Researcher_Pipeline.md
+│   │   ├── AI_Assembly_Transcription_Pipeline.md
+│   │   ├── AI_Assembly_Voice_Pipeline.md          # Steps 1+2 only; Step 3 unspecified
+│   │   ├── AUDIENCE_BRIEF.md
+│   │   └── LLM_CALL_INVENTORY.md
+│   ├── runtime/                        # PRODUCTION code: FastAPI ingest + Prefect flows
+│   │   ├── ingest/                     # built, tested, deployable
+│   │   ├── flows/
+│   │   │   ├── transcription_flow.py   # built, validated 3 MSC sessions
+│   │   │   ├── researcher_flow.py      # built, validated dev_msc_test
+│   │   │   ├── provocateur_flow.py     # built, validated dev_msc_test
+│   │   │   ├── voice_flow.py           # NOT BUILT
+│   │   │   └── shared/council/         # council_config (dev_stub_v3_audience_sharpened)
+│   │   ├── reference/                  # sessions.json, speakers.json
+│   │   └── scripts/
+│   ├── personas/                       # PRODUCTION code: Persona Pipeline (v4)
+│   │   ├── run_pass0a_voice_config.py
+│   │   ├── run_phase0_1_research.py
+│   │   ├── run_pass_1_all.py           # arch-03 chunked merge driver (1.1–1.6)
+│   │   ├── run_pass_1_7.py             # arch-03 coherence audit
+│   │   ├── run_persona_pipeline.py     # main orchestrator (Pass 1c → Derive)
+│   │   ├── flows/shared/               # prompts, schemas, clients, paths, etc.
+│   │   ├── schemas/                    # Pydantic source-of-truth (chunk schemas + card)
+│   │   ├── scripts/                    # batch_pre_dr.sh, sentinel_regen.py, migrators
+│   │   ├── tests/                      # 212 tests, all passing 2026-04-27
+│   │   └── HANDOFF.md                  # cross-repo contract (production, current)
+│   ├── research/                       # PRESERVED Deep Research compass artifacts (5)
+│   ├── _workspace/
+│   │   ├── planning/                   # active: HANDOFF_2026_04_27, FOLLOW_UPS, ONBOARDING
+│   │   ├── archive/                    # historical (planning_2026_04_consolidation/, specs/, fix-plans/)
+│   │   ├── arch_03_baseline_snapshot/  # gitignored: Phase L pre/post snapshots
+│   │   └── sentinel_baselines/         # gitignored: per-prompt-edit snapshots
+│   ├── .env                            # shared secrets (gitignored at code/.env)
+│   ├── README.md, CLAUDE.md
+│   └── (other top-level files)
+├── projects/                           # NEVER pushed — per-project data, sibling to code
+│   ├── test/                           # sandbox / experimentation
+│   ├── phase-l-plato/                  # Plato Phase L working project (carry-over source)
+│   ├── phase-l-dostoevsky/             # Dostoevsky Phase L working project
+│   └── athens-2026/                    # PRODUCTION — own git repo `mp13131313/ai-assembly-athens2026-voices` (private)
+│       ├── conference_facts.json       # at root, NOT under inputs/
+│       ├── audience_profile.json
+│       ├── panel_roster.json
+│       ├── reference/                  # runtime artifacts (sessions, speakers)
+│       └── voices/<slug>/              # per-voice work — see §0.1
+└── archive/                            # frozen historical runs — NEVER pushed
+    └── runs/{personas,runtime}/        # v3.10 + dev_msc_test rehearsal artifacts
+```
+
+### 0.1 Per-voice folder layout (Phase B, since 2026-04-21)
+
+Per voice under `<PROJECT_ROOT>/voices/<slug>/`:
+
+```
+voices/<slug>/
+├── 00_intake/
+│   ├── 01_non_human_grounding.md       # optional, for non-human voices
+│   ├── 02_voice_config.json            # Pass 0a output (validated)
+│   └── 03_review_doc.md                # Pass 0a operator-review surface
+├── 01_research/
+│   ├── 01_perplexity_dossier.json      # Pass 1a
+│   ├── 02_gemini_broad_scan.json       # Pass 1b
+│   ├── 03_dr_prompts/                  # 9 files: monolithic + base + tailoring_notes + 6 sections
+│   └── 04_dr_dossier/
+│       ├── 01_section_1.md ... 06_section_6.md   # operator's manual claude.ai DR outputs
+├── 02_merge/
+│   ├── pass_1_1/ ... pass_1_6/         # chunk JSONs (arch-03)
+│   ├── 07_pass_1_7_coherence.json      # Pass 1.7 (narrow audit)
+│   ├── 08_merged_dossier.json          # convenience snapshot rebuilt from chunks
+│   └── _fix_log.json                   # FU#13 patcher log (if revisions ran)
+├── 03_corpus/
+│   ├── 00_primary_text_urls.json       # CC#1 — derived from chunks
+│   ├── 01_primary_texts.json           # Pass 1c fetch
+│   ├── 02_excerpt_selections.json      # Pass 1d
+│   └── 03_primary_texts_reviewed.flag  # manual gate
+├── 04_generation/                      # Pass 2/3/4a/4b/5/6 + CT compress files
+├── 05_validation/                      # Pass 7-pre/7-anachronism/7a/7b/7c
+├── 06_derive/
+│   ├── 00_derive_raw.json
+│   ├── 01_provocateur_profile.json     # Provocateur Pipeline consumer
+│   ├── 02_evaluation_rubric.json       # 9 test prompts
+│   └── 03_chat_system_prompt.json      # FU#41 chat artifact (Claude project paste-target)
+└── 07_persona_card_assembled.json      # 35 fields + 2 continuity null + metadata block
 ```
 
 ---
 
 ## 1. What exists and is verified
 
-### 1.1 Persona Pipeline (personas/)
+### 1.1 Persona Pipeline (personas/) — PRODUCTION
 
-**Status: built, end-to-end. Phases 1, 2, 3, 4 complete. Phase 5 Cross-Persona QC not built.**
+**Status: production-ready for voices 3–12. End-to-end validated on Plato (2026-04-26).**
 
-Two full runs completed: **Plato** (full pipeline, all artifacts in `~/Desktop/AI Assembly/archive/runs/personas/plato/` — moved out of the code repo in Tier 3, 2026-04-20) and **Hannah Arendt** (01_research + 02_passes populated; final assembled card not yet verified). Runs per voice take 60–120 minutes wall time, cost $14–18 in API calls (before Claude Batch discount).
+Plato shipped per chat-test 2026-04-26 → Phase L sign-off. Voice 3–12 buildout for athens-2026: 12 voice_configs authored via Pass 0a (Pass 0a now operator-trusted, no hand-authoring); Phase 0.5 research complete for all 12; pipeline-fidelity audit confirmed all voice_configs match Phase 0.5 research outputs.
 
-Built and verified:
-
-| Component | Status | Notes |
-|---|---|---|
-| Node 0 validation | ✓ | 5 gates: impossible, type, voice_mode (strict 3-enum), subtype, corpus_constraint |
-| Pass 0a Intake | ✓ | Claude Opus + adaptive thinking; produces voice config + review doc |
-| Phase 0.5 Pre-DR Research | ✓ | `run_phase0_1_research.py`: Pass 1a (Perplexity) + Pass 1b (Gemini) in parallel, then renders DR prompt via Jinja2 |
-| Pass 0b DR Prompt | ✓ | Jinja2 template renderer (no API call); scaffolds DR prompt with research findings |
-| Pass 1a Perplexity | ✓ | sonar-deep-research; `<think>` block stripped; now runs in Phase 0.5 |
-| Pass 1a-DR Claude | ✓ | Manual paste; Approach C merge partner |
-| Pass 1b Gemini | ✓ | Broad scan; now runs in Phase 0.5 |
-| Pass 1-merge | ✓ | 3-way contradiction check (Perplexity + Claude DR + Gemini) |
-| Pass 1c-extract | ✓ | NEW: extracts primary text URLs from merged dossier |
-| Pass 1c fetch | ✓ | SSRF-hardened (scheme restriction, RFC1918 block, 5MB cap) |
-| Pass 1d excerpt selection | ✓ | Sonnet-curated ~30K char subset (replaces naive 80K slice) |
-| Pass 2 Identity & Boundaries | ✓ | Opus + adaptive thinking; 9 fields |
-| Pass 3 Intellectual Core | ✓ | Opus + thinking; 5 fields; ChatGPT DR conditional |
-| Pass 4a Voice | ✓ | Opus + thinking; 7 fields; corpus-grounded |
-| Pass 4b Artifact | ✓ | Sonnet; 8 fields |
-| Pass 5 Engagement | ✓ | Opus + thinking; 4 fields; constitution + reasoning_method in user prompt |
-| Pass 6 Corpus Curation | ✓ | Sonnet; 1 field; HALT if no primary texts |
-| Coherence Threading | ✓ | Per-pass Sonnet compression after Passes 2, 3, 4a, 4b |
-| Pass 7-pre Citation | ✓ | Sonnet; voice-mode branching; hostile-source variant |
-| Pass 7a Cross-Model | ✓ | GPT-4o → o3 → Gemini fallback; register check |
-| Revision loop | ✓ | Max 2; downstream cache invalidation; per-pass critiques |
-| Pass 7b Worked Provocations | ✓ | Opus + thinking; diagnostic only, NOT runtime few-shot |
-| Pass 7c Negative Constraints | ✓ | Gemini → Sonnet fallback with bias-awareness |
-| Derive | ✓ | Sonnet; produces Provocateur Profile + Evaluation Rubric |
-| Output Register check | ✓ | Built into runner; flags third-person leaks in voice fields |
-| Assembled card write | ✓ | 35 fields at root + metadata block; matches spec |
-
-**What Plato's run produced:**
-
-```
-runs/plato/
-├── persona_card_assembled.json  (35 fields + metadata, spec-compliant)
-├── provocateur_profile.json     (8 fields, ready for council_config)
-├── evaluation_rubric.json       (9 test prompts)
-├── 01_research/
-│   ├── perplexity_dossier.json
-│   ├── gemini_broad_scan.json
-│   ├── chatgpt_dr_supplement.json  (triggered — DR supplement fired)
-│   ├── contradiction_check.json
-│   ├── merged_dossier.json
-│   ├── primary_texts.json           (5 Gutenberg dialogues fetched)
-│   └── excerpt_selections.json      (Pass 1d curated)
-└── 02_passes/
-    ├── pass2_identity_boundaries.json
-    ├── pass3_intellectual_core.json
-    ├── pass4a_voice.json
-    ├── pass4b_artifact.json
-    ├── pass5_engagement.json
-    ├── pass6_corpus.json
-    ├── pass7pre_citation.json
-    ├── pass7a_cross_model.json
-    ├── pass7b_smoke_test.json
-    ├── pass7c_negative.json
-    ├── derive.json
-    └── _ct_pass2.json, _ct_pass2_3.json, _ct_pass2_3_4a.json, _ct_pass2_3_4.json
-```
-
-### 1.2 Ingest app (runtime/ingest/)
-
-**Status: production-ready, tested, deployed-deployable.**
+Per-voice cost: ~$18–22, wall time ~2 hours (excluding manual claude.ai DR sessions which run human-in-the-loop on 6 sections per voice).
 
 | Component | Status | Notes |
 |---|---|---|
-| FastAPI routes (index, session detail, status, overview, upload, retry, health) | ✓ | All routes auth-gated except /health |
+| Node 0 validation | ✓ | strict 3-enum voice_mode {philosophical, observational, narratival}, null permitted only for `subtype=system` |
+| Pass 0a (voice_config + review_doc) | ✓ | Opus + adaptive thinking; operator-trusted — do NOT hand-author bypassing this |
+| Phase 0.5 research | ✓ | Pass 1a (Perplexity sonar-deep-research) ‖ Pass 1b (Gemini); then Pass 0b base render (Jinja) + Pass 0b tailor (LLM splice — structured injections only); split into 6 per-section DR prompts |
+| Manual claude.ai DR gate | — | 6 sessions per voice (sections 1–5 = Opus 4.6, section 6 = Opus 4.7 per Phase L finding); 60–180 min per session |
+| Pass 1.1–1.6 chunked merge (arch-03) | ✓ | Replaced monolithic Pass 1-merge — see §5.18. 6 chunks: BIOGRAPHICAL, INTELLECTUAL, REASONING, VOICE, BOUNDARIES, CORPUS. Each emits Pydantic-validated structured output |
+| Pass 1.7 coherence (arch-03) | ✓ | Narrow LLM audit — emits flags + resolutions + edits[]; Python applies edits to chunk files (chunks = source of truth) |
+| Pass 1c-extract | ✓ | Deterministic regex URL extraction from `passages[].citation` + `works[]` (1-arch-07; CC#1 relocation) |
+| Pass 1c fetch | ✓ | SSRF-hardened (scheme restriction, RFC1918 block, 5 MB cap) |
+| Pass 1c review gate | ✓ | Manual: touch `03_primary_texts_reviewed.flag` |
+| Pass 1d excerpt selection | ✓ | Opus + thinking; 60K char budget (FU#46 raised from 30K for richer-corpus voices) |
+| Pass 2 Identity & Boundaries | ✓ | Opus + thinking; FU#49D Position B corpus-accurate softening landed in `hard_limits` field-spec preamble |
+| Pass 3 Intellectual Core | ✓ | Opus + thinking |
+| Pass 4a Voice (corpus-grounded) | ✓ | Opus + thinking |
+| Pass 4b Artifact | ✓ | Sonnet; FU#49A generativity-permitting prompt + length variance 350–1500 |
+| Pass 5 Engagement | ✓ | Opus + thinking; audience-primed via FU#12-B |
+| Pass 6 Corpus Curation | ✓ | Sonnet; HALT if no primary texts |
+| Coherence Threading | ✓ | Per-pass Sonnet compress after Passes 2/3/4a/4b |
+| **Pass 6.5-clean (FU#33 P1)** | ✓ | Deterministic regex bracket-strip — preserves Boddice biocultural tags `[experiential_reconstruction]`, `[projection_warning:...]`; runs BEFORE validators so reports reflect shipped state |
+| Pass 7-pre (FU#2 chunked) | ✓ | 3-stage: Stage 1 extract claims (1 Sonnet call) → Stage 2 verify N parallel batches (~25 claims each) → Stage 3 boddice tag check (parallel with Stage 2). Replaced single-shot which hit 128K output ceiling |
+| Pass 7-anachronism | ✓ | gpt-5.4 high → fallbacks |
+| Pass 7a Cross-Model | ✓ | gpt-5.4 high → fallbacks; merges Pass 7-anachronism + FU#33 P2 INCONSISTENT flags into `field_issues` |
+| **Pass 7a-FIX (FU#13 linear patcher)** | ✓ | Replaces revision loop — Opus 4.7 + thinking; emits surgical JSON patches via path-walker; FU#44 register-drift + internal-contradiction patches; ~$1 per voice vs $5–10 per loop |
+| Pass 7b Worked Provocations | ✓ | Opus + thinking; build-time diagnostic NOT runtime few-shot |
+| Pass 7c Negative Constraints | ✓ | Gemini → Sonnet bias-aware fallback |
+| Derive (Profile + Rubric) | ✓ | Opus + thinking |
+| **FU#41 chat artifact** | ✓ | `flows/shared/chat_prompt_builder.py` — strips 11 fields (5 chat-incompatible + 5 spec-shell + 1 nested) |
+| Card assembly | ✓ | 35 generated fields + metadata block + 2 continuity nulls |
+| **Sentinel regen (FU#29/50(2))** | ✓ | `sentinel_regen.py` per-voice baseline subdir support; standard prompt-edit smoke-test workflow |
+
+**Voices 3–12 state (athens-2026):**
+
+| Voice | type/subtype/voice_mode/hostile/corpus | Phase 0.5 | DR sessions |
+|---|---|---|---|
+| Plato | human / – / philosophical / F / full | ✓ | ✓ (carry-over from phase-l-plato) |
+| Cleopatra | human / – / observational / **T** / **hostile_read_against_grain** | ✓ (re-tailored) | – |
+| Ibn Battuta | human / – / narratival / F / full | ✓ | – |
+| Scheherazade | fictional / – / narratival / F / full | ✓ | – |
+| Ada Lovelace | human / – / philosophical / F / full | ✓ | – |
+| Fyodor Dostoevsky | human / – / narratival / F / full | ✓ | – |
+| Hannah Arendt | human / – / philosophical / F / full | ✓ | – |
+| Bob Marley | human / – / narratival / F / **lyrics_patterns_only** | ✓ | – |
+| Audrey Tang | human / – / philosophical / F / full | ✓ | – |
+| Peter Thiel | human / – / philosophical / F / full | ✓ | – |
+| Whanganui River | non_human / system / **null** / T / full | ✓ (re-run) | – |
+| Octopus | non_human / organism / observational / F / full | ✓ (serial after 429) | – |
+
+### 1.2 Ingest app (runtime/ingest/) — PRODUCTION-READY
+
+**Status: production-ready, tested, deployable.** No change since 2026-04-17 description.
+
+| Component | Status | Notes |
+|---|---|---|
+| FastAPI routes (index, session detail, status, overview, upload, retry, health) | ✓ | All routes auth-gated except `/health` |
 | HTTP Basic Auth | ✓ | `secrets.compare_digest`; IP-based rate limiting (10 fails/60s → 429) |
-| Upload pipeline: receive → normalize → spawn transcription | ✓ | Atomic JSON writes, fcntl file locking |
+| Upload pipeline: receive → normalize → spawn transcription | ✓ | Atomic JSON writes, fcntl locking |
 | Audio normalization | ✓ | ffmpeg → 96 kbps mono AAC; ffprobe validation (timeout=30s) |
-| Status state machine | ✓ | received → normalizing → transcribing (with substates) → done/error |
+| Status state machine | ✓ | received → normalizing → transcribing (substates) → done/error |
 | Reconcile-on-startup | ✓ | Scans runs/ on app start, marks orphaned PIDs as error |
 | Detached subprocess spawn | ✓ | `start_new_session=True`; survives uvicorn restart |
-| PID liveness check | ✓ | Detects zombie/defunct processes |
-| Incremental crumb display | ✓ | UI shows which step the subprocess is on |
-| Retry endpoint | ✓ | Resume from last completed checkpoint |
-| Filters (day, venue, search) | ✓ | Client-side JS |
-| Track colour system | ✓ | Matches program.worldbeautifulbusinessforum.com |
-| Tests | ✓ | `test_app.py`, `test_pipeline.py`, `test_sessions.py` + fake flow |
-| Deploy configs | ✓ | `ingest.service` (systemd with hardening), `Caddyfile`, `README.md` |
+| Tests + deploy configs | ✓ | `test_app.py`, `test_pipeline.py`, `test_sessions.py`, `ingest.service`, `Caddyfile`, deploy README |
 
 ### 1.3 Transcription Pipeline (runtime/flows/transcription_flow.py)
 
-**Status: built, validated on 3 MSC 2026 test sessions (Vox Populi, Breaking Point, West-West Divide).**
-
-| Component | Status | Notes |
-|---|---|---|
-| AssemblyAI Universal-3 Pro | ✓ | speaker_diarization, language_detection, keyterms_prompt |
-| SDK 0.59.0 workarounds | ✓ | `config.raw.speech_models = ["universal-3-pro"]`; `speech_model = None` |
-| Speaker ID (5-pass) | ✓ | Pass 5 = per-turn reassignment; Opus override via `TRANSCRIPTION_SPEAKER_ID_MODEL` |
-| Cleaning | ✓ | Streaming required; 64K max_tokens; 80% budget warning |
-| Session package assembly | ✓ | Metadata + transcript + review_queue |
-| Resume-from-disk | ✓ | Skips completed stages if output JSON exists |
-| Prefect task caching (dev) | ✓ | `TRANSCRIPTION_CACHE=1` env var; off in production |
+**Status: built, validated on 3 MSC 2026 test sessions.** Unchanged since 2026-04-17.
 
 ### 1.4 Researcher Pipeline (runtime/flows/researcher_flow.py)
 
-**Status: v3 built, validated on dev_msc_test (106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio).**
-
-| Component | Status | Notes |
-|---|---|---|
-| Node 1 Extraction (per-session) | ✓ | Namespaced IDs `{session_id}:NNN`; verify_markers handling |
-| Node 2a Clustering | ✓ | Opus + adaptive thinking; minimal input `{ref, extraction, context}`; shuffled seed 42 |
-| Node 2b Theming | ✓ | Same model config; cluster-level input only |
-| `_validate_clusters` | ✓ | Closure + uniqueness; orphan detection; empty-cluster pruning |
-| `_validate_themes` | ✓ | Closure; orphan promotion to single-cluster themes |
-| Merge step | ✓ | Python; builds final `grouping.json` with full themes→clusters→extractions nesting |
+**Status: v3 built, validated on dev_msc_test (106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio).** Unchanged.
 
 ### 1.5 Provocateur Pipeline (runtime/flows/provocateur_flow.py)
 
-**Status: v3 (5-stage) built, validated on dev_msc_test.**
-
-| Component | Status | Notes |
-|---|---|---|
-| Stage 1A Triage Part A (per-voice) | ✓ | 12 parallel LLM calls; incremental checkpoint per voice |
-| Stage 1B Triage Part B (theme flags) | ✓ | 1 LLM call; `worth_surfacing` + friction + fault_line |
-| Stage 2 Selection | ✓ | Pure Python, deterministic, 9 steps, 8 tunable knobs in council_config |
-| Stage 3 Formulation (per-pair) | ✓ | Parallel batched; PROPOSITION TEST (5 conditions); narrative briefing components |
-| Stage 4 Packaging | ✓ | Two-view briefings: `narrative_briefing` (markdown) + `full_theme_record` (structured) |
-| Incremental checkpoints | ✓ | Per-voice triage, per-pair formulation, briefings per voice |
-| Rate-limit batching | ✓ | `PROVOCATEUR_FORMULATION_BATCH=4`, `PROVOCATEUR_BATCH_WAIT_S=20` |
+**Status: v3 (5-stage) built, validated on dev_msc_test.** Unchanged.
 
 ---
 
@@ -199,267 +202,259 @@ runs/plato/
 ### 2.1 Voice Pipeline Steps 1 + 2 (runtime/flows/voice_flow.py)
 
 **Spec:** `docs/AI_Assembly_Voice_Pipeline.md` (covers Steps 1+2 only).
-
 **Status: not built.** (`runtime/flows/voice/` directory does not exist.)
 
 **What Step 1 does:** Receive Provocateur briefing → load Persona Card as system prompt → produce one detailed response per formulation (~3 per voice).
 
 **What Step 2 does:** Read back all detailed responses → make focus + stance decisions → produce one artifact per voice in the voice's natural medium.
 
-**Key wiring decisions already made (documented in voice/README.md and personas/HANDOFF.md):**
-- Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (smoke_test_chains is a build-time smoke test, NOT a runtime few-shot — critical).
-- Foundational fields (12) appear in both Step 1 and Step 2 system prompts.
-- Step 1 uses Reasoning + Engagement fields; Step 2 uses Voice + Artifact fields.
-- Runtime reads `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json` directly (Tier 3 — project data lives outside the code repo; see CLAUDE.md §"Code / project separation").
-
-**What needs building:**
-- Prefect flow with Step 1 task + Step 2 task
-- System prompt templates for each step (per voice)
-- Per-voice parallel execution; per-formulation parallel within a voice
-- Optional validation (anachronism check, constitutional check)
-- Output schema: detailed_responses[] + artifact per voice per night
-- Cross-voice venv handling (the voice pipeline runs in runtime's venv but reads personas' assembled cards — cross-repo read, same machine)
+**Key wiring decisions already made:**
+- Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (build-time diagnostic, NOT runtime few-shot — see §5.10).
+- Foundational fields (12) appear in both Step 1 and Step 2.
+- Step 1 uses Reasoning + Engagement fields (9); Step 2 uses Voice + Artifact fields (15).
+- **`reference_only_passages`** (FU#41-related) is loaded into Step 1 system prompt but MUST be dropped from Step 2 system prompt to avoid copyright exposure for musical/copyright-sensitive voices (see `personas/HANDOFF.md`).
+- Runtime reads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` directly.
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
-**Spec:** `docs/AI_Assembly_Persona_Pipeline_v3_10.md` § Phase 5.
+**Spec:** Pipeline v4 (and v3.10) §"Phase 5 Cross-Persona Quality Control".
+**Status:** Scaffolded but not run. `personas/phase_5_cross_persona_qc.py` exists (~487 lines) as scaffolding; needs all 12 athens-2026 cards complete before invocation.
 
-**Status: not built.** The `IMPLEMENTATION_AUDIT_v3_7.md` flagged this in April 2026; since then Phase 3+4 were built but Phase 5 was not.
-
-**What it does:** After all 12 cards complete, run three batch tests:
-1. **Swap test:** shuffle constitution principles, can an evaluator attribute each? Misattributed → too generic.
-2. **Blind identification:** remove names from character + register_and_tone, shuffle, can evaluator identify?
-3. **Same-question distinctiveness:** run all voices through one provocation, compare for style/metaphor/values similarity.
-
-**Tool:** ChatGPT (cross-model from Claude-generated cards).
-
-**Blocker:** needs all 12 cards to exist first. So it runs last in the persona pipeline sequence.
+Three batch tests:
+1. **Swap test** — shuffle constitution principles, can an evaluator attribute each? Misattributed → too generic.
+2. **Blind identification** — remove names from character + register_and_tone, shuffle, can evaluator identify?
+3. **Same-question distinctiveness** — run all voices through one provocation, compare for style/metaphor/values similarity.
 
 ---
 
 ## 3. Not yet specified (and unbuilt)
 
-These are in the briefing but have no detailed spec yet.
-
 ### 3.1 Voice Pipeline Step 3 — Amendment
 
-**Briefing v3.1 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice, implicitly or explicitly). If no amendment, Step 2 artifact publishes unchanged.
+**Briefing v3.1 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice).
 
-**What's needed:**
-- System prompt for Step 3 (framed by shared-theme portions of other voices' artifacts)
-- Input format: how other voices' artifacts are presented (shared-theme highlighted, other portions summarised?)
-- Output format: amended_artifact + amendment metadata (which voices referenced, in response to what)
-- Integration with Step 2 output (each voice's Step 2 result feeds all voices' Step 3 via theme-graph)
-- Timing within overnight budget
+**Status: UNSPECIFIED.** FU#49E flagged this as the **highest-impact post-Athens item** during reviewer pass 2 (2026-04-26).
 
-**Dependency order for spec work:** needs Voice Pipeline Steps 1+2 building to have reference outputs, then spec Step 3 against those.
+**Dependency order:** needs Voice Pipeline Steps 1+2 building first to have reference outputs, then spec Step 3 against those.
 
 ### 3.2 Closing-show pipelines (Day 3 afternoon)
 
-Per Briefing v3.1, THREE pipeline passes run Day 3 afternoon before the closing show:
+Per Briefing v3.1: theme identification, per-theme mapping (Matrix A + B), video pipeline. **Not specified, not built.**
 
-1. **Theme identification pass** — reads across all 3 nights' Researcher themes, Provocateur formulations, and voice detailed responses. Identifies 3–5 throughline themes.
-2. **Per-theme mapping pass** — for each throughline, reads each voice's positions and plots on Matrix A (Power & Agency, human↔nonhuman / many↔one) and Matrix B (Change & Actor, rupture↔progression / individual↔collective). Generates read-through script segment per theme.
-3. **Video pipeline pass** — generates per-voice spoken-dialogue fragments for the closing-show running-the-last-kilometre video snippets. Uses persona cards + all 36 artifacts + Video Context block.
+### 3.3 Downstream pipeline (per-night, runs after Voice Pipeline)
 
-**What's needed:**
-- Input format for each pass
-- System prompts for each pass
-- Matrix plotting format (visual spec for the closing-show visualisation team)
-- Output handoff to closing-show production (video editors, animators)
-- Human editorial pass after generation (~1–2 hours per pass)
-
-### 3.3 Downstream pipeline (per-night, runs after Voice Pipeline completes)
-
-Per Briefing v3.1 + Architecture_v1 (Architecture_v1 is stale on orchestrator but the stage logic stands):
-
-1. **Render** — text passes through; Marley's artifact → Suno API; Octopus's artifact → client-side shader params packaging. Retries + fallbacks.
-2. **Publish** — aggregate all 12 artifacts into `night-N.json`; commit+push to microsite content repo; Vercel rebuild.
-3. **Curate** — single Claude Opus call generates HoBB-voiced Substack read-through. Few-shot on real HoBB newsletters. Skipped on Night 3 (closing show reveals it).
-4. **Deliver** — Substack publishes; blurb inside HoBB daily newsletter.
-
-**Not yet built. Newsletter style calibration is a separate workstream.**
+Render → Publish → Curate → Deliver. **Not built.** Newsletter style calibration is a separate workstream.
 
 ### 3.4 Microsite
 
-Per Briefing v3.1: Astro or Next.js static site, Vercel/Netlify hosting, content repo (GitHub), deep links per artifact (`/night-1/plato`, etc.).
-
-**Needs building:** design prototype (Lovable/v0), production codebase, content schema, chromatophore shader integration, navigation pattern.
+**Not specified, not built.** Astro/Next.js + Vercel/Netlify + content repo + deep links per artifact.
 
 ### 3.5 Admin Console
 
-**User's intent:** a web UI similar in spirit to the ingest app but covering the full pipeline. Runs under a different user than ingest; ingest narrows to "received" status only. Admin console orchestrates: transcription, researcher, provocateur, voice, downstream, persona card building, council sync, closing-show pipelines.
-
-**Not specified. Not built.** Natural first features:
-- Kick off a pipeline stage on demand
-- View status across all stages
-- View logs
-- Sync persona Derive outputs → council_config.json (script already plannable)
-- Pre-flight checks
+**Not specified, not built.** Web UI to orchestrate all pipelines (transcription, researcher, provocateur, voice, downstream, persona card building, council sync, closing-show).
 
 ### 3.6 Night 2 / Night 3 plumbing
 
-**Provocateur:** has placeholder for "Night 1/2 exclusion filter" — simple (theme_id, member) exclusion list to avoid repeating assignments. Not implemented. Needs building before first production run past Night 1.
-
-**Voice Pipeline:** Continuity block generation (1 API call per voice after Night 1/2 completes, produces 4-field structured summary inserted into next night's persona card). Not built because Voice Pipeline not built.
-
-**Researcher:** processes fresh each night; no cross-night dependency. Good as is.
+- **Provocateur** Night 1/2 exclusion filter — placeholder, not implemented.
+- **Voice Pipeline** continuity block generation — not built (because Voice Pipeline isn't).
+- **Researcher** processes fresh each night; no cross-night dependency.
 
 ### 3.7 Cross-repo tooling
 
-- **Sync council config**: script that reads all `$PROJECT_ROOT/runs/*/provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json` members array, bumping version. Currently manual copy-paste. Easy Python script; natural first feature for admin console.
+- **Sync council config** — script that reads all `<PROJECT_ROOT>/voices/*/06_derive/01_provocateur_profile.json` and writes them into `runtime/flows/shared/council/council_config.json`. Currently manual. Easy Python script; natural first admin-console feature.
 
 ---
 
 ## 4. Cross-repo data contracts
 
-Documented precisely so nothing drifts.
-
-### 4.1 Persona → Runtime (2 artifacts per voice)
+### 4.1 Persona → Runtime (per voice)
 
 **Provocateur Profile (8 fields):**
-- File: `$PROJECT_ROOT/runs/<voice_slug>/provocateur_profile.json` (per Tier 3, project data lives outside the code repo; default sibling `../athens-2026/`)
+- File: `<PROJECT_ROOT>/voices/<slug>/06_derive/01_provocateur_profile.json`
 - Consumer: `runtime/flows/shared/council/council_config.json#members[]`
 - Fields: `name`, `speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`
-- Currently: **council_config is `dev_stub_v2`** — hand-written, not derived. 12 stub members present. Needs replacement with real derived profiles before production.
+- Currently: council_config is **`dev_stub_v3_audience_sharpened`** — hand-written. Will be replaced as athens-2026 cards complete.
 
-**Assembled Persona Card (37 fields):**
-- File: `$PROJECT_ROOT/runs/<voice_slug>/persona_card_assembled.json`
+**Assembled Persona Card (35 generated + 2 continuity null + metadata):**
+- File: `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json`
 - Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt
-- Runtime MUST drop `metadata` block and `smoke_test_chains` field before using as prompt (per HANDOFF.md and voice/README.md). Both are build-time artifacts, not runtime contract.
-- 35 fields appear as system prompt content; 2 null continuity fields populated during runtime Night 2.
+- Runtime MUST drop `metadata`, `smoke_test_chains`, `reference_only_passages` (Step 2 only) before assembling system prompt.
+- 35 fields populate at build time; 2 null continuity fields populated at runtime on Night 2.
+
+**Chat artifact (FU#41, 4th Derive output):**
+- File: `<PROJECT_ROOT>/voices/<slug>/06_derive/03_chat_system_prompt.json`
+- Consumer: operator paste-target for Claude project custom instructions
+- 11 fields stripped from assembled card per Amendments A+B (chat-incompatible + spec-shell meta + 1 nested)
+- NOT consumed by runtime pipelines — standalone for chat-test validation pre-ship and for chat-native deployments
+
+**Evaluation Rubric (9 test prompts):**
+- File: `<PROJECT_ROOT>/voices/<slug>/06_derive/02_evaluation_rubric.json`
+- Consumer: Voice Pipeline testing harness (when built)
 
 ### 4.2 Transcription → Researcher
 
-**Session package:**
-- File: `runtime/runs/<run>/01_transcription/<session>/session_package.json`
-- Consumer: `runtime/flows/researcher_flow.py`
-- Structure: `metadata` (carried forward) + `transcript.turns[]` + `review_queue.verify_markers[]`
-- Critical invariant: per-turn `confidence` flows through to Researcher (contract verified on 3 MSC test sessions)
-- `review_queue.verify_markers` is actively consumed (Node 1 degrades extraction confidence on hinge words)
+**Session package** at `runtime/runs/<run>/01_transcription/<session>/session_package.json`. Critical invariant: per-turn `confidence` flows through to Researcher (validated on 3 MSC test sessions). `review_queue.verify_markers` is actively consumed.
 
 ### 4.3 Researcher → Provocateur
 
-**Two artifacts per run:**
-- `runtime/runs/<run>/02_researcher/all_extractions.json` — flat list of extractions
-- `runtime/runs/<run>/02_researcher/grouping.json` — themes → clusters → extraction_ids
-
-**Provocateur interface contract (verified on dev_msc_test):**
-- Step 1 Triage reads abstracts only (themes + clusters)
-- Step 2 Selection reads abstracts + extraction_ids for counting
-- Step 3 Formulation reads raw extractions for the single theme it's formulating on
-- Step 4 Packaging reads everything
-
-**Field format conventions:**
-- Extraction IDs are namespaced strings: `"breaking_point:014"`
-- `lens` values use underscore: `"open_question"` (not space)
-- `engagement`: `null` for open questions; `"challenged" | "reinforced" | "unengaged"` otherwise
-- `energy`: `"high" | "normal"`
-- `speaker`: string or `null` (null for synthesized open questions)
+`all_extractions.json` (flat) + `grouping.json` (themes → clusters → extraction_ids). Field-format conventions per dev_msc_test validation: namespaced extraction IDs (`"breaking_point:014"`), `lens` underscored (`"open_question"`), `engagement` ∈ {null, challenged, reinforced, unengaged}, `energy` ∈ {high, normal}.
 
 ### 4.4 Provocateur → Voice Pipeline
 
-**Per-voice briefing:**
-- File: `runtime/runs/<run>/03_provocateur/briefings/<voice_slug>.json`
-- Consumer: `runtime/flows/voice_flow.py` (when built)
-- Structure: `formulations[]` each with TWO views:
-  - `narrative_briefing` — markdown string, the Step 1 user prompt
-  - `full_theme_record` — structured JSON, the Step 1 private reasoning surface
+Per-voice briefing at `runtime/runs/<run>/03_provocateur/briefings/<voice_slug>.json`. Two-view per formulation: `narrative_briefing` (markdown, Step 1 user prompt) + `full_theme_record` (structured JSON, Step 1 private reasoning surface).
 
 ### 4.5 Ingest → Transcription
 
-**Per-session trigger:**
-- Ingest produces `runs/<run>/01_transcription/<session>/audio.m4a` (normalized)
-- Ingest produces `runs/<run>/01_transcription/<session>/session.json` (schema-translated from sessions.json + speakers.json join)
-- Ingest spawns `python flows/transcription_flow.py <audio> <session_json>` detached; transcription_flow writes all outputs back into the same dir
-
-**Schema translation (critical):**
-- `sessions.json` field `title` → `session.json` field `session_title`
-- `sessions.json` field `description` → `session.json` field `session_description`
-- `sessions.json` field `date_time_start` → `session.json` field `date_time`
-- `venue + venue_sub` → concatenated `venue` (` · ` separator if both)
+Schema translation from `sessions.json` to `session.json`: `title→session_title`, `description→session_description`, `date_time_start→date_time`, `venue+venue_sub→` concatenated (` · ` if both).
 
 ---
 
 ## 5. Architectural decisions & rationale
 
-Key decisions that aren't obvious from reading the code and that a new session/collaborator needs to know.
+Decisions a new session/collaborator needs to know that aren't obvious from reading the code.
 
 ### 5.1 Separate venvs (runtime + personas)
 
-**Why:** dependency isolation. Both currently pin `anthropic==0.94.1`, but separate venvs mean one pipeline can update a dependency without forcing the other to follow. Admin console can subprocess into whichever venv it needs.
+Dependency isolation. Both currently pin `anthropic==0.94.1`.
 
 ### 5.2 Unified `.env` at monorepo root
 
-**Why:** same API keys used by both pipelines. Single source of truth. All 7 `load_dotenv` callers explicitly load from `_REPO_ROOT.parent / ".env"` where `_REPO_ROOT` is the sub-repo root. `personas/flows/shared/clients.py` keeps bare `load_dotenv()` — it walks up from CWD and finds the root `.env` automatically.
+Single source of truth. All loaders explicitly load from `_REPO_ROOT.parent / ".env"` (or bare `load_dotenv()` for `personas/flows/shared/clients.py`).
 
 ### 5.3 Output Register rule (v3.7)
 
-**Why:** mock execution showed that 10–15K tokens of third-person field content overwhelmed the ~80-token second-person epistemic frame. The model adopted scholarly distance regardless. Every field now in first or second person. Enforced by Pass 7a register check + runner's `_check_register` function + per-field register table in the card spec.
+Every field in first or second person; never third-person scholarly. Mock execution showed 10–15K tokens of third-person field content overwhelmed the ~80-token second-person epistemic frame. Enforced by Pass 7a register check + per-field register table in Card v2 spec.
 
 ### 5.4 KJ Round 1 minimal input (Researcher v2.4 → v3)
 
-**Why:** Opus+thinking was using the namespace prefix as a grouping shortcut. Round 1 sees only `{ref, extraction, context}` — no real ID, no session, no responds_to, no lens, no engagement. Restored 4.08 extractions/cluster average and 83% cross-session ratio from 2.08 and 25%.
+Round 1 sees only `{ref, extraction, context}`; namespace prefix as grouping shortcut was producing session-grouped clusters. Restored 4.08 extractions/cluster average and 83% cross-session ratio.
 
 ### 5.5 Python Selection (Provocateur v3)
 
-**Why:** Selection is combinatorial scoring, not editorial judgment. LLM was slow, non-reproducible, opaque. Python is instant, deterministic, all knobs tunable in council_config. Substance-aware work moved to per-pair Formulation where it matters.
+Selection is combinatorial scoring, not editorial judgment. Python is instant, deterministic, all knobs tunable in council_config. Substance-aware work moved to per-pair Formulation.
 
 ### 5.6 Per-pair Formulation (Provocateur v3)
 
-**Why:** one formulation per theme forced to generic altitude to fit all assigned voices. Per-pair calls let each formulation aim at one voice's specific territory. Two voices on the same theme now get genuinely different questions, not wording variations.
+One formulation per theme forced generic altitude. Per-pair lets each formulation aim at one voice's specific territory.
 
 ### 5.7 Proposition Test with 5 conditions (Provocateur v3)
 
-**Why:** v1's informal "use proposition when material contains a sharp claim" drifted to proposition-by-default in testing. Explicit 5-condition test in prompt catches it. Validation: 3/40 propositions on dev_msc_test, all passing all 5 conditions; rest correctly wrote questions.
+Explicit 5-condition test in prompt catches default-to-proposition drift.
 
-### 5.8 Checkpoints-as-cache (Provocateur, Personas)
+### 5.8 Checkpoints-as-cache
 
-**Why:** explicit cache flag forgotten half the time. Incremental writes of each LLM call to disk before return. Restart picks up from wherever it died. Force clean run by deleting the specific checkpoint. No `CACHE=1` env var needed.
+Incremental writes of each LLM call to disk before return. Restart picks up from wherever it died. No `CACHE=1` env var.
 
 ### 5.9 Deterministic shuffle seed 42 (Researcher Round 1 + Round 2)
 
-**Why:** session-ordered concatenation produces session-grouped reading order bias. Fixed seed breaks the bias without losing reproducibility.
+Fixed seed breaks session-ordering bias without losing reproducibility.
 
 ### 5.10 `smoke_test_chains` is build-time only, NOT runtime few-shot
 
-**Decision date:** 2026-04-15. Documented in: `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` and `personas/HANDOFF.md`. (`runtime/flows/voice/README.md` was planned but never built — the rule moved to the two personas locations above.) Rationale: few-shotting from 4 test chains would collapse the voice's range toward those 4 patterns, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
+**Decision date:** 2026-04-15. Documented in `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` and `personas/HANDOFF.md`. Few-shotting from 4 test chains would collapse the voice's range, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
-### 5.11 Pass 1a primary text URLs moved from Pass 0a to Pass 1c-extract (commit b1868da)
+### 5.11 Pass 1a primary text URLs moved out of voice_config (b1868da → CC#1 2026-04-26)
 
-**Why:** Pass 0a has no internet access and was proposing URLs from training data — risk of hallucinated or stale URLs. Now primary text URLs are extracted from the merged dossier (which contains Section 6 URLs from all three research sources). Backward compat: if voice config has `primary_text_sources` populated manually (Plato), those are used directly.
+Pass 0a has no internet access; URLs from training data risk hallucination/staleness. Now derived deterministically at render time from `passages[].citation` + `works[]` via `flows/shared/url_extract.py` (CC#1 1-arch-07; relocated from research/ to corpus/00_primary_text_urls.json).
 
-### 5.12 `voice_mode` validation — strict 3-value enum
+### 5.12 `voice_mode` strict 3-value enum
 
-**Current:** {philosophical, observational, narratival}, with null
-allowed only for `subtype: "system"` voices (system entities bypass
-voice_mode branching entirely).
+{philosophical, observational, narratival}, with null permitted only for `subtype: "system"`. Enforced at `personas/flows/shared/node0_validation.py:60`. Brief relaxation to freeform in commit `b1868da` was reverted (`4c5c366`) — downstream prompt branching depends on the fixed enum; freeform broke prompt rendering.
 
-**History:** commit `b1868da` (2026-04-16) briefly relaxed this to
-freeform string to accommodate Pass 0a proposing creative per-voice
-modes (`sovereign-diplomatic`, `embodied-distributed`, etc.). Commit
-`4c5c366` (restore strict voice_mode validation) reverted that —
-downstream prompt branching in Passes 2-5 depends on the fixed
-three-value enum; freeform modes broke prompt rendering for any voice
-Pass 0a proposed a novel mode for.
+**Watch-out:** This bit during voice 3–12 buildout — Cleopatra and Bob Marley needed voice_mode fixed before Phase 0.5 launched.
 
-**Enforcement:** `personas/flows/shared/node0_validation.py:60`.
+### 5.13 `needs_dr_supplement` hardcoded to True (b1868da)
 
-**Open question for Phase B:** whether to expand the enum is
-`_workspace/planning/REBUILD_PLAN.md §Cross-cutting §"Decision: keep \`voice_mode\` 3-enum
-or expand?"`. Default for now: keep the 3-enum.
-
-### 5.13 `needs_dr_supplement` hardcoded to True (commit b1868da)
-
-**Why:** the DR supplement (GPT-4o call in Pass 3) is cheap ($0.10) and always adds depth. No reason to conditionally skip. Removed from Pass 0a schema.
+DR supplement is cheap (~$0.10) and always adds depth. No reason to skip.
 
 ### 5.14 Prefect orchestration (not n8n)
 
-**Why:** n8n's 25MB file limit, weak async polling, and lack of Python-native audio processing ruled it out for the audio stage. Architecture_v1 originally specified "Prefect for audio, n8n for everything else" but in practice the whole pipeline is Prefect. Architecture_v1 is stale on this.
+Architecture_v1 originally specified "Prefect for audio, n8n for everything else" — in practice the whole pipeline is Prefect. Architecture_v1 archived as stale (2026-04-19).
 
 ### 5.15 FastAPI web upload (not rclone + Drive mount)
 
-**Why:** rclone was the original design (per Infrastructure_Setup doc, stale). Actual choice: web upload from producers is simpler logistically — no Drive folder permissions to manage, no sync delays, producers upload at venue with mobile data if needed. Infrastructure_Setup doc is stale on this.
+Producers upload at venue with mobile data; no Drive permissions to manage. Infrastructure_Setup archived as stale.
+
+### 5.16 Phase B per-voice folder layout (2026-04-21)
+
+Per-voice data moved from flat `inputs/voices/` + `runs/<slug>/` to `voices/<slug>/{00_intake, 01_research, 02_merge, 03_corpus, 04_generation, 05_validation, 06_derive}/`. Migrated by `personas/scripts/migrate_to_per_voice_layout.py`. Reason: clearer ownership per pipeline stage, easier per-voice deletion + resumability, better fits the manual claude.ai DR step (6 per-section files per voice instead of one monolithic dossier).
+
+### 5.17 Tier 3 code/project separation (2026-04-20)
+
+Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Resolves via `--project <path>` > `AI_ASSEMBLY_PROJECT_ROOT` env > **hard fail** (no silent default). Multiple projects (test / phase-l-plato / phase-l-dostoevsky / athens-2026) share the same code, separate data. athens-2026 has its own git repo (`mp13131313/ai-assembly-athens2026-voices`, private) for backup; the code repo never touches per-project data.
+
+### 5.18 Arch-03 additive-merge architecture (2026-04-22)
+
+Pass 1-merge replaced with Pass 1.1–1.7 chunked merge. 6 chunks (BIOGRAPHICAL, INTELLECTUAL, REASONING, VOICE, BOUNDARIES, CORPUS) each emit Pydantic-validated structured output via `chunk_runner.run_chunk()`. Pass 1.7 coherence is a **narrow LLM audit** (not a re-merge): emits flags + resolutions + edits[]; Python applies edits to chunk files (chunks = SoT per 1-arch-05 Part B).
+
+Sub-architecture decisions:
+- **1-arch-04**: AnalyticalContext containers preserve scholarly-interpretive material previously dropped (structural_patterns, worked_demonstrations, scholarly_debates).
+- **1-arch-05 Part A**: Pass 2–6 read per-chunk variables instead of `merged_dossier` blob (`_per_chunk_vars()` in `run_persona_pipeline.py`). **Part B**: chunks are source of truth; `08_merged_dossier.json` is convenience snapshot.
+- **1-arch-06**: top-level `interpretive_frames[]` container at Pass 1.2 (frame_type discriminator: interpretive_method / cross_disciplinary_reframing / voice_level_debate). Cross-cuts chunk boundaries.
+- **1-arch-07**: `urls` chunk removed; URL inventory derived deterministically at render time from `passages[].citation` + `works[]` via `flows/shared/url_extract.py`.
+- **1-arch-08**: anachronism discipline consolidated at `KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5) with dual framings per entry. Removed from `LifeScaffold.anachronisms_to_avoid`.
+
+### 5.19 FU#33 P1 bracket-strip (Pass 6.5-clean, 2026-04-25)
+
+After Pass 6, before Pass 7-pre, runs deterministic regex strip on `04_generation/*.json` files. Strips schema-taxonomy markers (`[ontological]`, `[stated]`, `[curator_note]`, etc.) but **preserves Boddice biocultural tags** (`[experiential_reconstruction]`, `[projection_warning:...]`) which Pass 7-pre's boddice check looks for. Placement before validators ensures their reports reflect shipped state.
+
+### 5.20 FU#13 linear patcher replaces revision loop (2026-04-23)
+
+Pass 7a + Pass 7-anachronism `field_issues` feed a single Sonnet/Opus patcher call (`run_persona_pipeline.py:_pass_7a_fix`) emitting surgical JSON patches via path-walker (`flows/shared/patch_walker.py`). Replaced FU#3 surgical revision loop, which over-corrected (writer Opus + thinking + critique tends to expand rather than trim). FU#5 pre-fix snapshot dirs preserve pre-patch state. Cost: ~$1 vs ~$5–10 per loop. FU#44 added register-drift + internal-contradiction patch types.
+
+### 5.21 FU#41 chat artifact (4th Derive output, 2026-04-24, amended 2x)
+
+After CARD COMPLETE, `flows/shared/chat_prompt_builder.py` writes `06_derive/03_chat_system_prompt.json` — assembled card with 11 fields stripped (5 chat-incompatible per Amendment A: `metadata`, `smoke_test_chains`, `reference_only_passages`, 2 continuity blocks; 5 spec-shell meta per Amendment B: `voice_name`, `voice_mode`, `pipeline_version`, `generated_date`, `council_member_name`; 1 nested: `curated_corpus_passages.corpus_metadata`). Operator paste-target for Claude project custom instructions.
+
+### 5.22 FU#2 chunked Pass 7-pre (2026-04-24)
+
+Replaces single-shot Pass 7-pre (which hit Sonnet 4.6's 128K output ceiling on rich cards). 3-stage architecture in `flows/shared/pass_7pre_chunked.py`: Stage 1 extract claims (1 Sonnet call), Stage 2 verify N parallel batches (~25 claims each), Stage 3 boddice tag check (parallel with Stage 2). Aggregation pure Python.
+
+### 5.23 FU#49 family — fidelity-generativity gap (2026-04-26/27)
+
+Reviewer-flagged structural issue: Step 1 (private reasoning) had anti-polish teeth; Step 2 (artifact) didn't. Result: thinking layer produced genuine novelty; synthesis layer reliably softened or dropped those moves.
+
+**Landed (universal patterns in 4 prompt files: Pass 2 + Pass 4a + Pass 4b + Pass 5):**
+- **49A**: Pass 4b prompt updates (generativity criterion + preserve-trace-tensions + length variance 350–1500).
+- **49C**: `conference_facts.json` `session_role_for_ai_assembly` rewrite (removed "breakfast reading" frame; added 3-bar test + framework-strain directive).
+- **49D**: Position B corpus-accurate softening — `hard_limits` field-spec preamble forbids framework-ABANDONMENT, NOT corpus-internal CROSS-EXAMINATION (e.g. Plato's Parmenides cross-examining the Forms is permitted; denying the Forms exist is not). Sentinel-validated on Plato.
+- **49H**: structural-strain licensing in `epistemic_frame_statement`.
+- **49I**: two-aporia distinction in `translation_protocol`.
+- **49J**: phenomena-outside-corpus universal entry in `topics_requiring_care`.
+- **49K**: 5 fidelity + 2 generativity quality_criteria + don't-silently-complete-incomplete-translation entry in `banned_modes`.
+
+**Universal-pattern principle:** voice-specific corpus self-criticism moves emerge from the corpus at generation time. Voices 3–12 generate their own voice-specific content following the universal instruction in the prompt; the Plato text is the worked example, not the prescription.
+
+**Deferred post-Athens:**
+- **49B** Step 2 generativity teeth (runtime workstream)
+- **49E** Step 3 specification (currently UNSPECIFIED — reviewer flagged as highest-impact)
+- **49F** per-voice framework-strain log on micro-site
+- **49G** Greek-scholar calibration (operator outreach: Quarch / Tsinorema / Erinakis on Plato with the **provotype-test** question, not the pastiche-test)
+
+### 5.24 Position B vs Position C (2026-04-27)
+
+**Position B** = corpus-accurate softening (permit corpus-internal self-criticism). **Position C** = framework-lifting (permit denying core commitments). The Athens panel format is **Position B only** — voices speak FROM their frameworks, not against them. FU#49D's universal pattern enforces this in `hard_limits`.
+
+### 5.25 Pipeline-fidelity audit method
+
+When `voice_config` changes after Phase 0.5 ran: three voice-config fields affect 1a/1b template selection (`type`/`subtype`/`hostile_sources`); the rest only affect Pass 0b tailor. If `hostile_sources` flipped, the dossier was generated WITHOUT the hostile-source warning block and must be re-run from scratch. If only `voice_mode`/`corpus_constraint` changed, only the tailor needs to re-run. Audit caught Whanganui hostile_sources misalignment during voice 3–12 buildout.
+
+### 5.26 Pass 0a is operator-trusted
+
+Hand-authoring voice_configs bypasses the operator-review checkpoint (`03_review_doc.md`). Pass 0a output is canonical; if operator review disagrees, edit and re-run Pass 0a (do NOT hand-edit downstream). Caught and corrected during voice 3–12 buildout for Cleopatra, Whanganui, Battuta — Pass 0a was sound on each.
+
+### 5.27 Sentinel_regen smoke-test pattern
+
+For prompt edits: snapshot pre-edit voice (`<baseline-snapshot-dir>/<voice_slug>/<filename>`), make prompt edit, run `sentinel_regen.py regen --pass <NAME> --voices <slug> --baseline-snapshot <DIR>`, inspect diff. Validate that intended pattern surfaced. Restore voice baseline post-validation if it was a smoke-test (not a real generation). 5 sentinel runs landed FU#49H/I/J/K/D this week.
+
+### 5.28 Four deployment-context JSONs at project root (Tier 3)
+
+- `conference_facts.json` (program — used by Pass 0a + Pass 7b)
+- `audience_profile.json` (audience descriptive — Pass 7b)
+- `panel_roster.json` (12 voices + casting principle — Pass 0a)
+- `council_config.json` (runtime artifact, runtime team owns)
+
+Each layer has single ownership. **Never** put real-person names in these — use generic descriptions ("a former PM," "a leading cognitive-warfare theorist"). Voices generate their own engagement_topics; we don't pre-populate with operator-curated targets. Refreshed for athens-2026 per `AUDIENCE_BRIEF.md` Part 3 (contributors-vs-audience distinction).
 
 ---
 
@@ -467,51 +462,52 @@ or expand?"`. Default for now: keep the 3-enum.
 
 ### 6.1 Data gaps
 
-- **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching. Expected accuracy degrades from 70–85% to 40–50% without bios. **Pre-Athens blocker** — bios must be populated before first production session.
-- **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC` (Philosophical Speed-Dating Rave, How to Meet an Idiot). Either firm up venues in program or leave them skipped.
-- **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs for all 12 members; not derived from real persona-pipeline Derive output. Will be replaced with real Derive output from the rebuilt Phase B persona pipeline.
-- **`$PROJECT_ROOT/voices/<slug>/00_intake/02_voice_config.json`** (new layout since 2026-04-21): 6 voice configs migrated (Dostoevsky × 2 projects, Cleopatra, Hannah Arendt, Ibn Battuta, Octopus, Plato in athens-2026). **All 12 voice configs are pending under Phase B** — Pass 0a itself is being redesigned (per `_workspace/planning/REBUILD_PLAN.md` §"Phase 0 — Intake · Pass 0a"; 7 changes including `editorial_rationale` field, `manual_grounding` unification, decoupling from full conference_context, domain-specific non-human grounding, plus Boddice integration). The existing configs are archaeology; they get regenerated under the redesigned Pass 0a along with the other 7 (Scheherazade, Whanganui, Marley, Audrey Tang, Peter Thiel, Ada Lovelace).
-- **`$PROJECT_ROOT/voices/<slug>/01_research/04_dr_dossier/`**: Dostoevsky §1–§4 present (4.6 model). §5–§6 pending manual DR sessions. 0 of remaining 11 voices have DR dossiers yet.
-- **`~/Desktop/AI Assembly/archive/runs/personas/_dr_prompts/`**: 3 v3.10 artifacts on disk (cleopatra, ibn_battuta, octopus). Same as voice configs — these are pre-Phase-B outputs that won't survive the redesigned Pass 0b. All 12 DR prompts get regenerated under Phase B's hybrid-tailored renderer. (Moved to umbrella-level archive/ in Tier 3 cleanup, 2026-04-20.)
+- **`runtime/reference/speakers.json`**: 202 speakers, **all `title/affiliation/bio` empty**. Speaker ID Pass 3 relies on bios for expertise matching (degrades from 70–85% to 40–50% without). **Pre-Athens blocker.**
+- **`runtime/reference/sessions.skipped.json`**: 2 sessions with `venue: TBC`. Either firm up or leave skipped.
+- **`runtime/flows/shared/council/council_config.json`**: version `dev_stub_v3_audience_sharpened`. Hand-written stubs. Replaced as athens-2026 cards complete.
+- **athens-2026 voice_configs**: 12 of 12 written via Pass 0a (closed since 2026-04-26).
+- **athens-2026 DR dossiers**: 1 of 12 voices have all 6 sections (Plato, carry-over). 11 voices × 6 sections = **66 manual claude.ai DR sessions outstanding**.
+- **athens-2026 review_doc editorial_rationale**: 12 of 12 review_docs have `editorial_rationale: null` (each ends with `✍ CURATOR ACTION REQUIRED`). Optional — tailor already ran without these.
 
 ### 6.2 Pipeline gaps
 
-- **Voice Pipeline**: not built. Without it, persona cards can't produce runtime output. Downstream pipeline can't render. Microsite has no content. Everything from Night 1 downstream is blocked.
-- **Phase 5 Cross-Persona QC**: not built. Tests distinctiveness across voices; could surface that e.g. Plato and Arendt sound too similar after their cards complete.
-- **Night 2 exclusion filter (Provocateur)**: not implemented; simple pre-filter between Selection steps 1 and 4.
-- **Continuity block generation**: not built; 1 API call per voice after Night 1/2 to produce 4-field summary.
-- **Downstream pipeline**: Render/Publish/Curate/Deliver — all four stages unbuilt.
-- **Closing-show pipelines**: theme identification, per-theme mapping, video pipeline — three passes unbuilt.
+- **Voice Pipeline** (Steps 1+2+3): not built. Without it, persona cards can't produce runtime output. Everything from Night 1 downstream is blocked.
+- **Step 3 Amendment**: unspecified (FU#49E flagged highest-impact post-Athens).
+- **Phase 5 Cross-Persona QC**: scaffolded (`phase_5_cross_persona_qc.py`), not run — needs all 12 cards.
+- **Night 2 exclusion filter (Provocateur)**: placeholder, not implemented.
+- **Continuity block generation**: not built.
+- **Downstream pipeline** (Render/Publish/Curate/Deliver): unbuilt.
+- **Closing-show pipelines** (theme identification, per-theme mapping, video): unspecified, unbuilt.
 - **Microsite**: unbuilt.
 - **Admin console**: unbuilt.
 
 ### 6.3 Documentation staleness
 
-- **`_workspace/archive/specs/AI_Assembly_Architecture_v1.md`** (archived — stale): describes n8n orchestration (actual is Prefect); 2-step Voice Pipeline (briefing has 3); 2 nights (briefing has 3 + Day 4 goodbye); missing closing-show pipelines, Matrix A/B, newsletter delivery via Substack blurb.
-- **`_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md`** (archived — stale): describes rclone/Drive mount + n8n Docker + file watcher (actual is FastAPI upload + pure Prefect + status.json state machine); pre-flight checklist references obsolete elements.
+- **`_workspace/archive/specs/AI_Assembly_Architecture_v1.md`** — stale (n8n vs Prefect; 2-step vs 3-step Voice Pipeline; missing closing-show pipelines).
+- **`_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md`** — stale (rclone/Drive mount + n8n Docker vs FastAPI upload).
+- **`docs/AI_Assembly_Persona_Pipeline_v3_10.md`** — superseded by **v4** (2026-04-27). Body retained at `docs/_archive/` for history.
+- **`docs/LLM_CALL_INVENTORY.md`** — needs update (new passes: 6.5-clean, 7a-fix, FU#2 3-stage, FU#41 chat builder).
 
 ### 6.4 Code issues (minor)
 
-- **`runtime/scratch/rerun_speaker_id_and_cleaning.py`**: development utility for re-running Speaker ID + Cleaning without paying AssemblyAI twice. Fine as-is but gitignored (`scratch/`).
-- **`runtime/flows/shared/io.py#write_json_atomic`**: uses `tempfile.mkstemp` + cleanup on failure (good). Matches personas version.
-- **`personas/flows/shared/clients.py#call_perplexity`**: guarded access to `data["choices"][0]["message"]["content"]`. `call_openai`: guarded empty choices check + JSON parse error surfacing. Both hardened.
-- **`personas/flows/shared/node1c_fetch.py`**: SSRF-hardened (scheme restriction, RFC1918 block, 5MB cap, narrow exceptions).
+- `personas/flows/shared/clients.py#call_perplexity` + `call_openai`: hardened (guarded access, narrow exceptions).
+- `personas/flows/shared/node1c_fetch.py`: SSRF-hardened.
+- **FU#50(1) Pydantic enforcement at Pass 2/4a outputs**: deferred post-Athens. List-of-string vs list-of-dict shapes both currently valid per prompts; orchestrator accepts both. Voices 3–12 may produce inconsistent shapes — empirical monitor on voice 3 ship.
 
 ### 6.5 Environmental dependencies
 
-- **OpenAI quota**: was exceeded during Plato run (Pass 3 DR supplement fallback was not implemented at the time, mentioned in IMPLEMENTATION_AUDIT). Now hardcoded on by default; needs quota allowance for remaining voices.
-- **Google API quota**: personas project had zero free-tier quota at one point (causing Pass 1b to be skipped and Pass 1-merge to fall back to single-source). Verify before batch persona runs.
-- **Perplexity quota**: 500 queries/month on Pro plan; 12 voices = 12 queries, fine.
+- **OpenAI quota**: needs allowance for voices 3–12 + Pass 7a calls.
+- **Google API quota**: verify before batch persona runs.
+- **Perplexity quota**: 500 queries/month on Pro; 12 voices = 12 queries, fine.
 
 ### 6.6 Open design questions (per Briefing v3.1)
 
-- **Introduction location** for Day 1 (4 options; decision between Till and Matthias)
-- **Program copy revision** for the AIssembly entry
-- **Video production path** (live action / animation / stylised composite)
-- **Day 4 goodbye voice** (which voice's final line closes the relationship)
-- **Multilingual interpretation policy** (whether to flag interpreted quotes with `[interpreted]`)
-- **Audience question mic separation** (recording-protocol change; worth raising with HoBB)
-- **Cross-channel audio recording** (panel vs. audience on separate tracks would fix Q&A diarization merges)
+- Introduction location for Day 1 (4 options).
+- Program copy revision for the AIssembly entry.
+- Video production path.
+- Day 4 goodbye voice.
+- Multilingual interpretation policy (whether to flag interpreted quotes).
+- Audience question mic separation (recording-protocol change).
 
 ---
 
@@ -520,166 +516,149 @@ or expand?"`. Default for now: keep the 3-enum.
 ### 7.1 Required on every machine that runs the pipelines
 
 - Python 3.12 (both venvs)
-- `ffmpeg` (system package) — required for ingest normalization
-- `ffprobe` (comes with ffmpeg) — required for ingest audio validation
-- Git (for microsite content commits, when microsite is built)
+- `ffmpeg` + `ffprobe` (system) — required for ingest normalization + validation
+- Git
 
 ### 7.2 API keys (unified `.env` at monorepo root)
 
-| Key | Used by | Pre-conference / overnight / both | Notes |
+| Key | Used by | Phase | Notes |
 |---|---|---|---|
 | `ANTHROPIC_API_KEY` | Both | Both | Largest volume |
-| `ASSEMBLYAI_API_KEY` | runtime only | Overnight | Transcription |
+| `ASSEMBLYAI_API_KEY` | runtime | Overnight | Transcription |
 | `UPLOAD_APP_PASSWORD` | runtime ingest | Overnight | HTTP Basic Auth |
-| `PERPLEXITY_API_KEY` | personas only | Pre-conference | ~$5/voice for Pass 1a |
-| `GOOGLE_API_KEY` | personas only | Pre-conference | Gemini broad scan + Pass 7a fallback |
-| `OPENAI_API_KEY` | personas only | Pre-conference | Pass 7a primary + Pass 3 DR supplement |
-| Optional overrides | — | — | CLAUDE_MODEL, TRANSCRIPTION_CLAUDE_MODEL, RESEARCHER_CLAUDE_MODEL, PROVOCATEUR_CLAUDE_MODEL, PROVOCATEUR_THINKING, RESEARCHER_THINKING, PROVOCATEUR_FORMULATION_BATCH, TRANSCRIPTION_SPEAKER_ID_MODEL, TRANSCRIPTION_CACHE |
+| `PERPLEXITY_API_KEY` | personas | Pre-conference | ~$5/voice for Pass 1a |
+| `GOOGLE_API_KEY` | personas | Pre-conference | Gemini broad scan + Pass 7c fallback |
+| `OPENAI_API_KEY` | personas | Pre-conference | Pass 7-anachronism + Pass 7a primary |
 
-Future keys (when components build): `SUNO_API_KEY` (Marley renders), `GITHUB_TOKEN` (microsite commits), `VERCEL_TOKEN` (if auto-deploy), email tool credentials (Substack/HoBB newsletter).
+Future keys: `SUNO_API_KEY` (Marley renders), `GITHUB_TOKEN` (microsite), `VERCEL_TOKEN`, email tool credentials.
 
 ### 7.3 Version pins
 
-- `anthropic==0.94.1` (both venvs) — separate venvs for dependency isolation, same Anthropic version
-- `assemblyai==0.59.0` (runtime only)
+- `anthropic==0.94.1` (both)
+- `assemblyai==0.59.0` (runtime)
 - `prefect==3.6.26` (both)
-- `google-genai==1.73.1` (personas only)
-- `openai==2.31.0` (personas only)
-- `fastapi==0.135.3` (runtime only)
-- `jinja2==3.1.6` (personas only)
+- `google-genai==1.73.1` (personas)
+- `openai==2.31.0` (personas)
+- `fastapi==0.135.3` (runtime)
+- `jinja2==3.1.6` (personas)
 
 ### 7.4 VM target (Hetzner CX22/CX32)
 
-- Ubuntu 24.04 LTS
-- 2–4 vCPU, 4–8 GB RAM, ≥100 GB SSD
-- `ingest` system user (nologin)
-- `/opt/ai-assembly/` install root (matches monorepo structure: `runtime/`, `personas/`, `docs/`, `.env`)
-- Caddy reverse proxy + Let's Encrypt auto TLS
-- systemd service with hardening directives
-- ufw: 22/80/443 only
-- No admin console user yet; planned for future
+Ubuntu 24.04 LTS; 2–4 vCPU, 4–8 GB RAM, ≥100 GB SSD; `ingest` system user (nologin); `/opt/ai-assembly/` install root; Caddy reverse proxy + Let's Encrypt; systemd hardening; ufw 22/80/443.
 
-### 7.5 Cost estimates (per spec + validation)
+### 7.5 Cost estimates
 
 | Component | Per-unit cost | Volume | Total |
 |---|---|---|---|
-| Persona Pipeline per voice | $14–18 | 12 voices | $170–220 |
-| + Claude Batch API (50% off Claude portion) | ~$115–150 |
-| Transcription (per night, ~6-9 sessions) | $4–6 | 3 nights | $12–18 |
-| Researcher (per night, Opus + thinking) | $15–25 | 3 nights | $45–75 |
-| Provocateur (per night) | $15–25 | 3 nights | $45–75 |
-| Voice Pipeline (per night, ~36 Step1 + 12 Step2) | est $20–40 | 3 nights | $60–120 |
-| Downstream (Suno + Curate) | $0.50–2.50 + $0.50 | 2 nights curate | $2–6 |
-| **Total infrastructure + API for full Athens run** | | | **~€200–350** |
+| Persona Pipeline per voice | $18–22 | 12 voices | $215–265 |
+| Transcription per night | $4–6 | 3 nights | $12–18 |
+| Researcher per night | $15–25 | 3 nights | $45–75 |
+| Provocateur per night | $15–25 | 3 nights | $45–75 |
+| Voice Pipeline per night (est) | $20–40 | 3 nights | $60–120 |
+| Downstream (Suno + Curate) | ~$1–3 | 2 nights curate | $2–6 |
+| **Total Athens run** | | | **~€400–600** |
+
+Per-voice envelope rose from v3.10's $14–18 to v4's $18–22 due to: (a) per-section claude.ai DR sessions are operator-paid (not per-API), but Phase 0.5 + Pass 1d (60K char budget) + arch-03 chunked merge runs cost slightly more; (b) FU#13 patcher replaces revision loop, **lowering** API cost ~$5–10 → ~$1; net higher because FU#2 chunked Pass 7-pre adds Sonnet calls.
 
 ---
 
 ## 8. Pre-Athens critical path
 
-In the sequence the user intends to work:
+Given today's state: voices 3–12 are at Phase 0.5 complete; 11 × 6 = 66 manual DR sessions outstanding; Voice Pipeline + downstream all unbuilt.
 
-### Phase A — Persona Pipeline validation (now → +1 day)
+### Phase A — Persona pipeline build-side (DONE 2026-04-27)
 
-- [ ] Re-audit Plato's assembled card against the 37-field spec. Check metadata block completeness, register violations, coherence between fields, realism of smoke_test_chains.
-- [ ] Re-read Arendt's 02_passes output; complete any passes that failed or didn't run; produce final assembled card + provocateur_profile.
-- [ ] Spot-check Cleopatra's Pass 0a output (review doc + voice config); if it reads well, proceed to DR prompt generation (Pass 0b), then human DR session (60–120 min at claude.ai), then full pipeline run.
-- [ ] Spot-check Octopus similarly.
-- [ ] Compare the 4 cards side-by-side: do they actually sound different? If Plato and Arendt read similarly, that's a Phase 5 Cross-Persona QC finding (currently caught manually).
+- ✓ Plato shipped + chat-test validated (2026-04-26)
+- ✓ Voice 3–12 voice_configs (Pass 0a, all 12)
+- ✓ Phase 0.5 research for all 12 voices
+- ✓ Pipeline-fidelity audit
+- ✓ FU#49 family of universal patterns landed (49A, 49C, 49D, 49H, 49I, 49J, 49K)
+- ✓ 212/212 tests passing
 
-### Phase B — Complete persona cards for 3–4 voices (+1 → +1 week)
+### Phase B — Voice 3–12 cards complete (now → Athens-3w)
 
-Candidates, in likely order of tractability:
-1. Cleopatra (hostile-sources branch; tests the most complex prompt branching)
-2. Octopus (non-human organism; tests anti-anthropomorphisation)
-3. Bob Marley (musical voice; tests `corpus_constraint: "lyrics — describe patterns only"`)
-4. Dostoevsky or Ada Lovelace (well-documented; baseline check)
+**Operator gates (parallel to code work):**
+1. **66 manual claude.ai DR sessions** (11 voices × 6 sections, ~60–180 min each).
+   - §1–§5: claude.ai with **Opus 4.6** + Extended Thinking + Deep Research
+   - §6: claude.ai with **Opus 4.7** + Extended Thinking + Deep Research (Phase L empirical: 4.6 produces reader's-intro on §6; 4.7 required)
+   - Save each as `voices/<slug>/01_research/04_dr_dossier/0N_section_N.md`
+2. **Optional**: editorial_rationale fill-in on 12 review_docs.
+3. **FU#49G** Greek-scholar calibration (Quarch / Tsinorema / Erinakis on Plato — provotype-test, not pastiche-test).
+4. **As DR data lands per voice**, run pipeline:
+   ```bash
+   cd code/personas
+   set -a && source ../.env && set +a
+   venv/bin/python run_persona_pipeline.py "<Voice>" \
+     --project "/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026"
+   ```
+   ETA: ~2h / ~$18–22. After CARD COMPLETE: chat-test paste `06_derive/03_chat_system_prompt.json` into Claude project.
 
-Each: Pass 0a (15 min + review) → Pass 0b (seconds) → DR session (60–120 min human-in-loop at claude.ai) → run_persona_pipeline (60–90 min automated) → human review (30–60 min).
+**When 12/12 ship:** closes the pre-Athens persona pipeline workstream.
 
-Total per voice: ~3–4 hours.
+### Phase C — Voice Pipeline + supporting infrastructure (Athens-4w → Athens-1w)
 
-### Phase C — Finish persona pipeline (+1 → +3 weeks)
-
-- Remaining 8 voices × 3–4 hours = ~24–32 hours
-- Build Phase 5 Cross-Persona QC (~1 day)
-- Run Phase 5 after all 12 cards
-- Address any distinctiveness issues flagged by QC
-- Update `runtime/flows/shared/council/council_config.json` with real Derive output (tooling: script to assemble members array from all `provocateur_profile.json` files; natural first admin-console feature but can be a one-off script for now)
-
-### Phase D — Voice Pipeline (+3 weeks → +4 weeks)
-
-- Spec Step 3 Amendment (~1 day: system prompt template + input format + output format + integration)
-- Build Steps 1+2: Prefect flow, parallel per-voice, system prompt assembly from persona card, optional validation (anachronism + constitutional)
-- Build Step 3: inter-voice amendment; requires theme-graph (which voices share which themes)
-- Integration test: run full voice pipeline against dev_msc_test Provocateur output
+- Spec **Step 3 Amendment** (currently unspecified — FU#49E)
+- Build Voice Pipeline Steps 1+2 (Prefect flow, system prompt assembly from cards, optional validation)
+- Build Step 3 Amendment + theme-graph
+- Integration test against dev_msc_test Provocateur output
 - Build Night 2 continuity generation
-- Budget: ~1 week focused work
+- Phase 5 Cross-Persona QC — run after all 12 cards complete; address distinctiveness issues
+- Sync `council_config.json` from real Derive output (script or admin-console feature)
 
-### Phase E — Microsite (+4 weeks → +5 weeks, parallelisable with D)
+### Phase D — Microsite (parallelisable with C)
 
-- Design prototype in Lovable or v0 (navigation pattern, voice-then-night vs night-then-voice)
-- Production codebase in Cursor/Claude Code (Astro preferred per spec; Next.js also acceptable)
-- Content schema (night-N.json, per-voice artifact files, shader integration for Octopus, Suno audio hosting for Marley)
-- Vercel or Netlify deploy with auto-rebuild on commit
-- Placeholder content for test runs
-- "Holding page" ready for Night 1 failure fallback
+- Lovable / v0 prototype for nav pattern
+- Production Astro/Next.js codebase, content schema, shader integration (Octopus), Suno hosting (Marley)
+- Vercel/Netlify auto-rebuild
+- Holding-page fallback for Night 1 failure
 
-### Phase F — Readout + closing show (+5 weeks → +6 weeks)
+### Phase E — Closing show + readout
 
-- Spec theme identification pass (1 day)
-- Spec per-theme mapping pass + Matrix visualization (1–2 days, including visual template design)
-- Spec video pipeline pass (1 day)
-- Build all three passes (~3–5 days)
-- Build Matrix-pair visualization template (static HTML/SVG that renders per-theme data)
-- Handoff protocol to closing-show production team (video editors for snippet production)
-- Human editorial pass tooling (where the 1–2 hour polish happens)
+- Spec theme identification, per-theme mapping (Matrix A+B), video pipeline
+- Build all three passes
+- Matrix-pair visualization template
+- Handoff protocol to closing-show production team
+- Human editorial pass tooling
 
-### Phase G — VM + console/UI (+6 weeks → +7 weeks)
+### Phase F — VM + admin console
 
-- Provision Hetzner VM (~15 min)
-- Install stack per deploy/README (Ubuntu 24.04, Python 3.12, Caddy, ffmpeg)
-- Clone monorepo to `/opt/ai-assembly/`, create both venvs, populate `.env`
-- Install systemd unit + Caddy + firewall + journald cap
-- Smoke test: ingest + fake flow + real session
-- Build admin console (FastAPI app mirroring ingest architecture)
-  - Route for each pipeline stage
-  - Subprocess spawning + status.json pattern per ingest
-  - Council sync button (reads persona runs → writes council_config)
-  - Log tail viewer
-- Dry Run 1 (T–2 weeks before Athens): plumbing test
-- Dry Run 2 (T–1 week): full pipeline against real HoBB panel
-- Recording protocol briefing to HoBB A/V team
+- Hetzner provision, install stack, clone monorepo, populate `.env`
+- systemd + Caddy + ufw
+- Build admin console (FastAPI mirroring ingest architecture); council sync button; log tail
+- Dry Run 1 (T–2w): plumbing test
+- Dry Run 2 (T–1w): full pipeline against real HoBB panel
+- Recording-protocol briefing to A/V team
 
-### Phase H — Pre-conference logistics (+7 weeks → Athens)
+### Phase G — Pre-conference logistics
 
-- Populate `runtime/reference/speakers.json` with bios (blocking for Speaker ID quality)
-- Moderators briefed to introduce panelists by full name
-- Walking-session participants briefed to self-introduce
-- AssemblyAI custom vocabulary populated with all panelist names
-- HoBB email tool identified + API credentials (Substack likely)
-- Greek SIM for Athens
-- Printouts: all pipeline specs, this CURRENT_STATE.md, runbook, filename convention for A/V
-- Final full test from hotel Wi-Fi
+- Populate `runtime/reference/speakers.json` bios (blocking for Speaker ID quality)
+- Moderator briefings (full-name introductions)
+- Walking-session participant briefings (self-introduce)
+- AssemblyAI custom vocabulary populated
+- HoBB email tool + API credentials (Substack)
+- Greek SIM
+- Printouts: pipeline specs, this CURRENT_STATE.md, runbook, A/V filename convention
+- Final hotel Wi-Fi test
 - Backup person has SSH key + `.env` copy in 1Password
 
 ---
 
 ## 9. Risks and mitigations
 
-In decreasing order of "if this goes wrong, how bad is it?"
+In decreasing order of "if this goes wrong, how bad?"
 
 | Risk | Mitigation | Notes |
 |---|---|---|
-| Voice Pipeline not built by Athens | Drop Step 3 Amendment, ship Steps 1+2 only; briefing is robust to this per Briefing v3.1's "Step 3 is new architecture" flag | Would reduce deliberative character but keep the experiment intact |
-| Persona cards not all complete | Ship with 8–10 cards; drop 2–4 voices; adjust council_config members array | Weakens the panel composition but better than no Assembly |
-| Closing show too ambitious | Ship mapped read-through only; drop video snippets | Video is nice-to-have; mapped read-through is the structural argument |
-| AssemblyAI diarization fails on key session | Speaker ID flags for human review; human 15–30 min pass catches it | Already validated on MSC test sessions |
-| API quota exhaustion mid-Athens | Pre-test all keys in final week; have backup keys ready; Anthropic Batch API for non-urgent | Dominant risk is OpenAI (Plus plan has query caps on full-model requests) |
-| VM dies mid-conference | Laptop fallback tested pre-Athens; `.env` in 1Password; repo cloned locally | Per Infrastructure_Setup §Failure fallback |
-| Audio recording quality bad | Normalized 96 kbps mono is forgiving; speaker-ID 5-pass catches most issues; human review queue catches the rest | 15–30 min human review per night |
-| Cleopatra persona produces sanitised output on ethnicity | Voice-specific warnings in her config (no flattening to pop culture readings); Pass 7a register + anachronism checks | Monitor during her card build |
-| Thiel persona carries legal risk | Needs review separate from architectural spec | Open question per Briefing v3.1 |
-| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 goodbye publishes regardless | "Indifference is failure" per Briefing v3.1; build the experiment anyway |
+| Voice Pipeline not built by Athens | Drop Step 3, ship Steps 1+2 only; briefing robust to this | Reduces deliberative character but keeps experiment intact |
+| Persona cards not all complete | Ship with 8–10 cards; drop voices; adjust council_config | Weakens panel, better than no Assembly |
+| Closing show too ambitious | Ship mapped read-through only; drop video snippets | Video is nice-to-have |
+| AssemblyAI diarization fails on key session | Speaker ID flags for human review; 15–30 min human pass | Validated on MSC test sessions |
+| API quota exhaustion mid-Athens | Pre-test all keys final week; backup keys; Anthropic Batch | Dominant: OpenAI |
+| VM dies mid-conference | Laptop fallback; `.env` in 1Password; repo cloned locally | Per Infrastructure_Setup §Failure fallback |
+| Audio recording quality bad | Normalized 96 kbps mono is forgiving; 5-pass Speaker ID | 15–30 min human review per night |
+| Cleopatra voice produces sanitised output on ethnicity | hostile_sources=true + Pass 7a register/anachronism checks | Voice config is `hostile_read_against_grain` |
+| Thiel voice carries legal risk | Needs review separate from architectural spec | Open question per Briefing v3.1 |
+| Audience doesn't engage | Provotype is designed to surface this as a finding; Day 4 publishes regardless | "Indifference is failure" |
 
 ---
 
@@ -688,25 +667,29 @@ In decreasing order of "if this goes wrong, how bad is it?"
 ### 10.1 How to update this doc
 
 - On any significant state change, update the relevant section in the same commit.
-- If Phase A completes: move items from §8 Phase A to §1 (what exists) or §6 (known gaps closed).
-- If a spec becomes stale: flag in §6.3 and in `docs/README.md`.
-- If a new architectural decision is made: add to §5 with rationale.
-- If a new data contract is introduced: add to §4.
-- Bump the `Last updated` date at top.
+- If a phase completes: move items from §8 to §1 or §6.
+- If a spec becomes stale: flag in §6.3 and `docs/README.md`.
+- New architectural decision: add to §5 with rationale.
+- New data contract: add to §4.
+- Bump `Last updated` at top.
 
 ### 10.2 Commit convention
 
-For this doc, prefix commits with `state:` — e.g., `state: Phase A complete, 4 persona cards validated`. Keeps state-tracking commits distinguishable from feature commits.
+For this doc, prefix commits with `state:`.
 
 ### 10.3 Related docs
 
-- `docs/README.md` — staleness banner for the spec set
-- `docs/AI_Assembly_Briefing_v3_1.md` — the target-state document
-- `_workspace/archive/fix-plans/IMPLEMENTATION_AUDIT_v3_7.md` — pre-Phase-3/4 audit (historical; superseded by this doc's §1–§3)
-- `personas/HANDOFF.md` — persona → runtime handoff contract (still current)
-- `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` — header comment documents the "smoke_test_chains are not runtime few-shot exemplars" rule. Also see `personas/HANDOFF.md` for the full rationale.
-- `_workspace/archive/fix-plans/PROPOSED_pipeline_doc_change.md` — working doc of proposed pipeline changes (archived; absorbed into current specs)
+- `docs/README.md` — staleness banner
+- `docs/AI_Assembly_Briefing_v3_1.md` — target state
+- `docs/AI_Assembly_Persona_Pipeline_v4.md` — current persona pipeline (2026-04-27)
+- `docs/AI_Assembly_Persona_Card_v2.md` — 35+2 field schema (with v2.1 amendments section)
+- `personas/HANDOFF.md` — persona → runtime contract (current)
+- `_workspace/planning/HANDOFF_2026_04_27.md` — current session pickup
+- `_workspace/planning/FOLLOW_UPS.md` — active FU# tracker
+- `_workspace/planning/ONBOARDING.md` — fresh-session onboarding
+- `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` — STALE (archived)
+- `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` — STALE (archived)
 
 ---
 
-*End of CURRENT_STATE.md. This document should be read alongside the Briefing v3.1 as the most current picture of the system. When in doubt between them: Briefing describes what we're building; this describes where we are.*
+*End of CURRENT_STATE.md. Read alongside Briefing v3.1 as the most current picture of the system. When in doubt: Briefing describes what we're building; this describes where we are.*

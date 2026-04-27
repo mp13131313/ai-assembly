@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "SourceCitation": {
+      "description": "A single citation supporting a claim.",
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "work": {
+          "title": "Work",
+          "type": "string"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "tier": {
+          "enum": [
+            "tier_1_primary",
+            "tier_2_scholarly",
+            "tier_3_contested"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "work",
+        "tier"
+      ],
+      "title": "SourceCitation",
+      "type": "object"
+    }
+  },
+  "description": "Structured exclusion entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | ExclusionEntry] in KnowledgeBoundary.\n\nExample for Plato's conceptual_exclusions: {\n    term: \"'personality'\",\n    reason_excluded: \"imports 20th-C trait theory (Allport, Cattell, Big\n                     Five) foreign to Greek character-grammar; use sōphrosynē /\n                     tripartite soul / hexis instead\",\n    voice_native_alternative: \"character in period-vocabulary per Boddice §15\"\n}",
+  "properties": {
+    "term": {
+      "title": "Term",
+      "type": "string"
+    },
+    "reason_excluded": {
+      "description": "1-line reason this term is excluded. Preserve scholarly reasoning where source provides.",
+      "title": "Reason Excluded",
+      "type": "string"
+    },
+    "voice_native_alternative": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Voice's own tradition-specific term if one exists. For pre-modern voices this is usually where period-vocabulary lives.",
+      "title": "Voice Native Alternative"
+    },
+    "evidence_tag": {
+      "default": "scholarly_consensus",
+      "enum": [
+        "stated",
+        "scholarly_consensus",
+        "contested",
+        "inference",
+        "experiential_reconstruction",
+        "projection_warning"
+      ],
+      "title": "Evidence Tag",
+      "type": "string"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/SourceCitation"
+      },
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "term",
+    "reason_excluded"
+  ],
+  "title": "ExclusionEntry",
+  "type": "object"
+}

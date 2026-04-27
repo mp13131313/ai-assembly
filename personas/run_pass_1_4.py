@@ -13,10 +13,22 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.chunk_runner import run_chunk
 from flows.shared.project_root import add_project_arg, resolve_project_root
+from schemas._analytical import AnalyticalContext
 from schemas.pass_1_4 import Moves, Register, Vocabulary
 
 
-OUTPUT_KEYS = {"moves": Moves, "register": Register, "vocabulary": Vocabulary}
+# 1-arch-03: analytical_context_voice added as OPTIONAL top-level output.
+# Populated for richly-scholarly voices (Dostoevsky, Plato, Arendt); may be
+# null for voices without substantive voice-level scholarly material.
+# The (AnalyticalContext, False) + optional-null handling is enforced at
+# prompt level (system prompt says "null for voices without substantive
+# material") and at Pydantic level (field is Optional).
+OUTPUT_KEYS = {
+    "moves": Moves,
+    "register": Register,
+    "vocabulary": Vocabulary,
+    "analytical_context_voice": AnalyticalContext,
+}
 
 
 def run_pass_1_4(project_root=None, project=None, **kwargs) -> dict:

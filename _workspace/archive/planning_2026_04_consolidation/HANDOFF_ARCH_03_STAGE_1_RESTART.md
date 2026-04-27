@@ -1,0 +1,553 @@
+# Arch-03 Stage 1 + Stage 2 Restart — Handoff & Onboarding
+
+**Session date:** 2026-04-23 (updated end-of-session after Stage 2 partial runs)
+**Branch:** `arch-03-additive-merge`
+**Status:** full fix stack + runtime fixes committed; branch ready for **clean full-pipeline restart from merge through card assembly** on Dostoevsky
+**Next session model:** Opus 4.7 + adaptive thinking recommended — judgment needed to interpret Stage 1 preservation audit + Stage 3 qualitative review. Sonnet 4.6 + high works for mechanical restart and progress-polling if operator directs.
+
+---
+
+## ONBOARDING PROMPT (copy-paste into fresh session)
+
+```
+You are resuming the arch-03 additive-merge testing track on the AI
+Assembly project. All architectural fixes are committed; the branch is
+ready for a clean full-pipeline run from Pass 1.1 merge through Pass 7
+validation to final persona_card_assembled.json, on the Dostoevsky
+Phase L frozen fixture.
+
+Model: Opus 4.7 + adaptive thinking. High effort.
+
+FIRST ACTIONS:
+
+1. Read _workspace/planning/HANDOFF_ARCH_03_STAGE_1_RESTART.md in full.
+   That doc is the source of truth for this track. Read §"Stage 2
+   execution findings" carefully — every runtime fix from the prior
+   session is there with commit hashes.
+
+2. Verify branch + tests:
+   cd "/Users/aienvironment/Desktop/AI Assembly/code"
+   git log --oneline origin/main..HEAD | head -20
+   cd personas && venv/bin/python -m pytest tests/ -x -q
+   (Expect 128/128 tests pass, branch ~25 commits ahead of main.)
+
+3. Archive prior-run artifacts + clear downstream (the proper clean
+   restart discipline the prior session failed to follow once):
+   BASE="../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky"
+   ARC="_workspace/arch_03_baseline_snapshot"
+   mkdir -p "$ARC/pre_full_rerun_$(date +%Y%m%d_%H%M)"
+   RUN_ARC="$ARC/pre_full_rerun_$(date +%Y%m%d_%H%M)"
+   # Archive everything downstream of the merge
+   cp -R "$BASE/02_merge"/* "$RUN_ARC/" 2>/dev/null || true
+   cp -R "$BASE/04_generation" "$RUN_ARC/" 2>/dev/null || true
+   cp -R "$BASE/05_validation" "$RUN_ARC/" 2>/dev/null || true
+   cp -R "$BASE/06_derive" "$RUN_ARC/" 2>/dev/null || true
+   cp "$BASE/07_persona_card_assembled.json" "$RUN_ARC/" 2>/dev/null || true
+   cp "$BASE/03_corpus/02_excerpt_selections.json" "$RUN_ARC/" 2>/dev/null || true
+   cp "$BASE/_arch_03_audit.json" "$RUN_ARC/" 2>/dev/null || true
+   # Clear for fresh run
+   rm -rf "$BASE/02_merge/pass_1_"*
+   rm -f "$BASE/02_merge/08_merged_dossier.json" \
+         "$BASE/02_merge/_coherence_audit.json" \
+         "$BASE/03_corpus/02_excerpt_selections.json" \
+         "$BASE/07_persona_card_assembled.json" \
+         "$BASE/_arch_03_audit.json"
+   rm -rf "$BASE/04_generation"/* "$BASE/05_validation"/* "$BASE/06_derive"/*
+
+   # Also clear the Pass 1c HTTP-fetch cache + review flag so the run
+   # tests what arch-03 actually delivers end-to-end:
+   # Phase L cache has 22 URLs; arch-03's extract_urls (post-fix) derives
+   # 6 Gutenberg URLs. Keeping the cache means testing with Phase L's
+   # richer primary_texts superset — NOT what voices 2-12 will see.
+   # Clearing = real arch-03 end-to-end test, but triggers the Pass 1c
+   # review gate which halts autonomous execution until the operator
+   # manually reviews the fetched content and creates the flag.
+   rm -f "$BASE/03_corpus/01_primary_texts.json" \
+         "$BASE/03_corpus/03_primary_texts_reviewed.flag" \
+         "$BASE/03_corpus/04_primary_texts_review.md"
+   # PRESERVE: 00_intake (voice_config), 01_research (frozen 3-source
+   # research fixture: Perplexity + Gemini + 6 Claude DR sections).
+   #
+   # EXPECTED PAUSE: pipeline will halt at "PASS 1c REVIEW GATE" after
+   # fetching the 6 arch-03-derived URLs. Operator inspects
+   # 03_corpus/01_primary_texts.json, optionally edits, then creates
+   # the flag to unblock:
+   #     touch 03_corpus/03_primary_texts_reviewed.flag
+   # Pipeline resumes automatically when flag is present on next run.
+
+4. Launch the FULL pipeline from Pass 1.1 merge onward:
+   cd personas
+   mkdir -p /tmp/arch03
+   venv/bin/python run_persona_pipeline.py "Fyodor Dostoevsky" \
+       --project "../../projects/phase-l-dostoevsky" \
+       > /tmp/arch03/full_run.log 2>&1 &
+
+   (Background. Monitor via tail -f /tmp/arch03/full_run.log.)
+
+   This runs:
+   - Pass 1 (merge): Pass 1.1-1.7 — 6 parallel chunks + Pass 1.7 coherence.
+     Wall-time: ~20-25 min.
+   - Pass 1c-extract + 1c-fetch + 1c review gate + Pass 1d: ~3-5 min.
+   - Pass 2-6 (generation, Opus + Sonnet mix): ~20-30 min.
+   - Pass 7 family + revision loops (up to 2) + derive + assembly:
+     ~20-40 min.
+   TOTAL: ~60-90 min wall-time end-to-end.
+
+5. After completion, run the preservation audit on the merge layer
+   AND compare the new card to the Phase L baseline:
+   cd personas
+   venv/bin/python scripts/arch_03_preservation_audit.py \
+       --voice fyodor_dostoevsky \
+       --project "../../projects/phase-l-dostoevsky"
+   # Spot-check interpretive_frames[] populated, anachronism_discipline[]
+   # consolidated with dual framings, _coherence_audit.json separated,
+   # chunks-are-source-of-truth invariant (diff chunk files against
+   # 02_merge/08_merged_dossier.json snapshot).
+
+6. Report to operator:
+   - Merge-layer preservation metrics (6 section char-overlap,
+     9 structural patterns §3, citation preservation rate)
+   - interpretive_frames[] count + frame_type distribution (expect
+     ≥3 for Dostoevsky including at least 1 per frame_type)
+   - anachronism_discipline[] count + dual-framings populated
+   - Pass 7a verdict + validator used (gpt-4.1 primary — verify from
+     log; should NOT fall back to Gemini for the clean run)
+   - Card field counts vs. Phase L baseline
+     (baseline: 44 top-level keys, 115K card file)
+   - Register-drift status — Pass 7a baseline flagged 6 Pass 4b
+     output-characteristics fields; arch-03 hypothesis is richer CT
+     resolves this
+   - smoke_test_chains quality + Pass 7c banned_language/modes
+   - Final verdict: PROCEED / ITERATE / ROLLBACK
+
+DO NOT:
+- Stop the pipeline mid-run to apply new fixes mid-flight (prior session
+  did this twice → inconsistent state). Let it complete, report, then
+  fix cleanly.
+- Merge to main autonomously (operator decision per plan §18b).
+- Re-run the 1-arch-* fixes already committed (see commit list below).
+- Skip the Pass 1c review gate — when the pipeline halts there after
+  fetching the 6 arch-03-derived URLs, the operator must manually review
+  and flag. This IS the real arch-03 path for voices 2-12; running with
+  Phase L's cached 22-URL superset would be a shortcut that over-states
+  what production voices will see.
+- Modify the frozen research fixture at 01_research/.
+
+KEY FILES:
+- Plan: _workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md §5.1-§5.8
+- Tracker: _workspace/planning/PIPELINE_REVIEW_FIXES.md §1-arch-03 through -08
+- Handoff: _workspace/planning/HANDOFF_ARCH_03_STAGE_1_RESTART.md (this doc)
+- Preservation audit: personas/scripts/arch_03_preservation_audit.py
+- Runner: personas/run_persona_pipeline.py
+- Pass 1.7: personas/run_pass_1_7.py (three-stage split per §5.5 amendment)
+
+KNOWN WATCH-ITEMS:
+- extract_urls() now recurses into citations[].url (1-arch-07 follow-up
+  fixed this session). Produces 6 direct Gutenberg URLs for Dostoevsky
+  (one per canonical novel/work with curated passages). **These are
+  architecturally disjoint from Phase L's 22 URLs** — Phase L emitted a
+  broad URL inventory (Gutenberg direct-text + archive.org collection
+  pages + scholar portal URLs like rvb.ru/dostoevski/ + fedordostoevsky.ru).
+  Arch-03's citations[].url model only emits per-passage primary-text
+  URLs, so scholar portals / archive aggregators disappear. Likely net
+  quality improvement at Pass 1c-fetch (Gutenberg plaintext vs. Phase L's
+  mix of useful + useless aggregator pages), but narrower work coverage
+  (missing Diary of a Writer, Letters, Notebooks, Adolescent if they
+  weren't represented in curated passages). If Pass 4a Diary-register
+  content thins or Pass 6 letter-passage curation weakens in the report,
+  THAT is a real arch-03 finding worth flagging — not a bug to fix.
+- Pass 7a fallback ladder is gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro.
+  gpt-4.1 (1M context) should handle arch-03's rich card. If it also
+  hits an org-tier limit, Gemini is the working fallback.
+- Preservation audit script has high false-positive rate on the
+  "citation" extractor (regex catches character names, first names,
+  country names as "missing authors"). Read the audit report narrative,
+  not just pass/fail.
+- arch-03's hypothesis re: register-drift at Pass 4b (baseline Pass 7a
+  flagged 6 fields) is empirically tested for the first time in this
+  run. Report what Pass 7a says.
+```
+
+---
+
+---
+
+## What this handoff is
+
+A clean onboarding for whoever (human operator or fresh Claude session) picks up the arch-03 testing track after this session. The 2026-04-22 → 2026-04-23 work cycle landed five architectural fixes on top of the original arch-03 pre-seed + Sonnet Wave 1/2/3 implementation. All fix-stack work is now complete; the branch is ready for Stage 1 empirical validation on the Dostoevsky fixture.
+
+If you are a fresh Claude session reading this: **do not re-implement anything in the fix tracker without checking commit history first.** Everything tagged as `APPLIED` or landed in this session is in the commits listed below.
+
+---
+
+## Branch state at handoff
+
+**HEAD:** (see `git log --oneline origin/main..HEAD` for the current head and full commit sequence)
+
+Commit sequence on `arch-03-additive-merge` above `origin/main` at handoff time, newest first:
+
+1. **docs(arch-03):** plan amendments + tracker status updates + this handoff doc
+2. **feat(arch-03/1-arch-05-A):** per-chunk reads at Pass 1d/2/3/4a/6 — 5 user prompts + runner refactor
+3. **feat(arch-03/1-arch-05-B):** Pass 1.7 Stage C routes edits to chunk files; coherence metadata to `_coherence_audit.json`; merged_dossier rebuilt as snapshot
+4. **feat(arch-03/1-arch-08):** anachronism discipline consolidated at `KnowledgeBoundary.anachronism_discipline[]` with dual framings; `LifeScaffold.anachronisms_to_avoid` removed
+5. **feat(arch-03/1-arch-06):** `interpretive_frames[]` container at Pass 1.2 (cross-cutting scholarly material: interpretive methods + cross-disciplinary re-framings + voice-level debates)
+6. **feat(arch-03/1-arch-04):** Gemini cross-disciplinary preservation discipline block in all 6 merge prompts
+7. **feat(arch-03/1-arch-07):** `urls` chunk dropped; URLs derived at render-time via `flows/shared/url_extract.py`
+8. **docs(arch-03):** tracker additions for 1-arch-04/05/06/07/08 + WATCH-ITEM
+9. Prior: Pass 1.7 split (§5.5 amendment) + chunk_runner fixes (voice_config loading, retry widening, skip-if-exists) + Sonnet Wave 1/2/3 applications + preservation-audit script + Opus arch-03 pre-seed
+
+All commits pushed to `origin/arch-03-additive-merge` as of handoff.
+
+**Working tree:** expected clean. `_workspace/arch_03_baseline_snapshot/` is untracked (backup artifacts from prior runs — safe to keep or discard).
+
+---
+
+## Architecture as of handoff
+
+The arch-03 merge pipeline under the full fix stack looks like this:
+
+### Stage 1A — Parallel chunk merge (Pass 1.1-1.6)
+
+Each Pass 1.N reads Perplexity §N + Claude DR §N + full Gemini; emits per-key JSON files. 19 chunk output files total after 1-arch-07 (`urls` dropped) and 1-arch-06 (new `interpretive_frames`):
+
+- `02_merge/pass_1_1/`: `life_scaffold.json`, `formative_candidates.json`
+- `02_merge/pass_1_2/`: `commitments.json`, `concepts.json`, `tensions.json`, **`interpretive_frames.json`** (NEW per 1-arch-06)
+- `02_merge/pass_1_3/`: `reasoning_method.json`, `textures.json`, `analytical_context_reasoning.json`
+- `02_merge/pass_1_4/`: `moves.json`, `register.json`, `vocabulary.json`, `analytical_context_voice.json`
+- `02_merge/pass_1_5/`: `knowledge_boundary.json` (now carries `anachronism_discipline[]` per 1-arch-08), `sensitive_topics.json`, `hard_limits.json`
+- `02_merge/pass_1_6/`: `works.json`, `passages.json`, `reference_only_passages.json` (`urls.json` **removed** per 1-arch-07)
+
+**Note for 1-arch-08:** `LifeScaffold.anachronisms_to_avoid` is gone. Anachronism discipline lives at `KnowledgeBoundary.anachronism_discipline[]` with `biographical_framing` + `epistemic_framing` + `severity` per entry.
+
+**Note for 1-arch-04:** each merge prompt carries a Gemini-preservation-discipline block (Block 2) instructing the LLM not to deduplicate Gemini's cross-disciplinary re-framings as overlap with Perplexity/DR canonical claims.
+
+### Stage 1B — Pass 1.7 Coherence (three stages, chunks-as-source-of-truth)
+
+- **Stage A** (Python, deterministic): compose 19 chunks into in-memory MergedDossier dict; Pydantic-validate.
+- **Stage B** (LLM, Opus 4.7, `max_tokens=24000`, thinking on): narrow coherence audit; emits `CoherenceAuditResult` = `{flags[], resolutions[], edits[]}` only. Does NOT re-emit the dossier.
+- **Stage C** (Python, 1-arch-05 Part B): each edit routed to its owning chunk file under `02_merge/pass_1_N/<key>.json` via the `_CHUNK_ROUTING` map; chunk re-validated against its Pydantic model; atomic write-back. Coherence metadata writes to `02_merge/_coherence_audit.json` (new file). Merged dossier snapshot is rebuilt from post-edit chunks and written to `02_merge/08_merged_dossier.json` as a human-review convenience artifact.
+
+### Stage 2 — Pass 2-6 Generation (chunks-as-source-of-truth via named template vars)
+
+Per 1-arch-05 Part A, each of Pass 1d/2/3/4a/6 user prompts declares named chunk-content template variables instead of `{{ merged_dossier }}` blob. Runner helper `_per_chunk_vars(merged_dossier_dict)` produces 23 named vars (19 chunk keys + 2 sub-slices + 3 filtered interpretive_frames subsets). Each pass receives only what it needs.
+
+Per-pass consumption (see `run_persona_pipeline.py` render calls for exact kwargs):
+
+| Pass | Model | Chunk inputs | Card fields produced |
+|---|---|---|---|
+| 1d | Sonnet 4.6 | passages, works, reasoning_method_chunk, register, moves + structural_index | (primary_block for Pass 4a/6) |
+| 2 | Opus 4.7 | life_scaffold, formative_candidates, knowledge_boundary_chunk, sensitive_topics, hard_limits_chunk, voice_level_debate_frames | 10 |
+| 3 | Opus 4.7 | commitments, concepts, tensions, interpretive_frames, reasoning_method_chunk, textures, analytical_context_reasoning | 5 |
+| 4a | Opus 4.7 | moves, register, vocabulary, analytical_context_voice, available_pathe, reasoning_method_summary, cross_disciplinary_frames, primary_texts | 7 |
+| 4b | Sonnet 4.6 | (CT-only; no chunk reads) | 8 |
+| 5 | Opus 4.7 | (CT + constitution + reasoning_method card fields) | 4 |
+| 6 | Sonnet 4.6 | works, passages, reference_only_passages + primary_texts + 6 prior card-field refs | 1+1 |
+
+**Chunk-key variable-naming convention:** `_chunk` suffix on chunk vars that collide with downstream card-field names (`reasoning_method_chunk`, `knowledge_boundary_chunk`, `hard_limits_chunk`). Other 16 chunks use natural names.
+
+---
+
+## What to do in the next session
+
+### 1. Orient (10 min)
+
+- Read this handoff (you're doing it).
+- `git log --oneline origin/main..HEAD` — confirm the commit sequence matches what's listed above.
+- `cd personas && venv/bin/python -m pytest tests/ -x -q` — confirm 128/128 tests pass.
+- Briefly skim `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md` §5.5–§5.8 for arch-03's evolved architecture.
+
+### 2. Restart Stage 1 (Pass 1.1-1.7 on Dostoevsky)
+
+Archive prior run, clear merge outputs, restart:
+
+```bash
+cd /Users/aienvironment/Desktop/AI\ Assembly/code
+BASE="../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky"
+mkdir -p _workspace/arch_03_baseline_snapshot/pre_stage1_v4_run
+mv "$BASE/02_merge/pass_1_"* "$BASE/02_merge/08_merged_dossier.json" \
+   "$BASE/02_merge/_coherence_audit.json" \
+   "$BASE/_arch_03_audit.json" \
+   _workspace/arch_03_baseline_snapshot/pre_stage1_v4_run/ 2>/dev/null
+
+cd personas
+venv/bin/python run_pass_1_all.py "Fyodor Dostoevsky" \
+    --project "../../projects/phase-l-dostoevsky"
+```
+
+Expected wall-time: 15-25 min (6 merge chunks in parallel, max 3 concurrent; then Pass 1.7 sequential).
+
+### 3. Run preservation audit
+
+```bash
+cd personas
+venv/bin/python scripts/arch_03_preservation_audit.py \
+    --voice fyodor_dostoevsky \
+    --project "../../projects/phase-l-dostoevsky"
+```
+
+Output at `projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/_arch_03_audit.json`.
+
+**Audit metrics to check** (per plan §7.3):
+
+- (a) Character-overlap ≥85% on §3/§4/§5 (vocabulary-recall metric; has known false-positive issues — read report text, not just pass/fail)
+- (b) Citation preservation — 100% target (extractor has false-positive issues with character names)
+- (c) Named structural patterns §3: 9/9 (scandal-scene, carnivalization, threshold-chronotope, sideshadowing, crowning/decrowning, Menippean, confession-under-pressure, vdrug, polyphony)
+
+### 4. Critical new checks (specific to this session's fixes)
+
+**Verify `interpretive_frames[]` populated (1-arch-06 + 1-arch-04 effectiveness):**
+
+```bash
+cd personas
+venv/bin/python -c "
+import json
+d = json.load(open('../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/08_merged_dossier.json'))
+frames = d.get('interpretive_frames', [])
+print(f'interpretive_frames count: {len(frames)}')
+for f in frames:
+    print(f'  [{f[\"frame_type\"]}] {f[\"name\"]} — scholars: {f.get(\"primary_scholars\", [])}')
+"
+```
+
+**Expect**: ≥3 frames for Dostoevsky (well-documented voice). Expected content per 1-arch-06 + 1-arch-04 preservation discipline:
+- At least 1 `interpretive_method` (hesychast reading per Kasatkina 2022, or subject-to-subject method, or Patyk provocation frame)
+- At least 1-2 `cross_disciplinary_reframing` (post-2022 Ukrainian scholarship, postcolonial reading, etc.)
+- At least 1 `voice_level_debate` (Williams-vs-Frank on Myshkin, antisemitism structural-vs-incidental, or similar)
+
+**Verify `anachronism_discipline[]` consolidated (1-arch-08 effectiveness):**
+
+```bash
+cd personas
+venv/bin/python -c "
+import json
+d = json.load(open('../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/08_merged_dossier.json'))
+ad = d['knowledge_boundary'].get('anachronism_discipline', [])
+print(f'anachronism_discipline count: {len(ad)}')
+for a in ad[:3]:
+    print(f'  {a[\"modern_term\"]} ({a.get(\"severity\",\"?\")}):')
+    print(f'    bio: {a.get(\"biographical_framing\",\"\")[:80]}...')
+    print(f'    epi: {a.get(\"epistemic_framing\",\"\")[:80]}...')
+print()
+ls = d.get('life_scaffold', {})
+assert 'anachronisms_to_avoid' not in ls, 'LifeScaffold should not have anachronisms_to_avoid under 1-arch-08'
+print('LifeScaffold.anachronisms_to_avoid correctly absent ✓')
+"
+```
+
+**Expect**: ≥4 entries each with both framings populated, for a well-documented voice like Dostoevsky. Trauma / depression / existentialist / identity at minimum.
+
+**Verify `_coherence_audit.json` separation (1-arch-05 Part B effectiveness):**
+
+```bash
+cd personas
+ls -la ../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/_coherence_audit.json
+venv/bin/python -c "
+import json
+c = json.load(open('../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/_coherence_audit.json'))
+print(f'flags: {len(c[\"coherence_flags\"])}')
+print(f'resolutions: {len(c[\"coherence_resolutions\"])}')
+print(f'edits applied: {c[\"edits_applied\"]}')
+print(f'edits skipped: {c[\"edits_skipped\"]}')
+for desc in c['edit_log']:
+    print(f'  → {desc}')
+"
+```
+
+**Expect**: separate file exists; flags/resolutions/edits all captured; `edit_log` shows `pass_1_N/<key>.json` file paths if edits were applied.
+
+**Verify chunks edited (Part B source-of-truth check):**
+
+If any edits were applied, spot-check that the chunk file reflects them. Example for a vocabulary edit:
+
+```bash
+cd personas
+venv/bin/python -c "
+import json
+v = json.load(open('../../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky/02_merge/pass_1_4/vocabulary.json'))
+terms = [e['term'] if isinstance(e, dict) else e for e in v.get('preferred_vocabulary', [])]
+print(f'vocabulary.preferred_vocabulary: {len(terms)} terms')
+print(f'  sample: {terms[:10]}')
+"
+```
+
+### 5. Stage 2 (Pass 2-7 full pipeline) — operator pauses before
+
+Per the original Opus testing handoff (§18b), Stage 2 runs `run_persona_pipeline.py` end-to-end and measures new card quality vs. Phase L baseline. Under this session's fix stack, Pass 2-6 exercise the per-chunk reads (Part A). Recommended to pause after Stage 1 preservation-audit review, report findings, then decide on Stage 2.
+
+If Stage 1 preservation confirms 1-arch-04 + 1-arch-06 closed the Gemini gap (interpretive_frames populated with post-2022 + cross-disciplinary content), Stage 2 should empirically test whether richer upstream resolves Pass 7a's baseline register-drift (ISSUE on 6 Pass 4b fields).
+
+### 6. What to NOT do
+
+- Do NOT re-implement fixes already in commit history (use `git log --grep` to confirm before editing any 1-arch-* file).
+- Do NOT modify Pass 0a/0b/1a/1b/1c/1d code beyond what this session already landed; those are locked per Wave 1/2 SURVIVES status.
+- Do NOT merge to main autonomously — operator decision per §18b.
+- Do NOT regenerate the Dostoevsky research inputs (frozen fixture per §7.1; if Stage 1 shows research-side content gap, that's a separate diagnostic question).
+
+---
+
+## Stage 2 execution findings (2026-04-23, in progress)
+
+After Stage 1 v4 completed cleanly, operator directed autonomous proceed to Stage 2 (full pipeline to card). Full pipeline surfaced 5 runtime issues in sequence. All are fixed + committed. Findings:
+
+### Fix 1: `url_extract` didn't recurse into `citations[].url` (1-arch-07 follow-up)
+
+**Surfaced:** Stage 2 v1. Pass 1c-extract returned 0 URLs from arch-03 merge (vs. 22 from Phase L). Pass 1c-fetch short-circuited `pass1c={"passages":[]}` → Pass 1d skipped → Pass 4a ran with empty primary_block (`voice_basis=training-data`) → Pass 6 halted.
+
+**Root cause:** Arch-03 merge emits URLs at `passages[].citations[].url` (nested list-of-dicts). Original `extract_urls_from_passages()` iterated top-level string fields only. Separately, `works[].note` references use shorthand ("Project Gutenberg", "rvb.ru/...") without `https://` prefix.
+
+**Fix:** `_walk_for_urls()` recursive walker in `personas/flows/shared/url_extract.py`. Handles both conventions (regex-extracted URL-in-string + explicit `url` keys in dicts). Smoke-test on Stage 1 v4 merge returns 6 Gutenberg URLs. Commit `ec6c3fc`.
+
+### Fix 2: Pass 7-pre max_tokens ceiling hit on verification output
+
+**Surfaced:** Stage 2 v1 + Stage 2 v5. Sonnet 4.6 hit `max_tokens=24000` ceiling at 78K raw text mid-JSON (v1), then `max_tokens=48000` ceiling at 154K mid-JSON (v5 revision loop 2).
+
+**Root cause:** Arch-03 preserved richer scholarly citations (interpretive_frames + scholarly_context populated) → more citations in the card → Pass 7-pre's per-item verification output grew proportionally. Revision loops on bigger cards push this further.
+
+**Fix:** `max_tokens` 24000 → 48000 (commit `ec6c3fc`) → 96000 (commit `2d98dd4`). 96K gives ~2× headroom even for revision-loop iterations.
+
+### Fix 3: Pass 1d Sonnet 4.6 content-filter block
+
+**Surfaced:** Stage 2 v2. Sonnet 4.6's JSON selection output (selection rubric for Dostoevsky's corpus) tripped Anthropic's output content-filtering policy — likely because descriptive `why`/`label` fields paraphrased violent/disturbing scenes (Karamazov Rebellion, Stavrogin-Matryosha confession, Svidrigailov suicide).
+
+**Fix:** Pass 1d model upgraded claude-sonnet-4-6 → claude-opus-4-7 (commit `0c8da09`). Opus 4.7 handles canonical literary material reliably in our testing. Pass 1d is a small call (~8K output); modest cost delta.
+
+### Fix 4: Opus 4.7 deprecated `temperature` parameter
+
+**Surfaced:** Stage 2 v3. After model swap (Fix 3), Opus 4.7 rejected the call with `temperature is deprecated for this model`.
+
+**Fix:** `call_claude(temperature=...)` now accepts `None` to omit the parameter from API kwargs (commit `4f92610`). Pass 1d passes `temperature=None` explicitly. Backward-compat default of 0.2 preserved for older models.
+
+### Fix 5: (not actually a fix, a finding) Pass 7a uses Gemini fallback because o3 + gpt-4o hit rate limits
+
+**Surfaced:** Stage 2 v5/v6. Pass 7a's primary validator is o3, fallback gpt-4o, second fallback Gemini 2.5 Pro. Both OpenAI models hit RateLimitError ("Request too large for o3/gpt-4o in organization"). Gemini succeeds.
+
+**Not a fix needed:** the cross-model fallback ladder is designed for this. Pass 7a runs cleanly under Gemini 2.5 Pro. Noting for the record — if OpenAI org-level rate limits are materially reached, can adjust primary selection.
+
+### Fix 6: Pass 7a + 7-anachronism ladder — gpt-4.1 primary (OpenAI for this step)
+
+**Surfaced:** Stage 2 v5/v6. OpenAI org-tier `org-p7GAOaz0fFUwWtXRE0GgLDO4` rejected o3 + gpt-4o for Pass 7a with `Request too large ... on tokens`. Not RPM — per-request token ceiling exceeded by arch-03's richer ~60-80K-token card payload. Pass 7a fell back to Gemini 2.5 Pro (works, but operator wants OpenAI for this step with the right model).
+
+**Root cause:** o3 + gpt-4o tiered TPM + per-request limits too low for rich arch-03 payload at this org tier. Not a model failure — a capacity-at-tier issue.
+
+**Fix:** Ladder reordered to `gpt-4.1 → o3 → gpt-4o → Gemini` in both Pass 7-anachronism and Pass 7a. **gpt-4.1's 1M context window** handles arch-03 payloads reliably, and gpt-4.1 typically has higher per-model TPM than o3 at tier 1. o3 kept as reasoning-mode fallback for smaller payloads. Gemini last-resort. Commit `233c757`.
+
+### Session-end state (2026-04-23 end-of-day pause)
+
+Pipeline partial runs executed. Operator directed FULL clean restart next session after this one, from the research merge onward. Why partial rather than complete:
+
+- Stage 2 v5 made it through Pass 2-6 + Pass 7-pre loop 1 + Pass 7a loop 1 Gemini + revision loop 1 Pass 5/6 + crashed at Pass 7-pre loop 2 (48K ceiling)
+- Stage 2 v6 restarted with 96K ceiling, reached revision loop 1 Pass 3 mid-re-run
+- Stage 2 v7 launched from messy partial state (mix of loop-1-revised + pre-revision outputs) — wasn't a clean test of the new gpt-4.1 ladder
+- Operator called it + directed clean full restart for next session
+
+Next session starts from **clean state** per the onboarding prompt above. No mid-run patches. Let it complete, report, fix cleanly if anything emerges.
+
+### Archive inventory (under `_workspace/arch_03_baseline_snapshot/`)
+
+| Archive | What it contains | Purpose |
+|---|---|---|
+| `baseline_*.json/*` | Phase L Dostoevsky baseline (pre-arch-03) — card, merged_dossier, validation, generation, derive | Stage 2/3 comparison reference |
+| `pre_fixstack_run/` | Stage 1 v3 output (1-arch-04 + 06 + 07 applied, but not 05 or 08) | Intermediate milestone |
+| `stage1_v4_run/` | Stage 1 v4 output (FULL fix stack 04/05/06/07/08 applied) | Current best Stage 1 |
+| `phase_l_pre_stage2_baseline/` | Pre-Stage-2 downstream state (Phase L 03_corpus + 04_generation + 05_validation + 06_derive + card) | Compared against arch-03 output |
+| `stage2_v1_failed_partial/` | Stage 2 v1 partial (crashed at Pass 7-pre 24K ceiling) | Diagnostic |
+| `stage2_v6_partial/` | Stage 2 v6 partial (revision loop 1 Pass 3 mid-run when stopped) | Diagnostic |
+| `partial_*run/` | Older partial Stage 1 attempts | Diagnostic |
+
+### Commit sequence — this session (all pushed to `origin/arch-03-additive-merge`)
+
+**Architecture fixes (Stage 1):**
+- `70dc9d0` — 1-arch-07: drop urls chunk output; derive URLs at render-time
+- `bc3d994` — 1-arch-04: Gemini cross-disciplinary preservation discipline (6 merge prompts)
+- `6508163` — 1-arch-06: interpretive_frames[] container at Pass 1.2
+- `b798c18` — 1-arch-08: consolidate anachronism_discipline at KnowledgeBoundary
+- `f5f2950` — 1-arch-05 Part B: Pass 1.7 Stage C edits-to-chunks
+- `3cfaabf` — 1-arch-05 Part A: per-chunk reads at Pass 1d/2/3/4a/6
+- `6232156` — docs: plan §5.5-§5.8 amendments + tracker APPLIED + initial handoff
+
+**Runtime fixes (Stage 2 execution):**
+- `ec6c3fc` — url_extract recursion into citations[].url + Pass 7-pre 24K→48K
+- `7335696` — docs note on 1-arch-07 follow-up
+- `0c8da09` — Pass 1d Sonnet → Opus (content-filter block on literary-canon)
+- `8609c60` — Pass 1d Opus temperature handling (partial fix, superseded by next)
+- `4f92610` — call_claude honors temperature=None (supports Opus 4.7 deprecation)
+- `2d98dd4` — Pass 7-pre 48K → 96K for revision-loop iterations
+- `233c757` — Pass 7a + 7-anachronism ladder: gpt-4.1 primary
+- `5e547c5` — docs: Stage 2 findings + this handoff
+
+---
+
+## Known issues / watch items carried forward
+
+1. **Preservation audit script false-positive rate** — the `citation preservation` metric extracts names via regex that catches fictional character names (Alyosha, Mitya, Zosima), first names, country names (France), and epithets ("Younger" from "Holbein the Younger") as "missing authors." Script needs recalibration as a post-Stage-1 improvement task. Run the manual verification queries in step 4 above for authoritative readings.
+
+2. **Pass 4b / Pass 5 register drift** (baseline Pass 7a ISSUE on 6 Pass 4b output-characteristics fields) — arch-03's hypothesis is that richer CT upstream resolves this. **Empirical question for Stage 2.** If it persists, the fix is prompt-hardening at Pass 4b's first-person/second-person register discipline (chunk reads at Pass 4b were considered and withdrawn during the retrospective — chunks are third-person descriptive, would likely worsen the drift).
+
+3. **`reference_only_passages` scope** (WATCH-ITEM in tracker) — untested for Dostoevsky (public-domain corpus; field is empty). First voice with a copyrighted-corpus (Whanganui, contemporary voices) will test whether it should be a merge output or move to project-level intake config. Revisit when that first voice processes.
+
+4. **`1-arch-01`** (curated_corpus_passages from Pass 1d) remains **deferred post-Phase-N**. Not a conflict with this session's fixes; 1-arch-05 Part A to Pass 1d actually pre-enables 1-arch-01 by making selection criteria explicit.
+
+5. **`1d-06`** (fuzzy-match primary-path, Wave 2 HIGH architectural) remains **deferred** per operator default. Not material for Stage 1.
+
+---
+
+## Files of record
+
+- **Planning docs (authoritative):**
+  - `_workspace/planning/ARCH_03_ADDITIVE_MERGE_PLAN.md` (§5.5–§5.8 for this session's amendments)
+  - `_workspace/planning/PIPELINE_REVIEW_FIXES.md` (1-arch-01 through 1-arch-08 + WATCH-ITEM)
+  - `_workspace/planning/OPEN_ITEMS.md` (broader project pickup)
+  - `_workspace/planning/REBUILD_PLAN.md` (Phase B locked decisions PB#1-9)
+
+- **Code of record:**
+  - `personas/run_persona_pipeline.py` — orchestrator; `_per_chunk_vars()` helper is the 1-arch-05 Part A entry point
+  - `personas/run_pass_1_7.py` — Stage A/B/C; `_CHUNK_ROUTING` map + `_route_edit_to_chunk_file()` is the 1-arch-05 Part B entry point
+  - `personas/schemas/_frames.py` — InterpretiveFrame + FrameType (1-arch-06)
+  - `personas/schemas/pass_1_1.py` — AnachronismEntry expanded (1-arch-08); LifeScaffold.anachronisms_to_avoid removed
+  - `personas/schemas/pass_1_5.py` — KnowledgeBoundary.anachronism_discipline[] added (1-arch-08)
+  - `personas/flows/shared/url_extract.py` — URL extraction helper (1-arch-07)
+  - `personas/flows/shared/prompts/pass_1_1_merge.md` through `pass_1_6_merge.md` — 1-arch-04 Gemini discipline block in each
+  - `personas/flows/shared/prompts/persona_pass_2_user.md`, `persona_pass_3_user.md`, `persona_pass_4a_user.md`, `persona_pass_6_user.md`, `persona_pass_1d_excerpt_selection.md` — 1-arch-05 Part A per-chunk user prompts
+
+- **Baselines preserved under `_workspace/arch_03_baseline_snapshot/`:**
+  - `baseline_07_persona_card_assembled.json` — Phase L pre-arch-03 card (for Stage 2/3 comparison)
+  - `baseline_08_merged_dossier.json` — Phase L pre-arch-03 merged dossier
+  - `baseline_05_validation/` — Phase L Pass 7 validation outputs
+  - `baseline_04_generation/`, `baseline_06_derive/` — Phase L generation + derive outputs
+  - `partial_killed_run/`, `partial_run_2/`, `pre_fixstack_run/` — intermediate run archives from this session's testing
+
+---
+
+## Operator quick-start (if you want to just go)
+
+```bash
+cd /Users/aienvironment/Desktop/AI\ Assembly/code
+
+# Verify branch + tests
+git log --oneline origin/main..HEAD | head -10
+cd personas && venv/bin/python -m pytest tests/ -x -q && cd ..
+
+# Clear prior merge outputs, keep archive
+BASE="../projects/phase-l-dostoevsky/voices/fyodor_dostoevsky"
+mkdir -p _workspace/arch_03_baseline_snapshot/pre_stage1_v4_run
+mv "$BASE/02_merge/pass_1_"* "$BASE/02_merge/08_merged_dossier.json" \
+   "$BASE/02_merge/_coherence_audit.json" \
+   "$BASE/_arch_03_audit.json" \
+   _workspace/arch_03_baseline_snapshot/pre_stage1_v4_run/ 2>/dev/null
+
+# Restart Stage 1 (15-25 min wall time)
+cd personas
+venv/bin/python run_pass_1_all.py "Fyodor Dostoevsky" \
+    --project "../../projects/phase-l-dostoevsky"
+
+# Preservation audit
+venv/bin/python scripts/arch_03_preservation_audit.py \
+    --voice fyodor_dostoevsky \
+    --project "../../projects/phase-l-dostoevsky"
+```
+
+Then run the 3 verification blocks in step 4 above for the new-fix-specific checks (interpretive_frames + anachronism_discipline + _coherence_audit.json + chunks-as-source-of-truth).
+
+---
+
+*End handoff. Next session: restart Stage 1, measure, report PROCEED / ITERATE / ROLLBACK.*

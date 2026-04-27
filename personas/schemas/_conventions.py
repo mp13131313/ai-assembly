@@ -29,6 +29,15 @@ from pydantic import BaseModel, Field
 EvidenceTag = Literal[
     "stated",
     "scholarly_consensus",
+    "contested",                  # active scholarly disagreement (e.g.
+                                  # voice_level_debate frames, antisemitism
+                                  # structural-vs-incidental, Williams-vs-
+                                  # Frank on Myshkin, Bakhtin polyphony
+                                  # relativism-vs-authorial-guidance).
+                                  # Distinct from `inference` (a single
+                                  # scholar's reasoned extrapolation):
+                                  # `contested` means multiple credible
+                                  # readings persist in the literature.
     "inference",
     "experiential_reconstruction",
     "projection_warning",

@@ -22,8 +22,6 @@ OUTPUT REQUIREMENTS — read first, optimize for these throughout:
 - **Minimum 15,000 words total.** Brevity defeats the purpose. If the
   scientific record on this organism is genuinely thin, say so
   explicitly per section and produce what the record supports.
-- **Each of the 6 sections: 2,000+ words.** Do not produce shallow
-  filler — but do not summarize away substantive material either.
 - **Use these EXACT section heading formats** (the downstream parser
   depends on this): `## 1. ECOLOGICAL FOUNDATION`, `## 2. PERCEPTUAL
   WORLD`, `## 3. RELATIONAL PATTERNS`, `## 4. SCIENTIFIC LITERATURE`,
@@ -39,17 +37,18 @@ OUTPUT REQUIREMENTS — read first, optimize for these throughout:
 
 NON-ANGLOPHONE SCIENTIFIC LITERATURE — load-bearing:
 
-Cephalopod, corvid, cetacean, elephant, and canid cognition research
-is substantially non-Anglophone. Japanese cephalopod work (Okinawa
-Institute of Science & Technology, 久保田 / Kubota, 池田 / Ikeda);
-Spanish and Portuguese marine biology (Iberian, Azores); German
-ethology (Max Planck tradition); Italian cognitive-ecology
-(Stazione Zoologica Anton Dohrn, Napoli); Russian comparative
-psychology. **Prioritize peer-reviewed primary research over
-popular-science summaries**, and do not default to Anglophone-only
-coverage where leading field-site research exists in other
-languages. Cite authors' names in their original form where
-transliteration matters.
+Prioritize the original-language research tradition for this
+organism's primary field-site base. Do not default to Anglophone-only
+coverage where leading field-site research exists in other languages.
+Cite authors' names in their original form where transliteration
+matters. **Prioritize peer-reviewed primary research over
+popular-science summaries.**
+
+For cephalopods (e.g.): Japanese work (Okinawa Institute of Science &
+Technology, 久保田 / Kubota, 池田 / Ikeda); Spanish and Portuguese
+marine biology (Iberian, Azores); German ethology (Max Planck
+tradition); Italian cognitive-ecology (Stazione Zoologica Anton Dohrn,
+Napoli); Russian comparative psychology.
 
 Per major claim, indicate source basis briefly: `[primary]` (original
 peer-reviewed research paper), `[consensus]` (uncontested scientific
@@ -148,11 +147,16 @@ Target: 2,500+ words.
 
 Target: 2,000+ words.
 
-- **The reasoning-equivalent**: a 5-8 step PERCEPTUAL-RESPONSE PROCESS
-  (full-field reception → salience assessment → exploratory contact
-  → bodily-display → spatial-navigability read → decisive
-  orientation). Each step grounded in a specific peer-reviewed
-  behavioural observation.
+- **The reasoning-equivalent**: 5-8 perceptual-response stages,
+  sequential where the ethology documents ordering, parallel/distributed
+  where the organism's actual cognition runs that way — prefer the
+  organism's documented cognitive structure over an imposed sequential
+  model. For cephalopods (adapt to taxon): full-field reception →
+  salience assessment → exploratory contact → bodily-display →
+  spatial-navigability read → decisive orientation. For corvids: the
+  equivalent problem-solve + tool-deploy + future-planning cycle. For
+  cetaceans: echolocation-driven exploration + social-signaling + group-
+  decision integration. Each stage grounded in a peer-reviewed observation.
 - **Textures of stimulus** the organism leans into (3-5 items with
   documented example) vs. withdraws from (3-5 items with example).
   Not "topics" — textures of stimulus: novelty, spatial openness,

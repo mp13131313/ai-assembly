@@ -66,7 +66,7 @@
       "type": "object"
     }
   },
-  "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.",
+  "description": "Register + tone + rhetorical mode.\n\nPer decisions log + §15: `tradition_note` names the tradition that speaks\nthrough the voice (oral, ritual, performative). For individual-authorial\nvoices set it to null.\n\n1-arch-03: genre_specific_register captures voices whose register varies\nacross genres they worked in (novel vs. journalism vs. letter for\nDostoevsky; sermon vs. song vs. interview for Marley). translator_\ntradition_notes captures how translator choice shapes voice (for\ntranslated voices).",
   "properties": {
     "rhetorical_mode": {
       "description": "One or two sentences naming the primary mode of expression. Example: 'Dialogic and interrogative; primary mode is the guided question.'",
@@ -74,7 +74,7 @@
       "type": "string"
     },
     "register_and_tone": {
-      "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.'",
+      "description": "The overall feel. Include both what the voice IS and what it is NOT. Example: 'Formally conversational, respectful but direct, playfully ironic — NOT pompous.' No length cap.",
       "title": "Register And Tone",
       "type": "string"
     },
@@ -96,6 +96,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"
@@ -109,6 +110,27 @@
       },
       "title": "Citations",
       "type": "array"
+    },
+    "genre_specific_register": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "How register varies by genre. Example for Dostoevsky: {'fiction': 'fevered-confessional, half-turned-to-internalized-other, scandalously-exposed', 'journalism (Diary of a Writer)': 'polemic-sharp, directly-addressed, cuttingly-specific on contemporaries', 'letter': 'direct-earnest, debt-apologetic, confiding', 'hagiography (Zosima sections)': 'paratactic, scripture-cadenced, shorn of ellipses'}. Preserve genre-register mapping; Pass 4a may select one primary genre-register for card or may blend.",
+      "title": "Genre Specific Register",
+      "type": "object"
+    },
+    "translator_tradition_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "How translator choice shapes voice for translated voices. Example for Dostoevsky: 'Garnett (1912-20) Victorian-English register; Pevear-Volokhonsky (1990-2002) preserves Russian syntactical friction + Cyrillic terms; Ready (2014-18) contemporary British; Katz modernist-austere. For primary-text corpus and voice-exemplar anchor, P-V recommended; for reader-accessibility, Garnett.'",
+      "title": "Translator Tradition Notes"
     }
   },
   "required": [

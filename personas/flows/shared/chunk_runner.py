@@ -32,6 +32,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 import anthropic as _anthropic
+import httpx as _httpx
+import httpcore as _httpcore
 from pydantic import BaseModel
 
 from flows.shared import paths as _paths
@@ -42,7 +44,27 @@ from flows.shared.prompt_render import render
 from schemas._entry import ValidationError, validate_chunk_output, generate_json_schemas
 
 
-_RETRYABLE = (RuntimeError, json.JSONDecodeError, _anthropic.APIError, _anthropic.RateLimitError)
+# Streaming calls can drop mid-response on transient network flakes — the
+# peer closing the chunked connection before the JSON body completes surfaces
+# as httpx.RemoteProtocolError (wrapping httpcore.RemoteProtocolError), which
+# the anthropic SDK does not translate into its own APIError hierarchy. A
+# single bounce on these is always the right move; they are independent of
+# prompt content. See first Stage 1 run under arch-03 where Pass 1.4 died on
+# "peer closed connection without sending complete message body".
+_RETRYABLE = (
+    RuntimeError,
+    json.JSONDecodeError,
+    _anthropic.APIError,
+    _anthropic.RateLimitError,
+    _httpx.RemoteProtocolError,
+    _httpx.ReadError,
+    _httpx.ConnectError,
+    _httpx.ReadTimeout,
+    _httpcore.RemoteProtocolError,
+    _httpcore.ReadError,
+    _httpcore.ConnectError,
+    _httpcore.ReadTimeout,
+)
 
 
 def _stamp(msg: str) -> None:
@@ -199,13 +221,41 @@ def run_chunk(
     output_subdir: str | None = None,
     use_test_fixtures: bool = False,
     user_prompt: str | None = None,
-    max_tokens: int = 32000,
+    max_tokens: int = 48000,
     mode: str = "auto",  # "per_section", "monolithic", or "auto"
 ) -> dict[str, Any]:
-    """Run a single chunked-merge pass end-to-end. Returns the validated dict."""
+    """Run a single chunked-merge pass end-to-end. Returns the validated dict.
+
+    Under 1-arch-03 additive merge, per-chunk outputs are larger (preservation
+    discipline). max_tokens default raised from 32000 → 48000 after Pass 1.1
+    hit 32000 on rich Dostoevsky biographical output. Downstream chunks with
+    smaller outputs still fit comfortably.
+    """
     slug = voice_slug(name)
     chunk_num = int(chunk_name.split(".")[1])  # "1.2" → 2
     _stamp(f"Pass {chunk_name} merge: '{name}' (slug={slug}, fixtures={use_test_fixtures})")
+
+    # Skip-if-already-run. When all per-key JSON outputs exist under the
+    # chunk directory (from a prior successful run), load + validate them
+    # from disk and return — no LLM call, no cost. This lets restarts after
+    # transient failures (e.g. one chunk's streaming connection drops)
+    # avoid re-running already-completed chunks. Delete the chunk's output
+    # directory to force a re-run.
+    out_dir_preview = _paths.merge_dir(slug, project_root) / (
+        output_subdir or f"pass_{chunk_name.replace('.', '_')}"
+    )
+    existing_files = {k: out_dir_preview / f"{k}.json" for k in output_keys}
+    if all(p.exists() for p in existing_files.values()):
+        _stamp(f"  skip: all outputs present at {out_dir_preview.relative_to(project_root)}")
+        cached = {k: json.loads(p.read_text()) for k, p in existing_files.items()}
+        try:
+            validated = _validate(cached, output_keys)
+        except ValidationError as exc:
+            _stamp(f"  cached outputs failed validation; re-running: {exc}")
+        else:
+            validated["_usage"] = {"input_tokens": 0, "output_tokens": 0, "cached": True}
+            validated["_model"] = "cached"
+            return validated
 
     if not use_test_fixtures and mode == "auto":
         mode = detect_dr_mode(slug, project_root)
@@ -216,12 +266,30 @@ def run_chunk(
     )
     schema_vars = _inline_schemas(output_keys)
 
+    # Load voice_config for hostile_sources + corpus_constraint (referenced
+    # by arch-03 pre-seed prompts 1.1, 1.5, 1.6). Fixtures mode: default
+    # both to falsey/"full" since fixtures don't ship a voice_config.
+    if use_test_fixtures:
+        hostile_sources = False
+        corpus_constraint = "full"
+    else:
+        vc_path = _paths.voice_config(slug, project_root)
+        if vc_path.exists():
+            vc = json.loads(vc_path.read_text())
+            hostile_sources = bool(vc.get("hostile_sources", False))
+            corpus_constraint = vc.get("corpus_constraint", "full") or "full"
+        else:
+            hostile_sources = False
+            corpus_constraint = "full"
+
     system = render(
         template_name,
         name=name,
         type=voice_type,
         subtype=subtype,
         voice_mode=voice_mode,
+        hostile_sources=hostile_sources,
+        corpus_constraint=corpus_constraint,
         perplexity_dossier_text=perp_text,
         claude_dr_dossier_text=dr_text,
         gemini_broad_scan_text=gem_text,

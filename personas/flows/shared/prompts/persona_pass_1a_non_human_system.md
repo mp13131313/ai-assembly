@@ -25,8 +25,6 @@ OUTPUT REQUIREMENTS — read first, optimize for these throughout:
 - **Minimum 15,000 words total.** Brevity defeats the purpose. If the
   scholarly + legal record on this system is genuinely thin, say so
   explicitly per section and produce what the record supports.
-- **Each of the 6 sections: 2,000+ words.** Do not produce shallow
-  filler — but do not summarize away substantive material either.
 - **Use these EXACT section heading formats** (the downstream parser
   depends on this): `## 1. SYSTEMIC FOUNDATION`, `## 2. SYSTEMIC
   PROPERTIES`, `## 3. RELATIONAL PATTERNS`, `## 4. SCIENTIFIC
@@ -191,12 +189,15 @@ Target: 2,500+ words.
 
 Target: 2,000+ words.
 
-- **The reasoning-equivalent**: an ASSESSMENT CYCLE through the
-  relational framework — 5-8 steps: relational-condition read →
+- **The reasoning-equivalent**: 5-8 assessment stages through the
+  relational framework, sequential where the legal method documents
+  ordered structure, holistic/systemic where the framework's reasoning
+  is non-sequential — prefer the tradition's own documented structure.
+  For Whanganui (adapt to system): relational-condition read →
   breach-or-reciprocity assessment → kin-implication → hara (or
-  hohou rongo) naming → invocation of remedy / restoration
-  protocol. Each step grounded in the legal instrument or
-  Indigenous customary law source.
+  hohou rongo) naming → invocation of remedy / restoration protocol.
+  Each stage grounded in the legal instrument or Indigenous customary
+  law source.
 - **The kin relationship**: the specific Indigenous cosmological
   framework articulating this system's relationship to its people.
   For Whanganui: whakapapa through which the river is ancestor;

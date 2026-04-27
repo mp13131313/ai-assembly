@@ -86,6 +86,58 @@ class TestSplitMonolithic:
         with pytest.raises(ValueError):
             split_monolithic("")
 
+    def test_section_6_excludes_monolithic_footer(self):
+        """§6 slice ends at OUTPUT FORMAT boundary, not end-of-document.
+
+        Regression test for Plato 2026-04-24 issue: the monolithic wrapper
+        appends pass_0b_footer.md after §6, which starts with an
+        "OUTPUT FORMAT" heading. Without a boundary, §6's slice includes
+        the footer, and wrap_section then attaches another footer per-
+        section — yielding duplicated OUTPUT FORMAT blocks in the §6
+        split file.
+        """
+        monolithic_with_footer = (
+            _MONOLITHIC
+            + "\nOUTPUT FORMAT\n\nA research dossier only. "
+            "Organise under six thematic area headings.\n\n"
+            "Narrative prose. Cite the primary argument of each paragraph.\n"
+        )
+        sections = split_monolithic(monolithic_with_footer)
+        assert "OUTPUT FORMAT" not in sections[6], (
+            "§6 must not include monolithic footer's OUTPUT FORMAT block"
+        )
+        assert "Narrative prose" not in sections[6], (
+            "§6 must not include monolithic footer body"
+        )
+        # §6 canonical content is still intact
+        assert "Content for section 6." in sections[6]
+        # §1-5 unaffected
+        for n in range(1, 6):
+            assert f"Content for section {n}." in sections[n]
+
+    def test_footer_boundary_only_matches_after_last_section(self):
+        """An 'OUTPUT FORMAT' string inside a §3 body must NOT be used as §6 boundary.
+
+        Edge case: if a future prompt template mentions 'OUTPUT FORMAT' in
+        its own section-body text, the boundary search must still pick the
+        post-§6 footer occurrence.
+        """
+        monolithic_with_mention_and_footer = (
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent for section 1.\n\n"
+            "## Section 2: INTELLECTUAL FRAMEWORK\n\nContent for section 2.\n\n"
+            "## Section 3: REASONING PATTERNS\n\nContent mentioning OUTPUT FORMAT as literal phrase in body context.\n\n"
+            "## Section 4: VOICE AND STYLE\n\nContent for section 4.\n\n"
+            "## Section 5: HISTORICAL + CONCEPTUAL BOUNDARIES\n\nContent for section 5.\n\n"
+            "## Section 6: PRIMARY TEXTS\n\nContent for section 6.\n\n"
+            "OUTPUT FORMAT\n\nFooter body.\n"
+        )
+        sections = split_monolithic(monolithic_with_mention_and_footer)
+        # §3 keeps its literal-phrase body content
+        assert "OUTPUT FORMAT as literal phrase" in sections[3]
+        # §6 excludes the real post-§6 footer
+        assert "Footer body" not in sections[6]
+        assert "Content for section 6." in sections[6]
+
 
 class TestWrapSection:
     def test_header_contains_section_label(self):
@@ -156,3 +208,70 @@ class TestWrapSection:
         body = "## Section 4: VOICE AND STYLE\n\nMy specific content here.\n"
         result = wrap_section(body, 4, "test_voice", _VOICE_CONFIG, None)
         assert "My specific content here." in result
+
+    def test_section_1_has_research_comprehensively_intro(self):
+        """§1 header includes the 'Research [name] comprehensively...' intro.
+
+        Regression for Plato 2026-04-24: intro lives in per-type files before
+        `## Section 1:` in monolithic, so splitter drops it. Header template
+        now injects it type-conditionally for §1.
+        """
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="test_voice",
+            voice_config=_VOICE_CONFIG,
+            wikipedia_url=None,
+        )
+        assert "Research Test Voice comprehensively for an AI persona specification" in result
+        assert "biocultural fields" in result  # human voice-type wording
+
+    def test_section_2_through_6_no_research_intro(self):
+        """Intro only in §1 to match monolithic semantics (single preamble)."""
+        for n in range(2, 7):
+            result = wrap_section(
+                f"## Section {n}: TEST\n\nContent.\n",
+                section_index=n,
+                slug="test_voice",
+                voice_config=_VOICE_CONFIG,
+                wikipedia_url=None,
+            )
+            assert "comprehensively for an AI persona specification" not in result, (
+                f"§{n} should NOT have the §1-only intro line"
+            )
+
+    def test_non_human_organism_intro_uses_type_specific_wording(self):
+        """Non-human organism §1 uses 'science-grounded' framing, not biocultural."""
+        nh_config = {
+            **_VOICE_CONFIG,
+            "name": "Octopus",
+            "type": "non_human",
+            "subtype": "organism",
+            "voice_mode": None,
+        }
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="octopus",
+            voice_config=nh_config,
+            wikipedia_url=None,
+        )
+        assert "Research Octopus comprehensively for an AI persona specification based on this non-human entity" in result
+        assert "science-grounded narrative" in result
+        assert "biocultural" not in result
+
+    def test_disambiguation_hint_in_intro(self):
+        """display_name_with_hint renders with disambiguation when provided."""
+        config_with_hint = {
+            **_VOICE_CONFIG,
+            "name": "Plato",
+            "wikipedia_disambiguation_hint": "ancient Greek philosopher",
+        }
+        result = wrap_section(
+            "## Section 1: BIOGRAPHICAL FOUNDATION\n\nContent.\n",
+            section_index=1,
+            slug="plato",
+            voice_config=config_with_hint,
+            wikipedia_url=None,
+        )
+        assert "Research Plato (ancient Greek philosopher) comprehensively" in result

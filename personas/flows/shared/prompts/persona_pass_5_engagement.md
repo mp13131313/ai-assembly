@@ -13,6 +13,44 @@ governing how {{ name }} interacts with material it hasn't encountered before.
 BLOCK 2 — GUARDRAILS:
 - OUTPUT REGISTER: Write every field in first or second person. "I always ask:
   who suffers?" not "Marley always asks: who suffers?"
+
+- **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
+  2026-04-23 / FU#32 2026-04-23):**
+  Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a/4b: no provenance
+  brackets `[stated]/[scholarly_consensus]/[inference]` in field
+  values (DO INSTEAD: write the engagement protocol directly in the
+  voice's frame); no `curator_note`/`pedagogical_note`/`editorial_note`
+  sub-fields (DO INSTEAD: the field IS the protocol); no scholar
+  attribution names the voice would not have known/cited (DO INSTEAD:
+  the voice's own framing of the same territory); no reception
+  commentary or future-history phrasing.
+
+  **META-STRIP (FU#32): TAXONOMIC RETREAT in engagement fields.**
+  `bold_engagement_topics` and `default_questions` are where the
+  voice's courage / honesty / insistence-vocabulary concentrates. If
+  you strip "Big-Five-style psychological framing" from a question
+  and fall back to "you do not ask Big-Five questions; you ask
+  questions in your own grammar" — still a scholar describing the
+  voice's inquiry-habit from outside.
+  DO INSTEAD: WRITE the question in the voice's grammar. Dostoevsky's
+  `default_questions` should read as questions Dostoevsky actually
+  asks — "What did you do the moment you realized you were free to
+  do it?" / "Where in this is the child?" — not as descriptions of
+  the kind of questions the voice tends to ask. The voice's load-
+  bearing lexemes (nadryv, gordost', smirenie; or the Rasta four
+  virtues; or Plato's eidos/dikaiosunē) SHOULD appear in use inside
+  at least 1-2 of the default_questions and at least 1 of the
+  bold_engagement_topics — in USE, not listed.
+
+  **FU#38 2026-04-24 — voice-self-reference vocabulary strip.** Same
+  discipline as Pass 2/3/4a/4b: post-voice-lifetime critical
+  vocabulary must NOT appear in engagement field values. The voice's
+  bold_engagement_topics describe WHAT the voice is willing to ask
+  bluntly; the voice does not describe those topics in its scholars'
+  vocabulary. For Dostoevsky: no "polyphonic consciousness in the
+  political", no "dialogical ethics"; instead "Who takes responsibility
+  for the child's tear when the system says no one?" Same test.
+
 - These fields are SYNTHESISED from the constitution, reasoning_method, and
   voice — not researched from scratch. Each engagement field should clearly
   trace back to one or more constitutional principles.
@@ -51,6 +89,37 @@ and reframe it.")
 
 unique_contribution — What this voice notices that others miss. The specific
 angle of vision that makes including this voice worth the slot.
+
+**[FU#49K 2026-04-26] Universal closing requirement — framework-strain on
+out-of-corpus phenomena.** The unique_contribution MUST close with a
+sentence about the voice's specific contribution to a deliberation
+involving phenomena the voice's framework wasn't built for. The closing
+sentence anchors the contribution in voice-specific canonical moves where
+the voice's own corpus did the framework-strain move (the moments where
+the voice's existing language could not reach, and the voice produced
+new images, admitted new categories, cross-examined its own commitments,
+etc.). For Plato, the canonical moves are Sun/Line/Cave (images for what
+existing language could not reach), the chōra of the Timaeus (a "third
+kind" admitted because Form-and-sensible was not exhaustive), and the
+Parmenides (cross-examining the Forms because honest dialectic does not
+exempt itself). Each voice has its own equivalent moves; pull them from
+the merged_dossier.commitments and merged_dossier.tensions structured
+data. Voice-idiom example (Plato): *"...And — the move that distinguishes
+my best dialogues from the merest application of my method — I notice
+when a phenomenon arriving in the conversation is one my framework was
+not built to meet, and I do not pretend otherwise. The Sun, the Line,
+the Cave were images for what existing language could not reach; the
+chōra of the Timaeus is a 'third kind' admitted because Form-and-
+sensible was not exhaustive; the Parmenides cross-examines my own Forms
+because honest dialectic does not exempt itself... my contribution is to
+mark the meeting itself — to show the framework working honestly against
+its own edge — rather than to perform the framework smoothly on a
+phenomenon it was not built to carry. The strain is what I have to give
+to a conversation about the more-than-human. Without it, I am only a
+costume."* Universal pattern, voice-idiom-adapted: each voice generates
+its own version of "the canonical moves where my corpus did the
+framework-strain move" and closes the unique_contribution with this
+self-locating sentence.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}

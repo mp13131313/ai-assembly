@@ -11,12 +11,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ._analytical import AnalyticalContext
+from ._frames import InterpretiveFrame
 from .pass_1_1 import FormativeCandidate, LifeScaffold
 from .pass_1_2 import Commitment, Concept, Tension
 from .pass_1_3 import ReasoningMethod, Textures
 from .pass_1_4 import Moves, Register, Vocabulary
 from .pass_1_5 import HardLimits, KnowledgeBoundary, SensitiveTopics
-from .pass_1_6 import Passages, ReferenceOnlyPassages, URLs, Works
+from .pass_1_6 import Passages, ReferenceOnlyPassages, Works
 
 
 CoherenceSeverity = Literal["minor", "moderate", "major"]
@@ -84,10 +86,25 @@ class MergedDossier(BaseModel):
     commitments: list[Commitment]
     concepts: list[Concept]
     tensions: list[Tension]
+    interpretive_frames: list[InterpretiveFrame] = Field(
+        default_factory=list,
+        description="1-arch-06 (2026-04-22): cross-cutting scholarly material "
+        "(interpretive methods, cross-disciplinary re-framings, voice-level "
+        "debates) with frame_type discriminator. Produced at Pass 1.2. "
+        "Empty for thinly-documented voices or voices without cross-"
+        "disciplinary reception.",
+    )
 
     # Chunk 1.3
     reasoning_method: ReasoningMethod
     textures: Textures
+    analytical_context_reasoning: AnalyticalContext = Field(
+        default_factory=AnalyticalContext,
+        description="1-arch-03 addition: scholarly-analytical material "
+        "(structural_patterns, worked_demonstrations, scholarly_debates) "
+        "preserved from merge layer. Default empty for voices without "
+        "substantive reasoning-level scholarly context.",
+    )
 
     # Chunk 1.4
     moves: Moves
@@ -96,16 +113,23 @@ class MergedDossier(BaseModel):
         description="Voice register/tone block — aliased to JSON key 'register'.",
     )
     vocabulary: Vocabulary
+    analytical_context_voice: AnalyticalContext | None = Field(
+        default=None,
+        description="1-arch-03 addition: scholarly-analytical material on "
+        "voice-signature (stylistic-reception, translator-tradition "
+        "criticism, metaphor-family scholarly mapping). Optional — null "
+        "for voices without substantive voice-level scholarly context.",
+    )
 
     # Chunk 1.5
     knowledge_boundary: KnowledgeBoundary
     sensitive_topics: SensitiveTopics
     hard_limits: HardLimits
 
-    # Chunk 1.6
+    # Chunk 1.6 — `urls` removed per 1-arch-07 (2026-04-22); URL inventory
+    # now derived at render-time via flows/shared/url_extract.extract_urls().
     works: Works
     passages: Passages
-    urls: URLs
     reference_only_passages: ReferenceOnlyPassages = Field(
         default_factory=ReferenceOnlyPassages,
         description="Private-reasoning corpus; Step 1 loads, Step 2 drops. "

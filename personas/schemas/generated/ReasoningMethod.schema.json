@@ -1,11 +1,20 @@
 {
   "$defs": {
     "ReasoningStep": {
-      "description": "One step in the voice's characteristic reasoning method.\n\n5-8 steps per voice. For human voices: cognitive moves (dialectic,\nelenchus, etc.). For non-human organisms: perceptual-response cycle.\nFor non-human systems: assessment cycle through the relational framework.\nFor fictional/narratival: story-construction process.",
+      "description": "One step in the voice's characteristic reasoning method.\n\nMinimum 5, uncapped maximum (pre-1-arch-03 cap was 5-8; now lower-bound\nonly). For human voices: cognitive moves (dialectic, elenchus, etc.).\nFor non-human organisms: perceptual-response cycle. For non-human\nsystems: assessment cycle through the relational framework. For\nfictional/narratival: story-construction process.\n\n`step_number` optional — for voices whose reasoning isn't sequential\n(perceptual-response cycles with parallel activation, narratival\nreasoning where steps are simultaneous).",
       "properties": {
         "step_number": {
-          "title": "Step Number",
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sequential ordering if method is ordered. Omit for non-sequential methods (parallel perceptual-response, scenic-collision where multiple moves fire simultaneously).",
+          "title": "Step Number"
         },
         "name": {
           "description": "Short cognitive-move name, e.g. 'Test with counterexamples'.",
@@ -13,18 +22,30 @@
           "type": "string"
         },
         "description": {
-          "description": "What the step does; what it moves the voice toward.",
+          "description": "What the step does; what it moves the voice toward. No length cap.",
           "title": "Description",
           "type": "string"
         },
         "example": {
-          "description": "One concrete example applying this step to a representative provocation.",
+          "description": "One concrete example applying this step to a representative provocation. Prefer lift-from-primary-text where possible. No length cap.",
           "title": "Example",
           "type": "string"
+        },
+        "scholarly_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Named scholarly framing of this step. Example for Dostoevsky's 'Incarnate idea in person' step: 'Bakhtin names this the idea-hero (PDP ch. 5, image of the idea).' For Plato's 'Test with counterexamples' step: 'Vlastos on Socratic elenchus as the structural move of early dialogues; refined by Griswold on mature hypothetical method.' Preserve for Pass 3 synthesis context.",
+          "title": "Scholarly Context"
         }
       },
       "required": [
-        "step_number",
         "name",
         "description",
         "example"
@@ -98,7 +119,7 @@
       "type": "object"
     }
   },
-  "description": "Per decisions log + REBUILD_PLAN D.1.\n\n5-8 steps. Includes concluding steps for how the voice evaluates claims\nand how it structures conclusions. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
+  "description": "Per decisions log + REBUILD_PLAN D.1.\n\nMinimum 5 steps, uncapped. Pre-1-arch-03 targeted 5-8; additive merge\naccepts more where sources warrant. Test: if two different provocations\nrun through this method, do the results sound like the same voice\nengaging differently — or like a generic responder?",
   "properties": {
     "voice_mode": {
       "anyOf": [
@@ -133,6 +154,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"

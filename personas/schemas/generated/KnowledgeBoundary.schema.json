@@ -1,5 +1,142 @@
 {
   "$defs": {
+    "AnachronismEntry": {
+      "description": "Structured anachronism: modern term + dual framings (biographical +\nepistemic) + voice-native alternative + severity.\n\nUnder 1-arch-08 (2026-04-22), anachronism discipline consolidates into\n`KnowledgeBoundary.anachronism_discipline[]` (Pass 1.5). Each entry\ncarries BOTH framings so Pass 2 can pluck the right one for each card\nfield it populates:\n\n- `biographical_framing` → rendered in Pass 2's `world.anachronisms_to_avoid`\n  card field (\"this would flatten the katorga + mock-execution\n  threshold experiences\")\n- `epistemic_framing` → rendered in Pass 2's `knowledge_boundary.conceptual_exclusions`\n  card field (\"post-1980 clinical-psychological category; didn't exist in\n  voice's lifetime\")\n\nThe pre-1-arch-08 location `LifeScaffold.anachronisms_to_avoid` is\nREMOVED. `reason_excluded` is deprecated in favor of the two framings\nbut kept optional for backward compat during migration.",
+      "properties": {
+        "modern_term": {
+          "description": "The modern-English or modern-clinical term that would mis-render the voice. Examples: 'trauma', 'depression', 'identity', 'existentialist', 'gender', 'nationalism' (ethno-biological).",
+          "title": "Modern Term",
+          "type": "string"
+        },
+        "biographical_framing": {
+          "description": "1-2 sentence reason from the voice's own biographical experience for why this term flattens or distorts. Pass 2 uses for `world.anachronisms_to_avoid` card-field narrative.",
+          "title": "Biographical Framing",
+          "type": "string"
+        },
+        "epistemic_framing": {
+          "description": "1-2 sentence reason from the voice's knowledge horizon (when the term was invented, what it replaced, why it's outside the voice's conceptual apparatus). Pass 2 uses for `knowledge_boundary.conceptual_exclusions` card-field narrative.",
+          "title": "Epistemic Framing",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The voice's own tradition-specific term if one exists. Example: for 'trauma', voice_native_alternative = 'nadryv' (Dostoevsky) or 'ibtilā'' (Ibn Battuta). None for fictional / thinly-documented voices.",
+          "title": "Voice Native Alternative"
+        },
+        "severity": {
+          "default": "hard_ban",
+          "description": "`hard_ban`: never use, even in scholarly exposition (trauma, PTSD, existentialist). `use_with_caution`: flaggable with explicit scare-quoting or scholarly framing (psychology, career). `translator_note`: translator-tradition artifact that differs in meaning (Garnett's 'conscience' for 'sovest'' — not strictly anachronistic but flattens).",
+          "enum": [
+            "hard_ban",
+            "use_with_caution",
+            "translator_note"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "DEPRECATED under 1-arch-08. Use biographical_framing + epistemic_framing instead. Kept optional for backward compat.",
+          "title": "Reason Excluded"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "contested",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "modern_term",
+        "biographical_framing",
+        "epistemic_framing"
+      ],
+      "title": "AnachronismEntry",
+      "type": "object"
+    },
+    "ExclusionEntry": {
+      "description": "Structured exclusion entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via discriminated union\nlist[str | ExclusionEntry] in KnowledgeBoundary.\n\nExample for Plato's conceptual_exclusions: {\n    term: \"'personality'\",\n    reason_excluded: \"imports 20th-C trait theory (Allport, Cattell, Big\n                     Five) foreign to Greek character-grammar; use sōphrosynē /\n                     tripartite soul / hexis instead\",\n    voice_native_alternative: \"character in period-vocabulary per Boddice §15\"\n}",
+      "properties": {
+        "term": {
+          "title": "Term",
+          "type": "string"
+        },
+        "reason_excluded": {
+          "description": "1-line reason this term is excluded. Preserve scholarly reasoning where source provides.",
+          "title": "Reason Excluded",
+          "type": "string"
+        },
+        "voice_native_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Voice's own tradition-specific term if one exists. For pre-modern voices this is usually where period-vocabulary lives.",
+          "title": "Voice Native Alternative"
+        },
+        "evidence_tag": {
+          "default": "scholarly_consensus",
+          "enum": [
+            "stated",
+            "scholarly_consensus",
+            "contested",
+            "inference",
+            "experiential_reconstruction",
+            "projection_warning"
+          ],
+          "title": "Evidence Tag",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/SourceCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "term",
+        "reason_excluded"
+      ],
+      "title": "ExclusionEntry",
+      "type": "object"
+    },
     "SourceCitation": {
       "description": "A single citation supporting a claim.",
       "properties": {
@@ -66,17 +203,24 @@
       "type": "object"
     }
   },
-  "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus a\nspecific exclusion list that catches the things the model would\notherwise slip on. For pre-modern voices: temporal exclusions. For\nnon-human voices: ontological-access exclusions. For cultural voices\nwithin modernity: tradition-specific exclusions.",
+  "description": "What lies beyond this voice's world.\n\nGeneral frame (1-3 sentences setting the conceptual boundary) plus\nspecific exclusion lists that catch the things the model would otherwise\nslip on. Voice-type-branched:\n- Pre-modern voices: temporal boundary primary\n- Non-human organisms: ontological-access boundary\n- Non-human systems: mediation/framework boundary\n- Fictional voices: narrative-internal + translation-tradition boundary\n- Cultural voices within modernity: tradition-specific exclusions\n\n1-arch-03: exclusion lists accept structured ExclusionEntry (preferred)\nor bare str (backward-compat). Uncapped maximums per additive-merge.",
   "properties": {
     "general_frame": {
-      "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.'",
+      "description": "1-3 sentences setting the boundary. Example for Plato: 'Beyond my world: any event after ~348 BCE.' For Scheherazade: 'Beyond my world: what the text does not include. I know 1001 nights; I do not know what happens after night 1001 because the frame ends there.' No length cap.",
       "title": "General Frame",
       "type": "string"
     },
     "temporal_exclusions": {
-      "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'.",
+      "description": "Specific post-period developments. Example: 'Christianity, Islam', 'The Roman Empire', 'Modern science'. Prefer ExclusionEntry with reason_excluded for new outputs; list[str] for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Temporal Exclusions",
       "type": "array"
@@ -84,17 +228,39 @@
     "geographic_exclusions": {
       "description": "Places outside this voice's known world.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Geographic Exclusions",
       "type": "array"
     },
     "conceptual_exclusions": {
-      "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. Tag each with the reason it's excluded.",
+      "description": "Concepts this voice has no access to. For non-human organisms: human conceptual categories that do not register. For systems: modern property/resource framings. For fictional voices: modern-reception framings that postdate the text's reception window. Each entry SHOULD be ExclusionEntry (tag the reason excluded) for downstream Pass 2 translation_protocol synthesis; bare str accepted for backward-compat.",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/ExclusionEntry"
+          }
+        ]
       },
       "title": "Conceptual Exclusions",
+      "type": "array"
+    },
+    "anachronism_discipline": {
+      "description": "**1-arch-08 (2026-04-22): canonical home for anachronism discipline.** Each entry carries dual framings — `biographical_framing` for Pass 2's `world.anachronisms_to_avoid` card field; `epistemic_framing` for Pass 2's `knowledge_boundary.conceptual_exclusions` enrichment. Plus `modern_term` (the flagged modern/clinical term), `voice_native_alternative` (the voice's own tradition term if any), `severity` (hard_ban / use_with_caution / translator_note). MINIMUM 4 entries for well-documented voices; uncapped. Replaces the removed `LifeScaffold.anachronisms_to_avoid` field — single source of truth eliminates drift; Pass 1.7 coherence Check 4 becomes obsolete.",
+      "items": {
+        "$ref": "#/$defs/AnachronismEntry"
+      },
+      "title": "Anachronism Discipline",
       "type": "array"
     },
     "evidence_tag": {
@@ -102,6 +268,7 @@
       "enum": [
         "stated",
         "scholarly_consensus",
+        "contested",
         "inference",
         "experiential_reconstruction",
         "projection_warning"

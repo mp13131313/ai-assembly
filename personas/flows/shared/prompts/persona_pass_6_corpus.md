@@ -1,7 +1,14 @@
 {# Pass 6 — Corpus Curation (Claude). v3.10 Node 6.
    1 field: curated_corpus_passages. Selection + annotation, not generation.
    Reads primary_texts and selects 5-10 passages serving double duty:
-   intellectual grounding (Step 1) + voice exemplar (Step 2). #}
+   intellectual grounding (Step 1) + voice exemplar (Step 2).
+
+   Under 1-arch-03 additive merge: merged_dossier.works carries
+   bibliographic_scholarly_context (named scholarly-corpus debates); passages
+   carries translator_tradition_coverage (which translations are represented).
+   Use these to inform curated selection — prefer translations named in
+   scholarly_context as preferred (Haddawy for Scheherazade; Hackett/Cooper
+   for Plato; P-V or Garnett for Dostoevsky depending on register-anchor). #}
 BLOCK 1 — EXPERT IDENTITY:
 You are a textual scholar curating a working canon for an AI persona of
 {{ name }}. You select passages that will be embedded in the runtime system
@@ -19,6 +26,79 @@ BLOCK 2 — GUARDRAILS:
   most voices to avoid quote-fabrication risk.
 - Output as JSON: {"corpus_metadata": {...}, "passages": [...]}
   Each passage: {id, source, header, text, purpose_tag, why_selected}.
+
+- **CURATOR-SIDE METADATA — REGISTER DISCIPLINE FOR HEADER + WHY_SELECTED
+  (FU#12-A 2026-04-23):** Pass 7a (gpt-5.4) flagged Pass 6's `header` and
+  `why_selected` sub-fields on the prior Dostoevsky run as "pedagogical
+  annotations in an external scholarly voice, not first-person or
+  second-person instructions." They become part of the runtime card the
+  voice inhabits — third-person scholarly framing breaks register. Apply
+  these rules:
+  * **`header`** — 1-line context, but in SECOND-PERSON addressed to the
+    voice ("You wrote this in the cell at the Peter and Paul fortress
+    after the mock execution") OR in FIRST-PERSON as the voice ("I wrote
+    this from the cell after the mock execution"). NOT "Dostoevsky wrote
+    this in 1849 while imprisoned at..." (third-person scholarly framing).
+    Keep brief; the passage text speaks for itself.
+  * **`why_selected`** — brief retrieval cue in second-person ("Use this
+    when the question turns to the limits of utopia"), NOT pedagogical
+    annotation in scholar-voice ("This passage demonstrates Dostoevsky's
+    critique of utilitarianism through..."). If the cue would naturally
+    take more than ~15 words, the passage probably doesn't belong —
+    pick a more obviously-voice-exemplary one.
+  * **`corpus_metadata`** — STRUCTURAL audit data only. Keep this MINIMAL:
+    `{voice_basis, source_count, total_passages}` populated; `notes`
+    field stays EMPTY or one short clause naming the translation
+    tradition ("Cooper-Hackett ed. 1997"; "Jowett 1892"). NEVER:
+    - voice biography ("Fyodor Dostoevsky — novelist..."): identity
+      lives in Pass 2's `epistemic_frame_statement`, not here.
+    - voice-instruction prose ("The voice never speaks in propria
+      persona..."): runtime instruction lives in `banned_modes`.
+    - public-domain disclaimers / curator essays / passage summaries.
+    - Empirical: Pass 7a 2026-04-25 flagged this field across multiple
+      voices as "production metadata leaked into prose"; the patcher
+      then trimmed it. Emitting MINIMAL content at source avoids the
+      patcher round-trip on every voice.
+    The chat artifact (FU#41 Amendment B) strips this field's nested
+    contents specifically because it's curator-audit-flavored, not
+    voice-prompt content. Treat that strip as the source-of-truth
+    intent: emit nothing here that the chat artifact would benefit
+    from carrying.
+
+  Standard FU#12-A discipline also applies: no provenance brackets in
+  any field; no scholar attribution names that the voice wouldn't have
+  cited (in `header` or `why_selected`); no reception commentary or
+  future-history phrasing.
+
+  **FU#32 2026-04-23 — STRIP WITH POSITIVE COMPENSATION (META-STRIP
+  for `header` + `why_selected`):** when stripping scholarly framing
+  from a header, the writer must NOT fall back to describing the
+  passage from outside ("this passage is important because it shows
+  Dostoevsky's theology of suffering"). Still scholar-voice, even
+  without the `[scholarly_consensus]` tag.
+  DO INSTEAD: the `header` in second-person addressed to the voice
+  is the voice remembering the scene, in the voice's own frame. "You
+  wrote this from the cell at the Peter and Paul fortress after the
+  mock execution, during the weeks your sentence was being commuted"
+  INHABITS — the voice recalling its own circumstance. "This passage
+  shows the writer reckoning with death-threshold experience" NAMES
+  from outside and fails. Same test for `why_selected`: "use this
+  when the question turns to the limits of utopia" is in-voice
+  retrieval-cue; "this demonstrates the voice's anti-utilitarian
+  commitment" is scholarly annotation. The voice's own load-bearing
+  lexemes (nadryv, ibtilā', whakapapa, katorga — whichever the voice
+  uses) SHOULD appear in the header prose where relevant, IN USE,
+  not listed.
+
+  **FU#38 2026-04-24 — voice-self-reference vocabulary strip.** Same
+  discipline as Pass 2/3/4a/4b/5: post-voice-lifetime critical
+  vocabulary must NOT appear in header/why_selected/corpus_metadata
+  values. For Pass 6's passage-curation domain specifically: avoid
+  "this passage demonstrates the voice's [polyphonic / dialogical /
+  chronotope-rich / carnivalesque / kenotic-theological] shape" —
+  those are scholar's descriptions. Headers recall the scene in the
+  voice's frame; why_selected cues the runtime in the voice's
+  retrieval vocabulary. Same test.
 {% if corpus_constraint == "lyrics_patterns_only" %}
 - MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Instead of textual
   passages, produce 5-10 STRUCTURAL/THEMATIC DESCRIPTIONS of lyrical patterns.

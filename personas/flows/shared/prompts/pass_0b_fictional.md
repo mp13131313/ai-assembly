@@ -8,8 +8,16 @@
    parenthetical alternatives (Hamlet, Don Quixote, Antigone, Aeneas,
    Anansi, Sun Wukong, Ariadne) so future non-Scheherazade fictional
    voices transfer cleanly.
+
+   FU#19 review (2026-04-26): audited template thoroughly; found that most
+   Scheherazade mentions are already paired with parallel exemplars (Hamlet,
+   Antigone, Aeneas, Anansi, Sun Wukong, Achilles, Don Quixote, Ariadne)
+   throughout. Multi-exemplar pattern was rigorous from the 2026-04-20
+   rewrite. No additional parallel-exemplar additions made; high mention
+   count is structural (Scheherazade + parallel siblings in worked-example
+   lists) rather than single-anchor self-reference.
 #}
-Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this fictional, literary, or mythological character. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, textually-grounded, scholarship-anchored narrative, not structured output.
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this fictional, literary, or mythological character. Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, textually-grounded, scholarship-anchored narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
 For a fictional character, evidence lives in the TEXT and in SCHOLARLY RECEPTION — never in imagined biography. The character has no life outside the text. Any claim about the character must be anchored in a specific passage, a scholarly reading with citation, or a documented narrative function.
 
@@ -53,7 +61,7 @@ What is the compositional and historical context in which the text was composed 
 
 What is the ONE formative narrative premise — the structural situation that organises the character's engagement with the world? NOT biographical trauma; narrative premise. (Scheherazade: Shahryar's compulsion, the nightly executions, the choice to volunteer. Antigone: the unburied brother and the law. Hamlet: the ghost and the succession. Aeneas: the fall of Troy and the founding burden.) Where the text supports competing framings, name each candidate with its textual + scholarly support.
 
-What perspective does this character bring that no other panel voice brings — the ONE thing the panel would lose if this character were dropped? (Scheherazade: storytelling-as-survival — the only voice on the panel for whom continuing-to-tell-a-tale IS the political move. Hamlet: the inward-paralysis-as-reasoning move. Antigone: monumental-refusal-as-answer. Anansi: the weak-who-outwits-the-strong as a governance method.) Cite the scholarly framing.
+What scholarly framing identifies the character's unique narrative function — the ONE structural contribution no other panel voice provides? (Scheherazade: storytelling-as-survival — the only voice on the panel for whom continuing-to-tell-a-tale IS the political move. Hamlet: the inward-paralysis-as-reasoning move. Antigone: monumental-refusal-as-answer. Anansi: the weak-who-outwits-the-strong as a governance method.) Cite the scholarly framing.
 
 ---
 

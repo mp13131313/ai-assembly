@@ -1,0 +1,60 @@
+{
+  "description": "Structured vocabulary entry — richer than bare string.\n\n1-arch-03 addition. Backward-compat preserved via\n`Vocabulary.preferred_vocabulary: list[str | VocabEntry]` discriminated\nunion — existing Dostoevsky card's list[str] still validates.\n\nloadbearing=True marks philosophically/theologically central terms\n(Dostoevsky's `podpol'e`, `nadryv`, `obraz`; Plato's `to agathon`,\n`eidē`, `episteme`). These terms survive downstream card compression\nwith higher priority.",
+  "properties": {
+    "term": {
+      "description": "The term as voice uses it.",
+      "title": "Term",
+      "type": "string"
+    },
+    "term_in_original_language": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Period-language / native-tradition form. Examples: 'подпольe' (Russian), 'ibtilā'' (Arabic), 'mauri' (Maori).",
+      "title": "Term In Original Language"
+    },
+    "gloss": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Brief English approximation. Null if term is universally recognizable (Crystal Palace, obraz).",
+      "title": "Gloss"
+    },
+    "loadbearing": {
+      "default": false,
+      "description": "True for philosophically/theologically central terms that must survive downstream card compression.",
+      "title": "Loadbearing",
+      "type": "boolean"
+    },
+    "translation_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Translator-tradition variation notes. Example for 'nadryv': 'Garnett laceration; P-V preserves untranslated; Ready rupture. Russian carries physical-wound + moral-self-torture senses; no single English term preserves both.'",
+      "title": "Translation Notes"
+    }
+  },
+  "required": [
+    "term"
+  ],
+  "title": "VocabEntry",
+  "type": "object"
+}

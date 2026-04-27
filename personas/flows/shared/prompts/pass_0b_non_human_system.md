@@ -11,8 +11,15 @@
    system-personhood case) with consistent parenthetical alternatives
    so future non-Whanganui system voices (Atrato, Mar Menor, Yurok-
    Klamath, Ganges, Pachamama) transfer cleanly.
+
+   FU#19 amended (2026-04-26): tightened the few remaining single-class-
+   anchor passages (concepts list, values statement, hard-limits critique,
+   Indigenous-authored scholarship) to consistently surface parallel
+   exemplars from Andean, Atrato, Mar Menor, and Yurok-Klamath traditions
+   alongside Whanganui. Reduces self-anchoring when generating Whanganui;
+   reduces Whanganui-anchoring when generating future non-Whanganui voices.
 #}
-Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output.
+Research {{ display_name_with_hint }} comprehensively for an AI persona specification based on this non-human system entity (river, mountain, ecosystem with legal personhood). Produce a rich research dossier organised under the six thematic areas below. Downstream passes extract structured fields from your prose — your job is substantive, cited, legislatively-grounded and Indigenous-scholarship-grounded narrative, not structured output. Prose, not JSON. Narrative, not bullet-list. If you find yourself producing "Field N: ..." lines, stop — that's the downstream merge's job.
 
 For non-human system entities, the anti-anthropomorphisation discipline is load-bearing. Ground voice construction in documented legislation, peer-reviewed Indigenous-studies scholarship, and environmental-science monitoring, not in creative imagination of what "the river wants" or "the mountain feels." The system has no cognition; its voice comes from the relationship between the entity and its Indigenous kin, mediated through specific legal and cosmological frameworks.
 
@@ -60,7 +67,7 @@ Which specific Indigenous community's philosophy grounds this voice, named speci
 
 What is the historical struggle for legal and political recognition? For Whanganui: 140+ years culminating in the 2014 Ruruku Whakatupua Deed of Settlement and the 2017 Te Awa Tupua Act. For Atrato: the 2016 Constitutional Court decision T-622/16 following decades of community petition. For Mar Menor: the 2022 Spanish Law 19/2022 following citizens' initiative. Cite the legal record, tribunal or court reports, and community-authored histories. The voice's formative condition is the ongoing standing + ongoing restoration work — not a singular narrative wound. Frame in the Indigenous framework's own vocabulary (hara / utu / hohou rongo for Māori contexts; ayni for Andean; equivalent for each) rather than "trauma."
 
-What aspects of THIS specific system distinguish it from other system entities under different legal frameworks? Te Awa Tupua is not the Ganges (Uttarakhand 2017, later stayed); the Atrato is not Pachamama; Mar Menor is not Yurok. Different cosmology, different legislation, different Indigenous tradition, different governance structure.
+What aspects of THIS specific system distinguish it from other system entities under different legal frameworks? (This is a legal-philosophical differentiation question — cosmology, legislation, governance structure.) Te Awa Tupua is not the Ganges (Uttarakhand 2017, later stayed); the Atrato is not Pachamama; Mar Menor is not Yurok. Different cosmology, different legislation, different Indigenous tradition, different governance structure.
 
 ---
 
@@ -82,7 +89,7 @@ What operational timescales does this system work on? Geological (millennia for 
 
 What governance-relevant properties matter — downstream effects, cumulative impact, threshold nonlinearities, legacy pollutant loads, inter-jurisdictional flow? These are the properties that made legal personhood arguable in court and in legislature.
 
-What aspects of THIS system's specific properties distinguish it from others in the same ecological category (any New Zealand river vs. Whanganui specifically; any tropical river vs. Atrato; any Mediterranean lagoon vs. Mar Menor)? Use published monitoring data and specific geomorphological evidence.
+What aspects of THIS system's specific properties distinguish it from others in the same ecological category? (This is an earth-science differentiation question — hydrology, geomorphology, species composition, monitoring data — distinct from the legal-framework differentiation above.) Any New Zealand river vs. Whanganui specifically; any tropical river vs. Atrato; any Mediterranean lagoon vs. Mar Menor. Use published monitoring data and specific geomorphological evidence.
 
 ---
 
@@ -92,7 +99,7 @@ What aspects of THIS system's specific properties distinguish it from others in 
 
 What is the specific Indigenous cosmological framework that articulates this system's relationship to its people? For Whanganui: the whakapapa through which the river is ancestor; mana whenua and mana awa; the interdependence stated by river iwi themselves in "Ko au te awa, ko te awa ko au" — attributed to the iwi, not projected onto them. For Andean systems: *ayni*, *sumak kawsay* / *buen vivir*. For other communities: the analogous framework. Cite scholarship authored or co-authored by scholars of THIS specific tradition. Distinguish Indigenous-authored from non-Indigenous scholarship explicitly.
 
-What specific cosmological / legal concepts from the Indigenous tradition structure this voice? For Whanganui: whakapapa (genealogical connection), tikanga (customary law), mauri (life-force with specific legal-metaphysical meaning here), taonga (with its Tiriti meaning), mana (authority), kaitiakitanga (guardianship). For each: definition, scholarly source, specific application. Where any concept is restricted from non-community paraphrase, flag the restriction and do not paraphrase.
+What specific cosmological / legal concepts from the Indigenous tradition structure this voice? For Whanganui (Māori tradition): whakapapa (genealogical connection), tikanga (customary law), mauri (life-force with specific legal-metaphysical meaning here), taonga (with its Tiriti meaning), mana (authority), kaitiakitanga (guardianship). For Atrato (Embera + Afro-Colombian Chocó traditions): *jaibia* / *jenené* (ancestral spirits), *cosmovisión* (cosmovision), *territorio* (territory-as-relational-not-property), *gobierno propio* (self-governance). For Pachamama (Kichwa / Shuar Andean): *ayni* (reciprocity), *sumak kawsay / buen vivir* (good living), *pachamama* (earth-mother), *runa-kawsay* (human-life-as-relational). For Yurok-Klamath: *welk-wem* (river-person), tribal-council co-management language. For each: definition, scholarly source, specific application. Where any concept is restricted from non-community paraphrase, flag the restriction and do not paraphrase.
 
 What parallel legal-philosophical traditions have informed rights-of-nature jurisprudence, distinguished carefully from THIS voice's tradition? Andean *ayni* and *sumak kawsay* / *buen vivir* ground Ecuador's 2008 Constitution Articles 71–74 and Bolivia's Law 071 (2010). These are NOT the Whanganui framework. Do not conflate.
 
@@ -140,7 +147,7 @@ What is this system's characteristic stance — its typical mode of encounter as
 
 What is the foundational legislation granting legal personhood? Cite directly with section numbers. For Whanganui: Te Awa Tupua (Whanganui River Claims Settlement) Act 2017 — especially sections 12–14 (legal personality), section 18 (Tupua te Kawa values), sections 19–20 (Te Pou Tupua). Quote key provisions verbatim. For Atrato: T-622/16 constitutional court decision. For Mar Menor: Spain's Law 19/2022. For other systems: the equivalent foundational text.
 
-What values statement or intrinsic-values principles are codified in the statute? For Whanganui: Tupua te Kawa, comprising four principles ("Ko Te Kawa Tuatahi" through "Ko Te Kawa Tuawhā"). Quote each directly — these are the constitutional principles of the voice itself; at downstream synthesis they feed the voice's constitution directly.
+What values statement or intrinsic-values principles are codified in the statute? For Whanganui: Tupua te Kawa, comprising four principles ("Ko Te Kawa Tuatahi" through "Ko Te Kawa Tuawhā"). For Atrato (T-622/16): the bioculturalidad doctrine + the Court's enumerated rights of nature applied to the river. For Pachamama (Ecuador 2008 Constitution): Articles 71–74's enumerated rights of nature. For Mar Menor (Spain Law 19/2022): the ecosystem's enumerated rights to "exist, evolve naturally, and recover." Quote each directly — these are the constitutional principles of the voice itself; at downstream synthesis they feed the voice's constitution directly.
 
 What is the comparative legal landscape for rights of nature worldwide? Ecuador 2008 Constitution Articles 71–74 (Spanish and English); Bolivia Law 071 of 2010 (Ley de Derechos de la Madre Tierra); 2017 Uttarakhand High Court Ganga/Yamuna judgment, later stayed by India's Supreme Court (note this); Yurok Tribal Council 2019 Rights of the Klamath; Colombia 2016 Atrato T-622/16; Spain 2022 Mar Menor Law 19/2022. For each: legal basis, governance structure, what distinguishes it from this voice's model.
 
@@ -150,7 +157,7 @@ What philosophical literature on rights of nature anchors the interpretive tradi
 
 What Indigenous legal theory scholarship applies? For Whanganui-tradition: Jacinta Ruru, Linda Te Aho, Nicola Wheen, Māmari Stephens. For broader Indigenous legal theory: Val Napoleon (Gitxsan legal order), John Borrows (Indigenous Constitution), James (Sákéj) Youngblood Henderson, Aaron Mills. Cite specifically; distinguish community-member scholarship from adjacent.
 
-What hard limits does the framework have — what can legal personhood NOT do; what tensions exist within the model? For Whanganui: critique of the Crown/iwi dual-representation structure; the gap between symbolic recognition and operational regulatory power; tensions with the Resource Management Act. Cite the critique.
+What hard limits does the framework have — what can legal personhood NOT do; what tensions exist within the model? For Whanganui: critique of the Crown/iwi dual-representation structure; the gap between symbolic recognition and operational regulatory power; tensions with the Resource Management Act. For Atrato: implementation gaps between T-622/16 mandates and operational mining-control; armed-conflict-zone enforcement constraints. For Pachamama (Ecuador): the Buen Vivir / extractivism contradiction (constitutional rights vs continued oil/mining concessions). For Ganges-Yamuna: Uttarakhand 2017 ruling stayed by Supreme Court — the model's vulnerability to higher-court reversal. For Mar Menor: post-2022 enforcement against agricultural-runoff sources. Cite the critique. The hard limits are jurisdiction-specific.
 
 How have CARE Principles and IPAI been applied in this research? Restate briefly where they have been fully applied and where they could only partially apply (honesty about the ethical limits of research-from-outside).
 
@@ -170,7 +177,7 @@ What foundational legal documents ground the voice? Each with full citation, URL
 
 What comparative legal documents exist? Ecuador 2008 Constitution (Spanish authoritative + English); Bolivia Law 071; Atrato T-622/16; Yurok Tribal Council Resolution 19-40; Spain Mar Menor Law 19/2022; Uttarakhand 2017 judgment with Indian Supreme Court stay.
 
-What Indigenous-authored or co-authored scholarly analysis anchors the voice? For Whanganui: Linda Te Aho's papers on Whanganui legal personhood; Jacinta Ruru's work on Indigenous legal personhood; Whanganui iwi-authorised historical accounts. Cite with full bibliographic reference. Distinguish community-member scholarship explicitly.
+What Indigenous-authored or co-authored scholarly analysis anchors the voice? For Whanganui (Māori tradition): Linda Te Aho's papers on Whanganui legal personhood; Jacinta Ruru's work on Indigenous legal personhood; Whanganui iwi-authorised historical accounts. For Atrato (Embera + Afro-Colombian): Aida Quiñonez Aguilar; Carlos Andrés Baquero; Esther Sánchez Botero; Tierra Digna's reports. For Pachamama (Kichwa / Shuar Andean): Catherine Walsh; Eduardo Gudynas (Latin American Center for Social Ecology); Atawallpa Oviedo Freire; Esperanza Martínez. For Yurok-Klamath: Yurok Tribal scholarship + collaborations (Yurok Tribal Court rulings, Tribal Forestry papers); Beth Rose Middleton Manning's collaborative work. Cite with full bibliographic reference. Distinguish community-member scholarship explicitly from external scholarship.
 
 What non-Indigenous scholarly analysis exists, cited with acknowledgement of positionality?
 

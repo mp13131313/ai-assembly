@@ -13,13 +13,16 @@ load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.chunk_runner import run_chunk
 from flows.shared.project_root import add_project_arg, resolve_project_root
-from schemas.pass_1_6 import Passages, ReferenceOnlyPassages, URLs, Works
+from schemas.pass_1_6 import Passages, ReferenceOnlyPassages, Works
 
 
+# 1-arch-07 (2026-04-22): `urls` chunk output removed. URL inventory is
+# derived at render-time by Python from `passages[].citation` + `works[]`
+# entries via flows/shared/url_extract.extract_urls(). See
+# _workspace/planning/PIPELINE_REVIEW_FIXES.md § 1-arch-07.
 OUTPUT_KEYS = {
     "works": Works,
     "passages": Passages,
-    "urls": URLs,
     "reference_only_passages": ReferenceOnlyPassages,
 }
 

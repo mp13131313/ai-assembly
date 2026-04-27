@@ -2,6 +2,115 @@
 
 **Voice: \`[______]\`**
 
+**Schema:** v2 (35 generated fields + 2 continuity nulls + metadata block).
+**Spec body status:** stable since 2026-04-15.
+**Latest amendments:** v2.1 (2026-04-27, see next section).
+
+---
+
+## v2.1 Amendments (2026-04-27)
+
+The Persona Card v2 schema (35 generated fields + 2 continuity nulls) is unchanged. The amendments below clarify field-emission patterns + derivative artifacts that landed under arch-03 + FU#1–50 follow-ups, and update the metadata block description.
+
+### A. `metadata` block — current contents (replaces v3.10 description)
+
+The `metadata` block in each assembled card contains:
+
+- `passes_completed` — pipeline steps that ran for this voice
+- `validation_status` — Pass 7a's overall verdict (`PASS` or `REVISION_NEEDED`)
+- **`fix_pass_log`** — FU#13 patcher log if Pass 7a-FIX fired (replaces v3.10's `revision_loops` counter; the linear-patcher architecture supersedes the revision-loop architecture)
+- `tools_used` — which models/APIs touched this card
+- `voice_basis` — `corpus-based` (Pass 1d produced excerpts) or `training-data` (no primary texts)
+- `hostile_sources`, `corpus_constraint`, `subtype` — input-derived flags for downstream interpretation
+- `deployment_context` — full `conference_context` used in Pass 7b (re-run Pass 7b alone if redeploying)
+- `human_review_status` — `pending` until human signs off
+- `approach_c` — `true` if Claude DR dossier present
+- `citation_verification`, `cross_model_validation`, `negative_constraints_refinement` — Phase 3 results
+- `smoke_test_chains_role` — explicit "build-time diagnostic — NOT runtime few-shot" notice
+- `field_counts`, `register_violations` — diagnostic extras
+
+`pipeline_version` is at root level (not in metadata): currently `"4.0"` per the Pipeline v4 spec. Pre-2026-04-27 cards (Plato) carry `"3.10"`; cards generated thereafter carry `"4.0"`. The string is a label for provenance, not a schema constraint — runtime consumes both identically.
+
+### B. `reference_only_passages` (two-tier corpus, Phase B)
+
+Field present on every assembled card; usually `{"passages": []}` for public-domain voices. For copyright-sensitive voices (Marley `corpus_constraint=lyrics_patterns_only`, possibly Dostoevsky under specific modern translation), populated with a tier-2 corpus that:
+
+- IS loaded into Voice Pipeline **Step 1** (Private Reasoning) — voice reasons from its actual words
+- MUST be DROPPED before Voice Pipeline **Step 2** (Public Expression) assembles its system prompt — copyright exposure if direct quotation appears in the artifact 750 people read
+
+Carries `runtime_contract_note` inline so any consumer reading the JSON sees the warning without external doc reference. See `personas/HANDOFF.md` §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2".
+
+### C. FU#41 chat artifact (4th Derive output, 2026-04-24, amended 2x)
+
+The pipeline now writes a **fourth Derive output** at `voices/<slug>/06_derive/03_chat_system_prompt.json` — the assembled card with **11 items stripped**, ready to paste into Claude project custom instructions (or as a Claude API system prompt for chat-native deployments).
+
+**Stripped (11 items total):**
+
+| Group | Field | Why stripped |
+|---|---|---|
+| Amendment A — chat-incompatible (5 top-level) | `metadata` | build-time provenance, not behavioral spec |
+| | `smoke_test_chains` | build-time diagnostic, not runtime few-shot |
+| | `reference_only_passages` | Step 1 only / copyright |
+| | `continuity_block_if_night_2` | runtime-only |
+| | `continuity_block_artifact_if_night_2` | runtime-only |
+| Amendment B — spec-shell meta (5 top-level) | `voice_name` | model already addressed as the voice |
+| | `voice_mode` | pipeline-internal flag |
+| | `pipeline_version` | provenance, not behavioral |
+| | `generated_date` | provenance |
+| | `council_member_name` | duplicates voice_name |
+| Nested (1) | `curated_corpus_passages.corpus_metadata` | nested provenance; parent preserved with `passages[]` |
+
+The chat artifact is a **standalone deployment artifact** for chat-test validation pre-ship and for chat-native deployments that bypass the Voice Pipeline's two-step protocol. **NOT consumed by the Provocateur Pipeline or Voice Pipeline** — it coexists with `01_provocateur_profile.json`, targeting different runtime channels.
+
+Implementation: `personas/flows/shared/chat_prompt_builder.py:write_chat_system_prompt()`.
+
+### D. Field-emission patterns (FU#49 family, 2026-04-26/27)
+
+The reviewer-pass-3 family of universal patterns landed in 4 prompt files (Pass 2 + Pass 4a + Pass 4b + Pass 5). They do NOT change the card schema — they change how voices emit content within existing fields. Voices generate their own voice-specific corpus-self-criticism moves at generation time; the Plato text is the worked example, not the prescription.
+
+| FU# | Field affected | Pass | Pattern |
+|---|---|---|---|
+| 49H | `epistemic_frame_statement` | 2 | structural-strain licensing — voices may push their framework into productive strain on novel material |
+| 49I | `translation_protocol` | 2 | two-aporia distinction — voice translates from its corpus aporias to modern questions, not modern aporias to corpus categories |
+| 49J | `topics_requiring_care` | 2 | phenomena-outside-corpus universal entry — voice acknowledges material the corpus genuinely doesn't reach |
+| 49D | `hard_limits` | 2 | **Position B corpus-accurate softening** — forbids framework-ABANDONMENT (e.g. denying core commitments) but PERMITS corpus-internal CROSS-EXAMINATION (e.g. Plato's Parmenides cross-examining the Forms) |
+| 49I | `translation_protocol` | 4a | (also affected via voice patterns) |
+| 49J | `banned_modes` | 4b | don't-silently-complete-incomplete-translation universal entry |
+| 49A | `length_and_format_constraints` + Pass 4b prompt | 4b | length variance 350–1500; generativity-permitting prompt; preserve-trace-tensions |
+| 49K | `quality_criteria` + `unique_contribution` + `banned_modes` | 5 | premature-closure-of-either-kind in `banned_modes`; 5 fidelity + 2 generativity `quality_criteria`; framework-strain closer in `unique_contribution` |
+
+**Position B vs Position C distinction (load-bearing):**
+
+- **Position B** = corpus-accurate softening. Voice may engage in corpus-internal self-criticism (Plato's late dialogues cross-examining earlier ones). The Athens panel format is **Position B only**.
+- **Position C** = framework-lifting. Voice denies its own core commitments. **NOT permitted** in the Athens panel format — voices speak FROM their frameworks.
+
+FU#49D's universal pattern enforces this distinction in `hard_limits`.
+
+### E. Pass 6.5-clean preserves Boddice biocultural tags (FU#33 P1, 2026-04-25)
+
+After Pass 6, before Pass 7-pre, a deterministic regex strip runs on `04_generation/*.json`. It strips schema-taxonomy markers (`[ontological]`, `[stated]`, `[curator_note]`, etc.) so they don't appear in the shipped card. **It explicitly preserves** Boddice biocultural tags:
+
+- `[experiential_reconstruction]` — flags content that reconstructs experience from limited evidence
+- `[projection_warning: ...]` — flags content where the model may be projecting modern frames onto historical experience
+
+These tags appear in fields like `formative_experience`, `world`, `character`, `topics_requiring_care`, `curated_corpus_passages` and SHOULD remain visible in the assembled card — they're a calibration aid for human review and downstream consumers.
+
+### F. Deferred / out-of-band card-shape work
+
+The following are **NOT** in v2 / v2.1 — flagged for post-Athens consideration:
+
+- **FU#42 split-card architecture** — split the assembled card into Step 1 / Step 2 / shared sub-cards. ~1–2 weeks. Deferred.
+- **FU#50(1) Pydantic enforcement at Pass 2/4a outputs** — Pass 2 and Pass 4a outputs currently lack Pydantic validation; list-of-string vs list-of-dict shapes both valid; orchestrator accepts both. ~4–6 hr but risks regenerating cards mid-Athens-prep. Deferred.
+- **`reference_only_passages.runtime_contract_note`** is currently a freeform string — could be promoted to a structured warning object with `restricted_steps[]`, `copyright_holders[]`. Deferred.
+
+### G. Pipeline reference
+
+For the build-side specification (which pass produces which field, with which prompt + model + max_tokens): see `docs/AI_Assembly_Persona_Pipeline_v4.md`.
+
+For the runtime contract (how Voice Pipeline + Provocateur Pipeline consume the card): see `personas/HANDOFF.md`.
+
+For the gap-analysis snapshot of what's built and what's not: see `docs/CURRENT_STATE.md`.
+
 ---
 
 ## What This Document Is

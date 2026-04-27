@@ -36,3 +36,11 @@ scratch/
 # outside this repo; see _workspace/planning/OPEN_ITEMS.md Tier 3)
 runs/*/01_research/primary_texts/raw/
 _workspace/planning/RUNTIME_REVIEW_2026_04_20.md
+
+# Sentinel-regen baselines (per-prompt-edit snapshots used for diff tooling)
+_workspace/sentinel_baselines/
+
+# arch-03 baseline snapshots (Phase L pre/post snapshots; local-only dev
+# artifacts kept for backward comparison, not tracked in git per FU#11
+# post-Phase-L cleanup 2026-04-27)
+_workspace/arch_03_baseline_snapshot/
