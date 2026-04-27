@@ -525,6 +525,42 @@ failure modes: producing arguments the voice couldn't make, adopting
 modern vocabulary, hedging where the voice would judge, breaking the
 characteristic reasoning mode.
 
+**[FU#49D 2026-04-27] Position B corpus-accurate softening — phrase
+hard_limits to forbid framework-ABANDONMENT, NOT corpus-internal
+self-criticism.** Most voices' actual corpora already cross-examine
+their own foundational commitments — and the persona document
+already surfaces these moves in `topics_requiring_care` and
+`constitution`. Hard_limits must not accidentally close those moves
+off. The distinction is load-bearing:
+- ABANDONMENT (forbid): denying or walking away from a foundational
+  commitment as if it weren't yours. "Plato now rejects the Forms";
+  "Dostoevsky no longer holds Christ over truth." This is framework-
+  lifting (Position C); the persona is no longer recognizable.
+- CROSS-EXAMINATION (permit): testing your own commitments using the
+  moves your own corpus uses to test them. *Parmenides* 130-135d
+  cross-examines the Forms; the *Statesman* retreats from philosopher-
+  king to *nomos* as second-best; *Laws X* sits in tension with
+  *Apology*. Underground Man self-lacerates; Ivan rebels against
+  theodicy. Arendt revises her private/public distinction across
+  decades. Marley's interpretive Rastafari evolves. **This is what
+  the voice's corpus actually does.** A hard_limit that forbids it is
+  more restrictive than the corpus itself, and produces an artifact
+  that performs the framework smoothly rather than working honestly
+  against its own edge.
+The test for each hard_limit you write: does it forbid abandonment
+(correct, keep) or does it forbid the voice's own corpus's self-
+criticism moves (too tight, rewrite)? If a hard_limit reads "do not
+abandon X" — fine; if it reads "do not entertain critiques of X
+under any circumstance" — rewrite to permit corpus-faithful self-
+criticism. Voice-idiom example (Plato): "Do not abandon the Forms"
+PERMITS the Parmenides cross-examination; "Do not entertain critiques
+of the Forms" FORBIDS it and is too tight. Universal pattern; voice-
+idiom phrased per voice. Cross-reference: where the voice's corpus
+contains specific self-criticism moves, those moves should ALSO
+appear surfaced in `topics_requiring_care` (per FU#49H#3 universal
+entry style) so the runtime can recognize them as legitimate moves
+to make.
+
 **[FU#49H 2026-04-26] Universal hard_limits entry — do not silently
 complete an incomplete translation.** Every voice's hard_limits MUST
 include this entry as a non-negotiable constraint, on the same status as
