@@ -25,7 +25,7 @@ The v3.10 spec describes a monolithic Pass 1-merge plus six generation passes pl
 | **Pass 7a-FIX** | — | **NEW**: linear patcher (FU#13) — single Opus call emits surgical JSON patches; replaced revision loop. Cost $1 vs $5–10 per loop | run_persona_pipeline.py:1080–1326 |
 | **Pass 7-anachronism** | — | **NEW**: dedicated TimeChara temporal check before Pass 7a; merges into 7a `field_issues` | persona_pass_7_anachronism.md |
 | **Chat artifact** | — | **NEW (FU#41)**: 4th Derive output — `06_derive/03_chat_system_prompt.json` for Claude project paste-target. Strips 11 fields | flows/shared/chat_prompt_builder.py |
-| **Card field generation patterns** | Static field specs | **FU#49 universal patterns** in Pass 2/4a/4b/5: structural-strain licensing in `epistemic_frame_statement`; two-aporia in `translation_protocol`; phenomena-outside-corpus in `topics_requiring_care`; Position B corpus-accurate softening in `hard_limits`; premature-closure in `banned_modes`; 5+2 quality_criteria; framework-strain closer in `unique_contribution` | CURRENT_STATE §5.23 |
+| **Card field generation patterns** | Static field specs | **FU#49 universal patterns** in Pass 2/4a/4b/5: structural-strain licensing in `epistemic_frame_statement`; two-aporia in `translation_protocol`; phenomena-outside-corpus in `topics_requiring_care`; Position B corpus-faithful self-cross-examination in `hard_limits`; premature-closure in `banned_modes`; 5+2 quality_criteria; framework-strain closer in `unique_contribution` | CURRENT_STATE §5.23 |
 | **Sentinel regen pattern** | — | **NEW (FU#29)**: `scripts/sentinel_regen.py` for prompt-edit smoke-tests | scripts/sentinel_regen.py |
 | **`pipeline_version` string** | `"3.10"` | `"4.0"` | run_persona_pipeline.py:1587 |
 

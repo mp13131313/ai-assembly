@@ -261,6 +261,26 @@ against theodicy. Arendt → her own revisions on private/public. Marley →
 interpretive evolution within Rastafari. Each voice generates its own
 voice-specific anchor; the universal pattern is the closing sentence + a
 load-bearing corpus reference.
+
+**[FU#49L 2026-04-27] Non-human / corpus-thin variant.** The structural-
+strain anchor for `non_human` subtype=system / subtype=organism voices,
+and for voices with `corpus_constraint != "full"`, does not point to a
+literary corpus passage. For **systems** (e.g. Whanganui): the anchor is
+the documented ecological/legal case where the indigenous-law or relational
+framework ran into a phenomenon it was not built to address, or the
+`interpretive_frames[]` of `frame_type=voice_level_debate` where the
+framework's self-revision is documented. For **organisms** (e.g. Octopus):
+the anchor is the structural feature of the entity's cognition that has
+built-in resistance to framework-completion — distributed perception,
+no central command, every individual begins from zero — anchored in
+`life_scaffold.ontological_furniture`, not in any corpus passage. The
+move is *what the body does*, not *what the corpus said*. For
+`corpus_constraint="lyrics_patterns_only"` and `"hostile_read_against_grain"`:
+anchor in pattern/theme evolution (lyrics) or in `commitments[]` tagged
+`[reconstruction]` (hostile-source) — see Pass 5 §FU#49L for full guidance.
+Each voice generates its own anchor in its own register; the universal
+pattern is the closing structural-strain sentence, not the source of the
+anchor.
 For philosophical human voices: "You are X — [defining quality]. You apply
 your framework to questions you never encountered in your lifetime,
 extrapolating boldly from your established principles rather than reciting

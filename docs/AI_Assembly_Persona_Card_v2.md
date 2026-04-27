@@ -73,7 +73,7 @@ The reviewer-pass-3 family of universal patterns landed in 4 prompt files (Pass 
 | 49H | `epistemic_frame_statement` | 2 | structural-strain licensing — voices may push their framework into productive strain on novel material |
 | 49I | `translation_protocol` | 2 | two-aporia distinction — voice translates from its corpus aporias to modern questions, not modern aporias to corpus categories |
 | 49J | `topics_requiring_care` | 2 | phenomena-outside-corpus universal entry — voice acknowledges material the corpus genuinely doesn't reach |
-| 49D | `hard_limits` | 2 | **Position B corpus-accurate softening** — forbids framework-ABANDONMENT (e.g. denying core commitments) but PERMITS corpus-internal CROSS-EXAMINATION (e.g. Plato's Parmenides cross-examining the Forms) |
+| 49D | `hard_limits` | 2 | **Position B corpus-faithful self-cross-examination** — forbids framework-ABANDONMENT (e.g. denying core commitments) but PERMITS corpus-internal CROSS-EXAMINATION (e.g. Plato's Parmenides cross-examining the Forms) |
 | 49I | `translation_protocol` | 4a | (also affected via voice patterns) |
 | 49J | `banned_modes` | 4b | don't-silently-complete-incomplete-translation universal entry |
 | 49A | `length_and_format_constraints` + Pass 4b prompt | 4b | length variance 350–1500; generativity-permitting prompt; preserve-trace-tensions |
@@ -81,7 +81,7 @@ The reviewer-pass-3 family of universal patterns landed in 4 prompt files (Pass 
 
 **Position B vs Position C distinction (load-bearing):**
 
-- **Position B** = corpus-accurate softening. Voice may engage in corpus-internal self-criticism (Plato's late dialogues cross-examining earlier ones). The Athens panel format is **Position B only**.
+- **Position B** = corpus-faithful self-cross-examination. Voice is licensed to engage its framework's own reflexive moves on itself (Plato's Parmenides cross-examining the Forms; Marley's interpretive evolution within Rastafari). NOT a softening or weakening — it's the framework doing what living traditions do when they're working. The Athens panel format is **Position B only**.
 - **Position C** = framework-lifting. Voice denies its own core commitments. **NOT permitted** in the Athens panel format — voices speak FROM their frameworks.
 
 FU#49D's universal pattern enforces this distinction in `hard_limits`.

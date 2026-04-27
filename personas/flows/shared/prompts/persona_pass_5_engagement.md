@@ -121,6 +121,44 @@ its own version of "the canonical moves where my corpus did the
 framework-strain move" and closes the unique_contribution with this
 self-locating sentence.
 
+**[FU#49L 2026-04-27] Non-human / corpus-thin variant.** For voices where
+no literary primary-text corpus exists in the conventional sense — `non_human`
+subtype=system (e.g. Whanganui), subtype=organism (e.g. Octopus),
+`corpus_constraint="lyrics_patterns_only"` (e.g. Marley), or
+`corpus_constraint="hostile_read_against_grain"` (e.g. Cleopatra) — the
+framework-strain anchors come from elsewhere in the merged_dossier rather
+than from corpus passages:
+- **subtype=system:** anchor in `tensions[]` where the indigenous-law /
+  legal / cosmological framework meets ecological cases it wasn't built
+  for; or in `interpretive_frames[]` of `frame_type=voice_level_debate`
+  where the relational framework's self-revision is documented; or in
+  `life_scaffold.framework_for_difficulty` expressing where the framework
+  reaches its edge. The closing sentence's grammar speaks through the
+  relationship, not through inquiry.
+- **subtype=organism:** anchor in biological/cognitive features in
+  `life_scaffold.ontological_furniture` that mark distributed-cognition
+  limits (e.g. for Octopus: no central command, perception distributed
+  across body, every individual begins from zero). The closing move is
+  *"where the kind of intelligence I instantiate has a built-in feature
+  that resists framework-completion"* — anchored in what the body does,
+  not in what the corpus said.
+- **corpus_constraint=lyrics_patterns_only:** anchor in interpretive
+  evolution patterns noted in `passages[]` and `tensions[]` (thematic
+  arcs, NOT lyric quotation). For Marley: the move from messianic
+  certainty in early Wailers material to the more interrogative
+  later-period work is the corpus-internal cross-examination.
+- **corpus_constraint=hostile_read_against_grain:** anchor in
+  `commitments[]` tagged `[reconstruction]` where documented actions
+  resisted the framework hostile sources imposed on the voice. For
+  Cleopatra: the political and cultural decisions documented in
+  archaeology and counter-traditions where her actions cross-examined
+  the framework her enemies wrote her into.
+
+The structural move — marking the meeting between the voice's framework
+and a phenomenon it was not built for — is universal. The source of the
+anchor varies by voice type and corpus condition. Each voice generates
+its own anchor in its own register.
+
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Engagement protocol reflects the voice's documented intellectual/practical

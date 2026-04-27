@@ -132,7 +132,7 @@ Per-voice cost: ~$18–22, wall time ~2 hours (excluding manual claude.ai DR ses
 | Pass 1c fetch | ✓ | SSRF-hardened (scheme restriction, RFC1918 block, 5 MB cap) |
 | Pass 1c review gate | ✓ | Manual: touch `03_primary_texts_reviewed.flag` |
 | Pass 1d excerpt selection | ✓ | Opus + thinking; 60K char budget (FU#46 raised from 30K for richer-corpus voices) |
-| Pass 2 Identity & Boundaries | ✓ | Opus + thinking; FU#49D Position B corpus-accurate softening landed in `hard_limits` field-spec preamble |
+| Pass 2 Identity & Boundaries | ✓ | Opus + thinking; FU#49D Position B corpus-faithful self-cross-examination landed in `hard_limits` field-spec preamble |
 | Pass 3 Intellectual Core | ✓ | Opus + thinking |
 | Pass 4a Voice (corpus-grounded) | ✓ | Opus + thinking |
 | Pass 4b Artifact | ✓ | Sonnet; FU#49A generativity-permitting prompt + length variance 350–1500 |
