@@ -2,29 +2,41 @@
 
 > **Read this first.** Not all files here are current. This index tells you which to trust.
 
-## Current (authoritative as of 2026-04-17)
+## Current (authoritative as of 2026-04-27)
 
 | File | Status | Notes |
 |------|--------|-------|
+| `CURRENT_STATE.md` | **Current** (rewritten 2026-04-27) | Gap analysis + architectural rationale (§5.16–5.28 cover the v3.10 → v4 shift). Read alongside the briefing. |
 | `AI_Assembly_Briefing_v3_1.md` | **Current** | Project source of truth. Supersedes Briefing v2 (deleted). Adds prosumer/infrastructure second-order provotype condition. |
-| `AI_Assembly_Persona_Card_v2.md` | **Current** | 37-field card template. |
-| `AI_Assembly_Persona_Pipeline_v3_10.md` | **Current** | Persona build pipeline v3.10 (walkthrough fixes round 2 2026-04-17). Supersedes v3.8 (deleted). |
-| `AI_Assembly_Researcher_Pipeline.md` | **Current** | Researcher extraction and grouping (v3). |
-| `AI_Assembly_Provocateur_Pipeline.md` | **Current** | Triage, selection, formulation, packaging (v2). |
-| `AI_Assembly_Transcription_Pipeline.md` | **Current** | Audio to clean transcript pipeline (v2.1). |
-| `AI_Assembly_Voice_Pipeline.md` | **Partial** | Covers Steps 1+2 only. Step 3 Amendment (per Briefing v3.1) is unspecified — spec not yet written. |
+| `AI_Assembly_Persona_Card_v2.md` | **Current** (v2 schema; v2.1 amendments 2026-04-27) | 35-generated + 2-continuity-null + metadata-block schema. v2.1 amendments section near top covers FU#41 chat artifact, FU#49 universal patterns, Boddice tag preservation, Position B vs C, updated `metadata` block. |
+| `AI_Assembly_Persona_Pipeline_v4.md` | **Current** (2026-04-27) | Persona build pipeline v4. Replaces v3.10 spec. Reflects arch-03 chunked merge (Pass 1.1–1.7), Phase B per-voice layout, Tier 3 separation, Pass 6.5-clean (FU#33 P1), FU#2 chunked Pass 7-pre, FU#13 linear patcher, FU#41 chat artifact, FU#49 universal patterns. |
+| `AI_Assembly_Researcher_Pipeline.md` | **Current** | Researcher extraction and grouping (v3). Validated on dev_msc_test. |
+| `AI_Assembly_Provocateur_Pipeline.md` | **Current** | Triage, selection, formulation, packaging (v2). Validated on dev_msc_test. |
+| `AI_Assembly_Transcription_Pipeline.md` | **Current** | Audio to clean transcript pipeline (v2.1). Validated on 3 MSC test sessions. |
+| `AUDIENCE_BRIEF.md` | **Current** (refreshed 2026-04-26 for athens-2026 deployment) | Audience characterization + contributors-vs-audience distinction. |
 
-## Stale
+## Partial / pending update
+
+| File | Status | Notes |
+|------|--------|-------|
+| `AI_Assembly_Voice_Pipeline.md` | **Partial** | Covers Steps 1+2 only. Step 3 Amendment (per Briefing v3.1) is unspecified — FU#49E flagged as highest-impact post-Athens item. |
+| `LLM_CALL_INVENTORY.md` | **Needs update** | Doesn't include passes added since 2026-04-21: Pass 1.1–1.7 chunked merge, Pass 6.5-clean, Pass 7-pre 3-stage, Pass 7-anachronism, Pass 7a-FIX (FU#13), FU#41 chat builder. |
+
+## Archived / stale
 
 | File | What's stale |
 |------|-------------|
-| `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` | Describes n8n orchestration, but the actual implementation is pure Prefect flows. Describes a 2-step voice pipeline; Briefing v3.1 has 3 steps. Describes 2 conference nights; Briefing v3.1 has 3. Missing: closing-show pipelines, Governance Matrix A/B split, Day 4 goodbye sequence, and the changed newsletter delivery model (standalone HoBB newsletter → blurb + Substack read-through). |
-| `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` | Describes rclone/Google Drive mount and n8n Docker, but the actual ingest is a FastAPI upload app writing to local disk with pure Prefect flows. Pre-flight checklist references n8n and Drive. |
+| `_archive/AI_Assembly_Persona_Pipeline_v3_10.md` | Superseded by v4 (2026-04-27). Body retained as historical record (changelog from v2.0 → v3.10 is preserved there). |
+| `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` | Describes n8n orchestration; actual implementation is pure Prefect. 2-step Voice Pipeline; Briefing v3.1 has 3 steps. 2 nights; Briefing v3.1 has 3 + Day 4 goodbye. Missing closing-show pipelines, Matrix A/B, Substack delivery model. |
+| `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` | Describes rclone/Drive mount + n8n Docker + file watcher; actual is FastAPI upload + pure Prefect + status.json state machine. Pre-flight checklist references obsolete elements. |
 
-When these stale docs conflict with `AI_Assembly_Briefing_v3_1.md` or the code in `runtime/`, trust the briefing and the code.
+When archived/stale docs conflict with `AI_Assembly_Briefing_v3_1.md`, `CURRENT_STATE.md`, or the code in `runtime/`+`personas/`, trust the current docs and the code.
 
 ## What's NOT in `docs/`
 
-- **`research/`** — preserved grounding material (Deep Research compass artifacts). When you want to know *why* the pipeline is designed the way it is, look here. Not deletable.
-- **`_workspace/planning/`** — forward-looking design for unbuilt features. Currently: `REBUILD_PLAN.md` (single source of truth for the Phase B persona pipeline rewrite, with the 9 locked architectural decisions PB#1–9 merged in 2026-04-19). Promoted into `docs/` when the work lands.
-- **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts, run artifacts). Eligible for deletion once the current state has absorbed their content. Out of scope for code reviews by default.
+- **`research/`** — preserved grounding material (5 Deep Research compass artifacts). Not deletable. When you want to know *why* the pipeline is designed the way it is, look here.
+- **`_workspace/planning/`** — forward-looking design + active follow-ups. Currently:
+  - `HANDOFF_2026_04_27.md` — current session pickup
+  - `FOLLOW_UPS.md` — active follow-up tracker (FU#1–50 family)
+  - `ONBOARDING.md` — permanent fresh-session pickup
+- **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts). Out of scope for code reviews by default.

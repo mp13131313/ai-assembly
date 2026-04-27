@@ -5,14 +5,16 @@ Persona Cards produced by this pipeline.
 
 ## What the runtime gets per voice
 
-A flat JSON file at `runs/<voice_slug>/persona_card_assembled.json` containing:
+A flat JSON file at `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` containing:
 
-- 4 identity fields at root: `voice_name`, `voice_mode`, `pipeline_version`,
-  `generated_date`
-- 35 card fields at root (all the v3.10 spec's fields, flat)
+- 4 identity fields at root: `voice_name`, `voice_mode`, `pipeline_version`
+  (currently `"4.0"`; pre-2026-04-27 cards carry `"3.10"`), `generated_date`
+- 35 card fields at root (all v2-spec fields, flat)
 - 2 null continuity fields: `continuity_block_if_night_2`,
   `continuity_block_artifact_if_night_2` (populated by Voice Pipeline at
   runtime if the voice carries something forward into Night 2)
+- 1 `reference_only_passages` field (Step-1-only / copyright-sensitive
+  tier; carries `runtime_contract_note` inline)
 - 1 `metadata` block with provenance, validation status, and field role
   clarifications
 
@@ -26,7 +28,7 @@ After Derive runs, the pipeline writes four files under `06_derive/`:
 | `00_derive_raw.json` | pipeline internal | Raw Derive call output (provocateur_profile + evaluation_rubric combined). Kept for cache/resumability; not consumed downstream. |
 | `01_provocateur_profile.json` | Provocateur Pipeline | 8-field profile (`speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`). Wires into `runtime/flows/shared/council/council_config.json` under `members[]`. |
 | `02_evaluation_rubric.json` | Voice Pipeline testing harness | 9 test prompts (3 identity + 3 reasoning + 3 stress) for ongoing voice-quality monitoring. |
-| `03_chat_system_prompt.json` | Claude project custom instructions (operator paste-target) | FU#41 2026-04-24. Chat-ready persona-card JSON. Mechanical strip of assembled card — drops 10 Voice-Pipeline-only fields (metadata, smoke_test_chains, reference_only_passages, 5 artifact-spec fields, 2 continuity blocks). Produced by `personas/flows/shared/chat_prompt_builder.py`. NOT consumed by Provocateur Pipeline or Voice Pipeline — standalone artifact for chat-test validation + Claude-project deployments. Coexists with `01_provocateur_profile.json`; they target different runtime channels. |
+| `03_chat_system_prompt.json` | Claude project custom instructions (operator paste-target) | FU#41 2026-04-24, amended 2x. Chat-ready persona-card JSON. Mechanical strip of assembled card — drops **11 items** (5 chat-incompatible: `metadata`, `smoke_test_chains`, `reference_only_passages`, 2 continuity blocks; 5 spec-shell meta: `voice_name`, `voice_mode`, `pipeline_version`, `generated_date`, `council_member_name`; 1 nested: `curated_corpus_passages.corpus_metadata`). Produced by `personas/flows/shared/chat_prompt_builder.py`. NOT consumed by Provocateur Pipeline or Voice Pipeline — standalone artifact for chat-test validation + Claude-project deployments. Coexists with `01_provocateur_profile.json`; they target different runtime channels. |
 
 ## Two consumers, two roles
 
@@ -131,7 +133,7 @@ The `metadata` block in each assembled card contains:
 
 - `passes_completed` — the actual pipeline steps that ran for this voice
 - `validation_status` — Pass 7a's overall verdict (PASS or REVISION_NEEDED)
-- `revision_loops` — number of revision loops the pipeline ran (max 2 per spec)
+- `fix_pass_log` — FU#13 linear-patcher log if Pass 7a-FIX fired (replaces v3.10's `revision_loops` counter; the linear-patcher architecture supersedes the revision-loop architecture, ~$1 vs ~$5–10 per loop)
 - `tools_used` — which models/APIs touched this card
 - `voice_basis` — `corpus-based` or `training-data` (set by Pass 4a depending
   on whether Node 1c found primary texts)
