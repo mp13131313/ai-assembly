@@ -235,7 +235,21 @@ def main() -> int:
                 continue
             print(f"\n=== Regen Pass {args.pass_name} for {slug} ===")
             regen_path = _regen_pass_for_voice(args.pass_name, slug, project_root)
-            baseline_path = Path(args.baseline_snapshot) / regen_path.name
+            # FU#50(2) 2026-04-27: per-voice baseline subdirectory support.
+            # Both sentinel voices have files of identical name (e.g. both
+            # have 01_pass_2_identity_boundaries.json under their own
+            # 04_generation/). A flat --baseline-snapshot dir collapses
+            # them. Look for <DIR>/<voice_slug>/<filename> first; fall
+            # back to <DIR>/<filename> for backward-compat with flat
+            # snapshots.
+            per_voice_baseline = Path(args.baseline_snapshot) / slug / regen_path.name
+            flat_baseline = Path(args.baseline_snapshot) / regen_path.name
+            if per_voice_baseline.exists():
+                baseline_path = per_voice_baseline
+            elif flat_baseline.exists():
+                baseline_path = flat_baseline
+            else:
+                baseline_path = per_voice_baseline  # report the preferred path on miss
             if not baseline_path.exists():
                 print(f"  WARN: no baseline at {baseline_path}; skipping diff")
                 results[slug] = {"regen_path": str(regen_path), "diff": None}

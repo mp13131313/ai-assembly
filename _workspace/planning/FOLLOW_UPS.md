@@ -169,11 +169,17 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - **Fictional (Scheherazade):** audit found template was already rigorous in multi-exemplar pattern (Scheherazade always paired with Hamlet / Antigone / Aeneas / Anansi / Sun Wukong / Achilles / Don Quixote / Ariadne). High mention count was structural — Scheherazade in worked-example lists alongside parallels, not single-anchor self-reference. **No additional parallel-exemplar additions made** beyond updating header comment to document the FU#19 audit verdict.
 - **Effect for voices 3-12:** new same-class voices (second non-human-organism / non-human-system / fictional voice) will not be anchored to the existing panel exemplar. Cleaner DR generation for those classes.
 
-#### FU#22 — MergedDossier.register / voice_register Pydantic alias audit
-- **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
-- **Problem:** Cleanup-deferral-B fixed the Pydantic warning by renaming the attribute to `voice_register` with `alias="register"` + `populate_by_name=True` + `serialization_alias="register"`. Primary site (`run_pass_1_7.py` → `model_dump(by_alias=True)`) is updated. Not audited across all consumers.
-- **Risk:** Low probability of breakage but worth verifying if Pass 1.7 ever produces unexpected output.
-- **Effort:** ~30 min.
+#### FU#22 — MergedDossier.register / voice_register Pydantic alias audit ✅ AUDITED 2026-04-27 — CLEAN
+- **Audit finding:** every consumer accesses the field as a dict key (`merged_dossier["register"]` or `chunks["register"]` or `chunk_vars["register"]`), not as a Python attribute (`model.register`). Dict-key access works transparently via `model_dump(by_alias=True)` round-trip — the alias does its job.
+- **Verified call sites:**
+  * `run_pass_1_7.py:92` (layout dict), `:158` (compose), `:308` (chunk routing) — all dict-key.
+  * `run_persona_pipeline.py:264` (`md.get("register", {})`), `:567`/`:616` (Pass 4a + 6 chunk_vars["register"]) — all dict-key.
+  * `run_pass_1_4.py:28` (output_keys map) — file-naming, dict-key.
+  * `scripts/arch_03_preservation_audit.py:300`, `arch_03_synthesis_audit.py:80`/`:113` — file-paths + chunk-key strings, all dict-key.
+- **No Python-attribute access (`.register` on a MergedDossier instance) found anywhere.** Close as AUDITED.
+- **Original definition (preserved for re-activation):**
+  - **Problem:** Cleanup-deferral-B fixed the Pydantic warning by renaming the attribute to `voice_register` with `alias="register"` + `populate_by_name=True` + `serialization_alias="register"`. Primary site (`run_pass_1_7.py` → `model_dump(by_alias=True)`) is updated. Audit needed across all consumers.
+  - **Risk:** Low probability of breakage but worth verifying if Pass 1.7 ever produces unexpected output.
 
 #### FU#15 — Pass 5 A/B test (Sonnet+thinking on a low-stakes voice)
 - **Origin:** This session's quality-tuning assessment (operator kept Pass 5 on Opus + thinking under quality lean; flagged for empirical validation).
@@ -218,10 +224,13 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** when active development settles (Phase L sign-off + Plato + a few more voices).
 - **Action:** tighten back to read-only-only after architecture work fully lands.
 
-#### FU#11 — Workspace archive cleanup
-- **Origin:** This session.
-- **Problem:** `_workspace/arch_03_baseline_snapshot/` accumulated archives from multiple Stage 2 attempts. Useful while debugging; bloat after Phase L sign-off.
-- **Fix:** After Phase L verdict, prune to: `baseline_*` (Phase L pre-arch-03 reference) + `stage1_v4_run/` (final Stage 1 output) + final shipped Dostoevsky card. Delete intermediate failed-partials.
+#### FU#11 — Workspace archive cleanup ✅ APPLIED 2026-04-27
+- **Trigger:** Plato shipped + chat-test validated 2026-04-26 = Phase L sign-off.
+- **Pruned:** `_workspace/arch_03_baseline_snapshot/{fu32_complete_20260424_0817, phase_1_complete_20260423_2251, phase_3_fu2_complete_20260424_0844}` — the intermediate post-FU#32 / Phase 1 / post-FU#2 snapshots. Findings absorbed into FOLLOW_UPS.md as completed FU# items; snapshots no longer needed.
+- **Kept:** `baseline_04_generation/` + `baseline_05_validation/` + `baseline_06_derive/` + `baseline_07_persona_card_assembled.json` + `baseline_08_merged_dossier.json` + `baseline_arch_03_audit_sonnet_run.json` (Phase L pre-arch-03 reference) + `stage1_v4_run/` (final Stage 1 output). Total ~1.5MB local-only reference.
+- **Gitignored:** `_workspace/arch_03_baseline_snapshot/` added to `.gitignore` — these are dev artifacts for backward comparison, not pipeline code or project data.
+- **Original definition (preserved for archival):**
+  - **Problem:** `_workspace/arch_03_baseline_snapshot/` accumulated archives from multiple Stage 2 attempts. Useful while debugging; bloat after Phase L sign-off.
 - **Trigger:** Phase L verdict.
 - **Effort:** ~15 min judgment + manual.
 
@@ -555,7 +564,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#50 — Two observations from FU#49H/I/J/K sentinel-regen validation (2026-04-26)
 - **Origin:** sentinel-regen validation runs on Plato during FU#49H/I/J/K landing. Two orthogonal observations surfaced; both are pre-existing or tooling-side, neither caused by 49H/I/J/K, neither blocking voice 3 startup. Tracked here for post-Athens attention.
 - **(1) Schema enforcement at Pass 2/4a outputs.** Plato's FU#49H regen emitted `banned_language` as a list of strings (Plato's prior card had it as list of `{avoid, use_instead}` dicts) and `hard_limits` as a list of `{rule: <str>}` dicts (prior card had list of strings). Both shapes are valid for the prompt's instructions, but the orchestrator does not enforce a Pydantic schema for these card fields at Pass 2/4a output. Voices 3-12 will produce inconsistent shapes across runs as a result. Empirical impact for the runtime depends on how the Voice Pipeline serializes the card: plain JSON serialization handles both, but downstream consumers that walk the structure (e.g., chat artifact strip, register-violation scanner, FU#13 patcher) might assume one shape. Fix: declare Pydantic schemas for the card-emitting passes (Pass 2 ten fields + Pass 4a seven fields + Pass 4b eight fields + Pass 5 four fields + Pass 6 one field), validate at output-time, fall back to a normalization step if validation fails. Effort: ~4-6 hr (schema authoring + validation hook + per-voice migration if existing cards diverge from the chosen canonical shape). Adjacent to FU#22 (MergedDossier alias audit) — the same architectural-tightening direction. **Trigger:** post-Athens; pre-Athens tightening risks regenerating cards mid-Athens-prep. **Note:** consider whether the chosen canonical shape should be the dict version (richer, supports per-entry metadata) or the string version (simpler, current Plato baseline). Plato's old card had banned_language-as-dicts (FU#32 STRIP+USE pair format) — strong precedent for the dict shape there.
-- **(2) Sentinel_regen tooling — per-voice baseline support.** `personas/scripts/sentinel_regen.py regen` takes a single `--baseline-snapshot <DIR>` argument used for both voices in `--voices`. The script does `Path(args.baseline_snapshot) / regen_path.name` for each voice — both voices look up the same filename (e.g., `01_pass_2_identity_boundaries.json`) in the same directory, which fails when the baseline snapshot is per-voice (the natural structure: one subdir per voice since both voices have files of identical name). FU#49H/I/J/K validation worked around this by invoking sentinel_regen once per voice with `--baseline-snapshot <SNAP>/<voice_slug>/`. Fix options: (a) refactor sentinel_regen to handle per-voice subdirectories under `--baseline-snapshot` (look for `<DIR>/<voice_slug>/<filename>`); OR (b) snapshot files with voice-prefixed names (`<DIR>/<voice_slug>_pass_2.json`) so a single flat directory works for multiple voices. Option (a) is cleaner. Effort: ~30 min. **Trigger:** next time sentinel_regen is run (likely after voice 3 ships and a new prompt edit lands).
+- **(2) Sentinel_regen tooling — per-voice baseline support.** ✅ APPLIED 2026-04-27 (option a). `sentinel_regen.py:238` now looks for `<DIR>/<voice_slug>/<filename>` first; falls back to `<DIR>/<filename>` for backward-compat with flat snapshots. Both voices in `--voices` can now share a single `--baseline-snapshot` argument and resolve to their per-voice subdir naturally. Original problem: `personas/scripts/sentinel_regen.py regen` took a single `--baseline-snapshot <DIR>` argument used for both voices in `--voices`; the flat `Path(args.baseline_snapshot) / regen_path.name` collapsed both voices to the same lookup. FU#49H/I/J/K validation worked around this by invoking sentinel_regen once per voice with `--baseline-snapshot <SNAP>/<voice_slug>/`. Now natively supported.
 - **(Note, not a separate sub-item) Drift on un-edited Pass 2 fields.** Plato's FU#49H regen produced significant drift on fields that had no spec change (world: +2818 chars, knowledge_boundary: +2106 chars, character: +92, etc.). Drift is in a sensible direction (richer content), but cause is hard to disentangle from natural LLM run-to-run variance vs cascade from the new BLOCK 2 guardrails (49H-extended) affecting all-fields synthesis. **Watch empirically when voice 3 ships:** if voices 3-12 generation produces fields significantly richer than Plato/Dostoevsky baseline, that's good signal (49 framework working as designed); if quality regresses on un-edited fields, the BLOCK 2 cascade is too aggressive and would warrant a Pass 2 prompt-tightening pass. Not a fix; an empirical monitoring directive.
 
 ---
