@@ -81,12 +81,45 @@ venv/bin/python run_persona_pipeline.py "Voice Name"
 
 ETA: ~2h API time after DR dossiers complete. Cost: ~$18–22/voice.
 
-### Batch multiple voices' DR prompts
+### Batch multiple voices' DR prompts (pre-DR)
 
 ```bash
 cd code/personas
 scripts/batch_pre_dr.sh "$AI_ASSEMBLY_PROJECT_ROOT/voices_batch.txt" --parallel 3
 ```
+
+### Batch full pipeline runs (after DR data lands per voice)
+
+When 6 manual claude.ai DR sessions are saved for one or more voices, run
+the full pipeline via the batch wrapper. **Always passes `--project`
+explicitly — refuses env-var fallback to avoid wrong-folder accidents
+during unattended runs.**
+
+```bash
+cd code/personas
+scripts/run_pipeline_batch.sh \
+    --project /Users/aienvironment/Desktop/AI\ Assembly/projects/athens-2026 \
+    --parallel 3 \
+    "Cleopatra" "Octopus" "Bob Marley"
+```
+
+Per-voice logs land at `$PROJECT/batch_logs/<slug>.pipeline.log`; summary
+at `_batch_results_<timestamp>.txt`. Each voice resumes from cache on
+re-run, so failed voices can be retried individually.
+
+### Wrong-folder safety harness
+
+Every runner prints a startup banner showing `PROJECT_ROOT` + `SOURCE`
+(`--project` / env-var / default). When resolution targets a production
+project (basename contains `athens-2026` or `phase-l-`) via env-var
+fallback (no explicit `--project` flag), the banner escalates with ⚠
+markers and a "production target via env-var fallback" warning.
+Operator can abort with Ctrl-C if unintended. Sandbox env-var
+resolution stays quiet.
+
+**Operator habit:** for production runs (athens-2026), always pass
+`--project` explicitly — even on single ad-hoc invocations. The env-var
+default in `code/.env` points at `projects/test` by design.
 
 ### Run a runtime stage on test data
 
