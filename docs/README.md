@@ -20,7 +20,7 @@
 | File | Status | Notes |
 |------|--------|-------|
 | `AI_Assembly_Voice_Pipeline.md` | **Partial** | Covers Steps 1+2 only. Step 3 Amendment (per Briefing v3.1) is unspecified — FU#49E flagged as highest-impact post-Athens item. |
-| `LLM_CALL_INVENTORY.md` | **Needs update** | Doesn't include passes added since 2026-04-21: Pass 1.1–1.7 chunked merge, Pass 6.5-clean, Pass 7-pre 3-stage, Pass 7-anachronism, Pass 7a-FIX (FU#13), FU#41 chat builder. |
+| `LLM_CALL_INVENTORY.md` | **Current** (rewritten 2026-04-27) | Updated for arch-03 chunked merge (Pass 1.1–1.7), Pass 0b tailor, Pass 6.5-clean, Pass 7-pre 3-stage (FU#2), Pass 7-anachronism, Pass 7a-FIX linear patcher (FU#13), FU#41 chat builder. 5-model fallback ladder for Pass 7-anach + Pass 7a (gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro). |
 
 ## Archived / stale
 
