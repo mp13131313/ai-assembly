@@ -25,7 +25,7 @@
 │   │   ├── AI_Assembly_Provocateur_Pipeline.md
 │   │   ├── AI_Assembly_Researcher_Pipeline.md
 │   │   ├── AI_Assembly_Transcription_Pipeline.md
-│   │   ├── AI_Assembly_Voice_Pipeline.md          # Steps 1+2 only; Step 3 unspecified
+│   │   ├── AI_Assembly_Voice_Pipeline.md          # v2 (2026-04-28) — Steps 1+2+3 + validation + continuity
 │   │   ├── AUDIENCE_BRIEF.md
 │   │   └── LLM_CALL_INVENTORY.md
 │   ├── runtime/                        # PRODUCTION code: FastAPI ingest + Prefect flows
@@ -199,21 +199,27 @@ Per-voice cost: ~$18–22, wall time ~2 hours (excluding manual claude.ai DR ses
 
 ## 2. Specified but not built
 
-### 2.1 Voice Pipeline Steps 1 + 2 (runtime/flows/voice_flow.py)
+### 2.1 Voice Pipeline Steps 1 + 2 + 3 (runtime/flows/voice_flow.py)
 
-**Spec:** `docs/AI_Assembly_Voice_Pipeline.md` (covers Steps 1+2 only).
-**Status: not built.** (`runtime/flows/voice/` directory does not exist.)
+**Spec:** `docs/AI_Assembly_Voice_Pipeline.md` v2 (2026-04-28). Covers Steps 1+2+3 end-to-end + validation nodes + continuity block generation. Replaces v1 partial (archived at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`).
+**Status: spec current, build pending.** (`runtime/flows/voice/` contains only build-notes README — directory + flow + step modules + prompts not yet built.)
 
-**What Step 1 does:** Receive Provocateur briefing → load Persona Card as system prompt → produce one detailed response per formulation (~3 per voice).
+**What Step 1 does:** Receive Provocateur briefing → load Persona Card as system prompt (foundational + reasoning fields per routing matrix) → produce one detailed response per formulation (~3 per voice; ~30 per night across 10-voice panel).
 
-**What Step 2 does:** Read back all detailed responses → make focus + stance decisions → produce one artifact per voice in the voice's natural medium.
+**What Step 2 does:** Read back all detailed responses → make focus + stance + form-from-family decisions → produce one first-draft artifact per voice in its native medium (10 first-drafts per night).
 
-**Key wiring decisions already made:**
-- Load persona card fields as system prompt; DROP `metadata` and `smoke_test_chains` (build-time diagnostic, NOT runtime few-shot — see §5.10).
-- Foundational fields (12) appear in both Step 1 and Step 2.
-- Step 1 uses Reasoning + Engagement fields (9); Step 2 uses Voice + Artifact fields (15).
-- **`reference_only_passages`** (FU#41-related) is loaded into Step 1 system prompt but MUST be dropped from Step 2 system prompt to avoid copyright exposure for musical/copyright-sensitive voices (see `personas/HANDOFF.md`).
-- Runtime reads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` directly.
+**What Step 3 does (FU#49E):** Read other voices' first-draft artifacts on shared themes → decide amend (`extend` / `mark-limit` / `sharpen-disagreement`) or `stand-pat` → produce amended artifact (10 amended/stand-pat artifacts per night). FU#49E reviewer's framing baked into the system prompt verbatim: *"Amendments producing agreement are not useful; amendments smoothing over disagreement are anti-useful."*
+
+**Key wiring decisions (now in v2 spec):**
+- Per-step field-routing table for all 36 generated card fields + 2 continuity nulls + 4 strip rules
+- DROP `metadata` always; DROP `smoke_test_chains` always (NEVER few-shot); DROP `reference_only_passages` from Step 2 + Step 3 (copyright); DROP `curated_corpus_passages.corpus_metadata` always (FU#41 nested-strip)
+- Foundational fields (13, including new `voice_temporal_stance`) appear in all three steps
+- Step 1 + Step 3 share reasoning fields (Step 3 reasons about other voices' artifacts before amending)
+- Step 2 + Step 3 share voice/artifact fields (both produce public-facing text)
+- Step 2 picks form per formulation from voice's family-of-forms (Card v2.1 §H); Step 3 may reselect
+- Continuity block generation runs after Night N completes, before Night N+1 Provocateur runs; per-voice override at `<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json`
+- Validation default policy: Athens Night 1 ON for all voices; Night 2/3 ON for voices that flagged on prior nights
+- Runtime reads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` directly
 
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
@@ -231,11 +237,9 @@ Three batch tests:
 
 ### 3.1 Voice Pipeline Step 3 — Amendment
 
-**Briefing v3.1 describes it:** after all 12 voices produce first-draft artifacts, each voice reads first-draft artifacts of OTHER voices it shares at least one theme with, and decides whether to amend its own. Amendments are visible (reference the other voice).
+**Status:** SPEC LANDED 2026-04-28 in `docs/AI_Assembly_Voice_Pipeline.md` v2 §"Step 3 — Amended Artifact". FU#49E reviewer framing wired in verbatim. Implementation pending alongside Steps 1+2.
 
-**Status: UNSPECIFIED.** FU#49E flagged this as the **highest-impact post-Athens item** during reviewer pass 2 (2026-04-26).
-
-**Dependency order:** needs Voice Pipeline Steps 1+2 building first to have reference outputs, then spec Step 3 against those.
+(Was previously listed here as UNSPECIFIED — spec lifts it out of §3 into §2.1.)
 
 ### 3.2 Closing-show pipelines (Day 3 afternoon)
 
@@ -275,11 +279,11 @@ Render → Publish → Curate → Deliver. **Not built.** Newsletter style calib
 - Fields: `name`, `speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`
 - Currently: council_config is **`dev_stub_v3_audience_sharpened`** — hand-written. Will be replaced as athens-2026 cards complete.
 
-**Assembled Persona Card (35 generated + 2 continuity null + metadata):**
+**Assembled Persona Card (36 generated + 2 continuity null + metadata):**
 - File: `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json`
-- Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt
-- Runtime MUST drop `metadata`, `smoke_test_chains`, `reference_only_passages` (Step 2 only) before assembling system prompt.
-- 35 fields populate at build time; 2 null continuity fields populated at runtime on Night 2.
+- Consumer: `runtime/flows/voice_flow.py` (when built) — loads as system prompt per the field-routing matrix in `docs/AI_Assembly_Voice_Pipeline.md` v2 §"Card → System Prompt Assembly"
+- Runtime MUST drop `metadata` always; `smoke_test_chains` always (NEVER few-shot); `reference_only_passages` from Step 2 + Step 3 (copyright); `curated_corpus_passages.corpus_metadata` always (FU#41 nested-strip)
+- 36 fields populate at build time (35 v2 baseline + `voice_temporal_stance` added 2026-04-21); 2 null continuity fields populated at runtime via per-voice override file (`<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json`) on Night 2+3.
 
 **Chat artifact (FU#41, 4th Derive output):**
 - File: `<PROJECT_ROOT>/voices/<slug>/06_derive/03_chat_system_prompt.json`
@@ -471,11 +475,11 @@ Each layer has single ownership. **Never** put real-person names in these — us
 
 ### 6.2 Pipeline gaps
 
-- **Voice Pipeline** (Steps 1+2+3): not built. Without it, persona cards can't produce runtime output. Everything from Night 1 downstream is blocked.
-- **Step 3 Amendment**: unspecified (FU#49E flagged highest-impact post-Athens).
-- **Phase 5 Cross-Persona QC**: scaffolded (`phase_5_cross_persona_qc.py`), not run — needs all 12 cards.
+- **Voice Pipeline** (Steps 1+2+3): spec landed 2026-04-28 (`docs/AI_Assembly_Voice_Pipeline.md` v2); not built. Without implementation, persona cards can't produce runtime output. Everything from Night 1 downstream is blocked.
+- **Step 3 Amendment**: spec landed in v2 with FU#49E framing wired in verbatim; build pending alongside Steps 1+2.
+- **Phase 5 Cross-Persona QC**: scaffolded (`phase_5_cross_persona_qc.py`), not run — needs all athens-2026 cards.
 - **Night 2 exclusion filter (Provocateur)**: placeholder, not implemented.
-- **Continuity block generation**: not built.
+- **Continuity block generation**: spec landed in Voice Pipeline v2 §"Continuity Block Generation"; build pending.
 - **Downstream pipeline** (Render/Publish/Curate/Deliver): unbuilt.
 - **Closing-show pipelines** (theme identification, per-theme mapping, video): unspecified, unbuilt.
 - **Microsite**: unbuilt.
@@ -597,12 +601,10 @@ Given today's state: voices 3–12 are at Phase 0.5 complete; 11 × 6 = 66 manua
 
 ### Phase C — Voice Pipeline + supporting infrastructure (Athens-4w → Athens-1w)
 
-- Spec **Step 3 Amendment** (currently unspecified — FU#49E)
-- Build Voice Pipeline Steps 1+2 (Prefect flow, system prompt assembly from cards, optional validation)
-- Build Step 3 Amendment + theme-graph
-- Integration test against dev_msc_test Provocateur output
-- Build Night 2 continuity generation
-- Phase 5 Cross-Persona QC — run after all 12 cards complete; address distinctiveness issues
+- ✓ **Spec landed 2026-04-28** — `docs/AI_Assembly_Voice_Pipeline.md` v2 (Steps 1+2+3 + validation + continuity)
+- Build Voice Pipeline Steps 1+2+3 + validation + continuity per the v2 spec (`runtime/flows/voice_flow.py` + `runtime/flows/voice/*.py` + prompts in `runtime/flows/shared/prompts/voice_*.md`)
+- Integration test against `~/Desktop/AI Assembly/archive/runs/runtime/dev_msc_test/03_provocateur/briefings/` (the canonical Provocateur output from rehearsal)
+- Phase 5 Cross-Persona QC — run after all athens-2026 cards complete; address distinctiveness issues
 - Sync `council_config.json` from real Derive output (script or admin-console feature)
 
 ### Phase D — Microsite (parallelisable with C)

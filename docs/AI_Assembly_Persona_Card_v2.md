@@ -985,6 +985,8 @@ reasoning.
 
 # FIELD SUMMARY
 
+> **Voice Pipeline routing:** the runtime contract is `docs/AI_Assembly_Voice_Pipeline.md` v2 §"Card → System Prompt Assembly", which extends this table to Steps 1 / 2 / 3 (Step 3 = Amendment, FU#49E reviewer framing) and applies the four load-bearing strip rules at system-prompt-assembly time. The summary below covers Steps 1 and 2 only — Step 3 routing is in the Voice Pipeline doc.
+
 | # | Field | Section | Step 1 | Step 2 |
 |---|---|---|---|---|
 | 1 | council_member_name | Identity | ✓ | ✓ |
@@ -999,36 +1001,42 @@ reasoning.
 | 10 | translation_protocol | Boundaries | ✓ | ✓ |
 | 11 | topics_requiring_care | Boundaries | ✓ | ✓ |
 | 12 | hard_limits | Boundaries | ✓ | ✓ |
-| 13 | reasoning_method | Reasoning | ✓ | |
-| 14 | finds_compelling | Reasoning | ✓ | |
-| 15 | resists | Reasoning | ✓ | |
-| 16 | smoke_test_chains | Reasoning | ✓ | |
-| 17 | bold_engagement_topics | Engagement | ✓ | |
-| 18 | default_questions | Engagement | ✓ | |
-| 19 | disagreement_protocol | Engagement | ✓ | |
-| 20 | unique_contribution | Engagement | ✓ | |
-| 21 | rhetorical_mode | Voice | | ✓ |
-| 22 | characteristic_moves | Voice | | ✓ |
-| 23 | register_and_tone | Voice | | ✓ |
-| 24 | metaphorical_repertoire | Voice | | ✓ |
-| 25 | preferred_vocabulary | Voice | | ✓ |
-| 26 | banned_language | Voice | | ✓ |
-| 27 | banned_modes | Voice | | ✓ |
-| 28 | medium | Artifact | | ✓ |
-| 29 | technical_capabilities | Artifact | | ✓ |
-| 30 | characteristic_output_structure | Artifact | | ✓ |
-| 31 | relationship_to_detailed_response | Artifact | | ✓ |
-| 32 | aesthetic_qualities | Artifact | | ✓ |
-| 33 | stance_tendency | Artifact | | ✓ |
-| 34 | length_and_format_constraints | Artifact | | ✓ |
-| 35 | quality_criteria | Artifact | | ✓ |
-| 36 | continuity_block_if_night_2 | Continuity | ✓ | |
-| 37 | continuity_block_artifact_if_night_2 | Continuity | | ✓ |
+| 13 | voice_temporal_stance | Boundaries | ✓ | ✓ |
+| 14 | reasoning_method | Reasoning | ✓ | |
+| 15 | finds_compelling | Reasoning | ✓ | |
+| 16 | resists | Reasoning | ✓ | |
+| 17 | smoke_test_chains | Reasoning | ❌ DROP | ❌ DROP |
+| 18 | bold_engagement_topics | Engagement | ✓ | ✓ (Voice Pipeline v2: anchors focus decision) |
+| 19 | default_questions | Engagement | ✓ | |
+| 20 | disagreement_protocol | Engagement | ✓ | |
+| 21 | unique_contribution | Engagement | ✓ | ✓ (Voice Pipeline v2: anchors focus decision) |
+| 22 | rhetorical_mode | Voice | | ✓ |
+| 23 | characteristic_moves | Voice | | ✓ |
+| 24 | register_and_tone | Voice | | ✓ |
+| 25 | metaphorical_repertoire | Voice | | ✓ |
+| 26 | preferred_vocabulary | Voice | | ✓ |
+| 27 | banned_language | Voice | | ✓ |
+| 28 | banned_modes | Voice | | ✓ |
+| 29 | medium | Artifact | | ✓ |
+| 30 | technical_capabilities | Artifact | | ✓ |
+| 31 | characteristic_output_structure | Artifact | | ✓ |
+| 32 | relationship_to_detailed_response | Artifact | | ✓ |
+| 33 | aesthetic_qualities | Artifact | | ✓ |
+| 34 | stance_tendency | Artifact | | ✓ |
+| 35 | length_and_format_constraints | Artifact | | ✓ |
+| 36 | quality_criteria | Artifact | | ✓ |
+| 37 | continuity_block_if_night_2 | Continuity | ✓ (Night 2+) | |
+| 38 | continuity_block_artifact_if_night_2 | Continuity | | ✓ (Night 2+) |
 
-**Foundational (both steps):** 12 fields (Identity 5, Constitution 3, Boundaries 4)
-**Step 1 only:** 9 fields (Reasoning 4, Engagement 4, Continuity 1)
+**Field-count update (2026-04-28):** `voice_temporal_stance` was added to Pass 2 outputs on 2026-04-21 (commit `84e2b6b`) and refined three times across 2026-04-28 (cryofreeze framing, Card v2.1 §J). It is foundational — included in both Step 1 and Step 2. The total moves from 37 → 38 fields (36 generated + 2 continuity nulls).
+
+**Foundational (both steps):** 13 fields (Identity 5, Constitution 3, Boundaries 5 — including `voice_temporal_stance`)
+**Step 1 only:** 6 fields (Reasoning 3 + Engagement 2 [`default_questions`, `disagreement_protocol`] + Continuity 1)
+**Step 1 + Step 2 + Step 3 (added per Voice Pipeline v2):** 2 fields (`bold_engagement_topics`, `unique_contribution`) — these anchor Step 2's focus decision and Step 3's cross-framework reading; routing extended in the Voice Pipeline doc
 **Step 2 only:** 16 fields (Voice 7, Artifact 8, Continuity 1)
-**Total: 37 fields**
+**Drop list (always):** `metadata`, `smoke_test_chains`, `curated_corpus_passages.corpus_metadata` (nested)
+**Drop list (Step 2 + Step 3, per Voice Pipeline v2):** `reference_only_passages` (copyright)
+**Total generated fields: 36 + 2 continuity nulls = 38 entries in the assembled card**
 
 ---
 
