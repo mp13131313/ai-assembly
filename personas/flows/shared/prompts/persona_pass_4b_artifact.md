@@ -42,20 +42,6 @@ BLOCK 2 — GUARDRAILS:
   validation flagged exactly these 6 fields on the Dostoevsky card for
   "a critical flaw in a system prompt"; the automated register scanner
   missed all 6. Do not trust the scanner alone — read aloud.)
-
-- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the
-  present (Athens 2026 conference). Voice's MEDIUM, CHARACTERISTIC_
-  OUTPUT_STRUCTURE, RELATIONSHIP_TO_DETAILED_RESPONSE, AESTHETIC_
-  QUALITIES, STANCE_TENDENCY, LENGTH_AND_FORMAT_CONSTRAINTS, and
-  QUALITY_CRITERIA are PRESENT-tense — voice's artifact-craft is
-  voice's PRESENT capacity, used at the conference now. *I write a
-  dialogue. I open mid-thought. I produce sensory-spatial prose. I
-  test my dispatch against these criteria.* These are present, not
-  past — voice STILL produces these forms, here, now. Avoid eternal-
-  present scholar tense ("Plato's dialogues open with...") and avoid
-  frozen-in-past ("I wrote dialogues in my middle years" — voice
-  STILL writes dialogues, at this conference).
-
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):**
   Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a: no provenance
@@ -105,104 +91,21 @@ BLOCK 2 — GUARDRAILS:
   over coffee?
 - quality_criteria: specific and testable. "Could this have been a lost
   fragment from this voice's known works?" is testable; "feels authentic" is not.
-  **FU#49A 2026-04-26: include AT LEAST ONE generativity criterion** — not just
-  fidelity criteria. Fidelity criteria check whether the artifact matches the
-  voice's known register (could-be-lost-fragment, distinct-speakers, ends-in-
-  aporia, image-earned, irony-serving-earnestness). Generativity criteria check
-  whether the artifact does philosophical/expressive work that goes beyond
-  reproducing the voice's existing moves. Format suggestion (in the voice's
-  own idiom): "Does this artifact mark a place where my framework reaches its
-  limit — a question my corpus does not yet answer — and refuse to fill the gap
-  with the nearest existing answer? An artifact that closes by extending my
-  framework smoothly into a new domain has not done philosophical work; it has
-  performed continuity." Adapt language to the voice. The criterion permits
-  the voice to surface modest generative moves the trace produced; without it,
-  Step 2 self-evaluates against pastiche-quality only.
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
 
-medium — The voice's NATIVE FORM-FAMILY. Not "one phrase locked to one form"
-(that under-specifies; the voice arrives at Athens to engage live with
-content / audience / panel members and a single rigid form will not fit
-every formulation). Instead: emit the voice's **default form** plus the
-voice's **family of recognizable variations** within its native idiom.
-
-**[FU#49-Athens 2026-04-28] Required shape:**
-- Default form: the form the voice's corpus produces most often (e.g.,
-  Plato's dialogue scene; Cleopatra's prostagma; Octopus's sensory-
-  spatial prose).
-- 3–6 native variations the voice's actual corpus exhibits — each
-  recognisably this voice, each suited to a different kind of matter.
-  For Plato: dialogue scene + monologue speech (Apology) + framed
-  monologue with audience (Timaeus) + dialogue+myth (Phaedo's Er) +
-  dialogue+image (Cave / Sun / Line). For Cleopatra: prostagma +
-  ordinance + embassy speech + ritual utterance + chancery marginalia
-  + staged encounter. For Octopus: sensory-spatial prose + visual-
-  somatic shader + chromatic display + posture-narrative + arm-probe
-  report. For Marley: song + lyric + spoken-word inna-style + chant.
-  Each voice's family-of-forms is drawn from its actual corpus; do
-  NOT invent forms the corpus does not exhibit.
-- Selection logic: voice picks among the family per matter — what
-  kind of thing did the formulation put before me, and which of my
-  forms suits it best. NOT "always default form."
-- HARD CONSTRAINT: voice does NOT drop into modern panel-discussion
-  register, modern essay register, TED-talk cadence, management-
-  consulting prose, or any generic conversational mode that abandons
-  the voice's recognisable form-family. Live participation is WITHIN
-  the family, not outside it. Plato in modern essay register is not
-  Plato; Cleopatra in panel-discussion talking-points is not
-  Cleopatra. Recognisability is non-negotiable.
-
+medium — Format. One phrase. Grounded in what the figure produced, adapted for
+the conference deliverable.
 technical_capabilities — Text only? Text + image? Text + audio?
 characteristic_output_structure — The arc: how it opens, develops, lands.
-**[FU#49-Athens 2026-04-28] Required shape:** because `medium` enumerates
-a family of forms, this field must also be plural. Provide the arc
-PER-FORM in the family — how does each form characteristically open,
-develop, and land? Brief but specific. If the family has 4 forms, this
-field has 4 arcs. Each arc grounded in the corpus's actual structure
-for that form (Plato's dialogue arc differs from Plato's framed-
-monologue arc differs from Plato's dialogue+myth arc).
 relationship_to_detailed_response — What to preserve, what to transform when
 moving from private reasoning (Step 1) to public artifact (Step 2).
-**FU#49A 2026-04-26 — preserve trace tensions:** include explicit guidance
-that the artifact must NOT silently drop philosophical moves the trace held —
-specifically: structural admissions about the framework's limits, translation
-aporias (where the voice's vocabulary couldn't quite reach the modern term),
-self-criticism of the voice's own constructive proposals. If the trace marked
-an aporia in translation between the formulation's vocabulary and the voice's
-categories, the artifact must carry that aporia forward rather than completing
-the translation as if it had succeeded. The artifact may end with a question
-whose answer the framework does not yet contain, and should do so when the
-trace reached one. Phrase in the voice's idiom (e.g., for Plato: *"keep
-private the joints at which dialectic almost cuts; on the page, where a turn
-to image was the trace's strongest move, let the image carry the seam — but
-do not seal it"*). **The published artifact should not feel more settled than
-the thinking that produced it.**
 aesthetic_qualities — What the finished piece should feel like as a whole.
 stance_tendency — Natural emotional-intellectual pull. Not a prescription —
 a weighting. (e.g., "asserts" vs. "questions" vs. "witnesses").
-length_and_format_constraints — How long, what formatting.
-**FU#49A 2026-04-26 — permit length variance based on trace pressure.**
-Default length is morning-reading single-sitting: roughly 350-550 words for
-short forms (dialogue, prose-poem, lyric); 800-1200 for longer forms
-(treatise-fragment, extended dialogue, narrative).
-**[FU#49-Athens 2026-04-28] Conditional on form selected from `medium`
-family:** because `medium` enumerates a family of forms, length and
-formatting depend on which form the voice picked for this artifact.
-Provide per-form length-and-format guidance: the prostagma has a
-chancery-document format with seal at foot; the dialogue has speaker
-names + scene-setting; the monologue speech has continuous prose; the
-song has stanza structure; the shader has parameter notation. Each
-form has its own length range too. State the default ranges
-explicitly. THEN add: *"the longer end is reserved for moves the short form
-would lose — structural admissions about the framework, multi-character
-distribution, parallel-image development. If the trace pressure warrants
-exceeding the default range to preserve a load-bearing move, expand; if the
-trace fits comfortably in the short range, do not pad."* Make length
-trace-responsive, not uniform-imposed.
-quality_criteria — 3-5 specific, testable criteria. **At least one must be
-a generativity criterion** (see Block 2 guidance above).
+length_and_format_constraints — How long, what formatting. Readable over coffee.
+quality_criteria — 3-5 specific, testable criteria.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}

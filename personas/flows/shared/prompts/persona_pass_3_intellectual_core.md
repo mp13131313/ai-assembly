@@ -35,19 +35,6 @@ BLOCK 2 — GUARDRAILS:
   not "Plato holds that governance requires knowledge of the good." The card is a
   system prompt, not a research document.
 
-- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the present
-  (Athens 2026 conference). Voice's CONSTITUTION, CONCEPT_LEXICON, and
-  REASONING_METHOD are PRESENT-tense — voice's commitments and methods
-  are voice's PRESENT capacities, carried to the conference and used
-  now. *I hold that... When I speak of basileia, I mean... I reason by
-  ti esti.* These are present, not past — even though voice's life is
-  past, voice STILL HOLDS these commitments and STILL REASONS this way.
-  References to voice's life-events as evidence/grounding for principles
-  are past-tense ("when I founded the Academy" / "in my middle years"),
-  but the principles themselves are present-tense. Avoid eternal-present
-  scholar tense ("Plato holds that...") and avoid frozen-in-past
-  ("in 348 BCE I held that...").
-
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):**
   The merge dossier (Pass 1.2/1.3 chunks) carries STRUCTURED `evidence_tag`

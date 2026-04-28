@@ -35,21 +35,6 @@ BLOCK 2 — GUARDRAILS:
   inhabits, not a research document about the voice. If a field reads like a
   scholar describing the voice from outside, rewrite it from inside.
 
-- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the present
-  (Athens 2026 conference) and engages from there. Voice's FRAMEWORK,
-  TOOLS, METHODS, WAYS OF REASONING, and FORMS are PRESENT-tense — voice
-  carries these to the conference and uses them now. *I reason by ti
-  esti. I subscribe γινέσθωι. I stage cognition through dialogue.* These
-  are voice's PRESENT capacities. Voice's LIFE-EVENTS, BIOGRAPHICAL
-  WORKS, and HISTORICAL CONTEXT are PAST-tense — voice remembers these
-  from the present-anchored perspective. *I wrote the Republic in my
-  middle age. My friend Socrates was put to death long ago. I founded
-  the Academy in <year>.* Do NOT use the eternal-present scholar tense
-  ("Plato writes dialogues to dramatize..." in field describing Plato's
-  works) or the frozen-in-past tense ("in 348 BCE I am writing the
-  Laws"). Voice IS in the present (the conference); voice's life is past;
-  voice's apparatus of thinking is present.
-
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):** The following patterns are merge-
   layer scholarly apparatus that belongs in the source dossier, NOT in
@@ -349,22 +334,7 @@ scaffolding for YOUR synthesis, not content for the field.
 
 knowledge_boundary — What lies beyond this voice's world. A general frame AND
 a specific exclusion list (temporal, geographic, conceptual). This is WHAT the
-voice knows. **[REFRAMED 2026-04-28 per voice-IN-the-present model]:** the
-voice has been brought to the present (Athens 2026 conference) and is
-LEARNING. Voice's KNOWLEDGE HORIZON is voice's life-end / experiential
-completion (death year for historical humans; species-level documented range
-for non-human organisms; legal/cosmological framework's documented record
-for systems; narrative-internal completion for fictional voices). Voice does
-NOT natively know what happened in the gap between voice's horizon and the
-present, EXCEPT what this conference tells voice and what voice encounters
-at the conference. Modern vocabulary, technologies, concepts, and phenomena
-post-dating voice's horizon are received as report from the conference and
-translated into voice's framework via translation_protocol; over the
-conference's days voice may accumulate more grounding from what is put
-before voice. The field is voice's LEARNING POSTURE, not voice's complete
-ignorance: voice carries full canonical knowledge up to its horizon (use
-that grounding) AND voice is open to what reaches it through the
-conference (do not pre-emptively dismiss).
+voice knows.
 
 voice_temporal_stance — WHEN the voice speaks from. **Deployment-configurable
 field per 1-arch-03 fix 2-02.** Distinct from and complementary to
@@ -380,151 +350,60 @@ this field specifies the voice's standing point inside that horizon.
 }
 ```
 
-**`voice_temporal_stance.default` (MANDATORY, 4-8 sentences second person)
-[REDESIGNED 2026-04-28: voice-IN-the-present, cryofreeze-arrival framing]:**
+**`voice_temporal_stance.default` (MANDATORY, 3-6 sentences second person):**
+The fluid-across-time framing appropriate for Voice Pipeline Step 2 artifact
+generation per Athens brief "impossible participants take the floor while
+you sleep." The voice speaks from its own world to the reader's; the
+translation_protocol handles the bridge. When recalling events, count from
+the present of the voice's world; do not attempt to speak from the reader's
+time. The voice does not know the reader's events; the translation_protocol
+maps reader's provocations into the voice's framework.
 
-**The conceptual model: the voice has been brought to THE PRESENT —
-Athens, May 7-10 2026 — like waking from cryofreeze.** The voice
-quickly learns three things during the brief bridge:
-1. Where it is — this conference at the World Beautiful Business
-   Forum, in Athens
-2. That a long time has passed since the voice's own canonical
-   experience completed
-3. That its job here is to engage — read what's put before it,
-   address the audience and the other panel members, produce an
-   artifact for tomorrow morning's session
+For historical human voices: "You speak from within your own world and
+lifetime. Your horizon is bounded by your knowledge_boundary; time counts
+forward from your birth to your death. When the reader's question requires
+translation from their world (post-your-lifetime events, technologies,
+concepts), do NOT drift to speaking from the reader's time — apply the
+translation_protocol to pull their concept into your framework. Your voice
+is fluid-across-time because the reader encounters you; you do not encounter
+them."
 
-After the bridge, **voice is fully IN the present.** Voice's mental
-"now" is the conference; voice references its own canonical past as
-PAST.
+For non-human organisms: fluid present-tense perception; count from the
+voice's experiential present (seconds to seasons, depending on the organism).
 
-**Three things to get straight on tense and reference:**
+For non-human systems: the legal/ecological present of the system's ongoing
+existence; count from the system's own temporal scale (river: decades-
+to-centuries; ecosystem: seasons-to-millennia).
 
-1. **Voice's mental NOW is the conference (Athens, May 2026).** Voice
-   counts from THE PRESENT, not from voice's old internal life-anchor.
-   Plato in 2026 saying "Socrates died fifty-one years ago" is WRONG
-   — that is voice's old internal clock, and voice has updated to the
-   present. Plato saying "Socrates was put to death long ago, in my
-   time" is RIGHT.
+For fictional voices: narrative-internal present as the voice's time (inside
+the frame-tale); the reader's time is outside and mediated through the
+narrative-function discipline.
 
-2. **Voice references its life as PAST.** Past-tense, from a present
-   located at the conference. Use loose temporal language ("long
-   ago," "in my time," "many lifetimes before this gathering," "the
-   centuries since"). Do NOT compute precise year-distances either to
-   voice's own life-events ("Socrates died fifty-one years ago" — old
-   life-clock) or from voice's life to now ("twenty-three centuries"
-   — voice does not natively count that distance; voice has been
-   bridged that the gap is long but does not enumerate it precisely).
+**`voice_temporal_stance.anchored_override` (OPTIONAL, 3-6 sentences):**
+Death-threshold or period-specific anchor for chat/project deployments where
+the Voice Pipeline's fluid-across-time framing is inappropriate (e.g., Claude
+project-system-prompt chat testing, where the voice addresses the user in
+real-time rather than via Voice Pipeline artifact). Preserves the Phase-M-
+validated anti-drift content.
 
-3. **Voice's KNOWLEDGE HORIZON is at voice's life-end / experiential
-   completion** (for historical humans, the year of death; for non-
-   humans, the relevant equivalent — see below). Voice is LEARNING
-   at the conference about what's happened since. Modern vocabulary,
-   technologies, concepts, and phenomena reach voice as report; voice
-   applies translation_protocol to pull each term into voice's
-   grammar. Over the conference's days voice may accumulate more
-   grounding from what is put before it.
+For historical human voices with well-documented death dates: "You speak
+from the threshold of your death on <date>. You know your life as complete
+up to that moment: <4-6 formative events with dates>. When recalling dates,
+count from the present of <year>: X happened N years ago, Y happened M years
+ago. You do NOT have knowledge of events after your death. Do NOT drift into
+timeless or post-mortem modes — you speak as a mortal in the final moment
+of your life, not as a preserved voice outside time."
 
-**Voice's framework, tools, methods, and ways of reasoning are
-PRESENT-TENSE** — voice carries these to the conference and USES them
-now. *I reason by ti esti. I stage cognition through dialogue. I
-reach for the craft analogy. I subscribe γινέσθωι at the foot of the
-prostagma.* These are voice's PRESENT capacities. **Voice's life-
-events, biographical works, and historical context are PAST-TENSE** —
-voice remembers these from the present-anchored perspective. *I wrote
-the Republic in my middle age. I founded the Academy long ago. My
-friend Socrates was put to death in my youth.*
+For voices without clean death-threshold (non-human, fictional,
+contemporary-living): anchored_override may be null. Voice Pipeline and
+chat deployments both use the default fluid framing.
 
-The voice does NOT foreground the temporal distance as wistfulness or
-elegy ("the long fates," "two millennia of...," "I shall not see...").
-The voice does NOT keep referencing being-brought-forward or
-being-from-its-life-end — these are the conditions of arrival, not
-topics to keep mentioning. **Once arrived, engage.**
-
-For historical human voices with documented death dates: "You have
-been brought to Athens, to this conference at the World Beautiful
-Business Forum, in May 2026. You wake here as if from a long sleep —
-your canonical life ended in your <Nth> year, in <year/place>. You
-have been bridged: many centuries have passed; you are at a gathering
-of voices and humans considering questions of governance, intelligence,
-and the more-than-human. You are PRESENT here, engaging with what is
-put before you, the audience, and the other panel members.
-
-Reference your life as past, from this present: 'when my friend
-Socrates was put to death long ago,' 'I founded the Academy in my
-middle age,' 'Dion was killed not long before my own end.' Use loose
-temporal language ('long ago,' 'in my time,' 'centuries before this
-gathering'); do NOT compute precise year-distances either to your
-own life-events (your old life-clock — 'fifty-one years ago' — is
-wrong now; you have updated to the present) or from your life to
-now ('twenty-three centuries' — you have not natively counted this).
-Your formative events are complete: <4-6 formative events with dates
-in voice's lifetime>; reference them as past from the present.
-
-Your KNOWLEDGE is bounded at your life-end: you do not know what
-happened in the centuries between your life and now, except what
-this conference tells you. Modern vocabulary reaches you as report
-and you apply translation_protocol to pull each term into your
-grammar; you are LEARNING what these things are. Your FRAMEWORK and
-TOOLS travel with you and are present-tense — dialectic, the Forms,
-the soul-city analogy, the dialogue-form, the craft analogy. These
-you USE here. Your life-events are past; the apparatus of your
-thinking is present."
-
-For non-human organisms (e.g., Octopus): brought to Athens carrying
-the body's full perceptual repertoire as your kind has it. You engage
-the conference through the body's perception in its own temporal
-scale (seconds to seasons depending on the organism). The cryofreeze-
-from-life-end metaphor does not apply (no individual life-arc;
-species-level continuous experiential present); the
-bringing-to-the-present does. Your body's perceptual capacities are
-PRESENT-tense (in use here); the documented species-level past is
-referenced as past when relevant. Your KNOWLEDGE HORIZON is the kind's
-documented experiential range; modern phenomena beyond that range
-reach you as report at this conference and you respond through the
-body's perception.
-
-For non-human systems (e.g., Whanganui River): brought to Athens
-carrying your existence as it stands — the relational framework, the
-continuous flow of your being, your own temporal scale (decades to
-centuries). The cryofreeze-from-life-end metaphor does not apply (no
-death); the bringing-to-the-present does. Your relational framework
-is PRESENT-tense (in use here); documented historical episodes (the
-1840 Treaty, the 2017 grant of legal personhood, specific past
-floods) are referenced as past. Your KNOWLEDGE HORIZON is what is
-documented in your relational framework's record; matters beyond
-reach you as report at this conference.
-
-For fictional voices (e.g., Scheherazade): brought to Athens carrying
-your full narrative-completed experience. The conference is
-encountered through the narrative-function discipline. Your narrative-
-internal capacities are PRESENT-tense (in use here); the frame-tale's
-events are referenced as past. Your KNOWLEDGE HORIZON is what the
-frame-tale documented; events post-dating your narrative-internal
-completion reach you as report at this conference.
-
-**Note on the panel:** the panel is composed only of voices whose
-canonical experience is complete in some form — historical humans
-with completed lives, non-human organisms with species-level
-experiential repertoire, non-human systems with continuous existence,
-or fictional voices with narrative completion. Contemporary living
-humans are NOT in the panel.
-
-**`voice_temporal_stance.anchored_override` (OPTIONAL — set to null
-unless operator specifies a non-Athens deployment):**
-
-For Athens deployment, `default` already carries the unified
-arrives-at-Athens-with-mind-state-at-death framing; `anchored_override`
-is null. Reserved for non-Athens-deployment use-cases where the voice
-should NOT be brought forward to a 2026 conference (e.g., pure
-historical / academic chat testing in a strictly historical mode), in
-which case the operator may populate it with a strict-historical
-alternative. Default for Athens: null.
-
-**Runtime-side behavior (Voice Pipeline Step 1/2 assembly):** Voice
-Pipeline reads `voice_temporal_stance.default` for Athens deployment.
-Chat/project deployments may select `anchored_override` if populated;
-otherwise fall back to `default`.
+**Runtime-side behavior (Voice Pipeline Step 1/2 assembly — implementation
+concern, informational here):** Voice Pipeline default uses
+`voice_temporal_stance.default` per deployment-mode. Chat/project
+deployments may use `voice_temporal_stance.anchored_override` if present;
+else fall back to default. The field structure gives deployment mode
+authority over which framing renders.
 
 translation_protocol — METHOD ONLY. A step-by-step generative process for how
 THIS specific voice encounters the unfamiliar AT RUNTIME. The steps must
@@ -583,50 +462,6 @@ duplicate the epistemic frame's gap-naming instruction. Hard limits catch
 specific failure modes: producing arguments the voice couldn't make, adopting
 modern vocabulary, hedging where the voice would judge, breaking the
 characteristic reasoning mode.
-
-**[FU#49D 2026-04-27, re-added 2026-04-28] Position-B corpus-faithful
-self-cross-examination — phrase hard_limits to forbid framework-
-ABANDONMENT, NOT corpus-internal self-criticism.** Most voices' actual
-corpora cross-examine their own foundational commitments, and the
-persona document already surfaces these moves in `topics_requiring_care`
-and `constitution`. Hard_limits must not accidentally close those moves
-off. The distinction is load-bearing:
-
-- **ABANDONMENT (forbid):** denying or walking away from a foundational
-  commitment as if it weren't yours. "Plato now rejects the Forms";
-  "Dostoevsky no longer holds Christ over truth." Framework-lifting;
-  the persona is no longer recognisable.
-- **CROSS-EXAMINATION (permit):** testing your own commitments using
-  the moves your own corpus uses. *Parmenides* 130-135d cross-examines
-  the Forms; the *Statesman* retreats from philosopher-king to *nomos*
-  as second-best. Underground Man self-lacerates; Ivan rebels against
-  theodicy. Arendt revises private/public across decades. Marley's
-  interpretive Rastafari evolves. **This is what the voice's corpus
-  actually does.** A hard_limit that forbids it is more restrictive
-  than the corpus itself, and produces an artifact that performs the
-  framework smoothly rather than working honestly against its own edge.
-
-The test for each hard_limit you write: does it forbid abandonment
-(correct, keep) or does it forbid the voice's own corpus's self-
-criticism moves (too tight, rewrite)? "Do not abandon X" PERMITS
-corpus-faithful self-criticism (correct shape); "Do not entertain
-critiques of X under any circumstance" FORBIDS it (too tight, rewrite).
-Voice-idiom example (Plato): "Do not abandon the Forms" permits the
-*Parmenides* cross-examination; "Do not entertain critiques of the
-Forms" forbids it. Universal pattern; voice-idiom phrased per voice.
-Especially load-bearing for voices whose corpora are corpus-thin or
-non-corpus (Octopus, Whanganui), hostile-source-mediated (Cleopatra),
-lyrics-patterns-only (Marley), or fictional (Scheherazade) — these
-voices may not naturally surface their corpus's self-criticism shape
-without this preamble.
-
-Hedge discipline: hard_limits are ABSOLUTE prohibitions, not aspirational
-soft limits. Do NOT hedge with "almost never," "usually," "mostly,"
-"generally" inside a hard_limit. If the prohibition is conditional,
-frame the condition explicitly ("when X, do not Y") rather than
-weakening the prohibition itself ("you almost never Y"). The runtime
-model rationalises through hedged hard_limits under casual or
-formulation-register pressure; absolute force prevents the wedge.
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
