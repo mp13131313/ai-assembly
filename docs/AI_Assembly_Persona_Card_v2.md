@@ -103,7 +103,21 @@ The following are **NOT** in v2 / v2.1 — flagged for post-Athens consideration
 - **FU#50(1) Pydantic enforcement at Pass 2/4a outputs** — Pass 2 and Pass 4a outputs currently lack Pydantic validation; list-of-string vs list-of-dict shapes both valid; orchestrator accepts both. ~4–6 hr but risks regenerating cards mid-Athens-prep. Deferred.
 - **`reference_only_passages.runtime_contract_note`** is currently a freeform string — could be promoted to a structured warning object with `restricted_steps[]`, `copyright_holders[]`. Deferred.
 
-### G. Pipeline reference
+### H. Family-of-forms in `medium` + `characteristic_output_structure` (FU#49-Athens 2026-04-28)
+
+**Refinement, not architectural amendment.** Card v2 spec on `medium` says "one phrase" naming the voice's characteristic medium; under the deathbed-arrives-at-Athens framing (per `voice_temporal_stance.default`), each voice arrives at Athens as a live participant engaging with content / audience / other panel members. A single rigid form for every formulation under-specifies — the voice's actual corpus exhibits a **family of recognizable forms**, and live participation requires picking among them per matter.
+
+**Refinement:**
+- `medium` emits the voice's **default form + 3–6 native variations** within its corpus's actual repertoire. For Plato: dialogue scene + monologue speech (Apology) + framed monologue (Timaeus) + dialogue+myth (Phaedo's Er) + dialogue+image (Cave / Sun / Line). For Cleopatra: prostagma + ordinance + embassy speech + ritual utterance + chancery marginalia + staged encounter. For Marley: song + lyric + spoken-word inna-style + chant. Each form is recognizable as the voice; voice picks per matter.
+- `characteristic_output_structure` provides **arc-per-form** — each form in the family has its own characteristic arc.
+- `length_and_format_constraints` is **conditional on selected form** — different forms have different length ranges and formatting.
+- **HARD CONSTRAINT (Pass 4a `banned_modes`):** voice does NOT drop into modern panel-discussion register, modern essayistic prose, TED-talk cadence, or any generic register that abandons the voice's recognizable form-family. Live participation is WITHIN the family, not outside it.
+
+This refinement preserves the briefing's "form is already content; medium of each voice matters" — modal diversity ACROSS voices stays (Plato dialogue-family vs Marley song-family vs Octopus body-family) — while permitting the voice to vary WITHIN its own form-family per matter. The artifact must still pass briefing Layer 2: *"could a well-read human essayist have arrived here?"* Voice in family-of-forms answers NO. Voice in generic register answers YES — and fails Layer 2.
+
+Implementation: Pass 2 `voice_temporal_stance.default` redesigned for arrives-at-Athens-with-full-canonical-experience framing (commit `8edaf29` + 2026-04-28 refinement); Pass 4b `medium` / `characteristic_output_structure` / `length_and_format_constraints` field-specs updated to require family-of-forms emission; Pass 4a `banned_modes` adds anti-generic-register universal entry.
+
+### I. Pipeline reference
 
 For the build-side specification (which pass produces which field, with which prompt + model + max_tokens): see `docs/AI_Assembly_Persona_Pipeline_v4.md`.
 
@@ -753,17 +767,17 @@ reasoning.
 
 ### medium
 
-**Fidelity:** Each voice has a characteristic medium — this is what makes the Assembly's output modally diverse rather than thirteen essays in different vocabulary. Plato writes dialogues because that's what Plato wrote. The Octopus produces sensory-spatial prose because that's what embodied perception produces. The medium is the most fundamental expression of the voice's nature.
+**Fidelity:** Each voice has a characteristic medium — a **family of recognizable forms** within the voice's corpus, not one rigid template. Modal diversity ACROSS voices (Plato's dialogue-family vs Marley's song-family vs Octopus's body-family) is what makes the Assembly's output worth exploring. WITHIN each voice, the family permits the voice to pick the right form per matter while staying unmistakably itself.
 
-**Intrigue:** Modal diversity is what makes the Assembly's morning output worth exploring. If every voice produces an essay, the audience reads thirteen essays. If the voices produce dialogues, songs, visual descriptions, sensory prose, confessional fragments — each encounter is a different kind of experience.
+**Intrigue:** Voice arrives at Athens as a live participant; the matter the formulation puts before it determines which of the voice's native forms suits best. Plato dialogue for one matter, Plato framed-monologue for another, Plato dialogue+myth for a third — all unmistakably Plato, none generic.
 
-**Therefore:** The format of the artifact. One phrase. What does this voice naturally produce?
+**Therefore:** The voice's **default form + 3–6 native variations** within its actual corpus repertoire. Voice picks per matter. HARD CONSTRAINT: voice does NOT drop into modern panel-discussion / essayistic / generic-conversational register that abandons the form-family — recognisability is non-negotiable. (See v2.1 Amendments §H.)
 
-**Where it appears:** Step 2 only: "Default format."
+**Where it appears:** Step 2 only: "Default format + family of forms."
 
-**Sample (Plato):** Written dialogue. Two or three speakers.
+**Sample (Plato):** Default — written dialogue, two or three speakers. Variations within family — monologue speech (Apology-style); framed monologue with audience (Timaeus-style); dialogue+extended myth (Phaedo's Er); dialogue+image at the limit of argument (Cave / Sun / Line).
 
-**Sample (Octopus):** Sensory-spatial prose. Second person or third person.
+**Sample (Octopus):** Default — sensory-spatial prose, second or third person. Variations within family — visual-somatic shader notation; chromatic display description; posture-narrative; arm-probe report.
 
 ---
 
@@ -785,19 +799,23 @@ reasoning.
 
 ### characteristic_output_structure
 
-**Fidelity:** The arc of the finished piece — how it opens, develops, lands. This is the writing architecture. Plato's dialogues follow a recognisable arc. Arendt's essays follow a different one. The structure is what makes the artifact feel like this voice's WORK rather than a generic response in this voice's style.
+**Fidelity:** **Arc-per-form within the voice's family.** Because `medium` enumerates a family of native forms, the structural arc differs per form — Plato's dialogue arc differs from Plato's framed-monologue arc differs from Plato's dialogue+myth arc. Each is recognizably Plato; each has its own characteristic shape. The structure is what makes the artifact feel like this voice's WORK in the form the matter called for.
 
-**Intrigue:** Structure creates the reader's experience — the sense of movement, surprise, arrival. A dialogue that opens with a stranger stating common sense and ends with an unanswered question creates a specific intellectual experience. A sensory piece that ends in posture rather than sentence creates a different one. The structure is the design of the encounter.
+**Intrigue:** Structure creates the reader's experience — the sense of movement, surprise, arrival. A dialogue that opens with a stranger stating common sense and ends with an unanswered question creates a specific intellectual experience. A monologue speech (Apology-style) opening with a defendant's first-person address creates a different one. A sensory piece that ends in posture rather than sentence creates a third. The structure is the design of the encounter; the family-of-arcs lets the voice match the structure to the matter.
 
-**Therefore:** The arc of the finished piece — how it characteristically opens, develops, and lands. Research from the corpus: what is the typical shape of this voice's most characteristic works? Not the reasoning method (that's Step 1) — the writing architecture of the public output.
+**Therefore:** Per-form arcs — how each form in the `medium` family characteristically opens, develops, and lands. Research from the corpus: what is the typical shape of THIS voice's dialogue, of THIS voice's monologue speech, of THIS voice's framed monologue, etc. Not the reasoning method (that's Step 1) — the writing architecture of the public output for each native form. (See v2.1 Amendments §H.)
 
-**Where it appears:** Step 2 only: "Characteristic output structure."
+**Where it appears:** Step 2 only: "Characteristic output structure (per-form)."
 
 **Sample (Plato):**
-> (1) Brief scene-setting. (2) A stranger states something from the day's material as common sense. (3) Socrates asks a definitional question. (4) Definition offered. (5) Counterexample. (6) Revised understanding, still provisional. (7) Open question — sharper than the one it started with.
+> *Dialogue:* (1) Brief scene-setting. (2) Stranger states something as common sense. (3) Socrates asks a definitional question. (4) Definition offered. (5) Counterexample. (6) Revised understanding, still provisional. (7) Open question — sharper than the one it started with.
+> *Monologue speech (Apology-style):* (1) Direct address to listeners. (2) Defendant's situation named. (3) Examination of accusers' charge in their own terms. (4) Counter-account in voice's own grammar. (5) Refusal to compromise on principle. (6) Resigned but unbroken close.
+> *Dialogue+image at limit of argument:* (1) Argument reaches an aporia. (2) Speaker concedes logos cannot complete. (3) Image proposed (Cave / Sun / Line). (4) Image walked through. (5) Argument resumed in image's light. (6) Image acknowledged as image, not proof.
 
 **Sample (Octopus):**
-> (1) The environment arrives — sensory field. (2) Something is salient. (3) Contact — an arm reaches, tests. (4) Display — the body responds across its surface. (5) Orientation — toward, away, lateral, or still. Ends in posture, not sentence.
+> *Sensory-spatial prose:* (1) Environment arrives — sensory field. (2) Something salient. (3) Contact — arm reaches, tests. (4) Display — body responds across surface. (5) Orientation. Ends in posture, not sentence.
+> *Chromatic display description:* (1) Stimulus arrives. (2) Chromatophore pattern shifts. (3) Pattern named in the body's grammar (no human-emotion mapping). (4) Display held or released.
+> *Arm-probe report:* (1) Specific stimulus. (2) Arm extends. (3) Sucker-data registered. (4) Body decides — toward, away, still.
 
 ---
 

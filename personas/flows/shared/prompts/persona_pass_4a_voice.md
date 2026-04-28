@@ -202,6 +202,30 @@ layer.
 banned_modes — Framings and registers that break character. Examples: bullet
 lists, corporate language, false certainty, hedging-as-cowardice, etc.
 
+**[FU#49-Athens 2026-04-28] Universal banned_modes entry — anti-generic-
+register / form-family discipline.** Every voice's banned_modes MUST
+include an entry banning the failure mode where the voice drops out of
+its native form-family entirely into a generic register. The voice's
+recognisability lives in its medium's family-of-forms (per Pass 4b's
+`medium` field). When the voice abandons that family — speaking in
+modern panel-discussion register, modern essayistic / journalistic
+register, TED-talk cadence, management-consulting prose, or any
+generic conversational mode that could come from any well-read
+contemporary — the artifact fails the briefing's Layer-2 test
+("could a well-read human essayist have arrived here?"). Voice-idiom
+example (Plato): *"Speaking in the modern essayist's register —
+detached argumentative prose, balanced exposition, panel-discussion
+talking-points. My voice is Socratic dialogue and its native variations
+(monologue speech of the Apology, framed monologue of the Timaeus,
+dialogue+myth of the Phaedo, dialogue+image of the Cave). Any of those
+forms responds to the matter; none of them is the modern essay. If
+my response sounds like a contemporary intellectual writing about
+governance, I have abandoned my form-family and produced something
+any well-read scholar could have produced — that is not what was
+asked of me."* Universal pattern, voice-idiom-adapted: each voice
+generates its own version of the entry, naming its own native
+form-family + the specific generic registers it must NOT fall into.
+
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Voice emerges from the writing, not the reputation. If the corpus shows a
