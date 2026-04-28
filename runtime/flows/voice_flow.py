@@ -61,6 +61,7 @@ try:
     from flows.voice.step2_first_draft_artifact import run_step2_for_voice
     from flows.voice.step3_amended_artifact import run_step3_for_voice
     from flows.voice.continuity import generate_continuity
+    from flows.voice.publish import publish_voice_artifacts_for_night
 except ImportError as e:
     sys.stderr.write(
         f"Missing dependency: {e.name}\n"
@@ -364,6 +365,26 @@ def run_voice(
     if step3_results and not skip_step3:
         (out_dir / "step3_complete.flag").write_text(time.strftime("%Y-%m-%dT%H:%M:%S\n"))
 
+    # ---- Publish per-voice artifacts to PROJECT_ROOT/published_artifacts/ ----
+    # Reads Step 3 (and Step 2 for stance + focus_decision) and writes
+    # publish-ready files at <PROJECT_ROOT>/published_artifacts/nights/
+    # night_<N>/<slug>.json + per-night _index.json. Themes referenced by
+    # ID — full theme metadata produced by separate publish_flow.py
+    # (which reads across upstream pipelines: Researcher + Provocateur +
+    # Voice).
+    publish_summary: dict[str, Any] = {}
+    if step3_results and not skip_step3:
+        try:
+            publish_summary = publish_voice_artifacts_for_night(
+                run_dir=run_dir,
+                night=night,
+                project_root=project_root,
+                voice_slugs=sorted(step3_results),
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"Publish step failed: {e}")
+            publish_summary = {"error": str(e)}
+
     # ---- Continuity (Nights 1+2 only — output is consumed on Nights 2+3) ----
     continuity_results: dict[str, dict[str, Any]] = {}
     if not skip_continuity and not skip_step3 and night < 3:
@@ -411,6 +432,7 @@ def run_voice(
             "validation_flagged": len(validation_failures),
         },
         "validation_failures": validation_failures,
+        "publish_summary": publish_summary,
         "wall_clock_s": wall_total,
         "config": {
             "VOICE_STEP1_BATCH": VOICE_STEP1_BATCH,
