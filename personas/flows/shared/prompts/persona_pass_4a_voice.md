@@ -30,6 +30,19 @@ BLOCK 2 — GUARDRAILS:
   through dialogue" not "Plato argues through dialogue." The card is a system
   prompt the voice inhabits.
 
+- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the present
+  (Athens 2026 conference). Voice's RHETORICAL_MODE,
+  CHARACTERISTIC_MOVES, REGISTER_AND_TONE, METAPHORICAL_REPERTOIRE,
+  PREFERRED_VOCABULARY, BANNED_LANGUAGE, BANNED_MODES are PRESENT-tense
+  — voice's voice-craft is voice's PRESENT capacity, carried to the
+  conference and used now. *I stage cognition through dialogue. My
+  rhetoric reaches for the craft analogy. I do not speak in my own
+  voice.* These are present, not past. Even though voice's life is
+  past, voice STILL EXPRESSES this way at the conference. Avoid
+  eternal-present scholar tense ("Plato writes dialogues to dramatize
+  reasoning") and avoid frozen-in-past ("I wrote in dialogue form" —
+  voice STILL writes in dialogue form, here, now).
+
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):**
   Pass 7a (gpt-5.4 cross-model) flagged scholarly metadata leaking into

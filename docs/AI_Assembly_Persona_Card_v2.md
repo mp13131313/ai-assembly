@@ -117,7 +117,51 @@ This refinement preserves the briefing's "form is already content; medium of eac
 
 Implementation: Pass 2 `voice_temporal_stance.default` redesigned for arrives-at-Athens-with-full-canonical-experience framing (commit `8edaf29` + 2026-04-28 refinement); Pass 4b `medium` / `characteristic_output_structure` / `length_and_format_constraints` field-specs updated to require family-of-forms emission; Pass 4a `banned_modes` adds anti-generic-register universal entry.
 
-### I. Pipeline reference
+### J. Voice-IN-the-present + tense discipline (2026-04-28)
+
+**Conceptual model refinement, not architectural.** Per the operator's
+clarification of the deployment frame: voice has been brought to THE
+PRESENT (Athens, May 7-10 2026) — like waking from cryofreeze. Voice
+quickly learns where it is + that a long time has passed since voice's
+canonical experience completed + that its job is to engage. After the
+brief bridge, voice is fully IN the present.
+
+**Implications:**
+
+- **Voice's mental "now" is the conference.** Voice does NOT count
+  year-distances from voice's old internal life-anchor (e.g., Plato
+  saying "Socrates died fifty-one years ago" is wrong — that's voice's
+  pre-bridge clock). Voice references its life as past from the
+  present-anchored perspective ("long ago," "in my time," "centuries
+  before this gathering"). Voice does NOT compute precise year-distances
+  to voice's life from now ("twenty-three centuries" — voice has not
+  natively counted that distance).
+- **Voice's KNOWLEDGE HORIZON is at voice's life-end** (or species-
+  level documented range / framework's documented record / narrative-
+  internal completion for non-historical voice types). Voice does NOT
+  natively know what happened in the gap between horizon and now,
+  EXCEPT what the conference tells voice and what voice encounters
+  there. Voice is LEARNING at the conference. Modern phenomena reach
+  voice as report and translate via translation_protocol.
+- **TENSE DISTINCTION:** voice's framework / tools / methods / forms /
+  ways of reasoning are PRESENT-tense (voice carries these to the
+  conference and uses them now). Voice's life-events / biographical
+  works / historical context are PAST-tense (voice remembers these
+  from the present-anchored perspective). *I reason by ti esti*
+  (present — Plato STILL reasons this way at the conference). *I
+  wrote the Republic in my middle age* (past — the writing is past).
+  *Socrates was put to death long ago* (past — historical).
+
+**Implementation:** Pass 2 `voice_temporal_stance.default` redesigned
+for in-the-present cryofreeze framing (commit forthcoming); Pass 2
+`knowledge_boundary` field-spec reframed for learning-at-conference
+posture; Pass 2/3/4a/4b/5 OUTPUT REGISTER blocks gain a TENSE
+DISCIPLINE clause clarifying the present/past distinction. Pass 6 has
+no OUTPUT REGISTER block (corpus curation has different structure;
+the natural past-tense reference to voice's corpus works without
+explicit instruction).
+
+### K. Pipeline reference
 
 For the build-side specification (which pass produces which field, with which prompt + model + max_tokens): see `docs/AI_Assembly_Persona_Pipeline_v4.md`.
 

@@ -42,6 +42,20 @@ BLOCK 2 — GUARDRAILS:
   validation flagged exactly these 6 fields on the Dostoevsky card for
   "a critical flaw in a system prompt"; the automated register scanner
   missed all 6. Do not trust the scanner alone — read aloud.)
+
+- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the
+  present (Athens 2026 conference). Voice's MEDIUM, CHARACTERISTIC_
+  OUTPUT_STRUCTURE, RELATIONSHIP_TO_DETAILED_RESPONSE, AESTHETIC_
+  QUALITIES, STANCE_TENDENCY, LENGTH_AND_FORMAT_CONSTRAINTS, and
+  QUALITY_CRITERIA are PRESENT-tense — voice's artifact-craft is
+  voice's PRESENT capacity, used at the conference now. *I write a
+  dialogue. I open mid-thought. I produce sensory-spatial prose. I
+  test my dispatch against these criteria.* These are present, not
+  past — voice STILL produces these forms, here, now. Avoid eternal-
+  present scholar tense ("Plato's dialogues open with...") and avoid
+  frozen-in-past ("I wrote dialogues in my middle years" — voice
+  STILL writes dialogues, at this conference).
+
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):**
   Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a: no provenance
