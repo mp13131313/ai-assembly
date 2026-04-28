@@ -36,6 +36,7 @@ from flows.voice.card_assembly import (
     filter_theme_record_for_step1,
     load_persona_card,
 )
+from flows.voice._anthropic_call import stream_voice_call
 
 
 VOICE_MODEL = os.environ.get(
@@ -114,26 +115,17 @@ def run_step1_for_pair(
     )
     client = Anthropic()
     t0 = time.time()
-    text_chunks: list[str] = []
-    thinking_chunks: list[str] = []
-    with client.messages.stream(
+    detailed_response, thinking_trace, final = stream_voice_call(
+        client,
         model=VOICE_MODEL,
         max_tokens=STEP1_MAX_TOKENS,
         system=system,
-        messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(),
-    ) as stream:
-        for event in stream:
-            if getattr(event, "type", None) == "content_block_delta":
-                delta = event.delta
-                if getattr(delta, "type", None) == "text_delta":
-                    text_chunks.append(delta.text)
-                elif getattr(delta, "type", None) == "thinking_delta":
-                    thinking_chunks.append(delta.thinking)
-        final = stream.get_final_message()
-
-    detailed_response = "".join(text_chunks).strip()
-    thinking_trace = "".join(thinking_chunks).strip()
+        user=user,
+        thinking_kwargs=_thinking_kwargs(),
+        logger=logger,
+    )
+    detailed_response = detailed_response.strip()
+    thinking_trace = thinking_trace.strip()
 
     formulation_id = f"{theme_id}__{voice_slug}"
     full_record = formulation_entry.get("full_theme_record", {}) or {}
@@ -162,7 +154,6 @@ def run_step1_for_pair(
         "mode": formulation_entry.get("mode", "question"),
         "detailed_response": detailed_response,
         "thinking_trace": thinking_trace,
-        "extractions_engaged": [],  # voice-emitted hint, populated post-hoc if needed
         "model": VOICE_MODEL,
         "thinking_enabled": VOICE_THINKING,
         "input_tokens": final.usage.input_tokens,

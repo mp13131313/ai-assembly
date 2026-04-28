@@ -37,6 +37,7 @@ from flows.voice.card_assembly import (
     filter_first_draft_for_step3,
     load_persona_card,
 )
+from flows.voice._anthropic_call import stream_voice_call
 
 
 VOICE_MODEL = os.environ.get(
@@ -248,26 +249,16 @@ def run_step3_for_voice(
     )
     client = Anthropic()
     t0 = time.time()
-    text_chunks: list[str] = []
-    thinking_chunks: list[str] = []
-    with client.messages.stream(
+    raw_text, thinking_trace, final = stream_voice_call(
+        client,
         model=VOICE_MODEL,
         max_tokens=STEP3_MAX_TOKENS,
         system=system,
-        messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(),
-    ) as stream:
-        for event in stream:
-            if getattr(event, "type", None) == "content_block_delta":
-                delta = event.delta
-                if getattr(delta, "type", None) == "text_delta":
-                    text_chunks.append(delta.text)
-                elif getattr(delta, "type", None) == "thinking_delta":
-                    thinking_chunks.append(delta.thinking)
-        final = stream.get_final_message()
-
-    raw_text = "".join(text_chunks)
-    thinking_trace = "".join(thinking_chunks).strip()
+        user=user,
+        thinking_kwargs=_thinking_kwargs(),
+        logger=logger,
+    )
+    thinking_trace = thinking_trace.strip()
     parsed = _parse_step3_output(raw_text)
 
     # If standing pat, amended_artifact_text equals first-draft text verbatim.

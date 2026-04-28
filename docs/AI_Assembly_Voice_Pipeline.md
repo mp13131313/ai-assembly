@@ -401,7 +401,6 @@ Implementation note: this filtering happens in `step1_private_reasoning.py:rende
   "mode": "question" | "proposition",
   "detailed_response": "the full detailed response text — voice's private reasoning",
   "thinking_trace": "the model's internal reasoning trace (Opus thinking blocks concatenated) — captures HOW the voice arrived at the response, not just the response itself. Saved for traceability + downstream debugging + validation node use.",
-  "extractions_engaged": ["breaking_point:014"],
   "model": "claude-opus-4-7",
   "thinking_enabled": true,
   "input_tokens": 0,
@@ -411,20 +410,22 @@ Implementation note: this filtering happens in `step1_private_reasoning.py:rende
 }
 ```
 
-**Reasoning trace capture** — when `thinking.type=adaptive` (or `enabled`) is set on the Anthropic API call, the response stream returns thinking blocks alongside text blocks. The Voice Pipeline captures both: `detailed_response` is the concatenation of text-block content (the final response the voice produced); `thinking_trace` is the concatenation of thinking-block content (the model's working reasoning). The pattern is:
+**Reasoning trace capture** — when `thinking.type=adaptive` (or `enabled`) is set on the Anthropic API call, the response stream returns thinking blocks alongside text blocks. The Voice Pipeline captures both: `detailed_response` is the concatenation of text-block content (the final response the voice produced); `thinking_trace` is the concatenation of thinking-block content (the model's working reasoning). The implementation extracts both from `final.content` after the stream completes — simpler and more robust than capturing per-event deltas, and matches the `researcher_flow.py` pattern. Schematic:
 
 ```python
 with client.messages.stream(model="claude-opus-4-7", thinking={"type": "adaptive"}, max_tokens=64000, ...) as stream:
-    text_chunks, thinking_chunks = [], []
-    for event in stream:
-        if event.type == "content_block_delta":
-            if event.delta.type == "text_delta": text_chunks.append(event.delta.text)
-            elif event.delta.type == "thinking_delta": thinking_chunks.append(event.delta.thinking)
-    detailed_response = "".join(text_chunks)
-    thinking_trace = "".join(thinking_chunks)
+    for _ in stream.text_stream:
+        pass  # consume; final assembly happens via final.content below
+    final = stream.get_final_message()
+text_parts, thinking_parts = [], []
+for block in final.content:
+    if block.type == "text": text_parts.append(block.text)
+    elif block.type == "thinking": thinking_parts.append(block.thinking)
+detailed_response = "".join(text_parts)
+thinking_trace = "".join(thinking_parts)
 ```
 
-The thinking trace is a real audit asset — it lets a human reviewer (or a downstream pipeline like the closing-show theme identification pass) see WHY a voice landed where it did, not just where it landed. Useful for: anomaly investigation, calibration checks, FU#49E "did the voice's framework actually do what the amendment claims it did?" verification.
+The thinking trace is a real audit asset — it lets a human reviewer (or a downstream pipeline like the closing-show theme identification pass) see WHY a voice landed where it did, not just where it landed. Useful for: anomaly investigation, calibration checks, "did the voice's framework actually do what the amendment claims it did?" verification.
 
 **Lineage block** — every Voice Pipeline output JSON carries a `lineage` block at the top that points back to its inputs, mirroring the chain that flows from Transcription through Provocateur. For Step 1:
 
@@ -435,7 +436,7 @@ The thinking trace is a real audit asset — it lets a human reviewer (or a down
 - `session_ids` is derivable from `grounding_extraction_ids` (prefix of `<session_id>:NNN`) but pre-computed for fast filtering.
 - `co_assigned_voices` is copied from `briefing.full_theme_record.co_assigned_voices` — tells you which other voices share this theme, foreshadowing Step 3's cross-voice deliberation.
 
-**`extractions_engaged`** is a Voice Pipeline-emitted hint distinct from `grounding_extraction_ids` — these are the IDs of specific extractions the voice cited or wrestled with **in its detailed response**, which may be a subset of (or different from) what the Provocateur grounded the formulation in. Surfaced to operators for traceability; the lineage chain proper uses `grounding_extraction_ids`.
+The lineage chain uses `grounding_extraction_ids` (copied from the Provocateur formulation) as the canonical link back to session extractions. Operators wanting to know which specific extractions the voice cited in its prose can grep `detailed_response` for IDs of the form `<session_id>:NNN` post-hoc — the IDs appear inline because the closing instruction asks the voice to cite them by ID.
 
 **Checkpoint behaviour:** if `04_voice/step1_detailed_responses/<voice_slug>__<theme_id>.json` already exists at run start, skip; otherwise compute and write atomically.
 
@@ -952,9 +953,11 @@ A consumer can answer questions like:
 
 ## Continuity Block Generation
 
-After Night N completes (Step 3 artifacts written), before Night N+1 Provocateur runs, a separate flow generates per-voice continuity blocks.
+After Night N completes (Step 3 artifacts written), before Night N+1 Provocateur runs, per-voice continuity blocks are generated.
 
-**Trigger:** end of Voice Pipeline run for Night N. `voice_flow.py` writes a sentinel `04_voice/step3_complete.flag` after all 10 Step 3 calls succeed; the continuity flow watches for this and runs.
+**Trigger:** the `voice_flow.py` orchestrator runs continuity inline immediately after Step 3 completes for that night, in the same process. Implementation choice (simpler than a separate watcher process; the continuity-generation cost and wall time are small enough that batching with the rest of the pipeline is cleaner). A sentinel file `04_voice/step3_complete.flag` is still written for audit (lets a downstream consumer know Step 3 finished cleanly) but is not used as an inter-process trigger.
+
+Continuity is skipped on Night 3 (no Night 4 to feed) and skippable via the `--skip-continuity` CLI flag.
 
 **Per voice:** `continuity.py:generate_continuity(voice_slug, night)`. Sonnet 4.6, `max_tokens=8000`. Reads:
 

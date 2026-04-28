@@ -193,6 +193,36 @@ def _strip_nested_corpus_metadata(curated: Any) -> Any:
     return out
 
 
+def _unwrap_voice_temporal_stance(vts: Any) -> str:
+    """Per spec §"What the Voice Pipeline Knows §1": Athens uses the
+    `default` text. If `anchored_override` is non-null, the operator
+    selected a non-Athens deployment and the override is used instead.
+    Either way, the voice sees a single block of prose, not the JSON
+    container with both keys.
+
+    Defensive: if the field is already a string (older cards or hand-
+    edited), pass through unchanged. If the dict has neither key
+    populated, fall back to JSON dump so nothing is silently dropped.
+    """
+    if isinstance(vts, str):
+        return vts
+    if not isinstance(vts, dict):
+        return json.dumps(vts, indent=2, ensure_ascii=False)
+    override = vts.get("anchored_override")
+    if override:  # non-null + non-empty
+        return override if isinstance(override, str) else json.dumps(
+            override, indent=2, ensure_ascii=False
+        )
+    default = vts.get("default")
+    if default:
+        return default if isinstance(default, str) else json.dumps(
+            default, indent=2, ensure_ascii=False
+        )
+    # Neither key populated — fall back to dumping the whole dict so
+    # the operator sees something during dry-run and can investigate.
+    return json.dumps(vts, indent=2, ensure_ascii=False)
+
+
 def _render_section(card: dict[str, Any], header: str, fields: Iterable[str]) -> str:
     """Render a named section of the system prompt from the card.
 
@@ -200,6 +230,11 @@ def _render_section(card: dict[str, Any], header: str, fields: Iterable[str]) ->
     `### <field_name>\\n<value>`. Missing fields are silently skipped
     (the orchestrator should ensure required fields exist; missing
     optional fields just don't appear).
+
+    Two field-specific transforms are applied here:
+      - `curated_corpus_passages`: nested strip of `corpus_metadata`
+      - `voice_temporal_stance`: unwrap to default (or anchored_override
+        if non-null) text so the voice reads clean prose, not JSON
     """
     lines = [f"\n---\n\n# {header}\n"]
     for field in fields:
@@ -208,6 +243,8 @@ def _render_section(card: dict[str, Any], header: str, fields: Iterable[str]) ->
         value = card[field]
         if field == "curated_corpus_passages":
             value = _strip_nested_corpus_metadata(value)
+        if field == "voice_temporal_stance":
+            value = _unwrap_voice_temporal_stance(value)
         lines.append(f"\n### {field}\n")
         lines.append(_render_value(value))
         lines.append("\n")

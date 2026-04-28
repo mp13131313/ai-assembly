@@ -28,8 +28,9 @@ if str(_REPO_ROOT) not in sys.path:
 
 from anthropic import Anthropic
 
-from flows.shared.io import extract_json, get_logger, write_json_atomic
+from flows.shared.io import get_logger, write_json_atomic
 from flows.voice.card_assembly import assemble_system_prompt, load_persona_card
+from flows.voice._anthropic_call import stream_voice_call
 
 
 VOICE_MODEL = os.environ.get(
@@ -66,16 +67,14 @@ def build_step2_user_prompt(step1_outputs: list[dict[str, Any]]) -> str:
 def _parse_step2_output(raw_text: str) -> dict[str, Any]:
     """Parse the model's Step 2 output into structured fields.
 
-    Per spec, the model produces (in order):
-      Decision 1: focus_decision + focus_rationale
-      Decision 2: stance + stance_rationale
-      Decision 3: selected_form + form_rationale
-      Then: artifact_title, artifact_subtitle, artifact_text
+    The closing instruction in voice_step2_artifact.md asks the model
+    to emit fields in a specific order, each as `**Label:** value` on
+    its own line, with `artifact_text` being the last labelled field
+    and the artifact body following it without further labels.
 
-    Models tend to write this as labelled prose ("Focus: focused on
-    theme_X — rationale: …"). We extract by line-pattern matching.
-    Defensive: if any field can't be extracted, the raw text remains in
-    artifact_text so nothing is lost.
+    Defensive: if `artifact_text:` label isn't found, the raw text
+    remains in artifact_text so nothing is lost. Other field misses
+    leave that field empty rather than aborting.
     """
     out: dict[str, Any] = {
         "focus_decision": "",
@@ -84,56 +83,95 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
         "stance_rationale": "",
         "selected_form": "",
         "form_rationale": "",
+        "themes_covered": [],
         "artifact_title": "",
         "artifact_subtitle": "",
         "artifact_text": "",
     }
-    # Field-extraction patterns — case-insensitive, line-anchored.
-    # Each captures everything up to the next labelled field or end of text.
-    labels = {
-        "focus_decision": r"focus\s*decision",
-        "focus_rationale": r"focus\s*rationale",
-        "stance": r"^stance(?!\s*rationale)",
-        "stance_rationale": r"stance\s*rationale",
-        "selected_form": r"(?:selected\s*)?form(?!\s*rationale)",
-        "form_rationale": r"form\s*rationale",
+
+    # Single-line fields: extract `**Label:** value` (or `Label: value`)
+    # up to the next labelled line or to artifact_text (which is multi-line).
+    # The closing instruction asks the model to emit each field on its own
+    # `**Label:** value` line; the parser is tolerant of the model varying
+    # surrounding markdown (asterisks, underscores, dashes, headings).
+    single_line_labels = {
+        "focus_decision": r"focus[_\s]*decision",
+        "focus_rationale": r"focus[_\s]*rationale",
+        # `stance` must not match `stance_rationale`. Negative lookahead
+        # requires NO `_rationale` or `\s+rationale` immediately after.
+        "stance": r"stance(?![_\s]*rationale)",
+        "stance_rationale": r"stance[_\s]*rationale",
+        # Same negative-lookahead pattern for selected_form vs form_rationale.
+        "selected_form": r"(?:selected[_\s]*)?form(?![_\s]*rationale|[_\s]*change)",
+        "form_rationale": r"form[_\s]*rationale",
+        "themes_covered": r"themes[_\s]*covered",
         "artifact_title": r"(?:artifact[_\s]*)?title",
         "artifact_subtitle": r"(?:artifact[_\s]*)?subtitle",
-        "artifact_text": r"(?:artifact[_\s]*)?text",
     }
-    # Naive split: try `KEY: value` lines; if not found, keep raw_text in artifact_text.
-    found_any = False
-    for key, pattern in labels.items():
+    # A "next labelled line" is any newline followed by optional markdown
+    # chrome (`**`, `_`, `#`, `-`) and a lowercase identifier (matching
+    # any field name that might appear). We terminate the current capture
+    # when we see this pattern OR end-of-text.
+    next_label_lookahead = r"\n\s*[*_#\-]+\s*[a-z][a-z_]+"
+    for key, pattern in single_line_labels.items():
         rx = re.compile(
-            rf"^\s*[*_#\-]*\s*{pattern}\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]*\s*(?:focus|stance|form|title|subtitle|text|artifact)[\s_]*[:=]|\Z)",
+            rf"^\s*[*_#\-]*\s*{pattern}\s*[*_]*\s*[:=]\s*[*_]*\s*(.+?)(?={next_label_lookahead}|\Z)",
             re.IGNORECASE | re.MULTILINE | re.DOTALL,
         )
         m = rx.search(raw_text)
         if m:
             value = m.group(1).strip()
-            # Strip trailing markdown chrome
-            value = re.sub(r"\s*\*+\s*$", "", value).strip()
-            out[key] = value
-            found_any = True
-    if not found_any:
-        # Couldn't parse structured fields — preserve everything in artifact_text.
+            # Strip leading + trailing markdown chrome (`**`, `*`, `_`).
+            value = re.sub(r"^[*_]+\s*", "", value).strip()
+            value = re.sub(r"\s*[*_]+$", "", value).strip()
+            if key == "themes_covered":
+                # Comma- or whitespace-separated list of theme_ids.
+                ids = re.findall(r"theme_[a-z0-9_]+", value, re.IGNORECASE)
+                out[key] = [t.lower() for t in ids]
+            else:
+                out[key] = value
+
+    # artifact_text: the remainder of the response after the
+    # `artifact_text:` label. Multi-line; runs to end of response.
+    # Tolerant of `**artifact_text:**` markdown by stripping `*`/`_`
+    # both before and after the colon.
+    text_rx = re.compile(
+        r"^\s*[*_#\-]*\s*(?:artifact[_\s]*)?text\s*[*_]*\s*[:=]\s*[*_]*\s*\n?(.+)\Z",
+        re.IGNORECASE | re.MULTILINE | re.DOTALL,
+    )
+    m = text_rx.search(raw_text)
+    if m:
+        text_value = m.group(1).strip()
+        # Strip leading markdown chrome the model may have emitted
+        # before the artifact body (e.g. `**\n` from a closing `**`).
+        text_value = re.sub(r"^[*_]+\s*", "", text_value).strip()
+        out["artifact_text"] = text_value
+    else:
+        # No artifact_text label found — preserve full raw_text so
+        # nothing is silently lost.
         out["artifact_text"] = raw_text.strip()
     return out
 
 
-def _derive_themes_covered(focus_decision: str, step1_outputs: list[dict[str, Any]]) -> list[str]:
-    """Derive themes_covered list from the focus_decision string.
+def _ensure_themes_covered(
+    parsed_themes: list[str],
+    focus_decision: str,
+    step1_outputs: list[dict[str, Any]],
+) -> list[str]:
+    """Backstop for themes_covered.
 
-    "woven across all" → all themes from step1_outputs.
-    "focused on theme_X" or similar → extract theme IDs that appear in
-    the string. Defensive: if nothing matches, fall back to all themes.
+    The voice should emit themes_covered explicitly per the closing
+    instruction. If parsing failed AND focus_decision says "woven",
+    fall back to all themes. If neither, fall back to all themes (so
+    Step 3 sees the union; better-than-empty fallback that may produce
+    over-broad sharing rather than missing entirely). Operator should
+    investigate any case where this backstop fires (logged downstream
+    via wall_clock + manifest).
     """
+    if parsed_themes:
+        return parsed_themes
     all_themes = [o["lineage"]["theme_id"] for o in step1_outputs]
-    fd_lower = focus_decision.lower()
-    if "woven" in fd_lower or "across all" in fd_lower:
-        return all_themes
-    matched = [t for t in all_themes if t in focus_decision]
-    return matched if matched else all_themes
+    return all_themes
 
 
 def run_step2_for_voice(
@@ -178,28 +216,20 @@ def run_step2_for_voice(
     )
     client = Anthropic()
     t0 = time.time()
-    text_chunks: list[str] = []
-    thinking_chunks: list[str] = []
-    with client.messages.stream(
+    raw_text, thinking_trace, final = stream_voice_call(
+        client,
         model=VOICE_MODEL,
         max_tokens=STEP2_MAX_TOKENS,
         system=system,
-        messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(),
-    ) as stream:
-        for event in stream:
-            if getattr(event, "type", None) == "content_block_delta":
-                delta = event.delta
-                if getattr(delta, "type", None) == "text_delta":
-                    text_chunks.append(delta.text)
-                elif getattr(delta, "type", None) == "thinking_delta":
-                    thinking_chunks.append(delta.thinking)
-        final = stream.get_final_message()
-
-    raw_text = "".join(text_chunks)
-    thinking_trace = "".join(thinking_chunks).strip()
+        user=user,
+        thinking_kwargs=_thinking_kwargs(),
+        logger=logger,
+    )
+    thinking_trace = thinking_trace.strip()
     parsed = _parse_step2_output(raw_text)
-    themes_covered = _derive_themes_covered(parsed["focus_decision"], step1_outputs)
+    themes_covered = _ensure_themes_covered(
+        parsed["themes_covered"], parsed["focus_decision"], step1_outputs
+    )
 
     # Build lineage block (consumed Step 1 paths + union of grounding ids).
     consumed = []

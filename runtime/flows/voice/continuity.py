@@ -32,6 +32,7 @@ from anthropic import Anthropic
 
 from flows.shared.io import extract_json, get_logger, load_prompt, write_json_atomic
 from flows.shared.project_root import resolve_project_root
+from flows.voice._anthropic_call import stream_voice_call
 
 
 CONTINUITY_MODEL = os.environ.get(
@@ -175,18 +176,15 @@ def generate_continuity(
     )
     client = Anthropic()
     t0 = time.time()
-    chunks: list[str] = []
-    with client.messages.stream(
+    raw_text, _thinking_trace, final = stream_voice_call(
+        client,
         model=CONTINUITY_MODEL,
         max_tokens=CONTINUITY_MAX_TOKENS,
         system=system,
-        messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(),
-    ) as stream:
-        for text in stream.text_stream:
-            chunks.append(text)
-        final = stream.get_final_message()
-    raw_text = "".join(chunks)
+        user=user,
+        thinking_kwargs=_thinking_kwargs(),
+        logger=logger,
+    )
 
     # The model returns JSON with two keys, with the night number
     # substituted for "N+1". We accept either spelling.
