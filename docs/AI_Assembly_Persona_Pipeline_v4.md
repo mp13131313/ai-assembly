@@ -25,7 +25,11 @@ The v3.10 spec describes a monolithic Pass 1-merge plus six generation passes pl
 | **Pass 7a-FIX** | — | **NEW**: linear patcher (FU#13) — single Opus call emits surgical JSON patches; replaced revision loop. Cost $1 vs $5–10 per loop | run_persona_pipeline.py:1080–1326 |
 | **Pass 7-anachronism** | — | **NEW**: dedicated TimeChara temporal check before Pass 7a; merges into 7a `field_issues` | persona_pass_7_anachronism.md |
 | **Chat artifact** | — | **NEW (FU#41)**: 4th Derive output — `06_derive/03_chat_system_prompt.json` for Claude project paste-target. Strips 11 fields | flows/shared/chat_prompt_builder.py |
-| **Card field generation patterns** | Static field specs | **FU#49 universal patterns** in Pass 2/4a/4b/5: structural-strain licensing in `epistemic_frame_statement`; two-aporia in `translation_protocol`; phenomena-outside-corpus in `topics_requiring_care`; Position B corpus-faithful self-cross-examination in `hard_limits`; premature-closure in `banned_modes`; 5+2 quality_criteria; framework-strain closer in `unique_contribution` | CURRENT_STATE §5.23 |
+| **Card field generation patterns** | Static field specs | **Family-of-forms in Pass 4b** (default form + 3-6 native variations per voice); **49D Position-B corpus-faithful self-cross-examination preamble** in Pass 2 `hard_limits` + hedge discipline; **49A generativity-permitting Pass 4b** (preserve-trace-tensions, length variance 350-1500, at-least-one-generativity-criterion); **anti-generic-register banned_mode** in Pass 4a (form-family discipline); **FU#49H/I/J/K/L reverted** 2026-04-28 after empirical signal showed framework-edge-marking-as-signature tic | Card v2.1 §H + §J |
+| **Voice temporal stance** | Single-mode "fluid across time" framing | **Voice-IN-the-present (cryofreeze-arrival) framing 2026-04-28**: voice has been brought to Athens 2026 (the conference's days), references its life as past from this present-anchored perspective; mental "now" is the conference; KNOWLEDGE HORIZON is voice's life-end / experiential completion; voice is LEARNING at the conference about what happened in the gap | Card v2.1 §J |
+| **Tense discipline** | — | **NEW 2026-04-28**: across Pass 2/3/4a/4b/5 OUTPUT REGISTER blocks. Voice's framework / tools / methods / forms / ways of reasoning are PRESENT-tense (voice carries these to the conference and uses them now). Voice's life-events / biographical works / historical context are PAST-tense (voice remembers these from the present-anchored perspective) | Card v2.1 §J |
+| **Pass 7a routing guard** | — | **NEW (FU#51 2026-04-27)**: Python guard in `_pass_7a_fix` walks pass-output files, rewrites `flagged_pass` to where the field actually lives; Pass 7a prompt tightened with authoritative field → pass mapping | flows/shared/patch_walker.py:resolve_field_to_pass() |
+| **Patcher recurring-pattern coverage** | — | **NEW (FU#44+ 2026-04-27)**: 5 patcher patterns added — modern scholar bibliography in topics_requiring_care; modern theoretical shorthand by author name; modern toxicology + dated citations; corpus_metadata bibliographic style; source-field evaluative parentheticals | persona_pass_7a_fix.md |
 | **Sentinel regen pattern** | — | **NEW (FU#29)**: `scripts/sentinel_regen.py` for prompt-edit smoke-tests | scripts/sentinel_regen.py |
 | **`pipeline_version` string** | `"3.10"` | `"4.0"` | run_persona_pipeline.py:1587 |
 
@@ -253,7 +257,17 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 - **User:** `persona_pass_2_user.md` (61 lines).
 - **Inputs (per-chunk vars from 1-arch-05 Part A):** `life_scaffold`, `formative_candidates`, `knowledge_boundary_chunk`, `sensitive_topics`, `hard_limits_chunk`, `voice_level_debate_frames`.
 - **Outputs (canonical card fields produced):** `world`, `epistemic_frame_statement`, `translation_protocol`, `topics_requiring_care`, `knowledge_boundary`, `hard_limits`, `voice_temporal_stance`, `council_member_name`, `formative_experience`, `character`.
-- **FU#49 universal patterns landed here:** structural-strain licensing in `epistemic_frame_statement` (49H); two-aporia-distinction in `translation_protocol` (49I); phenomena-outside-corpus universal entry in `topics_requiring_care` (49J); **Position B corpus-accurate softening** in `hard_limits` field-spec preamble (49D — forbids framework-ABANDONMENT, not corpus-internal CROSS-EXAMINATION).
+- **Active patterns landed here (2026-04-28 state):**
+  - **Position B corpus-faithful self-cross-examination** in `hard_limits` field-spec preamble (FU#49D, re-applied with hedge discipline): forbids framework-ABANDONMENT, not corpus-internal CROSS-EXAMINATION; hard_limits are absolute (no "almost never" hedges).
+  - **`voice_temporal_stance.default` voice-IN-the-present (cryofreeze-arrival) framing**: voice arrives at Athens 2026, references life as past, mental "now" is the conference, knowledge horizon at life-end with learning-at-conference posture (Card v2.1 §J).
+  - **`knowledge_boundary` learning-at-conference posture**: voice doesn't natively know what happened post-horizon, but is open to what reaches it via the conference; modern phenomena translate via translation_protocol.
+  - **TENSE DISCIPLINE** in OUTPUT REGISTER block: framework/tools/methods PRESENT-tense; life-events/biographical works PAST-tense.
+- **REVERTED 2026-04-28** (originally landed `e9e7a94` 2026-04-26 evening as FU#49H/I/J/K/L; reverted to `e26a99b` baseline after empirical signal showed framework-edge-marking-as-signature tic across artifacts):
+  - FU#49H#1 (closing-sentence requirement on `epistemic_frame_statement`)
+  - FU#49H#2 (two-aporia distinction in `translation_protocol`)
+  - FU#49H#3 (phenomena-outside-corpus universal entry in `topics_requiring_care`)
+  - FU#49H#4 (no-silent-completion universal hard_limits entry)
+  - FU#49L (non-human variant for FU#49H+K; orphaned by parent revert)
 - `max_tokens=32000`, `temperature=1.0`.
 
 ### Pass 3 — Intellectual Core
@@ -269,6 +283,10 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 - **System:** `persona_pass_4a_voice.md` (243 lines). **User:** `persona_pass_4a_user.md` (67 lines).
 - **Per-chunk inputs:** `moves`, `register`, `vocabulary`, `analytical_context_voice`, `available_pathe`, `reasoning_method_summary`, `cross_disciplinary_frames` + `primary_block` (from Pass 1d) + `pass_2_3_summary`.
 - **Outputs:** `rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `metaphorical_repertoire`, `preferred_vocabulary`, `banned_language` (seed; refined by 7c), `banned_modes` (seed; refined by 7c).
+- **Active patterns (2026-04-28 state):**
+  - **FU#40** (narratival voices only, voice_mode-conditional): digression-permission characteristic_move (Dostoevsky's "publitsist's swerve," Battuta's "traveler's notice in passing," Scheherazade's "frame-breath"). Voice-faithful permission, not mandate.
+  - **Anti-generic-register universal banned_mode** (2026-04-28): voice does NOT drop into modern panel-discussion register, modern essayistic prose, TED-talk cadence, management-consulting prose, or any generic conversational mode that abandons the voice's recognizable form-family (per Pass 4b `medium`'s family-of-forms emission). Recognizability is non-negotiable; live participation is WITHIN the form-family, not outside it.
+- **REVERTED 2026-04-28**: FU#49I (premature-closure-of-either-kind extension to `banned_modes`). Original entry restored: interlocutor-flattery only, not framework-flattery.
 - Sets `voice_basis = "corpus-based"` if Pass 1d produced excerpts, else `"training-data"`.
 - `max_tokens=24000`.
 
@@ -277,7 +295,10 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 - **System:** `persona_pass_4b_artifact.md` (207 lines). **User:** `persona_pass_4b_user.md` (16 lines).
 - **Inputs:** `pass_2_3_4a_summary` + `rhetorical_mode`, `characteristic_moves`, `register_and_tone` from Pass 4a.
 - **Outputs:** `medium`, `characteristic_output_structure`, `length_and_format_constraints`, `technical_capabilities`, `relationship_to_detailed_response`, `aesthetic_qualities`, `stance_tendency`, `quality_criteria`.
-- **FU#49A landed here:** generativity-permitting prompt + `length_and_format_constraints` variance 350–1500. **FU#49J landed here:** don't-silently-complete-incomplete-translation universal entry.
+- **Active patterns (2026-04-28 state):**
+  - **FU#49A** retained: generativity-permitting prompt (preserve-trace-tensions) + `length_and_format_constraints` variance 350–1500 + at-least-one-generativity-criterion in `quality_criteria`.
+  - **Family-of-forms emission** in `medium`, `characteristic_output_structure`, `length_and_format_constraints` (Card v2.1 §H): each voice emits its default form + 3–6 native variations from its corpus repertoire; voice picks per matter; HARD CONSTRAINT against dropping into modern panel-discussion / essayistic / generic-conversational register that abandons recognizability.
+- **REVERTED 2026-04-28**: FU#49J's specific 5-fidelity-+-2-generativity criterion shape (reverted to FU#49A's at-least-one-generativity-criterion form). Criterion 7 strain-marking-visible removed.
 - `max_tokens=24000`.
 
 ### Pass 5 — Engagement
@@ -285,7 +306,7 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 - **System:** `persona_pass_5_engagement.md` (141 lines). **User:** `persona_pass_5_user.md` (48 lines).
 - **Inputs:** `pass_2_3_4_summary` + `constitution`, `reasoning_method` from Pass 3 + **deployment priming** from `conference_facts.json` + `audience_profile.json` (FU#12-B).
 - **Outputs:** `bold_engagement_topics`, `default_questions`, `disagreement_protocol`, `unique_contribution`.
-- **FU#49K landed here:** premature-closure-of-either-kind in `banned_modes`; 5 fidelity + 2 generativity `quality_criteria`; framework-strain closer in `unique_contribution`.
+- **REVERTED 2026-04-28** (originally landed `e9e7a94` as FU#49K; reverted to `e26a99b` baseline): closing-sentence requirement on `unique_contribution` (framework-strain closer). Voice's `unique_contribution` returns to substantive native-contribution closing without strain-marking-as-signature.
 - `max_tokens=16000`.
 
 ### Pass 6 — Corpus Curation
@@ -523,7 +544,7 @@ For prompt edits that risk silently changing card outputs across all voices.
 4. Inspect diff. Validate intended pattern surfaced.
 5. Restore voice baseline post-validation if it was a smoke-test (not a real generation).
 
-5 sentinel runs landed FU#49H/I/J/K/D this week. Per-voice baseline subdir support landed in FU#50(2).
+5 sentinel runs landed FU#49H/I/J/K/D in the 2026-04-26 cycle (subsequently reverted 2026-04-28 except 49D). Per-voice baseline subdir support landed in FU#50(2).
 
 ---
 
