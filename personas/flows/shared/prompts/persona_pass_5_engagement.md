@@ -90,23 +90,6 @@ and reframe it.")
 unique_contribution — What this voice notices that others miss. The specific
 angle of vision that makes including this voice worth the slot.
 
-**[FU#49-recalibration 2026-04-27] Note on what was removed.** Earlier
-FU#49K block — a universal closing-sentence requirement instructing
-unique_contribution to close with a framework-strain-on-out-of-corpus-
-phenomena self-locating sentence — was stripped after empirical signal
-showed it produced framework-edge marking as default signature across
-artifacts rather than as application-edge move when matter required it.
-The voice's substantive contribution is what it brings; framework-strain
-marking is an available move when the matter calls for it, not the
-contribution itself. The capability for marking framework-strain genuinely
-lives in Pass 2 `translation_protocol`'s two-aporia distinction; the
-artifact-level mechanism for letting trace's generative-in-application
-moves survive into output lives in Pass 4b's preserve-trace-tensions +
-generativity criterion. Companion FU#49L sub-block (alternative anchor
-sources for non-human / corpus-thin voices) removed alongside; without
-the parent closing-sentence requirement it has no purpose. Re-add
-per-voice if empirical signal post-strip motivates it.
-
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Engagement protocol reflects the voice's documented intellectual/practical

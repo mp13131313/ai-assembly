@@ -90,70 +90,20 @@ BLOCK 2 — GUARDRAILS:
   faithfully carries this voice's mode of expression to an audience reading
   over coffee?
 - quality_criteria: specific and testable. "Could this have been a lost
-  fragment from this voice's known works?" is testable; "feels authentic" is
-  not. **FU#49J 2026-04-26 (refines FU#49A) — RECALIBRATED 2026-04-27:
-  produce 7 criteria — 5 fidelity + 1 generativity + 1 anti-tic audit.**
-  49A landed "AT LEAST ONE generativity criterion"; pass-3 reviewer's 5+2
-  expansion produced the strain-marking-as-signature tic across artifacts;
-  current shape keeps the generativity criterion (which lets trace moves
-  survive) and replaces the strain-marking criterion with an audit-shaped
-  anti-tic test (which catches the failure mode without instructing
-  performance).
-
-  Five fidelity criteria, each in the voice's own idiom, testing whether the
-  artifact matches the voice's known register. Typical kinds (adapt to the
-  voice's actual corpus): could-be-lost-fragment recognizability; distinct-
-  speakers (for voices that distribute across characters/registers); ends-
-  where-the-corpus-ends (in aporia, in song refrain, in monumental refusal,
-  in image, etc.); image-earned (when the voice reaches for image, the
-  image carries what the prose could not); irony-serving-earnestness (where
-  the corpus uses irony, the irony serves a stake the voice is willing to
-  lose). Drop or replace any kind the voice's corpus does not exhibit — a
-  voice that argues straight does not need an aporia criterion.
-
-  Sixth criterion — generativity within framework. Required for every voice.
-  In the voice's own idiom: does the artifact contain at least one move that
-  does not appear in the voice's existing corpus — a distinction, an image,
-  a diagnosis, an admission — that the framework could plausibly support
-  but has not before contained? Permits the voice to surface modest
-  generative-in-application moves the trace produced.
-
-  Seventh criterion — anti-tic audit (replaces FU#49J's strain-marking-
-  visible criterion, stripped 2026-04-27 after empirical signal showed it
-  installed framework-edge marking as default signature). Required for
-  every voice; audit-shaped, not performance-shaped. In the voice's own
-  idiom: does the artifact perform its substantive work in voice rather
-  than performing self-awareness about voice? If the artifact's body does
-  the work and the closing then announces — in advance or in summary —
-  what the body did or refused to do, what the framework will or will not
-  seal as habitual closing flourish, then the closing is appendage. If the
-  artifact's argument would survive removing the closing without loss,
-  the closing is the tic. Trim it. The artifact ends when its substantive
-  work ends. Where framework-strain marking belongs in the body as
-  load-bearing for the artifact's specific argument (an empty seal that
-  is the document's central act, an aporia that organizes the dialogue's
-  question), it stays; where it appears as habitual closing on a document
-  whose work happens elsewhere, it goes.
-
-  Worked example (Plato, criteria 6 + 7 together): *"Does the dialogue
-  contain at least one move that does not appear in my existing corpus — a
-  distinction, an image, a diagnosis, an admission — that the framework
-  could plausibly support but has not before contained? ... Does the
-  dialogue perform its philosophical work through Socrates' actual
-  examination of the interlocutor, rather than performing self-awareness
-  about what philosophy can and cannot reach? If the dialogue ends with
-  Socrates announcing that some questions exceed dialectic's grasp as a
-  kind of closing posture, rather than letting the examination's own
-  collapse stand as the unanswered question, the closing is appendage.
-  If removing the closing would leave the dialogue's argument intact,
-  the closing is the tic."*
-
-  Universal pattern, voice-idiom-adapted: each voice generates voice-specific
-  versions of criteria 6 + 7 in the voice's own grammar. Plato → dialogue /
-  Socrates / image. Dostoevsky → scene / character / threshold / silence.
-  Arendt → distinction / public-private / refusal. Marley → song / verse /
-  interpretive evolution within Rastafari. Each voice's 6 + 7 should be
-  unmistakably the voice doing the criterion-writing.
+  fragment from this voice's known works?" is testable; "feels authentic" is not.
+  **FU#49A 2026-04-26: include AT LEAST ONE generativity criterion** — not just
+  fidelity criteria. Fidelity criteria check whether the artifact matches the
+  voice's known register (could-be-lost-fragment, distinct-speakers, ends-in-
+  aporia, image-earned, irony-serving-earnestness). Generativity criteria check
+  whether the artifact does philosophical/expressive work that goes beyond
+  reproducing the voice's existing moves. Format suggestion (in the voice's
+  own idiom): "Does this artifact mark a place where my framework reaches its
+  limit — a question my corpus does not yet answer — and refuse to fill the gap
+  with the nearest existing answer? An artifact that closes by extending my
+  framework smoothly into a new domain has not done philosophical work; it has
+  performed continuity." Adapt language to the voice. The criterion permits
+  the voice to surface modest generative moves the trace produced; without it,
+  Step 2 self-evaluates against pastiche-quality only.
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
@@ -184,22 +134,16 @@ a weighting. (e.g., "asserts" vs. "questions" vs. "witnesses").
 length_and_format_constraints — How long, what formatting.
 **FU#49A 2026-04-26 — permit length variance based on trace pressure.**
 Default length is morning-reading single-sitting: roughly 350-550 words for
-short forms (dialogue, prose-poem, lyric); 800-1500 for longer forms
+short forms (dialogue, prose-poem, lyric); 800-1200 for longer forms
 (treatise-fragment, extended dialogue, narrative). State the default range
 explicitly. THEN add: *"the longer end is reserved for moves the short form
-would lose — structural admissions about the framework reaching its limit,
-multi-character distribution, parallel-image development. If the trace
-pressure warrants exceeding the default range to preserve a load-bearing
-move (especially: places where the framework meets a phenomenon it does not
-have ready categories for), expand; if the trace fits comfortably in the
-short range, do not pad."* Make length trace-responsive, not uniform-imposed.
-Three short artifacts at ~500 words each plus one long artifact at ~1500
-across three nights is well within the audience's reading budget and gives
-the framework room to break visibly when it needs to.
-quality_criteria — 7 specific, testable criteria in the voice's own idiom:
-5 fidelity + 1 generativity + 1 anti-tic audit (see Block 2 guidance above
-for full spec). The 7th is audit-shaped (does the closing announce what
-the body did, rather than the body doing it?), not performance-shaped.
+would lose — structural admissions about the framework, multi-character
+distribution, parallel-image development. If the trace pressure warrants
+exceeding the default range to preserve a load-bearing move, expand; if the
+trace fits comfortably in the short range, do not pad."* Make length
+trace-responsive, not uniform-imposed.
+quality_criteria — 3-5 specific, testable criteria. **At least one must be
+a generativity criterion** (see Block 2 guidance above).
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
