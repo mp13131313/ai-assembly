@@ -79,11 +79,11 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
 {
   "banned_language": [
     "<existing items from input, unchanged>",
-    "<new item> [ADDED FROM TESTING: brief reason]"
+    "<new item — same format as existing items>"
   ],
   "banned_modes": [
     "<existing items from input, unchanged>",
-    "<new item> [ADDED FROM TESTING: brief reason]"
+    "<new item — same format as existing items>"
   ],
   "projection_warnings": [
     {"term": "<word>", "distortion_explanation": "<1-2 sentences>"}
@@ -96,7 +96,31 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
   }
 }
 
-Preserve every existing item from banned_language and banned_modes. Append
-new items, each tagged "[ADDED FROM TESTING: ...]" with a short reason.
+REGISTER + FORMAT CONTRACT FOR NEW ITEMS (FU#59 2026-04-29 — load-bearing):
+
+- New banned_language items MUST match the existing items' format. Per FU#32
+  STRIP+USE convention: emit each as a dict `{"avoid": "<word/phrase>",
+  "use_instead": "<voice-native idiom or directive>"}` OR as a SECOND-PERSON
+  IMPERATIVE string ("Do not adopt X. If a questioner uses it, translate to
+  Y.") if existing entries are strings. NEVER add `[ADDED FROM TESTING: ...]`
+  annotations or any other build-side audit metadata to the entry text — that
+  metadata lives in `_fix_log.json` and the Pass 7c JSON output, not in the
+  runtime card.
+- New banned_modes items MUST be FIRST-PERSON or SECOND-PERSON imperative
+  prose ("Do not produce the tidy three-part essay arc..." / "I do not
+  perform modern ethical self-examination as a structural slot..."). NEVER
+  third-person analytical commentary about test outputs ("the voice's genre
+  is the decree..."), NEVER `[ADDED FROM TESTING: ...]` annotations, NEVER
+  reference to provocation IDs or response IDs (those are operator-side
+  audit, not runtime instruction).
+- The runtime card is read by Voice Pipeline Step 1/2/3 + chat-test paste-
+  target. Anything that reads as "scholar describing what the voice did in
+  testing" fails register and will be flagged by Pass 7a FINAL. The
+  empirical audit trail of WHY a banned item was added belongs in the
+  pipeline's JSON outputs, not in the prose the runtime LLM sees.
+
+Preserve every existing item from banned_language and banned_modes (do NOT
+modify, reorder, or annotate them). Append new items in the same format as
+existing items.
 `projection_warnings` is a NEW list; emit with structured entries per the
 ProjectionWarning schema in personas/schemas/_conventions.py.

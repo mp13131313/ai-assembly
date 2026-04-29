@@ -751,6 +751,30 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **What remains for Cleopatra (the OTHER 7 issues from Pass 7a FINAL):** the Class A (post-30 BCE leakage in formative_experience / constitution / reasoning_method[8] / unique_contribution) + Class B (scholarly meta-language in topics_requiring_care / concept_lexicon / curated_corpus_passages) issues are still real and need operator-side patching. They're separate from this FU#58 finding.
 - **Architectural insight for post-Athens:** Pass 7a prompt's expected-fields lists for Pass 2/3/4a/4b/5/6 should be regenerated from the actual Pass {N}_user.md emission specs as a one-time alignment audit. May surface other drifts.
 
+#### FU#59 — Pass 7c × Pass 7a FINAL register-rule conflict (operator-patch reduction) ✅ LANDED 2026-04-29
+- **Origin:** Plato (round 1) + Cleopatra (round 1 + round 2) Pass 7a FINAL gates each surfaced a recurring class of issues that came from TWO distinct prompt-spec conflicts with the runtime register validator. Across 2 voices, these false-positive flags drove ~10 surgical operator patches that the spec architecture should have prevented.
+- **Conflict 1 — `[ADDED FROM TESTING: ...]` annotations from Pass 7c:**
+  - Pass 7c schema (`personas/flows/shared/prompts/persona_pass_7c_negative.md`) explicitly required new banned_language + banned_modes items to be tagged `[ADDED FROM TESTING: <brief reason>]` (build-side audit annotation per spec).
+  - Pass 7a FINAL flagged these annotations as register failures ("the entry is written in a third-person, analytical register, describing 'the voice's' behavior in test outputs").
+  - Compounding: Sonnet bias-aware fallback (when Gemini 503'd) wrote multi-sentence scholarly meta-commentary inside the annotation, not just "brief reason." This made the format-mismatch worse on top of the schema-spec annotation conflict.
+  - Empirical: 7 patches each on Plato + Cleopatra round 1 from this exact pattern.
+- **Conflict 2 — Boddice biocultural-discipline brackets:**
+  - FU#33 P1 Pass 6.5-clean DELIBERATELY preserves `[experiential_reconstruction]` and `[projection_warning: ...]` brackets inline (allowlist) — they are content-meaningful annotations of epistemic status REQUIRED by Pass 7-pre's boddice tag check (per `persona_pass_7pre_boddice_check.md`).
+  - Pass 7a FINAL flagged these same preserved-by-design brackets as scholarly scaffolding ("contains `[experiential_reconstruction]` and modern explanatory framing").
+  - Empirical: 4 of Cleopatra's round-2 residuals were Boddice-tag-only false-positives.
+  - **Architectural conflict:** strip them = break Pass 7-pre boddice check + lose biocultural-discipline annotations the build pipeline needs. Keep them = Pass 7a FINAL false-flags every field with epistemic-status annotations.
+- **Diagnosis:** Both conflicts are spec-vs-spec, not LLM compliance failures. Pass 7c was authored before Pass 7a FINAL existed (FU#53 2026-04-29); Pass 6.5-clean's Boddice-tag preservation was authored without Pass 7a FINAL's strict-register validator in mind. Each pass is correct in its own framing; their combination produces false positives that consume operator time.
+- **Fix LANDED 2026-04-29 (commit forthcoming):**
+  - **`personas/flows/shared/prompts/persona_pass_7c_negative.md`:** Removed `[ADDED FROM TESTING: brief reason]` from output schema. Added explicit REGISTER + FORMAT CONTRACT FOR NEW ITEMS section requiring new banned_language items to match existing FU#32 STRIP+USE format (or be second-person imperative if existing items are strings); new banned_modes items to be first/second-person imperative prose (NEVER third-person analytical commentary, NEVER `[ADDED FROM TESTING:]` annotations, NEVER provocation-ID references). Build-side audit metadata moves to `_fix_log.json` + Pass 7c JSON output (already preserved on disk).
+  - **`personas/flows/shared/prompts/persona_pass_7a_cross_model.md`:** Added explicit Boddice-tag tolerance instruction in REGISTER CHECK block. The validator now does NOT flag a field as register failure SOLELY because it contains `[experiential_reconstruction]` / `[projection_warning: ...]` / `[scholarly_consensus]` / `[stated]` / `[inference]` / `[contested]` / `[reconstruction]` brackets. Only flags if the surrounding prose is genuinely third-person scholarly. Also tolerates constitution principle category tags `[ontological]` / `[epistemological]` / `[ethical-political]` / `[unique]`.
+- **Expected impact for voices 4-10:**
+  - Pass 7c additions: clean format = no operator patches needed for `[ADDED FROM TESTING:]` / register breaks at the gate. **~7 fewer patches per voice.**
+  - Pass 7a FINAL: no false-flags on Boddice-tag fields (formative_experience, world subfields, character, concept_lexicon, reasoning_method). **~3-5 fewer issues per voice round 1; round 2 may not be needed at all.**
+  - Cumulative across 8 remaining voices: ~80-100 fewer operator patches + ~3-5 fewer minutes per voice at the gate.
+- **Tests:** 223/223 passing.
+- **Caveat / NOT addressed:** the FU#56-class long-form-field register critiques (concept_lexicon "X is..." vs "When I say X..." pattern; curated_corpus_passages quarantine strictness; formative_experience biographical-narration register) ARE still real and structurally produce non-zero residuals in the Pass 7a FINAL treadmill. The FU#59 fixes only eliminate FALSE-positives (spec-vs-spec conflicts); the genuine FU#56-class register critiques remain. Operator-flag exit is still the right resolution for those.
+- **Related:** FU#33 P1 (Boddice-tag preservation), FU#53 (Pass 7a FINAL added), FU#56 (long-form register treadmill — distinct, not addressed here).
+
 ---
 
 ## RECENTLY COMPLETED

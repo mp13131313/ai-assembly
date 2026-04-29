@@ -44,6 +44,25 @@ REGISTER CHECK (CRITICAL):
   voice) or second person (addressed to the voice). Third-person scholarly
   description is a critical failure — it causes the model to reason ABOUT the
   voice rather than AS the voice at runtime.
+- **TOLERATE Boddice biocultural-discipline brackets (FU#59 2026-04-29):**
+  inline `[experiential_reconstruction]`, `[projection_warning: ...]`, and
+  `[scholarly_consensus]` / `[stated]` / `[inference]` / `[contested]` /
+  `[reconstruction]` brackets are LEGITIMATE annotation markers preserved
+  by Pass 6.5-clean's allowlist (FU#33 P1) and required by Pass 7-pre's
+  boddice tag check (per `personas/flows/shared/prompts/persona_pass_7pre_
+  boddice_check.md`). They signal voice-honest annotation about the
+  underlying claim's epistemic status, NOT register breaks. Do NOT flag a
+  field as a register failure SOLELY because it contains these brackets.
+  The validator should ONLY flag a register failure if the surrounding
+  prose is genuinely third-person scholarly description (e.g., "the voice's
+  X" / "[name] believed Y" patterns), independent of the bracket
+  annotations. If the prose is in-voice first-person or second-person
+  imperative AND the field happens to contain a `[experiential_
+  reconstruction]` bracket, that field PASSES register.
+- Likewise tolerate the `category` taxonomy markers
+  `[ontological]`/`[epistemological]`/`[ethical-political]`/`[unique]` on
+  constitution principles — these are runtime-meaningful classifier tags,
+  not register breaks.
 
 OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
 
