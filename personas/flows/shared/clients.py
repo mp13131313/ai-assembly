@@ -83,17 +83,32 @@ def call_claude(
         "system": system,
         "messages": [{"role": "user", "content": user}],
     }
-    # Opus 4.7 (and newer models) deprecated the `temperature` parameter.
-    # Passing it yields a 400 BadRequestError. Callers that need to omit
-    # temperature explicitly pass `temperature=None`. Backward-compat
-    # default of 0.2 preserved for older models.
-    if temperature is not None:
+    # FU#60 2026-04-29 — temperature/thinking compatibility.
+    # Anthropic's extended-thinking docs (platform.claude.com §"Feature
+    # compatibility") state: "Thinking isn't compatible with temperature
+    # or top_k modifications as well as forced tool use." For newer models
+    # (Opus 4.7), non-default temperature returns 400. The SDK default is
+    # 1.0; setting temperature=1.0 explicitly currently works but is
+    # technically a "modification" per the docs.
+    # Policy: when thinking=True, DROP temperature from the API call to
+    # match Anthropic's example code (which omits temperature entirely
+    # in adaptive-thinking samples) and future-proof against API tightening.
+    # When thinking=False (e.g. Pass 7-pre Sonnet verifiers, Pass 7c
+    # bias-aware fallback), pass temperature through as caller specified.
+    if temperature is not None and not thinking:
         kwargs["temperature"] = temperature
     if thinking:
         # Anthropic recommends thinking.type="adaptive" over the deprecated
         # "enabled" mode. Adaptive does NOT take budget_tokens — the model
         # decides how much to think based on the task.
-        kwargs["thinking"] = {"type": "adaptive"}
+        # FU#60 2026-04-29: explicit `display: "summarized"`. On Opus 4.7
+        # the default is `omitted` — thinking blocks still come back in the
+        # response stream but with EMPTY `thinking` content (only signature).
+        # We're billed for the thinking either way; setting summarized makes
+        # it visible so we can audit whether adaptive actually engaged on
+        # any given call. See `personas/flows/shared/clients.py` thinking_trace
+        # field in the returned dict.
+        kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
 
     # Anthropic SDK refuses non-streaming for requests it estimates will take
     # >10 min. With max_tokens >= 16384 + adaptive thinking, the estimate
@@ -102,18 +117,33 @@ def call_claude(
     _t0 = time.time()
     if use_streaming:
         text_parts: list[str] = []
+        thinking_parts: list[str] = []
+        block_types: list[str] = []
         usage_in = 0
         usage_out = 0
         stop_reason = None
         with client.messages.stream(**kwargs) as stream:
             for event in stream:
                 etype = getattr(event, "type", None)
-                if etype == "content_block_delta":
+                if etype == "content_block_start":
+                    cb = getattr(event, "content_block", None)
+                    if cb is not None:
+                        block_types.append(getattr(cb, "type", "?"))
+                elif etype == "content_block_delta":
                     delta = getattr(event, "delta", None)
-                    if delta and getattr(delta, "type", None) == "text_delta":
+                    if delta is None:
+                        continue
+                    dtype = getattr(delta, "type", None)
+                    if dtype == "text_delta":
                         text_parts.append(delta.text)
+                    elif dtype == "thinking_delta":
+                        # FU#60 2026-04-29: capture thinking_delta events.
+                        # Previously dropped silently — caller couldn't see
+                        # whether adaptive thinking actually fired.
+                        thinking_parts.append(getattr(delta, "thinking", "") or "")
             final = stream.get_final_message()
             text = "".join(text_parts)
+            thinking_trace = "".join(thinking_parts)
             usage_in = final.usage.input_tokens
             usage_out = final.usage.output_tokens
             stop_reason = final.stop_reason
@@ -123,6 +153,11 @@ def call_claude(
             "usage": {"input_tokens": usage_in, "output_tokens": usage_out},
             "model": model,
             "stop_reason": stop_reason,
+            # FU#60: thinking-trace observability. Additive; existing callers
+            # ignore. New callers can inspect block_types + thinking_trace
+            # to verify adaptive thinking is actually firing on their prompts.
+            "thinking_trace": thinking_trace,
+            "block_types": block_types,
         }
     else:
         msg = client.messages.create(**kwargs)
