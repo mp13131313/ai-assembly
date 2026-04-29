@@ -49,14 +49,27 @@ STEP1_MAX_TOKENS = int(os.environ.get("VOICE_STEP1_MAX_TOKENS", "64000"))
 
 
 def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs (matches researcher_flow._thinking_kwargs).
+    """Adaptive thinking kwargs.
 
-    Adaptive mode lets the model decide how much to think; recommended
-    for Opus 4.7. Requires temperature=1.0.
+    Adaptive mode lets the model decide how much to think; the only
+    supported thinking mode on Opus 4.7. Returns no `temperature` key
+    by design — per Anthropic docs §"Feature compatibility":
+    "Thinking isn't compatible with `temperature` or `top_k`
+    modifications." The SDK default for temperature is 1.0; we let it
+    stand by omitting the key.
+
+    (Earlier voice-pipeline + researcher_flow drafts set
+    `temperature: 1.0` explicitly, copying a pattern from the
+    pre-Opus-4.7 manual-thinking era. That set was empirically
+    harmless on Opus 4.7 — thinking still happened — but technically
+    a docs violation. Removed for compliance + future-proofing.)
     """
     if not VOICE_THINKING:
         return {}
-    return {"thinking": {"type": "adaptive"}, "temperature": 1.0}
+    # display: "summarized" — Opus 4.7 default is "omitted" which returns
+    # empty thinking blocks (we're billed regardless). Setting summarized
+    # makes traces visible for audit. Matches personas/clients.py FU#60.
+    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 _TAIL_RE = re.compile(

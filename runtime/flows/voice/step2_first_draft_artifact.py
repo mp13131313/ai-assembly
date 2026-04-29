@@ -43,9 +43,13 @@ STEP2_MAX_TOKENS = int(os.environ.get("VOICE_STEP2_MAX_TOKENS", "64000"))
 
 
 def _thinking_kwargs() -> dict:
+    """Adaptive thinking kwargs. See step1_private_reasoning._thinking_kwargs
+    for full rationale. Short version: no `temperature` key — Anthropic
+    docs §"Feature compatibility" say thinking is incompatible with
+    temperature modifications. SDK default 1.0 stands via omission."""
     if not VOICE_THINKING:
         return {}
-    return {"thinking": {"type": "adaptive"}, "temperature": 1.0}
+    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def build_step2_user_prompt(step1_outputs: list[dict[str, Any]]) -> str:
@@ -161,10 +165,10 @@ def _derive_themes_covered(
     """Deterministically derive `themes_covered` from `focus_decision` +
     the voice's Step 1 theme_ids.
 
-    The voice is no longer asked to emit themes_covered (that would force
-    metadata bookkeeping into the artifact-writing surface, which at
-    temperature=1.0 + extended thinking is the wrong place for strict
-    format adherence). Instead the parser derives it:
+    The voice is no longer asked to emit themes_covered (that would
+    force metadata bookkeeping into the artifact-writing surface, where
+    creative-prose generation under extended thinking is the wrong
+    place for strict format adherence). Instead the parser derives it:
 
       - If `focus_decision` mentions specific theme_ids (e.g.
         "focused on theme_003" or "theme_001 and theme_004"), those

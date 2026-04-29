@@ -6,15 +6,37 @@
 
 ---
 
-## Decisions awaiting operator (deferred from this session)
+## Decisions resolved + cross-pipeline status
 
-### Thinking config (Path A vs Path B) — **deferred pending persona-pipeline audit**
+### Thinking config — RESOLVED 2026-04-29
 
-- **Brief written:** `_workspace/planning/BRIEF_OPUS_4_7_THINKING_AUDIT_2026_04_29.md`
-- **The question:** Are persona-pipeline (and runtime researcher / provocateur) Opus 4.7 calls actually getting extended thinking, or is `{type: "adaptive"}` at default effort silently producing 0 thinking tokens (as observed in Voice Pipeline dry-run)?
-- **Investigation tasks listed in the brief** (instrument `call_claude` to log `thinking_tokens`, run a single Pass on Plato, evaluate impact)
-- **Voice Pipeline holds at the established pattern** (`{"type": "adaptive"}` matching researcher/provocateur byte-for-byte) until the audit returns. Once the operator decides Path A (status quo) or Path B (adopt `output_config.effort` + `thinking.display: "summarized"`), Voice Pipeline follows in lockstep with the rest.
-- **Why not decide unilaterally:** changing thinking config mid-Athens-build risks invalidating shipped persona cards (FU#52 invalidation pattern). Cross-pipeline coordination required.
+**The 0 thinking tokens we observed was an instrumentation gap**, not a behavioral problem. Investigation summary:
+
+- **Anthropic SDK 0.94.1** has no `thinking_tokens` field on `Usage` — thinking is rolled into `output_tokens`
+- **Opus 4.7** defaults `thinking.display` to `"omitted"` — thinking blocks return with empty `thinking` text (we're still billed)
+- **Estimated thinking from voice dry-run #2**: ~1800-2400 hidden tokens per Step 1 call, computed as `output_tokens − visible_response_tokens`. Thinking IS happening
+- **Anthropic docs §"Feature compatibility"**: *"Thinking isn't compatible with `temperature` or `top_k` modifications."* Voice Pipeline (and researcher_flow) had been setting `temperature: 1.0` explicitly — copied from pre-Opus-4.7 manual-thinking docstring that said "extended thinking requires temperature=1.0" (true for manual mode, **not** true for adaptive mode)
+- **Persona pipeline noted empirically**: *"Opus 4.7 (and newer models) deprecated the `temperature` parameter. Passing it yields a 400 BadRequestError"* (`personas/flows/shared/clients.py`)
+- **Persona pipeline FU#60 (2026-04-29)** added `thinking.display: "summarized"` to make traces visible
+
+**Voice Pipeline matched the persona pattern in this branch:**
+- All 4 `_thinking_kwargs()` (step1, step2, step3, continuity) now return `{"thinking": {"type": "adaptive", "display": "summarized"}}` — no temperature key
+- Compliant with Anthropic docs feature-compatibility section
+- Thinking traces now visible (was empty by 4.7 default)
+
+### Cross-pipeline status (post this session)
+
+| Pipeline | Temperature with thinking | display: "summarized" | Status |
+|---|---|---|---|
+| Voice (this branch) | ✅ removed | ✅ added | Compliant |
+| Personas (`clients.py`) | ✅ already removed (FU prior) | ✅ added (FU#60) | Compliant |
+| Provocateur (`provocateur_flow.py`) | ✅ never set | ❌ not set | Partial — needs `display` |
+| Researcher (`researcher_flow.py`) | ❌ still sets `temperature: 1.0` | ❌ not set | **NON-compliant — needs both fixes** |
+
+**Outstanding cross-pipeline work** (filed as follow-ups, not for this branch):
+1. `runtime/flows/researcher_flow.py` `_thinking_kwargs` — drop `temperature: 1.0`, add `display: "summarized"`
+2. `runtime/flows/provocateur_flow.py` `_thinking_kwargs` — add `display: "summarized"`
+3. (Optional, if cost+latency warrant) Add `output_config: {effort: <level>}` per-call across all pipelines for explicit thinking-depth control. Currently default `high` effort, which docs say "Claude almost always thinks" — likely fine without explicit control
 
 ---
 
