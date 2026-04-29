@@ -150,6 +150,9 @@ def _parse_step3_output(raw_text: str) -> dict[str, Any]:
         "selected_form": "",
         "form_changed_from_first_draft": False,
         "form_change_rationale": None,
+        # amended_artifact_title + amended_artifact_subtitle are NOT
+        # asked of the voice (editorial / curation handled downstream).
+        # Schema fields kept as empty strings for stable shape.
         "amended_artifact_title": "",
         "amended_artifact_subtitle": "",
         "amended_artifact_text": "",
@@ -174,11 +177,9 @@ def _parse_step3_output(raw_text: str) -> dict[str, Any]:
         ("decision_rationale", r"decision[_\s]*rationale"),
         ("selected_form", r"selected[_\s]*form"),
         ("form_change_rationale", r"form[_\s]*change[_\s]*rationale"),
-        ("amended_artifact_title", r"(?:amended[_\s]*)?(?:artifact[_\s]*)?title"),
-        ("amended_artifact_subtitle", r"(?:amended[_\s]*)?(?:artifact[_\s]*)?subtitle"),
     ):
         rx = re.compile(
-            rf"^\s*[*_#\-]*\s*{label}\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]*\s*(?:decision|amendment|selected|form|title|subtitle|amended|artifact)[\s_]*[:=]|\Z)",
+            rf"^\s*[*_#\-]*\s*{label}\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]*\s*(?:decision|amendment|selected|form|amended|artifact)[\s_]*[:=]|\Z)",
             re.IGNORECASE | re.MULTILINE | re.DOTALL,
         )
         m = rx.search(raw_text)
@@ -262,10 +263,10 @@ def run_step3_for_voice(
     parsed = _parse_step3_output(raw_text)
 
     # If standing pat, amended_artifact_text equals first-draft text verbatim.
+    # Title/subtitle stay as empty strings (downstream-populated, not in
+    # voice's output surface).
     if parsed["decision"] == "stand-pat":
         parsed["amended_artifact_text"] = own_first_draft.get("artifact_text", "")
-        parsed["amended_artifact_title"] = own_first_draft.get("artifact_title", "")
-        parsed["amended_artifact_subtitle"] = own_first_draft.get("artifact_subtitle", "")
         parsed["selected_form"] = own_first_draft.get("selected_form", "")
         parsed["form_changed_from_first_draft"] = False
         parsed["form_change_rationale"] = None

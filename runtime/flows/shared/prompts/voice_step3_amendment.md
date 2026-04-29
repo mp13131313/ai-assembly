@@ -41,7 +41,9 @@ The amended artifact remains in your voice — apply the voice fields (`rhetoric
 <output>
 State `decision` (`amend` or `stand-pat`) and `decision_rationale` first.
 
-If amending: list each amendment as a structured entry — `cited_voice`, `cited_passage` (verbatim or paraphrased excerpt of the move), `amendment_type`, `rationale` (one sentence). Then write the amended artifact in full: `selected_form` (may have changed), `form_changed_from_first_draft`, `form_change_rationale` (if changed), `amended_artifact_title`, `amended_artifact_subtitle`, `amended_artifact_text`.
+If amending: list each amendment as a structured entry — `cited_voice`, `cited_passage` (verbatim or paraphrased excerpt of the move), `amendment_type`, `rationale` (one sentence). Then write the amended artifact in full: `selected_form` (may have changed), `form_changed_from_first_draft`, `form_change_rationale` (if changed), `amended_artifact_text`.
 
 If standing pat: list the voices you read and the moves you saw with brief notes. `amended_artifact_text` equals the text of the piece you wrote earlier, verbatim.
+
+Do NOT produce a title or subtitle for the amended piece — those are editorial concerns handled downstream of you. Your work is the piece itself.
 </output>

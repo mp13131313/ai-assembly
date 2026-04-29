@@ -93,6 +93,38 @@ Plus two supporting flows:
 
 The Voice Pipeline runs once per night across three Athens nights. On Night 2 + Night 3, the continuity override is loaded as a card supplement; otherwise the pipeline shape is identical.
 
+### Multi-night convention
+
+**One run_dir per night.** Each Athens night is a complete, self-contained pipeline run from transcription through publish. Convention:
+
+```
+<PROJECT_ROOT>/runs/athens_2026_2026_05_07_night1/
+                ├── 01_transcription/
+                ├── 02_researcher/
+                ├── 03_provocateur/
+                └── 04_voice/
+
+<PROJECT_ROOT>/runs/athens_2026_2026_05_08_night2/
+                └── (same shape, fresh inputs)
+
+<PROJECT_ROOT>/runs/athens_2026_2026_05_09_night3/
+                └── (same shape, fresh inputs)
+```
+
+Inside each night's `04_voice/`, voice files are named per-voice without a night suffix (`step2_first_draft_artifacts/plato.json`, not `plato_night_1.json`) — the night is implicit in the run_dir.
+
+Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. They are unique within a night via run_dir namespacing; cross-night referencing happens via lineage paths that include `run_id` (the run_dir leaf).
+
+**Cross-night state lives at PROJECT_ROOT, not inside any run_dir:**
+
+- `<PROJECT_ROOT>/voices/<slug>/continuity_night_<N>.json` — voice's memory of prior nights, written by the continuity flow at end of Night N-1, consumed by Night N's voice system prompt
+- `<PROJECT_ROOT>/published_artifacts/nights/night_<N>/<slug>.json` — published artifact (micro-site / Edition / Substack consumer)
+- `<PROJECT_ROOT>/published_artifacts/voices/<slug>_multi_night.json` — per-voice 3-night index (built by `publish_flow.py`)
+
+**Why this convention:** each night's run_dir is self-contained, easy to archive, and doesn't risk cross-night collision. Continuity reads ONE night's `04_voice/` at a time. Multi-night aggregation happens deliberately at the publish layer, where cross-night views are explicit. A failure on Night 2 doesn't risk Night 1 state.
+
+**Defensive labeling:** `04_voice/responded_to_graph_night_<N>.json` and `04_voice/themes_to_voices_night_<N>.json` carry `_night_N` in the filename even though the run_dir already implies the night. Cost is zero; benefit is clarity if the filename ever escapes context (e.g. surfaced in a publish layer that aggregates across nights). The runtime continuity + publish files at PROJECT_ROOT also include night in their names; consistency favors keeping the suffix here too.
+
 ---
 
 ## What the Voice Pipeline Knows
@@ -646,7 +678,7 @@ Apply the voice fields (above) systematically:
 
 Test against `quality_criteria` before delivery.
 
-Begin by stating the three decisions (focus, stance, form), then `artifact_title`, then `artifact_subtitle`, then `artifact_text`.
+Begin by stating the three decisions (focus, stance, form), then `artifact_text`. The voice does NOT produce a title or subtitle — those are editorial / curation concerns handled downstream of the Voice Pipeline.
 </output>
 ```
 
@@ -693,8 +725,8 @@ Each detailed response is rendered with a header naming its `theme_id`, `theme_d
   "stance_rationale": "one sentence",
   "selected_form": "dialogue+image (Cave-style)",
   "form_rationale": "one sentence",
-  "artifact_title": "headline string",
-  "artifact_subtitle": "subhead string",
+  "artifact_title": "",
+  "artifact_subtitle": "",
   "artifact_text": "the full artifact text",
   "thinking_trace": "the model's internal reasoning trace (Opus thinking blocks concatenated) — captures the focus/stance/form decisions in process, plus the artifact-writing reasoning",
   "word_count": 0,
@@ -710,7 +742,8 @@ Each detailed response is rendered with a header naming its `theme_id`, `theme_d
 **Lineage block — Step 2:**
 
 - `consumed_detailed_responses` is the **full set** of Step 1 detailed-response files this voice's first-draft was assembled from (typically all 3-5; if a Step 1 call failed and was skipped, that entry is absent — visible in the manifest's `validation_failures[]`).
-- `themes_covered` is the **subset** of those theme_ids the artifact actually draws from. If `focus_decision = "focused on theme_003"`, then `themes_covered = ["theme_003"]`. If `focus_decision = "woven across all"`, then `themes_covered` equals the theme_ids in `consumed_detailed_responses`. Used by Step 3 to determine which other voices' first-drafts share a theme.
+- `themes_covered` is the **subset** of those theme_ids the artifact actually draws from. **Derived deterministically by the parser** (NOT asked of the voice — that would force metadata bookkeeping into the artifact-writing surface, where temperature=1.0 + extended thinking is the wrong place for strict format adherence). The derivation: if `focus_decision` text mentions specific theme_ids, those are the themes_covered; otherwise (e.g. "woven across all", synthesis phrasings) themes_covered = full set of theme_ids the voice did Step 1 on. Used by Step 3 to determine which other voices' first-drafts share a theme.
+- `artifact_title` and `artifact_subtitle` are **kept in the schema as empty strings** for stable shape, but the voice does NOT produce them. Title/subtitle are editorial / curation concerns handled downstream of the Voice Pipeline (e.g. by a separate auto-titler step or by human editorial). Publish layer reads these fields and emits empty strings for the micro-site to fill in or override.
 - `all_grounding_extraction_ids` and `all_session_ids` are the union across the consumed Step 1 lineage blocks — pre-computed so a downstream consumer (e.g. closing-show pipeline) can filter "which artifacts trace back to session X?" without walking each Step 1 file.
 
 ---
@@ -797,7 +830,7 @@ The amended artifact remains in your voice — apply the voice fields (`rhetoric
 <output>
 State `decision` (`amend` or `stand-pat`) and `decision_rationale` first.
 
-If amending: list each amendment as a structured entry — `cited_voice`, `cited_voice_slug`, `cited_first_draft_path`, `cited_theme_id`, `cited_formulation_id`, `cited_passage` (verbatim or paraphrased excerpt of the move), `amendment_type`, `rationale` (one sentence). Then write the amended artifact in full: `selected_form` (may have changed), `form_changed_from_first_draft`, `form_change_rationale` (if changed), `amended_artifact_title`, `amended_artifact_subtitle`, `amended_artifact_text`.
+If amending: list each amendment as a structured entry — `cited_voice`, `cited_voice_slug`, `cited_first_draft_path`, `cited_theme_id`, `cited_formulation_id`, `cited_passage` (verbatim or paraphrased excerpt of the move), `amendment_type`, `rationale` (one sentence). Then write the amended artifact in full: `selected_form` (may have changed), `form_changed_from_first_draft`, `form_change_rationale` (if changed), `amended_artifact_text`. The voice does NOT produce a title or subtitle for the amended piece — title/subtitle are editorial concerns handled downstream of the Voice Pipeline.
 
 If standing pat: list `voices_read` and the moves you saw with brief notes. `amended_artifact_text` equals the text of the piece you wrote earlier, verbatim.
 </output>
@@ -846,7 +879,8 @@ Notes on this rendering:
 | `lineage` block (entire) | **Dropped.** Pure pipeline-meta. |
 | `council_member`, `voice_slug` | **Renamed/kept** as `voice_name` (voice's display name only — slug is filesystem-internal) |
 | `focus_decision`, `focus_rationale`, `stance`, `stance_rationale`, `selected_form`, `form_rationale` | **Kept.** These are the voice's own decisions about its own artifact; useful context for a reading voice that wants to understand what posture/form/focus produced what they're reading. |
-| `artifact_title`, `artifact_subtitle`, `artifact_text` | **Kept verbatim.** This IS the artifact. |
+| `artifact_text` | **Kept verbatim.** This IS the artifact. |
+| `artifact_title`, `artifact_subtitle` | **Empty strings** at this stage (downstream-populated). Step 3's voice-side reading focuses on `artifact_text` for cross-framework engagement; titles play no role in the amendment decision. |
 | `themes_covered` | **Kept** — needed for the reading voice to know which shared theme(s) the artifact engaged. |
 | `model`, `thinking_enabled`, `*_tokens`, `wall_clock_s`, `thinking_trace` | **Dropped.** Performance metadata + reasoning trace are bookkeeping; the voice should encounter the artifact, not the production telemetry. |
 | `word_count` | **Dropped** as bookkeeping. |
@@ -861,8 +895,8 @@ Voice-facing entry per other voice in `filtered_full_artifact_record`:
   "stance": "obsession",
   "selected_form": "song",
   "themes_covered": ["theme_007"],
-  "artifact_title": "string",
-  "artifact_subtitle": "string",
+  "artifact_title": "",
+  "artifact_subtitle": "",
   "artifact_text": "the artifact, as the audience would encounter it"
 }
 ```
@@ -914,8 +948,8 @@ Implementation note: same pattern as Step 1's filtering — happens in `step3_am
   "selected_form": "dialogue+image (Cave-style)",
   "form_changed_from_first_draft": false,
   "form_change_rationale": null,
-  "amended_artifact_title": "string (may be unchanged from first-draft)",
-  "amended_artifact_subtitle": "string",
+  "amended_artifact_title": "",
+  "amended_artifact_subtitle": "",
   "amended_artifact_text": "full text — if stand-pat, this equals first-draft text verbatim",
   "thinking_trace": "the model's internal reasoning trace — captures the FU#49E reading of other voices' artifacts and the amend/stand-pat decision in process; load-bearing audit asset for verifying that amendments actually engaged the cited moves",
   "word_count": 0,

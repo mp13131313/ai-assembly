@@ -84,7 +84,15 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
         "stance_rationale": "",
         "selected_form": "",
         "form_rationale": "",
+        # themes_covered is NOT parsed from voice output — it's derived
+        # deterministically from focus_decision + the voice's Step 1
+        # theme_ids by _derive_themes_covered() below. Keeping the empty
+        # default here for schema continuity; populated post-parse.
         "themes_covered": [],
+        # artifact_title + artifact_subtitle are NOT asked of the voice
+        # (editorial / curation concern handled downstream of voice
+        # pipeline). Schema fields kept as empty strings so publish layer
+        # has a stable shape to read from.
         "artifact_title": "",
         "artifact_subtitle": "",
         "artifact_text": "",
@@ -105,9 +113,6 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
         # Same negative-lookahead pattern for selected_form vs form_rationale.
         "selected_form": r"(?:selected[_\s]*)?form(?![_\s]*rationale|[_\s]*change)",
         "form_rationale": r"form[_\s]*rationale",
-        "themes_covered": r"themes[_\s]*covered",
-        "artifact_title": r"(?:artifact[_\s]*)?title",
-        "artifact_subtitle": r"(?:artifact[_\s]*)?subtitle",
     }
     # A "next labelled line" is any newline followed by optional markdown
     # chrome (`**`, `_`, `#`, `-`) and a lowercase identifier (matching
@@ -125,12 +130,7 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
             # Strip leading + trailing markdown chrome (`**`, `*`, `_`).
             value = re.sub(r"^[*_]+\s*", "", value).strip()
             value = re.sub(r"\s*[*_]+$", "", value).strip()
-            if key == "themes_covered":
-                # Comma- or whitespace-separated list of theme_ids.
-                ids = re.findall(r"theme_[a-z0-9_]+", value, re.IGNORECASE)
-                out[key] = [t.lower() for t in ids]
-            else:
-                out[key] = value
+            out[key] = value
 
     # artifact_text: the remainder of the response after the
     # `artifact_text:` label. Multi-line; runs to end of response.
@@ -154,25 +154,34 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
     return out
 
 
-def _ensure_themes_covered(
-    parsed_themes: list[str],
+def _derive_themes_covered(
     focus_decision: str,
     step1_outputs: list[dict[str, Any]],
 ) -> list[str]:
-    """Backstop for themes_covered.
+    """Deterministically derive `themes_covered` from `focus_decision` +
+    the voice's Step 1 theme_ids.
 
-    The voice should emit themes_covered explicitly per the closing
-    instruction. If parsing failed AND focus_decision says "woven",
-    fall back to all themes. If neither, fall back to all themes (so
-    Step 3 sees the union; better-than-empty fallback that may produce
-    over-broad sharing rather than missing entirely). Operator should
-    investigate any case where this backstop fires (logged downstream
-    via wall_clock + manifest).
+    The voice is no longer asked to emit themes_covered (that would force
+    metadata bookkeeping into the artifact-writing surface, which at
+    temperature=1.0 + extended thinking is the wrong place for strict
+    format adherence). Instead the parser derives it:
+
+      - If `focus_decision` mentions specific theme_ids (e.g.
+        "focused on theme_003" or "theme_001 and theme_004"), those
+        are the themes_covered.
+      - Otherwise (e.g. "woven across all three", "synthesis", or any
+        phrasing that doesn't explicitly name themes), themes_covered
+        is the full set of theme_ids the voice did Step 1 on — the
+        artifact necessarily draws from all of them.
+
+    The set is never empty unless the voice has zero Step 1 outputs
+    (which is its own error caught upstream).
     """
-    if parsed_themes:
-        return parsed_themes
-    all_themes = [o["lineage"]["theme_id"] for o in step1_outputs]
-    return all_themes
+    voice_theme_ids = [o["lineage"]["theme_id"] for o in step1_outputs]
+    matched = [tid for tid in voice_theme_ids if tid.lower() in focus_decision.lower()]
+    if matched:
+        return matched
+    return voice_theme_ids
 
 
 def run_step2_for_voice(
@@ -228,8 +237,10 @@ def run_step2_for_voice(
     )
     thinking_trace = thinking_trace.strip()
     parsed = _parse_step2_output(raw_text)
-    themes_covered = _ensure_themes_covered(
-        parsed["themes_covered"], parsed["focus_decision"], step1_outputs
+    # themes_covered is derived deterministically (not parsed). Voice
+    # focuses on the artifact; metadata bookkeeping is the parser's job.
+    themes_covered = _derive_themes_covered(
+        parsed["focus_decision"], step1_outputs
     )
 
     # Build lineage block (consumed Step 1 paths + union of grounding ids).

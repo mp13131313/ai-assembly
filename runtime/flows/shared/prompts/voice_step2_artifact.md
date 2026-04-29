@@ -71,7 +71,7 @@ Apply the voice fields (above) systematically:
 
 Test against `quality_criteria` before delivery.
 
-Begin by stating the three decisions (focus, stance, form). Then list `themes_covered` — the theme_ids of the detailed responses your artifact actually draws from (single-element list if focused on one response; the full set if woven across all). Then `artifact_title`, `artifact_subtitle`, and `artifact_text`.
+Begin by stating the three decisions (focus, stance, form). Then write the artifact itself.
 
 Use this exact order for the structured fields, each on its own line as `**Label:** value`:
 
@@ -81,10 +81,7 @@ Use this exact order for the structured fields, each on its own line as `**Label
 - **stance_rationale:** ...
 - **selected_form:** ...
 - **form_rationale:** ...
-- **themes_covered:** comma-separated list of theme_ids (e.g. `theme_003, theme_007` or just `theme_003`)
-- **artifact_title:** ...
-- **artifact_subtitle:** ...
 - **artifact_text:**
 
-Then the artifact body itself, with no further `**Label:**` lines after that.
+Then the artifact body itself, with no further `**Label:**` lines after that. Do NOT produce a title or subtitle for the piece — those are editorial concerns handled downstream of you. Your work is the piece itself.
 </output>

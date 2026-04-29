@@ -111,8 +111,6 @@ def _build_continuity_user_prompt(
             f"Form: {step2_output.get('selected_form', '')}\n\n"
         )
         parts.append(
-            f"### {step2_output.get('artifact_title', '')}\n"
-            f"_{step2_output.get('artifact_subtitle', '')}_\n\n"
             f"{step2_output.get('artifact_text', '')}\n\n"
         )
 
