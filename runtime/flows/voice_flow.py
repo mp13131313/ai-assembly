@@ -52,7 +52,9 @@ if str(_REPO_ROOT) not in sys.path:
 try:
     from prefect import flow, task
     from dotenv import load_dotenv
-    load_dotenv(_REPO_ROOT.parent / ".env")
+    # override=True so the .env values win over any empty / placeholder
+    # env vars in the parent shell. Matches personas/run_persona_pipeline.py.
+    load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import get_logger, member_slug, write_json_atomic
     from flows.shared.project_root import add_project_arg, resolve_project_root
     from flows.voice.card_assembly import load_persona_card

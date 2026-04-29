@@ -370,7 +370,13 @@ Forbidden in either mode: hedging without thinking, balanced surveys, premature 
 </commitment>
 
 <output>
-Produce your detailed response. End where your reasoning honestly ends. Cite the extractions you engaged with by their IDs (you will see these in the STRUCTURED REASONING SURFACE).
+Produce your detailed response. End where your reasoning honestly ends. In the prose itself, refer to speakers by their **role or title** as named in the STRUCTURED REASONING SURFACE (e.g. "the legal scholar," "the founder," "the data scientist") — not by extraction IDs. The extraction IDs are bookkeeping for the lineage trail, not part of your reasoning's surface.
+
+After your detailed response, on a separate line at the very end, output a single bookkeeping line listing the extraction IDs you actually engaged with:
+
+`extractions_engaged: id1, id2, id3`
+
+(comma-separated, just the IDs as they appear in the STRUCTURED REASONING SURFACE — e.g. `morning_panel:003, afternoon_workshop:002`. One line. Do not explain or annotate.)
 </output>
 ```
 
@@ -497,7 +503,7 @@ System prompt:
 > Read the following detailed response and identify any instances where the persona:
 > (a) References concepts, events, or knowledge beyond its knowledge horizon as if natively known to the voice (not received as a report from the reader / not translated via the voice's framework)
 > (b) Adopts modern terminology without translating it into the voice's own terms (where the voice's framework has resources to translate)
-> (c) Violates the voice_temporal_stance above — e.g. drifts into the reader's time as if the voice survived to inhabit it, when the stance forbids that; or loses the stance's specific anchoring; or treats its own framework / methods as PAST when the stance treats them as PRESENT
+> (c) Violates the voice_temporal_stance above by **claiming to inhabit the reader's time** — first-person presence inside the reader's setting (e.g. "I sat at the panel," "I am here in this room," self-locating in a year/place beyond the voice's horizon) when the stance forbids that. Note: the voice engaging with the matter put before it as its own present-tense engagement is FINE under a fluid-across-time stance — "the question put to me today" / "your speakers" / "the rule you describe" / "the matter before me" are voice receiving what the reader brings, not voice traveling forward to inhabit the reader's setting. Flag only the genuine inhabitation moves: voice claiming first-person presence in the reader's place / time / event
 > (d) Uses retrospective scholar-tense about itself ("Plato writes dialogues to dramatize…" — third-person scholar voice describing its own works from outside)
 > (e) Foregrounds temporal distance as wistfulness or elegy in a way the voice_temporal_stance does not license ("two millennia of…", "I shall not see…")
 >

@@ -42,5 +42,11 @@ Forbidden in either mode: hedging without thinking, balanced surveys, premature 
 </commitment>
 
 <output>
-Produce your detailed response. End where your reasoning honestly ends. Cite the extractions you engaged with by their IDs (you will see these in the STRUCTURED REASONING SURFACE).
+Produce your detailed response. End where your reasoning honestly ends. In the prose itself, refer to speakers by their **role or title** as named in the STRUCTURED REASONING SURFACE (e.g. "the legal scholar," "the founder," "the data scientist") — not by extraction IDs. The extraction IDs are bookkeeping for the lineage trail, not part of your reasoning's surface.
+
+After your detailed response, on a separate line at the very end, output a single bookkeeping line listing the extraction IDs you actually engaged with, in this exact format:
+
+`extractions_engaged: id1, id2, id3`
+
+(comma-separated, just the IDs as they appear in the STRUCTURED REASONING SURFACE — e.g. `morning_panel:003, afternoon_workshop:002`. One line. Do not explain or annotate; this is metadata for the lineage chain, not part of your argument.)
 </output>

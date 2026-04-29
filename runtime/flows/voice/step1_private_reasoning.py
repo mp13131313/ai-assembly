@@ -18,6 +18,7 @@ downstream audit (per spec §"Reasoning trace capture").
 from __future__ import annotations
 
 import json
+import re
 import os
 import sys
 import time
@@ -56,6 +57,58 @@ def _thinking_kwargs() -> dict:
     if not VOICE_THINKING:
         return {}
     return {"thinking": {"type": "adaptive"}, "temperature": 1.0}
+
+
+_TAIL_RE = re.compile(
+    r"^\s*(?:[*_`#\->]+\s*)?extractions[_\s]*engaged\s*[:=]\s*(.+?)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _extract_engaged_tail(
+    detailed_response: str, *, fallback_ids: list[str]
+) -> tuple[str, list[str]]:
+    """Strip the bookkeeping `extractions_engaged: id1, id2, id3` tail
+    line from the voice's detailed response and return (cleaned_text,
+    parsed_ids).
+
+    The closing instruction asks the voice to emit the line at the very
+    end as plain bookkeeping. We tolerate light markdown decoration
+    (asterisks, leading dashes, backticks, blockquote markers) the
+    voice may add, and case variation. The ID set itself is comma-
+    separated; we tolerate trailing periods, surrounding brackets, and
+    minor whitespace.
+
+    If the line is absent or unparseable, fall back to the briefing's
+    grounding_extraction_ids — lineage stays walkable, just at briefing
+    granularity rather than voice-engaged granularity.
+
+    Cleaning: only the LAST occurrence of the line is stripped (so a
+    voice that mentions an ID format mid-prose isn't mutilated). The
+    line and any trailing whitespace/decoration are removed cleanly.
+    """
+    if not detailed_response:
+        return detailed_response, list(fallback_ids)
+
+    matches = list(_TAIL_RE.finditer(detailed_response))
+    if not matches:
+        return detailed_response, list(fallback_ids)
+
+    last = matches[-1]
+    raw = last.group(1).strip()
+    # Strip surrounding [], (), markdown emphasis, trailing period
+    raw = raw.strip("[]()`*_ .")
+    # Split on commas; trim each; drop empties
+    ids = [tok.strip(" `*_.[]") for tok in raw.split(",")]
+    ids = [i for i in ids if i and ":" in i]  # extraction IDs always have a colon
+
+    if not ids:
+        # Line found but unparseable — keep prose untouched, fall back
+        return detailed_response, list(fallback_ids)
+
+    # Strip the matched line + any trailing whitespace
+    cleaned = (detailed_response[: last.start()] + detailed_response[last.end():]).rstrip()
+    return cleaned, ids
 
 
 def build_step1_user_prompt(formulation_entry: dict[str, Any]) -> str:
@@ -134,6 +187,16 @@ def run_step1_for_pair(
     session_ids = sorted({eid.split(":", 1)[0] for eid in grounding_ids if ":" in eid})
     co_assigned = full_record.get("co_assigned_voices", [])
 
+    # Parse the bookkeeping `extractions_engaged: id1, id2, id3` tail line
+    # the closing instruction asks the voice to emit. The line gets
+    # stripped from `detailed_response` so it doesn't pollute downstream
+    # consumers (Step 2 readback, etc). If the voice forgot to emit it
+    # (or emitted a malformed version), fall back to the briefing's
+    # grounding_extraction_ids — lineage stays walkable either way.
+    detailed_response, extractions_engaged = _extract_engaged_tail(
+        detailed_response, fallback_ids=grounding_ids
+    )
+
     output = {
         "lineage": {
             "run_id": run_dir.name,
@@ -153,6 +216,7 @@ def run_step1_for_pair(
         "formulation_text": formulation_entry.get("formulation_text", ""),
         "mode": formulation_entry.get("mode", "question"),
         "detailed_response": detailed_response,
+        "extractions_engaged": extractions_engaged,
         "thinking_trace": thinking_trace,
         "model": VOICE_MODEL,
         "thinking_enabled": VOICE_THINKING,
