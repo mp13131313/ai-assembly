@@ -10,16 +10,23 @@ A provotype for the **World Beautiful Business Forum** AI Democracy Marathon, At
 
 This is a **civic-design artifact**, not a product. Visible construction is a feature. The voices are honest constructions; the audience encounters them alongside their construction notes.
 
-## What "ready for Athens" means (operator priority, 2026-04-27)
+## What "ready for Athens" means (operator priority, refreshed 2026-04-29)
 
-**Athens needs the full runtime stack ready, not just the 12 persona cards.** The cards are necessary inputs but not sufficient. When planning work or recommending what's next, weigh runtime workstreams as equally critical to Athens, not "post-Athens deferred." Specifically the Athens-blockers beyond cards:
+**Athens needs the full runtime stack ready, not just the 12 persona cards.** The cards are necessary inputs but not sufficient. When planning work or recommending what's next, weigh runtime workstreams as equally critical to Athens, not "post-Athens deferred."
 
-- **Voice Pipeline Steps 1+2** — NOT BUILT. Without it, no card produces overnight artifacts. Highest single Athens blocker after voice cards complete.
-- **Voice Pipeline Step 3 Amendment** — UNSPECIFIED (FU#49E). Reviewer-flagged as conceptually load-bearing for the deliberative-character claim. Spec needed pre-Athens; build can be post-Athens IF Steps 1+2 ship and operator accepts a Step-3-less Athens.
-- **Downstream pipeline** (Render → Publish → Curate → Deliver) — UNBUILT. Marley artifact → Suno API; Octopus → client-side shader params; Substack delivery via HoBB newsletter blurb.
-- **Microsite** — UNBUILT. What 750 attendees actually see.
-- **Admin console** — UNBUILT. Operator infrastructure for orchestrating overnight pipelines + council sync + log tail.
-- **Closing-show pipelines** (theme ID + Matrix A/B mapping + video) — UNSPECIFIED, UNBUILT. Day 3 afternoon.
+### Athens-blockers — current state (refreshed 2026-04-29)
+
+**LANDED + IMPLEMENTED:**
+- ✅ **Voice Pipeline Steps 1+2+3** — implemented as v2 on 2026-04-28 (commit `180a18f` + pre-dry-run hardening `aca0e4c`). 2145 LOC across `runtime/flows/voice/` (Step 1 private reasoning + Step 1 validation [anachronism + constitutional] + Step 2 first-draft + Step 3 amendment + continuity + card_assembly). **Status: built, not yet dry-run end-to-end** (per `runtime/flows/voice/README.md`). Needs a Plato dry-run pass on synthetic Provocateur briefings to validate end-to-end.
+- ✅ **Voice Pipeline v2 spec** — landed at `docs/AI_Assembly_Voice_Pipeline.md` (1209 lines, last touched 2026-04-29). Includes Step 3 spec end-to-end. **FU#49E is effectively closed** — Step 3 IS specified and implemented; the spec covers cross-framework-examination framing.
+- ✅ **Publish layer** — `runtime/flows/voice/publish.py` (255 LOC, per-voice publish-ready files post-Step 3) + `runtime/flows/publish_flow.py` (cross-pipeline aggregation: themes, extractions, traces, lineage graph, voices index). Commit `ddec38a`. The handoff *for* the microsite + Edition + Substack — not the consumers themselves.
+
+**STILL UNBUILT (real Athens blockers):**
+- ⚠️ **Voice Pipeline end-to-end dry-run** — modules exist but haven't been exercised against a real Provocateur briefing pipeline. First dry-run candidate: Plato (the only voice with a finalized card as of 2026-04-29).
+- ❌ **Microsite** — UNBUILT. What 750 attendees actually see. The publish layer writes to `<PROJECT_ROOT>/published_artifacts/` for it to consume.
+- ❌ **Admin console** — UNBUILT. Operator infrastructure for orchestrating overnight pipelines + council sync + log tail.
+- ❌ **Closing-show pipelines** (theme ID + Matrix A/B mapping + video) — UNSPECIFIED + UNBUILT. Day 3 afternoon.
+- ⚠️ **Render layer for non-text artifacts** — Marley → Suno API + Octopus → client-side shader params: rendering specifics not yet implemented (publish layer handles structured handoff but not the rendering itself).
 
 Don't frame "12 voice cards complete" as the Athens completion line. When recommending build-side improvements (LLM-as-judge, FU#50(1) Pydantic enforcement, FU#42 split-card, etc.), check whether they delay runtime work that's already on the critical path. Surface runtime gaps proactively in "what's next" recommendations.
 
@@ -30,7 +37,7 @@ Don't frame "12 voice cards complete" as the Athens completion line. When recomm
 Read in this order:
 
 1. **This doc** — you're here.
-2. **`_workspace/planning/HANDOFF_<latest>.md`** — current session pickup. As of writing: `HANDOFF_2026_04_27.md`. Read it for the present state-of-the-moment.
+2. **`_workspace/planning/HANDOFF_<latest>.md`** — current session pickup. As of writing: `HANDOFF_2026_04_29.md`. Read it for the present state-of-the-moment.
 3. **`_workspace/planning/FOLLOW_UPS.md`** — active follow-up tracker (FU#1–50 family). Single source of truth for what's open.
 4. **`docs/CURRENT_STATE.md`** — gap analysis + architectural rationale. §0 quick map, §1 what exists, §5 architectural decisions.
 5. **`docs/AI_Assembly_Briefing_v3_1.md`** — project source of truth (target state).
