@@ -1,8 +1,9 @@
 """Voice Pipeline Step 2 — First-Draft Artifact.
 
 One LLM call per voice per night. Voice reads back ALL of its Step 1
-detailed responses, makes three decisions (focus / stance / form from
-its medium family-of-forms), and produces a single artifact text.
+detailed responses, makes three decisions (focus / stance / form per
+its `medium` field — single form or chosen from variants), and
+produces a single artifact text.
 
 Per docs/AI_Assembly_Voice_Pipeline.md §"Step 2 — First-Draft Artifact":
   Model: Opus 4.7 + adaptive thinking, max_tokens=64000

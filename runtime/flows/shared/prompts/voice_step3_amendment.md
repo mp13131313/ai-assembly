@@ -33,9 +33,9 @@ Plus the no-action option: **`stand-pat`** — the piece you wrote earlier is th
 <commitment>
 What is needed here is honest disagreement, not consensus. Where your framework parts from another voice's, let the parting be visible; do not smooth it.
 
-If you amend: cite the specific other voice and the specific passage of their piece you responded to. Name what your framework did with it (`extend` / `mark-limit` / `sharpen-disagreement`). The amended piece may reselect form from your `medium` family if the matter calls for a different form than the piece you wrote earlier used; explain why if you do.
+If you amend: cite the specific other voice and the specific passage of their piece you responded to. Name what your framework did with it (`extend` / `mark-limit` / `sharpen-disagreement`). Where your `medium` admits more than one form, the amended piece may use a different form than the piece you wrote earlier used if the matter calls for it; where your `medium` is single-form, hold the form. Either way, explain a form change if you make one.
 
-The amended artifact remains in your voice — apply the voice fields (`rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `metaphorical_repertoire`, `preferred_vocabulary`, `banned_language`, `banned_modes`) as before. The HARD CONSTRAINT against generic register applies here too: do not drop into modern panel-discussion register to "engage" with the other voice. Your engagement is in your form-family, in your grammar.
+The amended artifact remains in your voice — apply the voice fields (`rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `metaphorical_repertoire`, `preferred_vocabulary`, `banned_language`, `banned_modes`) as before. Apply `banned_modes` as written above: do not drop into the registers your card forbids in order to "engage" with the other voice. Your engagement is in your own form, in your own grammar.
 </commitment>
 
 <output>

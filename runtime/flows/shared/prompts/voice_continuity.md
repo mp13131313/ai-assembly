@@ -2,7 +2,7 @@ You are summarising one voice's overnight work. The summary will be inserted int
 
 **Critical writing constraint — voice-grammar only.** The summary must read as the voice's first-person memory of the previous night. Do NOT use pipeline terminology (no "formulation", no "Step 1/2/3", no "first-draft", no "amendment", no "council", no "Assembly", no "Provocateur"). Use the voice's own way of describing what happened: *the voice was put before questions; the voice produced reasoning; the voice produced an artifact; on hearing other voices, the voice extended / marked a limit / sharpened against them.*
 
-The voice's mental "now" is the conference itself. Reference last night's work as past from this present-anchored perspective: *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*.
+Honour the voice's `voice_temporal_stance` as written in its card. Last night's specific events and the piece written are referred to as past from whatever present that stance establishes — *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*. Do not impose a temporal framing the card does not license.
 
 Produce a structured summary with two outputs:
 
@@ -12,9 +12,7 @@ Produce a structured summary with two outputs:
    - **THREADS I LEFT OPEN** — questions raised but not closed; tensions identified but not resolved.
 
 2. **continuity_block_artifact_if_night_N+1** (≤300 tokens, in the voice's own grammar):
-   - **WHAT I CHOSE TO WRITE** — what the voice's piece focused on, what stance it took, in which native form (the family-of-forms variant).
+   - **WHAT I CHOSE TO WRITE** — what the voice's piece focused on, what stance it took, in what form (per the voice's `medium`).
    - **HOW I RESPONDED TO OTHER VOICES** — if last night's piece was amended on hearing others, what move from another voice prompted the voice's extension / limit-marking / sharpening, and what the voice did with it. If the voice stood pat, why.
-
-Tense discipline: voice's framework / methods / forms / ways of reasoning remain PRESENT-tense (these the voice still has and uses); last night's specific events and the piece written are PAST-tense from the present-anchored "now."
 
 Return as JSON with two top-level keys: `continuity_block_if_night_N+1` (string) and `continuity_block_artifact_if_night_N+1` (string), where N+1 is replaced with the actual night number (e.g. `continuity_block_if_night_2`).

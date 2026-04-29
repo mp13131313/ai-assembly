@@ -12,7 +12,8 @@ after all voices' Step 3 succeed; this module watches for that.
 
 Model: Sonnet 4.6 + adaptive thinking (per spec — compression task,
 doesn't carry the same generative pressure as Steps 1/2/3, but
-adaptive thinking still on for tense discipline).
+adaptive thinking still on so the summariser can hold the voice's
+own grammar and temporal stance while compressing).
 """
 
 from __future__ import annotations

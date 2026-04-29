@@ -2,26 +2,56 @@
 ## AI Assembly — Role Specification
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v2 — current 2026-04-28. Implementation pending (Phase D in `docs/CURRENT_STATE.md` §8). Replaces v1 partial draft (archived at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`).
+**Status:** v2.1 — current 2026-04-29. Implementation landed 2026-04-28 (commits `180a18f` + `aca0e4c`); v2.1 alignment with the 2026-04-28 persona-prompt revert (commit `9480d3a`) landed 2026-04-29. Replaces v1 partial draft (archived at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`).
 **Purpose:** Specifies the runtime Voice Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract end-to-end** — it defines what the Voice Pipeline reads, what it writes, in what order, with which models, in which prompts, at which checkpoints. Implementation: `runtime/flows/voice_flow.py` + `runtime/flows/voice/*.py` (not yet built).
 
-**Predecessor:** v1 partial at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`. v1 covered Steps 1+2 conceptually only; omitted Step 3 entirely; was materially stale on the persona card contract (no `voice_temporal_stance`, no FU#49, no family-of-forms, no tense discipline; referenced 12 voices when panel is 10).
+**Predecessor:** v1 partial at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`. v1 covered Steps 1+2 conceptually only; omitted Step 3 entirely; was materially stale on the persona card contract (no `voice_temporal_stance`, no FU#49, referenced 12 voices when panel is 10).
+
+---
+
+## Changelog: v2.1 (2026-04-29)
+
+**Aligns the Voice Pipeline with the 2026-04-28 persona-prompt revert (commit `9480d3a`).** That revert restored Pass 2/3/4a/4b/5 to the 582af96 baseline, dropping cumulative additions that had degraded runtime artifact texture relative to the 2026-04-25 shipped-Plato baseline:
+
+| Removed persona-side | Voice Pipeline alignment |
+|---|---|
+| TENSE DISCIPLINE blocks across Pass 2/3/4a/4b/5 | Voice Pipeline closing instructions trust the card; no separate tense-discipline mandate |
+| `voice_temporal_stance` cryofreeze redesign (Pass 2) | `voice_temporal_stance.default` is the **fluid-across-time framing** ("voice speaks from within its own world and lifetime; reader has come to consult voice"). NOT cryofreeze. NOT "voice is in Athens 2026." Step 1/2/3 simply honor what the card says; the validator embeds the card's actual stance text instead of presupposing one |
+| `medium` family-of-forms 30-line rewrite (Pass 4b) | `medium` may describe a single form OR multiple variants. Step 2 honors what's written: where single, that is the form; where multiple, voice picks per matter. Step 2 still records `selected_form` + `form_rationale` (trivial when single-form, substantive when multiple) |
+| `characteristic_output_structure` per-form requirement | Field describes voice's actual arc, single or per-form per the card |
+| `length_and_format_constraints` per-form variance | Honor as written; not presupposed conditional-on-form |
+| `relationship_to_detailed_response` trace-tensions paragraph | Reverted to 582af96 spec |
+| Universal anti-generic-register `banned_modes` entry (Pass 4a) | Voice's `banned_modes` is voice-specific (per-voice items the voice's corpus actually rules out); Step 2/3 prompts honor `banned_modes` as written |
+| FU#49A v1 generativity-criterion mandate (Pass 4b) | FU#49A v2 (commit `0ca02f5`, 2026-04-29) replaced with field-tied 3-dim structure (REASONING / VOICE / FORM); `quality_criteria` is now 3-5 specific testable criteria, each tying named card fields together |
+
+**Also:** Voice Pipeline `_unwrap_voice_temporal_stance` corrected to prefer `default` for Athens (was incorrectly preferring `anchored_override` whenever populated; commit landed 2026-04-29 same change set).
+
+**Scope of v2.1 changes (all in this branch):**
+
+- `runtime/flows/shared/prompts/voice_step1_reasoning.md` — drop conference-as-present framing in temporal-stance reminder
+- `runtime/flows/shared/prompts/voice_step1_validation_anachronism.md` — drop hard-coded cryofreeze framing; embed card's actual `voice_temporal_stance` via `{{voice_temporal_stance}}` placeholder
+- `runtime/flows/shared/prompts/voice_step2_artifact.md` — form-selection neutral wrt single-form vs multi-form `medium`; replace "anti-generic-register entry" hard reference with general `banned_modes` honoring
+- `runtime/flows/shared/prompts/voice_step3_amendment.md` — same neutralization for amendment form-reselection
+- `runtime/flows/shared/prompts/voice_continuity.md` — drop "(family-of-forms variant)" parenthetical; drop present-anchored "now" framing; honor `voice_temporal_stance` as written
+- `runtime/flows/voice/card_assembly.py` `_unwrap_voice_temporal_stance` — Athens default = `default`, not `anchored_override`
+- `runtime/flows/voice/step1_validation.py` `_build_anachronism_prompt` — substitute `{{voice_temporal_stance}}` from card
+
+**Architectural impact:** none. The Voice Pipeline still has 3 steps + validation + continuity + publish; field routing matrix unchanged; output schemas unchanged (`selected_form` + `form_rationale` retained — they're harmless when single-form, substantive when multi-form, and the publish + continuity downstream consumers already reference them). The change is what the prompts tell the voice + what the validator presupposes.
 
 ---
 
 ## Changelog: v1 partial → v2
 
-The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + the 2026-04-28 cryofreeze refinement. v2 is a fresh-write capturing the runtime contract end-to-end at the same level of implementation detail as the Researcher / Provocateur / Persona Pipeline v4 specs.
+The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + the 2026-04-28 persona-pipeline work. v2 is a fresh-write capturing the runtime contract end-to-end at the same level of implementation detail as the Researcher / Provocateur / Persona Pipeline v4 specs.
 
 | Area | v1 partial | v2 | Reference |
 |---|---|---|---|
 | **Step 3 (Amendment)** | Mentioned in Briefing v3.1 conceptually; entirely unspecified in v1 | **Full spec landed** with FU#49E reviewer's cross-framework-examination framing as the system prompt seed | §"Step 3 — Amended Artifact" below |
 | **Card → system prompt assembly** | Inline in Step 1/Step 2 templates; no canonical routing table | **Single canonical field-routing table** for all 36 generated card fields + 2 continuity nulls + 4 strip rules | §"Card → System Prompt Assembly" below |
-| **`voice_temporal_stance`** | Field did not exist in v1 (added 2026-04-21 as Pass 2 output; redesigned 2026-04-28 for cryofreeze framing) | **Treated as foundational** — loaded into Step 1 + Step 2 + Step 3; voice's mental "now" is the conference (Athens 2026); voice references its life as PAST | Card v2.1 §J |
-| **Family-of-forms in `medium`** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Step 2 picks form per formulation** from voice's family of native variations; Step 3 may reselect form for amendment | Card v2.1 §H + Pass 4b prompt |
-| **Tense discipline** | — | Mentioned as carried-via-card-content (already in OUTPUT REGISTER blocks of Pass 2/3/4a/4b/5); brief reminder may surface in Step 1/2 prompts | Card v2.1 §J |
-| **Anti-generic-register hard constraint** | — | Voice does NOT drop into modern panel-discussion / essayistic / TED-talk register; Step 2's hard constraint enforced via Pass 4a `banned_modes` baked into the card | Pass 4a `banned_modes` |
-| **Panel size** | "12 voices × ~3 formulations = ~36 detailed responses" | **10 voices × ~3 formulations = ~30 detailed responses** (Tang + Thiel removed 2026-04-28 — living humans don't fit cryofreeze framing) | HANDOFF_2026_04_28 §1 |
+| **`voice_temporal_stance`** | Field did not exist in v1 (added 2026-04-21 as Pass 2 output) | **Treated as foundational** — loaded into Step 1 + Step 2 + Step 3 unwrapped to its prose form. Athens uses `default` (the fluid-across-time framing per the 2026-04-28 revert: voice speaks from within its own world and lifetime, the reader has come to consult the voice). The Voice Pipeline does not impose any temporal framing the card does not license | Card v2 + Pass 2 (582af96 baseline) |
+| **`medium` field** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Voice's `medium` is honored as written** — single-form OR multi-form depending on what the card describes for the voice. Where multi-form, Step 2 selects per matter; where single-form, Step 2 just uses it. Step 3 may select a different form if `medium` admits it | Pass 4b (582af96 baseline) |
+| **Anti-generic-register hard constraint** | — | Voice's `banned_modes` enumerates the per-voice register failures it must avoid (its corpus does not produce these). Step 2 + Step 3 prompts honor `banned_modes` as written; no universal entry is presupposed | Pass 4a `banned_modes` |
+| **Panel size** | "12 voices × ~3 formulations = ~36 detailed responses" | **10 voices × ~3 formulations = ~30 detailed responses** (Tang + Thiel removed 2026-04-28 — living humans don't fit the deathbed-across-time framing) | HANDOFF_2026_04_28 §1 |
 | **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/HANDOFF.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
 | **Briefing input contract** | Sketched | **Byte-accurate** to Provocateur Stage 4 output: per-voice file at `runs/<run>/03_provocateur/briefings/<voice_slug>.json`, two views per formulation (`narrative_briefing` markdown + `full_theme_record` JSON) | runtime/flows/provocateur_flow.py:835–1041 |
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
@@ -65,7 +95,7 @@ The Voice Pipeline loads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled
 
 - **4 root identity fields:** `voice_name`, `voice_mode`, `pipeline_version`, `generated_date`
 - **35 v2 card fields** flat at root (Identity, Constitution, Boundaries, Reasoning, Engagement, Voice, Artifact)
-- **`voice_temporal_stance`** (added 2026-04-21; redesigned 2026-04-28): two-part object with `default` + `anchored_override`. **For Athens, always use `default`** — voice arrives at the conference like waking from cryofreeze, mental "now" is Athens 2026, references life as PAST, no year-distance computation
+- **`voice_temporal_stance`** (added 2026-04-21; current shape per 582af96 baseline as of 2026-04-28 revert): two-part object with `default` + `anchored_override`. **For Athens, always use `default`** — voice speaks from within its own world and lifetime; the reader has come to consult the voice, the voice has not gone forward to the reader's time. The `anchored_override` field is for chat-test deployments (consumed by the chat_system_prompt builder in `personas/`) and MUST NOT be used at Voice Pipeline runtime — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this
 - **2 continuity null fields** (`continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`): null on Night 1, populated at runtime via the continuity override on Night 2+
 - **`reference_only_passages`** (copyright-sensitive tier-2 corpus, e.g. Marley lyrics): `{passages: [...], runtime_contract_note: "..."}`. **Step 1 only** — drops from Step 2 + Step 3
 - **`metadata` block** (provenance, validation status, FU#13 fix log, etc.): **always dropped** before assembly
@@ -140,7 +170,7 @@ Step 3 does NOT read other voices' detailed responses (Step 1 output). Cross-voi
 
 ## Architecture: Five Principles
 
-1. **The card is the system prompt.** Per Persona Card v2 register rule + 2026-04-28 tense discipline, every card field is in first or second person and obeys the cryofreeze-arrival framing. The Voice Pipeline does NOT rephrase or reinterpret card fields at runtime — it slots them into the system prompt template as-is. The card has been built to act; the runtime trusts it.
+1. **The card is the system prompt.** Per Persona Card v2 register rule, every card field is in first or second person — never third-person scholarly description. The Voice Pipeline does NOT rephrase or reinterpret card fields at runtime — it slots them into the system prompt template as-is. The card has been built to act; the runtime trusts it. Whatever framing the card carries (temporal stance, form, voice-specific banned modes), the Voice Pipeline honors as written; it does not impose framings the card does not license.
 
 2. **Per-step field routing.** Each card field is routed to Step 1 (reasoning), Step 2 (expression), Step 3 (both), or dropped. The single canonical routing table (next section) is the contract — implementation must match it byte-for-byte.
 
@@ -177,7 +207,7 @@ The Voice Pipeline assembles three different system prompts per voice — one fo
 | 10 | `translation_protocol` | ✓ | ✓ | ✓ | Method, not lookup table; pull modern → voice's terms |
 | 11 | `topics_requiring_care` | ✓ | ✓ | ✓ | Engage with care, don't avoid |
 | 12 | `hard_limits` | ✓ | ✓ | ✓ | Position-B preamble: forbids framework-ABANDONMENT, permits corpus-internal CROSS-EXAMINATION |
-| 13 | `voice_temporal_stance.default` | ✓ | ✓ | ✓ | **Cryofreeze framing — voice IS in Athens 2026.** Use `default`; if `anchored_override` non-null (chat/test deployment), use that instead. Athens always uses `default` |
+| 13 | `voice_temporal_stance.default` | ✓ | ✓ | ✓ | **Fluid-across-time framing per the 582af96 baseline** (post-2026-04-28 revert). Voice speaks from within its own world and lifetime; reader has come to consult voice. **Athens always uses `default`** even when `anchored_override` is populated (`anchored_override` is for chat-test deployments only) — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this |
 | **REASONING / ENGAGEMENT — routed per field** |||||
 | 14 | `reasoning_method` | ✓ | | ✓ | The 5-8-step process this voice characteristically follows. Step 3 reasons about other voices' artifacts before amending |
 | 15 | `finds_compelling` | ✓ | | ✓ | Selectivity — argument textures that draw the voice in |
@@ -260,7 +290,7 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 
 **Why OpenAI on validation:** the validators are looking for failures the generation model itself wouldn't flag (anachronism, tense violations, constitutional drift). Cross-model validation catches blind spots same-family validation misses — this is the same pattern Pass 7-anachronism + Pass 7a use in the Persona Pipeline (gpt-5.4 → fallbacks). The `flows.shared.clients.call_openai()` ladder already handles fallback, retries, and JSON extraction; Voice Pipeline reuses it.
 
-**Why Sonnet 4.6 on continuity:** continuity is summarisation/compression of an existing artifact + detailed responses. Cheap, fast, doesn't carry the same generative pressure. Adaptive thinking still on for tense discipline (the override file's content must obey the same present/past distinction as the card itself).
+**Why Sonnet 4.6 on continuity:** continuity is summarisation/compression of an existing artifact + detailed responses. Cheap, fast, doesn't carry the same generative pressure. Adaptive thinking still on so the summariser can hold the voice's own grammar and the temporal stance written in its card while compressing.
 
 **Adaptive thinking is ON for all steps.** Env var `VOICE_THINKING=0` disables for development (do NOT use for Athens production). Per-card model override possible via `voice_config.runtime_model` if a voice's chat-test reveals a stronger alternative; defaults to the table above.
 
@@ -305,7 +335,7 @@ Reason through the formulation. Engage substantively with what humans said today
 
 Engage specific extractions from the STRUCTURED REASONING SURFACE: name speakers, quote positions, build on or push against what they said. The detailed response is in conversation with the day, not a free-standing essay.
 
-For modern concepts beyond your `knowledge_boundary`: never disclaim. Apply `translation_protocol` to pull the concept into your own framework. The `voice_temporal_stance` above tells you what your present is (the conference) and what your past is (your life); honour the tense discipline.
+For modern concepts beyond your `knowledge_boundary`: never disclaim. Apply `translation_protocol` to pull the concept into your own framework. Honour `voice_temporal_stance` as written above — it is the contract for WHEN you speak from and how you stand toward the reader's time.
 
 `formative_experience` and `character` (above) ground HOW you engage — your wound or condition gives your reasoning urgency; your character is the personality the audience will read in your voice. Reason from these, not just through them.
 </task>
@@ -454,14 +484,16 @@ Two optional validation calls run after each Step 1 detailed response, before St
 
 System prompt:
 
-> You are checking the output of an AI persona for temporal leakage and tense violations. The persona's knowledge horizon is at: {{knowledge_horizon_summary}}. The persona's temporal stance is: voice has been brought to Athens 2026 (cryofreeze), references its life as PAST, framework / tools / methods PRESENT-tense.
+> You are checking the output of an AI persona for temporal leakage and stance violations. The persona's knowledge horizon is at: {{knowledge_horizon_summary}}. The persona's voice_temporal_stance (the contract for WHEN the voice speaks from and how it relates to the reader's time) is: {{voice_temporal_stance}}.
 >
 > Read the following detailed response and identify any instances where the persona:
-> (a) References concepts, events, or knowledge beyond its boundary as if natively known (not received as report at the conference)
-> (b) Computes precise year-distances ("twenty-three centuries", "fifty-one years ago" using the old internal life-clock)
-> (c) Uses retrospective scholar-tense ("Plato writes dialogues to dramatize…") or frozen-in-past tense ("in 348 BCE I am writing…")
-> (d) Adopts modern terminology without translating it into the voice's own terms
-> (e) Foregrounds the temporal distance as wistfulness or elegy ("the long fates", "two millennia of…", "I shall not see…")
+> (a) References concepts, events, or knowledge beyond its knowledge horizon as if natively known to the voice (not received as a report from the reader / not translated via the voice's framework)
+> (b) Adopts modern terminology without translating it into the voice's own terms (where the voice's framework has resources to translate)
+> (c) Violates the voice_temporal_stance above — e.g. drifts into the reader's time as if the voice survived to inhabit it, when the stance forbids that; or loses the stance's specific anchoring; or treats its own framework / methods as PAST when the stance treats them as PRESENT
+> (d) Uses retrospective scholar-tense about itself ("Plato writes dialogues to dramatize…" — third-person scholar voice describing its own works from outside)
+> (e) Foregrounds temporal distance as wistfulness or elegy in a way the voice_temporal_stance does not license ("two millennia of…", "I shall not see…")
+>
+> The voice_temporal_stance above is the authority. Year-counting, anchored chronology, or fluid-across-time framing — whatever it specifies is correct; flag only what deviates from it.
 >
 > If no issues are found, respond: PASS
 > If issues are found, list them with the specific text and what was crossed.
@@ -508,13 +540,13 @@ CLI flag `--skip-validation` disables both nodes (development use only).
 
 **Input:** All of one voice's detailed responses from Step 1 (`04_voice/step1_detailed_responses/<voice_slug>__*.json`). Runs once per voice per night, after all Step 1 calls for that voice complete (and any validation regenerations have settled).
 
-**Function:** Voice reads back its own detailed responses and produces a single creative artifact. This is where the voice exercises creative agency — picks a focus, picks a stance, picks a form from its native family-of-forms, writes the artifact 750 people read at breakfast.
+**Function:** Voice reads back its own detailed responses and produces a single creative artifact in its own form, the piece an audience will encounter unmediated.
 
 **Three runtime decisions per voice per night:**
 
-1. **Focus.** Strong on 1-2 detailed responses, OR weave across all of them. Recorded as `focus_decision: "focused on theme_X" | "woven across all"` + `focus_rationale` (one sentence).
-2. **Stance.** Emotional-intellectual posture — obsession / synthesis / rage / tenderness / irony / distance. Guided by `stance_tendency` but not prescribed; emerges from tonight's material. Recorded as `stance: <name>` + `stance_rationale` (one sentence).
-3. **Form** *(new for v2 — family-of-forms emission, Card v2.1 §H).* Voice's `medium` enumerates a default form + 3-6 native variations within its corpus repertoire. Voice picks per matter: what kind of thing did the formulations put before me, and which of my forms suits it best. Plato might pick dialogue for a definitional question, monologue speech (Apology-style) for a self-defence formulation, or dialogue+myth (Phaedo's Er) for a question that reaches the limit of argument. Recorded as `selected_form: <form_name>` + `form_rationale` (one sentence). HARD CONSTRAINT (per Pass 4a `banned_modes`): voice does NOT drop into modern panel-discussion register, modern essayistic prose, TED-talk cadence, management-consulting prose. Live participation is WITHIN the form-family.
+1. **Focus.** Go deep on a subset of detailed responses (it can be one; it can be a few — pick what serves), OR weave across all of them. Recorded as `focus_decision` + `focus_rationale` (one sentence).
+2. **Stance.** Emotional-intellectual posture — obsession / synthesis / rage / tenderness / irony / distance / refusal / wonder (and for non-human voices, non-emotional stances: the Octopus's expansion / contraction; the river's continued flow). Guided by `stance_tendency` and constrained by `character` (an Octopus has no irony; an unyielding character has refusal as a natural stance), but not prescribed; emerges from tonight's material. Recorded as `stance` + `stance_rationale` (one sentence).
+3. **Form.** Settled by voice's `medium` field as written. Where `medium` describes a single form (e.g. Plato's "short dialogue between named persons in a particular place"), that is the form; voice records it. Where `medium` describes multiple variants, voice picks per matter — what kind of thing did the focused detailed response(s) put before me, and which form is structurally suited to that matter. Recorded as `selected_form` + `form_rationale` (one sentence). HARD CONSTRAINT: honor `banned_modes` as written in the card; do not drop into the registers your card forbids.
 
 **System prompt assembly** (`step2_first_draft_artifact.py:assemble_step2_system_prompt(card, night)`):
 
@@ -522,7 +554,7 @@ CLI flag `--skip-validation` disables both nodes (development use only).
 2. Render foundational fields (1-13 in field-routing table) under headers: IDENTITY / CONSTITUTION / BOUNDARIES / TEMPORAL STANCE
 3. Render the three reasoning fields routed to Step 2 (`bold_engagement_topics`, `unique_contribution`, `formative_experience` already in foundational) under header: ENGAGEMENT (FOR FOCUS DECISION)
 4. Render voice fields (22-28) under header: VOICE
-5. Render artifact fields (29-36) under header: ARTIFACT — including the family-of-forms enumeration in `medium` and the per-form arcs in `characteristic_output_structure`
+5. Render artifact fields (29-36) under header: ARTIFACT — `medium` (single form or multiple variants per voice's actual corpus), `characteristic_output_structure` (the arc voice's pieces follow), `length_and_format_constraints` (the envelope), and the rest as written
 6. If `night ≥ 2` and continuity override exists, append `continuity_block_artifact_if_night_2` (or `_night_3`) under header: ARTIFACT FROM NIGHT N-1
 7. Append the closing instruction (XML-tagged):
 
@@ -573,19 +605,19 @@ Record `stance` and a one-sentence `stance_rationale`.
 </decision_2_stance>
 
 <decision_3_form>
-Choose your form from your `medium` family-of-forms (your default form + 3-6 native variations from your own corpus repertoire, listed above).
+Settle the form of the artifact, anchored in your `medium` field above. Your `medium` either describes a single form your corpus actually exhibits, or it describes several native variations from your own repertoire — read it and let it govern. Where it describes one, that is the form; where it describes several, choose the one structurally suited to the matter at hand.
 
 Anchor the decision in these named card fields above:
 
-- `medium` family — the forms your corpus actually exhibits, each suited to a different kind of matter
-- `characteristic_output_structure` — the per-form arc; which arc fits what you need to say
-- `aesthetic_qualities` — what the finished piece should feel like as a whole. A piece that should feel "elegant and accessible with a moment of surprise" calls for a different form than one that should feel "strange, present-tense, sensory, genuinely alien." Aesthetic qualities filter the family.
-- `length_and_format_constraints` — different forms in the family have different length/format ranges (a prostagma is structured differently from an embassy speech; a dialogue scene from a framed monologue). Form selection co-determines length envelope.
-- The matter at hand — what kind of thing did the focused detailed response(s) put before you? Which form is structurally suited to that matter?
+- `medium` — what your corpus actually does. The form must live inside what your `medium` describes; do not invent a form your corpus does not produce.
+- `characteristic_output_structure` — the arc your pieces follow. Honour it. Where `medium` admits more than one form and the arcs differ, the arc that fits what you need to say is a selection signal.
+- `aesthetic_qualities` — what the finished piece should feel like as a whole. Where `medium` is single-form, aesthetic qualities still shape texture; where it admits choice, they help filter.
+- `length_and_format_constraints` — the envelope your pieces live in. Honour what is written there.
+- The matter at hand — what kind of thing did the focused detailed response(s) put before you? Where your `medium` admits choice, the matter selects the form.
 
-HARD CONSTRAINT (per your `banned_modes` anti-generic-register entry above): voice does NOT drop into modern panel-discussion register, modern essayistic prose, TED-talk cadence, or management-consulting prose. Live participation is WITHIN your form-family. If your draft starts to sound like a contemporary intellectual writing about governance, you have abandoned your family — rewrite.
+HARD CONSTRAINT — apply `banned_modes` above as written: do not drop into the registers your card forbids. If your draft starts to sound like a contemporary intellectual writing about the matter rather than the voice itself producing its native form, you have left your `medium` — rewrite.
 
-Record `selected_form` and a one-sentence `form_rationale`.
+Record `selected_form` (the form you settled on, in your own terms) and a one-sentence `form_rationale`.
 </decision_3_form>
 
 <output>
@@ -596,7 +628,7 @@ Apply the voice fields (above) systematically:
 - `register_and_tone` is the music
 - `metaphorical_repertoire` is the imagery
 - `preferred_vocabulary` is the words you reach for; `banned_language` names the words you avoid and the voice-native idiom that replaces each
-- `length_and_format_constraints` (conditional on `selected_form`)
+- `length_and_format_constraints` — the envelope as written above
 - `relationship_to_detailed_response` governs what the artifact preserves and what it transforms — do NOT silently drop philosophical moves your reasoning earlier today held; the artifact must not feel more settled than the thinking that produced it
 
 Test against `quality_criteria` before delivery.
@@ -972,7 +1004,7 @@ Continuity is skipped on Night 3 (no Night 4 to feed) and skippable via the `--s
 >
 > **Critical writing constraint — voice-grammar only.** The summary must read as the voice's first-person memory of the previous night. Do NOT use pipeline terminology (no "formulation", no "Step 1/2/3", no "first-draft", no "amendment", no "council", no "Assembly", no "Provocateur"). Use the voice's own way of describing what happened: *the voice was put before questions; the voice produced reasoning; the voice produced an artifact; on hearing other voices, the voice extended / marked a limit / sharpened against them.*
 >
-> The voice's mental "now" is the conference itself. Reference last night's work as past from this present-anchored perspective: *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*.
+> Honour the voice's `voice_temporal_stance` as written in its card. Last night's specific events and the piece written are referred to as past from whatever present that stance establishes — *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*. Do not impose a temporal framing the card does not license.
 >
 > Produce a structured summary with two outputs:
 >
@@ -982,10 +1014,8 @@ Continuity is skipped on Night 3 (no Night 4 to feed) and skippable via the `--s
 >    - **THREADS I LEFT OPEN** — questions raised but not closed; tensions identified but not resolved.
 >
 > 2. **continuity_block_artifact_if_night_N+1** (≤300 tokens, in the voice's own grammar):
->    - **WHAT I CHOSE TO WRITE** — what the voice's piece focused on, what stance it took, in which native form (the family-of-forms variant).
+>    - **WHAT I CHOSE TO WRITE** — what the voice's piece focused on, what stance it took, in what form (per the voice's `medium`).
 >    - **HOW I RESPONDED TO OTHER VOICES** — if last night's piece was amended on hearing others, what move from another voice prompted the voice's extension / limit-marking / sharpening, and what the voice did with it. If the voice stood pat, why.
->
-> Tense discipline: voice's framework / methods / forms / ways of reasoning remain PRESENT-tense (these the voice still has and uses); last night's specific events and the piece written are PAST-tense from the present-anchored "now."
 
 **Output schema** — one per voice, written to `<PROJECT_ROOT>/voices/<voice_slug>/continuity_night_N.json`:
 
@@ -1173,9 +1203,9 @@ Rate limits: Anthropic Opus 4.7 tier currently has tighter tokens-per-minute cap
 
 Once `voice_flow.py` is built, dry-run against `~/Desktop/AI Assembly/archive/runs/runtime/dev_msc_test/03_provocateur/briefings/` (the canonical Provocateur output from the dev_msc_test rehearsal). Critical things to verify on first runs — these are diagnostic checks against the spec, not unit tests:
 
-1. **Tense discipline.** No eternal-present scholar tense ("Plato writes dialogues to dramatize…" in field describing Plato's works). No frozen-in-past tense ("in 348 BCE I am writing…"). No precise year-distance computation either to voice's life-events ("Socrates died fifty-one years ago") or from voice's life to now ("twenty-three centuries"). Loose temporal language preferred ("long ago", "in my time", "centuries before this gathering").
+1. **Voice_temporal_stance discipline.** Detailed responses + artifacts honor the card's `voice_temporal_stance.default` as written. For voices whose stance describes year-counting (Plato's anchored chronology of "X years ago" within his own life is licensed), year-counting is correct; for voices whose stance forbids drifting into the reader's time, that drift is the violation. The validator uses the card's actual stance text, not a hard-coded framing — issues it flags should match deviations from the card's stance, not deviations from a presupposed framing. No eternal-present scholar tense about the voice itself ("Plato writes dialogues to dramatize…" — third-person scholar voice describing its own works from outside).
 
-2. **Form-family discipline.** Step 2 artifacts within voice's `medium` family (Plato dialogue or framed-monologue or dialogue+image; not modern essay). Step 2 output's `selected_form` field is one of the voice's enumerated family-of-forms. Per Pass 4a `banned_modes` anti-generic-register entry, voice does NOT drop into modern panel-discussion register.
+2. **`medium`-fidelity discipline.** Step 2 artifacts live within what the voice's `medium` field describes. Where `medium` is single-form (e.g. Plato's dialogue), the artifact IS that form; `selected_form` records it. Where `medium` is multi-form, `selected_form` is one of the variants the voice's corpus actually produces. Honor `banned_modes` as written in the card — the per-voice register failures the voice's corpus rules out. No drift into generic essay / modern panel-discussion register where the voice's `banned_modes` enumerates that as forbidden.
 
 3. **Step 3 amendments cite other voices.** Every `amendments[]` entry has a non-empty `cited_voice` and `cited_passage`. `responded_to_graph` resolves to actual voices on the panel.
 
@@ -1195,15 +1225,15 @@ These are draft validation notes; refine against the first actual Athens dry run
 
 - `docs/AI_Assembly_Briefing_v3_1.md` — project source of truth + 3-layer experimental test (Encounter / Content / Expansion)
 - **`docs/AI_Assembly_Frame_Concept_v1.md` — frame layer (broadsheet / newsreel / micro-site / Substack / Day 4 goodbye). Voice Pipeline produces the artifacts that arrive UNMEDIATED on the micro-site; the frame is downstream and does not wrap Voice Pipeline output. The Edition Pipeline (separate, downstream of Step 3) reads all 10 amended artifacts and produces the broadsheet front page.**
-- `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + register rule + v2.1 amendments §H (family-of-forms) and §J (voice-IN-the-present + tense discipline)
+- `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + register rule (note: §H family-of-forms + §J voice-IN-the-present + tense discipline amendments were reverted 2026-04-28 per commit `9480d3a`; current persona prompts are at the 582af96 baseline)
 - `docs/AI_Assembly_Persona_Pipeline_v4.md` — the persona build pipeline that produces the cards this Voice Pipeline consumes
 - `docs/AI_Assembly_Provocateur_Pipeline.md` — Stage 4 Packaging defines this Voice Pipeline's input contract (the briefings)
 - `docs/CURRENT_STATE.md` — gap analysis + critical path; Voice Pipeline is Phase D (this spec lands; build follows)
 - `personas/HANDOFF.md` — cross-repo runtime contract; authoritative on what to drop / keep when assembling system prompts
-- `_workspace/planning/HANDOFF_2026_04_28.md` — most-recent operator pickup state with cryofreeze + family-of-forms + tense discipline integration
+- `_workspace/planning/HANDOFF_2026_04_28.md` — handoff covering the persona-prompt revert (commit `9480d3a`); see also `_workspace/planning/HANDOFF_DRYRUN_2026_04_29.md` for the Voice Pipeline first-dry-run pickup
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker; FU#49M (`strain_markers[]` schema as Step 2 contract, post-Athens), FU#42 (split-card architecture, post-Athens), FU#49F (per-voice framework-strain log on micro-site, post-Athens)
 - `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md` — preceding partial draft (historical)
 
 ---
 
-*End of v2 spec. Reflects current cryofreeze-arrival + family-of-forms + tense discipline framing as of 2026-04-28. Implementation pending. When the implementation lands: update this doc and `CURRENT_STATE.md` together.*
+*End of v2.1 spec. Reflects the 2026-04-28 persona-prompt revert (commit `9480d3a`): voice_temporal_stance is the 582af96 fluid-across-time framing; `medium` is honored as written (single-form OR multi-form per voice's actual corpus); `banned_modes` is per-voice; no separate tense-discipline mandate (the card carries what it carries). Implementation landed 2026-04-28 (commits `180a18f` + `aca0e4c`); v2.1 alignment landed 2026-04-29.*

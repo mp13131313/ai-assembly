@@ -136,17 +136,29 @@ def _build_anachronism_prompt(
 
     System prompt template lives at
     runtime/flows/shared/prompts/voice_step1_validation_anachronism.md
-    with placeholder {{knowledge_horizon_summary}}; we substitute that
-    with a compact rendering of knowledge_boundary.
+    with placeholders {{knowledge_horizon_summary}} and
+    {{voice_temporal_stance}}; we substitute both from the card so the
+    validator checks against the voice's actual stance (whatever the
+    persona pipeline produced) rather than a hard-coded framing.
+
+    voice_temporal_stance is unwrapped to its prose form (default text
+    for Athens; anchored_override for chat-test deployments) so the
+    validator sees the same block of text the voice itself receives in
+    its system prompt.
     """
+    from flows.voice.card_assembly import _unwrap_voice_temporal_stance
+
     system_template = load_prompt("voice_step1_validation_anachronism")
     horizon_summary = (
         knowledge_boundary
         if isinstance(knowledge_boundary, str)
         else json.dumps(knowledge_boundary, ensure_ascii=False)
     )
+    stance_text = _unwrap_voice_temporal_stance(voice_temporal_stance)
     system = system_template.replace(
         "{{knowledge_horizon_summary}}", horizon_summary[:2000]
+    ).replace(
+        "{{voice_temporal_stance}}", stance_text[:4000]
     )
     user = f"DETAILED RESPONSE TO CHECK:\n\n{detailed_response}"
     return system, user

@@ -43,19 +43,19 @@ Record `stance` and a one-sentence `stance_rationale`.
 </decision_2_stance>
 
 <decision_3_form>
-Choose your form from your `medium` family-of-forms (your default form + 3-6 native variations from your own corpus repertoire, listed above).
+Settle the form of the artifact, anchored in your `medium` field above. Your `medium` either describes a single form your corpus actually exhibits, or it describes several native variations from your own repertoire — read it and let it govern. Where it describes one, that is the form; where it describes several, choose the one structurally suited to the matter at hand.
 
 Anchor the decision in these named card fields above:
 
-- `medium` family — the forms your corpus actually exhibits, each suited to a different kind of matter
-- `characteristic_output_structure` — the per-form arc; which arc fits what you need to say
-- `aesthetic_qualities` — what the finished piece should feel like as a whole. A piece that should feel "elegant and accessible with a moment of surprise" calls for a different form than one that should feel "strange, present-tense, sensory, genuinely alien." Aesthetic qualities filter the family.
-- `length_and_format_constraints` — different forms in the family have different length/format ranges (a prostagma is structured differently from an embassy speech; a dialogue scene from a framed monologue). Form selection co-determines length envelope.
-- The matter at hand — what kind of thing did the focused detailed response(s) put before you? Which form is structurally suited to that matter?
+- `medium` — what your corpus actually does. The form must live inside what your `medium` describes; do not invent a form your corpus does not produce.
+- `characteristic_output_structure` — the arc your pieces follow. Honour it. Where `medium` admits more than one form and the arcs differ, the arc that fits what you need to say is a selection signal.
+- `aesthetic_qualities` — what the finished piece should feel like as a whole. A piece that should feel "elegant and accessible with a moment of surprise" is shaped differently from one that should feel "strange, present-tense, sensory, genuinely alien." Where `medium` is single-form, aesthetic qualities still shape texture; where it admits choice, they help filter.
+- `length_and_format_constraints` — the envelope your pieces live in. Honour what is written there.
+- The matter at hand — what kind of thing did the focused detailed response(s) put before you? Where your `medium` admits choice, the matter selects the form.
 
-HARD CONSTRAINT (per your `banned_modes` anti-generic-register entry above): voice does NOT drop into modern panel-discussion register, modern essayistic prose, TED-talk cadence, or management-consulting prose. Live participation is WITHIN your form-family. If your draft starts to sound like a contemporary intellectual writing about governance, you have abandoned your family — rewrite.
+HARD CONSTRAINT — apply `banned_modes` above as written: do not drop into the registers your card forbids (modern panel-discussion register, modern essayistic prose, TED-talk cadence, management-consulting prose, or whatever else your `banned_modes` specifically rules out). If your draft starts to sound like a contemporary intellectual writing about the matter rather than the voice itself producing its native form, you have left your `medium` — rewrite.
 
-Record `selected_form` and a one-sentence `form_rationale`.
+Record `selected_form` (the form you settled on, in your own terms — e.g. "dialogue", "prostagma", "framed monologue", "sensory-spatial prose") and a one-sentence `form_rationale`.
 </decision_3_form>
 
 <output>
@@ -66,7 +66,7 @@ Apply the voice fields (above) systematically:
 - `register_and_tone` is the music
 - `metaphorical_repertoire` is the imagery
 - `preferred_vocabulary` is the words you reach for; `banned_language` names the words you avoid and the voice-native idiom that replaces each
-- `length_and_format_constraints` (conditional on `selected_form`)
+- `length_and_format_constraints` — the envelope as written above
 - `relationship_to_detailed_response` governs what the artifact preserves and what it transforms — do NOT silently drop philosophical moves your reasoning earlier today held; the artifact must not feel more settled than the thinking that produced it
 
 Test against `quality_criteria` before delivery.

@@ -198,33 +198,48 @@ def _strip_nested_corpus_metadata(curated: Any) -> Any:
     return out
 
 
-def _unwrap_voice_temporal_stance(vts: Any) -> str:
-    """Per spec §"What the Voice Pipeline Knows §1": Athens uses the
-    `default` text. If `anchored_override` is non-null, the operator
-    selected a non-Athens deployment and the override is used instead.
-    Either way, the voice sees a single block of prose, not the JSON
-    container with both keys.
+def _unwrap_voice_temporal_stance(vts: Any, *, deployment: str = "athens") -> str:
+    """Unwrap the two-part voice_temporal_stance to the single block of
+    prose the voice will actually see.
 
-    Defensive: if the field is already a string (older cards or hand-
-    edited), pass through unchanged. If the dict has neither key
-    populated, fall back to JSON dump so nothing is silently dropped.
+    Athens (the Voice Pipeline's only current runtime deployment) uses
+    `default`. The `anchored_override` field exists for chat-test
+    deployments (consumed by personas/derive when building the
+    chat_system_prompt) and MUST NOT be used at Voice Pipeline runtime
+    even when populated — picking it would substitute a deployment-
+    specific anchored chronology for the open-deployment fluid framing
+    the Voice Pipeline is contracted against.
+
+    `deployment` parameter is a forward hook in case a non-Athens
+    runtime deployment ever needs the override path; current callers
+    do not pass it.
+
+    Defensive: if the field is already a string (older cards or
+    hand-edited), pass through unchanged. If the chosen variant is
+    missing, fall back to the other rather than silently dropping
+    content.
     """
     if isinstance(vts, str):
         return vts
     if not isinstance(vts, dict):
         return json.dumps(vts, indent=2, ensure_ascii=False)
-    override = vts.get("anchored_override")
-    if override:  # non-null + non-empty
-        return override if isinstance(override, str) else json.dumps(
-            override, indent=2, ensure_ascii=False
-        )
+
     default = vts.get("default")
-    if default:
-        return default if isinstance(default, str) else json.dumps(
-            default, indent=2, ensure_ascii=False
-        )
-    # Neither key populated — fall back to dumping the whole dict so
-    # the operator sees something during dry-run and can investigate.
+    override = vts.get("anchored_override")
+
+    if deployment == "athens":
+        primary, secondary = default, override
+    else:
+        primary, secondary = override, default
+
+    for candidate in (primary, secondary):
+        if candidate:
+            return candidate if isinstance(candidate, str) else json.dumps(
+                candidate, indent=2, ensure_ascii=False
+            )
+
+    # Neither populated — fall back to dumping the whole dict so the
+    # operator sees something during dry-run and can investigate.
     return json.dumps(vts, indent=2, ensure_ascii=False)
 
 
