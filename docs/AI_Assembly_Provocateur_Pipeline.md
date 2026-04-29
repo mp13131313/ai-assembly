@@ -376,7 +376,7 @@ EXTRACTION — positions heard today:
 • "{quote_text}" ({attribution}, {flavor})
 • "{quote_text}" ({attribution}, {flavor})
 
-FORMULATION:
+FORMULATION (mode: {question|proposition}):
 {formulation_text}
 
 [Full structured supporting material — theme abstract, cluster abstracts,
@@ -385,6 +385,8 @@ all raw extractions sorted by lens, theme flags — is available in the
 ```
 
 This is what the voice's Step 1 LLM call sees as its user prompt. No parsing required — the voice agent reads it as prose and responds.
+
+**Mode label in the FORMULATION header (added 2026-04-28 for Voice Pipeline v2 contract):** the Provocateur tags each formulation as `mode: question` or `mode: proposition` per the PROPOSITION TEST (Stage 3). The Voice Pipeline's Step 1 closing instruction has explicit logic that branches on mode (proposition expects a default stance; question allows a sharper question, distinction, or aporia as valid landings) — both modes also share six valid landings in the Voice Pipeline v2 spec. Surfacing `mode` inline in the markdown header lets the voice's user prompt be self-contained; the voice does not have to look up the mode field in JSON metadata to know how to respond.
 
 **`full_theme_record` — the wider REASONING SURFACE for Step 1 thinking.**
 
@@ -418,6 +420,11 @@ A voice with the full picture might notice positions the curated quotes left out
       "theme_id": "theme_003",
       "theme_display_title": "...",
       "mode": "question",
+      "formulation_text": "...",
+      "context_narrative": "...",
+      "selected_quotes": [
+        {"extraction_id": "session:NNN", "quote": "...", "attribution": "...", "flavor": "..."}
+      ],
       "narrative_briefing": "markdown string...",
       "full_theme_record": {
         "clusters": [...],
@@ -431,6 +438,8 @@ A voice with the full picture might notice positions the curated quotes left out
   ]
 }
 ```
+
+**Structured fields added 2026-04-28 for Voice Pipeline v2 contract:** `formulation_text`, `context_narrative`, and `selected_quotes` are now exposed at the briefing-entry top level, alongside the rendered `narrative_briefing` markdown. The Voice Pipeline reads these structurally (rather than parsing the markdown) when populating its Step 1 output's `formulation_text` lineage echo and when downstream steps need access to the curated quotes (e.g. Step 3's amendment may want to cite a `selected_quote` directly rather than having the Step 3 model re-extract it from prose). The Provocateur's `rationale` field is still excluded from the briefing — kept in `formulations/{theme_id}__{slug}.json` for audit, never passed to the voice (would prime it toward the Provocateur's expected answer).
 
 Voices with zero assignments still get a briefing file (empty `formulations[]` array), to make the "who got nothing" case visible rather than silent. A voice showing up with zero is a signal that Triage found no ground for them and Force-fit had no survivors to grab — worth investigating in that run's diagnostics.
 

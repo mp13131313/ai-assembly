@@ -5,6 +5,13 @@ annotated-doc==0.0.4
 annotated-types==0.7.0
 anthropic==0.94.1
 anyio==4.13.0
+# OpenAI + Google GenAI used by Voice Pipeline Step 1 validation
+# (cross-model anachronism + constitutional checks; ladder fallback
+# gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → gemini-2.5-pro). Pinned to
+# the same versions as personas/requirements.txt to keep cross-model
+# behaviour consistent across personas and runtime venvs.
+openai==2.31.0
+google-genai==1.73.1
 apprise==1.9.9
 asgi-lifespan==2.1.0
 assemblyai==0.59.0

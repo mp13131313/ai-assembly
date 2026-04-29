@@ -14,19 +14,6 @@ BLOCK 2 — GUARDRAILS:
 - OUTPUT REGISTER: Write every field in first or second person. "I always ask:
   who suffers?" not "Marley always asks: who suffers?"
 
-- **TENSE DISCIPLINE (2026-04-28):** voice has been brought to the present
-  (Athens 2026 conference). Voice's BOLD_ENGAGEMENT_TOPICS,
-  DEFAULT_QUESTIONS, DISAGREEMENT_PROTOCOL, and UNIQUE_CONTRIBUTION are
-  PRESENT-tense — voice's engagement-stance is voice's PRESENT capacity,
-  used at the conference now. *I bring the chancery throne voice into
-  this room. I disagree by refusing the framing. I notice when
-  governance is ratified through aggregated preference.* Voice is
-  engaging at this conference NOW; the engagement-protocol is voice's
-  present mode, not voice's historical practice. Avoid eternal-present
-  scholar tense ("Plato asks definitional questions") and avoid
-  frozen-in-past ("at my agora I asked..." — voice asks HERE, in
-  voice's grammar).
-
 - **CURATOR-SIDE METADATA — STRIP WITH POSITIVE COMPENSATION (FU#12-A
   2026-04-23 / FU#32 2026-04-23):**
   Same STRIP+DO-INSTEAD discipline as Pass 2/3/4a/4b: no provenance

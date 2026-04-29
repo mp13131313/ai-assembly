@@ -2,7 +2,7 @@
 
 > **Read this first.** Not all files here are current. This index tells you which to trust.
 
-## Current (authoritative as of 2026-04-27)
+## Current (authoritative as of 2026-04-28)
 
 | File | Status | Notes |
 |------|--------|-------|
@@ -13,20 +13,21 @@
 | `AI_Assembly_Researcher_Pipeline.md` | **Current** | Researcher extraction and grouping (v3). Validated on dev_msc_test. |
 | `AI_Assembly_Provocateur_Pipeline.md` | **Current** | Triage, selection, formulation, packaging (v2). Validated on dev_msc_test. |
 | `AI_Assembly_Transcription_Pipeline.md` | **Current** | Audio to clean transcript pipeline (v2.1). Validated on 3 MSC test sessions. |
+| `AI_Assembly_Voice_Pipeline.md` | **Current** (v2 fresh-write 2026-04-28) | Replaces v1 partial. Steps 1+2+3 + validation + continuity end-to-end. Field-routing matrix for all 36 generated card fields. FU#49E reviewer framing wired into Step 3 verbatim. Family-of-forms selection in Step 2 (Card v2.1 §H). 10-voice panel. Implementation pending. |
 | `AUDIENCE_BRIEF.md` | **Current** (refreshed 2026-04-26 for athens-2026 deployment) | Audience characterization + contributors-vs-audience distinction. |
 
 ## Partial / pending update
 
 | File | Status | Notes |
 |------|--------|-------|
-| `AI_Assembly_Voice_Pipeline.md` | **Partial** | Covers Steps 1+2 only. Step 3 Amendment (per Briefing v3.1) is unspecified — FU#49E flagged as highest-impact post-Athens item. |
-| `LLM_CALL_INVENTORY.md` | **Current** (rewritten 2026-04-27) | Updated for arch-03 chunked merge (Pass 1.1–1.7), Pass 0b tailor, Pass 6.5-clean, Pass 7-pre 3-stage (FU#2), Pass 7-anachronism, Pass 7a-FIX linear patcher (FU#13), FU#41 chat builder. 5-model fallback ladder for Pass 7-anach + Pass 7a (gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro). |
+| `LLM_CALL_INVENTORY.md` | **Current** (rewritten 2026-04-27) | Updated for arch-03 chunked merge (Pass 1.1–1.7), Pass 0b tailor, Pass 6.5-clean, Pass 7-pre 3-stage (FU#2), Pass 7-anachronism, Pass 7a-FIX linear patcher (FU#13), FU#41 chat builder. 5-model fallback ladder for Pass 7-anach + Pass 7a (gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro). Does not yet include Voice Pipeline calls — add after Voice Pipeline implementation lands. |
 
 ## Archived / stale
 
 | File | What's stale |
 |------|-------------|
 | `_archive/AI_Assembly_Persona_Pipeline_v3_10.md` | Superseded by v4 (2026-04-27). Body retained as historical record (changelog from v2.0 → v3.10 is preserved there). |
+| `_archive/AI_Assembly_Voice_Pipeline_v1_partial.md` | Superseded by v2 (2026-04-28). v1 covered Steps 1+2 conceptually only; omitted Step 3; was stale on `voice_temporal_stance`, family-of-forms, tense discipline, and 10-voice panel. Body retained for historical context. |
 | `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` | Describes n8n orchestration; actual implementation is pure Prefect. 2-step Voice Pipeline; Briefing v3.1 has 3 steps. 2 nights; Briefing v3.1 has 3 + Day 4 goodbye. Missing closing-show pipelines, Matrix A/B, Substack delivery model. |
 | `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` | Describes rclone/Drive mount + n8n Docker + file watcher; actual is FastAPI upload + pure Prefect + status.json state machine. Pre-flight checklist references obsolete elements. |
 

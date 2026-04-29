@@ -839,7 +839,15 @@ def _render_narrative_briefing(formulation: dict, theme_display_title: str) -> s
     Format: THEME / CONTEXT / EXTRACTION / FORMULATION sections, with
     a final hint at the structured field for deeper inspection. Matches
     the format validated in trial runs.
+
+    Voice Pipeline Step 1 contract (Voice Pipeline v2 2026-04-28): the
+    FORMULATION header must surface the `mode` label so the voice's
+    closing instruction can branch on question vs proposition without
+    the voice having to infer mode from grammar. The mode is also
+    available structurally on the briefing entry; surfacing it inline
+    here makes the user prompt self-contained.
     """
+    mode = formulation.get("mode", "question")
     lines = []
     lines.append(f"THEME: {theme_display_title}")
     lines.append("")
@@ -859,7 +867,7 @@ def _render_narrative_briefing(formulation: dict, theme_display_title: str) -> s
             attribution_str = f"{attr}, {flavor}"
         lines.append(f'• "{quote_text}" ({attribution_str})')
     lines.append("")
-    lines.append("FORMULATION:")
+    lines.append(f"FORMULATION (mode: {mode}):")
     lines.append((formulation.get("formulation") or "").strip())
     lines.append("")
     lines.append(
@@ -1021,10 +1029,19 @@ def package_voice_briefings(
             #   - Provocateur's `rationale` field: would prime the voice
             #     toward the Provocateur's expected answer. Kept in per-pair
             #     checkpoint (formulations/{theme_id}__{slug}.json) for audit.
+            # Voice Pipeline v2 contract (2026-04-28): briefing entry exposes
+            # the structured formulation fields alongside the rendered markdown,
+            # so Voice Pipeline Step 1's output lineage block can echo
+            # `formulation_text` and access `selected_quotes` without parsing
+            # the markdown. Provocateur's `rationale` is still excluded
+            # (would prime the voice — kept in per-pair file for audit).
             my_formulations.append({
                 "theme_id": theme_id,
                 "theme_display_title": theme_display_title,
                 "mode": formulation.get("mode", "question"),
+                "formulation_text": (formulation.get("formulation") or "").strip(),
+                "context_narrative": (formulation.get("context_narrative") or "").strip(),
+                "selected_quotes": formulation.get("selected_quotes", []) or [],
                 "narrative_briefing": narrative,
                 "full_theme_record": {
                     "clusters": clusters_view,
