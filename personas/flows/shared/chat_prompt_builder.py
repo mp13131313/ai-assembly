@@ -106,6 +106,14 @@ _CHAT_INCOMPATIBLE_FIELDS = (
     # time AND structurally absent in single-paste chat deployment).
     "continuity_block_if_night_2",
     "continuity_block_artifact_if_night_2",
+    # FU#57 (2026-04-29): pre-loaded courage menu pulls reasoning toward
+    # predetermined topics rather than letting the matter drive. Empirical
+    # observation in chat-test on Plato (pre-12-patches): the voice
+    # reasoned more freely with bold_engagement_topics stripped. Field is
+    # still emitted by Pass 5 for build-side audit value, but does NOT
+    # belong in the runtime chat artifact (or in the Voice Pipeline
+    # system prompt — see runtime/flows/voice/card_assembly.py header).
+    "bold_engagement_topics",
 )
 
 # Strip set B — spec-shell meta fields. These label the artifact AS a

@@ -105,13 +105,15 @@ def test_all_voice_pipeline_only_fields_are_dropped():
 
 
 def test_chat_incompatible_strip_set():
-    """Strip set A — 5 chat-structurally-incompatible fields per Amendment A."""
+    """Strip set A — 6 chat-structurally-incompatible fields per Amendment A
+    (5 original) + Amendment C (FU#57 2026-04-29: bold_engagement_topics)."""
     expected_a = {
         "metadata",
         "smoke_test_chains",
         "reference_only_passages",
         "continuity_block_if_night_2",
         "continuity_block_artifact_if_night_2",
+        "bold_engagement_topics",  # FU#57 2026-04-29
     }
     assert set(_CHAT_INCOMPATIBLE_FIELDS) == expected_a
 
@@ -129,9 +131,10 @@ def test_spec_shell_strip_set():
 
 
 def test_combined_strip_set_total():
-    """Combined top-level strip set = 10 fields (A + B; nested strip is separate)."""
+    """Combined top-level strip set = 11 fields (A=6 + B=5; nested strip is
+    separate). FU#57 2026-04-29 bumped A from 5→6 with bold_engagement_topics."""
     assert set(_VOICE_PIPELINE_ONLY_FIELDS) == set(_CHAT_INCOMPATIBLE_FIELDS) | set(_SPEC_SHELL_META_FIELDS)
-    assert len(_VOICE_PIPELINE_ONLY_FIELDS) == 10
+    assert len(_VOICE_PIPELINE_ONLY_FIELDS) == 11
 
 
 def test_nested_strip_set():
@@ -283,8 +286,8 @@ def test_write_chat_system_prompt_cleans_tmp_file(tmp_path: Path):
 
 # ── architectural-amendment historical record ───────────────────────────────
 
-def test_amendment_history_2026_04_24_to_2026_04_25():
-    """Documents the strip-set evolution across two 2026-04-25 amendments.
+def test_amendment_history_2026_04_24_to_2026_04_29():
+    """Documents the strip-set evolution across three amendments.
 
     Original (2026-04-24 FU#41 b9c1eb2) stripped 10 fields; same 10
     operator's hand-produced Dostoevsky chat v2 had stripped.
@@ -296,7 +299,15 @@ def test_amendment_history_2026_04_24_to_2026_04_25():
     Amendment B (2026-04-25 spec-shell suppression): empirically motivated
     by Plato chat-test thinking-trace meta-reasoning. Strip grows 5→11
     by ADDING 5 spec-shell meta fields (top-level) + 1 nested production-
-    metadata sub-field."""
+    metadata sub-field.
+
+    Amendment C (FU#57 2026-04-29 bold_engagement_topics): empirically
+    motivated by Plato chat-test observation that the voice reasons more
+    freely with bold_engagement_topics stripped (pre-loaded courage menu
+    pulls reasoning toward predetermined topics rather than letting the
+    matter drive). Strip grows 11→12 by ADDING bold_engagement_topics to
+    Strip A. Coordinated with runtime/flows/voice/card_assembly.py drop
+    from runtime system prompts (FU#57)."""
     original_2026_04_24_strip = {
         "metadata",
         "smoke_test_chains",
@@ -324,9 +335,16 @@ def test_amendment_history_2026_04_24_to_2026_04_25():
         "council_member_name",
     }
     amendment_b_nested = (("curated_corpus_passages", "corpus_metadata"),)
+    amendment_c_added_to_strip = {
+        "bold_engagement_topics",  # FU#57 2026-04-29
+    }
 
     current = set(_VOICE_PIPELINE_ONLY_FIELDS)
-    expected_current = (original_2026_04_24_strip - amendment_a_promoted_to_preserve) | amendment_b_added_to_strip
+    expected_current = (
+        (original_2026_04_24_strip - amendment_a_promoted_to_preserve)
+        | amendment_b_added_to_strip
+        | amendment_c_added_to_strip
+    )
     assert current == expected_current
     assert _NESTED_STRIPS == amendment_b_nested
 

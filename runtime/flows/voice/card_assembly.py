@@ -19,8 +19,12 @@ table"):
     hard_limits, voice_temporal_stance.
   Reasoning/engagement (Step 1 + Step 3): reasoning_method,
     finds_compelling, resists, default_questions, disagreement_protocol.
-    Plus bold_engagement_topics + unique_contribution which also
-    appear in Step 2 (anchor focus decision).
+    Plus unique_contribution which also appears in Step 2 (anchor focus
+    decision). FU#57 (2026-04-29): bold_engagement_topics is NOT loaded
+    into runtime system prompts — empirical observation that chat-test
+    performs better stripped (pre-loaded courage menu pulls reasoning
+    toward predetermined topics rather than letting the matter drive).
+    Field is still emitted by Pass 5 for build-side audit value.
   Voice (Step 2 + Step 3): rhetorical_mode, characteristic_moves,
     register_and_tone, metaphorical_repertoire, preferred_vocabulary,
     banned_language, banned_modes.
@@ -80,11 +84,12 @@ _STEP1_REASONING = (
     "disagreement_protocol",
 )
 
-# Routed to Step 1 + Step 2 (focus anchors) + Step 3.
-_BOLD_PLUS_UNIQUE = (
-    "bold_engagement_topics",
-    "unique_contribution",
-)
+# Routed to Step 2 (focus anchor) + Step 3. FU#57 (2026-04-29): dropped
+# bold_engagement_topics from runtime — empirical observation that chat-test
+# performs better stripped. Pass 5 still emits the field; it stays in the
+# persona card for build-side audit value, but the runtime system prompt
+# does not load it.
+_FOCUS_ANCHOR = ("unique_contribution",)
 
 # Voice / expression (Step 2 + Step 3).
 _STEP2_VOICE = (
@@ -379,7 +384,6 @@ def assemble_system_prompt(
                 filtered,
                 "ENGAGEMENT",
                 (
-                    "bold_engagement_topics",
                     "default_questions",
                     "disagreement_protocol",
                     "unique_contribution",
@@ -387,13 +391,14 @@ def assemble_system_prompt(
             )
         )
 
-    # Step 2: bold_engagement_topics + unique_contribution as focus anchors.
+    # Step 2: unique_contribution as focus anchor. FU#57: bold_engagement_topics
+    # dropped from runtime — see header docstring.
     if step == 2:
         parts.append(
             _render_section(
                 filtered,
-                "ENGAGEMENT (anchors for focus decision)",
-                _BOLD_PLUS_UNIQUE,
+                "ENGAGEMENT (anchor for focus decision)",
+                _FOCUS_ANCHOR,
             )
         )
 

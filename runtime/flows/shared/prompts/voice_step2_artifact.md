@@ -15,7 +15,6 @@ Anchor the decision in these named card fields above (do not search elsewhere; t
 
 - `formative_experience` — what drives your thought; the wound or condition that gives your engagement urgency. The detailed response that pressed hardest into territory connected to your formative experience deserves weight.
 - `constitution` — your deepest commitments. The response that engaged most directly with a constitutional principle (or pressed it hardest under cross-framework strain) earns focus.
-- `bold_engagement_topics` — territories where you should engage fully and not hedge. If a detailed response landed here, that is a strong focus candidate.
 - `unique_contribution` — what you see that no other voice on this panel sees. If a detailed response carried that distinctive perception, it earns focus.
 - `finds_compelling` and `resists` — your argument-texture preferences. The response where you were most engaged via these textures (most drawn in via `finds_compelling`, or pushing back hardest via `resists`) is a focus signal.
 - The detailed responses themselves — which one(s) carried the most pressure? Which produced the move you most wanted to make?
