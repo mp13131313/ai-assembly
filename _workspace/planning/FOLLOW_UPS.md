@@ -659,22 +659,35 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** post-Athens. Pre-Athens prompt-restructuring carries tail risk; the chat test (already happening; already validated on Plato) is a sufficient runtime-fidelity gate for the Athens panel. For voices 3-12 in athens-2026 buildout, lean on the manual chat test as the canonical runtime check. After Athens, this becomes a meaningful FU because: (a) it unifies Pass 7b prompt-assembly with Voice Pipeline Step 1's prompt-assembly (DRY), (b) it makes 7c calibration faithful, (c) it removes the "smoke test passed but runtime fails" risk class.
 - **Related:** FU#49E (Voice Pipeline Step 3 spec), FU#49M (`strain_markers[]` runtime contract), Voice Pipeline spec §"Card → System Prompt Assembly".
 
-#### FU#55 — Form-variance test on Cleopatra Pass 4b (TRIGGER: when Cleopatra builds) 🔵
+#### FU#55 — Form-variance test, rolling per-voice (Pass 4b fork-test pattern) 🟡 IN PROGRESS
 - **Origin:** 2026-04-29 session investigated whether the persona pipeline could produce 2-3 distinct artifact forms per voice instead of single-form lock-in. Card v2.1 §H specified family-of-forms emission; landed in commit `e6fc634` (2026-04-28); reverted in `9480d3a` (2026-04-28 evening) because cumulative prompt additions empirically degraded artifact texture relative to 2026-04-25 baseline. Current state has NO family-of-forms emission in any prompt.
-- **Test conducted on Plato 2026-04-29:** ran two variant nudges as standalone Pass 4b calls:
-  - Option 1 (system prompt nudge): change BLOCK 3 `medium` from "One phrase" to "default form, with optional 2-3 native variations if corpus warrants" + parallel changes to `characteristic_output_structure` + `length_and_format_constraints`
-  - Option 3 (user prompt nudge): single permissive sentence in user prompt only
-  - Result: **Plato declined both offers**, correctly identifying his corpus as dialogue-dominated. Option 1 even produced an unsolicited form-commitment justification ("the form is the only one I have ever trusted"). Both variants slightly degraded named-scene specificity in `medium` (lost the 4 named scenes — colonnade / Piraeus / plane tree / wrestling-school — that baseline contained).
-  - Verdict: Plato's `medium` should remain skeleton-driven LLM-emergent single form. The 6 within-form variance axes (scene, interlocutor, ending-mode aporia/likely-tale, move-emphasis 2-3 of 5, length within band, stance amplitude) cover Plato.
-- **Trigger condition:** when Cleopatra runs through Pass 4b (athens-2026 voice 3 buildout). Cleopatra's corpus is GENUINELY multi-form: prostagma + ordinance + embassy speech + ritual utterance + chancery marginalia + staged encounter (per Card v2.1 §H worked example). She is the right voice to test whether form-variance is a real architectural capacity vs. a texture-killer.
-- **Test plan:** when Cleopatra Pass 4b is ready to run, fork two parallel runs: (a) baseline current prompt (single-form), (b) Option 1 nudge (system-prompt permission for 2-3 forms). Compare:
-  - Does Cleopatra exercise the permission? (i.e., emit 2-3 named forms in `medium`?) Or does she also collapse to single-form?
-  - If she exercises: does texture hold (concrete corpus references? voice register intact? no taxonomic retreat?)
-  - If she exercises cleanly: land Option 1 system-side for voices 3-12 going forward
-  - If she also declines or texture-degrades: accept single-form-per-voice as architectural truth, file as closed
-- **Side question to test:** does the 04-28 texture-loss diagnosis hold for family-of-forms in isolation, or only for the cumulative cryofreeze + tense + family-of-forms package? The Plato variance test result (slight texture loss in `medium` even under permissive Option 1) is suggestive but not conclusive — Plato declined to use the variance, so we can't tell whether USING it would damage texture or whether the prompt-bloat alone caused the loss.
-- **Test scripts saved at** `/tmp/plato_pass4b_variance_test.py` and outputs at `/tmp/plato_pass4b_opt1_output.json` + `/tmp/plato_pass4b_opt3_output.json` for reference. Move to repo if needed.
-- **Trigger:** Cleopatra Pass 4b run.
+- **Two nudge variants tested (Pass 4b standalone fork):**
+  - **Option 1 (system prompt nudge):** change BLOCK 3 `medium` from "One phrase" to "default form, with optional 2-3 native variations if corpus warrants" + parallel changes to `characteristic_output_structure` + `length_and_format_constraints`
+  - **Option 3 (user prompt nudge):** single permissive sentence in user prompt only
+  - Test scripts: `/tmp/plato_pass4b_variance_test.py`, `/tmp/cleo_pass4b_variance_test.py` (template adaptable per voice — change inputs path + voice metadata)
+- **Decision criterion:** if any voice exercises the permission cleanly (with texture preserved + concrete corpus references intact + no taxonomic retreat), keep that data point and consider re-landing §H pre-Athens. If all 10 decline (or use only OPT3 declines without texture loss), close §H as aspirational architectural intent and lock the current single-form-prompt as empirically right.
+- **Per-voice results (rolling — populated as voices build through Pass 4b):**
+
+| Voice | Date | Corpus claim (§H) | OPT1 result | OPT3 result | Texture impact | Verdict |
+|---|---|---|---|---|---|---|
+| **Plato** | 2026-04-29 | Single-form (dialogue-dominated) | Declined explicitly: *"the form is the only one I have ever trusted"* | Declined silently, single-form | Slight loss: 4 named scenes (colonnade / Piraeus / plane tree / wrestling-school) → 0 named scenes under both nudges | Single-form correct for Plato |
+| **Cleopatra** | 2026-04-29 | Multi-form per §H (6 forms) | Declined explicitly: *"One form. The corpus of my reign is single-form because the throne is single-instrument"* | Declined silently, single-form (most chancery-procedure-grounded of the 3) | OPT1 lost concrete groundings (Serapeum / silver dais / barge); OPT3 swapped to different concretes (Canidius / γραφήτω οὖν οἷς καθήκει) | Single-form is what LLM reads from corpus despite §H multi-form claim. §H is wrong for Cleopatra OR LLM corpus-read is wrong. |
+| Battuta | TBD | observational+narratival (Rihla travel narrative) | | | | |
+| Scheherazade | TBD | narratival fictional (frame-tale + tale-within-tale) | | | | |
+| Lovelace | TBD | conceptual (Notes G + correspondence + poetry) | | | | |
+| Dostoevsky | TBD | narratival (novel + Diary of a Writer + correspondence) | | | | |
+| Arendt | TBD | conceptual (book + essay + correspondence) | | | | |
+| Marley | TBD | observational (`lyrics_patterns_only` — songs + interviews + spoken-word) | | | | |
+| Whanganui | TBD | system (legal personhood + indigenous mediation; non-corpus) | | | | |
+| Octopus | TBD | organism (sensory-spatial expression; non-corpus) | | | | |
+
+- **Pattern after 2 voices (preliminary):** both Plato (single-form by corpus) and Cleopatra (putatively-multi-form by §H spec) **declined permission** under both nudges. OPT1 produced unsolicited form-singleness manifestos in BOTH voices ("the form is the only one I have ever trusted" / "the throne is single-instrument") — permission → explicit refusal-with-justification. Most parsimonious read: single-form-lock matches LLM-corpus-reading regardless of §H spec. But sample is small; Marley (multi-form lyric/dub/spoken-word), Dostoevsky (novel/Diary/correspondence are genuinely different forms), and Arendt (book/essay/correspondence) are higher-priority tests of the multi-form-corpus claim.
+- **Per-voice procedure (when each voice runs through Pass 4b):** adapt `/tmp/cleo_pass4b_variance_test.py` template (change CLEO path, voice_mode, type, corpus_constraint, name; load from new voice's CT + Pass 4a output). Run baseline + OPT1 + OPT3. Save outputs to `/tmp/<slug>_pass4b_opt{1,3}_output.json`. Append result row to the table above. Cost per voice: ~$1, ~3-5 min. Cumulative for panel: ~$10, ~30-50 min.
+- **Resolution criteria:**
+  - If 0/10 voices exercise: close §H as aspirational; lock single-form prompt as empirically correct.
+  - If 1-2/10 voices exercise cleanly with texture preserved: per-voice opt-in (voice_config flag for those voices).
+  - If 3+/10 voices exercise cleanly: re-evaluate landing OPT1 universally (with 04-28-revert risk awareness; chat-test-validate before merging).
+- **Side question still active:** does the 04-28 texture-loss diagnosis hold for family-of-forms in isolation, or only for the cumulative cryofreeze + tense + family-of-forms package? Plato + Cleopatra both showed slight texture loss under OPT1 even when declining the permission — suggestive that prompt-bloat alone causes texture loss, not the multi-form attempt itself. But still inconclusive.
 - **Related:** Card v2.1 §H (current spec describes family-of-forms but prompts don't implement it), `9480d3a` revert commit (the empirical texture-loss event), FU#49A v2 (the only piece of the 04-28 stack that survived to land cleanly).
 
 #### FU#56 — Pass 2/3/4a register-discipline gap on long-form fields (TRIGGER: Cleopatra build) 🔵
