@@ -611,7 +611,45 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Related:** FU#13 (linear patcher single-shot — design intentional, not changed by this), FU#5 (FU#5 snapshot mechanism — already gives operator the diff capability), FU#46 (excerpt budget — adjacent gate-thinking).
 
 #### Note on chat_system_prompt.json invalidation gap (related to FU#52)
-- The 7a-fix downstream-cache invalidation list (`run_persona_pipeline.py:1297-1305`) deletes `pass_7_pre`, `pass_7_anachronism`, `pass_7a`, `pass_7b`, `pass_7c`, `derive_raw`, `assembled_card`, `provocateur_profile`, `evaluation_rubric` — but NOT `chat_system_prompt`. This works in the happy path because the end-of-pipeline `write_chat_system_prompt(...)` overwrites unconditionally. But if the run is interrupted between fix-pass and completion, the chat prompt file silently mismatches the assembled card. **Fix:** add `_paths.chat_system_prompt(SLUG, PROJECT_ROOT)` to the invalidation list. Trivial 1-line change. Not blocking for Athens but worth landing with FU#52 work.
+- The 7a-fix downstream-cache invalidation list (`run_persona_pipeline.py:1297-1305`) deletes `pass_7_pre`, `pass_7_anachronism`, `pass_7a`, `pass_7b`, `pass_7c`, `derive_raw`, `assembled_card`, `provocateur_profile`, `evaluation_rubric` — but NOT `chat_system_prompt`. This works in the happy path because the end-of-pipeline `write_chat_system_prompt(...)` overwrites unconditionally. But if the run is interrupted between fix-pass and completion, the chat prompt file silently mismatches the assembled card. **Fix:** add `_paths.chat_system_prompt(SLUG, PROJECT_ROOT)` to the invalidation list. Trivial 1-line change. Not blocking for Athens but worth landing with FU#52 work. ✅ APPLIED 2026-04-29 in commit `c40419c` as part of FU#52 work.
+
+#### FU#53 — Pipeline review-gate refactor: Pass 7a FINAL + operator gate ✅ LANDED 2026-04-29
+- **Origin:** Plato 2026-04-29 standalone post-7c re-fire of Pass 7a (per FU#52 step 4) caught 4 cross-pass contradictions invisible to the in-pipeline 7a/7a-fix: `banned_language[16]` TESTING annotation in bare-string form, `banned_modes[10,11]` TESTING annotations + author/character register break, `corpus_metadata.source_count` = 7 (actual 4), and `curated_corpus_passages` Jowett translations contradicting `banned_language` Jowett-rejection. The in-pipeline 7a structurally cannot see cross-field contradictions because it validates per-pass slices, not the assembled card. Promoting the post-7c re-fire to a first-class pipeline stage closes the gap.
+- **Landed in commit `ddbe194` (2026-04-29):**
+  - New `paths.pass_7a_final()` + `paths.operator_review_flag()`
+  - New `_pass_7a_final()` runner function (mirrors `_pass_7a` but reads assembled card from disk; gpt-5.4 high → Gemini fallback ladder)
+  - New `_build_assembled_card_dict()` helper called twice (skeleton + final); on FINAL call it reads on-disk content to preserve operator patches and only rewrites the metadata block
+  - Skeleton write gated on file presence — re-runs after operator patches do not overwrite
+  - Dropped in-pipeline post-fix 7a re-fire (coverage promoted to 7a FINAL)
+  - 7a-fix cache invalidation list updated: removes `pass_7a` (preserves pre-fix per-pass verdict for fix-pass effectiveness tracking) + adds `pass_7a_final` + `operator_review_flag`
+  - Derive reads from disk post-gate (in-memory pass dicts may be stale after operator patches)
+  - Operator triage summary now reports Pass 7a FINAL as canonical `validation_status`; surfaces operator-accepted-residuals state
+  - Metadata block: new `cross_model_validation_final` field; pre-existing `cross_model_validation` annotated as pre-fix per-pass verdict
+- **New order of operations:** `... 7-pre / 7-anach / 7a per-pass / 7a-FIX / 7-pre+7-anach post-fix / 7b / 7c / ASSEMBLE skeleton / Pass 7a FINAL / OPERATOR REVIEW GATE / DERIVE / ASSEMBLE final / chat_system_prompt write / CARD COMPLETE summary`
+- **Operator workflow at the gate** (printed clearly when triggered):
+  - (a) Re-validate after patching: `rm 06_pass_7a_final.json && rerun`
+  - (b) Accept residuals & proceed: `touch _operator_review_passed.flag && rerun`
+- **Tests:** 223/223 passing.
+
+#### FU#54 — Smoke test runtime-fidelity refactor (Pass 7b) 🔵 POST-ATHENS
+- **Origin:** 2026-04-29 session reflection on whether Pass 7b ("smoke test chains") tests what its name claims. Three drift layers identified:
+  - (1) **Card delivery:** 7b puts the full card as a JSON blob in the user prompt with the wrapper *"COMPLETE PERSONA CARD: {json}"* and a system prompt that is the 7b instruction. Voice Pipeline runtime (per `docs/AI_Assembly_Voice_Pipeline.md` §"Card → System Prompt Assembly") puts the card AS the system prompt rendered as structured headers (`IDENTITY` / `CONSTITUTION` / `REASONING METHOD` / `ENGAGEMENT`) + an XML-tagged closing instruction. The user's manual chat-test workflow (paste `03_chat_system_prompt.json` as Claude project custom instructions, ask a question) matches runtime; 7b does not.
+  - (2) **Field set:** 7b uses ALL 35 generated fields in one call (Pass 2-6). Real runtime: Step 1 uses foundational + reasoning fields (1-21 minus smoke_test_chains); Step 2 uses voice + artifact fields (22-34); Step 3 uses both. 7b conflates Step 1 (private reasoning) and Step 2 (public artifact production) into a single shot.
+  - (3) **Step boundaries collapsed:** 7b produces "provocation→response chains" — both reasoning AND artifact in one call. Real runtime: Step 1 produces `detailed_response` (private); Step 2 reads Step 1's output + voice/artifact fields and produces the public artifact via family-of-forms selection (Card v2.1 §H). 7b's "response" doesn't correspond to anything in the real pipeline.
+- **Why it matters:**
+  - Pass 7c reads 7b output to refine `banned_language` / `banned_modes`. The failure-pattern surface 7c sees is biased by 7b's degenerate setup. So banned_language may be tuned against failures that don't actually occur at runtime.
+  - 7b can pass while runtime fails (Step 2's family-of-forms selection never exercised; Step 1's "valid landings" framing — sharper question / distinction / aporia / redirection / non-propositional — never exercised; reference_only_passages Step-1-only contract never exercised).
+- **Operator's preferred design (filed 2026-04-29):** restructure 7b into 6 LLM calls, not 1:
+  - **Call 1 — provocateur:** "Generate 3-5 provocations based on the conference profile / context paragraph." NO card. Output: 3-5 provocations tagged (`translation_through_boundary`, `bold_engagement`, `topics_requiring_care`, `general`).
+  - **Calls 2-6 — voice responses:** for each provocation, run a STANDALONE call where:
+    - System prompt = the assembled card rendered as structured headers per Voice Pipeline spec (matches Step 1 / chat-test pattern)
+    - User prompt = the single provocation (matches a Provocateur briefing's `narrative_briefing`)
+  - Each response is independent (no other provocations or responses in context). This mirrors how runtime actually works: each (voice, formulation) pair is a separate LLM call.
+  - **Why this is the right shape:** (1) tests the actual runtime system-prompt assembly + caching pattern, (2) tests one provocation at a time (no contamination across chains), (3) decouples provocation generation from response generation (mirrors Provocateur → Voice separation), (4) the chat-test pattern that empirically validated Plato 2026-04-26 is the per-call shape.
+- **Cost implication:** 6 calls instead of 1 per voice. ~6× the LLM spend on Pass 7b, but Pass 7b is one-time per voice — for 12 voices, this is ~$5-15 extra one-time cost. Negligible.
+- **Implementation:** new prompt files `persona_pass_7b_provocations_only.md` (call 1) + `persona_pass_7b_response.md` (calls 2-6); rewrite `_pass_7b()` in `run_persona_pipeline.py` to orchestrate the 6-call sequence; new helper `assemble_voice_system_prompt(card)` shared between Pass 7b restructured and Voice Pipeline Step 1 (this would also unblock Voice Pipeline implementation — same code path). Pass 7c reads the new chain shape; minor template update.
+- **Trigger:** post-Athens. Pre-Athens prompt-restructuring carries tail risk; the chat test (already happening; already validated on Plato) is a sufficient runtime-fidelity gate for the Athens panel. For voices 3-12 in athens-2026 buildout, lean on the manual chat test as the canonical runtime check. After Athens, this becomes a meaningful FU because: (a) it unifies Pass 7b prompt-assembly with Voice Pipeline Step 1's prompt-assembly (DRY), (b) it makes 7c calibration faithful, (c) it removes the "smoke test passed but runtime fails" risk class.
+- **Related:** FU#49E (Voice Pipeline Step 3 spec), FU#49M (`strain_markers[]` runtime contract), Voice Pipeline spec §"Card → System Prompt Assembly".
 
 ---
 
