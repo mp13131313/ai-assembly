@@ -674,6 +674,24 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** Cleopatra Pass 4b run.
 - **Related:** Card v2.1 §H (current spec describes family-of-forms but prompts don't implement it), `9480d3a` revert commit (the empirical texture-loss event), FU#49A v2 (the only piece of the 04-28 stack that survived to land cleanly).
 
+#### FU#56 — Pass 2/3/4a register-discipline gap on long-form fields (TRIGGER: Cleopatra build) 🔵
+- **Origin:** 2026-04-29 Plato finalization. After 12 surgical patches resolved the cleanly-actionable residuals (TESTING annotations, register breaks, anachronism vocabulary, doctrinal slips, Jowett translation contradictions, source-attribution metadata), 3 successive Pass 7a FINAL re-fires (gpt-5.4 high) kept surfacing register critiques on a recurring set of fields:
+  - `formative_experience` — biographical narration with BCE dates, retrospective sequencing, scholarly framing (e.g., "primary_candidate: The trial and execution of Socrates (399 BCE), with the family-tyranny crisis under the Thirty (404–403)...")
+  - `world.model_of_selfhood` — out-of-horizon language ("later reports", "Outside the disputed Letters")
+  - `concept_lexicon` — impersonal dictionary register ("The lowest part of the soul: bodily desire...") rather than first-person usage cues ("When I say X, I mean...")
+  - `metaphorical_repertoire` — taxonomic prose ("The Sun as offspring...", "The Cave as the master image...") rather than first-person repertoire ("I return to light and sight when...")
+  - `preferred_vocabulary` — glossary glosses ("the calculating, spirited, and appetitive parts of the soul, each with its proper virtue") rather than usage directives ("Use to agathon for...")
+- **Diagnosis:** the patterns are properties of the **prompts at 582af96 baseline**, not of Plato specifically. The 04-26 shipped Plato had the same patterns; chat-test passed despite them. So they are validator-strict-but-not-runtime-blocking critiques. But they ARE real critiques — the cards leak biographical/scholarly/glossary register where the runtime would benefit from first-person usage register.
+- **Why prompt-side, not card-side:** patching individual cards is whack-a-mole — the prompts will produce the same patterns on Cleopatra, Marley, Octopus, etc. The architecturally-correct fix is to add register-discipline guardrails to the Pass 2/3/4a system prompts:
+  - Pass 2 `formative_experience`: forbid bare BCE dating; require first/second-person framing ("What formed me most was..." / "Long before this gathering, the city killed Socrates"). voice_temporal_stance.default already says this for the temporal-stance field — extend the discipline.
+  - Pass 3 `concept_lexicon`: require first-person usage register ("When I say X, I mean..." + "Do not use X for...") instead of dictionary-style "X is..."
+  - Pass 4a `metaphorical_repertoire` + `preferred_vocabulary`: same register pivot — "I return to..." / "Use Y for..." instead of taxonomic listing
+- **Risk:** the 04-28 revert was driven by EMPIRICAL texture loss when too many cumulative prompt additions piled up. Adding register-discipline blocks to Pass 2/3/4a risks the same. **Mitigation:** test on Cleopatra (the natural next voice). If Cleopatra regenerates cleanly under the new guardrails AND chat-tests as well as 04-26 Plato, land for voices 3-12. If she regenerates with texture loss, revert and accept the gap as pre-Athens-known-limitation.
+- **Why Plato is acceptable as-shipped:** chat-test on 04-26 passed against the same prompt patterns. The 12 patches landed today address every cleanly-actionable issue. Remaining flags are register-strict-validator critiques, not runtime quality blockers. Operator-review-passed flag set 2026-04-29.
+- **Trigger:** Cleopatra Pass 4b run (athens-2026 voice 3 buildout). Same trigger as FU#55; bundle the experiments together (form-variance test + register-discipline test on the same Cleopatra build).
+- **Cost estimate:** ~1-2 hr for Pass 2/3/4a prompt edits + 1 Cleopatra full re-run + chat-test comparison.
+- **Related:** FU#55 (form-variance, same trigger), FU#49 stack (the prior episode of "we changed Pass 2/3/4a/4b/5 prompts and texture regressed" — same risk class), Pass 7a FINAL (the validator that surfaced these), `9480d3a` revert commit.
+
 ---
 
 ## RECENTLY COMPLETED
