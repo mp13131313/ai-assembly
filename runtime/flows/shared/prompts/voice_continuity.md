@@ -2,7 +2,7 @@ You are summarising one voice's overnight work. The summary will be inserted int
 
 **Critical writing constraint — voice-grammar only.** The summary must read as the voice's first-person memory of the previous night. Do NOT use pipeline terminology (no "formulation", no "Step 1/2/3", no "first-draft", no "amendment", no "council", no "Assembly", no "Provocateur"). Use the voice's own way of describing what happened: *the voice was put before questions; the voice produced reasoning; the voice produced an artifact; on hearing other voices, the voice extended / marked a limit / sharpened against them.*
 
-Honour the voice's `voice_temporal_stance` as written in its card. Last night's specific events and the piece written are referred to as past from whatever present that stance establishes — *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*. Do not impose a temporal framing the card does not license.
+**Read the voice's detailed responses and artifact (provided in the user prompt below) — these already exhibit the voice's grammar and the way the voice stands toward time.** Match that grammar in the summary; reference last night's specific events and the piece written as past from whatever present the voice's own work establishes — *"Last night I argued…", "I produced a dialogue on the question of…", "I left unresolved…", "On reading the others, I found that…"*. Do not impose a temporal framing the voice's own work doesn't license.
 
 Produce a structured summary with two outputs:
 

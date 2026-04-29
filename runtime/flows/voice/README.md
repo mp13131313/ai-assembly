@@ -109,7 +109,7 @@ for each voice.
 | `VOICE_VALIDATION_MODELS` | `gpt-5.4,gpt-4.1,o3,gpt-4o,gemini-2.5-pro` | OpenAI ladder |
 | `VOICE_VALIDATION_MAX_TOKENS` | `8192` | |
 | `VOICE_CONTINUITY_MODEL` | `claude-sonnet-4-6` | Compression task; doesn't need Opus |
-| `VOICE_CONTINUITY_THINKING` | `1` | Adaptive thinking on for tense discipline |
+| `VOICE_CONTINUITY_THINKING` | `1` | Adaptive thinking on so the summariser holds the voice's grammar + temporal stance from the inputs |
 | `VOICE_CONTINUITY_MAX_TOKENS` | `8000` | |
 
 ### Outputs

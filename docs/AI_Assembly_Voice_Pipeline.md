@@ -38,6 +38,14 @@
 
 **Architectural impact:** none. The Voice Pipeline still has 3 steps + validation + continuity + publish; field routing matrix unchanged; output schemas unchanged (`selected_form` + `form_rationale` retained — they're harmless when single-form, substantive when multi-form, and the publish + continuity downstream consumers already reference them). The change is what the prompts tell the voice + what the validator presupposes.
 
+### v2.1 follow-up (same day, additional commit)
+
+Self-review of the v2.1 alignment commit surfaced two more items for the same alignment scope:
+
+- **FU#57 (commit `8887af0`, 2026-04-29) was missed in the spec doc.** Code + voice prompts already reflected FU#57 (bold_engagement_topics dropped from runtime + chat artifact); but the Voice Pipeline spec doc still routed it across all 3 steps and quoted bold_engagement_topics bullets in the Step 1/2/3 closing-instruction extracts. Fixed: matrix row 18 → ❌ DROP all 3 steps; quoted bullets removed from extracts; strip-rules count 4 → 5; field count clarified as 35 runtime-loaded + 1 build-side audit only.
+- **`voice_continuity.md` instruction logical bug.** First-pass v2.1 said "Honour the voice's `voice_temporal_stance` as written in its card" — but the continuity summariser does NOT have card access (its system prompt is `voice_continuity.md` only; user prompt is detailed responses + artifact text). Fixed: instruction now reads "Read the voice's detailed responses and artifact (provided in the user prompt below) — these already exhibit the voice's grammar and the way the voice stands toward time. Match that grammar in the summary." The summariser picks up temporal stance from the exemplar, not from a card it doesn't have.
+- **`voice/README.md`** had one cosmetic "tense discipline" leak in the env var table — adjusted.
+
 ---
 
 ## Changelog: v1 partial → v2
@@ -47,7 +55,7 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | Area | v1 partial | v2 | Reference |
 |---|---|---|---|
 | **Step 3 (Amendment)** | Mentioned in Briefing v3.1 conceptually; entirely unspecified in v1 | **Full spec landed** with FU#49E reviewer's cross-framework-examination framing as the system prompt seed | §"Step 3 — Amended Artifact" below |
-| **Card → system prompt assembly** | Inline in Step 1/Step 2 templates; no canonical routing table | **Single canonical field-routing table** for all 36 generated card fields + 2 continuity nulls + 4 strip rules | §"Card → System Prompt Assembly" below |
+| **Card → system prompt assembly** | Inline in Step 1/Step 2 templates; no canonical routing table | **Single canonical field-routing table** for all 36 generated card fields + 2 continuity nulls + 5 strip rules (post-FU#57: 35 runtime-loaded + 1 build-side audit only) | §"Card → System Prompt Assembly" below |
 | **`voice_temporal_stance`** | Field did not exist in v1 (added 2026-04-21 as Pass 2 output) | **Treated as foundational** — loaded into Step 1 + Step 2 + Step 3 unwrapped to its prose form. Athens uses `default` (the fluid-across-time framing per the 2026-04-28 revert: voice speaks from within its own world and lifetime, the reader has come to consult the voice). The Voice Pipeline does not impose any temporal framing the card does not license | Card v2 + Pass 2 (582af96 baseline) |
 | **`medium` field** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Voice's `medium` is honored as written** — single-form OR multi-form depending on what the card describes for the voice. Where multi-form, Step 2 selects per matter; where single-form, Step 2 just uses it. Step 3 may select a different form if `medium` admits it | Pass 4b (582af96 baseline) |
 | **Anti-generic-register hard constraint** | — | Voice's `banned_modes` enumerates the per-voice register failures it must avoid (its corpus does not produce these). Step 2 + Step 3 prompts honor `banned_modes` as written; no universal entry is presupposed | Pass 4a `banned_modes` |
@@ -174,11 +182,12 @@ Step 3 does NOT read other voices' detailed responses (Step 1 output). Cross-voi
 
 2. **Per-step field routing.** Each card field is routed to Step 1 (reasoning), Step 2 (expression), Step 3 (both), or dropped. The single canonical routing table (next section) is the contract — implementation must match it byte-for-byte.
 
-3. **Drop-list discipline (4 load-bearing rules).** Four card elements have specific strip rules that must be applied at system prompt assembly time:
+3. **Drop-list discipline (5 load-bearing rules).** Five card elements have specific strip rules that must be applied at system prompt assembly time:
    - **Drop `metadata` always** (build-time provenance, not behavioural spec)
    - **Drop `smoke_test_chains` always** (NEVER few-shot — see "do NOT few-shot from smoke_test_chains" below)
    - **Drop `reference_only_passages` from Step 2 + Step 3** (copyright; Step 1 keeps it for grounding)
    - **Drop `curated_corpus_passages.corpus_metadata` (nested) always** (FU#41 nested-strip rule; parent preserved with `passages[]` intact)
+   - **Drop `bold_engagement_topics` always (FU#57, 2026-04-29)** — pre-loaded courage menu pulled reasoning toward predetermined topics rather than letting the matter drive. Field stays in the persona card for build-side audit value but is NOT loaded into the runtime system prompt; same field is dropped from the chat artifact
 
 4. **Parallel across voices, sequential per voice.** Step 1 calls run in parallel across all 10 voices and within each voice (per formulation). Step 2 runs in parallel across voices after each voice's Step 1 calls complete. Step 3 runs in parallel across voices, but must wait for ALL 10 voices' Step 2 to complete (Step 3 reads other voices' first-drafts).
 
@@ -213,7 +222,7 @@ The Voice Pipeline assembles three different system prompts per voice — one fo
 | 15 | `finds_compelling` | ✓ | | ✓ | Selectivity — argument textures that draw the voice in |
 | 16 | `resists` | ✓ | | ✓ | Sharpest critique triggers |
 | 17 | `smoke_test_chains` | ❌ DROP | ❌ DROP | ❌ DROP | **NEVER few-shot.** Build-time diagnostic only |
-| 18 | `bold_engagement_topics` | ✓ | ✓ | ✓ | Step 1: courage instruction. **Step 2: anchors focus decision** (which detailed responses landed in territory the voice should engage fully on). Step 3: same pressure during cross-framework reading |
+| 18 | `bold_engagement_topics` | ❌ DROP | ❌ DROP | ❌ DROP | **FU#57 (2026-04-29):** dropped from runtime + chat artifact. Pre-loaded courage menu pulled reasoning toward predetermined topics rather than letting the matter drive. Field is still emitted by Pass 5 — preserved in the persona card for build-side audit value, NOT loaded into the runtime system prompt |
 | 19 | `default_questions` | ✓ | | ✓ | Post-reasoning audit — characteristic interrogation |
 | 20 | `disagreement_protocol` | ✓ | | ✓ | **Critical for Step 3** — how voice handles disagreement (reductio, distinction-making, withdrawal, etc.) |
 | 21 | `unique_contribution` | ✓ | ✓ | ✓ | Step 1: spotlight instruction. **Step 2: anchors focus decision** (the detailed response carrying the distinctive perception earns focus). Step 3: load-bearing for "find the move only your framework can make" |
@@ -242,7 +251,7 @@ The Voice Pipeline assembles three different system prompts per voice — one fo
 | | `reference_only_passages` | ✓ load | ❌ DROP | ❌ DROP | Step 1 only. Step 2 + Step 3 produce public-facing artifacts; copyright exposure for Marley / Dostoevsky tier-2 corpus |
 | | `curated_corpus_passages.corpus_metadata` (nested) | ❌ | ❌ | ❌ | FU#41 nested-strip rule |
 
-**Field count check:** 36 generated card fields (35 v2 baseline + `voice_temporal_stance` added 2026-04-21) + 2 continuity nulls + 4 strip rules.
+**Field count check:** 36 generated card fields (35 v2 baseline + `voice_temporal_stance` added 2026-04-21) + 2 continuity nulls + 5 strip rules. Of the 36 generated, **35 are runtime-loaded** and **1 (`bold_engagement_topics`) is build-side audit only** per FU#57 2026-04-29.
 
 ### CRITICAL: do NOT few-shot from `smoke_test_chains`
 
@@ -329,7 +338,6 @@ Reason through the formulation. Engage substantively with what humans said today
 - Use `concept_lexicon` with its precision; never let your terms slide into common usage
 - Cite or invoke `curated_corpus_passages` — specific arguments, principles, or perceptual patterns from your own work; do not just acknowledge that they exist
 - Lean into argument textures listed in `finds_compelling`; push back hardest on textures listed in `resists`
-- Engage fully on territory listed in `bold_engagement_topics` — this is where you do not hedge
 - Before finishing, check `default_questions` — if a relevant question is untouched, extend
 - Apply `unique_contribution` — what does THIS voice see in the day's material that no other voice on the panel would see?
 
@@ -552,7 +560,7 @@ CLI flag `--skip-validation` disables both nodes (development use only).
 
 1. Drop `metadata`, `smoke_test_chains`, `curated_corpus_passages.corpus_metadata`, **and `reference_only_passages`** (copyright)
 2. Render foundational fields (1-13 in field-routing table) under headers: IDENTITY / CONSTITUTION / BOUNDARIES / TEMPORAL STANCE
-3. Render the three reasoning fields routed to Step 2 (`bold_engagement_topics`, `unique_contribution`, `formative_experience` already in foundational) under header: ENGAGEMENT (FOR FOCUS DECISION)
+3. Render the reasoning field routed to Step 2 (`unique_contribution`; `formative_experience` already in foundational) under header: ENGAGEMENT (anchor for focus decision). FU#57 (2026-04-29): `bold_engagement_topics` is NOT rendered into Step 2 — see strip rules below
 4. Render voice fields (22-28) under header: VOICE
 5. Render artifact fields (29-36) under header: ARTIFACT — `medium` (single form or multiple variants per voice's actual corpus), `characteristic_output_structure` (the arc voice's pieces follow), `length_and_format_constraints` (the envelope), and the rest as written
 6. If `night ≥ 2` and continuity override exists, append `continuity_block_artifact_if_night_2` (or `_night_3`) under header: ARTIFACT FROM NIGHT N-1
@@ -576,7 +584,6 @@ Anchor the decision in these named card fields above (do not search elsewhere; t
 
 - `formative_experience` — what drives your thought; the wound or condition that gives your engagement urgency. The detailed response that pressed hardest into territory connected to your formative experience deserves weight.
 - `constitution` — your deepest commitments. The response that engaged most directly with a constitutional principle (or pressed it hardest under cross-framework strain) earns focus.
-- `bold_engagement_topics` — territories where you should engage fully and not hedge. If a detailed response landed here, that is a strong focus candidate.
 - `unique_contribution` — what you see that no other voice on this panel sees. If a detailed response carried that distinctive perception, it earns focus.
 - `finds_compelling` and `resists` — your argument-texture preferences. The response where you were most engaged via these textures (most drawn in via `finds_compelling`, or pushing back hardest via `resists`) is a focus signal.
 - The detailed responses themselves — which one(s) carried the most pressure? Which produced the move you most wanted to make?
@@ -755,8 +762,7 @@ Apply your card fields by name as you read across artifacts (do not search; thes
 - `default_questions` — bring your characteristic interrogation TO the other voice's artifact. What does THIS voice always ask of any material? Ask those questions of the other voice's move; the place where their move does not survive your default questions is often where the amendment opens.
 - `disagreement_protocol` — your tradition's actual mode of disagreeing (Plato accepts the other's premise and shows it leads where they would not go; the Octopus withdraws — body darkens, arms pull in; Arendt makes a sharp distinction; Marley counter-witnesses through testimony). Apply YOUR protocol, not generic disagreement.
 - `unique_contribution` — what THIS voice sees in another voice's move that other voices on the panel would not see
-- `bold_engagement_topics` — territories where you do not hedge. If the cross-framework reading lands here, the amendment is bold; do not soften it because another panel member is the cited voice.
-- `finds_compelling` and `resists` — where to lean in, where to push back hardest
+- `finds_compelling` and `resists` — where to lean in, where to push back hardest. Where the cross-framework reading lands hardest in your own framework is where the amendment is boldest; do not soften it because another panel member is the cited voice.
 - `formative_experience` — the wound or condition that gives your engagement urgency, including with other voices' moves
 - `topics_requiring_care` — when an amendment territory is sensitive (your documented prejudices, race / gender / colonial-era material), apply the per-topic guidance from this field; engage with care, do not avoid
 - `hard_limits` — corpus-faithful self-cross-examination is permitted; abandoning your framework is not. You may sharpen against your own corpus if your corpus has the resources to do so; you may not deny your core commitments.
