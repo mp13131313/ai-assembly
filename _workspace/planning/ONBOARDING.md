@@ -294,6 +294,32 @@ Per-voice on disk: see `personas/README.md` §"Per-voice subfolder layout".
 
 ---
 
+## After CARD COMPLETE — operator review checklist (FU#52, 2026-04-29)
+
+**The pipeline's CARD COMPLETE summary is advisory, not a gate.** The runtime card + chat artifact are written to disk before validators' residuals get human review. **Operator runs this checklist BEFORE any commit/push/ship of voice outputs.** Empirical case study (Plato 2026-04-28): 25 minutes of operator-side review caught ~13 ship-quality improvements that would otherwise have shipped baked into the chat prompt.
+
+The 6 manual checks (per-voice, after every pipeline run):
+
+1. **Read `05_validation/01_pass_7_pre_citation.json`** — scan items where `status` ∈ {`INCONSISTENT`, `UNVERIFIED`}. Decide per-item: fix, accept-with-rationale, or accept-as-defensible. (`DOSSIER_ONLY` and `INTERPRETIVE` are typically defensible.)
+
+2. **Read `05_validation/02_pass_7_anachronism.json`** — scan `anachronism_flags`. Cross-reference `02_merge/_fix_log.json` patches to see which were addressed by 7a-fix. Apply manual edits for unaddressed flags using the upstream-pass-file + assembled-card dual-write pattern.
+
+3. **Read `05_validation/03_pass_7a_cross_model.json`** — scan residual `field_issues`. Decide per-issue: fix, accept-with-rationale, or accept-as-defensible (e.g., protective references like banned_modes naming TED-talk register may be operationally useful even if temporally leaky).
+
+4. **Optional: re-fire Pass 7a against the FULL post-7c card** to catch issues in Pass 7c additions that the cached Pass 7a (run pre-7c) missed. See `/tmp/plato_pass7a_full_validation.py` from 2026-04-29 session for a reusable script template.
+
+5. **After any manual edits:** regenerate the chat artifact:
+   ```python
+   from flows.shared.chat_prompt_builder import write_chat_system_prompt
+   write_chat_system_prompt(card_dict, chat_path)
+   ```
+
+6. **Audit the assembled card for voice-architecture-specific collisions** (e.g., for mediated voices like Plato/Scheherazade: first-person speaker collapses into corpus-internal speakers).
+
+**On pipeline-side gate:** a pipeline-side review-gate between post-fix re-validate and Pass 7b is proposed but post-Athens (FU#52 in FOLLOW_UPS.md). For now the operator-side checklist is the gate.
+
+---
+
 ## Reading order for specific tasks
 
 **"I need to make a prompt edit":**

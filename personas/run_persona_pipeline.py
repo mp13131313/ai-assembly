@@ -1293,7 +1293,16 @@ if pass7a["result"].get("overall") == "REVISION_NEEDED" and not fix_log_path.exi
     write_json_atomic(fix_log_path, fix_log)
 
     if fix_log["patches_applied"] > 0:
-        # Patches landed — invalidate downstream + re-fire validators once
+        # Patches landed — invalidate downstream + re-fire validators once.
+        # FU#52 sub-item: chat_system_prompt MUST be in this list. The chat
+        # artifact is built from the assembled card at end-of-pipeline; if a
+        # run is interrupted between fix-pass and end, a stale chat prompt
+        # could persist that mismatches the patched assembled card. The chat
+        # artifact is the operator-facing paste-target for runtime — the
+        # silently-stale failure mode is high-risk.
+        _chat_prompt_path_for_invalidation = (
+            _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "03_chat_system_prompt.json"
+        )
         for p in [_paths.pass_7_pre(SLUG, PROJECT_ROOT),
                   _paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
                   _paths.pass_7a(SLUG, PROJECT_ROOT),
@@ -1302,7 +1311,8 @@ if pass7a["result"].get("overall") == "REVISION_NEEDED" and not fix_log_path.exi
                   _paths.derive_raw(SLUG, PROJECT_ROOT),
                   _paths.assembled_card(SLUG, PROJECT_ROOT),
                   _paths.provocateur_profile(SLUG, PROJECT_ROOT),
-                  _paths.evaluation_rubric(SLUG, PROJECT_ROOT)]:
+                  _paths.evaluation_rubric(SLUG, PROJECT_ROOT),
+                  _chat_prompt_path_for_invalidation]:
             if p.exists():
                 p.unlink()
 
