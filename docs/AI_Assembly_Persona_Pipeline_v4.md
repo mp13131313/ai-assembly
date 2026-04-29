@@ -24,8 +24,11 @@ The v3.10 spec describes a monolithic Pass 1-merge plus six generation passes pl
 | **Pass 7-pre** | Single-shot Sonnet call (hit 128K output ceiling) | **3-stage chunked**: Stage 1 extract → Stage 2 verify N parallel batches → Stage 3 boddice tag check (FU#2) | flows/shared/pass_7pre_chunked.py |
 | **Pass 7a-FIX** | — | **NEW**: linear patcher (FU#13) — single Opus call emits surgical JSON patches; replaced revision loop. Cost $1 vs $5–10 per loop | run_persona_pipeline.py:1080–1326 |
 | **Pass 7-anachronism** | — | **NEW**: dedicated TimeChara temporal check before Pass 7a; merges into 7a `field_issues` | persona_pass_7_anachronism.md |
-| **Chat artifact** | — | **NEW (FU#41)**: 4th Derive output — `06_derive/03_chat_system_prompt.json` for Claude project paste-target. Strips 11 fields | flows/shared/chat_prompt_builder.py |
-| **Card field generation patterns** | Static field specs | **Family-of-forms in Pass 4b** (default form + 3-6 native variations per voice); **49D Position-B corpus-faithful self-cross-examination preamble** in Pass 2 `hard_limits` + hedge discipline; **49A generativity-permitting Pass 4b** (preserve-trace-tensions, length variance 350-1500, at-least-one-generativity-criterion); **anti-generic-register banned_mode** in Pass 4a (form-family discipline); **FU#49H/I/J/K/L reverted** 2026-04-28 after empirical signal showed framework-edge-marking-as-signature tic | Card v2.1 §H + §J |
+| **Chat artifact** | — | **NEW (FU#41)**: 4th Derive output — `06_derive/03_chat_system_prompt.json` for Claude project paste-target. Strips 12 fields (refreshed FU#57 2026-04-29 — bumped from 11) | flows/shared/chat_prompt_builder.py |
+| **Card field generation patterns** | Static field specs | **49D Position-B corpus-faithful self-cross-examination preamble** in Pass 2 `hard_limits` + hedge discipline (LANDED 2026-04-27, retained); **family-of-forms in Pass 4b + 49A v1 generativity-permitting Pass 4b + anti-generic-register banned_mode in Pass 4a — REVERTED 2026-04-28** (commit `9480d3a`, empirical chat-test texture loss vs 2026-04-25 baseline); **FU#49A v2 quality_criteria 3-dim field-tied scaffold** rebuilt 2026-04-29 (commit `0ca02f5`) over a 15-test exemplar journey — only piece of the 04-28 stack to land cleanly | Card v2.1 §H + §J + FOLLOW_UPS.md FU#49A |
+| **Review-gate refactor (FU#53)** | — | **NEW 2026-04-29**: Pass 7a FINAL post-assembly + operator review gate hard-stop. Catches cross-pass contradictions invisible to per-pass 7a (e.g., banned_language Jowett-rejection vs corpus Jowett-use). In-pipeline post-fix 7a re-fire dropped (coverage promoted to 7a FINAL). +365 / -143 LOC. | run_persona_pipeline.py + paths.pass_7a_final + paths.operator_review_flag |
+| **Chat artifact invalidation gap (FU#52)** | Latent silent-staleness window | **CLOSED 2026-04-29** (commit `c40419c`): chat_system_prompt path added to 7a-fix downstream invalidation list | run_persona_pipeline.py:7a-fix |
+| **bold_engagement_topics runtime drop (FU#57)** | Runtime field across Step 1+2+3 + chat | **NEW 2026-04-29** (commit `8887af0`): dropped from runtime system prompts (card_assembly.py + voice_step1/2/3 closing prompts) + chat artifact (chat_prompt_builder strip set). Pre-loaded courage menu pulled reasoning toward predetermined topics; chat-test on Plato performed better stripped. Field still emitted by Pass 5 — kept in card for build-side audit value | runtime/flows/voice/card_assembly.py + chat_prompt_builder.py |
 | **Voice temporal stance** | Single-mode "fluid across time" framing | **Voice-IN-the-present (cryofreeze-arrival) framing 2026-04-28**: voice has been brought to Athens 2026 (the conference's days), references its life as past from this present-anchored perspective; mental "now" is the conference; KNOWLEDGE HORIZON is voice's life-end / experiential completion; voice is LEARNING at the conference about what happened in the gap | Card v2.1 §J |
 | **Tense discipline** | — | **NEW 2026-04-28**: across Pass 2/3/4a/4b/5 OUTPUT REGISTER blocks. Voice's framework / tools / methods / forms / ways of reasoning are PRESENT-tense (voice carries these to the conference and uses them now). Voice's life-events / biographical works / historical context are PAST-tense (voice remembers these from the present-anchored perspective) | Card v2.1 §J |
 | **Pass 7a routing guard** | — | **NEW (FU#51 2026-04-27)**: Python guard in `_pass_7a_fix` walks pass-output files, rewrites `flagged_pass` to where the field actually lives; Pass 7a prompt tightened with authoritative field → pass mapping | flows/shared/patch_walker.py:resolve_field_to_pass() |
@@ -292,13 +295,13 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 
 ### Pass 4b — Artifact
 
-- **System:** `persona_pass_4b_artifact.md` (207 lines). **User:** `persona_pass_4b_user.md` (16 lines).
+- **System:** `persona_pass_4b_artifact.md` (130 lines, 2026-04-29 state). **User:** `persona_pass_4b_user.md` (17 lines).
 - **Inputs:** `pass_2_3_4a_summary` + `rhetorical_mode`, `characteristic_moves`, `register_and_tone` from Pass 4a.
 - **Outputs:** `medium`, `characteristic_output_structure`, `length_and_format_constraints`, `technical_capabilities`, `relationship_to_detailed_response`, `aesthetic_qualities`, `stance_tendency`, `quality_criteria`.
-- **Active patterns (2026-04-28 state):**
-  - **FU#49A** retained: generativity-permitting prompt (preserve-trace-tensions) + `length_and_format_constraints` variance 350–1500 + at-least-one-generativity-criterion in `quality_criteria`.
-  - **Family-of-forms emission** in `medium`, `characteristic_output_structure`, `length_and_format_constraints` (Card v2.1 §H): each voice emits its default form + 3–6 native variations from its corpus repertoire; voice picks per matter; HARD CONSTRAINT against dropping into modern panel-discussion / essayistic / generic-conversational register that abandons recognizability.
-- **REVERTED 2026-04-28**: FU#49J's specific 5-fidelity-+-2-generativity criterion shape (reverted to FU#49A's at-least-one-generativity-criterion form). Criterion 7 strain-marking-visible removed.
+- **Active patterns (refreshed 2026-04-29 state):**
+  - **System prompt at commit `0ca02f5` = revert-to-582af96 baseline + FU#49A v2 quality_criteria refinement.** All other FU#49A/J content + family-of-forms emission + cryofreeze tense discipline were REVERTED on commit `9480d3a` (2026-04-28 evening) due to empirical chat-test texture loss vs. 2026-04-25 baseline. See FOLLOW_UPS.md FU#49A entry for the full revert + v2 redesign trail.
+  - **FU#49A v2 quality_criteria** (2026-04-29, BLOCK 2 of Pass 4b system prompt): 3-5 testable criteria, each criterion tests 1-n named card fields, "Could this be mine?" overarching test across 3 dimensions: REASONING (`reasoning_method`/`constitution`/`concept_lexicon`), VOICE (`rhetorical_mode`/`characteristic_moves`/`register_and_tone`/`metaphorical_repertoire`), FORM (`medium`/`characteristic_output_structure`/`aesthetic_qualities`/`stance_tendency`). "Consult as needed" framing — LLM uses field list as scaffolding, extends to non-listed fields when warranted. Replaced v1's procedural-mandate ("5 fidelity + 2 generativity") that produced checkbox satisfaction. Empirical validation: Plato re-run produced 5 field-named criteria including organic trace-preservation criterion #5 ("has the piece done the elenctic work, or merely reported that such work could be done").
+  - **Family-of-forms (Card v2.1 §H) is currently NOT in the prompt** — describes architectural intent; reverted alongside the 04-28 stack. FU#55 schedules empirical re-test on Cleopatra build. See Card v2 §H amendment for status detail.
 - `max_tokens=24000`.
 
 ### Pass 5 — Engagement
@@ -384,7 +387,15 @@ System: `persona_pass_7a_fix.md` (147 lines). User: `persona_pass_7a_fix_user.md
 
 `flows/shared/patch_walker.apply_patch_in_place()` applies each patch (`{pass_id, field_path, new_value, rationale}`) to in-memory dict + writes cache file.
 
-After applying patches: invalidates pass7pre/7anach/7a/7b/7c/derive_raw/assembled_card/provocateur/rubric caches; **re-fires validators once** (Pass 7-pre, 7-anachronism, 7a). Fix log: `02_merge/_fix_log.json`.
+**FU#52 + FU#53 update (2026-04-29):** after applying patches, invalidation list extended:
+- `pass7pre`, `pass7anach`, `pass7b`, `pass7c`, `derive_raw`, `assembled_card`, `provocateur`, `rubric` (existing)
+- `pass_7a_final` (FU#53 — new post-assembly validator, see below)
+- `operator_review_flag` (FU#53 — gate state)
+- `chat_system_prompt` (FU#52 — closes silent staleness window if a run is interrupted between fix-pass and end-of-pipeline)
+
+`pass_7a` (the per-pass version) is **NOT** invalidated — its pre-fix verdict is preserved as build-time provenance for the operator triage summary. The post-fix verification happens at Pass 7a FINAL further downstream.
+
+**Re-fires validators once:** Pass 7-pre + Pass 7-anachronism. The in-pipeline Pass 7a re-fire was DROPPED in FU#53 — comprehensive coverage is promoted to Pass 7a FINAL post-assembly. Fix log: `02_merge/_fix_log.json`. `post_fix_verdict` field is set to `"deferred_to_7a_final"`.
 
 **Cost:** ~$1 per voice vs ~$5–10 per loop in v3.10 surgical revision. **Why it works better than the v3.10 loop:** writer Opus + thinking + critique tends to expand rather than trim; surgical patches operate on field paths only, no rewriter context.
 
@@ -407,6 +418,25 @@ System: `persona_pass_7c_negative.md` (102 lines, parameterized by `claude_fallb
 
 **Output:** `05_pass_7c_negative.json`. **Overwrites** `banned_language` + `banned_modes` from Pass 4a seeds with refined lists. Why Gemini primary: cross-model bias check catches Claude-specific phrasings Claude itself wouldn't flag.
 
+### Phase 3.5 (FU#53 2026-04-29) — Skeleton assemble + Pass 7a FINAL + Operator review gate
+
+After Pass 7c, before Phase 4, three new stages execute:
+
+**1. ASSEMBLE (skeleton)** — `run_persona_pipeline.py:_build_assembled_card_dict()` writes `07_persona_card_assembled.json` with skeleton metadata (no Derive output yet, validation_status `"pre_7a_final_pending"`). Gated on file presence: if the assembled card already exists on disk (operator patches from a prior run), the skeleton write is skipped — preserves operator edits across re-runs.
+
+**2. Pass 7a FINAL** — `_pass_7a_final()`. Mirrors the per-pass `_pass_7a` but reads the assembled card from disk + strips the standard EXCLUDE set (metadata, smoke_test_chains, reference_only_passages, continuity blocks, voice routing fields). Same OpenAI-ladder + Gemini-fallback as the per-pass 7a. Output: `05_validation/06_pass_7a_final.json`.
+
+**Why post-assembly is structurally different from per-pass:** the per-pass 7a validates Pass 4a / Pass 6 / etc. in isolation. Pass 7a FINAL sees the FULL assembled card with Pass 7c's banned_language/banned_modes replacements integrated and Pass 7b's smoke_test_chains in place. Catches **cross-pass contradictions invisible to the per-pass view** — proven on Plato 2026-04-29 where Pass 7a FINAL caught: banned_language Jowett-rejection vs. curated_corpus_passages Jowett-use; corpus_metadata source_count = 7 (actual 4); leftover `[ADDED FROM TESTING…]` operator-patch annotations across banned_modes/banned_language.
+
+**3. OPERATOR REVIEW GATE** — hard `sys.exit(0)` if `pass7a_final.overall == "REVISION_NEEDED"` AND `_operator_review_passed.flag` does NOT exist. Prints clear instructions:
+
+- (a) Re-validate after patching: `rm 06_pass_7a_final.json && rerun pipeline`
+- (b) Accept residuals & proceed: `touch _operator_review_passed.flag && rerun pipeline`
+
+The operator patches the assembled card directly (`07_persona_card_assembled.json`); on re-run, the skeleton write skips (file exists), Pass 7a FINAL fires fresh against the patched card, gate releases when verdict clean OR flag present. Path helpers: `paths.pass_7a_final()` + `paths.operator_review_flag()`.
+
+**Why this stage exists:** prior to FU#53, post-fix residuals propagated silently into Derive + chat artifact. Operator-side audit (per FU#52 ONBOARDING checklist) caught them but had no control-flow primitive. FU#53 promotes the operator-review checklist to a first-class pipeline gate.
+
 ---
 
 ## Phase 4: Derived Outputs
@@ -425,8 +455,8 @@ Files: `06_derive/{00_derive_raw, 01_provocateur_profile, 02_evaluation_rubric}.
 
 `flows/shared/chat_prompt_builder.py:write_chat_system_prompt()`. Pure Python — no LLM. After CARD COMPLETE.
 
-**Strips 11 items** from assembled card:
-- **Amendment A — chat-incompatible (5 top-level):** `metadata`, `smoke_test_chains`, `reference_only_passages`, `continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`.
+**Strips 12 items** from assembled card:
+- **Amendment A — chat-incompatible (6 top-level):** `metadata`, `smoke_test_chains`, `reference_only_passages`, `continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`, **`bold_engagement_topics`** (FU#57 2026-04-29 — pre-loaded courage menu pulls reasoning toward predetermined topics; chat-test on Plato performed better stripped; field stays in card for build-side audit value).
 - **Amendment B — spec-shell meta (5 top-level):** `voice_name`, `voice_mode`, `pipeline_version`, `generated_date`, `council_member_name`.
 - **1 nested:** `curated_corpus_passages.corpus_metadata` (parent preserved with `passages[]` intact).
 

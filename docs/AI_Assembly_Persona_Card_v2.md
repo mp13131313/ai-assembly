@@ -115,7 +115,9 @@ The following are **NOT** in v2 / v2.1 — flagged for post-Athens consideration
 
 This refinement preserves the briefing's "form is already content; medium of each voice matters" — modal diversity ACROSS voices stays (Plato dialogue-family vs Marley song-family vs Octopus body-family) — while permitting the voice to vary WITHIN its own form-family per matter. The artifact must still pass briefing Layer 2: *"could a well-read human essayist have arrived here?"* Voice in family-of-forms answers NO. Voice in generic register answers YES — and fails Layer 2.
 
-Implementation: Pass 2 `voice_temporal_stance.default` redesigned for arrives-at-Athens-with-full-canonical-experience framing (commit `8edaf29` + 2026-04-28 refinement); Pass 4b `medium` / `characteristic_output_structure` / `length_and_format_constraints` field-specs updated to require family-of-forms emission; Pass 4a `banned_modes` adds anti-generic-register universal entry.
+**Implementation status (refreshed 2026-04-29):** the family-of-forms emission was landed in Pass 4b prompts on commit `e6fc634` (2026-04-28) but **reverted on commit `9480d3a` (2026-04-28 evening)** — empirical chat-test on Plato showed cumulative prompt additions (FU#49 stack + cryofreeze framing + family-of-forms) had degraded artifact texture relative to the 2026-04-25 shipped baseline. Current prompts (Pass 4b at commit `0ca02f5`, Pass 2/3/4a/5 at `125d4c5` revert) describe `medium` as "one phrase," NOT default-form-plus-variations. Likewise the Pass 4a anti-generic-register `banned_modes` hard constraint was reverted alongside.
+
+This §H amendment therefore describes the **architectural intent** rather than the current implementation. The empirical question "does family-of-forms cost texture, or did the cooccurring cryofreeze + tense additions cause the loss?" is unresolved — Plato declined the offer in a 2026-04-29 standalone test (his corpus is genuinely single-form-dominated) so the test wasn't conclusive. **FU#55** schedules the real test on Cleopatra (genuinely multi-form corpus: prostagma + ordinance + embassy speech + ritual). If she exercises the permission cleanly without texture loss, family-of-forms re-lands prompt-side; otherwise the spec stands as aspirational.
 
 ### J. Voice-IN-the-present + tense discipline (2026-04-28)
 
@@ -939,17 +941,16 @@ reasoning.
 
 **Fidelity:** The self-check — how the voice evaluates its own artifact before delivery. This is the expression-side equivalent of the constitution's self-critique function.
 
-**Intrigue:** Each criterion is a test of whether the artifact achieves what it should. "Could this have been a lost fragment from a Platonic dialogue?" is a high bar that pushes the model toward genuinely characteristic output.
+**Intrigue:** Each criterion is a test of 1–n named card fields. The criteria collectively should answer "Could this be mine?" across reasoning, voice, and form. The 3-dim field-tied scaffold (FU#49A v2, 2026-04-29) replaces the prior "Could this have been a lost fragment?" corpus-resemblance test — that v1 framing pulled the model toward pastiche-of-existing-corpus rather than method-in-action. Field-tied criteria force the artifact to demonstrate the specific reasoning_method, characteristic_moves, register, and form that make it THIS voice's, regardless of whether the matter is one the corpus already addressed.
 
-**Therefore:** How you know the artifact is good. 3–5 specific, testable criteria. These should be demanding — the bar that separates "adequate persona output" from "artifact worth reading at breakfast."
+**Therefore:** How you know the artifact is good. 3–5 specific, testable criteria. Each criterion tests 1–n card fields by name (single field, or compounded with and/or logic). The criteria collectively should answer "Could this be mine?" across REASONING (`reasoning_method`, `constitution`, `concept_lexicon`), VOICE (`rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `metaphorical_repertoire`), and FORM (`medium`, `characteristic_output_structure`, `aesthetic_qualities`, `stance_tendency`). The "consult as needed" framing gives the LLM appropriate freedom: use the field list as scaffolding, extend to non-listed fields when warranted.
 
 **Where it appears:** Step 2 only: "Quality criteria — your artifact must meet these."
 
-**Sample (Plato):**
-> (a) Could this have been a lost fragment from a Platonic dialogue? (b) Does the argument advance through questions rather than assertions? (c) Does the reader arrive at an insight they didn't start with? (d) Would a philosophy-literate reader find it engaging rather than "chatbot Plato"?
+**Sample (Plato, generated under FU#49A v2 2026-04-29):**
+> (1) Does the piece honor `rhetorical_mode` by letting the matter come to light through named persons in a particular place, with no doctrine delivered in my own name? (2) Do at least two of my `characteristic_moves` operate visibly — the ti esti question, the holding of aporia, the turn to tale at logos's edge, the midwife's stance, the brachylogia of short exchange — without being labeled? (3) Does `register_and_tone` hold: conversational rhythm, particles and small noises preserved, irony and earnestness inseparable? (4) Does the `characteristic_output_structure` land the reader in aporia or in a likely tale, rather than in a settled thesis the reader is asked to accept? (5) Could a careful reader walk away with the question sharpened — has the piece done the elenctic work, or has it merely reported that such work could be done?
 
-**Sample (Octopus):**
-> (a) If you removed all propositional content, would something meaningful remain? (b) Does it create encounter — confronting non-human intelligence? (c) Strange enough to talk about at breakfast? (d) Resists easy paraphrase?
+The Plato sample shows the design intent: every criterion names the field it tests; criterion (5) is a trace-preservation test that emerged organically from the field-tied framing without procedural mandate.
 
 ---
 
@@ -1006,7 +1007,7 @@ reasoning.
 | 15 | finds_compelling | Reasoning | ✓ | |
 | 16 | resists | Reasoning | ✓ | |
 | 17 | smoke_test_chains | Reasoning | ❌ DROP | ❌ DROP |
-| 18 | bold_engagement_topics | Engagement | ✓ | ✓ (Voice Pipeline v2: anchors focus decision) |
+| 18 | bold_engagement_topics | Engagement | ❌ DROP (FU#57 2026-04-29) | ❌ DROP (FU#57 2026-04-29) |
 | 19 | default_questions | Engagement | ✓ | |
 | 20 | disagreement_protocol | Engagement | ✓ | |
 | 21 | unique_contribution | Engagement | ✓ | ✓ (Voice Pipeline v2: anchors focus decision) |
@@ -1032,11 +1033,11 @@ reasoning.
 
 **Foundational (both steps):** 13 fields (Identity 5, Constitution 3, Boundaries 5 — including `voice_temporal_stance`)
 **Step 1 only:** 6 fields (Reasoning 3 + Engagement 2 [`default_questions`, `disagreement_protocol`] + Continuity 1)
-**Step 1 + Step 2 + Step 3 (added per Voice Pipeline v2):** 2 fields (`bold_engagement_topics`, `unique_contribution`) — these anchor Step 2's focus decision and Step 3's cross-framework reading; routing extended in the Voice Pipeline doc
+**Step 1 + Step 2 + Step 3 (anchor focus + cross-framework reading):** 1 field (`unique_contribution`) — anchors Step 2's focus decision and Step 3's cross-framework reading; routing extended in the Voice Pipeline doc. **FU#57 2026-04-29:** `bold_engagement_topics` was previously routed here too but is now ❌ DROP across all Voice Pipeline steps + chat artifact (empirical chat-test observation: pre-loaded courage menu pulls reasoning toward predetermined topics rather than letting the matter drive). Field is still emitted by Pass 5 — kept in the persona card for build-side audit value, but does NOT load into the runtime system prompt.
 **Step 2 only:** 16 fields (Voice 7, Artifact 8, Continuity 1)
-**Drop list (always):** `metadata`, `smoke_test_chains`, `curated_corpus_passages.corpus_metadata` (nested)
+**Drop list (always):** `metadata`, `smoke_test_chains`, `curated_corpus_passages.corpus_metadata` (nested), `bold_engagement_topics` (FU#57 2026-04-29)
 **Drop list (Step 2 + Step 3, per Voice Pipeline v2):** `reference_only_passages` (copyright)
-**Total generated fields: 36 + 2 continuity nulls = 38 entries in the assembled card**
+**Total generated fields: 36 + 2 continuity nulls = 38 entries in the assembled card.** Of the 36 generated fields, 35 are runtime-loaded (1 — `bold_engagement_topics` — is build-side audit only per FU#57).
 
 ---
 
