@@ -42,7 +42,33 @@
 
 ## Follow-ups (not for the v2.1 align branch)
 
-### High priority — Athens-blocking-eligible
+### URGENT — Step 3 redesign from briefing (operator decision late-evening 2026-04-29)
+
+Step 3 to be redesigned from scratch tomorrow, working directly from `docs/AI_Assembly_Briefing_v3_1.md` as canonical source. **FU#49E framing dropped** — and the broader reviewer-pass family that informed it is no longer the design intent to follow.
+
+What's affected (provisional, not target-shape):
+- `runtime/flows/shared/prompts/voice_step3_amendment.md` — current prompt is built from FU#49E verbatim
+- `runtime/flows/voice/step3_amended_artifact.py` — output schema (`amendments[]`, `cited_voice`, `cited_passage`, `amendment_type`) may need rethinking
+- `docs/AI_Assembly_Voice_Pipeline.md` § Step 3 — reflects FU#49E framing throughout; needs revision after fresh design lands
+- `responded_to_graph` derivation (`voice_flow.py:_build_responded_to_graph`) — may need re-shaping
+- Dry-run #4's Step 3 artifacts demonstrate mechanics work, NOT target shape
+
+What's NOT affected (stays validated):
+- Step 1 + Step 2 mechanics + prompts + outputs
+- Card → system prompt assembly, validation ladder, continuity scaffolding, publish layer
+- Convention A, temperature compliance + display: summarized
+
+Briefing seed material for tomorrow's design (line refs into `docs/AI_Assembly_Briefing_v3_1.md`):
+- L91: *"Constitute the collective at specific moments... at Step 3 (artifact-level inter-voice response, overnight, constrained to shared themes) and at the closing show..."*
+- L167: *"The Assembly is therefore a lattice of overlapping theme-groups: each theme engaged by 2–8 voices, each voice engaging ~3 themes, the overlaps creating the deliberation structure for Step 3."*
+- L177: *"Each voice reads the artifacts of the other voices it shares at least one theme with, pointed at the shared-theme portions. The voice decides whether to amend: sharpen a disagreement, integrate a stronger framing, or leave its artifact unchanged. Amendments are visible — they reference the other voice so the amendment reads as responsive. A metadata flag records who amended in response to whom."*
+- L179: *"This is where the Assembly's collective character is constituted overnight... The published set is responsive to itself."*
+- L181: *"Steps 1 and 2: AI_Assembly_Voice_Pipeline.md. **Step 3 requires specification before Athens.**"*
+- L238: *"...mapped disagreement space with visible clusters and empty quadrants — closer to what deliberation theory recognises as collective output than a list of twelve monologues."*
+- L262: *"Step 3 amendments may show more inter-voice dialogue."*
+- L292: *"Step 3 specification. System prompt template, input format, output format, timing, integration with Voice Pipeline."*
+
+### High priority — Athens-blocking-eligible (the rest)
 
 - **Multi-voice + multi-night dry-runs** — Step 3 + Continuity have **never been exercised end-to-end**. Need:
   - Plato + Cleopatra (once Cleopatra is finalized) for Step 3 amendment cross-voice traffic

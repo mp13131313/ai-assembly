@@ -7,9 +7,32 @@
 
 ---
 
-## TL;DR
+## URGENT — for tomorrow's session: Step 3 redesign
 
-In one extended session (~7 hours), the Voice Pipeline went from "v2 spec landed but never run end-to-end" to "**Step 1 + Step 2 + Step 3 validated against real Plato and Cleopatra cards across four dry-runs**, with cross-voice amendment producing a genuine Socratic dialogue ↔ basilissa prostagma exchange." The branch carries:
+**Operator decision late-evening 2026-04-29:** Step 3 to be **redesigned from scratch** tomorrow, working directly from `docs/AI_Assembly_Briefing_v3_1.md` as canonical source. **FU#49E framing (and the broader reviewer-pass family that informed it) is dropped** — not the design intent to follow.
+
+**What this means concretely:**
+- The Step 3 implementation that landed across this session's commits (`voice_step3_amendment.md` prompt + `step3_amended_artifact.py` parser/output schema + the FU#49E-quoted "extend / mark-limit / sharpen" framing) is **provisional, not target-shape**
+- Dry-run #4's amended artifacts (Plato's Socratic dialogue addressed to Cleopatra, Cleopatra's prostagma addressed to Plato) **demonstrate Step 3 mechanics work end-to-end** but are **NOT what tomorrow's design will produce** — those artifacts are in correspondence shape; tomorrow's design works from the briefing's "amendments reference the other voice / published set is responsive to itself / collective character constituted at Step 3" formulations directly, without the FU#49E reviewer's intervening framing
+- Step 1 + Step 2 + the broader pipeline scaffolding are **validated and stay** — only Step 3's design (prompt, output schema, possibly responded_to_graph derivation, possibly the validation framing) is being redone
+
+**Briefing pointers for tomorrow:**
+- Line 91: *"Constitute the collective at specific moments, not continuously. The Assembly's collective character is constituted at Step 3..."*
+- Line 167: *"...the overlaps creating the deliberation structure for Step 3"*
+- Line 177: *"Each voice reads the artifacts of the other voices it shares at least one theme with... amendments are visible — they reference the other voice so the amendment reads as responsive."*
+- Line 179: *"This is where the Assembly's collective character is constituted overnight... The published set is responsive to itself."*
+- Line 181: *"Steps 1 and 2: AI_Assembly_Voice_Pipeline.md. Step 3 requires specification before Athens."*
+- Line 238: *"The mapped read-through does specific work against the Chwalisz/Alexander critique..."*
+- Line 262: *"Step 3 amendments may show more inter-voice dialogue."*
+- Line 292: *"Step 3 specification. System prompt template, input format, output format, timing, integration with Voice Pipeline."*
+
+The current Step 3 prompt + artifact schema can be inspected as a "what has been tried" reference, but the design moves from the briefing fresh.
+
+---
+
+## TL;DR (for the rest of the session's work)
+
+In one extended session (~7 hours), the Voice Pipeline went from "v2 spec landed but never run end-to-end" to "**Step 1 + Step 2 mechanics validated against real Plato and Cleopatra cards across four dry-runs; Step 3 mechanics also exercised but in a shape now flagged for redesign**." The branch carries:
 
 - v2.1 alignment with the 9480d3a persona-prompt revert (cryofreeze removal, validator card-driven, family-of-forms neutralized, `_unwrap_voice_temporal_stance` Athens-default fix)
 - Post-dryrun tuning (validator (c) soften, extraction-ID bookkeeping, `load_dotenv override=True`)
