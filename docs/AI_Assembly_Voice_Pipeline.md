@@ -978,7 +978,15 @@ Implementation note: same pattern as Step 1's filtering — happens in `step3_am
 - `cited_theme_id` — which shared theme the amendment is on (every amendment must be on a shared theme; if the cited move spans multiple shared themes, this is the primary one and the other appears in the same voice's other amendment entries)
 - `cited_formulation_id` — the Provocateur's per-pair ID for the cited voice's formulation (`<theme_id>__<cited_voice_slug>`). Lets you walk back: amendment → cited formulation → cited voice's grounding_extraction_ids → original session extractions.
 
-**`responded_to_graph`** entries roll up into a Night-N graph at `04_voice/responded_to_graph_night_N.json` after all 10 voices complete Step 3 — used by the closing-show pipelines for visualisation. Now includes `amendment_type` per edge so the graph can colour edges by extend / mark-limit / sharpen-disagreement.
+**`responded_to_graph`** is rolled up into a Night-N graph at `04_voice/responded_to_graph_night_N.json` after all 10 voices complete Step 3 — used by the closing-show pipelines for visualisation.
+
+**Edge derivation (post-dryrun #4 finding, 2026-04-29):** voices respond to each other holistically in prose rather than enumerating per-passage amendments. The orchestrator's `_build_responded_to_graph` therefore derives edges from each voice's `decision` + `lineage.voices_read` (baseline voice-pair edges) and decorates with per-passage detail ONLY when the voice emitted structured `amendments[]`:
+
+- **With structured amendments**: one edge per amendment, carries `amendment_type` ∈ {extend, mark-limit, sharpen-disagreement}, `theme_id`, `cited_passage`, `rationale`
+- **Without structured amendments (the common case)**: one edge per voice-pair, carries `amendment_type: "engaged"`, plus a `decision_rationale_excerpt` (≤240 chars) giving qualitative texture for downstream consumers without forcing per-passage parsing
+- **`decision: "stand-pat"`**: produces no edges (voice deliberately did not engage)
+
+This keeps the graph populated without pressuring the artifact-writing surface with metadata bookkeeping. Same design rationale as the `themes_covered` deterministic derivation: at extended-thinking + creative-prose, the artifact-writing surface is the wrong place for strict structured-output adherence; metadata is derived by the orchestrator from already-emitted fields.
 
 `form_changed_from_first_draft: true` is permitted but should be rare. If form changes, `form_change_rationale` explains what about the amendment matter required a different form.
 
@@ -1253,7 +1261,7 @@ Once `voice_flow.py` is built, dry-run against `~/Desktop/AI Assembly/archive/ru
 
 2. **`medium`-fidelity discipline.** Step 2 artifacts live within what the voice's `medium` field describes. Where `medium` is single-form (e.g. Plato's dialogue), the artifact IS that form; `selected_form` records it. Where `medium` is multi-form, `selected_form` is one of the variants the voice's corpus actually produces. Honor `banned_modes` as written in the card — the per-voice register failures the voice's corpus rules out. No drift into generic essay / modern panel-discussion register where the voice's `banned_modes` enumerates that as forbidden.
 
-3. **Step 3 amendments cite other voices.** Every `amendments[]` entry has a non-empty `cited_voice` and `cited_passage`. `responded_to_graph` resolves to actual voices on the panel.
+3. **Step 3 cross-voice engagement.** When `decision="amend"`, voices read each other and respond in their own grammar. The `responded_to_graph` populates from `voices_read` + `decision` (baseline voice-pair edges with `decision_rationale_excerpt`) and is decorated with per-passage `amendments[]` detail when voices emit structured amendments. Per-passage citations are visible IN the prose artifact regardless. Voices that stand-pat produce no edges.
 
 4. **Amendments-producing-agreement check.** For each amendment, verify the voice did one of: `extend` (framework absorbs the move with explicit extension), `mark-limit` (framework reaches its limit and acknowledges it), or `sharpen-disagreement` (voice doubles down). Amendments that smooth over disagreement are anti-useful — flag them in the manifest.
 

@@ -215,10 +215,76 @@ def _build_themes_to_voices(
 def _build_responded_to_graph(
     step3_results: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Per-night directed graph of amendment edges."""
-    edges = []
-    for s3 in step3_results.values():
-        edges.extend(s3.get("responded_to_graph", []))
+    """Per-night directed graph of cross-voice amendment engagement.
+
+    Edges are derived from each Step 3 output's `decision` +
+    `lineage.voices_read` + (when present) structured `amendments[]`.
+
+    Design (post-dryrun #4 finding): voices respond to each other
+    holistically in prose rather than enumerating per-passage
+    amendments. The voice's `amendments[]` field is therefore often
+    empty even when `decision="amend"` and the artifact substantively
+    engages other voices. To keep the graph populated without
+    pressuring the artifact-writing surface (which at extended-thinking
+    + creative-prose is the wrong place for metadata bookkeeping), we
+    derive baseline voice-pair edges from `voices_read` + `decision`
+    and decorate with per-passage detail ONLY when the voice emitted
+    structured amendments.
+
+    Edge shapes:
+      - With structured amendments: one edge per amendment, carries
+        `amendment_type` ∈ {extend, mark-limit, sharpen-disagreement},
+        `theme_id`, `cited_passage`, `rationale`
+      - Without structured amendments (the common case): one edge per
+        voice-pair, carries `amendment_type: "engaged"`, plus a
+        `decision_rationale_excerpt` (≤240 chars) giving qualitative
+        texture for downstream consumers (closing-show pipeline,
+        publish layer) without requiring per-passage parsing
+
+    Voices with `decision="stand-pat"` produce no edges (they
+    deliberately did not engage).
+    """
+    edges: list[dict[str, Any]] = []
+    for slug, s3 in step3_results.items():
+        if s3.get("decision") != "amend":
+            continue
+        # Group structured amendments by cited voice slug (when present)
+        amendments = s3.get("amendments", []) or []
+        by_voice: dict[str, list[dict[str, Any]]] = {}
+        for a in amendments:
+            target = (a.get("cited_voice_slug") or "").lower()
+            if not target and a.get("cited_voice"):
+                target = a["cited_voice"].lower().replace(" ", "_")
+            if target:
+                by_voice.setdefault(target, []).append(a)
+        voices_read = s3.get("lineage", {}).get("voices_read", []) or []
+        rationale = s3.get("decision_rationale", "") or ""
+        rationale_excerpt = (
+            rationale[:240] + ("…" if len(rationale) > 240 else "")
+        )
+        for vr in voices_read:
+            target_slug = vr.get("voice_slug")
+            if not target_slug:
+                continue
+            structured = by_voice.get(target_slug, [])
+            if structured:
+                for a in structured:
+                    edges.append({
+                        "from": slug,
+                        "to": target_slug,
+                        "amendment_type": a.get("amendment_type", "engaged"),
+                        "theme_id": a.get("cited_theme_id", ""),
+                        "cited_passage": a.get("cited_passage", ""),
+                        "rationale": a.get("rationale", ""),
+                    })
+            else:
+                edges.append({
+                    "from": slug,
+                    "to": target_slug,
+                    "amendment_type": "engaged",
+                    "theme_id": "",
+                    "decision_rationale_excerpt": rationale_excerpt,
+                })
     nodes = sorted({s3["lineage"]["voice_slug"] for s3 in step3_results.values()})
     return {"nodes": nodes, "edges": edges}
 
