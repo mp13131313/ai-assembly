@@ -116,43 +116,38 @@ def call_claude(
     use_streaming = max_tokens >= 16384 or thinking
     _t0 = time.time()
     if use_streaming:
+        # FU#60 cleanup 2026-04-29: drain text_stream + read final.content
+        # rather than walking streaming events manually. With
+        # display="summarized" thinking blocks land in final.content alongside
+        # text blocks, so a single content walk captures everything we need
+        # (text, thinking_trace, block_types). Matches runtime/flows/voice/
+        # _anthropic_call.py pattern. ~15 lines of event-walk code removed;
+        # observable behaviour identical.
+        with client.messages.stream(**kwargs) as stream:
+            for _ in stream.text_stream:
+                pass  # drain; final assembly via final.content below
+            final = stream.get_final_message()
         text_parts: list[str] = []
         thinking_parts: list[str] = []
         block_types: list[str] = []
-        usage_in = 0
-        usage_out = 0
-        stop_reason = None
-        with client.messages.stream(**kwargs) as stream:
-            for event in stream:
-                etype = getattr(event, "type", None)
-                if etype == "content_block_start":
-                    cb = getattr(event, "content_block", None)
-                    if cb is not None:
-                        block_types.append(getattr(cb, "type", "?"))
-                elif etype == "content_block_delta":
-                    delta = getattr(event, "delta", None)
-                    if delta is None:
-                        continue
-                    dtype = getattr(delta, "type", None)
-                    if dtype == "text_delta":
-                        text_parts.append(delta.text)
-                    elif dtype == "thinking_delta":
-                        # FU#60 2026-04-29: capture thinking_delta events.
-                        # Previously dropped silently — caller couldn't see
-                        # whether adaptive thinking actually fired.
-                        thinking_parts.append(getattr(delta, "thinking", "") or "")
-            final = stream.get_final_message()
-            text = "".join(text_parts)
-            thinking_trace = "".join(thinking_parts)
-            usage_in = final.usage.input_tokens
-            usage_out = final.usage.output_tokens
-            stop_reason = final.stop_reason
+        for block in final.content:
+            btype = getattr(block, "type", "?")
+            block_types.append(btype)
+            if btype == "text":
+                text_parts.append(getattr(block, "text", "") or "")
+            elif btype == "thinking":
+                thinking_parts.append(getattr(block, "thinking", "") or "")
+        text = "".join(text_parts)
+        thinking_trace = "".join(thinking_parts)
 
         out: dict[str, Any] = {
             "text": text,
-            "usage": {"input_tokens": usage_in, "output_tokens": usage_out},
+            "usage": {
+                "input_tokens": final.usage.input_tokens,
+                "output_tokens": final.usage.output_tokens,
+            },
             "model": model,
-            "stop_reason": stop_reason,
+            "stop_reason": final.stop_reason,
             # FU#60: thinking-trace observability. Additive; existing callers
             # ignore. New callers can inspect block_types + thinking_trace
             # to verify adaptive thinking is actually firing on their prompts.
