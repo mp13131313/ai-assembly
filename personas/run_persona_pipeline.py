@@ -1303,15 +1303,19 @@ if pass7a["result"].get("overall") == "REVISION_NEEDED" and not fix_log_path.exi
         _chat_prompt_path_for_invalidation = (
             _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "03_chat_system_prompt.json"
         )
+        # FU#53: pass_7a (per-pass) is intentionally NOT invalidated — it
+        # records the pre-fix per-pass verdict for the metadata block. The
+        # post-fix verification happens at pass_7a_final downstream.
         for p in [_paths.pass_7_pre(SLUG, PROJECT_ROOT),
                   _paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
-                  _paths.pass_7a(SLUG, PROJECT_ROOT),
                   _paths.pass_7b(SLUG, PROJECT_ROOT),
                   _paths.pass_7c(SLUG, PROJECT_ROOT),
+                  _paths.pass_7a_final(SLUG, PROJECT_ROOT),
                   _paths.derive_raw(SLUG, PROJECT_ROOT),
                   _paths.assembled_card(SLUG, PROJECT_ROOT),
                   _paths.provocateur_profile(SLUG, PROJECT_ROOT),
                   _paths.evaluation_rubric(SLUG, PROJECT_ROOT),
+                  _paths.operator_review_flag(SLUG, PROJECT_ROOT),
                   _chat_prompt_path_for_invalidation]:
             if p.exists():
                 p.unlink()
@@ -1346,32 +1350,29 @@ if pass7a["result"].get("overall") == "REVISION_NEEDED" and not fix_log_path.exi
             stamp(f"  WARN: Pass 7-anachronism (post-fix) failed: {str(e)[:160]}")
             fix_log["log"].append(f"Pass 7-anachronism (post-fix) skipped: "
                                    f"{type(e).__name__}: {str(e)[:160]}")
-        try:
-            pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT),
-                                    "Pass 7a (post-fix)", _pass_7a)
-            fix_log["post_fix_verdict"] = pass7a["result"].get("overall")
-        except Exception as e:
-            stamp(f"  WARN: Pass 7a (post-fix) failed: {str(e)[:160]}")
-            fix_log["post_fix_verdict"] = "VERIFICATION_FAILED"
-            fix_log["log"].append(f"Pass 7a (post-fix) skipped: "
-                                   f"{type(e).__name__}: {str(e)[:160]}")
+        # FU#53 (2026-04-29): per-pass Pass 7a is NOT re-fired post-fix.
+        # That coverage is moved to Pass 7a FINAL (post-assembly), which
+        # operates on the fully assembled card and catches cross-pass
+        # contradictions the per-pass 7a structurally cannot see (e.g.,
+        # banned_language rejecting Jowett while curated_corpus_passages
+        # uses Jowett — provable on Plato 2026-04-29). post_fix_verdict
+        # is now decided by Pass 7a FINAL further downstream.
+        fix_log["post_fix_verdict"] = "deferred_to_7a_final"
         write_json_atomic(fix_log_path, fix_log)
 
         stamp(f"PASS 7a-FIX: applied {fix_log['patches_applied']} of "
               f"{fix_log['patches_emitted']} patches "
               f"(failed={fix_log['patches_failed']}, skipped={fix_log['patches_skipped']}); "
-              f"post-fix verdict: {fix_log['post_fix_verdict']}")
+              f"final verdict deferred to Pass 7a FINAL")
     else:
         stamp(f"PASS 7a-FIX: 0 patches applied (emitted={fix_log['patches_emitted']}, "
               f"failed={fix_log['patches_failed']}, skipped={fix_log['patches_skipped']}); "
               f"accepting Pass 7a verdict as-is")
 
-# Final verdict (whether or not fix-pass ran)
-if pass7a["result"].get("overall") == "REVISION_NEEDED":
-    stamp(f"FINAL: post-fix verdict still REVISION_NEEDED — flagged for human review")
-else:
-    stamp(f"FINAL: 7a verdict {pass7a['result'].get('overall', '?')} — "
-          f"proceeding to 7b/7c/Derive/Assembly")
+# FU#53 (2026-04-29): final verdict deferred to Pass 7a FINAL (post-
+# assembly). Per-pass 7a verdict logged here for traceability only.
+stamp(f"PASS 7a (per-pass): {pass7a['result'].get('overall', '?')} — "
+      f"proceeding to 7b/7c/Assemble/7a-FINAL/Operator-Gate/Derive")
 
 
 # ---------- PASS 7b (Worked Provocations) ----------
@@ -1442,63 +1443,33 @@ stamp(f"  evaluator: {pass7c.get('evaluator', '?')} | "
       f"banned_modes +{add_summary.get('modes_added', 0)}")
 
 
-# ---------- DERIVE (Provocateur Profile + Evaluation Rubric) ----------
-# Spec Node Derive: Sonnet 4.6, temp 0.1, max 4096. Single call producing
-# 8-field Provocateur Profile (becomes a council_config.json member entry)
-# + 9-test Evaluation Rubric (for ongoing testing of the runtime voice).
-def _derive():
-    # Build the card the Derive call sees (after Pass 7b/7c additions/refinements)
-    full_card_for_derive = {**combined_2_3_4, **pass5["fields"]}
-    if pass6.get("fields"):
-        full_card_for_derive.update(pass6["fields"])
-    if pass7b.get("fields"):
-        full_card_for_derive.update(pass7b["fields"])
-    if pass7c.get("result"):
-        if pass7c["result"].get("banned_language") is not None:
-            full_card_for_derive["banned_language"] = pass7c["result"]["banned_language"]
-        if pass7c["result"].get("banned_modes") is not None:
-            full_card_for_derive["banned_modes"] = pass7c["result"]["banned_modes"]
-    sysp = load_prompt("persona_derive")
-    userp = render("persona_derive_user",
-                   persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
-    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
-    # ON (quality-tuning checklist). Derive is HIGH-LEVERAGE: provocateur_
-    # profile.system_prompt drives every runtime interaction × sessions ×
-    # turns × voices. Small quality differential here multiplies across
-    # thousands of runtime touchpoints. Despite consuming an Opus-quality
-    # card, derive itself is judgment-bound: selective synthesis (44 fields
-    # → ~5-10K prompt), voice-embedding from word one (Dostoevskian texture
-    # in the prompt voice; non-anthropocentric framing for Octopus), high-
-    # ratio compression with nuance preservation, AND original generation
-    # of evaluation_rubric (voice-specific scoring criteria, not derived).
-    # Sonnet rubric-follows; Opus + thinking deliberates the tradeoffs.
-    # Cost: ~$0.10-0.30 extra per voice (runs once). Quality: meaningful at
-    # every runtime turn. max_tokens 8192 → 24000 (thinking + ~10K output).
-    # temperature 0.1 → 1.0 (required for thinking).
-    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=24000, temperature=1.0, thinking=True,
-                    response_format_json=True)
-    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
-            "model": r["model"], "usage": r["usage"], "result": r["json"]}
-
-stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Opus + thinking)")
-derive = call_or_cache(_paths.derive_raw(SLUG, PROJECT_ROOT), "Derive", _derive)
-prov_profile = derive["result"].get("provocateur_profile", {})
-eval_rubric = derive["result"].get("evaluation_rubric", {})
-stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
-      f"evaluation_rubric: {len(eval_rubric.get('identity_tests', []))} identity, "
-      f"{len(eval_rubric.get('reasoning_tests', []))} reasoning, "
-      f"{len(eval_rubric.get('stress_tests', []))} stress")
-
-# Save Provocateur Profile as standalone artifact for the runtime ai-assembly
-# repo's council_config.json wiring (per spec — stored separately).
-write_json_atomic(_paths.provocateur_profile(SLUG, PROJECT_ROOT), prov_profile)
-write_json_atomic(_paths.evaluation_rubric(SLUG, PROJECT_ROOT), eval_rubric)
-stamp(f"  saved: provocateur_profile.json + evaluation_rubric.json → voices/{SLUG}/06_derive/")
+# ============================================================================
+# FU#53 (2026-04-29) — REVIEW-GATE REFACTOR
+#
+# New order of operations (vs. pre-FU#53):
+#
+#   ... Pass 7-pre, 7-anach, 7a per-pass, 7a-FIX, 7-pre/7-anach post-fix,
+#       7b, 7c (above — unchanged)
+#
+#   ASSEMBLE (skeleton)        ← write assembled card with skeleton metadata
+#   PASS 7a FINAL              ← cross-model against the assembled card
+#                                (catches cross-pass contradictions invisible
+#                                 to the per-pass 7a — proven on Plato 04-29)
+#   OPERATOR REVIEW GATE       ← hard-stop if REVISION_NEEDED unless flag
+#   DERIVE                     ← reads operator-patched card from disk
+#   ASSEMBLE (final)           ← re-write with full metadata + Derive info
+#   chat_system_prompt write   ← reads final assembled card from disk
+#   CARD COMPLETE summary
+#
+# Why: per-pass 7a structurally cannot see cross-field contradictions
+# (e.g., banned_language rejecting Jowett while curated_corpus_passages
+# uses Jowett). The standalone post-7c re-fire we ran on Plato 2026-04-29
+# caught 4 such issues in seconds. Promoting that re-fire to a first-class
+# pipeline stage closes the gap.
+# ============================================================================
 
 
-# ---------- FINAL SUMMARY ----------
-# Register-check constants (see _check_register below)
+# ---------- Register-check machinery (moved up — used pre-7a-FINAL) ----------
 REGISTER_CHECK_SKIP_FIELDS = {
     # Fields whose content is legitimately third-person scholarly annotation,
     # not voice-field content. Third-person in these fields is NOT a register
@@ -1566,19 +1537,6 @@ def _check_register(card_fields: dict, voice_last_name: str):
     return len(details), details
 
 
-full_card = {**combined_2_3_4, **pass5["fields"]}
-if pass6.get("fields"):
-    full_card.update(pass6["fields"])
-# Pass 7b: smoke_test_chains field
-if pass7b.get("fields"):
-    full_card.update(pass7b["fields"])
-# Pass 7c: refined banned_language and banned_modes (overwrite Pass 4a's seeds)
-if pass7c.get("result"):
-    if pass7c["result"].get("banned_language") is not None:
-        full_card["banned_language"] = pass7c["result"]["banned_language"]
-    if pass7c["result"].get("banned_modes") is not None:
-        full_card["banned_modes"] = pass7c["result"]["banned_modes"]
-
 # For most human voices, last token of the name is the surname. For
 # non-human voices where the whole name is a noun (Octopus, River) or
 # includes generic nouns (Whanganui River), using the naive last token
@@ -1588,62 +1546,48 @@ _LAST_NAME_OVERRIDES = {
     "Octopus": None,                # skip register check entirely
     "Whanganui River": "Whanganui", # match the unique part, not "River"
 }
+
+
+# ---------- Build full_card + register check (pre-assembly) ----------
+full_card = {**combined_2_3_4, **pass5["fields"]}
+if pass6.get("fields"):
+    full_card.update(pass6["fields"])
+if pass7b.get("fields"):
+    full_card.update(pass7b["fields"])
+# Pass 7c: refined banned_language and banned_modes (overwrite Pass 4a's seeds)
+if pass7c.get("result"):
+    if pass7c["result"].get("banned_language") is not None:
+        full_card["banned_language"] = pass7c["result"]["banned_language"]
+    if pass7c["result"].get("banned_modes") is not None:
+        full_card["banned_modes"] = pass7c["result"]["banned_modes"]
+
 last_name = _LAST_NAME_OVERRIDES.get(vi["name"], vi["name"].split()[-1])
 if last_name is None:
     register_violations, register_details = 0, []
 else:
     register_violations, register_details = _check_register(full_card, last_name)
 
-print()
-stamp("=" * 60)
-stamp(f"PIPELINE COMPLETE for {vi['name']}")
-stamp("=" * 60)
-stamp(f"  Voice slug:           {SLUG}")
-stamp(f"  Pass 2 fields:        {len(pass2['fields'])}")
-stamp(f"  Pass 3 fields:        {len(pass3['fields'])}")
-stamp(f"  Pass 4a fields:       {len(pass4a['fields'])} (voice_basis: {pass4a['voice_basis']})")
-stamp(f"  Pass 4b fields:       {len(pass4b['fields'])}")
-stamp(f"  Pass 5 fields:        {len(pass5['fields'])}")
-stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
-stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
-_fix_log_summary = (
-    "no fix needed" if not fix_log_path.exists()
-    else f"fix-pass applied {json.loads(fix_log_path.read_text()).get('patches_applied', 0)} "
-         f"of {json.loads(fix_log_path.read_text()).get('patches_emitted', 0)} patches"
-)
-stamp(f"  Pass 7a validate:     {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
-      f"— {_fix_log_summary}")
-stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('smoke_test_chains', []))} chains")
-stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
-      f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
-stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
-stamp(f"  Total card fields:    {len(full_card)}")
-stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
-stamp(f"  Card saved to:        {_paths.voice_root(SLUG, PROJECT_ROOT)}/")
-stamp("=" * 60)
 
-write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
-    # Spec wants 37 card fields flat at root + a metadata block.
-    "voice_name": vi["name"],
-    "voice_mode": vi["voice_mode"],
-    "pipeline_version": "4.0",
-    "generated_date": time.strftime("%Y-%m-%d"),
+# ---------- _build_assembled_card_dict helper ----------
+# Called twice: once pre-Derive (skeleton metadata, gated on file presence)
+# and once post-Derive (full metadata, including 7a FINAL verdict + Derive
+# completion). Card content (35 fields) is identical between calls; only
+# metadata differs. Operator patches between the two calls land on the
+# version-on-disk and are preserved across the second write because the
+# helper rebuilds the card from in-memory pass dicts — but wait, that
+# would erase operator patches. So we read the on-disk card if present
+# and merge the metadata block instead.
+def _build_assembled_card_dict(*, pass_7a_final_result=None, derive_completed=False):
+    """Build the assembled-card dict.
 
-    # All 35 generated card fields, flat at root level
-    **full_card,
+    On the FIRST call (skeleton), `full_card` from in-memory pass dicts is
+    the source of truth. On the SECOND call (final), the on-disk card is
+    the source of truth (operator may have patched it); we preserve all
+    field content from disk and only update the metadata block.
+    """
+    card_path = _paths.assembled_card(SLUG, PROJECT_ROOT)
 
-    # Two-tier corpus (Phase B): reference_only_passages is loaded into
-    # Voice Pipeline Step 1 ONLY; Step 2 drops it before assembling its
-    # system prompt. See personas/HANDOFF.md §"reference_only_passages is
-    # Step 1 only" for the enforcement contract.
-    "reference_only_passages": merged_dossier_dict.get("reference_only_passages", {"passages": []}),
-
-    # Runtime continuity fields (populated by Voice Pipeline at deployment, not
-    # by Persona Pipeline). Initialized null so consumers don't get KeyError.
-    "continuity_block_if_night_2": None,
-    "continuity_block_artifact_if_night_2": None,
-
-    "metadata": {
+    metadata = {
         "passes_completed": [
             "1a_perplexity",
             "1a_dr_claude" if claude_dr_text else "1a_dr_claude_SKIPPED",
@@ -1656,13 +1600,19 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
             "5_engagement",
             "6_corpus_curation" if pass6.get("status") != "HALTED" else "6_corpus_curation_HALTED",
             "7pre_citation_verification",
+            "7anach_anachronism_check",
             "7a_cross_model_validation",
             *(["7a_fix_linear_patcher"] if fix_log_path.exists() else []),
             "7b_smoke_test_chains",
             "7c_negative_constraints",
-            "derive_provocateur_profile_and_rubric",
+            *(["7a_final_post_assembly"] if pass_7a_final_result else []),
+            *(["operator_review_gate_passed"] if pass_7a_final_result else []),
+            *(["derive_provocateur_profile_and_rubric"] if derive_completed else []),
         ],
-        "validation_status": pass7a["result"].get("overall", "unknown"),
+        "validation_status": (
+            pass_7a_final_result.get("overall") if pass_7a_final_result
+            else "pre_7a_final_pending"
+        ),
         "fix_pass_log": (json.loads(fix_log_path.read_text()) if fix_log_path.exists() else None),
         "tools_used": ["perplexity:sonar-deep-research", "anthropic:claude-opus-4-7", "anthropic:claude-sonnet-4-6", "google:gemini-2.5-pro", "openai:gpt-5.4", "gutenberg:web_fetch"],
         "voice_basis": pass4a["voice_basis"],
@@ -1682,7 +1632,18 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
             "overall": pass7a["result"].get("overall"),
             "revision_target_passes": pass7a["result"].get("revision_target_passes", []),
             "summary": pass7a["result"].get("summary", ""),
+            "note": "Per-pass verdict (pre-fix). Final verdict is in cross_model_validation_final below.",
         },
+        "cross_model_validation_final": (
+            {
+                "validator": pass_7a_final_result.get("validator") if pass_7a_final_result else None,
+                "overall": pass_7a_final_result.get("overall") if pass_7a_final_result else None,
+                "field_issues_count": len(pass_7a_final_result.get("field_issues", []) or []) if pass_7a_final_result else None,
+                "field_issues": pass_7a_final_result.get("field_issues", []) if pass_7a_final_result else None,
+                "summary": pass_7a_final_result.get("summary", "") if pass_7a_final_result else None,
+                "note": "FU#53: validates the assembled card post-7b/7c. Operator patches against this verdict landed on the card directly before Derive ran.",
+            } if pass_7a_final_result else None
+        ),
         "negative_constraints_refinement": {
             "evaluator": pass7c.get("evaluator"),
             "additions_summary": pass7c["result"].get("additions_summary", {}),
@@ -1719,9 +1680,219 @@ write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT), {
         },
         "register_violations": register_violations,
         "register_violation_details": register_details,
-    },
-})
-stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
+    }
+
+    # FINAL call: preserve operator patches by reading on-disk card content
+    if derive_completed and card_path.exists():
+        existing = json.loads(card_path.read_text())
+        # Preserve all top-level field content; only swap metadata
+        existing["metadata"] = metadata
+        # Preserve voice_name etc. but ensure they're present
+        existing.setdefault("voice_name", vi["name"])
+        existing.setdefault("voice_mode", vi["voice_mode"])
+        existing["pipeline_version"] = "4.0"
+        existing["generated_date"] = time.strftime("%Y-%m-%d")
+        return existing
+
+    # SKELETON call: build from in-memory pass dicts
+    return {
+        "voice_name": vi["name"],
+        "voice_mode": vi["voice_mode"],
+        "pipeline_version": "4.0",
+        "generated_date": time.strftime("%Y-%m-%d"),
+        # All 35 generated card fields, flat at root level
+        **full_card,
+        # Two-tier corpus (Phase B): reference_only_passages is loaded into
+        # Voice Pipeline Step 1 ONLY; Step 2 drops it before assembling its
+        # system prompt. See personas/HANDOFF.md §"reference_only_passages is
+        # Step 1 only" for the enforcement contract.
+        "reference_only_passages": merged_dossier_dict.get("reference_only_passages", {"passages": []}),
+        # Runtime continuity fields (populated by Voice Pipeline at deployment, not
+        # by Persona Pipeline). Initialized null so consumers don't get KeyError.
+        "continuity_block_if_night_2": None,
+        "continuity_block_artifact_if_night_2": None,
+        "metadata": metadata,
+    }
+
+
+# ---------- ASSEMBLE (skeleton — pre-7a-FINAL) ----------
+# Only write the skeleton if the card doesn't already exist. On a re-run
+# after operator patches, the patched card is preserved.
+_card_path = _paths.assembled_card(SLUG, PROJECT_ROOT)
+if not _card_path.exists():
+    write_json_atomic(_card_path, _build_assembled_card_dict())
+    stamp(f"Assembled card (skeleton) -> {_card_path.relative_to(PROJECT_ROOT)}")
+else:
+    stamp(f"Assembled card already on disk (operator patches preserved) -> "
+          f"{_card_path.relative_to(PROJECT_ROOT)}")
+
+
+# ---------- PASS 7a FINAL — cross-model against assembled card ----------
+# Mirrors _pass_7a but reads from the assembled card on disk (which the
+# operator may have patched). Catches cross-pass contradictions that the
+# per-pass 7a structurally cannot see.
+def _pass_7a_final():
+    assembled = json.loads(_paths.assembled_card(SLUG, PROJECT_ROOT).read_text())
+    # Strip Voice-Pipeline-only / non-validatable fields (matches the
+    # standalone /tmp/plato_pass7a_full_validation.py exclusion set).
+    EXCLUDE = {
+        "metadata",
+        "smoke_test_chains",       # build-time only (Pass 7b)
+        "reference_only_passages", # Step 1 only
+        "council_member_name",     # informational
+        "voice_name", "voice_slug", "voice_mode", "voice_subtype", "voice_type",
+        "negative_constraints_additions",  # Pass 7c metadata
+        "pipeline_version", "generated_date",
+        "continuity_block_if_night_2", "continuity_block_artifact_if_night_2",
+    }
+    full_card_for_validate = {k: v for k, v in assembled.items() if k not in EXCLUDE}
+    sysp = load_prompt("persona_pass_7a_cross_model")
+    userp = render("persona_pass_7a_cross_model_user",
+                   persona_card_json=json.dumps(full_card_for_validate,
+                                                 ensure_ascii=False, indent=2))
+    # Same model ladder as per-pass 7a
+    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
+        try:
+            _effort = "high" if openai_model.startswith("gpt-5") else None
+            r = call_openai(system=sysp, user=userp, model=openai_model,
+                            temperature=0.0, max_tokens=16384,
+                            reasoning_effort=_effort,
+                            response_format_json=True)
+            return {"voice_name": vi["name"], "voice_slug": SLUG,
+                    "pass": "7a_final_post_assembly",
+                    "validator": f"openai:{openai_model}", "model": r["model"],
+                    "usage": r["usage"], "result": r["json"]}
+        except Exception as e:
+            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    try:
+        full_prompt = sysp + "\n\n" + userp
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        cleaned = r["text"].strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7a_final_post_assembly",
+                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "usage": r["usage"], "result": json.loads(cleaned)}
+    except Exception as e:
+        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+        return {"voice_name": vi["name"], "voice_slug": SLUG,
+                "pass": "7a_final_post_assembly",
+                "validator": "skipped",
+                "result": {"overall": "SKIPPED",
+                           "summary": "No cross-model validator available."}}
+
+
+stamp("PASS 7a FINAL: cross-model against assembled card (gpt-5.4 high → Gemini)")
+pass7a_final = call_or_cache(_paths.pass_7a_final(SLUG, PROJECT_ROOT),
+                              "Pass 7a FINAL", _pass_7a_final)
+final_verdict = pass7a_final["result"].get("overall", "?")
+n_final_issues = len(pass7a_final["result"].get("field_issues", []) or [])
+stamp(f"  validator: {pass7a_final.get('validator', '?')} | "
+      f"verdict: {final_verdict} | field_issues: {n_final_issues}")
+
+
+# ---------- OPERATOR REVIEW GATE — FU#53 (2026-04-29) ----------
+# Hard-stop if Pass 7a FINAL flags REVISION_NEEDED and the operator hasn't
+# already reviewed (touched the flag file). Operator workflow:
+#   1. Pipeline halts here with clear instructions.
+#   2. Operator reads pass_7a_final residuals + edits assembled card directly.
+#   3. To re-validate after patching: rm pass_7a_final.json && rerun
+#      To accept residuals as-is:    touch _operator_review_passed.flag && rerun
+# Either path lets the pipeline continue to Derive.
+operator_flag = _paths.operator_review_flag(SLUG, PROJECT_ROOT)
+if final_verdict == "REVISION_NEEDED" and not operator_flag.exists():
+    print()
+    stamp("=" * 60)
+    stamp("OPERATOR REVIEW GATE — pipeline halted (FU#53)")
+    stamp("=" * 60)
+    stamp(f"  Pass 7a FINAL flagged {n_final_issues} field issue(s) against the")
+    stamp(f"  assembled card. Pipeline cannot proceed to Derive without")
+    stamp(f"  operator review.")
+    stamp("")
+    stamp(f"  Read residuals: {_paths.pass_7a_final(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
+    stamp(f"  Edit card:      {_card_path.relative_to(PROJECT_ROOT)}")
+    stamp("")
+    stamp("  After patching the assembled card, choose ONE:")
+    stamp("    (a) Re-validate (recommended):")
+    stamp(f"        rm '{_paths.pass_7a_final(SLUG, PROJECT_ROOT)}'")
+    stamp("        # rerun pipeline; 7a FINAL re-fires against patched card")
+    stamp("")
+    stamp("    (b) Accept residuals & proceed:")
+    stamp(f"        touch '{operator_flag}'")
+    stamp("        # rerun pipeline; gate skipped, Derive runs")
+    stamp("=" * 60)
+    sys.exit(0)
+
+if operator_flag.exists():
+    stamp(f"  operator_review_passed flag present — proceeding past gate")
+
+
+# ---------- DERIVE (Provocateur Profile + Evaluation Rubric) ----------
+# Spec Node Derive: Sonnet 4.6, temp 0.1, max 4096. Single call producing
+# 8-field Provocateur Profile (becomes a council_config.json member entry)
+# + 9-test Evaluation Rubric (for ongoing testing of the runtime voice).
+# FU#53: Derive reads the assembled card from disk (operator-patched) — not
+# from in-memory pass dicts which may now be stale relative to the card.
+def _derive():
+    assembled = json.loads(_paths.assembled_card(SLUG, PROJECT_ROOT).read_text())
+    # Drop metadata + voice routing fields; keep all 35 generated fields
+    EXCLUDE_FROM_DERIVE = {
+        "metadata",
+        "voice_name", "voice_mode", "pipeline_version", "generated_date",
+        "continuity_block_if_night_2", "continuity_block_artifact_if_night_2",
+    }
+    full_card_for_derive = {k: v for k, v in assembled.items()
+                            if k not in EXCLUDE_FROM_DERIVE}
+    sysp = load_prompt("persona_derive")
+    userp = render("persona_derive_user",
+                   persona_card_json=json.dumps(full_card_for_derive, ensure_ascii=False, indent=2))
+    # 2026-04-23: model upgraded claude-sonnet-4-6 → claude-opus-4-7 + thinking
+    # ON (quality-tuning checklist). Derive is HIGH-LEVERAGE: provocateur_
+    # profile.system_prompt drives every runtime interaction × sessions ×
+    # turns × voices. Small quality differential here multiplies across
+    # thousands of runtime touchpoints. Despite consuming an Opus-quality
+    # card, derive itself is judgment-bound: selective synthesis (44 fields
+    # → ~5-10K prompt), voice-embedding from word one (Dostoevskian texture
+    # in the prompt voice; non-anthropocentric framing for Octopus), high-
+    # ratio compression with nuance preservation, AND original generation
+    # of evaluation_rubric (voice-specific scoring criteria, not derived).
+    # Sonnet rubric-follows; Opus + thinking deliberates the tradeoffs.
+    # Cost: ~$0.10-0.30 extra per voice (runs once). Quality: meaningful at
+    # every runtime turn. max_tokens 8192 → 24000 (thinking + ~10K output).
+    # temperature 0.1 → 1.0 (required for thinking).
+    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                    max_tokens=24000, temperature=1.0, thinking=True,
+                    response_format_json=True)
+    return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
+            "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Opus + thinking)")
+derive = call_or_cache(_paths.derive_raw(SLUG, PROJECT_ROOT), "Derive", _derive)
+prov_profile = derive["result"].get("provocateur_profile", {})
+eval_rubric = derive["result"].get("evaluation_rubric", {})
+stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
+      f"evaluation_rubric: {len(eval_rubric.get('identity_tests', []))} identity, "
+      f"{len(eval_rubric.get('reasoning_tests', []))} reasoning, "
+      f"{len(eval_rubric.get('stress_tests', []))} stress")
+
+# Save Provocateur Profile as standalone artifact for the runtime ai-assembly
+# repo's council_config.json wiring (per spec — stored separately).
+write_json_atomic(_paths.provocateur_profile(SLUG, PROJECT_ROOT), prov_profile)
+write_json_atomic(_paths.evaluation_rubric(SLUG, PROJECT_ROOT), eval_rubric)
+stamp(f"  saved: provocateur_profile.json + evaluation_rubric.json → voices/{SLUG}/06_derive/")
+
+
+# ---------- ASSEMBLE (final — full metadata, post-Derive) ----------
+# Re-write assembled card with full metadata block. Card content (35 fields)
+# is preserved from disk (including any operator patches applied at the
+# review gate); only the metadata block is updated to include 7a FINAL
+# verdict + Derive completion.
+write_json_atomic(_paths.assembled_card(SLUG, PROJECT_ROOT),
+                  _build_assembled_card_dict(
+                      pass_7a_final_result=pass7a_final["result"],
+                      derive_completed=True))
+stamp(f"Assembled card (final) -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to(PROJECT_ROOT)}")
 
 
 # ---------- FU#41 2026-04-24: chat-ready system prompt artifact ----------
@@ -1730,15 +1901,44 @@ stamp(f"Assembled card -> {_paths.assembled_card(SLUG, PROJECT_ROOT).relative_to
 # Claude project custom instructions. Mechanical field-strip transform of
 # the assembled card — drops Voice-Pipeline-only fields (metadata,
 # smoke_test_chains, reference_only_passages, artifact-spec fields,
-# continuity blocks). No content modification; editorial polish is operator
-# territory. Enables fast chat-test validation: pipeline run -> paste
-# artifact -> ask probing question -> assess voice quality. See
-# flows/shared/chat_prompt_builder.py for the transformation spec + the
-# list of Voice-Pipeline-only fields dropped.
+# continuity blocks).
 _assembled_card_dict = json.loads(_paths.assembled_card(SLUG, PROJECT_ROOT).read_text())
 _chat_prompt_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "03_chat_system_prompt.json"
 write_chat_system_prompt(_assembled_card_dict, _chat_prompt_path)
 stamp(f"Chat-ready system prompt -> {_chat_prompt_path.relative_to(PROJECT_ROOT)}")
+
+
+# ---------- PIPELINE COMPLETE summary ----------
+print()
+stamp("=" * 60)
+stamp(f"PIPELINE COMPLETE for {vi['name']}")
+stamp("=" * 60)
+stamp(f"  Voice slug:           {SLUG}")
+stamp(f"  Pass 2 fields:        {len(pass2['fields'])}")
+stamp(f"  Pass 3 fields:        {len(pass3['fields'])}")
+stamp(f"  Pass 4a fields:       {len(pass4a['fields'])} (voice_basis: {pass4a['voice_basis']})")
+stamp(f"  Pass 4b fields:       {len(pass4b['fields'])}")
+stamp(f"  Pass 5 fields:        {len(pass5['fields'])}")
+stamp(f"  Pass 6 fields:        {len(pass6.get('fields', {}))}")
+stamp(f"  Pass 7-pre verify:    {pass7pre['result'].get('overall', '?')} (review notes saved)")
+_fix_log_summary = (
+    "no fix needed" if not fix_log_path.exists()
+    else f"fix-pass applied {json.loads(fix_log_path.read_text()).get('patches_applied', 0)} "
+         f"of {json.loads(fix_log_path.read_text()).get('patches_emitted', 0)} patches"
+)
+stamp(f"  Pass 7a (per-pass):   {pass7a['result'].get('overall', '?')} ({pass7a.get('validator', '?')}) "
+      f"— {_fix_log_summary}")
+stamp(f"  Pass 7b provocations: {len(pass7b['fields'].get('smoke_test_chains', []))} chains")
+stamp(f"  Pass 7c neg-constr:   +{pass7c['result'].get('additions_summary', {}).get('language_added', 0)} lang, "
+      f"+{pass7c['result'].get('additions_summary', {}).get('modes_added', 0)} modes ({pass7c.get('evaluator', '?')})")
+stamp(f"  Pass 7a FINAL:        {final_verdict} ({pass7a_final.get('validator', '?')}) "
+      f"— {n_final_issues} field_issues" +
+      (f" [operator-accepted residuals]" if operator_flag.exists() and final_verdict == "REVISION_NEEDED" else ""))
+stamp(f"  Derive:               provocateur_profile + evaluation_rubric saved")
+stamp(f"  Total card fields:    {len(full_card)}")
+stamp(f"  Output Register check: {register_violations} violations ({'CLEAN' if register_violations == 0 else 'NEEDS REVIEW'})")
+stamp(f"  Card saved to:        {_paths.voice_root(SLUG, PROJECT_ROOT)}/")
+stamp("=" * 60)
 
 
 # ---------- FU#7 2026-04-24: Operator-facing CARD COMPLETE summary ----------
@@ -1814,11 +2014,15 @@ _card_path = _paths.assembled_card(SLUG, PROJECT_ROOT)
 _provocateur_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "01_provocateur_profile.json"
 _rubric_path = _paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive" / "02_evaluation_rubric.json"
 _fix_log_for_summary = json.loads(fix_log_path.read_text()) if fix_log_path.exists() else None
+# FU#53: top concerns + recommended action consume Pass 7a FINAL (post-
+# assembly, post-operator-gate) as the canonical validation surface. The
+# per-pass 7a verdict is still useful for fix-pass effectiveness tracking
+# but is not the runtime-facing status.
 _top_concerns = _compose_top_concerns(
-    pass7a["result"], pass7pre["result"], _fix_log_for_summary, register_violations
+    pass7a_final["result"], pass7pre["result"], _fix_log_for_summary, register_violations
 )
 _recommended = _compose_recommended_action(
-    pass7a["result"], pass7pre["result"], register_violations, _fix_log_for_summary
+    pass7a_final["result"], pass7pre["result"], register_violations, _fix_log_for_summary
 )
 _card_size_bytes = _card_path.stat().st_size if _card_path.exists() else 0
 
@@ -1828,7 +2032,10 @@ stamp(f"CARD COMPLETE — operator triage summary")
 stamp("=" * 60)
 stamp(f"  voice:                 {vi['name']} ({SLUG})")
 stamp(f"  card size:             {_card_size_bytes:,} bytes ({len(full_card)} fields)")
-stamp(f"  validation_status:     {pass7a['result'].get('overall', 'unknown')}")
+stamp(f"  validation_status:     {final_verdict} (Pass 7a FINAL)")
+if final_verdict == "REVISION_NEEDED" and operator_flag.exists():
+    stamp(f"                         operator-accepted residuals "
+          f"({n_final_issues} field issue(s) — see metadata.cross_model_validation_final)")
 stamp(f"  human_review_status:   pending")
 stamp("")
 if _fix_log_for_summary:

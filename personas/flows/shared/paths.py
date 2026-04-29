@@ -224,6 +224,21 @@ def pass_7c(slug: str, project_root: Path | None = None) -> Path:
     return validation_dir(slug, project_root) / "05_pass_7c_negative.json"
 
 
+def pass_7a_final(slug: str, project_root: Path | None = None) -> Path:
+    """Pass 7a FINAL: cross-model validation against the fully assembled card
+    (post-7b/7c). FU#53 review-gate refactor (2026-04-29). Catches cross-pass
+    contradictions invisible to the per-pass 7a (e.g., banned_language
+    rejecting Jowett while curated_corpus_passages uses Jowett)."""
+    return validation_dir(slug, project_root) / "06_pass_7a_final.json"
+
+
+def operator_review_flag(slug: str, project_root: Path | None = None) -> Path:
+    """Operator-review-passed touch flag. Created by operator after manually
+    reviewing Pass 7a FINAL residuals and either patching the assembled card
+    or accepting them; absent → pipeline hard-stops at the gate."""
+    return voice_root(slug, project_root) / "_operator_review_passed.flag"
+
+
 # ==== Derive files ====
 
 def derive_raw(slug: str, project_root: Path | None = None) -> Path:
