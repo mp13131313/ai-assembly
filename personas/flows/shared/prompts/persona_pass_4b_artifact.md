@@ -89,8 +89,17 @@ BLOCK 2 — GUARDRAILS:
   that preserves the voice's character. Ask: what written artifact most
   faithfully carries this voice's mode of expression to an audience reading
   over coffee?
-- quality_criteria: specific and testable. "Could this have been a lost
-  fragment from this voice's known works?" is testable; "feels authentic" is not.
+- quality_criteria: 3-5 specific, testable criteria. Each criterion
+  tests 1-n card fields by name (single field, or compounded with
+  and/or logic). The criteria collectively should answer "Could
+  this be mine?" across reasoning, voice, and form. Available
+  load-bearing fields (consult as needed):
+
+    - REASONING: reasoning_method, constitution, concept_lexicon
+    - VOICE: rhetorical_mode, characteristic_moves,
+      register_and_tone, metaphorical_repertoire
+    - FORM: medium, characteristic_output_structure,
+      aesthetic_qualities, stance_tendency
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
