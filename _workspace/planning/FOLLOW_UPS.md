@@ -728,6 +728,29 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Cost estimate:** ~1-2 hr for Pass 2/3/4a prompt edits + 1 Cleopatra full re-run + chat-test comparison.
 - **Related:** FU#55 (form-variance, same trigger), FU#49 stack (the prior episode of "we changed Pass 2/3/4a/4b/5 prompts and texture regressed" — same risk class), Pass 7a FINAL (the validator that surfaced these), `9480d3a` revert commit.
 
+#### FU#58 — Pass 7a prompt out of sync with Pass 2 user-prompt's 10-field emission spec ✅ LANDED 2026-04-29
+- **Origin:** 2026-04-29 Cleopatra build flagged "sensitive_topics: Required field is missing entirely" by Pass 7a FINAL. Investigation revealed:
+  - Pass 2 user prompt (`persona_pass_2_user.md` line 51-54) is explicit: *"Produce 10 Persona Card fields. Output as JSON with exact field names as keys: council_member_name, epistemic_frame_statement, world, formative_experience, character, knowledge_boundary, voice_temporal_stance, translation_protocol, topics_requiring_care, hard_limits."* — sensitive_topics is NOT in the 10.
+  - `sensitive_topics` IS produced by Pass 1.5 chunked merge (substantial structure: `{topic, what_the_voice_actually_thought, navigation_guidance, scholarly_reception}` per topic; 10 topics for Cleopatra).
+  - Pass 1.5's sensitive_topics is INJECTED into Pass 2's user prompt as research context (line 34-37: *"sensitive_topics (topics with what_the_voice_actually_thought + navigation_guidance + scholarly_reception per 1-arch-03)"*) — used by Pass 2 LLM to INFORM `topics_requiring_care` + `hard_limits` generation, NOT to be re-emitted as a card field.
+  - Architecturally `sensitive_topics` is **build-side substrate**, NOT a card field. Card v2.1 spec field-routing matrix has no row for it. `runtime/flows/voice/card_assembly.py` does NOT route it (not in `_FOUNDATIONAL`, `_STEP1_REASONING`, `_FOCUS_ANCHOR`, `_STEP2_VOICE`, or `_STEP2_ARTIFACT`). Even Plato's card had it (from over-helpful Pass 2 LLM compliance) but it was DEAD-LETTER at runtime.
+- **Empirical evidence sample (3 voices):**
+  - Plato (v4 2026-04-29): had `sensitive_topics` (over-emission); chat-tested fine without runtime exposure
+  - Dostoevsky (v3.10 2026-04-24): no `sensitive_topics`; chat-tested fine (operator's hand-curated chat v2 was canonical reference)
+  - Cleopatra (v4 2026-04-29): no `sensitive_topics`; correct per spec
+  - 2/3 voices missing → 67% rate of Pass 2 LLM correctly emitting only the 10 specified fields
+- **Diagnosis:** the bug is in Pass 7a prompt — its expected-Pass-2-fields list incorrectly includes `sensitive_topics`. The Pass 7a prompt was authored against an earlier intent that didn't survive into the Pass 2 user prompt's "exactly 10 fields" emission spec.
+- **Fix LANDED 2026-04-29 (commit forthcoming):**
+  - `personas/flows/shared/prompts/persona_pass_7a_cross_model.md`: removed `sensitive_topics` from pass_2 expected-emission list; added explicit note that sensitive_topics is Pass 1.5 build-side substrate, NOT a card field; cited Pass 2 user prompt line 51-54 for authority
+  - Plato's card: dropped `sensitive_topics` field (over-emission cleanup; harmless either way since it was never routed at runtime; snapshot at `voices/plato/_snapshots/PRE_DROP_SENSITIVE_TOPICS_20260429/`)
+  - Card v2 spec: no change needed (matrix never had a sensitive_topics row; existing absence was correct)
+- **What this resolves:**
+  - Cleopatra's "Required field is missing" flag from Pass 7a FINAL → was a false positive from the Pass 7a prompt drift, NOT a Cleopatra defect
+  - Future voices won't be falsely flagged by this validator rule
+  - Cleopatra needs no card patch for sensitive_topics — she's correct per actual spec
+- **What remains for Cleopatra (the OTHER 7 issues from Pass 7a FINAL):** the Class A (post-30 BCE leakage in formative_experience / constitution / reasoning_method[8] / unique_contribution) + Class B (scholarly meta-language in topics_requiring_care / concept_lexicon / curated_corpus_passages) issues are still real and need operator-side patching. They're separate from this FU#58 finding.
+- **Architectural insight for post-Athens:** Pass 7a prompt's expected-fields lists for Pass 2/3/4a/4b/5/6 should be regenerated from the actual Pass {N}_user.md emission specs as a one-time alignment audit. May surface other drifts.
+
 ---
 
 ## RECENTLY COMPLETED

@@ -477,6 +477,8 @@ Organisational categories by voice type:
 **Sample (Plato):**
 > Women (lean into Republic's progressivism — women can be guardians — while acknowledging contradictions in other dialogues). Slavery (acknowledge as historical limitation; do not defend). The noble lie (present the nuanced reading — a founding myth for social cohesion, not deception for control).
 
+**Note on `sensitive_topics` (FU#58 2026-04-29):** Pass 1.5 chunked merge produces a separate `sensitive_topics` structure (`{topic, what_the_voice_actually_thought, navigation_guidance, scholarly_reception}` per topic). This is **build-side substrate**, NOT a card field. It is INJECTED into Pass 2's user prompt as research context to inform `topics_requiring_care` + `hard_limits` generation; it is NOT re-emitted as a card field. Pass 2 user prompt explicitly enumerates the 10 fields to output (no `sensitive_topics`). Pass 7a validator was previously out-of-sync and false-flagged "missing sensitive_topics"; that's been corrected.
+
 ---
 
 ### hard_limits

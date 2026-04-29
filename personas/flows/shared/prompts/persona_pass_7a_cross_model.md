@@ -70,11 +70,22 @@ OUTPUT SCHEMA — return ONLY this JSON, no markdown fences, no preamble:
   authoritative field → pass mapping. Where a field is nested or list-
   indexed, look at the top-level key:
 
-    pass_2 (Identity & Boundaries) — emits:
-      epistemic_frame_statement, world (+ subfields), character,
-      formative_experience (+ subfields), voice_temporal_stance,
-      translation_protocol, knowledge_boundary, sensitive_topics,
-      hard_limits, topics_requiring_care
+    pass_2 (Identity & Boundaries) — emits exactly 10 fields:
+      council_member_name, epistemic_frame_statement, world (+ subfields),
+      character, formative_experience (+ subfields), voice_temporal_stance,
+      translation_protocol, knowledge_boundary, hard_limits,
+      topics_requiring_care.
+      (Note: `sensitive_topics` is NOT a Pass 2 emission — it is
+      Pass 1.5 build-side substrate, injected into Pass 2 user
+      prompt as research context to inform `topics_requiring_care` +
+      `hard_limits` generation. Do not flag a card as "missing
+      sensitive_topics" — that field is not a card field. Per
+      `personas/flows/shared/prompts/persona_pass_2_user.md` line
+      51-54: "Produce 10 Persona Card fields: council_member_name,
+      epistemic_frame_statement, world, formative_experience,
+      character, knowledge_boundary, voice_temporal_stance,
+      translation_protocol, topics_requiring_care, hard_limits."
+      FU#58 2026-04-29.)
 
     pass_3 (Intellectual Core) — emits:
       constitution (+ principles[]), concept_lexicon, reasoning_method
