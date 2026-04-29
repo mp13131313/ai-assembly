@@ -224,7 +224,7 @@ Per-voice cost: ~$18–22, wall time ~2 hours (excluding manual claude.ai DR ses
 ### 2.2 Phase 5 Cross-Persona QC (personas)
 
 **Spec:** Pipeline v4 (and v3.10) §"Phase 5 Cross-Persona Quality Control".
-**Status:** Scaffolded but not run. `personas/phase_5_cross_persona_qc.py` exists (~487 lines) as scaffolding; needs all 12 athens-2026 cards complete before invocation.
+**Status:** Scaffolded but not run. `personas/phase_5_cross_persona_qc.py` exists (~487 lines) as scaffolding; needs all 10 athens-2026 cards complete before invocation.
 
 Three batch tests:
 1. **Swap test** — shuffle constitution principles, can an evaluator attribute each? Misattributed → too generic.
@@ -573,8 +573,8 @@ Given today's state: voices 3–12 are at Phase 0.5 complete; 11 × 6 = 66 manua
 ### Phase A — Persona pipeline build-side (DONE 2026-04-27)
 
 - ✓ Plato shipped + chat-test validated (2026-04-26)
-- ✓ Voice 3–12 voice_configs (Pass 0a, all 12)
-- ✓ Phase 0.5 research for all 12 voices
+- ✓ Voice 3–10 voice_configs (Pass 0a, all 10 — historical 12 reduced to 10 in 04-28 panel revision; Tang + Thiel removed)
+- ✓ Phase 0.5 research for all 10 voices
 - ✓ Pipeline-fidelity audit
 - ✓ FU#49 family of universal patterns landed (49A, 49C, 49D, 49H, 49I, 49J, 49K)
 - ✓ 212/212 tests passing

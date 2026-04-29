@@ -206,11 +206,13 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - Wall savings: 25+ min per pipeline run
 - **Plato unblocked.** Post-arch-03 voices no longer ship without citation verification audit.
 
-#### FU#21 — Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract
+#### FU#21 — Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract ✅ LANDED 2026-04-28
 - **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
 - **Problem:** Two-tier corpus design (Marley lyrics in private reasoning only) is documented in `personas/HANDOFF.md`. Runtime Voice Pipeline Step 2 assembly code MUST drop the field before rendering.
-- **Trigger:** runtime Voice Pipeline workstream starts (out of scope per REBUILD_PLAN — separate workstream).
-- **Effort:** unknown until workstream begins.
+- **Resolution:** Voice Pipeline v2 implemented as commit `180a18f` includes the strip rule in `runtime/flows/voice/card_assembly.py`:
+  - Line 315-317: `if step in (2, 3): filtered.pop("reference_only_passages", None)` — Step 2/3 drop
+  - Line 364-369: `if step == 1 and "reference_only_passages" in filtered:` then render under its own section — Step 1 keeps
+- **Verified 2026-04-29** during FU#21 closure check.
 
 #### FU#23 — Cross-repo handoff timing (rebuild → runtime integration)
 - **Origin:** REBUILD_PLAN.md "Open questions to defer".
@@ -301,11 +303,12 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
     - 21 tests (was 19; +1 boddice-preserved-inline test, +1 boddice-excluded-from-allowlist regression test, 1 modified to test curator-note instead of projection_warning).
     - **Plato impact:** post-strip card had 0 schema-taxonomy + EvidenceTag residues (33 `[ontological]`-class markers + 9 evidence/curator brackets all gone). The Boddice tags would now stay inline if Pass 6.5-clean ran before Pass 7-pre; for Plato's already-stripped state this is a one-time gap until split-card lands.
     - Generalizes across voices: Pass 6.5-clean is now part of the standard pipeline; voices 3-12 will run it automatically with the corrected allowlist + placement.
-  - P2: Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input (Phase 1 card had Christ-over-truth attribution error flagged INCONSISTENT by 7-pre but unseen by patcher; Phase 2 card's 7-pre completed with 0 INCONSISTENT — but the wiring gap remains latent for future voices). Plato also had 0 INCONSISTENT — wiring gap stays deferred.
+  - **P2: Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input ✅ LANDED 2026-04-26** in `personas/run_persona_pipeline.py:1013-1078`. INCONSISTENT items are merged into Pass 7a's `field_issues[]` array with field-path-to-pass routing (path prefix → flagged_pass mapping for passes 2/3/4a/4b/5/6). Empirical activation: Plato 2026-04-29 surfaced 2 INCONSISTENT items (Phaedrus 246a + 275d-e Jowett translations) which were correctly routed; the FU#13 single-shot guard prevented automatic re-patching but the operator review gate (FU#53) caught them.
   - P3 (closed): transliteration-consistency + spell-check. Phase 2 card is clean on both.
-- **Effort:** P1 LANDED 2026-04-25 (commit forthcoming). P2 still ~1-2 hr. ~1-2 hr remaining.
-- **Activation:** Plato's first card empirically activated P1 (42 residues). P2 stays trigger-based.
-- **Relation:** orthogonal to voice-tissue work — addresses mechanical-defect class of issues the patcher missed.
+- **Effort:** All three sub-items closed. P1 LANDED 2026-04-25 (commit `6c0daf5`); P2 LANDED 2026-04-26; P3 closed by upstream improvements.
+- **Activation:** Plato's first card empirically activated P1 (42 residues). Plato 2026-04-29 empirically activated P2 (2 Jowett-translation flags routed correctly).
+- **Relation:** orthogonal to voice-tissue work — addressed mechanical-defect class of issues the patcher missed.
+- **Status:** ✅ FULLY LANDED — all three sub-items closed.
 
 #### FU#37 — Declarative preserve-verbatim load-bearing-sentence markers 🔵 DEFERRED 2026-04-24
 - **Deferral rationale (2026-04-24):** FU#32 alone empirically closed the voice-tissue gap on Dostoevsky. Pass 2 isolation re-run recovered the exact gordost'-walking-through-nadryv incarnate pattern the handoff flagged as missing; full re-run + FU#1 Layer 2 audit showed no preservation regression + Pass 4a substantial gain (+9.4% recall / +6.2% cite / +26.1% density). FU#37's primary-backstop role becomes unnecessary when upstream generation no longer produces the regression. **Re-activate ONLY if a future voice (Plato / Cleopatra / etc.) shows residual voice-tissue regression after FU#32 prompts.**

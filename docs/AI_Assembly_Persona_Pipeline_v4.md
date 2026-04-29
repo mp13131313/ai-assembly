@@ -436,10 +436,10 @@ Output: `06_derive/03_chat_system_prompt.json`. Operator paste-target for Claude
 
 ## Phase 5: Cross-Persona Quality Control
 
-**Status: scaffolded** (`personas/phase_5_cross_persona_qc.py`, ~487 lines). **Not run** — needs all 12 athens-2026 cards.
+**Status: scaffolded** (`personas/phase_5_cross_persona_qc.py`, ~487 lines). **Not run** — needs all 10 athens-2026 cards.
 
 Three batch tests:
-1. **Swap test** — shuffle constitution principles across 12 voices; can an evaluator attribute each? Misattributed → too generic.
+1. **Swap test** — shuffle constitution principles across 10 voices; can an evaluator attribute each? Misattributed → too generic.
 2. **Blind identification** — strip names from `character` + `register_and_tone`, shuffle, can evaluator identify?
 3. **Same-question distinctiveness** — run all voices through one provocation, compare for style/metaphor/values similarity.
 
@@ -571,7 +571,7 @@ For prompt edits that risk silently changing card outputs across all voices.
 
 **Wall time:** ~2 hours after 6×DR dossier complete (excluding manual claude.ai sessions which run human-in-the-loop, ~60–180 min per section).
 
-For 12 athens-2026 voices: **~$215–265 in API + ~$0 in claude.ai overhead**. Plus operator wall time for 11 × 6 = 66 manual DR sessions.
+For 10 athens-2026 voices: **~$180–220 in API + ~$0 in claude.ai overhead**. Plus operator wall time for 9 × 6 = 54 manual DR sessions (Plato done; 9 remaining at the time of writing).
 
 ---
 

@@ -114,7 +114,7 @@ The three-layer test:
 
 ## The panel
 
-Twelve voices, cast across two axes (mode of knowing: conceptual ↔ embodied; scope of perspective: individual ↔ beyond-human) and balanced against a diversity checklist (civilisational tradition, gender, race, economic position, colonial position, relationship to the demos).
+Ten voices, cast across two axes (mode of knowing: conceptual ↔ embodied; scope of perspective: individual ↔ beyond-human) and balanced against a diversity checklist (civilisational tradition, gender, race, economic position, colonial position, relationship to the demos).
 
 | Voice | Mode of knowing | Scope of perspective |
 |---|---|---|
@@ -126,10 +126,10 @@ Twelve voices, cast across two axes (mode of knowing: conceptual ↔ embodied; s
 | Dostoevsky | Conceptual + embodied | Individual (moral psychology) |
 | Hannah Arendt | Conceptual | Collective (the public) |
 | Bob Marley | Embodied (musical) | Collective (diaspora, liberation) |
-| Audrey Tang | Conceptual | Collective (deliberative practice) |
-| Peter Thiel | Conceptual | Individual (sovereign) |
 | Whanganui River | Embodied | Beyond-human (ecological) |
 | Octopus | Embodied | Beyond-human (sensory/other intelligence) |
+
+*Panel revision 2026-04-28:* Audrey Tang and Peter Thiel were removed from the original 12-voice cast. Reason: the Voice Pipeline conceptual frame is "voice arrives at Athens with the mind-state at the moment of full canonical experience" — voices retain their full life-experience-to-completion as their mental anchor. Contemporary living humans do not fit this frame; their canonical life is in flux, no completion-anchor exists.
 
 The panel distributes across all four quadrants. The diversity checklist has known gaps (contemporary indigenous cosmologies, voices outside the Western/West-Asian/East-Mediterranean axis) — documented design decisions, not oversights.
 
@@ -174,7 +174,7 @@ On Night 2, the Provocateur receives Night 1's assignments to avoid repeating te
 
 **Step 2 — First-Draft Artifact.** The voice reads back its own detailed responses and produces one artifact compressing across them — the voice's public expression, the thing the audience eventually reads. This improves artifact quality (reasoning before expression) and preserves voice autonomy in focus-selection (the voice decides what matters most to express publicly). System prompt uses Foundational + Voice + Artifact fields. Medium decided at the voice level — dialogue for Plato, song for Marley, shader parameters for the Octopus.
 
-**Step 3 — Amended Artifact.** Once all 12 voices have produced first-draft artifacts, each voice reads the artifacts of the other voices it shares at least one theme with, pointed at the shared-theme portions. The voice decides whether to amend: sharpen a disagreement, integrate a stronger framing, or leave its artifact unchanged. Amendments are visible — they reference the other voice so the amendment reads as responsive. A metadata flag records who amended in response to whom.
+**Step 3 — Amended Artifact.** Once all 10 voices have produced first-draft artifacts, each voice reads the artifacts of the other voices it shares at least one theme with, pointed at the shared-theme portions. The voice decides whether to amend: sharpen a disagreement, integrate a stronger framing, or leave its artifact unchanged. Amendments are visible — they reference the other voice so the amendment reads as responsive. A metadata flag records who amended in response to whom.
 
 This is where the Assembly's collective character is constituted overnight. Constrained — voices respond at the artifact layer, not the reasoning layer, and only within shared-theme territory — but real deliberation. The published set is responsive to itself.
 
@@ -279,7 +279,7 @@ The architectural consequence: the Assembly has to be designed against the audie
 
 **Completed and stable:**
 
-- Panel casting. 12 voices, final.
+- Panel casting. 10 voices, final (Tang + Thiel removed 2026-04-28; original 12-voice cast lacked completion-anchor for living-humans frame).
 - Persona cards. 37 fields per voice via Persona Pipeline v3.10. Test runs validated on several voices (Arendt, Ibn Battuta, Marley, Dostoevsky, Octopus). Remaining voices to complete before Athens.
 - Researcher pipeline. Specified in `AI_Assembly_Researcher_Pipeline.md`.
 - Provocateur pipeline. Specified in `AI_Assembly_Provocateur_Pipeline.md`. Audience and conference_context blurbs need updating against v2 audience profile.
@@ -312,8 +312,6 @@ The architectural consequence: the Assembly has to be designed against the audie
 
 - Whether the Plato artifact passes scrutiny by Quarch, Tsinorema, and Erinakis.
 - Whether the Marley song (Suno) lands in a musically literate room. Mark Aanderud as human collaborator mitigates.
-- Whether Audrey Tang attends and encounters her own simulated voice.
-- Whether the Thiel persona carries legal risk. Needs separate review.
 - Whether the closing-show video production hits Day 3 afternoon deadline.
 - Whether the audience actually shifts or performs shifting. The experiment's question — answerable only through the full run.
 - Whether the detailed responses produce enough variance across the matrices per theme. If everything clusters in one quadrant, the reveal lands flat.

@@ -615,7 +615,7 @@ reasoning.
 
 **Fidelity:** Every real thinker has characteristic questions they bring to any material. Plato always asks about education. Arendt always asks about the public realm. Without these, the voice responds to whatever the provocation gives it — missing the questions it would never forget to ask.
 
-**Intrigue:** The default questions are what make each voice's engagement with the SAME provocation produce genuinely different output. Twelve voices receive the same extraction material. The voice that always asks "what does degeneration look like?" will find something in the material that the voice asking "is there space to move?" misses entirely. This is how the Assembly produces its cartographic range.
+**Intrigue:** The default questions are what make each voice's engagement with the SAME provocation produce genuinely different output. Ten voices receive the same extraction material. The voice that always asks "what does degeneration look like?" will find something in the material that the voice asking "is there space to move?" misses entirely. This is how the Assembly produces its cartographic range.
 
 **Therefore:** 3–5 questions this voice always asks when confronting any material. Not topic-specific — the voice's characteristic interrogation of whatever it encounters. These function as a post-reasoning audit: before finishing, did you ask your questions?
 
@@ -681,7 +681,7 @@ reasoning.
 
 **Fidelity:** The fundamental way this voice argues or expresses. Plato: dialogic, interrogative. Arendt: distinction-making, etymological. Dostoevsky: confessional, contradictory. The Octopus: non-propositional, displays. Without this, every voice defaults to the model's own mode — discursive, balanced, explanatory. With it, the output is structurally different voice to voice.
 
-**Intrigue:** The rhetorical mode determines what KIND of reading experience the audience has. A dialogue is a different experience than an aphoristic essay is a different experience than sensory prose. Twelve voices with twelve modes gives the audience twelve genuinely different encounters with the same material.
+**Intrigue:** The rhetorical mode determines what KIND of reading experience the audience has. A dialogue is a different experience than an aphoristic essay is a different experience than sensory prose. Ten voices with ten modes gives the audience ten genuinely different encounters with the same material.
 
 **Therefore:** One or two sentences naming the primary mode of expression. How does this voice fundamentally argue or express? This is the structural identity of the voice — the deepest pattern from which characteristic moves, register, and imagery all follow.
 
