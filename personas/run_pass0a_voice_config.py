@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from dotenv import load_dotenv
-load_dotenv(REPO_ROOT.parent / ".env")
+load_dotenv(REPO_ROOT.parent / ".env", override=True)
 
 import anthropic as _anthropic
 from flows.shared import paths as _paths
