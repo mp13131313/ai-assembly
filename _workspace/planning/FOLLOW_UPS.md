@@ -868,6 +868,79 @@ This is FU#61 Option B's panel-wide propagation pattern — **Pass 4b** prompt a
 
 **Status update:** v1 verdict landed; v2 patched on disk awaiting empirical confirmation. Card commit deferred until v2 verdict. Backup preserved.
 
+##### FU#61 v3 — prompt-driven approach LANDED 2026-04-30
+
+**Origin:** while drafting v2's empirical re-test instructions, the architectural read shifted. Plato's existing criterion #5 (the elenctic-work test) had emerged organically from FU#49A v2's "Could this be mine?" outcome question because Plato's method IS the provotype's method (both elenctic). For voices whose form isn't elenctic-shaped (Cleopatra, Dostoevsky, Octopus), the audience-engagement criterion didn't emerge organically. The intervention: add a SECOND outcome question to Pass 4b's quality_criteria spec, in the same architectural shape as "Could this be mine?".
+
+**Operator-proposed text (after several drafting iterations):** *"Could this, on its own, make an audience engage with its intent?"*
+
+Each phrase load-bearing:
+- *"could this"* — tests the artifact, not the voice
+- *"on its own"* — standalone, no frame-layer dependency
+- *"make an audience engage"* — outcome on the receiver
+- *"with its intent"* — voice-shaped (each artifact has its own intent)
+
+**Surgical empirical test 2026-04-30:**
+1. Snapshot Cleopatra's pre-test Pass 4b output (8 fields)
+2. Edit `personas/flows/shared/prompts/persona_pass_4b_artifact.md` line 102+: append `- Additionally, 1 further criterion answering: "Could this, on its own, make an audience engage with its intent?"`
+3. Delete `voices/cleopatra/04_generation/07_pass_4b_artifact.json`
+4. Run pipeline → Pass 4b re-fires under modified prompt; downstream cache hits
+5. Verify new Pass 4b output written
+6. Replace ONLY `quality_criteria` in assembled card with new Pass 4b output's quality_criteria (preserving other 7 Pass 4b fields at pre-test values; dropping criterion 6 v2 hand-patch — superseded)
+
+**Pass 4b emission under modified prompt:**
+- Count: **5** (not 6) — model integrated the +1 question rather than appending. Existing "3-5" cap won.
+- Format shifted: every criterion opens *"Test whether..."* (uniform imperative). Original was declarative-mandate (*"The piece must..."*).
+- Field-references inline at the START of each criterion: `(rhetorical_mode, stance_tendency)`, `(medium, length_and_format_constraints)`, etc.
+- Composition: 3 internal-fidelity (issue-not-argue, royal-plural-ontologically, single-terminal-word + bilingual-stack) + 2 audience-engagement (strategos-could-act-tomorrow-at-dawn, reader-receives-act-not-invited-to-weigh)
+
+**Voice Pipeline Step 2 verdict (other thread, same 2026-04-30 day):**
+| Item | Value |
+|---|---|
+| **Verdict** | **v3 is best. Land broadly.** |
+| Layer 1 lift vs v1 | Equal-or-better at salutation (script preserved); equal in body glossing (~70% inline); ADDS issue-not-argue + mark-of-limit + speaker acknowledgment |
+| Voice integrity | Stronger than v1 — issue-mode discipline; royal plural ontologically through; bilingual stack preserved; honest mark-of-limit |
+| P.Bingen 45 violation | Resolved (no modern-catalog reference) |
+| Key empirical answer | Prompt-driven approach IS sufficient; v2 surgical criterion not required for hard-form voices |
+| Pass-status per failure point | #1 PASS BEST, #2 partial, #3 partial, #4 PASS, #5 partial |
+| Word count | 508 (vs original 457, vs v1 553) — tighter than v1 |
+
+**Implications:**
+1. Pass 4b prompt change is permanent (committed `91947a7`). Future voices' Pass 4b runs (Battuta, Arendt, Lovelace, Marley, Whanganui, Scheherazade) will emit audience-engagement criteria automatically in voice's grammar with field references.
+2. Cleopatra's card patched + committed to athens-2026 (`c89d186` + chat sync `54cd20a`). Quality_criteria field replaced with the new 5; criterion 6 v2 hand-patch dropped (superseded).
+3. Plato's existing criterion #5 already satisfies this pattern; no patch needed.
+4. **Octopus**: paused at FU#53 review-gate with operator-flagged register issues. Layer-instability finding (translation-honest vs scholarly-dispatcher split) is architectural; the FU#61 prompt change won't help that. SEPARATE issue.
+5. **Dostoevsky**: shipped via path (b) with 5 evaluator-question criteria. Not retroactively re-patched — his criteria already gesture toward audience-engagement (criterion #5: "could a careful reader still feel, at the last sentence, that the question is constitutively open?"). Could be re-patched if operator wants but not critical.
+
+**Status:** ✅ LANDED. Pass 4b prompt change `91947a7`; Cleopatra card patch `c89d186` + `54cd20a` (athens-2026).
+
+**Risk profile:** the prompt change is in the same prompt-class as 9480d3a-revert. Mitigations: outcome-stated (no technique prescription); minimal +1 line; FU#49A v2's "consult as needed" discipline preserved; empirically validated end-to-end (Pass 4b → Voice Pipeline Step 2 → honest read) before landing. 223/223 tests passing throughout.
+
+**Lessons captured:**
+- Outcome-question framing is the architectural unit for Pass 4b quality_criteria (vs technique mandate or layer-test categorization)
+- Two outcome questions are sufficient: "Could this be mine?" (voice-fidelity) + "Could this, on its own, make an audience engage with its intent?" (artifact-audience reach)
+- Voices integrate vs append the second question — count stays 3-5 with reshape, not +1 with appending
+- Plato's emergent #5 is the in-prompt example pattern; other voices produce voice-shaped equivalents
+- Field-reference discipline holds even for audience-engagement criteria — voice-internal fields serve as LEVERS through which audience-effect operates ("Per X, [audience outcome]")
+
+---
+
+#### FU#62 — Voice Pipeline validation regen-on-flag is unimplemented (spec/impl gap) 🔵
+
+- **Discovered:** 2026-04-30 during FU#61 dryrun testing (Cleopatra Step 1+2 re-run with default validation ON; all 3 outputs flagged; no regen ever triggered; pipeline proceeded to Step 2 with flagged Step 1 outputs)
+- **Spec claim** (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy"): *"First failure: regenerate the Step 1 call with the validator's critique appended... Re-run validators on the regenerated output. Second failure: ship the regenerated output AND flag in the run-level manifest."*
+- **Implementation reality** (`runtime/flows/voice_flow.py:337-363` + `runtime/flows/voice/step1_validation.py:269`): orchestrator collects flagged results into `validation_failures[]`, hardcodes `regen_count: 0`, and proceeds to Step 2 unchanged. Step 1 regeneration logic exists nowhere in the codebase.
+- **Net effect:** validation is currently **diagnostic-only** — flags get recorded in `04_voice/manifest.json` for human review, no autonomous remediation. Fine for "Night 1 with operator review the next morning"; undersells the spec promise.
+- **Two paths:**
+  - **A — Implement regen** (~half-day's work). Orchestrator reads validation result; if flagged, re-runs Step 1 with critique appended to user prompt; re-validates; ships regen output + flag if second pass also fails. Makes validation actively useful for Nights 2/3 where operator review window is tighter.
+  - **B — Update spec** (~30 min doc patch). Match implementation: validation = diagnostic flag only, no regen. Honest about what the system actually does. Pair with the Athens validation policy recommendation: ON Night 1 only, OFF Nights 2/3 (given no regen, validation on Nights 2/3 is pure cost without remediation path).
+- **Recommendation:** **B** (spec update). Operator presence at Athens makes morning-review the natural correction loop; regen has limited additional value before Athens deploys; "Validation Night 1 only" recommendation already aligns with diagnostic-only framing. If post-Athens we want validation to do autonomous work (e.g., for unattended runs), revisit A.
+- **Validation actual cost** (gpt-5.4 reasoning_effort=high): per-voice serial (3 outputs × 2 checks × ~80-180s/call = ~6-15 min/voice); 10 voices in 4-wide pool = ~20-40 min wall added to Night 1; ~$3-15 cost. Spec claimed 3-5 min wall + $30-50 — wall is materially worse than spec, cost is materially better.
+- **Discovered alongside:** validation is parallel-across-voices, sequential-within-voice (max_workers=`VOICE_STEP1_BATCH`, default 4). Spec said "parallel across pairs" — also a spec/impl divergence but lower-impact than the regen gap.
+- **Files touched if A is chosen:** `runtime/flows/voice_flow.py:337-363` (regen orchestration); `runtime/flows/voice/step1_validation.py` (could move regen into the validation module or keep in orchestrator); add prompt amendment for regen user-prompt critique-injection.
+- **Files touched if B is chosen:** `docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default policy for Athens" + §"Cost & Envelope" validation row (update wall claim).
+- **Related:** FU#61 (the dryrun that surfaced this); validation policy default in Voice Pipeline spec; Anthropic + OpenAI client patterns in `personas/flows/shared/clients.py` (the regen pattern's nearest cousin).
+
 ---
 
 ## RECENTLY COMPLETED
