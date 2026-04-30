@@ -123,10 +123,33 @@ def call_claude(
         # (text, thinking_trace, block_types). Matches runtime/flows/voice/
         # _anthropic_call.py pattern. ~15 lines of event-walk code removed;
         # observable behaviour identical.
-        with client.messages.stream(**kwargs) as stream:
-            for _ in stream.text_stream:
-                pass  # drain; final assembly via final.content below
-            final = stream.get_final_message()
+        # 2026-04-30: streaming-stability retry. Empirically attested 3x
+        # consecutive Pass 4a failures on Octopus voice (107K corpus excerpts,
+        # large response near ceiling) with httpx.RemoteProtocolError "peer
+        # closed connection without sending complete message body". 1-retry
+        # with 15s backoff; non-deterministic flake usually passes second time.
+        # Mirrors FU#2 retry-on-JSONDecodeError pattern but for transport-side
+        # stream drops.
+        import httpx as _httpx
+        import sys as _sys
+        last_stream_err = None
+        for _attempt in range(2):
+            try:
+                with client.messages.stream(**kwargs) as stream:
+                    for _ in stream.text_stream:
+                        pass  # drain; final assembly via final.content below
+                    final = stream.get_final_message()
+                break  # success
+            except (_httpx.RemoteProtocolError, _httpx.ReadError, _httpx.ReadTimeout) as _e:
+                last_stream_err = _e
+                if _attempt == 0:
+                    _sys.stderr.write(
+                        f"[call_claude WARN] {type(_e).__name__} on attempt 1: {str(_e)[:120]}. "
+                        f"Retrying in 15s.\n"
+                    )
+                    time.sleep(15)
+                    continue
+                raise
         text_parts: list[str] = []
         thinking_parts: list[str] = []
         block_types: list[str] = []
