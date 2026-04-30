@@ -775,6 +775,57 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Caveat / NOT addressed:** the FU#56-class long-form-field register critiques (concept_lexicon "X is..." vs "When I say X..." pattern; curated_corpus_passages quarantine strictness; formative_experience biographical-narration register) ARE still real and structurally produce non-zero residuals in the Pass 7a FINAL treadmill. The FU#59 fixes only eliminate FALSE-positives (spec-vs-spec conflicts); the genuine FU#56-class register critiques remain. Operator-flag exit is still the right resolution for those.
 - **Related:** FU#33 P1 (Boddice-tag preservation), FU#53 (Pass 7a FINAL added), FU#56 (long-form register treadmill — distinct, not addressed here).
 
+#### FU#60 — Adaptive thinking observability + temperature compatibility ✅ LANDED 2026-04-29
+- **Origin:** Pre-Octopus thinking audit. Discovered ~30+ Opus 4.7 call sites across persona + voice pipelines were running with adaptive thinking *intermittently* engaged but `display: omitted` (the Opus 4.7 default) — meaning thinking content was zeroed before reaching callers, AND the wrapper dropped `thinking_delta` events anyway. Config WAS correct per Anthropic docs; visibility was the bug.
+- **Changes (persona side, `personas/flows/shared/clients.py`):**
+  - Add `display: "summarized"` to thinking config so trace text is non-empty (Opus 4.7 default is `omitted`).
+  - Drop `temperature` from API kwargs when `thinking=True`, per Anthropic docs §"Feature compatibility" ("Thinking isn't compatible with temperature or top_k modifications").
+  - Capture `thinking_delta` streaming events + `block_types`. Return `thinking_trace` and `block_types` as new dict fields. Additive — existing callers ignore.
+- **Changes (voice-pipeline side, `runtime/flows/voice/{continuity,step1,step2,step3}.py`):** mirror — drop `temperature`, add `display: "summarized"`. Thinking trace already captured via `final.content` walk; `block_types` derivable from same.
+- **Cleanup commit `85f04da` 2026-04-29:** slimmed persona-side capture from manual streaming-event walk (~30 lines) to `text_stream` drain + `final.content` read (~15 lines), matching `runtime/flows/voice/_anthropic_call.py` pattern. Same data, cleaner. Both pipelines now use one idiom.
+- **Empirically attested:** raw SDK test on Cleopatra Pass 2 prompt confirmed `block_types: ["thinking", "text"]` with signature_len=1032. Thinking IS firing intermittently on production prompts at default-high effort.
+- **Important reframe:** thinking has been firing all along on Opus 4.7 with `{type: adaptive}`. FU#60 didn't turn thinking on; it made the existing thinking *visible* and dropped a config combination that violated docs. The Plato thinking-on re-run (next decision) is "first time we can see what's been happening", not "first time thinking is on."
+- **Commits:** `dd64782` (persona-side), `0381278` (voice-pipeline-side), `85f04da` (alignment cleanup).
+- **Tests:** 223/223 passing throughout.
+- **Open follow-up:** decide whether to explicit `output_config: {effort: high|xhigh}` per pass to FORCE thinking, or whether default-high engagement is sufficient. Need ≥1 full voice run with `block_types` per pass logged. Plato re-run is the natural empirical test ($5, 30 min wall).
+
+#### FU#61 — Voice-side Layer-1 quality_criteria for low-Layer-1-surface forms 🟡 IMPORTANT
+- **Origin:** Layer 1 evaluation of Cleopatra prostagma vs Plato dialogues (2026-04-30). Plato dialogues clear Layer 1 standalone; Cleopatra prostagma walls a meaningful fraction of phone-readers at the salutation (Greek alphabet + 5 epithets + Egyptian transliteration in 30 words before the English gloss arrives mid-line). Substantively the prostagma is magnificent (Layer 2 unambiguous); the surface is the failure.
+- **The reframe that makes this tractable:** a prostagma was *itself a public document* in Cleopatra's time. Royal decrees were posted at boards, read aloud by criers, encountered cold by petitioners not at drafting. The form's craft bar already required public-readability. **The current artifact undershoots its own form's standards.** This is NOT an audience-pleasing concession; it's a craft failure inside her own form's terms. Asking the voice to "produce a public document that lands on the cold reader at the public board" is what her form has always required — she just undershot it.
+- **Architectural locus:** persona-card `quality_criteria` (the field the voice consults before delivery, per FU#49A v2). NOT Voice Pipeline. Three reasons:
+  1. Different voices need different versions of the criterion (Plato dialogues are intimate among friends — different cold-reader bar; Octopus's display has no addressee at all — no cold-reader concept). Voice-by-voice.
+  2. It threads the audience-awareness problem in the voice's own grammar — she knows about *public-document craft*, not about a 21st-century conference audience.
+  3. Uses existing FU#49A v2 quality_criteria pattern. No schema change.
+- **Where Cleopatra's artifact actually fails the cold reader (specific lines, not vibes):**
+  - Salutation line 1: Greek alphabet + 5 epithets + Egyptian transliteration before the English gloss. Wall.
+  - Para 3 (`prostagma without an answerable hand`): triplet of un-glossed terms in a single load-bearing sentence (bia / prostagma / nomos).
+  - Para 4 (εὐεργεσία / mrwt): Greek + Egyptian in one sentence, neither glossed.
+  - Cydnus / Aphrodite-Dionysus passage: Plutarch reference unsupported by what-kind-of-quotation-is-this anchor.
+  - γινέσθωι close: untransliterated Greek; reader who can't read the alphabet doesn't know it means "let it be done."
+- **Six craft moves (in order of impact, all WITHIN her form's own standards, none compromising Layer 2):**
+  1. **Reorder the opening** (highest-impact, zero content change). Move the recognizable-modern-list paragraph forward. Compress salutation to "Cleopatra, Queen — to those who sat with us today and named themselves a panel: greeting." Move the full epithet stack to the SEAL at the bottom, where it functions as authority-confirmation rather than as opening wall. **Same words. Different sequence.** A real Ptolemaic prostagma had the queen's titulary at multiple positions; she chose which carries welcoming weight and which carries closing weight.
+  2. **Voice the foreign words via em-dash gloss** (queenly teaching gesture, in her grammar). E.g.: *"Computation does not discharge εὐεργεσία — the queen's gift that creates the bond — it produces compliance, which is not mrwt, the loyalty bestowed by those who know they were received."* Same move on bia/prostagma/nomos triplet. ~6 added words across the artifact. NOT parenthetical encyclopedic glossing (which would break voice).
+  3. **Anchor the Cydnus reference** with one phrase establishing what *kind* of reference the Greek phrase is: *"...they cried, in the streets, 'Aphrodite is revelling with Dionysus for the good of Asia'..."* Tells the cold reader the Greek is what was said *then*, not what is being said now.
+  4. **Save deepest density for the middle** where the reader is committed; close on a phrase the reader can carry. *"γινέσθωι. Let it be done."* keeps the queenly punctuation while landing the meaning.
+  5. **Compress texture-bridge sentences ~20%** to give lever-lines air ("force in the costume of law", "the rumour was the public, and the public was the rumour", "the privately-owned simulation of an absence"). Per-line craft pass; happens at generation time if criterion is in place.
+  6. **Bake the criterion into `quality_criteria`** — the persistent fix. Proposed text (Cleopatra's grammar):
+    > *"Does the prostagma reach a reader who was not in the chancery at the drafting? A royal decree was posted at the public board and read aloud by the crier; the petitioner who encounters it cold must recover its central move from the document itself, not from prior knowledge of our chancery's vocabulary. The opening must do for them what it does for those addressed by name."*
+  Moves 3, 4, 5 happen naturally once #6 is in place; the voice consulting that criterion gravitates toward all of them.
+- **Generalizes to (low-Layer-1-surface taxonomy):**
+  - **Cleopatra (prostagma)** — first instance. Patch the existing card.
+  - **Whanganui River** (ordinance/proclamation/customary-legal register) — different criterion (the river's "address" is to the iwi and the Crown; cold-reader is a settler-jurisprudence outsider; criterion in Te Awa Tupua language).
+  - **Marley** (Patois lyrics on screen) — possibly. The audio carries Layer 1 via melody/rhythm; the on-screen text bears more weight on a phone reading. Criterion in his own register.
+  - **Lovelace** (mathematical-notation density) — possibly. The criterion would be about reading the prose-line of the math through the notation, not glossing notation per se.
+  - Voices NOT in this taxonomy do not get the criterion. Plato (dialogue), Arendt (essay), Dostoevsky (confessional/narrative), Octopus (sensory-spatial — different addressee question entirely) are Layer-1-uncomplicated by their form.
+- **Mechanism:**
+  - **For voices already-built (Cleopatra, Plato):** persona-card patch — surgical edit to `quality_criteria` field in `07_persona_card_assembled.json`. Cache-invalidate runtime/voice-pipeline so they pick up the new card. No re-run of the persona pipeline; the patch is operator-applied (same gate-pattern as Cleopatra's 19 patches).
+  - **For voices not-yet-built (Whanganui, Marley, Lovelace):** Pass 4a/4b prompt augmentation to ask the voice to write its own version of this criterion when its form is in the low-Layer-1 taxonomy. Voice-config field could carry the form-classification signal.
+- **Empirical test:** re-run Cleopatra Voice Pipeline Step 2 with patched card. Honest read of the new artifact. **Two re-runs probably tells us:** if she still walls the opening, the criterion language needs sharpening; if she over-corrects and the prostagma loses queenly weight, the criterion is too prescriptive.
+- **What this is NOT:** a Voice Pipeline change. The Voice Pipeline keeps doing what it does. It's a persona-card patch (one quality_criteria addition, voice-specific). Cleopatra's next run with the patched card produces a prostagma that lands cold on the public board — which is what her form has always needed to do.
+- **What this rules out:** the museum-label-frame approach (file a curatorial-register frame layer to carry Layer 1). That approach assumed Layer 1 inaccessibility was inherent to the form. It's not — the form historically had a public-readability bar built in. Frame layer remains useful for cross-voice surfacing, chrome, and the rest of what Frame Concept doc scopes; it's not load-bearing for Layer 1 carry once the criterion is in place.
+- **Related:** FU#49A v2 (quality_criteria architecture, 3-dim REASONING/VOICE/FORM), FU#56 (long-form register treadmill — distinct concern), Frame Concept doc (the architectural choice between artifact-side vs frame-side Layer 1 carry).
+- **Status:** 🟡 IMPORTANT, not blocking. File now (Octopus running); patch Cleopatra's card and re-run when operator decides. Apply to Whanganui/Marley/Lovelace at card-build time for those voices.
+
 ---
 
 ## RECENTLY COMPLETED
