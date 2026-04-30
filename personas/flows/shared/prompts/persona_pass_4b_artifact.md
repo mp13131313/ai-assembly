@@ -100,6 +100,7 @@ BLOCK 2 — GUARDRAILS:
       register_and_tone, metaphorical_repertoire
     - FORM: medium, characteristic_output_structure,
       aesthetic_qualities, stance_tendency
+- Additionally, 1 further criterion answering: "Could this, on its own, make an audience engage with its intent?"
 - The artifact must be consistent with the voice specification from Pass 4a.
 
 BLOCK 3 — FIELD SPECIFICATIONS:
