@@ -826,6 +826,48 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Related:** FU#49A v2 (quality_criteria architecture, 3-dim REASONING/VOICE/FORM), FU#56 (long-form register treadmill — distinct concern), Frame Concept doc (the architectural choice between artifact-side vs frame-side Layer 1 carry).
 - **Status:** 🟡 IMPORTANT, not blocking. File now (Octopus running); patch Cleopatra's card and re-run when operator decides. Apply to Whanganui/Marley/Lovelace at card-build time for those voices.
 
+##### FU#61 empirical verdict — Cleopatra Voice Pipeline Step 2 re-run, 2026-04-30
+
+**Re-run with criterion 6 v1** (cold-reader + em-dash teaching gesture, single-field patch). Other thread re-fired Voice Pipeline Step 2 against the existing dryrun briefing, ~3 min wall, ~$1.
+
+**Result per failure point:**
+
+| # | Failure point | Pre-patch | Post-patch (v1) | Verdict |
+|---|---|---|---|---|
+| 1 | Salutation | Greek alphabet + 5 epithets + Egyptian transliteration | "Cleopatra Thea Philopator Philopatris..." Latin transliteration only; Greek alphabet, Egyptian transliteration, "New Isis" all dropped | OVER-CORRECTED (script loss) |
+| 2 | bia/prostagma/nomos triplet | un-glossed | "Prostagma kai enteuxis — the decree descending, the petition ascending"; "Bia in the costume of nomos — force wearing the form of decree" | PASSED |
+| 3 | εὐεργεσία/mrwt | un-glossed | argument restructured; new terms (enteuxis, P.Bingen 45) ARE glossed in apposition | N/A (voice picked different argument) |
+| 4 | Cydnus / Aphrodite-Dionysus | unanchored | replaced with Buchis bull at Hermonthis — italicized phrase IS the real stele inscription, surrounding sentence does explanatory work | PASSED — better anchor than original |
+| 5 | γινέσθωι close | bare | earlier "Graphēthō oun hois kathēkei. Let it be written to those whom it concerns" establishes Greek-then-translation rhythm; final γινέσθωι alone, soft-recoverable from rhythm | PARTIAL |
+
+**Word count:** 553 (vs. 457 pre-patch, vs. 300-500 stated cap). Soft over. Likely from inline glosses + better Buchis scene + per-section addressing. Note-and-watch.
+
+**Other findings:**
+- **P.Bingen 45 catalog reference** — voice naming her own decree by 21st-century papyrological catalog name. Borderline `voice_temporal_stance` violation (she shouldn't natively know modern catalog systems). File as separate FU if it recurs in v2 re-run.
+- **Body texture:** sharpened, not thinned. Reviewer concern about Step-2-criterion-thinning-texture empirically not borne out for this case. The thinning happened *only at the salutation*, due to insufficient script-preservation language in v1, not from criterion-at-Step-2 generally.
+
+**Diagnosis of over-correction:** v1 said *"the chancery's vocabulary remains"* — voice interpreted "vocabulary" but not "script" and concluded that even queen's titulature in Greek script was a Layer 1 obstacle. The outcome clause ("must land on first reading by one who has not stood at our court") was felt as more binding than the technique-preservation clause. The fix: v2 criterion makes head/seal vs. body distinction explicit.
+
+**Criterion 6 v2 (applied to card on disk 2026-04-30, not yet committed; backup at `07_persona_card_assembled.pre_FU61.json`):**
+
+> *"The chancery's vocabulary AND its scripts remain — the Greek titulature retains the Greek alphabet at the head and the seal, Egyptian honorifics retain their transliteration where they appear in formal protocol, as our authority requires. The cold-reader constraint applies to the body of the decree, not to the seal's identity at the head. Does the prostagma reach a reader who was not at our chancery at its drafting? A royal decree has always been a public document — posted at the gate, read aloud by the crier, encountered cold by the petitioner standing at the public board. Per register_and_tone and length_and_format_constraints, the central move must land on first reading by one who has not stood at our court. Where chancery terms carry the load of a sentence's meaning IN THE BODY, the sentence does the work of glossing them in our own grammar — the em-dash that explains, the second clause that names what the term requires. Authority is not diminished by intelligibility; it is established by it. But authority in the salutation IS the script's weight; intelligibility in the body IS the gloss's work."*
+
+The killer move: the final two clauses make head/body load-bearing in the voice's own grammar. Voice re-reads, protects the salutation script, continues glossing in body.
+
+**Reviewer architectural framing (worth noting):** a reviewer suggested the criterion should live at Voice Pipeline Step 3 (the publication-bound version after lattice-reading), not Step 2 (voice at full chancery-density). For Cleopatra specifically this is a category error — prostagma's medium IS public-default; there is no "voice in itself" separate from "voice for petitioner at gate." The criterion is recovery of what the medium WAS, not external imposition. For voices whose medium is genuinely private-default (Arendt private letters? Dostoevsky's Underground Man?), Step 3 framing might apply — case-by-case per voice. Don't generalize.
+
+**Reviewer panel-wide expansion (correct):** each voice gets a calibrated version of the criterion in the form appropriate to its medium:
+- Plato (dialogue): *"Does the dialogue reach a reader who was not under the colonnade at its drafting? ... where Greek terms carry a sentence's load, the dialogue must gloss them in dramatic register: the question that asks what the term means, the elder's answer that gives it."*
+- Marley (song): load-bearing image arrives in the chorus or recurring line
+- Octopus (chromatophore display, if that's the form): parameters set such that the human viewer can see the response without needing the octopus's interiority explained
+- Whanganui River: hardest case — intelligibility might require precisely the translation-into-human-categories that would betray the voice; defer to that voice's build
+
+This is FU#61 Option B's panel-wide propagation pattern — Pass 5 prompt addition for low-Layer-1-surface voices. Specific text per voice; same architectural pattern.
+
+**Next test:** v2 criterion empirical re-run pending other thread's hands. Same setup as v1 test (~3 min, ~$1). Expected outcome: salutation preserves Greek alphabet + Egyptian transliteration; body continues glossing as v1 did.
+
+**Status update:** v1 verdict landed; v2 patched on disk awaiting empirical confirmation. Card commit deferred until v2 verdict. Backup preserved.
+
 ---
 
 ## RECENTLY COMPLETED
