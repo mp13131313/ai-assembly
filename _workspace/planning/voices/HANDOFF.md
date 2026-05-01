@@ -1,4 +1,4 @@
-# Voices — Handoff (session-end snapshot, 2026-05-01)
+# Voices — Handoff (session-end snapshot, 2026-05-02 — supersedes 2026-05-01)
 
 **Companion:** `OPEN_ITEMS.md` (open-items list) + `ONBOARDING.md` (how-to / fresh-pickup). This doc is the session-end pickup snapshot: where we landed today, what's in flight, what's the next operator decision.
 
@@ -10,14 +10,12 @@
 
 | Repo | Branch | HEAD | Pushed |
 |---|---|---|---|
-| code | `voice-pipeline-v2.1-align-revert` | `80338f6` | ✅ yes |
-| athens-2026 | `main` | `5088d67` | ✅ yes |
-
-`voice-pipeline-v2.1-align-revert` is 22+ commits ahead of `main`. Merge decision deferred.
+| code | `voice-pipeline-v2.1-align-revert` | (this commit + push) | ✅ yes |
+| athens-2026 | `main` | `4cff85b` | ✅ yes (Octopus shipped + FU#61-fresh quality_criteria from 2026-05-01) |
 
 ---
 
-## Where the 5-of-10 panel voices stand
+## Where the 10 panel voices stand
 
 | Voice | State |
 |---|---|
@@ -25,89 +23,114 @@
 | Cleopatra | ✅ shipped at FU#61 v3 (committed `c89d186` + `54cd20a`) |
 | Dostoevsky | ✅ shipped via path (b) + FU#61-fresh quality_criteria patched (committed `5088d67`) |
 | Battuta | ✅ shipped via path (b) — pipeline trail tracked in athens-2026 (`e300508`) |
-| Octopus | ✅ shipped via Path A surgical 6-patch + path (b) — committed `8bb9981` |
-| Hannah Arendt | ❌ not started |
-| Ada Lovelace | ❌ not started |
-| Bob Marley | ❌ not started |
+| **Octopus** | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **rebuild in progress 2026-05-02 in current-tests sandbox** — compass framework + 6-layer translation chain + chromatophore display engine integration. DR prompts ready for claude.ai paste. See §"Octopus compass rebuild" below. |
+| Hannah Arendt | 🟡 Pass 0a + Phase 0.5 done in current-tests; DR prompts ready for claude.ai paste |
+| Ada Lovelace | 🟡 Pass 0a done; Phase 0.5 retrying (Gemini 503 outage); DR prompts pending |
+| Bob Marley | 🟡 Pass 0a + Phase 0.5 done in current-tests; voice_mode flipped observational → narratival (Pass 0a hallucinated Card v2 reference; OPEN_ITEMS §3 prediction was correct); DR prompts ready for claude.ai paste |
 | Whanganui River | ❌ not started |
 | Scheherazade | ❌ not started — mediated-voice prompt fix flagged as pre-build attention |
 
 ---
 
-## What this session landed (since the LATE handoff)
+## Octopus compass rebuild (2026-05-02 session)
 
-**Voice cards committed to athens-2026:**
-- Cleopatra FU#61 v3 + chat sync (`c89d186` + `54cd20a`)
-- Dostoevsky FU#61-fresh quality_criteria + chat sync (`5088d67`)
+**Trigger:** chat-test of shipped Octopus card revealed it produced "scholarly translator reporting on the body from outside" rather than the experiment-in-mind voice the operator had originally blueprinted (in March 2026 mock card + compass DR artifact). The shipped card was internally coherent + validator-passed but not the build the operator wanted.
 
-**Code-repo commits:**
-- `91947a7` — FU#61 Pass 4b prompt: +1 audience-engagement question
-- `9eb0222` — FU#61 v3 verdict + lessons in FOLLOW_UPS.md
-- `e90f1e2` — Pass 0a `load_dotenv override=True` bug fix
-- `a6fa848` — clients.py retry-on-stream-drop (httpx.RemoteProtocolError)
-- `57cb0b5` — FU#61 Pass 4b not Pass 5 doc correction
-- `d0457cb` — voices/ subfolder created (OPEN_ITEMS + ONBOARDING)
-- `80338f6` — voices/ docs authoritative sweep (incorporates every planning doc + thread)
-- `8c1d5f9`, `ba2bcd8` — FU#60/61 filing in FOLLOW_UPS.md
-- `85f04da` — clients.py alignment refactor
+**Diagnosis:** the live April 2026 claude.ai DR sessions had drifted toward precautionary-Continental philosophical framing — Birch's bracketing-as-method, Continental ethological-attunement, CARE Principles as binding constraint, research-governance-as-constitutive — propagating through Pass 1.4 voice synthesis into the built card's anti-unified-I refusal-to-render register. Editorial_rationale was actually compass-friendly all along; the drift came from §5 of the live DR + the operator-stage `review_doc` "refuse to invent... Confidence high" auto-generated language (Pass 0a LLM run-variance — see voices/ONBOARDING DO-list).
 
-**Voices built end-to-end this session:** Octopus (to gate, deferred), Dostoevsky (shipped), Battuta (shipped). FU#61 prompt change empirically validated on Cleopatra + Dostoevsky.
+**Approach: full rebuild from scratch in current-tests sandbox.** Snapshot of shipped Octopus state preserved at `projects/current-tests/voices/octopus_pre_compass_rebuild_2026-05-01/` (93 files, 9.1MB, full pipeline trail including all `.pre_*.json` snapshots). Athens-2026 production state untouched until rebuild verified.
+
+**Rebuild pivots:**
+
+1. **Pass 0a re-run** with `--editorial-rationale null` → fresh review_doc surfaced "anthropomorphism vs excessive-alienness twin-risks" framing (vs April 27 run's "refuse to invent... Confidence high"). Lesson: Pass 0a is partly LLM run-variance; treat review_doc as starting proposal to interrogate, not as binding commitment. Documented in voices/ONBOARDING DO-list (committed `1c83034`).
+
+2. **`voice_config.manual_grounding`** — replaced auto-generated Wikipedia-only text with rich grounding: Godfrey-Smith *Other Minds* (2016) framing as primary methodology + biology + lifecycle + three-registers (technical-neurobiological / philosophical-phenomenological / felt-encounter Montgomery+Scheel) + explicit **6-layer translation chain** (Athens theme → Translation IN → Biology → Reaction approximation → Chromatophore display → Translation OUT → Encounter) + compass framing. ~7,500 chars (was ~670).
+
+3. **`voice_config.editorial_rationale`** — preserved operator-written first paragraph byte-identical; added explicit 6-layer chain + compass scaffolding + twin-risks closing. ~2,250 → 5,500 chars.
+
+4. **Pass 0b base template amendment** at `personas/flows/shared/prompts/pass_0b_non_human_organism.md` (this commit) — 6 surgical edits making the template **compass-permissive** (both precautionary AND phenomenologically-permissive postures supported; voice_config.editorial_rationale determines which). Header anti-anthropomorphisation paragraph reframed as posture-conditional; verb-discipline-as-banned-language reframed as craft-choice with debates surfaced; precautionary epistemic frame reframed as posture-conditional; popular-but-unreliable corpus framing reframed as two-registers (felt-encounter vs anthropomorphic); Continental philosophy demoted from foundational to one-strand; CARE Principles reframed from binding-guardrails to citation-discipline; §6 corpus question reframed as three-register-set (technical / philosophical / felt-encounter). **Architectural fix that benefits all future non-human-organism voice rebuilds (Whanganui especially).**
+
+5. **Phase 0.5 v3.1** auto-generated 6 DR prompts from amended template + 6-layer voice_config. Compass framing partially propagated via Pass 0b's tailoring layer (voice-specific follow-up questions inherit compass scaffolding; underlying template-rendered questions also amended).
+
+6. **Manual TAILORING ORIENTATION preamble** added to each of the 6 octopus DR prompts (after section heading, before voice-specific questions). Surfaces the full 6-layer chain + compass scaffolding + twin-risks at every section paste. ~3000 chars per prompt. **Octopus DR prompts now have 11-14 compass+6-layer markers per section** (vs 0-7 in surgical_v1, 0-2 in v2 auto-generated, 0-7 in v3 template-amended-only).
+
+**Status:** Octopus compass rebuild ready for operator's claude.ai DR sessions. Each section ~30 min wall = ~3hr operator wall total. After all 6 saved → cache-invalidate from Pass 1.1 → re-fire pipeline.
+
+**Backup snapshots preserved:**
+- `voices/octopus_pre_compass_rebuild_2026-05-01/` (full athens-2026 shipped state)
+- `voices/octopus/01_research/03_dr_prompts.surgical_v1/` (manual surgical edits)
+- `voices/octopus/01_research/03_dr_prompts.v2_partial/` (auto-generated before §6 amendment)
+- `voices/octopus/01_research/01_perplexity_dossier.pre_6layer.json` + `02_gemini_broad_scan.pre_6layer.json` (research outputs from before voice_config 6-layer rewrite)
+
+---
+
+## What this session landed (2026-05-02)
+
+**Code-repo commits (this commit):**
+- Pass 0b template amendment (`pass_0b_non_human_organism.md`) — 6 surgical edits + §6 amendment making template compass-permissive while preserving precautionary-posture support
+- voices/ONBOARDING DO-list addition: interrogate Pass 0a review_doc framings (committed earlier `1c83034`)
+- voices/HANDOFF.md (this doc) + voices/OPEN_ITEMS.md updates
+
+**No athens-2026 changes this session.** Octopus rebuild stays in current-tests until verified.
+
+**4 voices' Pass 0a + Phase 0.5 fired in current-tests sandbox:**
+- Octopus (rebuild — full compass framework)
+- Arendt (clean Pass 0a, voice_mode=philosophical, DR prompts ready)
+- Lovelace (Pass 0a clean, Phase 0.5 retry pending Gemini outage)
+- Marley (Pass 0a, voice_mode flipped observational → narratival, DR prompts ready)
 
 ---
 
 ## What's in flight / open at session end
 
-### Operator-decision pending
+### Operator wall (claude.ai DR sessions — biggest time investment)
 
-1. **Plato 3 surgical patches** for dramatist-vs-speaker collision (`I am the son of Phaenarete` etc.). Drafted in HANDOFF_2026_04_28 §13, never applied. ~10 min. See OPEN_ITEMS.md §9.
-2. **Octopus FU#53 review-gate path** — A (surgical 6-patch) / B (Pass 2 rebuild) / C (accept residuals via flag). See OPEN_ITEMS.md §2.
-3. **Mediated-voice prompt clarification** — land before Scheherazade's Pass 0a, or plan for surgical patches at her gate. See OPEN_ITEMS.md §9 + ONBOARDING.md "Mediated voices".
-4. **Plato thinking-on re-run experiment** ($5, 30 min). See OPEN_ITEMS.md §5.
-5. **9480d3a revert hypothesis re-evaluation** — connected to FU#56 + FU#4. See OPEN_ITEMS.md §5.
-6. **5 unbuilt voices DR session sequencing** — operator wall time, ~3-4 hr per voice. See OPEN_ITEMS.md §3.
+1. **Octopus 6 DR sessions** — paste each section prompt into claude.ai (Opus 4.7 + Extended Thinking + Deep Research), save outputs to `voices/octopus/01_research/04_dr_dossier/`. ~3hr operator wall. Highest priority — completes the rebuild.
+2. **Arendt 6 DR sessions** — same pattern, ~3hr.
+3. **Marley 6 DR sessions** — same pattern, ~3hr (note voice_mode=narratival; lyrics_patterns_only corpus_constraint).
+4. **Lovelace 6 DR sessions** — pending Phase 0.5 completion when Gemini recovers.
 
-### Cleanup operations (operator confirmation)
+These can be parallelized across browser tabs (operator-side parallelism unlimited).
 
-7. **Athens-2026 archive file revert** — `archive/first_run/voices/cleopatra/01_research/03_dr_prompts/08_section_6_dr_prompt.md` has 80 lines deleted (forensic, NOT this session). Revert or commit?
-8. **Athens-2026 sweep-commit** — Battuta entire voice folder + Dosto pipeline trail + Octopus missing files = ~700 files matching Plato pattern.
-9. **Athens-2026 `.gitignore` additions** — `_pipeline_logs/`, `*.pre_*.json`, `_operator_review_passed.flag`.
-10. **`/tmp/` cleanup** — pass4b_test_* + standalone_pass4b_test.py + older diagnostic scripts.
-11. **Code repo 4 untracked planning docs** — FU61_DRYRUN_VERDICT, PIPELINE_DOWNSTREAM_DESIGN, STEP3_REDESIGN, runtime/ subfolder. Other-thread artifacts; commit or leave?
+### Operator-decision pending (carried from 2026-05-01)
 
-### Voice-build-affecting but outside voices/ scope
+5. **Plato 3 surgical patches** for dramatist-vs-speaker collision. Drafted in HANDOFF_2026_04_28 §13, never applied. ~10 min. See OPEN_ITEMS.md §9.
+6. **Mediated-voice prompt clarification** — land before Scheherazade's Pass 0a, or plan for surgical patches at her gate. See OPEN_ITEMS.md §9.
+7. **Plato thinking-on re-run experiment** ($5, 30 min). See OPEN_ITEMS.md §5.
+8. **9480d3a revert hypothesis re-evaluation** — connected to FU#56. See OPEN_ITEMS.md §5.
 
-12. **Parent `_workspace/planning/ONBOARDING.md`** — drop "Phase L sign-off" framing + correct §1-§5 vs §6 DR-model spec (stale: pattern is now 4.7 across all 6 sections).
-13. **Older HANDOFF_*.md docs** — sweep for "Phase L sign-off" references, or leave as historical?
-14. **`LLM_CALL_INVENTORY.md`** — stale since 04-27.
-15. **`voice-pipeline-v2.1-align-revert` → `main` merge** — operator decision when.
-16. **Pipeline v4 spec doc** — needs reflecting recent FU#52/53/57/58/59/60/61 changes.
+### Octopus rebuild verification (after operator runs DR sessions)
+
+9. **Run pipeline on rebuilt Octopus** — cache-invalidate from Pass 1.1, fire `run_persona_pipeline.py "Octopus" --project /path/to/current-tests`
+10. **Verify chat-test artifact** matches experiment-in-mind voice + chromatophore display engine integration (medium + technical_capabilities should prescribe the JSON parameter emission)
+11. **Promote rebuilt Octopus to athens-2026** — copy `current-tests/voices/octopus/` → `athens-2026/voices/octopus/` (overwrite shipped state). Athens-2026 commit + push.
+12. **Document rebuild lessons** in voices/ONBOARDING — twin-risks calibration, compass-permissive template architecture
+
+### Whanganui-relevant
+
+13. **Whanganui rebuild design** — when she eventually builds, use the compass-permissive template (now in place) + voice_config.editorial_rationale that explicitly chooses precautionary OR phenomenologically-permissive posture. Whanganui has same "non-human + no-first-person-source" structural challenge as Octopus; choose posture deliberately.
 
 ### Out of voices/ but related
 
-17. **FU#62 spec-update vs implement** — Voice Pipeline validation regen-on-flag spec/impl gap (recommendation: spec-update path B). Operator decision.
+14. **FU#62 spec-update vs implement** — Voice Pipeline validation regen-on-flag spec/impl gap (recommendation: spec-update path B). Operator decision.
+15. **`voice-pipeline-v2.1-align-revert` → `main` merge** — operator decision when.
 
 ---
 
 ## What I would do next session in priority order
 
-1. **Verify branch state** — confirm `80338f6` HEAD on code repo + `5088d67` on athens-2026; check for new other-thread commits.
-2. **Pick the next operator-decision** from the list above. Highest-value low-cost: A1 (Plato patches) or B-cluster (athens-2026 sweep + .gitignore).
-3. **Or: pick a next voice to build** — Battuta queue is exhausted; 5 voices left. DR sessions are operator-bounded (~3-4 hr each). Sequence: Arendt (philosophical, FU#49 patterns proven) is the easiest pick if Battuta DR-prompts approach was clean.
-
-If task is voice-build:
-1. Pass 0a + Phase 0.5 for next voice (~7 min, $)
-2. Operator does manual claude.ai DR sessions (~3-4 hr operator wall)
-3. Run pipeline: chunked merge → Pass 1c gate → Pass 2-7 → FU#53 gate → operator decision (a/b)
-4. Match the 4-shipped-voices pattern: 2 patch rounds + path (b) accept-residuals via flag
-
-If task is cleanup / archive: see §10-11 of this doc.
+1. **Run Octopus DR sessions** in claude.ai (operator wall ~3hr) using the compass-aligned prompts in current-tests
+2. **Optionally: run Arendt + Marley DR sessions** in parallel browser tabs (operator wall ~6hr more)
+3. **After Octopus DR done: cache-invalidate + re-fire pipeline + chat-test the rebuilt voice + promote to athens-2026 if good**
+4. **Lovelace Phase 0.5 retry** — wakeup scheduled for Gemini recovery; complete when ready
+5. **Plato 3 surgical patches** if there's spare time
 
 ---
 
 ## Reading order for next session
 
-1. `voices/ONBOARDING.md` (steady-state how-to, ~10 min)
-2. `voices/HANDOFF.md` — this doc (~5 min)
+1. `voices/ONBOARDING.md` (steady-state how-to + Pass 0a interrogation discipline, ~10 min)
+2. `voices/HANDOFF.md` — this doc (~5 min, especially §"Octopus compass rebuild")
 3. `voices/OPEN_ITEMS.md` (status snapshot, ~10 min)
 
 That's ~25 min to working knowledge for picking up voice-build work cold.

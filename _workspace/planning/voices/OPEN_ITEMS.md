@@ -1,4 +1,4 @@
-# Voices — Open Items (authoritative, 2026-05-01)
+# Voices — Open Items (authoritative, 2026-05-02)
 
 **Scope:** EVERYTHING still open or undecided that pertains to the **persona pipeline / voice cards** for athens-2026. Distinct from the Voice Pipeline runtime (Steps 1+2+3) which has its own tracking.
 
@@ -18,10 +18,10 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`).
 | Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
 | Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
 | Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). Voice files **untracked** in athens-2026 git. |
-| Octopus | non_human | observational | false | ✅ shipped | Path A surgical 6-patch (translation_protocol Step 5 / character bracket / medium citation-default / length_and_format 'I' ban / characteristic_output_structure observer-staging / metaphorical_repertoire third-person) → round 2 = 1 false-positive (council_member_name) → path (b). Athens-2026 commit `8bb9981`. |
-| Hannah Arendt | human | (TBD) | (TBD) | ❌ not started | Phase 0a + 0.5 + DR + pipeline. Likely philosophical. |
-| Ada Lovelace | human | (TBD) | (TBD) | ❌ not started | Likely narratival or observational. |
-| Bob Marley | human | (TBD) | (TBD) | ❌ not started | Likely narratival (song-as-witness). |
+| Octopus | non_human | observational | false | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **compass rebuild in progress 2026-05-02** in current-tests sandbox. See §15 below. |
+| Hannah Arendt | human | philosophical | false | 🟡 Pass 0a + Phase 0.5 done (in current-tests); DR prompts ready for claude.ai paste |
+| Ada Lovelace | human | philosophical | false | 🟡 Pass 0a done; Phase 0.5 retry pending (Gemini 503 outage); DR prompts pending |
+| Bob Marley | human | **narratival** | false | 🟡 Pass 0a + Phase 0.5 done; voice_mode flipped observational→narratival (Pass 0a hallucinated Card v2 reference per ONBOARDING DO-list); DR prompts ready for claude.ai paste; lyrics_patterns_only corpus_constraint (atypical) |
 | Whanganui River | non_human | observational (likely) | (TBD) | ❌ not started | Hardest case — non-human/system; the river constructed via human observation/legal status. |
 | Scheherazade | fictional | narratival (likely) | false | ❌ not started | **Mediated-voice prompt fix** flagged in earlier session — verify status pre-build. |
 
@@ -417,6 +417,71 @@ For voice-build planning context only:
 - **Voice Pipeline dry-runs:** Plato solo on 2026-04-29 (3 formulations on "Legitimacy of the Invisible") + Plato + Cleopatra dual on 2026-04-30 — both successful, produced quality Socratic dialogues / prostagmata. Step 3 still pending — needs more voices for cross-voice amendment traffic.
 
 This means: as soon as a voice's `07_persona_card_assembled.json` ships, runtime can consume it. Voice-build is the rate-limit.
+
+---
+
+## 15. Octopus compass rebuild (in progress, 2026-05-02)
+
+**Trigger:** chat-test of shipped Octopus card revealed it produced "scholarly translator reporting on the body from outside" rather than the experiment-in-mind voice the operator had originally blueprinted (March 2026 mock card + compass DR). Shipped card was internally coherent + validator-passed but not the build the operator wanted.
+
+**Diagnosis:** the live April 2026 claude.ai DR sessions had drifted toward **precautionary-Continental philosophical framing** — Birch's bracketing-as-method, Continental ethological-attunement, CARE Principles as binding constraint, research-governance-as-constitutive — propagating through Pass 1.4 voice synthesis into the built card's anti-unified-I refusal-to-render register. Editorial_rationale was actually compass-friendly all along; the drift came from §5 of the live DR + the operator-stage `review_doc` "refuse to invent... Confidence high" auto-generated language (Pass 0a LLM run-variance — see ONBOARDING DO-list).
+
+**Approach: full rebuild from scratch in current-tests sandbox.** Snapshot of shipped Octopus state preserved at `projects/current-tests/voices/octopus_pre_compass_rebuild_2026-05-01/`. Athens-2026 production untouched until rebuild verified.
+
+### Rebuild architecture
+
+**The 6-layer translation chain** (operative across all build artifacts):
+- Layer 0: Athens theme (raw human input)
+- Layer 1: Translation IN (human concept → octopus-readable stimulus-class via voice's `translation_protocol`)
+- Layer 2: Biology (documented science substrate)
+- Layer 3: Reaction approximation (inferred body-response, Godfrey-Smith license)
+- Layer 4: Chromatophore display rendering (body's native output, parametrized animation per the runtime-thread chromatophore display engine spec)
+- Layer 5: Translation OUT (audience-readable text with translation work visible, construction-acknowledged-at-frame)
+- Layer 6: Encounter (audience reads display + text together at Athens)
+
+**Compass philosophical scaffolding** (license across moves):
+- Godfrey-Smith *Other Minds* (2016) + *Metazoa* (2020) gradualist phenomenology — primary methodology
+- de Waal anthropodenial — cross-architecture imaginative-analogy license
+- Carls-Diamante disunity — one of three live options (unified macro / multiple micro / loose hybrid), not constraining frame
+- Nagel's bat — opening of the imaginative question, not the wall
+- Continental tradition (Despret/Lestel) — one strand, not foundational
+- CARE Principles + research-governance — brief citation discipline, not constitutive of voice
+- Construction-acknowledged-at-frame — makes Translation OUT honest
+
+**Twin-risks calibration** (the dossier should surface scholarship to support voice navigation between):
+- Clever-pet anthropomorphism (flattens alien intelligence by mapping onto human-pet emotional categories)
+- Excessive-alienness refusal (prevents voice from speaking by refusing to render)
+
+The middle is **experiment-in-mind**: alien-but-engaging, first-person-with-construction-acknowledged, render-with-limits-named.
+
+### What's been done
+
+1. **Pass 0a re-run** (current-tests sandbox) — fresh review_doc surfaced "twin-risks" framing (vs April's "refuse to invent... Confidence high"). Documents Pass 0a LLM run-variance.
+2. **`voice_config.manual_grounding`** rewritten — Godfrey-Smith primary + biology + lifecycle + three-registers (technical-neurobiological / philosophical-phenomenological / felt-encounter Montgomery+Scheel) + explicit 6-layer chain + compass framing. ~7,500 chars (was ~670).
+3. **`voice_config.editorial_rationale`** — preserved operator-written first paragraph byte-identical; added explicit 6-layer chain + compass scaffolding + twin-risks. ~5,500 chars.
+4. **Pass 0b base template amendment** at `personas/flows/shared/prompts/pass_0b_non_human_organism.md` — 7 surgical edits making template **compass-permissive** (both precautionary AND phenomenologically-permissive postures supported; voice_config.editorial_rationale determines which). Architectural fix benefits all future non-human-organism rebuilds.
+5. **Phase 0.5 v3.1** auto-generated 6 DR prompts from amended template + compass voice_config.
+6. **Manual TAILORING ORIENTATION preamble** added to each of the 6 octopus DR prompts surfacing full 6-layer chain + compass scaffolding + twin-risks at every section paste.
+
+### What's pending
+
+- **Operator runs Octopus 6 claude.ai DR sessions** (~3hr operator wall) using compass-aligned prompts in `projects/current-tests/voices/octopus/01_research/03_dr_prompts/`
+- Save outputs to `voices/octopus/01_research/04_dr_dossier/0N_section_N.md`
+- Cache-invalidate from Pass 1.1 + re-fire `run_persona_pipeline.py "Octopus" --project /path/to/current-tests`
+- Verify chat-test artifact produces experiment-in-mind voice (synesthetic / first-person body-speaker / chromatophore display engine integration)
+- If verified: **promote rebuilt Octopus to athens-2026** (overwrite shipped state); commit + push to athens-2026
+
+### Architectural artifact: compass-permissive Pass 0b template
+
+The Pass 0b base template amendment (this commit) is a **durable architectural fix**, not just an Octopus-specific intervention. Future non-human-organism voice rebuilds (especially Whanganui — same "no-first-person-source" structural challenge) inherit the compass-permissive template automatically. They get to choose precautionary OR phenomenologically-permissive posture via voice_config.editorial_rationale — both supported, both honest.
+
+### Rebuild backup snapshots preserved
+
+- `voices/octopus_pre_compass_rebuild_2026-05-01/` (full athens-2026 shipped state — 93 files, 9.1MB)
+- `voices/octopus/01_research/03_dr_prompts.surgical_v1/` (manual surgical edits before template amendment)
+- `voices/octopus/01_research/03_dr_prompts.v2_partial/` (auto-generated before §6 amendment)
+- `voices/octopus/01_research/01_perplexity_dossier.pre_6layer.json` (research output before voice_config 6-layer rewrite)
+- `voices/octopus/07_persona_card_assembled.pre_*.json` × 3 (Path A patches / FU#61-fresh / compass rebuild)
 
 ---
 
