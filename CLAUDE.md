@@ -61,18 +61,61 @@ Four categories:
   deploy.
 - `research/` — **preserved grounding**. Deep Research artifacts that
   ground architecture decisions. Not deletable.
-- `_workspace/planning/` — **forward-looking design + active follow-ups**.
-  Currently three files: `HANDOFF_2026_04_27.md` (session pickup),
-  `FOLLOW_UPS.md` (active SoT for FU#1–50), `ONBOARDING.md` (permanent
-  fresh-session pickup).
+- `_workspace/planning/` — **forward-looking design + active workstream
+  trackers**. Two-workstream structure (see §"Planning / tracking
+  conventions" below): `runtime/{HANDOFF, ONBOARDING, OPEN_ITEMS}.md`,
+  `voices/{HANDOFF, ONBOARDING, OPEN_ITEMS}.md`, plus a thin root
+  `ONBOARDING.md` (cross-cutting DON'Ts + calibration), `FOLLOW_UPS.md`
+  (frozen historical ledger of FU#1–62), and dated session handoffs.
 - `_workspace/archive/` — **historical docs only** (executed fix plans,
   stale specs, session artifacts, planning consolidation). Run data
-  (persona + runtime runs from v3.10 + dev_msc_test rehearsal) lives at
-  the umbrella level under `~/Desktop/AI Assembly/archive/runs/` (Tier 3,
-  2026-04-20). **Out of scope for code reviews and VM deploys by default
-  — mention it explicitly if you want Claude to look here.**
+  (persona + runtime runs from v3.10 + dev_msc_test rehearsal) and
+  development snapshots (arch_03_baseline_snapshot, sentinel_baselines)
+  live at the umbrella level under `~/Desktop/AI Assembly/archive/`
+  (Tier 3, 2026-04-20). **Out of scope for code reviews and VM deploys
+  by default — mention it explicitly if you want Claude to look here.**
 - `.env` — shared secrets at `code/.env` (not committed). Both sub-trees
   load from `../.env`.
+
+## Planning / tracking conventions
+
+The `_workspace/planning/` folder splits into two workstream-specific
+subfolders + a thin index + a frozen historical FU# ledger:
+
+```
+_workspace/planning/
+├── ONBOARDING.md              thin index + cross-cutting DON'Ts + calibration
+├── FOLLOW_UPS.md              FROZEN historical ledger of FU#1–62 (no new entries)
+├── runtime/
+│   ├── HANDOFF_<DATE>.md      session-state-of-the-moment
+│   ├── ONBOARDING.md          durable runtime onboarding
+│   └── OPEN_ITEMS.md          authoritative runtime open items
+├── voices/
+│   ├── HANDOFF.md             session-state-of-the-moment
+│   ├── ONBOARDING.md          durable voices onboarding
+│   └── OPEN_ITEMS.md          authoritative voice-build open items
+└── HANDOFF_2026_04_27.md … _NIGHT.md (6 dated)  persona-thread historical handoffs
+```
+
+**For NEW items, file in the relevant subfolder OPEN_ITEMS:**
+
+- Runtime workstream → `runtime/OPEN_ITEMS.md` (sections A gating / B
+  Athens-blocking / C hygiene / D existing FU# index / E docs pending)
+- Voices workstream → `voices/OPEN_ITEMS.md` (per its structure)
+- Cross-cutting **items** (affect both threads) → file in BOTH subfolder
+  OPEN_ITEMS with mutual cross-references
+- Cross-cutting **rules / calibration** → root `ONBOARDING.md`
+  §"Cross-cutting DON'Ts" or §"Cross-cutting calibration"
+
+**No new FU# numbering.** The FU#1–62 ledger is closed as of 2026-05-01.
+Existing FU# references in code, commits, prompts, and docs remain valid;
+they resolve to entries in `FOLLOW_UPS.md`. Cross-cutting FUs that
+affected both threads (FU#42, 60, 61, 62) stay there as canonical entries.
+
+**Where to file commit references:** for new items, cite the OPEN_ITEMS
+section (e.g. `runtime/OPEN_ITEMS.md C9` or `voices/OPEN_ITEMS.md §4`)
+rather than coining a FU#. For pre-existing items, FU# references stay
+authoritative.
 
 ## Code / project separation (Tier 3)
 

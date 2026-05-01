@@ -461,7 +461,9 @@ Four small items flagged 2026-04-20; not yet closed:
 
 ## Section D — Existing FU#s, runtime-relevant
 
-These are open FU# entries from FOLLOW_UPS.md that pertain to runtime. Cross-referenced; full text in FOLLOW_UPS.md. (Persona-internal FUs not listed here.)
+These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain to runtime. Cross-referenced; full text in FOLLOW_UPS.md. (Persona-internal FUs not listed here.)
+
+**Note (2026-05-01):** FOLLOW_UPS.md is **FROZEN** as of 2026-05-01 — no new FU# entries will be added. The list below is closed at FU#62. New runtime items file directly in this OPEN_ITEMS doc (Section A/B/C/E as appropriate); no FU# numbering required. See `code/CLAUDE.md` §"Planning / tracking conventions" for the full workflow.
 
 | FU# | Description | Status | Trigger |
 |---|---|---|---|

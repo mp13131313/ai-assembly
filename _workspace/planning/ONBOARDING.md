@@ -38,11 +38,17 @@ Each subfolder has the same shape:
 
 ---
 
-## Cross-cutting tracker
+## Cross-cutting tracker (frozen)
 
-**`FOLLOW_UPS.md`** in this folder root is the active source-of-truth for FU#1–62 across both workstreams. Persona-internal FUs (most) are tracked there; runtime-relevant FUs are also indexed in `runtime/OPEN_ITEMS.md` Section D for runtime-thread navigation.
+**`FOLLOW_UPS.md`** at this folder root is the **frozen historical ledger** of FU#1–62 (as of 2026-05-01). Existing FU# references in code, commits, prompts, and docs resolve to entries there — no new entries are added.
 
-When adding a new FU, append to `FOLLOW_UPS.md` tail. If runtime-relevant, also surface in `runtime/OPEN_ITEMS.md`. If persona-internal, the entry in `FOLLOW_UPS.md` is enough.
+**For NEW items going forward,** file in the relevant subfolder OPEN_ITEMS in the appropriate section:
+- Runtime: `runtime/OPEN_ITEMS.md` (sections A gating / B Athens-blocking / C hygiene / E docs pending)
+- Voices: `voices/OPEN_ITEMS.md` (per its structure)
+
+Cross-cutting items file in BOTH subfolder OPEN_ITEMS with mutual cross-references. Cross-cutting **rules / calibration** (not items) file in this doc's §"Cross-cutting DON'Ts" or §"Cross-cutting calibration".
+
+No new FU# numbering. See `code/CLAUDE.md` §"Planning / tracking conventions" for the full workflow.
 
 ---
 

@@ -1,13 +1,30 @@
-# Follow-Ups Tracker — single source of truth (2026-04-24)
+# Follow-Ups Tracker — FROZEN historical ledger (as of 2026-05-01)
 
-**Purpose:** consolidates all open work + recently-completed work + closed/superseded items previously tracked across `OPEN_ITEMS.md`, `PIPELINE_REVIEW_FIXES.md` (FU sections), `HANDOFF_PHASE_M.md`, and `REBUILD_PLAN.md` (Open questions to defer).
+**Status:** This doc is the historical ledger of FU#1–62 filed across the project's lifetime (LANDED / IN PROGRESS / DEFERRED / WITHDRAWN). **No new entries will be added going forward.** Existing FU# references in code, commits, prompts, and docs remain valid; they resolve to entries here.
 
-**Supersedes for tracking purposes:**
+**For NEW items going forward, file in the relevant subfolder OPEN_ITEMS:**
+- Runtime workstream → `_workspace/planning/runtime/OPEN_ITEMS.md`
+- Voices workstream → `_workspace/planning/voices/OPEN_ITEMS.md`
+- Cross-cutting rules / calibration → `_workspace/planning/ONBOARDING.md`
+
+Cross-cutting FUs that affected both threads (FU#42 split-card, FU#60 thinking observability, FU#61 voice-side Layer-1 quality_criteria, FU#62 validation regen-on-flag) stay here as canonical entries. New cross-cutting items file in BOTH subfolder OPEN_ITEMS with mutual cross-references.
+
+No new FU# numbering. The ledger is closed at FU#62.
+
+See `code/CLAUDE.md` §"Planning / tracking conventions" for the full workflow.
+
+---
+
+## Original purpose (preserved as historical context)
+
+**Purpose** (2026-04-24): consolidated all open work + recently-completed work + closed/superseded items previously tracked across `OPEN_ITEMS.md`, `PIPELINE_REVIEW_FIXES.md` (FU sections), `HANDOFF_PHASE_M.md`, and `REBUILD_PLAN.md` (Open questions to defer).
+
+**Superseded for tracking purposes** (the docs this one consolidated from):
 - `PIPELINE_REVIEW_FIXES.md` §"FU#1-13" (still authoritative for `1-arch-*` history)
 - `OPEN_ITEMS.md` §"PHASE M PUNCH LIST", §"Smaller improvements", §"Code-cleanup-on-fresh-project"
 - `REBUILD_PLAN.md` §"Open questions to defer"
 
-**Use this doc going forward.** Older docs retain historical context (Phase B / arch-03 design rationale, executed fix plans, lessons learned) but should not be modified for new tracking.
+This doc itself is now superseded for new tracking by the per-workstream OPEN_ITEMS docs (per the freeze above). It retains historical authority for FU#1–62.
 
 ---
 
