@@ -567,15 +567,51 @@ billed_thinking_tokens = output_tokens - count_tokens(response_text)
 
 **Existing artifacts:** the legitimacy-test outputs (Section F) have thinking_tokens=0 — those were generated before this fix landed. The bug is fixed forward; existing artifacts unchanged.
 
-### C15. Step 2 `consumed_detailed_responses` field unpopulated 🟢
+### C15. Step 2 `consumed_detailed_responses` field unpopulated — lineage gap 🟡 (re-elevated 2026-05-01 from external review)
 
-**Surfaced 2026-05-01** by the legitimacy test (Section F).
+**Surfaced 2026-05-01** by the legitimacy test. **Re-elevated** from green to yellow same day after external review reframed the issue.
 
-In Test 2 (4 voices × 3 formulations Step 1 → 4 Step 2), all 4 voices reported `focus_decision: "woven across all three"` in their Step 2 outputs but the `consumed_detailed_responses` schema field was empty (`[]`) on all 4. The field exists in the schema but isn't populated by Step 2 runtime — minor metadata bug; doesn't affect output quality or downstream consumers (publish_flow uses lineage paths, not this field).
+In Test 2 (4 voices × 3 formulations Step 1 → 4 Step 2), all 4 voices reported `focus_decision: "woven across all three"` in their Step 2 outputs but the `consumed_detailed_responses` schema field was empty (`[]`) on all 4. The field exists in the schema but isn't populated by Step 2 runtime.
+
+**Why this matters more than I initially scoped (per external review):** for a "cartography not consensus" provotype, the traceability of moves IS part of the epistemic claim. With this field empty, no operator/journalist/researcher can trace which Step 1 detailed response fed which Step 2 artifact from the artifact alone — they have to reconstruct from filenames + theme_ids, which is fragile and breaks once artifacts move out of run-dir context. **For Athens, fix before Night 1.**
 
 **Estimated:** ~15-30 min — `step2_first_draft_artifact.py` should populate the field with the list of Step 1 detailed-response files actually loaded into the user prompt. Verifiable via Test 2 re-run.
 
-**Pre-Athens-eligible** but not blocking — operator-side downstream tooling that wants to surface "this artifact was woven from these N detailed responses" would benefit from this field being populated.
+### C17. Legitimacy-test report renderer bug ✅ FIXED 2026-05-01
+
+External reviewer caught: the report's "Continuity → Night 3" section showed `continuity_block_if_night_2 — POSITIONS: (none)` for all 4 voices, suggesting either (a) renderer bug or (b) regression where N3 continuity actually empty. **Diagnosis: (a) renderer bug.** Actual N3 continuity files have field `continuity_block_if_night_3` (not `_if_night_2`); the renderer hardcoded `_if_night_2` for all continuity sections. Fixed in `/tmp/build_report.py` to use `f"continuity_block_if_night_{for_night}"`. Report regenerated; N3 continuity blocks now render correctly with rich content (2.5-4.2K chars per voice). Bugfix verification of `ccc6229` stands — Dostoevsky N3's *"I wrote that pause yesterday"* reference IS legitimate; he had a populated continuity overlay loaded onto his Night 3 card.
+
+### C18. Test 2 confound — focus-on-one branch untested 🟡 (filed 2026-05-01 from external review)
+
+External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding: the 3 formulations were all variations on one theme (legitimacy of the invisible), so weaving was the natural choice. We've shown the synthesis branch of `focus_decision` works; the focus-on-one branch is untested.
+
+**Recommended:** Test 3 — 4 voices × 1 night × 3 deliberately-divergent formulations (e.g., legitimacy-of-the-invisible + funeral-march-for-human-democracy + Pnyx-walks). Watch whether at least one voice picks one to go deep on. If all 4 still weave under genuine divergence, that's evidence `focus_decision` is biased toward synthesis regardless of input shape — important to know pre-Athens.
+
+**Estimated:** ~15 min author 3 divergent formulations + ~7 min wall + ~$15 API for the run.
+
+### C19. Token economics check — Step 2 input padding 🟡 (filed 2026-05-01 from external review)
+
+External reviewer estimate: at Athens scale (12 voices × 3 nights × 3-5 formulations + continuity overlays), persona pipeline alone could be $400-600/night before researcher + provocateur — higher than Voice Pipeline doc's current $130-190/night Athens N1 forecast.
+
+Test artifacts show Step 2 inputs are heavy: Dostoevsky N3 = 46K input → 7.4K output; Cleopatra Test 2 = 44K input → 3.9K output. **If most of 45K input is Step 1 detailed responses passed through, fine. If a significant fraction is repeated context (briefing + card + system frames duplicated across calls), there's headroom.**
+
+**Recommended:** dump one Step 2 user prompt + system prompt to disk; tokenize each section; identify duplicated content. Cheapest fix likely the largest payoff (briefings + system frames cached/deduplicated).
+
+**Estimated:** ~30-45 min for the audit.
+
+### C20. Voice-side recurrence patterns (handoff to persona thread) 🟡 (filed 2026-05-01 from external review)
+
+External reviewer flagged three voice-side moves that recurred across Test 1 nights:
+
+- **Plato — Theuth/Thamus reach.** Phaedrus / writing-cannot-answer-when-questioned appears in N1, N2, AND Test 2 synthesis. Canonical Plato, but at Athens with 9-12 briefings landing on him across the conference, if 6+ reach for Theuth/Thamus the audience will notice.
+- **Ibn Battuta — Tughluq beard-plucking.** Shaykh Shihāb al-Dīn beard-plucking appears in both N1 and N2 Step 1 with very similar phrasing. Same recurrence concern.
+- **Dostoevsky — closing on suspended judgment.** N2 ends *"they have not yet earned the right to answer it"*; Test 2 synthesis ends *"any justice was ever made."* Close enough that the move-shape may calcify into a verbal tic across more nights.
+
+**Path A:** flag in voice cards (`banned_modes` or per-voice "moves already used" tracking).
+**Path B:** continuity overlay carries a "stock examples already deployed" register so voices don't lean on the same anecdotes night after night.
+**Path C:** accept as a Platonic/Battutan/Dostoevskian tic the audience would recognize — but make that decision deliberately.
+
+**Belongs to persona thread for voice-card-side resolution.** Filed here (runtime workstream) as a cross-thread observation; cross-reference in `voices/OPEN_ITEMS.md` recommended.
 
 ---
 
