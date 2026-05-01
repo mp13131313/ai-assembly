@@ -20,6 +20,46 @@ from pathlib import Path
 from typing import Any
 
 
+def assert_run_dir_night_matches(run_dir: Path, night: int) -> None:
+    """Defensive check: --night must match the night embedded in run_dir name.
+
+    Both Convention A (`athens_2026_2026_05_07_night1`) and the
+    legacy ingest format (`athens_night_1`) embed the night number in
+    the run_dir's last path segment. If the run_dir name embeds
+    `_night<N>` or `_night_<N>`, verify the supplied --night argument
+    matches it. If they don't match, refuse to run with a clear error.
+
+    The dangerous failure mode this guards against: voice_flow run with
+    --night=1 against Night 2's run_dir would generate
+    `voices/<slug>/continuity_night_2.json` from Night 2's data,
+    silently overwriting the file that legitimately summarized Night 1
+    for Night 2's voice cards. Cross-night state corruption that's hard
+    to spot post-hoc — best caught at the moment of misuse.
+
+    Run_dirs without an embedded night number (legacy dryruns,
+    test fixtures, ad-hoc names) skip the check gracefully — the
+    regex falls through and no error is raised.
+    """
+    name = Path(run_dir).name
+    m = re.search(r"_night[_]?(\d+)\b", name)
+    if not m:
+        return  # no embedded night; skip check
+    rd_night = int(m.group(1))
+    if rd_night != night:
+        raise SystemExit(
+            f"--night={night} does not match the night embedded in run_dir "
+            f"name ('{name}' carries night={rd_night}). Refusing to run.\n"
+            f"\n"
+            f"This guard catches cross-night state corruption: with the wrong "
+            f"--night, voice_flow would write continuity_night_<N+1>.json from "
+            f"the wrong night's data, silently overwriting valid prior-night "
+            f"continuity. Either fix --night or pick the right run_dir.\n"
+            f"\n"
+            f"If you're certain you want to override (e.g. testing), rename the "
+            f"run_dir to remove the embedded night number."
+        )
+
+
 def load_session_package(path: Path | str) -> dict[str, Any]:
     """Load a session_package.json, defensively injecting `turn_index` if absent.
 

@@ -307,6 +307,14 @@ def run_voice(
     if project_root is None:
         project_root = resolve_project_root(None)
 
+    # Defensive: refuse to run if --night doesn't match run_dir's embedded
+    # night number. Catches the silent-cross-night-corruption failure mode
+    # where wrong --night writes continuity_night_<N+1>.json from the wrong
+    # night's data, overwriting valid prior continuity. See shared.io
+    # assert_run_dir_night_matches docstring for full rationale.
+    from flows.shared.io import assert_run_dir_night_matches
+    assert_run_dir_night_matches(run_dir, night)
+
     logger.info(f"Voice Pipeline: run_dir={run_dir}, night={night}, project_root={project_root}")
     briefings = _load_briefings(run_dir)
     if voices_filter:

@@ -657,6 +657,33 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **Reviewer's $400-600/night estimate was high.** Voice Pipeline doc's current $130-190/night Night 1 forecast is closer; with prompt caching enabled (see C19a), it would drop further to ~$70-120/night Night 1. Athens 3-night total: ~$200-300 with caching vs ~$390-550 currently.
 
+### C22. Overnight pipeline orchestrator (automation) 🟡 (filed 2026-05-02)
+
+**Source:** operator question 2026-05-02 — *"if we automate the pipeline, which I want — how does it know which night it is in?"*
+
+**Design landed at:** `_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md` — full event-driven design that fires each stage when its inputs are ready (per-session transcription → researcher → provocateur → voice → publish). Trigger model: 1-min polling on filesystem-as-state. No new infra, no database, idempotent restart-safe.
+
+**Three scope options for Athens (T-5 days at filing):**
+
+| Variant | Effort | Tradeoff |
+|---|---|---|
+| **Manual-fire wrapper** | ~30 min | One command per morning runs the 4-stage chain. Operator monitors. |
+| **Full orchestrator** | ~3-4 hr | Unattended. Operator wakes up to either ✅ complete or ❌ stage failure. |
+| **Defer post-Athens** | – | Operator runs each flow manually per documented Athens production CLI. 4 commands per night. |
+
+**Defensive infrastructure already landed 2026-05-02:**
+- `runtime/flows/shared/io.py:assert_run_dir_night_matches()` — refuses to run voice_flow / publish_flow when `--night` doesn't match run_dir's embedded night number. Catches the silent cross-night corruption failure mode (wrong --night → continuity_night_<N+1>.json overwritten with wrong-night data).
+- 9 unit tests in `runtime/tests/test_run_dir_night_check.py`.
+- Wired into `voice_flow.run_voice` + `publish_flow.run_publish`.
+
+**How the orchestrator would know which night (per design doc):**
+- Date → night mapping (`2026-05-07 → 1`, `2026-05-08 → 2`, `2026-05-09 → 3`)
+- Tonight's session set: `sessions.json` filter by `day == NIGHT_TO_DAY[night]` AND `ai_assembly == true` (already populated per `recording_sessions.csv` → 25 sessions across 3 nights)
+- Run_dir name: `athens_2026_<YYYY_MM_DD>_night<N>` (Convention A)
+- All flows trust the run_dir + explicit `--night` flag; defensive check above prevents misalignment
+
+**Decision needed:** which variant? Or defer entirely. If building, recommend Manual-fire wrapper as the minimum-viable path — full orchestrator is post-Athens hygiene unless operator wants to sleep through nights.
+
 ### C19a. Anthropic prompt caching ✅ LANDED 2026-05-01
 
 **Surfaced 2026-05-01 by C19 audit.** No `cache_control` calls anywhere in `runtime/flows/`. Each voice's identical 40K-token system prompt is paid at full price across ~5-7 calls per voice per night (Step 1 ×3-5 + Step 2 ×1 + Step 3 ×1 when enabled).

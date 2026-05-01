@@ -753,6 +753,13 @@ def run_publish(
     if project_root is None:
         project_root = resolve_project_root(None)
 
+    # Defensive: refuse to run if --night doesn't match run_dir's embedded
+    # night number. Same guard as voice_flow — protects per-night published
+    # paths (themes/night_<N>/, traces/lineage_graph_night_<N>.json) from
+    # being written under the wrong night.
+    from flows.shared.io import assert_run_dir_night_matches
+    assert_run_dir_night_matches(run_dir, night)
+
     logger.info(f"Publish Pipeline: run_dir={run_dir}, night={night}")
     t_start = time.time()
 
