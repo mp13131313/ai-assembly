@@ -43,11 +43,10 @@ multiple projects active, defaulting risks writing to the wrong one).
 
 Active projects (sibling to `code/`):
 
-- `../projects/test/` — sandbox
-- `../projects/phase-l-plato/` — Plato Phase L working project
-- `../projects/phase-l-dostoevsky/` — Dostoevsky Phase L working project
+- `../projects/current-tests/` — sandbox PROJECT_ROOT (default for `AI_ASSEMBLY_PROJECT_ROOT`); also contains `voice-pipeline-dryrun/` + `dev_msc_test/` as sibling test surfaces
 - `../projects/athens-2026/` — production (own backup git repo,
   `mp13131313/ai-assembly-athens2026-voices`, private)
+- Dormant Phase L projects (`phase-l-plato/`, `phase-l-dostoevsky/`) relocated to umbrella `~/Desktop/AI Assembly/archive/` 2026-05-01 — voices shipped to athens-2026
 
 ### Project-level files (at `PROJECT_ROOT/` root, NOT under `inputs/`)
 

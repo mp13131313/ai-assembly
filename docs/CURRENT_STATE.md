@@ -58,9 +58,7 @@
 │   ├── README.md, CLAUDE.md
 │   └── (other top-level files)
 ├── projects/                           # NEVER pushed — per-project data, sibling to code
-│   ├── test/                           # sandbox / experimentation
-│   ├── phase-l-plato/                  # Plato Phase L working project (carry-over source)
-│   ├── phase-l-dostoevsky/             # Dostoevsky Phase L working project
+│   ├── current-tests/                  # sandbox + voice-pipeline-dryrun/ + dev_msc_test/ inside (relocated 2026-05-01)
 │   └── athens-2026/                    # PRODUCTION — own git repo `mp13131313/ai-assembly-athens2026-voices` (private)
 │       ├── conference_facts.json       # at root, NOT under inputs/
 │       ├── audience_profile.json
@@ -154,7 +152,7 @@ Per-voice cost: ~$18–22, wall time ~2 hours (excluding manual claude.ai DR ses
 
 | Voice | type/subtype/voice_mode/hostile/corpus | Phase 0.5 | DR sessions |
 |---|---|---|---|
-| Plato | human / – / philosophical / F / full | ✓ | ✓ (carry-over from phase-l-plato) |
+| Plato | human / – / philosophical / F / full | ✓ | ✓ (carry-over from phase-l-plato; now archived at `~/Desktop/AI Assembly/archive/phase-l-plato/`) |
 | Cleopatra | human / – / observational / **T** / **hostile_read_against_grain** | ✓ (re-tailored) | – |
 | Ibn Battuta | human / – / narratival / F / full | ✓ | – |
 | Scheherazade | fictional / – / narratival / F / full | ✓ | – |
@@ -384,7 +382,7 @@ Per-voice data moved from flat `inputs/voices/` + `runs/<slug>/` to `voices/<slu
 
 ### 5.17 Tier 3 code/project separation (2026-04-20)
 
-Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Resolves via `--project <path>` > `AI_ASSEMBLY_PROJECT_ROOT` env > **hard fail** (no silent default). Multiple projects (test / phase-l-plato / phase-l-dostoevsky / athens-2026) share the same code, separate data. athens-2026 has its own git repo (`mp13131313/ai-assembly-athens2026-voices`, private) for backup; the code repo never touches per-project data.
+Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Resolves via `--project <path>` > `AI_ASSEMBLY_PROJECT_ROOT` env > **hard fail** (no silent default). Two active projects (`projects/current-tests/` sandbox + `projects/athens-2026/` production) share the same code, separate data. athens-2026 has its own git repo (`mp13131313/ai-assembly-athens2026-voices`, private) for backup; the code repo never touches per-project data. Dormant Phase L projects (`phase-l-plato`, `phase-l-dostoevsky`) relocated to umbrella `~/Desktop/AI Assembly/archive/` 2026-05-01.
 
 ### 5.18 Arch-03 additive-merge architecture (2026-04-22)
 

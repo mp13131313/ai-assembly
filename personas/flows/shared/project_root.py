@@ -19,8 +19,8 @@ Precedence:
      fallback would risk writing to the wrong project on a forgotten flag.
 
 Typical dev-machine setup: the shared `.env` sets
-`AI_ASSEMBLY_PROJECT_ROOT=.../projects/test` so bare invocations land in
-the test project; pass `--project .../projects/athens-2026` for production.
+`AI_ASSEMBLY_PROJECT_ROOT=.../projects/current-tests` so bare invocations
+land in the sandbox; pass `--project .../projects/athens-2026` for production.
 
 Safety: every resolution prints a visible banner on stderr showing the
 target PROJECT_ROOT and the source (CLI / env-var). When the resolved path
@@ -100,7 +100,7 @@ def resolve_project_root(
         sys.exit(
             "PROJECT_ROOT is not set. Pass --project <path>, or set "
             "AI_ASSEMBLY_PROJECT_ROOT in the shared .env / shell (e.g. "
-            "AI_ASSEMBLY_PROJECT_ROOT=\"/Users/you/Desktop/AI Assembly/projects/test\"). "
+            "AI_ASSEMBLY_PROJECT_ROOT=\"/Users/you/Desktop/AI Assembly/projects/current-tests\"). "
             "See CLAUDE.md §'Code / project separation (Tier 3)'."
         )
 

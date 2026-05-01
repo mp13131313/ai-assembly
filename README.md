@@ -16,12 +16,12 @@ Twelve non-human voices (a river, an octopus, Plato, Hannah Arendt, and eight ot
 │   ├── _workspace/         # planning/ + archive/ (out of scope for code reviews)
 │   └── .env                # Shared secrets (gitignored — see .env.example)
 ├── projects/               # NEVER pushed — per-project data, sibling to code/
-│   ├── test/               # sandbox
-│   ├── phase-l-plato/      # Plato Phase L working project
-│   ├── phase-l-dostoevsky/ # Dostoevsky Phase L working project
+│   ├── current-tests/      # sandbox PROJECT_ROOT + voice-pipeline-dryrun/ + dev_msc_test/ inside
 │   └── athens-2026/        # PRODUCTION — own git repo (private):
 │                           # `mp13131313/ai-assembly-athens2026-voices`
-└── archive/                # frozen historical runs — NEVER pushed
+└── archive/                # frozen historical runs + dormant projects — NEVER pushed
+    ├── phase-l-plato/, phase-l-dostoevsky/  # dormant (voices shipped to athens-2026)
+    ├── runs/{personas,runtime}/, arch_03_baseline_snapshot/, sentinel_baselines/  # dev artifacts
 ```
 
 Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Both pipelines resolve it via:

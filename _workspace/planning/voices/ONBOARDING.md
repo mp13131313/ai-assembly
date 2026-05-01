@@ -384,7 +384,7 @@ The 6 manual checks (per-voice, after every pipeline run):
 
 Every runner prints a startup banner showing `PROJECT_ROOT` + `SOURCE` (`--project` / env-var / default). When resolution targets a production project (basename contains `athens-2026` or `phase-l-`) via env-var fallback (no explicit `--project` flag), the banner escalates with ⚠ markers. Operator can abort with Ctrl-C if unintended.
 
-**Habit:** for production runs (athens-2026), always pass `--project` explicitly. The env-var default in `code/.env` points at `projects/test` by design.
+**Habit:** for production runs (athens-2026), always pass `--project` explicitly. The env-var default in `code/.env` points at `projects/current-tests` (sandbox) by design.
 
 ### Batch wrappers (refuse env-var fallback)
 
