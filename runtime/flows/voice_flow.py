@@ -429,8 +429,16 @@ def run_voice(
         _build_themes_to_voices(step1_results, step2_results, step3_results),
     )
 
-    # Sentinel for continuity flow.
-    if step3_results and not skip_step3:
+    # Determine voices that completed the night (Step 3 if it ran, else Step 2).
+    # Under A1 (Step 3 SKIPPED for Athens production via --skip-step3), the
+    # night is "complete" once Step 2 ships — continuity + downstream consumers
+    # need a night-completion signal regardless of whether Step 3 ran.
+    completed_voices: dict[str, Any] = step3_results if step3_results else step2_results
+
+    # Sentinel for continuity flow / night completion. Filename retained for
+    # back-compat with any downstream consumers; semantic is "night complete"
+    # not literally "step3 complete" since A1.
+    if completed_voices:
         (out_dir / "step3_complete.flag").write_text(time.strftime("%Y-%m-%dT%H:%M:%S\n"))
 
     # ---- Publish per-voice artifacts to PROJECT_ROOT/published_artifacts/ ----
@@ -454,9 +462,13 @@ def run_voice(
             publish_summary = {"error": str(e)}
 
     # ---- Continuity (Nights 1+2 only — output is consumed on Nights 2+3) ----
+    # Per A1 (2026-05-01), continuity must run when Step 2 completes, even
+    # when Step 3 is skipped — so the gate is on `completed_voices`, not on
+    # step3 having run. continuity.py already tolerates step3_output=None
+    # at runtime (it iterates over Step 1 + 2 + 3 and skips missing parts).
     continuity_results: dict[str, dict[str, Any]] = {}
-    if not skip_continuity and not skip_step3 and night < 3:
-        logger.info(f"  Continuity: generating for {len(step3_results)} voices (for night {night + 1})")
+    if not skip_continuity and night < 3 and completed_voices:
+        logger.info(f"  Continuity: generating for {len(completed_voices)} voices (for night {night + 1})")
         with ThreadPoolExecutor(max_workers=VOICE_CONTINUITY_BATCH) as ex:
             futures = {
                 ex.submit(
@@ -466,7 +478,7 @@ def run_voice(
                     run_dir=run_dir,
                     project_root=project_root,
                 ): slug
-                for slug in step3_results
+                for slug in completed_voices
             }
             for fut in as_completed(futures):
                 slug = futures[fut]
@@ -479,6 +491,8 @@ def run_voice(
             logger.info("  Continuity: SKIPPED (last night — no Night 4 to feed)")
         elif skip_continuity:
             logger.info("  Continuity: SKIPPED (--skip-continuity)")
+        elif not completed_voices:
+            logger.info("  Continuity: SKIPPED (no voices completed this night)")
 
     wall_total = round(time.time() - t_start, 2)
 
