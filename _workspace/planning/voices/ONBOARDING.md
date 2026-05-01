@@ -6,6 +6,8 @@
 
 **Truth source:** When this doc disagrees with another planning doc, this doc is right (or fix this doc). Older docs may have stale framings.
 
+**Cross-cutting rules:** the parent `_workspace/planning/ONBOARDING.md` carries cross-cutting DON'Ts and calibration that apply to both voices + runtime threads (no `--no-verify`, no `git push origin main` without ask, no Plato re-run, no real-person names in deployment JSONs, etc.). Read it once; this doc holds voice-build-specific guidance only.
+
 ---
 
 ## What "voices" means here

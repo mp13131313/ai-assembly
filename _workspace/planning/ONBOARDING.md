@@ -91,9 +91,9 @@ Subfolder-specific calibration (e.g., "always `--skip-validation` for dryrun wor
 | File | Purpose |
 |---|---|
 | `ONBOARDING.md` | this doc — index + cross-cutting rules |
-| `FOLLOW_UPS.md` | active SoT for FU#1–62 (cross-cutting) |
-| `HANDOFF_2026_04_27.md` … `_NIGHT.md` (6 dated docs) | persona-thread session handoffs from 2026-04-27 → 2026-04-29. Historical reference; the equivalent role going forward is `voices/HANDOFF.md` (replaced by latest dated voices/HANDOFF on each session). Could be archived; persona thread's call. |
-| `BRIEF_OPUS_4_7_THINKING_AUDIT_2026_04_29.md` | brief that resolved into FU#60 (LANDED). Could be archived; persona thread's call. |
+| `FOLLOW_UPS.md` | frozen historical ledger of FU#1–62 (cross-cutting reference; no new entries) |
+
+The 6 dated persona-thread handoffs (`HANDOFF_2026_04_27.md … _NIGHT.md`) and `BRIEF_OPUS_4_7_THINKING_AUDIT_2026_04_29.md` were archived 2026-05-01 to `_workspace/archive/voices_consolidation_2026_05_01/` (commit `82e5a65`). Going forward, voices session-state lives in `voices/HANDOFF.md` (replaced each session).
 
 ---
 
