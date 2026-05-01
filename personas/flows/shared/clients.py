@@ -21,6 +21,30 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _estimate_anthropic_thinking_tokens(client: Any, model: str, response_text: str, output_tokens: int) -> int:
+    """Compute billed thinking tokens via subtraction.
+
+    Anthropic's `Usage.output_tokens` is the BILLED total (thinking +
+    response, undifferentiated). The SDK has no `Usage.thinking_tokens`
+    field at any version (verified empirically on SDK 0.94.1 +
+    Anthropic docs Apr 2026). To recover the thinking-only count for
+    observability, we subtract the response-text token count (measured
+    via the free `messages.count_tokens` API) from the total.
+
+    Returns 0 on failure — telemetry must not break the pipeline.
+    """
+    if not response_text or not output_tokens:
+        return 0
+    try:
+        count = client.messages.count_tokens(
+            model=model,
+            messages=[{"role": "assistant", "content": response_text}],
+        )
+        return max(0, output_tokens - count.input_tokens)
+    except Exception:  # noqa: BLE001 — never break pipeline on telemetry
+        return 0
+
+
 def _record(
     slug: str | None,
     pass_name: str | None,
@@ -163,11 +187,21 @@ def call_claude(
         text = "".join(text_parts)
         thinking_trace = "".join(thinking_parts)
 
+        # Thinking tokens via subtraction: Anthropic SDK Usage exposes only
+        # output_tokens (the BILLED total = thinking + response, undifferentiated).
+        # We use the free `messages.count_tokens` API on the response text to
+        # recover the response-only count, then subtract. Verified against
+        # Anthropic docs (Apr 2026) + SDK 0.94.1 empirical probe — there is
+        # no `usage.thinking_tokens` field at any SDK version.
+        thinking_tokens = _estimate_anthropic_thinking_tokens(
+            client, model, text, final.usage.output_tokens
+        )
         out: dict[str, Any] = {
             "text": text,
             "usage": {
                 "input_tokens": final.usage.input_tokens,
                 "output_tokens": final.usage.output_tokens,
+                "thinking_tokens": thinking_tokens,
             },
             "model": model,
             "stop_reason": final.stop_reason,
@@ -181,11 +215,15 @@ def call_claude(
         msg = client.messages.create(**kwargs)
         text_parts = [b.text for b in msg.content if b.type == "text"]
         text = "".join(text_parts)
+        thinking_tokens = _estimate_anthropic_thinking_tokens(
+            client, model, text, msg.usage.output_tokens
+        )
         out = {
             "text": text,
             "usage": {
                 "input_tokens": msg.usage.input_tokens,
                 "output_tokens": msg.usage.output_tokens,
+                "thinking_tokens": thinking_tokens,
             },
             "model": model,
             "stop_reason": msg.stop_reason,

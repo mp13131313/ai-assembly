@@ -254,7 +254,7 @@ def run_step3_for_voice(
     )
     client = Anthropic()
     t0 = time.time()
-    raw_text, thinking_trace, final = stream_voice_call(
+    raw_text, thinking_trace, final, thinking_tokens = stream_voice_call(
         client,
         model=VOICE_MODEL,
         max_tokens=STEP3_MAX_TOKENS,
@@ -342,7 +342,7 @@ def run_step3_for_voice(
         "thinking_enabled": VOICE_THINKING,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
-        "thinking_tokens": getattr(final.usage, "thinking_tokens", 0) or 0,
+        "thinking_tokens": thinking_tokens,
         "wall_clock_s": round(time.time() - t0, 2),
     }
 

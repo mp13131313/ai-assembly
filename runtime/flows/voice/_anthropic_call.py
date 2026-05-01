@@ -8,6 +8,15 @@ The orchestrator (voice_flow.py) catches exceptions thrown by this
 helper after the retry budget is spent and logs the failure into
 manifest.validation_failures or manifest.skipped — a missing detailed
 response is better than a stalled pipeline.
+
+Thinking-token computation: Anthropic's API does NOT expose thinking
+tokens separately. `usage.output_tokens` is the BILLED total
+(thinking + response tokens combined). To recover the thinking-only
+count for observability, we subtract the response token count
+(measured via the free `messages.count_tokens` API) from the total.
+This gives accurate billed thinking tokens — necessary because the
+SDK's Usage object has no `thinking_tokens` field (verified empirically
+on SDK 0.94.1 + Anthropic docs Apr 2026).
 """
 
 from __future__ import annotations
@@ -15,6 +24,32 @@ from __future__ import annotations
 import logging
 import time
 from typing import Any
+
+
+def _estimate_thinking_tokens(client: Any, model: str, response_text: str, output_tokens: int, logger: logging.Logger | None = None) -> int:
+    """Compute billed thinking tokens via subtraction.
+
+    Anthropic's `Usage.output_tokens` includes both thinking + response
+    tokens, with no separation. This function uses the free
+    `messages.count_tokens` API to count tokens in the response text,
+    then subtracts from output_tokens. The remainder is the billed
+    thinking-token count (matches Anthropic's billing tokenizer).
+
+    Returns 0 on failure — telemetry should never break the pipeline.
+    """
+    if not response_text or not output_tokens:
+        return 0
+    try:
+        count = client.messages.count_tokens(
+            model=model,
+            messages=[{"role": "assistant", "content": response_text}],
+        )
+        response_tokens = count.input_tokens
+        return max(0, output_tokens - response_tokens)
+    except Exception as e:  # noqa: BLE001 — telemetry must not break pipeline
+        if logger:
+            logger.warning(f"thinking-token estimate failed: {type(e).__name__}: {e}")
+        return 0
 
 
 def stream_voice_call(
@@ -27,14 +62,16 @@ def stream_voice_call(
     thinking_kwargs: dict | None = None,
     retry_backoff_s: int = 5,
     logger: logging.Logger | None = None,
-) -> tuple[str, str, Any]:
+) -> tuple[str, str, Any, int]:
     """Stream a messages call; extract text + thinking from final.content.
 
-    Returns: (detailed_text, thinking_trace, final_message).
+    Returns: (detailed_text, thinking_trace, final_message, thinking_tokens).
 
     `final_message` is the Anthropic Message object — caller can read
-    `.usage.input_tokens / .output_tokens / .thinking_tokens` for
-    accounting.
+    `.usage.input_tokens / .output_tokens` for accounting (the SDK does
+    not expose `.thinking_tokens` separately; use the returned
+    `thinking_tokens` int instead, which is computed via subtraction
+    against `count_tokens(response)`).
 
     Behaviour:
       - First attempt streams normally.
@@ -74,10 +111,15 @@ def stream_voice_call(
                     text_parts.append(block.text)
                 elif btype == "thinking":
                     thinking_parts.append(block.thinking)
+            detailed_text = "".join(text_parts)
+            thinking_tokens = _estimate_thinking_tokens(
+                client, model, detailed_text, final.usage.output_tokens, logger
+            )
             return (
-                "".join(text_parts),
+                detailed_text,
                 "".join(thinking_parts),
                 final,
+                thinking_tokens,
             )
         except Exception as e:  # noqa: BLE001 — retry is intentional
             last_err = e

@@ -181,7 +181,7 @@ def run_step1_for_pair(
     )
     client = Anthropic()
     t0 = time.time()
-    detailed_response, thinking_trace, final = stream_voice_call(
+    detailed_response, thinking_trace, final, thinking_tokens = stream_voice_call(
         client,
         model=VOICE_MODEL,
         max_tokens=STEP1_MAX_TOKENS,
@@ -235,7 +235,7 @@ def run_step1_for_pair(
         "thinking_enabled": VOICE_THINKING,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
-        "thinking_tokens": getattr(final.usage, "thinking_tokens", 0) or 0,
+        "thinking_tokens": thinking_tokens,
         "wall_clock_s": round(time.time() - t0, 2),
     }
 

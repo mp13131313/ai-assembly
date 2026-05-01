@@ -540,6 +540,33 @@ Four small items flagged 2026-04-20; not yet closed:
 
 **Estimated:** ~30-60 min to close all four. Anytime; risk-free.
 
+### C16. Thinking-tokens-always-0 bugfix (Voice + Persona Pipelines) ✅ LANDED 2026-05-01
+
+**Surfaced 2026-05-01** by inspecting test artifacts after the legitimacy test (Section F). Operator noted thinking_tokens=0 across all artifacts despite thinking_enabled=True + populated thinking_trace text.
+
+**Root cause:** Anthropic SDK 0.94.1's `Usage` object has NO `thinking_tokens` field — verified by [official docs](https://platform.claude.com/docs/en/build-with-claude/extended-thinking) and live SDK probe. Anthropic's API does not expose thinking tokens separately; `output_tokens` is the BILLED total (thinking + response, undifferentiated). LiteLLM and other wrappers don't expose it either; no SDK version has ever surfaced it. The codebase had `getattr(final.usage, "thinking_tokens", 0)` calls in 6 places (Voice 4 + Persona 2) that ALL fell through to default 0.
+
+**Fix landed:** introduced `_estimate_thinking_tokens()` / `_estimate_anthropic_thinking_tokens()` helpers in both pipelines that compute via subtraction:
+
+```python
+billed_thinking_tokens = output_tokens - count_tokens(response_text)
+```
+
+`count_tokens` is the free Anthropic API; uses Anthropic's billing tokenizer; ~100-300ms per call.
+
+**Files changed:**
+- `runtime/flows/voice/_anthropic_call.py` — added `_estimate_thinking_tokens` helper; `stream_voice_call` returns 4-tuple including computed value
+- `runtime/flows/voice/step1_private_reasoning.py` — read from new return shape
+- `runtime/flows/voice/step2_first_draft_artifact.py` — same
+- `runtime/flows/voice/step3_amended_artifact.py` — same
+- `personas/flows/shared/clients.py` — added `_estimate_anthropic_thinking_tokens` helper; `call_claude` (both streaming + non-streaming branches) populates `usage["thinking_tokens"]`
+
+**Coverage gap left as-is:** Researcher + Provocateur don't track thinking_tokens at all (never had broken code, no observability either). Adding to those is FU#60-style observability extension; defer until needed.
+
+**Tests:** 223/223 passing on personas after fix; runtime smoke imports clean. Will be exercised on the next Voice/Persona Pipeline run.
+
+**Existing artifacts:** the legitimacy-test outputs (Section F) have thinking_tokens=0 — those were generated before this fix landed. The bug is fixed forward; existing artifacts unchanged.
+
 ### C15. Step 2 `consumed_detailed_responses` field unpopulated 🟢
 
 **Surfaced 2026-05-01** by the legitimacy test (Section F).
