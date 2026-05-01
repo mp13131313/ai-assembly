@@ -581,13 +581,24 @@ In Test 2 (4 voices × 3 formulations Step 1 → 4 Step 2), all 4 voices reporte
 
 External reviewer caught: the report's "Continuity → Night 3" section showed `continuity_block_if_night_2 — POSITIONS: (none)` for all 4 voices, suggesting either (a) renderer bug or (b) regression where N3 continuity actually empty. **Diagnosis: (a) renderer bug.** Actual N3 continuity files have field `continuity_block_if_night_3` (not `_if_night_2`); the renderer hardcoded `_if_night_2` for all continuity sections. Fixed in `/tmp/build_report.py` to use `f"continuity_block_if_night_{for_night}"`. Report regenerated; N3 continuity blocks now render correctly with rich content (2.5-4.2K chars per voice). Bugfix verification of `ccc6229` stands — Dostoevsky N3's *"I wrote that pause yesterday"* reference IS legitimate; he had a populated continuity overlay loaded onto his Night 3 card.
 
-### C18. Test 2 confound — focus-on-one branch untested 🟡 (filed 2026-05-01 from external review)
+### C18. Test 2 confound — focus-on-one branch untested 🟡 (filed 2026-05-01 from external review; refined by Test 2 v2 same day)
 
-External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding: the 3 formulations were all variations on one theme (legitimacy of the invisible), so weaving was the natural choice. We've shown the synthesis branch of `focus_decision` works; the focus-on-one branch is untested.
+External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding: the 3 formulations were all variations on one theme (legitimacy of the invisible), so weaving was the natural choice.
 
-**Recommended:** Test 3 — 4 voices × 1 night × 3 deliberately-divergent formulations (e.g., legitimacy-of-the-invisible + funeral-march-for-human-democracy + Pnyx-walks). Watch whether at least one voice picks one to go deep on. If all 4 still weave under genuine divergence, that's evidence `focus_decision` is biased toward synthesis regardless of input shape — important to know pre-Athens.
+**Test 2 v2 attempted partial fix (2026-05-01):** re-ran with 3 distinct `theme_display_title`s ("Algorithmic Governance and Public Reason" / "Recognition in Automated Decisions" / "The Withdrawal from Public Life") but same formulation bodies. **All 4 voices STILL wove.** Each voice's `focus_rationale` actively articulated a unifying through-line in their own grammar:
 
-**Estimated:** ~15 min author 3 divergent formulations + ~7 min wall + ~$15 API for the run.
+- Plato: "three scales — soul, agora, magistrate — bound by a single diagnosis"
+- Cleopatra: "the apparatus continues to issue after the subscribing hand has been removed"
+- Dostoevsky: "the porog dissolved, the obraz unrendered, the face engineered out of the room"
+- Battuta: "isnād — the chain of named guarantors — is what makes a thing addressable"
+
+**Diagnosis:** the title was not the load-bearing variable. The substantive content of the 3 formulations converges conceptually (all about legitimacy / recognition / public-realm questions), and voices have rich enough conceptual machinery to find unity in any 3 inputs that share territory.
+
+**To truly test the focus-on-one branch:** Test 3 needs formulations on **substantively different conceptual territories** — not 3 angles on the same one. Reviewer's structural recommendation ("legitimacy + funeral march + Pnyx walks") was correct; my Test 2 v2 attempt at title-only differentiation was insufficient.
+
+**Status:** Test 2 v2 artifacts at `runs/legitimacy_test2_v2_divergent_titles/`. Side-validation: confirmed `thinking_tokens` fix from `8c47e1f` works (values 2286-4828 across the 4 voices).
+
+**Recommended:** Test 3 with 3 truly-divergent formulations (different conceptual territories). Operator-authored or me-drafted from the 25 Athens recording-session topics. ~7 min wall + ~$15 API.
 
 ### C19. Token economics check — Step 2 input padding 🟡 (filed 2026-05-01 from external review)
 
