@@ -567,15 +567,17 @@ billed_thinking_tokens = output_tokens - count_tokens(response_text)
 
 **Existing artifacts:** the legitimacy-test outputs (Section F) have thinking_tokens=0 — those were generated before this fix landed. The bug is fixed forward; existing artifacts unchanged.
 
-### C15. Step 2 `consumed_detailed_responses` field unpopulated — lineage gap 🟡 (re-elevated 2026-05-01 from external review)
+### C15. Step 2 `consumed_detailed_responses` field — ✅ CLOSED 2026-05-01 (misdiagnosed; field IS populated, just under `lineage.consumed_detailed_responses`)
 
-**Surfaced 2026-05-01** by the legitimacy test. **Re-elevated** from green to yellow same day after external review reframed the issue.
+**Initial filing 2026-05-01** flagged this as unpopulated based on Test 2 inspection. **External review reframed as cartography concern.** **On verification: misdiagnosis, like C6 and C17 before.**
 
-In Test 2 (4 voices × 3 formulations Step 1 → 4 Step 2), all 4 voices reported `focus_decision: "woven across all three"` in their Step 2 outputs but the `consumed_detailed_responses` schema field was empty (`[]`) on all 4. The field exists in the schema but isn't populated by Step 2 runtime.
+The runtime DOES populate this field correctly — it lives at `artifact.lineage.consumed_detailed_responses`, not at the top-level `artifact.consumed_detailed_responses`. The original Test 2 inspection script read from the wrong location.
 
-**Why this matters more than I initially scoped (per external review):** for a "cartography not consensus" provotype, the traceability of moves IS part of the epistemic claim. With this field empty, no operator/journalist/researcher can trace which Step 1 detailed response fed which Step 2 artifact from the artifact alone — they have to reconstruct from filenames + theme_ids, which is fragile and breaks once artifacts move out of run-dir context. **For Athens, fix before Night 1.**
+Per `step2_first_draft_artifact.py:251-274`: the field is built as a list of `{theme_id, formulation_id, path}` dicts and stored under `lineage`. Verified empirically on Test 2 outputs — all 4 voices have 3-entry lineage lists with full path references back to their Step 1 detailed responses.
 
-**Estimated:** ~15-30 min — `step2_first_draft_artifact.py` should populate the field with the list of Step 1 detailed-response files actually loaded into the user prompt. Verifiable via Test 2 re-run.
+**Lineage IS fully auditable from the artifact alone** — operator/journalist/researcher can trace exactly which Step 1 responses fed each Step 2 by reading `artifact.lineage.consumed_detailed_responses[].path`. The cartography claim is preserved.
+
+No code change needed. Closing.
 
 ### C17. Legitimacy-test report renderer bug ✅ FIXED 2026-05-01
 
