@@ -150,30 +150,30 @@ data; the code repo never touches per-project data.
 For a fresh Claude session that needs to understand the project:
 
 1. `CLAUDE.md`, `README.md` (this file + top-level — repo conventions)
-2. `_workspace/planning/HANDOFF_2026_04_27.md` (current session pickup —
-   READ FIRST on any fresh session)
-3. `_workspace/planning/ONBOARDING.md` (permanent fresh-session pickup;
-   maintained going forward)
-4. `_workspace/planning/FOLLOW_UPS.md` (active follow-up tracker — single
-   source of truth for FU#1–50)
-5. `docs/README.md` (staleness index for canonical specs)
-6. `docs/CURRENT_STATE.md` (gap analysis snapshot — what's built, what's
-   not, architectural decisions)
-7. `docs/AI_Assembly_Briefing_v3_1.md` (project source of truth — target
-   state)
-8. `docs/AUDIENCE_BRIEF.md` (audience characterization +
-   contributors-vs-audience distinction)
-9. `docs/AI_Assembly_Persona_Pipeline_v4.md` (current persona pipeline
-   spec)
-10. Other `docs/AI_Assembly_*_Pipeline.md` and `runtime/` + `personas/`
+2. `_workspace/planning/ONBOARDING.md` (thin index — workstream split +
+   cross-cutting DON'Ts + calibration)
+3. **For voice-build work:** `voices/ONBOARDING.md` → `voices/OPEN_ITEMS.md`
+   → `voices/HANDOFF.md` (~25 min to working knowledge)
+4. **For runtime work:** `runtime/ONBOARDING.md` → `runtime/OPEN_ITEMS.md`
+   → latest `runtime/HANDOFF_*.md`
+5. `_workspace/planning/FOLLOW_UPS.md` (frozen historical ledger of
+   FU#1–62; consult only when chasing a specific FU# reference)
+6. `docs/README.md` (staleness index for canonical specs)
+7. `docs/CURRENT_STATE.md` (gap analysis snapshot)
+8. `docs/AI_Assembly_Briefing_v3_1.md` (project source of truth)
+9. `docs/AUDIENCE_BRIEF.md` (audience characterization)
+10. `docs/AI_Assembly_Persona_Pipeline_v4.md` (current persona pipeline
+    spec)
+11. Other `docs/AI_Assembly_*_Pipeline.md` and `runtime/` + `personas/`
     code by area, as the task requires
 
-Stop after step 4 unless the task demands more — that's ~30–45 min of
-working knowledge. Then ask the user for the specific task.
+Stop after step 3 (or 4 for runtime work) unless the task demands more
+— that's ~25–30 min of working knowledge. Then ask the user for the
+specific task.
 
-If a session-artifact references a fix-plan or run artifact in
-`_workspace/archive/`, read it then. Otherwise treat `_workspace/archive/`
-as cold storage per the §"Repo layout" rule.
+If a session-artifact references a fix-plan, run artifact, or
+consolidation snapshot in `_workspace/archive/`, read it then. Otherwise
+treat `_workspace/archive/` as cold storage per the §"Repo layout" rule.
 
 ## Separate venvs
 
