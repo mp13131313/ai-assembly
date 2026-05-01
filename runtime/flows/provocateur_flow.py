@@ -278,6 +278,7 @@ def _stream_and_parse(
     max_tokens: int,
     task_label: str,
     logger: Any,
+    cache_system: bool = False,
 ) -> dict:
     """Run a streaming LLM call, collect text, parse JSON defensively.
 
@@ -287,13 +288,32 @@ def _stream_and_parse(
 
     Raises a descriptive exception on any failure so Prefect retries
     have useful context.
+
+    `cache_system`: when True, wrap the system prompt in a cache_control
+    block (5-min ephemeral). C19a: enabled for Formulation calls — each
+    voice has 3-5 formulations sharing the same voice-profile-filled
+    system prompt, so caching saves ~80% of input cost on reads 2-N.
+    NOT enabled for Triage (per-voice ranking has unique system prompt
+    per call; triage_flags is a single call) — pure write cost with no
+    reads. Min 4096 cached tokens for Opus; voice-profile-filled
+    Formulation systems are well above this.
     """
     t0 = time.time()
     chunks = []
+    if cache_system:
+        system_arg: Any = [
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ]
+    else:
+        system_arg = system
     with client.messages.stream(
         model=CLAUDE_MODEL,
         max_tokens=max_tokens,
-        system=system,
+        system=system_arg,
         messages=[{"role": "user", "content": user}],
         **_thinking_kwargs(),
     ) as stream:
@@ -996,6 +1016,7 @@ def formulate_for_member(
         max_tokens=FORMULATION_MAX_TOKENS,
         task_label=label,
         logger=logger,
+        cache_system=True,  # C19a: voice's 3-5 formulations share system prompt
     )
     # Defensive: ensure member + theme_id echoed back even if model omitted them
     result.setdefault("member", member_name)

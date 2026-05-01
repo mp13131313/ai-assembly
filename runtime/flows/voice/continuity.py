@@ -180,7 +180,7 @@ def generate_continuity(
     )
     client = Anthropic()
     t0 = time.time()
-    raw_text, _thinking_trace, final = stream_voice_call(
+    raw_text, _thinking_trace, final, _thinking_tokens = stream_voice_call(
         client,
         model=CONTINUITY_MODEL,
         max_tokens=CONTINUITY_MAX_TOKENS,

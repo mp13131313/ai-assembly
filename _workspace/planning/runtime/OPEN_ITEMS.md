@@ -645,7 +645,7 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **Reviewer's $400-600/night estimate was high.** Voice Pipeline doc's current $130-190/night Night 1 forecast is closer; with prompt caching enabled (see C19a), it would drop further to ~$70-120/night Night 1. Athens 3-night total: ~$200-300 with caching vs ~$390-550 currently.
 
-### C19a. Anthropic prompt caching not enabled — Athens-eligible optimization 🟡 (filed 2026-05-01 from C19 audit)
+### C19a. Anthropic prompt caching ✅ LANDED 2026-05-01
 
 **Surfaced 2026-05-01 by C19 audit.** No `cache_control` calls anywhere in `runtime/flows/`. Each voice's identical 40K-token system prompt is paid at full price across ~5-7 calls per voice per night (Step 1 ×3-5 + Step 2 ×1 + Step 3 ×1 when enabled).
 
@@ -667,13 +667,36 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 Plus output tokens (~$50-100 across 3 nights) which caching doesn't affect.
 
-**Estimated:** ~1-2 hr engineering — add `cache_control` headers to system blocks in `_anthropic_call.py` (Voice) + `clients.py` (Persona, if same pattern); verify with one Step 1 call that `cache_creation_input_tokens` + `cache_read_input_tokens` populate correctly. ~1 hr testing on a Plato dryrun to confirm savings materialize.
+**Implementation 2026-05-01:**
 
-**Risk:** small. Anthropic prompt caching is a documented stable feature. Only failure mode is if cache TTL (5 min default; 1 hr available with `ephemeral_1h` tier) is too short for a multi-call sequence — but our Step 1 calls are batched + parallel within ~2-3 min total wall, well inside 5 min.
+- `runtime/flows/voice/_anthropic_call.py`: `stream_voice_call` now wraps the system prompt in a `cache_control` block with **1-hour TTL** (`{"type": "ephemeral", "ttl": "1h"}`). 1-hour chosen because Athens Night 1 wall envelope (50-80 min including validation gap) exceeds the 5-min default. Covers Steps 1, 2, 3, and continuity (all go through `stream_voice_call`).
+- `runtime/flows/provocateur_flow.py`: `_stream_and_parse` accepts new `cache_system: bool` parameter; enabled (default 5-min TTL) only on `formulate_for_member` calls where one voice's 3-5 formulations share the same voice-profile-filled system prompt. Triage A/B don't benefit (per-call unique system) — kept uncached to avoid pure write cost.
 
-**Pre-Athens-eligible** — saves ~$60-75 across 3 nights (input) and de-risks the cost forecast. Could also be deferred post-Athens since current cost is already in Voice Pipeline doc's stated envelope.
+**Live verification 2026-05-01:**
+```
+Call 1: cache_creation_input_tokens=8424, cache_read_input_tokens=0
+Call 2: cache_creation_input_tokens=0,    cache_read_input_tokens=8424  ✓ CACHE HIT
+```
 
-**Decision needed:** land before Athens (low-risk + concrete savings) OR defer to post-Athens (current cost is acceptable).
+Both Anthropic SDK Usage fields populate correctly. The 1h TTL accepted without beta headers (per Anthropic docs as of 2026-05).
+
+**Math (Voice Pipeline, per voice per night):**
+- Without cache: 5 calls × 40K-token system × $15/M = $3.00
+- With 1h cache: 1 write × 2.0× ($1.20) + 4 reads × 0.1× ($0.24) = $1.44
+- **Savings: $1.56 per voice per night × 12 voices × 3 nights = ~$56**
+
+Plus Provocateur Formulation (5-min cache, smaller system but more calls): another ~$15 savings.
+
+**Total Athens 3-night savings: ~$60-75.** Voice Pipeline doc's $130-190/night Night 1 forecast remains correct as upper bound (without caching); actual cost with caching enabled drops by ~25-35%.
+
+**Files changed:**
+- `runtime/flows/voice/_anthropic_call.py` (cache_control on system block, 1h TTL)
+- `runtime/flows/voice/continuity.py` (latent bug fix from `8c47e1f`: was unpacking 3-tuple from updated 4-tuple-returning `stream_voice_call`; not surfaced in tests because Test 2 v2's continuity hit cache)
+- `runtime/flows/provocateur_flow.py` (`_stream_and_parse` cache_system param; enabled on Formulation)
+
+**Risk:** very low. Cache is an Anthropic SDK feature, not custom code. Falls back gracefully on cache miss (just pays full input price). No new failure modes introduced.
+
+**Side-validation:** the `count_tokens` API used by C16 (thinking_tokens fix) also exercised here — both fixes use the same Anthropic SDK paths.
 
 ### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism (handoff to persona thread) 🟡 (filed 2026-05-01)
 

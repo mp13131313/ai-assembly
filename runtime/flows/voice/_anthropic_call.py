@@ -90,13 +90,28 @@ def stream_voice_call(
     """
     if thinking_kwargs is None:
         thinking_kwargs = {}
+    # C19a: prompt caching on the system prompt block. Voice Pipeline
+    # makes 5-7 calls per voice per night with identical system prompts
+    # (the persona card). 1-hour TTL covers Athens Night 1's full wall
+    # envelope (validation gap can push Step 1 → Step 2 beyond 5-min
+    # default TTL); subsequent reads cost 0.1× normal input vs 1× full.
+    # Voice card system prompts are 35-44K tokens, well above Opus's
+    # 4096-token cache minimum. See OPEN_ITEMS C19a + provocateur_flow
+    # parallel change.
+    cached_system = [
+        {
+            "type": "text",
+            "text": system,
+            "cache_control": {"type": "ephemeral", "ttl": "1h"},
+        }
+    ]
     last_err: Exception | None = None
     for attempt in range(2):  # initial + 1 retry
         try:
             with client.messages.stream(
                 model=model,
                 max_tokens=max_tokens,
-                system=system,
+                system=cached_system,
                 messages=[{"role": "user", "content": user}],
                 **thinking_kwargs,
             ) as stream:
