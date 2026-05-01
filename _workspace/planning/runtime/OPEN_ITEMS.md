@@ -540,6 +540,16 @@ Four small items flagged 2026-04-20; not yet closed:
 
 **Estimated:** ~30-60 min to close all four. Anytime; risk-free.
 
+### C15. Step 2 `consumed_detailed_responses` field unpopulated 🟢
+
+**Surfaced 2026-05-01** by the legitimacy test (Section F).
+
+In Test 2 (4 voices × 3 formulations Step 1 → 4 Step 2), all 4 voices reported `focus_decision: "woven across all three"` in their Step 2 outputs but the `consumed_detailed_responses` schema field was empty (`[]`) on all 4. The field exists in the schema but isn't populated by Step 2 runtime — minor metadata bug; doesn't affect output quality or downstream consumers (publish_flow uses lineage paths, not this field).
+
+**Estimated:** ~15-30 min — `step2_first_draft_artifact.py` should populate the field with the list of Step 1 detailed-response files actually loaded into the user prompt. Verifiable via Test 2 re-run.
+
+**Pre-Athens-eligible** but not blocking — operator-side downstream tooling that wants to surface "this artifact was woven from these N detailed responses" would benefit from this field being populated.
+
 ---
 
 ## Section D — Existing FU#s, runtime-relevant
@@ -629,7 +639,8 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 | 2026-04-30 | FU#61-fresh pattern propagated to Dostoevsky | athens-2026 commit `5088d67` |
 | 2026-04-30 | FU#61 Pass 4b prompt addition (panel-wide propagation) | code commit `91947a7` |
 | 2026-05-01 | C6 CLOSED — misdiagnosed at filing; three names mark intentional domain boundaries (persona-card / voice-internal / publish-audience-facing), not duplicate fields | this doc C6 |
-| 2026-05-01 | **Continuity-after-Step-2 bugfix** (Athens-blocking, surfaced by Test 1 design) — under A1 (`--skip-step3` for Athens production), `voice_flow.py:458` had `not skip_step3` in the continuity gate, silently disabling continuity. Fixed: continuity now fires whenever Step 2 completes, regardless of Step 3 status. Without this, Athens Nights 2+3 would have launched with no continuity carried forward. `continuity.py` already tolerated `step3_output=None`; only the orchestrator gate was wrong. | runtime/flows/voice_flow.py |
+| 2026-05-01 | **Legitimacy-test verification** — operator-driven 4-voice test (Plato/Cleopatra/Dostoevsky/Battuta) on 3 mock formulations of "The Legitimacy of the Invisible." Two tests: (T1) 3-night sequence, 1 formulation/night → verified continuity flow + Convention A end-to-end; cross-night memory observed (Dostoevsky N3: *"I wrote that pause yesterday"*). (T2) Single night, 4×3 formulations → all 4 voices chose `focus_decision: "woven across all three"`, each finding a unifying through-line in their own grammar. All 16 Step 2 artifacts in correct native register (Plato dialogue, Cleopatra prostagma w/ full Greek titulary + γινέσθωι, Dostoevsky Writer's Diary w/ вдруг, Battuta Riḥla w/ Tawakkaltu ʿalā Allāh). Total ~$50-60 API + ~18 min wall. Artifacts: `projects/current-tests/voice-pipeline-dryrun/runs/legitimacy_test1_night{1,2,3}/` + `legitimacy_test2_single_night/`. Briefing template + scripts: `runtime/scripts/` (none new) + voice-pipeline-dryrun/`_legitimacy_test_briefing_template.json`. | runtime test artifacts |
+| 2026-05-01 | **Continuity-after-Step-2 bugfix** (Athens-blocking, surfaced by Test 1 design) — under A1 (`--skip-step3` for Athens production), `voice_flow.py:458` had `not skip_step3` in the continuity gate, silently disabling continuity. Fixed: continuity now fires whenever Step 2 completes, regardless of Step 3 status. Verified end-to-end across 3-night sequence in legitimacy test (above). Without this, Athens Nights 2+3 would have launched with no continuity carried forward. `continuity.py` already tolerated `step3_output=None`; only the orchestrator gate was wrong. | runtime/flows/voice_flow.py |
 | 2026-05-01 | C11 FULLY CLOSED — Dave + Helen Edwards bios applied (Path B); all other empty-bio speakers verified out-of-recording-scope; 219/224 active populated (97.8%); the 5 still-empty are not in any of the 25 recording sessions | projects/athens-2026/reference/speakers.json |
 | 2026-05-01 | ai_assembly schedule LANDED — operator-provided CSV (`recording_sessions.csv`) drove `apply_ai_assembly_flags_from_csv.py`; all 25 sessions matched cleanly (10 N1 + 9 N2 + 6 N3); CSV is now authoritative source-of-truth for transcription scope | projects/athens-2026/reference/sessions.json + runtime/scripts/apply_ai_assembly_flags_from_csv.py + projects/athens-2026/reference/_source/recording_sessions.csv |
 | 2026-05-01 | C11 + C11a LANDED — built `populate_speakers_from_program_html.py` (HTML extractor with oneliner-fallback + accent-tolerant name match); refreshed sessions.json (132→146; preserved/re-applied 29 of 31 ai_assembly flags); refreshed speakers.json scaffold (added 30 new speakers, 7 dropped); 217/224 active speakers enriched with title + affiliation + bio (96.9%). Restores Speaker ID Pass 3 accuracy from 40-50% (all-empty) into 70-85% target band. Source HTML stashed at PROJECT_ROOT/reference/_source/program_index.html — re-runnable | projects/athens-2026/reference/{speakers,sessions}.json + runtime/scripts/populate_speakers_from_program_html.py |
