@@ -8,7 +8,7 @@ Runs once per night AFTER voice_flow has produced:
 Reads from upstream pipelines (Researcher + Provocateur + Voice) and
 produces:
 
-  <PROJECT_ROOT>/published_artifacts/themes/<theme_id>.json
+  <PROJECT_ROOT>/published_artifacts/themes/night_<N>/<theme_id>.json
        Per-theme files: theme metadata + clusters + extractions +
        formulations-per-voice + voices-who-addressed + amendments-on-
        this-theme. First-class theme entities so the micro-site can
@@ -192,9 +192,19 @@ def _build_per_theme_files(
     formulations: dict[str, dict[str, Any]],
     published_voices: dict[str, dict[str, Any]],
 ) -> list[str]:
-    """Build per-theme files. Returns list of theme_ids written."""
+    """Build per-theme files. Returns list of theme_ids written.
+
+    Theme files are written under a per-night subdirectory:
+    `published_artifacts/themes/night_<N>/<theme_id>.json`. Theme_ids
+    are not stable across Researcher runs (each Researcher run emits
+    fresh sequential IDs), so a flat `themes/<theme_id>.json` layout
+    causes Night 2's theme_001 to overwrite Night 1's theme_001 — silent
+    data loss across the Athens 3-night sequence. The per-night
+    subdirectory disambiguates without requiring a wider ID-naming
+    refactor. (Spec evolution noted in OPEN_ITEMS C3 + C9.)
+    """
     logger = get_logger("publish_flow")
-    out_dir = project_root / "published_artifacts" / "themes"
+    out_dir = project_root / "published_artifacts" / "themes" / f"night_{night}"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     extractions_by_id = {e["id"]: e for e in all_extractions}

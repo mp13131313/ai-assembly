@@ -20,7 +20,7 @@ The published file is the SAME artifact as the run-dir Step 3 file but:
     deliberation grouped logically)
   - Named with stable URL paths (/night-N/<slug>)
   - Themes referenced by theme_id (joins to per-theme files in
-    <PROJECT_ROOT>/published_artifacts/themes/<theme_id>.json)
+    <PROJECT_ROOT>/published_artifacts/themes/night_<N>/<theme_id>.json)
 
 The run-dir Step 3 files remain on disk as the audit / debug surface
 (full lineage, thinking_trace, telemetry). The published files are
@@ -67,8 +67,11 @@ def _to_publish_per_voice(
       - generated_at (ISO timestamp)
 
     Themes referenced by ID; full theme metadata lives at
-    <PROJECT_ROOT>/published_artifacts/themes/<theme_id>.json (produced
-    by publish_flow.py — separate stage that reads across pipelines).
+    <PROJECT_ROOT>/published_artifacts/themes/night_<N>/<theme_id>.json
+    (produced by publish_flow.py — separate stage that reads across
+    pipelines; per-night subdir disambiguates Night 2 + Night 3 themes
+    from Night 1's, since theme_ids are not stable across Researcher
+    runs).
     """
     voice_slug = step3_output["lineage"]["voice_slug"]
     voice_name = step3_output.get("council_member") or voice_slug

@@ -338,15 +338,27 @@ Voice Pipeline hit the shell-empty-env bug (Claude Code agent shell pre-sets API
 
 All three flow entry-points now consistent with voice + persona pipeline patterns.
 
-### C3. publish_flow.py end-to-end exercise 🔴
+### C3. publish_flow.py end-to-end exercise 🟡 (cross-night theme path bug fixed 2026-05-02; full exercise still pending)
 
 **Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"High priority — Athens-blocking-eligible".
 
-`runtime/flows/publish_flow.py` (per-theme + per-extraction reverse index + lineage graph) has **never run end-to-end against real Researcher/Provocateur outputs**. Either:
+`runtime/flows/publish_flow.py` (per-theme + per-extraction reverse index + lineage graph + per-voice multi-night index) has **never run end-to-end against real Researcher/Provocateur outputs**. Either:
 - Re-run `dev_msc_test` through researcher_flow + provocateur_flow + voice_flow + publish_flow, OR
 - Hand-author fixtures matching the briefing schema
 
-**Pre-Athens-must-do.** Publish layer is what hands off to microsite + editor + Substack downstream.
+**Cross-night theme-file collision FIXED 2026-05-02:** publish_flow.py:197 was writing per-theme files to `published_artifacts/themes/<theme_id>.json` (flat, no night scope). Theme_ids are not stable across Researcher runs (each Researcher run emits fresh sequential IDs from its own clusters), so on Athens Night 2's run, Night 1's `theme_001.json` would have been silently overwritten with Night 2's content. Same again on Night 3 → only Night 3's themes survive in `themes/`.
+
+This was Athens-eligible: although `voice_flow.py` auto-publishes per-night per-voice files (safe), `publish_flow.py` is invoked separately for the cross-night per-voice multi-night index + audit + lineage trails — useful regardless of microsite. Operator running it once per night is enough to lose Nights 1+2 theme aggregations by morning of Day 4.
+
+**Patch:** path is now `published_artifacts/themes/night_<N>/<theme_id>.json` (per-night subdirectory). All other publish_flow outputs were already collision-safe:
+- `extractions/<eid>.json` — extraction IDs are session-prefixed (`<session_prefix>:NNN`), naturally non-colliding across nights
+- `traces/lineage_graph_night_<N>.json` — already night-scoped via filename
+- `voices/<slug>.json` — designed to walk `nights/night_*/` and aggregate cross-night (intentional accumulation)
+- `nights/night_<N>/<slug>.json` — already night-scoped via path
+
+`runtime/flows/voice/publish.py` docstring also updated to reflect the new path.
+
+**Still pending:** the full end-to-end exercise (running publish_flow against real Researcher/Provocateur/Voice outputs). Defer until microsite-build-phase OR a pre-Athens dryrun decides to exercise it. Now safe to do whenever — the collision bug won't fire.
 
 ### C4. Multi-night sequence dry-run 🔴
 
