@@ -118,4 +118,4 @@ That's ~25 min to working knowledge for picking up voice-build work cold.
 
 Update `HANDOFF.md` at the end of every voice-build session — it's the session-snapshot, not the steady-state. Roll the prior session's HANDOFF into the next session's by dating the doc and adding a "supersedes prior HANDOFF" note at top.
 
-If you want a versioned history, save prior HANDOFFs as `HANDOFF_<DATE>.md` in `voices/archive/` (per OPEN_ITEMS.md §6 archive convention).
+If you want a versioned history, save prior HANDOFFs as `HANDOFF_<DATE>.md` in `_workspace/archive/voices_consolidation_<date>/` (per the umbrella `<topic>_consolidation_<date>/` convention; first instance: `voices_consolidation_2026_05_01/`).
