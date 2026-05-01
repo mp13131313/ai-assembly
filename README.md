@@ -10,9 +10,9 @@ Twelve non-human voices (a river, an octopus, Plato, Hannah Arendt, and eight ot
 ~/Desktop/AI Assembly/
 ├── code/                   # THE GIT REPO — `mp13131313/ai-assembly`
 │   ├── docs/               # PRODUCTION: canonical specs + briefing docs
+│   │   └── research/       # PRESERVED: grounding Deep Research artifacts (5; under docs/)
 │   ├── runtime/            # PRODUCTION: FastAPI ingest + Prefect flows
 │   ├── personas/           # PRODUCTION: Persona Pipeline (v4) — builds 35-field cards
-│   ├── research/           # PRESERVED: grounding Deep Research artifacts (5)
 │   ├── _workspace/         # planning/ + archive/ (out of scope for code reviews)
 │   └── .env                # Shared secrets (gitignored — see .env.example)
 ├── projects/               # NEVER pushed — per-project data, sibling to code/

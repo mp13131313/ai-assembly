@@ -33,11 +33,11 @@
 
 When archived/stale docs conflict with `AI_Assembly_Briefing_v3_1.md`, `CURRENT_STATE.md`, or the code in `runtime/`+`personas/`, trust the current docs and the code.
 
+## Also in `docs/` (preserved grounding)
+
+- **`docs/research/`** — preserved grounding material (5 Deep Research compass artifacts). Not deletable. When you want to know *why* the pipeline is designed the way it is, look here. (Relocated from top-level `research/` to `docs/research/` 2026-05-01 to consolidate documentation under one tree.)
+
 ## What's NOT in `docs/`
 
-- **`research/`** — preserved grounding material (5 Deep Research compass artifacts). Not deletable. When you want to know *why* the pipeline is designed the way it is, look here.
-- **`_workspace/planning/`** — forward-looking design + active follow-ups. Currently:
-  - `HANDOFF_2026_04_27.md` — current session pickup
-  - `FOLLOW_UPS.md` — active follow-up tracker (FU#1–50 family)
-  - `ONBOARDING.md` — permanent fresh-session pickup
+- **`_workspace/planning/`** — forward-looking design + active follow-up tracking. Two-workstream structure (`runtime/` + `voices/` subfolders) + thin root index + frozen historical FU# ledger. See `code/CLAUDE.md` §"Planning / tracking conventions" for the full workflow.
 - **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts). Out of scope for code reviews by default.

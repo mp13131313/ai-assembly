@@ -49,7 +49,7 @@
 │   │   ├── scripts/                    # batch_pre_dr.sh, sentinel_regen.py, migrators
 │   │   ├── tests/                      # 212 tests, all passing 2026-04-27
 │   │   └── HANDOFF.md                  # cross-repo contract (production, current)
-│   ├── research/                       # PRESERVED Deep Research compass artifacts (5)
+│   │   └── research/                   # PRESERVED Deep Research compass artifacts (5; relocated from top-level research/ 2026-05-01)
 │   ├── _workspace/
 │   │   ├── planning/                   # active: ONBOARDING (thin index), FOLLOW_UPS, runtime/, voices/, dated handoffs
 │   │   └── archive/                    # historical (planning_2026_04_consolidation/, runtime_consolidation_2026_05_01/, specs/, fix-plans/)

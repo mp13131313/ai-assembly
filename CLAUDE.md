@@ -1,24 +1,25 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-04-27)
+## Current branch state (2026-05-01)
 
-Active branch: `arch-03-additive-merge` (~136 commits ahead of `main`, PR
-#2 open). The persona pipeline has been substantially re-engineered under
-arch-03 (chunked Pass 1.1–1.7) + Phase B (per-voice folder layout) + Tier
-3 (code/project separation) + the FU#1–50 follow-up family. **Pipeline
-v4** is now the current spec (`docs/AI_Assembly_Persona_Pipeline_v4.md`,
-2026-04-27). v3.10 archived at `docs/_archive/`.
+Active branch: `voice-pipeline-v2.1-align-revert` (22+ commits ahead of
+`main`, merge decision deferred). Persona pipeline at **v4**
+(`docs/AI_Assembly_Persona_Pipeline_v4.md`); `pipeline_version` string in
+code: `"4.0"`. v3.10 archived at `docs/_archive/`. Pipeline architecture
+includes chunked Pass 1.1–1.7 merge, Phase B per-voice folder layout,
+Tier 3 code/project separation, and the FU#1–62 follow-up family
+(closed/frozen as of 2026-05-01).
 
-`pipeline_version` string in code: `"4.0"` (was `"3.10"`).
+Voice-build state for athens-2026: 4 of 10 panel voices shipped (Plato,
+Cleopatra, Dostoevsky, Battuta); Octopus paused at FU#53 review-gate;
+5 unbuilt (Arendt, Lovelace, Marley, Whanganui, Scheherazade — each
+~3-4 hr operator wall for manual claude.ai DR sessions).
 
-Plato shipped + chat-test validated 2026-04-26 → Phase L sign-off. Voice
-3–12 buildout for athens-2026 is at Phase 0.5 complete (12 voice_configs
-+ Phase 0.5 research for all 12); 11 × 6 = 66 manual claude.ai DR
-sessions outstanding. 212/212 tests passing.
-
-**Pickup doc:** `_workspace/planning/HANDOFF_2026_04_27.md` (authoritative
-session pickup). On any fresh session, read that first.
-**Permanent onboarding:** `_workspace/planning/ONBOARDING.md`.
+**Pickup pattern:** two workstreams, two subfolders.
+- For voice-build work: `_workspace/planning/voices/{ONBOARDING,OPEN_ITEMS,HANDOFF}.md`
+- For runtime work: `_workspace/planning/runtime/{ONBOARDING,OPEN_ITEMS,HANDOFF*}.md`
+- For cross-cutting rules + DON'Ts: `_workspace/planning/ONBOARDING.md` (thin index)
+- Frozen FU# ledger: `_workspace/planning/FOLLOW_UPS.md` (no new entries)
 
 ## Filesystem layout (umbrella — Tier 3)
 
@@ -32,10 +33,12 @@ Everything lives under `~/Desktop/AI Assembly/`:
 │   ├── runtime/            # runtime-pipeline code
 │   ├── docs/               # specs + briefings (current)
 │   │   └── _archive/       # historical specs (e.g. v3.10 pipeline)
-│   ├── research/           # preserved baseline research
+│   │   └── research/       # preserved baseline Deep Research artifacts (under docs/)
 │   └── _workspace/
-│       ├── planning/       # active: HANDOFF_2026_04_27, FOLLOW_UPS, ONBOARDING
-│       └── archive/        # historical fix-plans, session-artifacts, specs
+│       ├── planning/       # active: ONBOARDING (thin index) + FOLLOW_UPS (frozen)
+│       │   ├── runtime/    #   runtime-thread workstream (HANDOFF + ONBOARDING + OPEN_ITEMS)
+│       │   └── voices/     #   voice-build workstream (HANDOFF + ONBOARDING + OPEN_ITEMS)
+│       └── archive/        # historical fix-plans, session-artifacts, consolidations
 ├── projects/               # NEVER pushed to GitHub — active project data
 │   ├── test/               # sandbox / experimentation (Dostoevsky lives here)
 │   │   └── voices/<slug>/  # 00_intake/ 01_research/ 02_merge/ … 06_derive/ 07_persona_card_assembled.json
@@ -59,8 +62,10 @@ Four categories:
 - `docs/`, `runtime/`, `personas/` — **production** slice. Current specs,
   running code, canonical pipeline. In scope for every code review and VM
   deploy.
-- `research/` — **preserved grounding**. Deep Research artifacts that
-  ground architecture decisions. Not deletable.
+- `docs/research/` — **preserved grounding**. Deep Research artifacts
+  that ground architecture decisions. Not deletable. (Relocated from
+  top-level `research/` to `docs/research/` 2026-05-01 to consolidate
+  documentation under one tree.)
 - `_workspace/planning/` — **forward-looking design + active workstream
   trackers**. Two-workstream structure (see §"Planning / tracking
   conventions" below): `runtime/{HANDOFF, ONBOARDING, OPEN_ITEMS}.md`,
