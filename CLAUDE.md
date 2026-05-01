@@ -233,8 +233,10 @@ All canonical pipeline specs are in `docs/`:
   packaging
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript
   pipeline
-- `AI_Assembly_Voice_Pipeline.md` — Voice Pipeline Steps 1+2 (Step 3
-  unspecified — FU#49E flagged as highest-impact post-Athens item)
+- `AI_Assembly_Voice_Pipeline.md` — Voice Pipeline Steps 1+2+3 (v2.1,
+  2026-04-29). Step 3 spec is being redesigned from Briefing v3.1 line
+  177 per operator decision 2026-04-29 evening; FU#49E framing dropped.
+  Pre-Athens gating decision tracked at `_workspace/planning/runtime/OPEN_ITEMS.md` A1.
 - `AUDIENCE_BRIEF.md` — audience characterization
 - `LLM_CALL_INVENTORY.md` — call inventory (needs update for new
   passes since 2026-04-21)
