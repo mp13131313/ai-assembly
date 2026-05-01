@@ -602,29 +602,71 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **Recommended:** Test 3 with 3 truly-divergent formulations (different conceptual territories). Operator-authored or me-drafted from the 25 Athens recording-session topics. ~7 min wall + ~$15 API.
 
-### C19. Token economics check — Step 2 input padding 🟡 (filed 2026-05-01 from external review)
+### C19. Token economics audit — completed 2026-05-01 ✅ + C19a filed for action
 
-External reviewer estimate: at Athens scale (12 voices × 3 nights × 3-5 formulations + continuity overlays), persona pipeline alone could be $400-600/night before researcher + provocateur — higher than Voice Pipeline doc's current $130-190/night Athens N1 forecast.
+**Audit run 2026-05-01.** Tokenized all 4 voices' Step 2 inputs (system + user prompts) via Anthropic `count_tokens` API.
 
-Test artifacts show Step 2 inputs are heavy: Dostoevsky N3 = 46K input → 7.4K output; Cleopatra Test 2 = 44K input → 3.9K output. **If most of 45K input is Step 1 detailed responses passed through, fine. If a significant fraction is repeated context (briefing + card + system frames duplicated across calls), there's headroom.**
+**Findings:**
 
-**Recommended:** dump one Step 2 user prompt + system prompt to disk; tokenize each section; identify duplicated content. Cheapest fix likely the largest payoff (briefings + system frames cached/deduplicated).
+| Voice | Total input | System (card) | User (Step 1 responses) | System % |
+|---|---|---|---|---|
+| Plato | 41,643 | 35,468 | 6,175 | 85.2% |
+| Cleopatra | 44,437 | 39,153 | 5,284 | 88.1% |
+| Dostoevsky | 49,768 | 43,740 | 6,028 | 87.9% |
+| Battuta | 49,616 | 42,475 | 7,141 | 85.6% |
 
-**Estimated:** ~30-45 min for the audit.
+**85-88% of Step 2 input is the persona card (system prompt).** User prompt (Step 1 responses) is only 5-7K — small and reasonable.
 
-### C20. Voice-side recurrence patterns (handoff to persona thread) 🟡 (filed 2026-05-01 from external review)
+**Reviewer's $400-600/night estimate was high.** Voice Pipeline doc's current $130-190/night Night 1 forecast is closer; with prompt caching enabled (see C19a), it would drop further to ~$70-120/night Night 1. Athens 3-night total: ~$200-300 with caching vs ~$390-550 currently.
 
-External reviewer flagged three voice-side moves that recurred across Test 1 nights:
+### C19a. Anthropic prompt caching not enabled — Athens-eligible optimization 🟡 (filed 2026-05-01 from C19 audit)
 
-- **Plato — Theuth/Thamus reach.** Phaedrus / writing-cannot-answer-when-questioned appears in N1, N2, AND Test 2 synthesis. Canonical Plato, but at Athens with 9-12 briefings landing on him across the conference, if 6+ reach for Theuth/Thamus the audience will notice.
-- **Ibn Battuta — Tughluq beard-plucking.** Shaykh Shihāb al-Dīn beard-plucking appears in both N1 and N2 Step 1 with very similar phrasing. Same recurrence concern.
-- **Dostoevsky — closing on suspended judgment.** N2 ends *"they have not yet earned the right to answer it"*; Test 2 synthesis ends *"any justice was ever made."* Close enough that the move-shape may calcify into a verbal tic across more nights.
+**Surfaced 2026-05-01 by C19 audit.** No `cache_control` calls anywhere in `runtime/flows/`. Each voice's identical 40K-token system prompt is paid at full price across ~5-7 calls per voice per night (Step 1 ×3-5 + Step 2 ×1 + Step 3 ×1 when enabled).
 
-**Path A:** flag in voice cards (`banned_modes` or per-voice "moves already used" tracking).
-**Path B:** continuity overlay carries a "stock examples already deployed" register so voices don't lean on the same anecdotes night after night.
-**Path C:** accept as a Platonic/Battutan/Dostoevskian tic the audience would recognize — but make that decision deliberately.
+**With Anthropic prompt caching:**
+- Add `"cache_control": {"type": "ephemeral"}` on system prompt blocks
+- Cache write: 1.25× normal input price (one-time per voice per night)
+- Cache reads: 0.1× normal input price (5-min TTL; subsequent calls within window)
+- **Net: ~87% savings on system-prompt portion across reads 2-N**
 
-**Belongs to persona thread for voice-card-side resolution.** Filed here (runtime workstream) as a cross-thread observation; cross-reference in `voices/OPEN_ITEMS.md` recommended.
+**Athens projection:**
+
+| Stage | Without cache (current) | With cache |
+|---|---|---|
+| Step 1 input (3 nights) | ~$50-70 | ~$10-15 |
+| Step 2 input (3 nights) | ~$22 | ~$5-7 |
+| Step 3 input | $0 (skipped per A1) | $0 |
+| Continuity | ~$3 | ~$1 |
+| **Total input** | **~$75-95** | **~$16-23** |
+
+Plus output tokens (~$50-100 across 3 nights) which caching doesn't affect.
+
+**Estimated:** ~1-2 hr engineering — add `cache_control` headers to system blocks in `_anthropic_call.py` (Voice) + `clients.py` (Persona, if same pattern); verify with one Step 1 call that `cache_creation_input_tokens` + `cache_read_input_tokens` populate correctly. ~1 hr testing on a Plato dryrun to confirm savings materialize.
+
+**Risk:** small. Anthropic prompt caching is a documented stable feature. Only failure mode is if cache TTL (5 min default; 1 hr available with `ephemeral_1h` tier) is too short for a multi-call sequence — but our Step 1 calls are batched + parallel within ~2-3 min total wall, well inside 5 min.
+
+**Pre-Athens-eligible** — saves ~$60-75 across 3 nights (input) and de-risks the cost forecast. Could also be deferred post-Athens since current cost is already in Voice Pipeline doc's stated envelope.
+
+**Decision needed:** land before Athens (low-risk + concrete savings) OR defer to post-Athens (current cost is acceptable).
+
+### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism (handoff to persona thread) 🟡 (filed 2026-05-01)
+
+External reviewer flagged three voice-side moves that recurred across Test 1 nights. Operator added a fourth on inspection: a Plato anachronism that --skip-validation didn't catch.
+
+**1. Plato — Theuth/Thamus reach.** Phaedrus / writing-cannot-answer-when-questioned appears in N1, N2, AND Test 2 synthesis. Canonical Plato, but at Athens with 9-12 briefings landing on him across the conference, if 6+ reach for Theuth/Thamus the audience will notice.
+
+**2. Plato — Socrates referencing his own death (anachronism, found 2026-05-01 inspection).** Test 1 N3 artifact has Plato writing a Socrates ↔ Charmides dialogue with **Socrates as the first-person narrator**. Socrates then asks: *"Charmides — the assembly that voted Socrates' death, was that public life?"* And later: *"by mine it was the day the most just man I knew was killed by counted opinion"* — Socrates calling himself the most just man he knew, in past tense, after his own death. Pattern observed: when Plato writes Socrates as narrator (not as a character encountered by another narrator), Plato fuses his post-Socrates authorial vantage with Socrates' first-person voice. Other 4 Plato artifacts (N1, N2, Test 2, Test 2 v2) avoid the trap by having a non-Socrates narrator encounter Socrates. **The anachronism validator on Night 1 would catch this** (the entire purpose of Pass 7-anachronism). Athens production CLI per A1 has validation ON Night 1 / OFF Nights 2+3 — operator morning review of N1 flags is the correction loop, but **this WOULD ship if it occurred on Night 2/3 without operator catching it.**
+
+**3. Ibn Battuta — Tughluq beard-plucking.** Shaykh Shihāb al-Dīn beard-plucking appears in both N1 and N2 Step 1 with very similar phrasing. Same recurrence concern.
+
+**4. Dostoevsky — closing on suspended judgment.** N2 ends *"they have not yet earned the right to answer it"*; Test 2 synthesis ends *"any justice was ever made."* Close enough that the move-shape may calcify into a verbal tic across more nights.
+
+**Resolution paths (per-voice-card):**
+- **Path A:** flag in voice cards. For Plato: `banned_modes` or `quality_criteria` constraint forbidding first-person Socrates referencing his own death; tighten `voice_temporal_stance` enforcement when Socrates is the narrator. For Battuta: stock-anecdote register entry. For Dostoevsky: closing-phrase variation guard.
+- **Path B:** continuity overlay carries a "stock examples / closing phrases already deployed" register so voices don't lean on the same moves night after night.
+- **Path C:** accept some moves as deliberately-recognized canonical tics; voice-card the others.
+
+**Belongs to persona thread for voice-card resolution.** Filed here (runtime workstream) as a cross-thread observation. Memo for persona thread: `_workspace/planning/voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (next).
 
 ---
 
