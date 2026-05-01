@@ -16,7 +16,7 @@ Twelve non-human voices (a river, an octopus, Plato, Hannah Arendt, and eight ot
 │   ├── _workspace/         # planning/ + archive/ (out of scope for code reviews)
 │   └── .env                # Shared secrets (gitignored — see .env.example)
 ├── projects/               # NEVER pushed — per-project data, sibling to code/
-│   ├── current-tests/      # sandbox PROJECT_ROOT + voice-pipeline-dryrun/ + dev_msc_test/ inside
+│   ├── current-tests/      # container: dev_msc_test/ + voice-pipeline-dryrun/ (NOT itself a PROJECT_ROOT)
 │   └── athens-2026/        # PRODUCTION — own git repo (private):
 │                           # `mp13131313/ai-assembly-athens2026-voices`
 └── archive/                # frozen historical runs + dormant projects — NEVER pushed

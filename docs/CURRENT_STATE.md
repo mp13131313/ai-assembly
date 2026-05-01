@@ -58,7 +58,7 @@
 │   ├── README.md, CLAUDE.md
 │   └── (other top-level files)
 ├── projects/                           # NEVER pushed — per-project data, sibling to code
-│   ├── current-tests/                  # sandbox + voice-pipeline-dryrun/ + dev_msc_test/ inside (relocated 2026-05-01)
+│   ├── current-tests/                  # container: dev_msc_test/ + voice-pipeline-dryrun/ (relocated 2026-05-01; NOT itself a PROJECT_ROOT)
 │   └── athens-2026/                    # PRODUCTION — own git repo `mp13131313/ai-assembly-athens2026-voices` (private)
 │       ├── conference_facts.json       # at root, NOT under inputs/
 │       ├── audience_profile.json
@@ -382,7 +382,7 @@ Per-voice data moved from flat `inputs/voices/` + `runs/<slug>/` to `voices/<slu
 
 ### 5.17 Tier 3 code/project separation (2026-04-20)
 
-Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Resolves via `--project <path>` > `AI_ASSEMBLY_PROJECT_ROOT` env > **hard fail** (no silent default). Two active projects (`projects/current-tests/` sandbox + `projects/athens-2026/` production) share the same code, separate data. athens-2026 has its own git repo (`mp13131313/ai-assembly-athens2026-voices`, private) for backup; the code repo never touches per-project data. Dormant Phase L projects (`phase-l-plato`, `phase-l-dostoevsky`) relocated to umbrella `~/Desktop/AI Assembly/archive/` 2026-05-01.
+Per-project data lives **outside** the code repo at `PROJECT_ROOT`. Resolves via `--project <path>` > `AI_ASSEMBLY_PROJECT_ROOT` env > **hard fail** (no silent default). Active project `projects/athens-2026/` (production) is the only complete PROJECT_ROOT. Test surfaces live in `projects/current-tests/{dev_msc_test, voice-pipeline-dryrun}/` — pass via `--project` per surface. athens-2026 has its own git repo (`mp13131313/ai-assembly-athens2026-voices`, private) for backup; the code repo never touches per-project data. Dormant Phase L projects (`phase-l-plato`, `phase-l-dostoevsky`) and the prior Dostoevsky sandbox (`projects/test/` PROJECT_ROOT shape) relocated to umbrella `~/Desktop/AI Assembly/archive/` 2026-05-01.
 
 ### 5.18 Arch-03 additive-merge architecture (2026-04-22)
 

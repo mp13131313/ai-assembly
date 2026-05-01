@@ -40,10 +40,9 @@ Everything lives under `~/Desktop/AI Assembly/`:
 │       │   └── voices/     #   voice-build workstream (HANDOFF + ONBOARDING + OPEN_ITEMS)
 │       └── archive/        # historical fix-plans, session-artifacts, consolidations
 ├── projects/               # NEVER pushed to GitHub — active project data
-│   ├── current-tests/      # sandbox PROJECT_ROOT (default for AI_ASSEMBLY_PROJECT_ROOT)
-│   │   ├── voices/<slug>/  # sandbox voice data (Dostoevsky here)
-│   │   ├── runs/{fyodor_dostoevsky, dev_msc_test}/  # sandbox runs (dev_msc_test relocated from archive 2026-05-01)
-│   │   └── voice-pipeline-dryrun/   # nested Voice Pipeline sandbox PROJECT_ROOT (Cleopatra v1/v3, Plato dryruns)
+│   ├── current-tests/      # container for two active test surfaces (NOT itself a PROJECT_ROOT)
+│   │   ├── dev_msc_test/   # Researcher/Provocateur dryrun reference data (relocated from archive 2026-05-01)
+│   │   └── voice-pipeline-dryrun/   # Voice Pipeline sandbox PROJECT_ROOT (Cleopatra v1/v3, Plato dryruns)
 │   └── athens-2026/        # production instance — own git repo (private):
 │                           # `mp13131313/ai-assembly-athens2026-voices`
 └── archive/                # frozen historical runs + dormant working projects — NEVER pushed

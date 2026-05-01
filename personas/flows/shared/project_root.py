@@ -18,9 +18,11 @@ Precedence:
      with multiple projects on one codebase (test / athens-2026 / …), a
      fallback would risk writing to the wrong project on a forgotten flag.
 
-Typical dev-machine setup: the shared `.env` sets
-`AI_ASSEMBLY_PROJECT_ROOT=.../projects/current-tests` so bare invocations
-land in the sandbox; pass `--project .../projects/athens-2026` for production.
+Typical dev-machine setup (post 2026-05-01 reorg): the shared `.env` no
+longer sets a default for `AI_ASSEMBLY_PROJECT_ROOT` (current-tests/ is a
+container, not a PROJECT_ROOT). Pass `--project` explicitly:
+  - test surface: `--project .../projects/current-tests/voice-pipeline-dryrun`
+  - production:   `--project .../projects/athens-2026`
 
 Safety: every resolution prints a visible banner on stderr showing the
 target PROJECT_ROOT and the source (CLI / env-var). When the resolved path
