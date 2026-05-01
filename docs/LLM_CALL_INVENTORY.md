@@ -4,7 +4,7 @@
 
 **Scope:** All LLM / AI API calls initiated by code in this repo — runtime flows (transcription, researcher, provocateur) and the persona pipeline. External-facing manual steps (the human Claude DR sessions at claude.ai) are noted for completeness but are not code-initiated.
 
-**Last read against the code:** 2026-04-27. Major rewrite covering arch-03 chunked merge (Pass 1.1–1.7), Phase B per-voice layout, FU#2 chunked Pass 7-pre, FU#13 linear patcher (replaces revision loop), FU#41 chat artifact, FU#33 P1 bracket-strip (Pass 6.5-clean), Pass 7-anachronism added, Pass 0b tailor LLM call added. Models and parameters update frequently; re-verify before quoting for budgeting.
+**Last read against the code:** 2026-05-01. Updates since 2026-04-27: **FU#53 Pass 7a FINAL** (post-Derive cross-model re-validation against assembled card; new entry **41B** below). FU#57 (`bold_engagement_topics` dropped from runtime card; runtime-side strip — no new call), FU#58/59 (prompt-only register-rule fixes — no signature change), FU#60 (`{type: "adaptive"}` thinking + `display: "summarized"` + `temperature` dropped when `thinking=True` + retry on `httpx.RemoteProtocolError`/`ReadError`/`ReadTimeout` with 15s backoff in `clients.py` — already reflected as "Adaptive" column), FU#61 (Pass 4b prompt audience-engagement +1 — prompt-only). Earlier major changes still hold: arch-03 chunked merge (Pass 1.1–1.7), Phase B per-voice layout, FU#2 chunked Pass 7-pre, FU#13 linear patcher (replaces revision loop), FU#41 chat artifact, FU#33 P1 bracket-strip (Pass 6.5-clean), Pass 7-anachronism, Pass 0b tailor. Models and parameters update frequently; re-verify before quoting for budgeting.
 
 ---
 
@@ -78,19 +78,24 @@ Grouped by pipeline; N = expected invocations per run. Cost rough-cuts per the s
 | 40d | Pass 7a fallback 3 | OpenAI | `gpt-4o` | `chat.completions.create` | 16384 | — | 0.0 | per-attempt | only if 40c fails |
 | 40e | Pass 7a fallback 4 | Google | `gemini-2.5-pro` | `generate_content` | 16384 | Model default | 0.0 | None | only if all OpenAI attempts fail (writes SKIPPED sentinel if all fail) |
 | **41** | **Personas · Pass 7a-FIX (linear patcher)** *(NEW v4 FU#13 — replaces revision loop)* | Anthropic | `claude-opus-4-7` | via `call_claude` (streams) | 32000 | Adaptive | 1.0 | 1× retry | 0 or 1 per voice (only if Pass 7a `overall == REVISION_NEEDED`); on apply, re-fires #36+#39+#40 once |
+| **41B-a** | **Personas · Pass 7a FINAL (post-assembly cross-model)** *(NEW v4 FU#53)* — primary | OpenAI | `gpt-5.4` (high) | `chat.completions.create` | 16384 | — | 0.0 | per-attempt | 1 per voice (against assembled card, with build-only fields stripped) |
+| 41B-b | Pass 7a FINAL fallback 1 | OpenAI | `gpt-4.1` | `chat.completions.create` | 16384 | — | 0.0 | per-attempt | only if 41B-a fails |
+| 41B-c | Pass 7a FINAL fallback 2 | OpenAI | `o3` | `chat.completions.create` (reasoning) | 16384 | — | omitted | per-attempt | only if 41B-b fails |
+| 41B-d | Pass 7a FINAL fallback 3 | OpenAI | `gpt-4o` | `chat.completions.create` | 16384 | — | 0.0 | per-attempt | only if 41B-c fails |
+| 41B-e | Pass 7a FINAL fallback 4 | Google | `gemini-2.5-pro` | `generate_content` | 16384 | Model default | 0.0 | None | only if all OpenAI attempts fail (writes SKIPPED sentinel if all fail) |
 | 42 | Personas · Pass 7b Worked Provocations | Anthropic | `claude-opus-4-7` | via `call_claude` (streams) | 24000 | Adaptive | 1.0 | 1× retry | 1 per voice |
 | 43a | Personas · Pass 7c Negative Constraints — primary | Google | `gemini-2.5-pro` | `generate_content` | 16384 | Model default | 0.0 | None | 1 per voice |
 | 43b | Pass 7c fallback | Anthropic | `claude-sonnet-4-6` (bias-aware variant) | via `call_claude` (non-streaming) | 8192 | Off | 0.0 | 1× retry | only if Gemini fails |
 | **44** | **Personas · Derive** *(model upgraded Sonnet→Opus + thinking)* | Anthropic | `claude-opus-4-7` | via `call_claude` (streams) | 24000 | Adaptive | 1.0 | 1× retry | 1 per voice |
 | **45** | **Personas · Chat artifact (FU#41)** | — | — | Pure Python via `flows/shared/chat_prompt_builder.py` | — | — | — | — | 1 per voice |
 | 46 | Personas · Wikipedia | Wikipedia | — | REST (opensearch + page summary) | — | — | — | None | 1–6 per Pass 0a interactive run |
-| — | Personas · Pass 1a-DR (manual claude.ai) | Anthropic (claude.ai UI) | `claude-opus-4-6` for §1–§5; `claude-opus-4-7` for §6 | **Human paste-and-wait, Extended Thinking + Deep Research** | — | — | — | — | **6 per voice**, ~60–180 min per session wall time |
+| — | Personas · Pass 1a-DR (manual claude.ai) | Anthropic (claude.ai UI) | `claude-opus-4-7` across §1–§6 (older "4.6 for §1–§5; 4.7 for §6" Phase L spec is stale) | **Human paste-and-wait, Extended Thinking + Deep Research** | — | — | — | — | **6 per voice**, ~30–60 min per section wall time |
 
 **Runtime call count per night** (12 voices, ~20 themes, ~40 assigned pairs): ASR 6–9 · Speaker ID 6–9 · Cleaning 6–9 · Extraction 6–9 · Clustering 1 · Theming 1 · Triage Voice 12 · Triage Flags 1 · Formulation ~40 → **~80–90 LLM calls per night**.
 
-**Personas call count per voice (v4):** 0a 1 · 1a 1 · 1b 1 · 0b tailor 1 · Pass 1.1–1.7 (7) · 1d 1 · Pass 2+CT 2 · Pass 3+CT 2 · Pass 4a+CT 2 · Pass 4b+CT 2 · Pass 5 1 · Pass 6 1 · 7-pre 3-stage (1+N+1, where N≈3–6) · 7-anach 1 (1–5 attempts) · 7a 1 (1–5 attempts) · 7a-FIX 0 or 1 (with 3 re-fires of pre/anach/7a if it runs) · 7b 1 · 7c 1 (1–2 attempts) · Derive 1 → **~28–35 LLM calls per voice (more if 7a-FIX fires; the verify-batches and the model-ladder fallbacks are the variable parts)**. 12 voices → **~340–420 calls for the full pre-Athens build.**
+**Personas call count per voice (v4):** 0a 1 · 1a 1 · 1b 1 · 0b tailor 1 · Pass 1.1–1.7 (7) · 1d 1 · Pass 2+CT 2 · Pass 3+CT 2 · Pass 4a+CT 2 · Pass 4b+CT 2 · Pass 5 1 · Pass 6 1 · 7-pre 3-stage (1+N+1, where N≈3–6) · 7-anach 1 (1–5 attempts) · 7a 1 (1–5 attempts) · 7a-FIX 0 or 1 (with 3 re-fires of pre/anach/7a if it runs) · 7b 1 · 7c 1 (1–2 attempts) · Derive 1 · **7a FINAL 1 (1–5 attempts; FU#53)** → **~29–37 LLM calls per voice (more if 7a-FIX fires; the verify-batches and the model-ladder fallbacks are the variable parts)**. Note Pass 7a FINAL re-fires on operator-patch loop (path-(a)) — empirically 1–2 extra runs per voice across the 4 shipped voices. 10 voices (Athens panel) → **~300–400 calls for the full pre-Athens build**, plus ~5–15 per-voice path-(a) re-validation runs.
 
-Add to that **66 manual claude.ai DR sessions** (11 voices × 6 sections; Plato done) — these are operator-paid against the claude.ai subscription, not API.
+Add to that **manual claude.ai DR sessions** — 6 per voice; 5 of 10 panel voices done as of 2026-05-01 (Plato, Cleopatra, Dostoevsky, Battuta shipped + Octopus paused at FU#53 gate); 5 voices × 6 sections = **30 sessions outstanding** for the remaining panel build (Arendt, Lovelace, Marley, Whanganui, Scheherazade). These are operator-paid against the claude.ai subscription, not API.
 
 ---
 
