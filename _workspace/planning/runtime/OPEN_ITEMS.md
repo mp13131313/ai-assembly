@@ -386,6 +386,77 @@ From dryrun #2 (Plato solo) validator findings:
 
 **None blocking.** Could sharpen via Plato card patches OR via Step 1 closing-instruction guards. Operator-side judgment call.
 
+### C9. Provocateur Night 2 / Night 3 (theme_id, member) exclusion filter 🔴
+
+**Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 210 ("Night 2/3 plumbing: not plumbed"). Confirmed by `docs/AI_Assembly_Provocateur_Pipeline.md` §"Night 2 is different from Night 1" — flagged as pending implementation.
+
+**Problem:** Provocateur Selection on Night 2 must avoid repeating per-voice (theme_id, member) pairs already assigned on Night 1. Night 3 must avoid pairs from Nights 1 + 2. Per Briefing v3.1 §"Stage 1b": *"On Night 2, the Provocateur receives Night 1's assignments to avoid repeating territory. On Night 3, both previous nights."*
+
+**Status:** unimplemented in `runtime/flows/provocateur_flow.py` Selection stage. The filter logic does not currently load prior nights' selections.
+
+**Pre-Athens-must-do.** Without it, Night 2 + Night 3 risk repeating territory assigned on Night 1 + 2. Athens runs are 3 nights — this fires twice.
+
+**Estimated:** ~2-3 hr (load prior `selection.json` files from previous nights' run_dirs; add exclusion filter to the deterministic Python Selection stage; tests).
+
+### C10. Council config: replace `dev_stub_v2_with_selection_params` with real Provocateur Profiles 🔴
+
+**Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 211 ("Council config members are stubs… Pre-Athens blocker").
+
+**Problem:** `runtime/flows/shared/council/council_config.json` `members[]` are still hand-written stubs (`dev_stub_v2_with_selection_params`), not derived from completed Persona Cards' Provocateur Profile artifacts.
+
+**Per cross-repo handoff contract (`personas/HANDOFF.md`):** each finalized voice's `voices/<slug>/06_derive/01_provocateur_profile.json` (8 fields) wires into `council_config.json` `members[]`.
+
+**Current state:** Plato + Cleopatra + Dostoevsky have shipped Provocateur Profiles in athens-2026; runtime council_config has not yet been updated to consume them.
+
+**Pre-Athens-must-do.** Provocateur Triage + Selection both consume `council_config.json` — mismatched member profiles produce wrong assignments.
+
+**Estimated:** ~30 min once profiles are ready (mostly mechanical concatenation + selection_parameters preserved). Re-runs as more voices ship.
+
+### C11. Speaker bios empty in `runtime/reference/speakers.json` 🟡
+
+**Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 212 ("Speaker bios empty… Speaker ID Pass 3 accuracy drops from 70-85% to 40-50% without them. Pre-Athens blocker.").
+
+**Problem:** `runtime/reference/speakers.json` has 202 speakers, all with `bio: ""`. Transcription Pipeline Pass 3 (multi-pass speaker attribution) uses bios as one of its disambiguation signals; empty bios degrade accuracy materially.
+
+**Per Transcription Pipeline spec:** Speaker ID Pass 3 is a 5-pass attribution (cue → role → expertise → confidence → per-turn sanity check); the role/expertise pass relies on speaker bios.
+
+**Estimated:** ~3-4 hr operator wall time to populate from program materials + speaker page sources. Or accept the accuracy drop and rely on Pass 4 manual review (15-30 min per night per Architecture v1).
+
+### C12. HoBB email tool integration 🟡
+
+**Source:** `docs/AI_Assembly_Briefing_v3_1.md` §"Operational workstreams" + archive `specs/AI_Assembly_Architecture_v1.md` §"Stage D — Deliver to HoBB email tool".
+
+**Problem:** Substack / newsletter delivery requires API access to HoBB's email tool (Mailchimp / Campaign Monitor / HubSpot / Substack / Beehiiv / Ghost — most have REST APIs; some have native Prefect/n8n nodes).
+
+**Open:** which tool HoBB actually uses + obtaining API credentials. Architecture v1 flagged as "30-minute investigation."
+
+**Fallback:** manual paste from a shared folder if API integration isn't possible.
+
+**Pre-Athens-eligible.** Needs operator-side conversation with whoever runs HoBB's list.
+
+### C13. Recording protocol pre-Athens 🟡
+
+**Source:** `docs/AI_Assembly_Briefing_v3_1.md` §"Operational workstreams" + archive `specs/AI_Assembly_Architecture_v1.md` §"Recording Protocol".
+
+Three procedural items raise transcription accuracy from ~50% to 70-85%:
+1. Moderators introduce all panelists by full name at the start of every session
+2. Walking-session participants state their names at the start of each reflection recording
+3. All panelist names + affiliations + session-specific terminology pre-loaded into AssemblyAI custom vocabulary before the conference
+
+**Operator-side / WBBF coordination.** Out of strict runtime-code scope but pre-Athens infrastructure.
+
+### C14. Runtime doc-hygiene minor gaps 🟢
+
+**Source:** archive `planning_2026_04_consolidation/RUNTIME_REVIEW_2026_04_20.md` §"Minor doc-hygiene gaps".
+
+Four small items flagged 2026-04-20; not yet closed:
+- `runtime/flows/shared/prompts/_archive/` has no README stating retirement reason for archived prompts
+- `runtime/scripts/generate_sessions_json.py` + `runtime/scripts/generate_speakers_json.py` lack module docstrings
+- `runtime/ingest/pipeline.py` writes `status.json` consumed by UI templates; schema not documented near the writer (no dataclass, no comment block)
+- `runtime/flows/shared/download_session.sh` (yt-dlp + ffmpeg dev utility) is mis-located in `flows/shared/` — natural home is `runtime/scripts/`
+
+**Estimated:** ~30-60 min to close all four. Anytime; risk-free.
+
 ---
 
 ## Section D — Existing FU#s, runtime-relevant
@@ -444,11 +515,11 @@ Triggers on A2 decision.
 
 **Estimated:** ~1-2 hr.
 
-### E4. `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` ⚠️ UNTRACKED
+### E4. PIPELINE_DOWNSTREAM_DESIGN — archived ✅ 2026-05-01
 
-**State:** drafted today; not committed. Useful architectural reference; should be committed.
+**State:** moved to `_workspace/archive/runtime_consolidation_2026_05_01/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` in commit `ab2c082`. Architectural content folded into runtime/OPEN_ITEMS.md A2 + runtime/ONBOARDING.md architecture sections.
 
-**Action:** `git add` + commit with the Step 3 redesign work.
+**Action:** none. Resolved.
 
 ### E5. New mini-concept docs needed (per Frame Concept §"production implications")
 
@@ -496,6 +567,8 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - B2 (microsite) built and deployed
 - B3 (broadsheet / Edition Pipeline) built
 - B4 (Substack draft pass) built
+- **C9 (Provocateur Night 2/3 exclusion filter)** — fires twice during Athens
+- **C10 (council_config.json populated from real Provocateur Profiles)** — runtime infrastructure
 - C1 + C2 (cross-pipeline compliance) landed
 - C3 (publish_flow.py end-to-end exercise) completed
 - C4 (multi-night sequence dry-run) completed
@@ -511,11 +584,15 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - E3 (LLM_CALL_INVENTORY refresh)
 - C5 (multi-voice 3+ dry-run)
 - C6 (naming inconsistency cleanup) — quality-of-life for ops
+- **C11 (speaker bios populated)** — transcription accuracy
+- **C12 (HoBB email tool API investigation)** — newsletter delivery
+- **C13 (recording protocol coordination)** — operator/WBBF side; raises ASR accuracy
 
 **Can land during/after Athens:**
 - B7 (render layer) — only matters when Marley/Octopus voices ship
 - B8 (admin console) — operator infra; can be improvised with command-line for Athens
 - C8 (voice-side artifact tuning) — operator-side; per-voice judgment
+- **C14 (runtime doc-hygiene minor gaps)** — anytime; risk-free
 
 **Post-Athens deferred:**
 - FU#42, FU#47, FU#49M, FU#54
