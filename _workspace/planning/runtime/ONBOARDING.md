@@ -12,6 +12,8 @@ The overnight pipeline that consumes the day's human sessions and produces voice
 
 Implementation lives at `runtime/`. The persona pipeline (which builds the cards runtime consumes) lives at `personas/`. They are separate workstreams with separate venvs. This doc covers `runtime/` only.
 
+**Operator priority calibration** (per project ONBOARDING.md, refreshed 2026-04-29): *"Athens needs the full runtime stack ready, not just the 12 persona cards."* When recommending build-side improvements, check whether they delay runtime work that's already on the critical path. Persona-side hardening (FU#42 split-card, FU#50(1) Pydantic enforcement, etc.) does NOT pre-empt runtime workstream items. Surface runtime gaps proactively.
+
 ---
 
 ## First 20 minutes — read in this order
@@ -357,6 +359,8 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 
 ## DON'Ts (runtime-specific)
 
+> **See also project-wide DON'Ts** in `_workspace/planning/ONBOARDING.md` §"DON'Ts" — cross-cutting rules apply on top of these (no Plato re-run without explicit ask, no `--no-verify`, no force push, no real-person names in deployment-context JSONs, no commits with `--allow-empty`, no xattr/ACL mods, etc.).
+
 - **Don't `rm -rf 04_voice/` to bust cache.** RENAME (`mv 04_voice 04_voice_pre_<reason>`). Preserves diffable history.
 - **Don't run dryrun with default validation ON.** Step 1 outputs are cached → validation re-runs against unchanged outputs → same flags → ~8 min/voice burned. Always `--skip-validation` for dryrun work.
 - **Don't run Athens Night 2/3 with validation ON.** Per FU#62: regen-on-flag is unimplemented, so flagged outputs ship to Step 2 regardless. Pure cost without remediation.
@@ -380,6 +384,7 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 | Researcher prompts | `runtime/flows/shared/prompts/researcher_*.md` |
 | Voice Pipeline spec | `docs/AI_Assembly_Voice_Pipeline.md` |
 | Frame Concept | `docs/AI_Assembly_Frame_Concept_v1.md` |
+| Gap analysis + architectural rationale (cross-cuts persona + runtime) | `docs/CURRENT_STATE.md` (§0 quick map, §1 what exists, §5 architectural decisions) |
 | Briefing (project source of truth) | `docs/AI_Assembly_Briefing_v3_1.md` |
 | Persona Card schema | `docs/AI_Assembly_Persona_Card_v2.md` |
 | Provocateur spec | `docs/AI_Assembly_Provocateur_Pipeline.md` |
