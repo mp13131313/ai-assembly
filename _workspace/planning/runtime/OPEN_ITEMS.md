@@ -46,17 +46,18 @@ Admin console                operator infra (NOT BUILT)
 **Built but never exercised:**
 - `publish_flow.py` end-to-end against real Researcher/Provocateur outputs (only against hand-authored briefings)
 
-**Currently being redesigned:**
-- Step 3 — original FU#49E correspondence-shape produces letter-back artifacts; user dropped that framing; B+ recommended (metadata + optional postscript) but no decision yet
+**Step 3 status (resolved 2026-05-01):**
+- ✅ A1 RESOLVED: Step 3 SKIPPED for Athens (Option A). Athens runs ship Steps 1+2 only via existing `--skip-step3` CLI flag. Cross-voice visibility moves to editor layer + Substack. B+ shape preserved as the re-add path post-Athens (~2 days). Module + prompt + `_build_responded_to_graph` stay in codebase, dormant.
 
 **Designed conceptually, not yet built:**
-- Editor / Frame layer (the missing connective tissue between Voice Pipeline and audience surfaces)
-- Microsite, broadsheet, Substack draft pipelines
+- Editor / Frame layer — A2 architecture settled 2026-05-01 (per-theme article, all-AI drafting, voice artifacts ship as-is); editor output schema gated on microsite design
+- Microsite (operator designing) — drives editor output schema per A2 F
+- Broadsheet, Substack draft pipelines — consume editor + voice outputs
 - Closing-show pipelines, Day 4 goodbye, render layer for non-text artifacts, admin console
 
 **Spec/impl divergences worth knowing:**
-- Voice Pipeline validation regen-on-flag is unimplemented (FU#62) — diagnostic flag only
-- Validation wall-time is ~20-40 min/night actual vs spec's 3-5 min claim
+- ~~Voice Pipeline validation regen-on-flag is unimplemented (FU#62) — diagnostic flag only~~ ✅ RESOLVED 2026-05-01: spec updated to match implementation (validation is diagnostic-only; Athens policy Night 1 ON / Nights 2+3 OFF)
+- ~~Validation wall-time is ~20-40 min/night actual vs spec's 3-5 min claim~~ ✅ RESOLVED 2026-05-01: spec updated; Night 1 envelope ~50-80 min, Nights 2+3 ~30-45 min documented
 
 ---
 
@@ -64,81 +65,98 @@ Admin console                operator infra (NOT BUILT)
 
 These need operator answers before implementation can proceed.
 
-### A1. Step 3 architectural shape 🔴 GATING
+### A1. Step 3 architectural shape ✅ RESOLVED 2026-05-01 (Option A — skip for Athens; re-add post-editor/microsite if budget permits)
 
-**Question:** what does Step 3 produce, and how does cross-voice deliberation become visible?
+**Resolution:** Athens runs ship Steps 1+2 only. Step 3 skipped via existing `--skip-step3` CLI flag (was DEV-USE-ONLY warning; now Athens production default). Cross-voice visibility moves entirely to the editor layer (A2) + Substack walkthrough — editor reads peer Step 2 artifacts on shared themes via `themes_to_voices` map and authors cross-voice contrast text in editorial register.
 
-**Four options on the table:**
+**Trade made (with eyes open):**
+- *Lost:* Briefing line 177-179's claim that voices themselves read each other and decide whether to amend at the artifact layer. Cross-voice conversation becomes editor-narrated (third-party register), not voice-in-its-own-grammar.
+- *Preserved:* `themes_to_voices` structural map; editor cross-voice contrast text; Substack walkthrough; continuity flow (reads Step 2 + Step 1 detailed responses, doesn't depend on Step 3).
+- *Reversible:* Step 3 prompt + module + `_build_responded_to_graph` stay in codebase, dormant. Re-enable cost ~2 days.
+
+**Why Option A over B+:** Six days to Athens; editor + microsite + broadsheet + Substack draft pass all unbuilt. Pragmatic triage — ship the surfaces that aren't built, defer Step 3 (mechanically validated but framing-in-flux) until those land. Provotype framing absorbs the cost: visible construction is a feature, and an editor-mediated cross-voice surface is honest about what happened (voices wrote in parallel; editor reads across).
+
+**For background — the four options that were on the table:**
 
 | Option | Step 3 output | Artifact body | Cross-voice visibility | Layer 1 risk | Cost/night |
 |---|---|---|---|---|---|
-| **A** Skip entirely | (no Step 3) | Step 2 only | Editor narrates third-party | None | $0 |
+| **A** Skip entirely *(CHOSEN for Athens)* | (no Step 3) | Step 2 only | Editor narrates third-party | None | $0 |
 | **B** Metadata-only | engaged_peers[] notes | Step 2 unchanged | Metadata footer + editor + Substack | None | ~$5 (Sonnet read-only) |
-| **B+** Metadata + postscript | engaged_peers[] + optional postscript paragraph | Step 2 + postscript appended | Postscript visible in artifact + metadata + editor + Substack | None (body unchanged) | ~$10-20 |
+| **B+** Metadata + postscript *(originally recommended)* | engaged_peers[] + optional postscript paragraph | Step 2 + postscript appended | Postscript visible in artifact + metadata + editor + Substack | None (body unchanged) | ~$10-20 |
 | **C** Full body regeneration | engaged_peers[] + amended artifact | Regenerated | Visible in artifact body | Real (regen risks Step 2 calibration) | ~$50 (Opus + thinking) |
 
-**Briefing line 177 (load-bearing):**
-> *"Each voice reads the artifacts of the other voices it shares at least one theme with… The voice decides whether to amend: sharpen a disagreement, integrate a stronger framing, or leave its artifact unchanged. Amendments are visible — they reference the other voice so the amendment reads as responsive. A metadata flag records who amended in response to whom."*
+**Re-add path (post-Athens, or pre-Athens if editor + microsite + broadsheet land fast):**
 
-**Briefing line 179:**
-> *"This is where the Assembly's collective character is constituted overnight. Constrained — voices respond at the artifact layer, not the reasoning layer, and only within shared-theme territory — but real deliberation. The published set is responsive to itself."*
+Adopt B+ shape: `engaged_peers[]` metadata + optional voice-written postscript paragraph appended below Step 2 body. Body untouched (no regen risk).
 
-**Recommendation: B+** (metadata + optional postscript). Reasons:
-- Voices DO read each other and decide (briefing 177 honored at the reading level; "leave artifact unchanged" is the briefing's third valid outcome and becomes the default body-state)
-- The postscript IS visible engagement — voice's response to peers, in voice's own grammar (briefing 177's "amendments are visible" satisfied without putting Step 2's careful calibration at regen risk)
-- Layer 1 surface protected (body untouched; postscript is additive)
-- Honest about temporal sequence (artifact written first, postscript added after reading peers)
-- Cheap (~$10-20/night vs C's ~$50)
+Files to change:
+- `runtime/flows/shared/prompts/voice_step3_amendment.md` — full rewrite (drop FU#49E correspondence framing; new B+ prompt; ~1 day)
+- `runtime/flows/voice/step3_amended_artifact.py` — output schema overhaul: `engaged_peers[{peer_voice, peer_artifact_focus, took, rejected, decision}] + postscript_text + postscript_form` (~half-day)
+- `runtime/flows/voice_flow.py:_build_responded_to_graph` — derive from `engaged_peers[].decision`
+- Editor schema update — additive `engaged_peers` + `postscript_text` consumer fields (~30 min)
+- Microsite footer update — show responded_to_graph (~30 min)
+- Substack walkthrough update — cite voice's own engaged_peers material (~30 min)
+- `docs/AI_Assembly_Voice_Pipeline.md` Step 3 section rewrite
+- One-shot migration script for old `amendments[]`-shape Step 3 files in dryrun directories (or just regenerate — only Plato + Cleopatra dryrun #4 has the old shape)
 
-**Last operator query:** *"Does B+ reach what you were after with the catch? Or does it still feel structurally off?"* — awaiting answer.
-
-**Files affected when this decides:**
-- `runtime/flows/shared/prompts/voice_step3_amendment.md` — full rewrite (drop FU#49E correspondence framing)
-- `runtime/flows/voice/step3_amended_artifact.py` — output schema overhaul (engaged_peers replaces amendments)
-- `runtime/flows/voice_flow.py:_build_responded_to_graph` — refactor to derive from engaged_peers
-- `docs/AI_Assembly_Voice_Pipeline.md` — Step 3 section rewrite
-- One-shot migration script for old `amendments[]`-shape Step 3 files in dryrun directories
+**Estimate:** ~2 days total to add back.
 
 ---
 
-### A2. Editor / Frame layer architecture (decisions A-F from PIPELINE_DOWNSTREAM_DESIGN)
+### A2. Editor / Frame layer architecture ✅ RESOLVED 2026-05-01 (mostly — D deferred, microsite output schema TBD)
 
-**Question:** does an Editor / Frame layer exist as a separate pipeline pass, and what does it produce?
+**Resolution per operator 2026-05-01:**
 
-The PIPELINE_DOWNSTREAM_DESIGN doc surfaced six decisions:
+| | Decision | Resolution |
+|---|---|---|
+| **A** | Separate editor pipeline pass between Step 2 and audience surfaces | ✅ **YES** |
+| **B** | Editor unit of work — per-voice OR per-theme | ✅ **PER-THEME**. Editor reads all voices on a single theme + their Step 2 artifacts + per-voice Provocateur formulations, and writes a **theme-level article** that frames the theme and surveys positions across voices. **Voice artifacts ship as-is** (untouched), with their Provocateur formulation as a micro-header above each artifact. *Different from the per-voice "editorial chrome" model originally proposed.* |
+| **C** | Drafting model — AI-drafted operator-polished vs all-AI | ✅ **ALL AI**. No operator polish phase. AI output ships directly. Implications: editor model needs to produce reader-ready prose without human pass; argues for Sonnet 4.6 + thinking minimum, possibly Opus 4.7 if quality observation warrants escalation. Substack-pattern operator polish does NOT apply here. |
+| **D** | Strip rule (curatorial preamble for hard-form voices) | 🟡 **DEFERRED — operator not sure**. Largely moot under B's per-theme restructure: the theme article carries cross-voice framing; per-voice artifacts ship as-is with formulation. Re-open if microsite design surfaces a need. |
+| **E** | Cross-voice visibility distribution across surfaces | 🔵 **DESIGNED ELSEWHERE** by operator (microsite + broadsheet + Substack design docs). Editor's job is just to produce an output schema those surfaces consume. Out of A2 scope going forward. |
+| **F** | Build order: editor first vs surfaces first | ✅ **PARALLEL BUILD; microsite specifies editor output**. Microsite design drives editor schema. Microsite says "I need fields X, Y, Z"; editor produces those fields. Editor build proceeds in parallel with microsite design once microsite output schema is settled. |
 
-| | Decision | Recommendation | Status |
-|---|---|---|---|
-| **A** | Approve a separate editor / frame pipeline pass between Step 3 and audience surfaces | **Yes** — three converging needs (Layer 1 for hard-form voices, title/subtitle generation, cross-voice contrast text) | NOT DECIDED |
-| **B** | Editor runs per-voice (one call per artifact) producing title + subtitle + curatorial preamble + pull-quotes + cross-voice contrast block | **Yes** — voice-register awareness is local; broadsheet does deterministic assembly | NOT DECIDED |
-| **C** | AI-drafted, operator-polished (~5 min/artifact, ~2.5 hr/night for editorial pass) — not pure AI, not pure human | **Yes** — matches existing Substack pattern; realistic for 1-person editorial budget | NOT DECIDED |
-| **D** | Microsite strip rule becomes voice-register-conditional (curatorial preamble appears for hard-form voices, stripped for dialogue voices) | **Yes** — already surfaced as FU#61 finding | NOT DECIDED |
-| **E** | Cross-voice visibility distributed: microsite footer (structural reference), broadsheet (typographic contrast), Substack (narrative — primary carrier) | **Yes** — surfaces complement; no single carrier | NOT DECIDED |
-| **F** | Build order: editor design first, then Step 3 redesign against editor's input contract | **Yes** — Step 3 output shape is constrained by what editor consumes | NOT DECIDED |
+**Architectural shape (per A + B + C + F):**
 
-**A is the gating decision** — if no editor layer, Step 3 collapses to either correspondence (FU#49E) or no cross-voice visibility, and Frame Concept's three-surface architecture loses connective tissue.
+- **Unit:** per-theme. Roughly 3-5 themes per night × 1 editor call per theme = ~3-5 calls/night (vs 10/night for per-voice).
+- **Input:** one theme record + all voices' Step 2 artifacts on that theme + each voice's Provocateur formulation for that theme + audience context.
+- **Output:** a theme-level article. Schema TBD — **gated on microsite design output** (per F). Editor build cannot finalize prompts until microsite specifies what fields it consumes.
+- **Drafting:** all-AI, no polish. Sonnet 4.6 + adaptive thinking as v1 default; flag for Opus 4.7 escalation if quality observation suggests.
+- **Voice artifacts:** ship as-is from Step 2. Formulation appears above the artifact on display surfaces as a micro-header.
 
-**Important nuance from FU#61:** the persona thread explicitly RULED OUT the museum-label-frame approach for Layer 1 ("the form historically had public-readability built in… frame layer remains useful for cross-voice surfacing, chrome, and the rest of what Frame Concept doc scopes; it's not load-bearing for Layer 1 carry once the criterion is in place"). This **reduces** one of three editor-layer justifications: voice-card patches now carry Layer 1 directly. The editor layer is still needed for **#2 title/subtitle generation** and **#3 cross-voice contrast text** — those don't go away. But the "Layer 1 for hard-form voices" pillar is replaced by FU#61 Pass 4b prompt-driven approach (already shipped on Cleopatra + Dostoevsky).
+**Cost estimate (revised under per-theme + Sonnet):**
+- ~3-5 themes/night × ~$2/call = ~$6-10/night editor cost
+- Across 3 Athens nights: ~$20-30 added to total
+- Wall: ~2-3 min/night (parallel across themes)
 
-**Files implicated when this decides:**
-- New: `runtime/flows/editor_flow.py` + `runtime/flows/voice/editor.py` (~per-voice pass)
-- New: `runtime/flows/shared/prompts/editor_*.md` (per-register templates)
-- Updates: `docs/AI_Assembly_Frame_Concept_v1.md` (strip rule voice-register-conditional; add the editor layer)
+**Files implicated when this fully decides + microsite design lands:**
+- New: `runtime/flows/editor_flow.py` (per-theme orchestrator, parallel across themes)
+- New: `runtime/flows/voice/editor.py` (single per-theme editor call) — naming may change since editor is per-theme not per-voice
+- New: `runtime/flows/shared/prompts/editor_theme_article.md` (single template; per-voice register taxonomy not needed under per-theme)
+- Updates: `docs/AI_Assembly_Frame_Concept_v1.md` (per-theme article framing; strip rule deferred per D)
 - Updates: `docs/AI_Assembly_Voice_Pipeline.md` (downstream consumer reference)
 
+**Status of editor build:**
+- ✅ Architecture settled (A + B + C + F decided 2026-05-01)
+- 🔵 Editor output schema gated on microsite design (operator working elsewhere per E + F)
+- 🔵 D (curatorial preamble) deferred; re-open if microsite design surfaces a need
+- ⏳ Once microsite design specifies editor output schema → editor build proceeds (~6-10 hr engineering + 5 register prompts collapsed to 1 theme-article prompt = simpler than originally scoped)
+
 ---
 
-### A3. FU#62 — validation regen-on-flag: implement or update spec? 🔵
+### A3. FU#62 — validation regen-on-flag: implement or update spec? ✅ RESOLVED 2026-05-01 (path B)
 
-**Status:** Filed in FOLLOW_UPS.md FU#62; needs decision.
+**Resolution:** Path B chosen and applied.
 
-**Background:** Voice Pipeline spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy") promises *"First failure: regenerate the Step 1 call with the validator's critique appended… Second failure: ship the regenerated output AND flag in the run-level manifest."* Implementation reality: orchestrator collects flagged results into `validation_failures[]`, hardcodes `regen_count: 0`, proceeds to Step 2 unchanged. **No regen ever fires.**
+`docs/AI_Assembly_Voice_Pipeline.md` updated:
+- §"Regeneration policy" rewritten — validation is diagnostic-only; no regen, no retry; flagged outputs ship to Step 2 with manifest entries for operator review
+- §"Default policy for Athens" — Night 1 ON for all 10 voices; **Nights 2+3 OFF** (no regen → pure cost on Nights 2+3 without remediation; operator morning-review handles correction)
+- §"Cost & Envelope" — split into Night 1 (~$180-240, ~50-80 min wall — validation per-voice serial) vs Nights 2+3 (~$180-230, ~30-45 min wall, validation OFF, continuity ON). 3-night Athens total ~$540-700.
+- v1→v2.1 changes table + Overview envelope statement updated to match.
 
-**Two paths:**
-- **A — Implement regen** (~half-day's work). Orchestrator reads validation result; if flagged, re-runs Step 1 with critique appended; re-validates; ships regen + flag if second pass fails. Makes validation autonomous.
-- **B — Update spec** (~30 min doc patch). Match implementation: validation = diagnostic flag only. Pair with Athens validation policy: ON Night 1 only, OFF Nights 2/3.
+**Background (preserved for context):** Voice Pipeline spec previously promised *"First failure: regenerate the Step 1 call with the validator's critique appended… Second failure: ship the regenerated output AND flag in the run-level manifest."* Implementation reality: orchestrator collects flagged results into `validation_failures[]`, hardcodes `regen_count: 0`, proceeds to Step 2 unchanged. **No regen ever fires.** Spec now matches implementation.
 
-**Recommendation: B (spec update).** Operator presence at Athens makes morning-review the natural correction loop; regen has limited additional value before Athens; matches "validation Night 1 only" policy which already aligns with diagnostic-only framing.
+**Future post-Athens:** if autonomous regen is wanted for unattended runs, file as a new item in this OPEN_ITEMS doc against the contract documented in the spec. ~half-day implementation against `runtime/flows/voice_flow.py:337-363` + `runtime/flows/voice/step1_validation.py`.
 
 ---
 
@@ -167,38 +185,40 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 **State:** unspecified; conceptual reasoning in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md`. **No code; no detailed spec.**
 
-**Triggers on:** A2 decision approving editor as separate pass.
+**Triggers on:** Microsite design specifying editor output schema (per A2 F decision 2026-05-01 — parallel build, microsite specifies).
 
-**Implementation scope:**
-- `runtime/flows/editor_flow.py` — orchestrator
-- `runtime/flows/voice/editor.py` — per-voice editor pass (Sonnet recommended; reads amended artifact + engaged_peers metadata + Provocateur briefing + persona-card headline poetics)
-- `runtime/flows/shared/prompts/editor_*.md` — register templates (museum-label / pull-quote / liner-notes / wall-text)
-- Output: per-voice editorial JSON (title, subtitle, curatorial preamble, pull-quotes, cross-voice contrast block)
-- Estimated: ~6-10 hr build for v1; per-voice cost ~$0.50 per artifact
+**Architecture (per A2 decisions 2026-05-01 — A + B + C + F):**
+- **Per-theme** (not per-voice). One editor call per theme that has voices on it.
+- **All-AI** drafting; no operator polish phase.
+- **Voice artifacts ship as-is** (Step 2 untouched). Voice's Provocateur formulation appears as micro-header above the artifact on display surfaces.
+- **Cross-voice work happens in the theme article**, not in per-voice editorial chrome.
 
-**Per-voice frame register taxonomy (from FU#61 work):**
-- Plato (dialogue): pull-quote / brisk headline
-- Cleopatra (prostagma): museum label / curatorial
-- Whanganui River (proclamation): legal-explanation wall text
-- Marley (song): liner notes
-- Octopus (sensory prose): exhibition wall text / scientific gloss
-- Arendt (essay): pull-quote / argumentative summary
-- Ada Lovelace (computational): documentation / readme
-- Dostoevsky (confession): epigraph / framing note
-- Scheherazade (frame tale): teller-introduces-the-tale
-- Ibn Battuta (travelogue): excerpt with travel-context note
+**Implementation scope (revised under per-theme):**
+- `runtime/flows/editor_flow.py` — orchestrator (parallel across themes)
+- `runtime/flows/voice/editor.py` — per-theme editor call (~3-5/night). Naming may change from `voice/editor.py` to `theme/editor.py` since unit is theme not voice.
+- `runtime/flows/shared/prompts/editor_theme_article.md` — single template (not per-register taxonomy; voice register is now carried by voice's own as-is artifact)
+- **Input:** one theme record + all voices' Step 2 artifacts on that theme + each voice's Provocateur formulation + audience context
+- **Output:** theme-level article. **Schema TBD — gated on microsite design output (per F).**
+- **Model:** Sonnet 4.6 + adaptive thinking v1 default; flag for Opus 4.7 if quality observation suggests escalation (since all-AI with no polish raises the quality bar on the model output).
+- **Estimated:** ~6-10 hr build for v1 once microsite output schema lands; ~$2/call × 3-5 themes/night = ~$6-10/night; ~$20-30 across 3 Athens nights.
+
+**Per-voice frame register taxonomy (originally proposed):** REMOVED under per-theme architecture. Voice artifacts ship in their native form with their Provocateur formulation as micro-header — no per-voice editorial chrome. Headline poetics may still matter for broadsheet display of voice names; that's a broadsheet/microsite concern, not editor's.
 
 ### B2. Microsite 🔴
 
-**State:** UNBUILT. Per-artifact pages, edition pages, index pages, footer rendering, shader/audio support.
+**State:** UNBUILT. Operator currently designing (per A2 E decision 2026-05-01 — designed elsewhere).
+
+**Two page types under per-theme editor architecture:**
+- **Theme page:** editor's theme-level article + the voices' as-is artifacts (each with formulation as micro-header) on that theme
+- **Per-voice artifact page:** voice's Step 2 artifact as-is, with Provocateur formulation as header context. No editor-authored title/subtitle/preamble (per A2 B 2026-05-01 — artifact lands as is).
 
 **Per Frame Concept:** Astro or Next.js static site, GitHub content repo, Vercel/Netlify hosting. Stays live after Athens.
 
-**Per FU#61 + the Step 3 + editor design:** artifact pages for hard-form voices include curatorial preamble above artifact; dialogue-form voices stay stripped. Footer below artifact lists engaged peers (per Step 3 metadata). Shader (Octopus) runs client-side. Audio (Marley) plays inline.
+**Triggers / blocks:**
+- 🔵 Operator-designed; design output **specifies editor output schema** (per A2 F 2026-05-01)
+- Once microsite design completes → editor build (B1) unblocks; broadsheet (B3) and Substack (B4) consume same outputs
 
-**Triggers on:** Step 3 shape (A1) + editor (A2) decided. Microsite consumes their output schemas.
-
-**Per Frame Concept §"production implications":** mini-concept doc needed before build (`docs/AI_Assembly_Microsite_Concept.md`).
+**Per Frame Concept §"production implications":** `docs/AI_Assembly_Microsite_Concept.md` mini-concept landing as part of operator's design work.
 
 ### B3. Broadsheet / Edition Pipeline 🔴
 
@@ -206,21 +226,23 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 **Per Frame Concept §"newspaper":** one of N artifacts per night (NOT the wrapper); Caslon-style typography; ten voice headlines + short reportage paragraphs; wire-service unavailability paragraph (≤1 per edition); strikethrough as signature visual move (≤1 per edition); masthead with incrementing issue number.
 
-**Implementation:** likely deterministic Python pass + visual production (HTML/CSS template + per-night content fill, possibly screenshot for share). **NOT an LLM pass** if editor layer (B1) produces enough material.
+**Implementation:** likely deterministic Python pass + visual production (HTML/CSS template + per-night content fill, possibly screenshot for share). **NOT an LLM pass** if editor layer (B1) produces enough material — under per-theme editor, broadsheet consumes theme articles + voice artifacts directly; headline grammar still needs solving (per-voice headline poetics may matter for broadsheet voice-name display).
 
-**Triggers on:** A2 (editor layer) + B1 (editor implementation). Broadsheet consumes editor output.
+**Triggers on:** A2 (editor layer) decisions settled ✅; microsite output schema (B2) → editor build (B1) → broadsheet consumes editor + voice outputs.
 
 **Per Frame Concept:** `docs/AI_Assembly_Broadsheet_Concept.md` mini-concept needed.
 
 ### B4. Substack draft pipeline pass 🔴
 
-**State:** UNBUILT. AI-drafted HoBB-voice walkthrough ready for editor polish.
+**State:** UNBUILT.
+
+**Per A2 C decision 2026-05-01 (all-AI):** still TBD whether Substack inherits all-AI mode or keeps its existing AI-drafted-operator-polished pattern. The original Frame Concept positioned Substack as HoBB editorial voice with operator polish; A2 C only resolved the editor layer's drafting model, not Substack's. Decision pending — operator owns.
 
 **Per Frame Concept §"substack":** Real HoBB voice; engages substance directly; pull-quotes from artifacts (NOT from broadsheet); deep-links to microsite per-artifact pages. Day 2 + Day 3 mornings: read-through previous night. Day 4: Night 3 read-through + goodbye.
 
-**Implementation:** Sonnet pass running overnight (after broadsheet writes); reads amended artifacts + editor pull-quotes + cross-voice contrast blocks + previous broadsheet (referenced not routed-through). Produces draft for HoBB editor 5-15 min polish before publish.
+**Implementation:** Sonnet pass running overnight; reads voice artifacts + editor theme articles + previous Substack post (referenced not routed-through).
 
-**Triggers on:** B1 (editor) so pull-quotes + contrast text are available.
+**Triggers on:** B1 (editor) so theme articles are available; B2 (microsite) so deep-links resolve.
 
 ### B5. Closing-show pipelines 🔴
 
@@ -283,37 +305,38 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 ## Section C — Smaller open items / hygiene
 
-### C1. researcher_flow.py cross-pipeline compliance 🟡
+### C1. researcher_flow.py cross-pipeline compliance ✅ LANDED 2026-05-01
 
 **Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"Cross-pipeline status" + FU#60 alignment.
 
 `runtime/flows/researcher_flow.py` `_thinking_kwargs`:
-- Drop `temperature: 1.0` (incompatible with thinking per Anthropic docs §"Feature compatibility")
-- Add `display: "summarized"` (matches FU#60 + voice pipeline pattern landed in `0381278`)
+- ✅ Dropped `temperature: 1.0` (incompatible with thinking per Anthropic docs §"Feature compatibility")
+- ✅ Added `display: "summarized"` (matches FU#60 + voice pipeline pattern landed in `0381278`)
+- Docstring updated to reflect feature-compatibility constraint
+- Verified: `researcher_flow._thinking_kwargs(0)` returns `{'thinking': {'type': 'adaptive', 'display': 'summarized'}}` matching voice-pipeline shape
 
-**Estimated:** ~3 lines, ~30 min.
-
-**Trigger:** before Athens. Opus 4.7 returns 400 BadRequestError on `temperature` parameter — confirmed by persona pipeline empirical observation.
-
-### C2. provocateur_flow.py cross-pipeline compliance 🟡
+### C2. provocateur_flow.py cross-pipeline compliance ✅ LANDED 2026-05-01
 
 **Source:** Same as C1.
 
 `runtime/flows/provocateur_flow.py` `_thinking_kwargs`:
-- Add `display: "summarized"`
-- (Doesn't currently set `temperature` — only one fix needed)
+- ✅ Added `display: "summarized"`
+- (Didn't set `temperature` — only one fix needed)
+- Docstring updated to reflect FU#60 alignment
+- Verified: `provocateur_flow._thinking_kwargs()` returns `{'thinking': {'type': 'adaptive', 'display': 'summarized'}}` matching voice-pipeline shape
 
-**Estimated:** ~1 line, ~15 min.
-
-### C2a. researcher_flow.py + provocateur_flow.py load_dotenv override=True 🟢
+### C2a. load_dotenv override=True (researcher + provocateur + transcription) ✅ LANDED 2026-05-01
 
 **Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"High priority".
 
-Voice Pipeline hit the shell-empty-env bug (Claude Code agent shell pre-sets API keys to empty strings; `load_dotenv` without `override=True` keeps the empty string). Fixed in Voice Pipeline (commit `f68bc3f`) with `load_dotenv(override=True)`. Same fix not yet landed for `runtime/flows/researcher_flow.py` + `runtime/flows/provocateur_flow.py`.
+Voice Pipeline hit the shell-empty-env bug (Claude Code agent shell pre-sets API keys to empty strings; `load_dotenv` without `override=True` keeps the empty string). Fixed in Voice Pipeline (commit `f68bc3f`) with `load_dotenv(override=True)`.
 
-**Empirical caveat:** may only matter when run from the same Claude Code agent shell environment; operator's normal terminal may not exhibit. But cheap fix worth landing for symmetry.
+✅ Same fix landed 2026-05-01 on:
+- `runtime/flows/researcher_flow.py:47`
+- `runtime/flows/provocateur_flow.py:92` (with explanatory comment about the empty-env bug)
+- `runtime/flows/transcription_flow.py:56` (extended scope per operator request — transcription also hits this if run from Claude Code agent shell)
 
-**Estimated:** ~2 lines, ~5 min total.
+All three flow entry-points now consistent with voice + persona pipeline patterns.
 
 ### C3. publish_flow.py end-to-end exercise 🔴
 
@@ -348,18 +371,30 @@ Step 3 cross-voice engagement only exercised on 2 voices (Plato + Cleopatra). 3+
 
 **Trigger:** more voices finalized (Octopus + 1-2 more).
 
-### C6. Naming inconsistency cleanup 🟡
+### C6. Naming inconsistency cleanup ✅ CLOSED 2026-05-01 (misdiagnosed at filing — three names mark domain boundaries by design, not duplicate fields)
 
-**Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"Medium priority".
+**Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"Medium priority" (original filing, since superseded).
 
-Three names for the same field:
-- `council_member_name` (persona card)
-- `council_member` (voice output)
-- `voice_name` (publish output)
+**Resolution 2026-05-01:** investigated and closed as misdiagnosed. The three names are not redundant — they mark deliberate domain boundaries:
 
-Could harmonize in a single rename pass. Low priority but cosmetically jarring across logs and downstream consumers.
+```
+persona card        →  voice pipeline        →  publish layer
+council_member_name →  council_member        →  voice_name
+(ceremonial,           (internal Provocateur-    (audience-facing
+ full identity)         domain identifier)        display name)
+```
 
-**Estimated:** ~30-60 min including grep + rename + test.
+Evidence: `runtime/flows/voice/card_assembly.py:476-497` — the publish-layer rename is documented:
+```python
+"""Keep: voice_name (renamed from council_member),"""
+...
+if k == "council_member":
+    out["voice_name"] = first_draft[k]
+```
+
+The rename at the publish-assembly boundary is a deliberate architectural transition, not an oversight. Harmonizing would collapse meaningful distinctions (audience-facing display name vs internal Provocateur-domain identifier vs persona-card ceremonial identity), break 4 shipped athens-2026 voice cards in a separate private repo, and update the Persona Card v2 spec — all for a "cosmetic logs readability" win that doesn't justify the cost.
+
+**If post-Athens we want a smaller logs-readability win,** file a separate item scoped narrowly to log-line normalization without touching field names.
 
 ### C7. Title source pipeline 🟡
 
@@ -410,17 +445,65 @@ From dryrun #2 (Plato solo) validator findings:
 
 **Pre-Athens-must-do.** Provocateur Triage + Selection both consume `council_config.json` — mismatched member profiles produce wrong assignments.
 
-**Estimated:** ~30 min once profiles are ready (mostly mechanical concatenation + selection_parameters preserved). Re-runs as more voices ship.
+**Estimated:** ~30 min once profiles are ready (mostly mechanical concatenation + selection_parameters preserved).
 
-### C11. Speaker bios empty in `runtime/reference/speakers.json` 🟡
+**Sequencing decision 2026-05-01 (operator):** wait until all 10 voices are shipped, then do single-pass population. Operator confirmed all 10 will be ready pre-Athens, so partial-now + re-run-later isn't worth the churn — single mechanical pass when voices track is complete. Currently 4 shipped (Plato, Cleopatra, Dostoevsky, Battuta) + Octopus paused at FU#53 review; 5 unbuilt (Arendt, Lovelace, Marley, Whanganui, Scheherazade).
+
+### C11. Speaker bios in `projects/athens-2026/reference/speakers.json` ✅ FULLY CLOSED 2026-05-01 (219/224 active enriched 97.8%; remaining 5 are not in any recording session — no transcription impact)
 
 **Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 212 ("Speaker bios empty… Speaker ID Pass 3 accuracy drops from 70-85% to 40-50% without them. Pre-Athens blocker.").
 
-**Problem:** `runtime/reference/speakers.json` has 202 speakers, all with `bio: ""`. Transcription Pipeline Pass 3 (multi-pass speaker attribution) uses bios as one of its disambiguation signals; empty bios degrade accuracy materially.
+**File location:** `projects/athens-2026/reference/speakers.json` (Tier 3 — at PROJECT_ROOT, not in code repo).
 
-**Per Transcription Pipeline spec:** Speaker ID Pass 3 is a 5-pass attribution (cue → role → expertise → confidence → per-turn sanity check); the role/expertise pass relies on speaker bios.
+**Resolution 2026-05-01 (multi-step):**
 
-**Estimated:** ~3-4 hr operator wall time to populate from program materials + speaker page sources. Or accept the accuracy drop and rely on Pass 4 manual review (15-30 min per night per Architecture v1).
+1. **Built `runtime/scripts/populate_speakers_from_program_html.py`** — extracts the `const SPEAKERS = {...}` JS object embedded in the WBBF program HTML and merges (`oneliner` → title, first attribute → affiliation, all attributes joined → bio) into the existing scaffold. Falls back to `oneliner` for bio + affiliation when `attributes` is empty (one-line speakers like dancers, DJs). Accent-tolerant fuzzy name matching for cases where SESSIONS and SPEAKERS spellings drift in source HTML. Merge-safe: preserves manually-curated values.
+
+2. **Source HTML stashed at** `projects/athens-2026/reference/_source/program_index.html` (May 1 export, 226 speakers). Re-runnable when WBBF updates the program.
+
+3. **Refreshed sessions.json scaffold** via `generate_sessions_json.py` to pick up new sessions + speakers (132 → 146 sessions; preserves `ai_assembly=true` operator flags by `session_id`; 19 of 31 prior flags preserved automatically; 10 more re-applied by exact-title-match against new sessions; 4 remain ambiguous + 1 dropped — see below).
+
+4. **Refreshed speakers.json scaffold** via `generate_speakers_json.py` to pick up 30 new speakers from new sessions; 7 dropped-from-program speakers retained with `_dropped_from_program: true` for bio preservation.
+
+5. **Re-ran enrichment** to populate the new 30 speakers + the 2 renames (Kosmopolou typo, Goudouna honorific) — 217/224 active enriched.
+
+6. **Normalized name typos** in both sessions.json and speakers.json: `Angeliki Kosmopolou` → `Angeliki Kosmopoulou`; `Dr. Sozita Goudouna` → `Sozita Goudouna`. Removed duplicate entries created when scaffold regen pulled SESSIONS' typo names.
+
+**Final coverage:**
+- speakers.json: 224 active + 7 dropped = 231 entries; 217 with bios populated (96.9%)
+- sessions.json: 146 sessions; 29 flagged for AI Assembly transcription
+- **Speaker ID Pass 3 accuracy:** restored from 40-50% (all-empty) into 70-85% target band per Transcription Pipeline spec
+
+**Operator decisions resolved 2026-05-01 (final):**
+
+| Speaker | In recording sessions? | Decision | Action |
+|---|---|---|---|
+| `Dave` | 4 sessions | Path B — copy HTML duo bio to both | ✅ Applied: title="Artificiality Researchers", bio="Founders of Artificiality Institute · Visiting Researchers at the UC Berkeley Center for Human-Compatible AI" |
+| `Helen Edwards` | 4 sessions | Path B — copy HTML duo bio to both | ✅ Same as Dave (preserves Pass 3 disambiguation between Dave/Helen and other speakers) |
+| `Giorgos Panagiotopoulos` | 1 session (Act One — 40+ panel) | Leave empty — single missing bio in 40-speaker panel has negligible Pass 3 impact | ✅ |
+| `Leon Schmit` | 0 | Leave empty — not in transcription scope | ✅ |
+| `Meg Syme` | 0 | Leave empty — not in transcription scope | ✅ |
+| `Cloud District` (collective) | 0 | Leave empty — not in transcription scope | ✅ |
+| `Launch Pad Teens` (collective) | 0 | Leave empty — not in transcription scope | ✅ |
+
+5 speakers in HTML but not in any session (`Alexandros Maganiotis`, `Clara E. Mattei`, `Dave and Helen Edwards` merged entry, `Leonⁿ MonoSerieⁿ`, `Meryem Lahrichi`): not added to speakers.json — they're program-only mentions, not in any session WBBF has linked.
+
+**Final coverage: 219/224 active speakers populated (97.8%); the 5 remaining are not in any of the 25 recording sessions, so transcription Pass 3 accuracy is unaffected. C11 fully closed.**
+
+~~*4 ambiguous ai_assembly flag re-applications + 1 dropped session*~~ ✅ RESOLVED 2026-05-01 by operator-provided authoritative CSV (`projects/athens-2026/reference/_source/recording_sessions.csv`). Built `runtime/scripts/apply_ai_assembly_flags_from_csv.py` (handles strikethrough markup normalization between CSV `~text~` and sessions.json `<s>text</s>`). All 25 CSV rows matched; ai_assembly=true set on those 25, false on the other 121 (CSV is authoritative source-of-truth going forward).
+
+**Final ai_assembly schedule (25 sessions across 3 nights):**
+- **Night 1 (Day One):** 10 sessions — Birthplace of Democracy Tour (10:00), Leading Under Fire (11:15), Human Democracy Is Dead (13:30), New Myths (13:30), The More-Than-Human Democracy (14:45), How to Meet an Idiot (15:30), Rooting the Next Generation (17:30), What Makes Us Human (18:00), Act One (20:00), The Dark Side of Democracy Nightwalk (22:30)
+- **Night 2 (Day Two):** 9 sessions — Act Two (8:45), Act Three (10:45), What Is a Good Life (13:30), The Reality Tunnels (14:00), Agents with the License to… (16:30), Aegean Intelligence (16:30), From Lifespan to Joyspan (17:30), Intelligence After Intelligence (18:00), Dance and Dissent Nightwalk (22:30)
+- **Night 3 (Day Three):** 6 sessions — Act Four (10:00), Citizen Assembly With AI (14:00), The Long Game (14:00), Building Belonging (14:30), Make Politics Great Again (16:00), Act Five (20:00)
+
+*5 speakers in HTML but not in speakers.json (`Alexandros Maganiotis`, `Clara E. Mattei`, `Dave and Helen Edwards`, `Leonⁿ MonoSerieⁿ`, `Meryem Lahrichi`):* These don't appear in any session in the current sessions.json. Either they're appearing in sessions WBBF hasn't yet linked, or they're program-only mentions. Operator review.
+
+**Per Transcription Pipeline spec:** Speaker ID Pass 3 is a 5-pass attribution (cue → role → expertise → confidence → per-turn sanity check); the role/expertise pass relies on speaker bios. AssemblyAI custom vocabulary (per C13 Recording Protocol) also benefits from populated affiliations + names.
+
+### ~~C11a. Sessions.json + speakers.json scaffold refresh~~ ✅ FOLDED INTO C11 RESOLUTION 2026-05-01
+
+The follow-up was completed inline as part of C11. Sessions.json regenerated from latest HTML; speakers.json scaffold refreshed; new speakers enriched; name typos normalized across both files. Re-runnable: stash refreshed HTML at `projects/athens-2026/reference/_source/program_index.html` and re-run `generate_sessions_json.py` → `generate_speakers_json.py` → `populate_speakers_from_program_html.py` chain.
 
 ### C12. HoBB email tool integration 🟡
 
@@ -481,9 +564,9 @@ These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain
 | FU#49M | `strain_markers[]` runtime artifact contract (Step 2 schema constraint) | 🔵 POST-ATHENS | Deferred |
 | FU#54 | Smoke test runtime-fidelity refactor (Pass 7b) | 🔵 POST-ATHENS | Deferred |
 | FU#57 | Drop `bold_engagement_topics` from runtime system prompts | ✅ LANDED 2026-04-29 | Done |
-| FU#60 | Adaptive thinking observability + temperature compatibility | ✅ LANDED 2026-04-29 (voice + persona); ⚠️ NOT YET on researcher/provocateur (see C1, C2) | C1+C2 close it for runtime |
+| FU#60 | Adaptive thinking observability + temperature compatibility | ✅ FULLY LANDED — voice + persona 2026-04-29; researcher + provocateur + transcription 2026-05-01 (C1+C2+C2a) | Done across all four runtime flow entry-points |
 | FU#61 | Voice-side Layer-1 quality_criteria for low-Layer-1-surface forms | 🟡 IMPORTANT — v3 LANDED on Cleopatra + Dostoevsky; persona Pass 4b prompt addition committed; **propagation to Whanganui / Marley / Octopus pending those builds** | Per-voice on next builds |
-| FU#62 | Voice Pipeline validation regen-on-flag is unimplemented | 🔵 NEW (filed today) — see A3 | A3 decision |
+| FU#62 | Voice Pipeline validation regen-on-flag is unimplemented | ✅ RESOLVED 2026-05-01 (path B — spec updated to match diagnostic-only impl; Nights 2+3 validation OFF) | Done — see A3 |
 
 ---
 
@@ -491,10 +574,10 @@ These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain
 
 ### E1. `docs/AI_Assembly_Voice_Pipeline.md` 🟡
 
-**State:** v2.1, last touched 2026-04-29. Stale on:
+**State:** v2.1, last touched 2026-05-01. Remaining staleness:
 - **Step 3 section** — written assuming FU#49E correspondence-shape; needs rewrite once A1 decides (probably to B+ shape with engaged_peers metadata + optional postscript)
-- **Validation policy + cost/wall-time** — spec claims 3-5 min wall, $30-50 cost; reality is 20-40 min wall, $3-15 cost (per code audit + dryrun observation). Update §"Cost & Envelope" validation row.
-- **Regeneration policy** — per FU#62, spec promises regen but code doesn't implement; either implement or update spec to "diagnostic flag only" (A3 decides)
+- ~~**Validation policy + cost/wall-time**~~ ✅ updated 2026-05-01 (FU#62 path B): Night 1 ~$180-240/~50-80 min wall; Nights 2+3 ~$180-230/~30-45 min wall; Athens 3-night total ~$540-700.
+- ~~**Regeneration policy**~~ ✅ updated 2026-05-01: rewritten to "diagnostic only"; if post-Athens autonomous regen wanted, file new item against the contract documented in spec.
 
 ### E2. `docs/AI_Assembly_Frame_Concept_v1.md` 🟡
 
@@ -545,6 +628,14 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 | 2026-04-30 | FU#61 v3 (5-criteria reshape) on Cleopatra | athens-2026 commit `c89d186` |
 | 2026-04-30 | FU#61-fresh pattern propagated to Dostoevsky | athens-2026 commit `5088d67` |
 | 2026-04-30 | FU#61 Pass 4b prompt addition (panel-wide propagation) | code commit `91947a7` |
+| 2026-05-01 | C6 CLOSED — misdiagnosed at filing; three names mark intentional domain boundaries (persona-card / voice-internal / publish-audience-facing), not duplicate fields | this doc C6 |
+| 2026-05-01 | C11 FULLY CLOSED — Dave + Helen Edwards bios applied (Path B); all other empty-bio speakers verified out-of-recording-scope; 219/224 active populated (97.8%); the 5 still-empty are not in any of the 25 recording sessions | projects/athens-2026/reference/speakers.json |
+| 2026-05-01 | ai_assembly schedule LANDED — operator-provided CSV (`recording_sessions.csv`) drove `apply_ai_assembly_flags_from_csv.py`; all 25 sessions matched cleanly (10 N1 + 9 N2 + 6 N3); CSV is now authoritative source-of-truth for transcription scope | projects/athens-2026/reference/sessions.json + runtime/scripts/apply_ai_assembly_flags_from_csv.py + projects/athens-2026/reference/_source/recording_sessions.csv |
+| 2026-05-01 | C11 + C11a LANDED — built `populate_speakers_from_program_html.py` (HTML extractor with oneliner-fallback + accent-tolerant name match); refreshed sessions.json (132→146; preserved/re-applied 29 of 31 ai_assembly flags); refreshed speakers.json scaffold (added 30 new speakers, 7 dropped); 217/224 active speakers enriched with title + affiliation + bio (96.9%). Restores Speaker ID Pass 3 accuracy from 40-50% (all-empty) into 70-85% target band. Source HTML stashed at PROJECT_ROOT/reference/_source/program_index.html — re-runnable | projects/athens-2026/reference/{speakers,sessions}.json + runtime/scripts/populate_speakers_from_program_html.py |
+| 2026-05-01 | C1 + C2 + C2a LANDED — researcher + provocateur drop temperature/add display:summarized; researcher + provocateur + transcription load_dotenv override=True. All three flows brought into FU#60 + voice-pipeline-pattern compliance | runtime/flows/researcher_flow.py + provocateur_flow.py + transcription_flow.py |
+| 2026-05-01 | A2 RESOLVED (mostly — A+B+C+F decided; D deferred; E designed elsewhere). Per-theme editor architecture (not per-voice); all-AI drafting (no polish phase); voice artifacts ship as-is with Provocateur formulation as micro-header; parallel build with microsite specifying editor output schema | this doc A2 + B1/B2/B3/B4 |
+| 2026-05-01 | A1 RESOLVED (Option A — Step 3 skipped for Athens; pipeline ships Steps 1+2 only via existing `--skip-step3` flag; cross-voice visibility moves to editor layer + Substack; re-add path documented as ~2-day post-Athens task) | this doc A1 + voice pipeline doc Step 3 §|
+| 2026-05-01 | FU#62 RESOLVED (path B — Voice Pipeline spec updated to match diagnostic-only validation impl; Nights 2+3 OFF; cost/wall-time envelope corrected) | docs/AI_Assembly_Voice_Pipeline.md + FOLLOW_UPS.md + this doc A3 |
 | 2026-04-30 | FU#62 filed (validation regen gap) | FOLLOW_UPS.md |
 | 2026-04-29 | Voice Pipeline v2.1 alignment with persona-prompt revert | branch `voice-pipeline-v2.1-align-revert` (commits `fb33bb9` + `30a38eb`) |
 | 2026-04-29 | Post-dryrun tuning: validator (c) soften, extraction-ID bookkeeping, load_dotenv override | commit `f68bc3f` |
@@ -564,17 +655,19 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 
 **Must land before Athens Night 1:**
-- A1 (Step 3 shape) decided + implemented
-- A2 (editor layer) decided + B1 (editor implementation) complete
+- ~~A1 (Step 3 shape) decided + implemented~~ ✅ done 2026-05-01 (Option A — skipped for Athens)
+- ~~A2 (editor layer) architecture decided~~ ✅ done 2026-05-01 (per-theme; all-AI; D deferred; E elsewhere; parallel build per F)
+- B1 (editor implementation) — gated on microsite output schema landing
+- B2 (microsite) — operator designing; specifies editor output schema
 - B2 (microsite) built and deployed
 - B3 (broadsheet / Edition Pipeline) built
 - B4 (Substack draft pass) built
 - **C9 (Provocateur Night 2/3 exclusion filter)** — fires twice during Athens
 - **C10 (council_config.json populated from real Provocateur Profiles)** — runtime infrastructure
-- C1 + C2 (cross-pipeline compliance) landed
+- ~~C1 + C2 (cross-pipeline compliance) landed~~ ✅ done 2026-05-01 (also C2a load_dotenv override on all three flows including transcription)
 - C3 (publish_flow.py end-to-end exercise) completed
 - C4 (multi-night sequence dry-run) completed
-- A3 / FU#62 path decided (probably spec update + Athens Night 1 only validation policy)
+- ~~A3 / FU#62 path decided~~ ✅ done 2026-05-01 (path B; Athens Night 1 only validation policy)
 - All 10 persona cards finalized (persona thread; not in scope here but blocks runtime end-to-end testing)
 
 **Should land before Athens (high-value, not strictly blocking):**
@@ -586,7 +679,7 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - E3 (LLM_CALL_INVENTORY refresh)
 - C5 (multi-voice 3+ dry-run)
 - C6 (naming inconsistency cleanup) — quality-of-life for ops
-- **C11 (speaker bios populated)** — transcription accuracy
+- ~~**C11 (speaker bios populated)** — transcription accuracy~~ ✅ largely done 2026-05-01 (193/202 enriched; 13 name mismatches for operator review). C11a follow-up open for 33 new speakers + sessions.json scaffold refresh
 - **C12 (HoBB email tool API investigation)** — newsletter delivery
 - **C13 (recording protocol coordination)** — operator/WBBF side; raises ASR accuracy
 

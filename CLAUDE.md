@@ -236,9 +236,17 @@ All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript
   pipeline
 - `AI_Assembly_Voice_Pipeline.md` — Voice Pipeline Steps 1+2+3 (v2.1,
-  2026-04-29). Step 3 spec is being redesigned from Briefing v3.1 line
-  177 per operator decision 2026-04-29 evening; FU#49E framing dropped.
-  Pre-Athens gating decision tracked at `_workspace/planning/runtime/OPEN_ITEMS.md` A1.
+  updated 2026-05-01). **Step 3 SKIPPED for Athens** per OPEN_ITEMS A1
+  decision 2026-05-01 (Option A); cross-voice visibility moves to editor
+  layer + Substack. Module dormant; ~2-day re-add path documented for
+  post-editor/microsite. Validation diagnostic-only (FU#62 path B); Athens
+  policy Night 1 ON / Nights 2+3 OFF. Athens production CLI:
+  `voice_flow.py <run_dir> --night N --skip-step3 [--skip-validation if Night 2/3]`.
+  **Editor / Frame layer** architecture settled 2026-05-01 (OPEN_ITEMS A2):
+  per-theme article (not per-voice editorial chrome); all-AI drafting (no
+  polish phase); voice artifacts ship as-is with Provocateur formulation as
+  micro-header. Editor output schema gated on microsite design (operator
+  building elsewhere; specifies editor output per A2 F decision).
 - `AUDIENCE_BRIEF.md` — audience characterization
 - `LLM_CALL_INVENTORY.md` — call inventory (needs update for new
   passes since 2026-04-21)

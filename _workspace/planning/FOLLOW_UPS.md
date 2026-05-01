@@ -943,7 +943,7 @@ Each phrase load-bearing:
 
 ---
 
-#### FU#62 — Voice Pipeline validation regen-on-flag is unimplemented (spec/impl gap) 🔵
+#### FU#62 — Voice Pipeline validation regen-on-flag is unimplemented (spec/impl gap) ✅ RESOLVED 2026-05-01 (path B — spec updated)
 
 - **Discovered:** 2026-04-30 during FU#61 dryrun testing (Cleopatra Step 1+2 re-run with default validation ON; all 3 outputs flagged; no regen ever triggered; pipeline proceeded to Step 2 with flagged Step 1 outputs)
 - **Spec claim** (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy"): *"First failure: regenerate the Step 1 call with the validator's critique appended... Re-run validators on the regenerated output. Second failure: ship the regenerated output AND flag in the run-level manifest."*
@@ -958,6 +958,7 @@ Each phrase load-bearing:
 - **Files touched if A is chosen:** `runtime/flows/voice_flow.py:337-363` (regen orchestration); `runtime/flows/voice/step1_validation.py` (could move regen into the validation module or keep in orchestrator); add prompt amendment for regen user-prompt critique-injection.
 - **Files touched if B is chosen:** `docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default policy for Athens" + §"Cost & Envelope" validation row (update wall claim).
 - **Related:** FU#61 (the dryrun that surfaced this); validation policy default in Voice Pipeline spec; Anthropic + OpenAI client patterns in `personas/flows/shared/clients.py` (the regen pattern's nearest cousin).
+- **Resolution 2026-05-01:** Path B chosen and applied. `docs/AI_Assembly_Voice_Pipeline.md` updated: §"Regeneration policy" rewritten to "diagnostic only"; §"Default policy for Athens" changed to Night 1 ON / Nights 2+3 OFF; §"Cost & Envelope" + wall-time table revised (Night 1 ~$180-240/~50-80 min; Nights 2+3 ~$180-230/~30-45 min); v1→v2.1 changes table updated. If post-Athens autonomous regen is wanted (e.g., for unattended runs), file as a new item in `_workspace/planning/runtime/OPEN_ITEMS.md` against this contract.
 
 ---
 

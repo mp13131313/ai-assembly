@@ -63,10 +63,10 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/HANDOFF.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
 | **Briefing input contract** | Sketched | **Byte-accurate** to Provocateur Stage 4 output: per-voice file at `runs/<run>/03_provocateur/briefings/<voice_slug>.json`, two views per formulation (`narrative_briefing` markdown + `full_theme_record` JSON) | runtime/flows/provocateur_flow.py:835–1041 |
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
-| **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Night 2/3 ON for voices that flagged on prior nights | §"Validation Nodes" below |
+| **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop) | §"Validation Nodes" below |
 | **Continuity block generation** | Sketched in Step 2 system prompt | **Separate flow** with defined runtime trigger (after Night N Step 3 artifacts written, before Night N+1 Provocateur reads them); per-voice override file | §"Continuity Block Generation" below |
-| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel — Step 1 + validation + Step 2 + Step 3 + continuity itemised; ~$40-50/night, ~25-35 min wall | §"Cost & Envelope" below |
-| **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]` | §"Implementation" below |
+| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). **Night 1: ~$130-190, ~45-75 min wall** (validation ON); **Nights 2+3: ~$130-180, ~25-40 min wall** (validation OFF, +continuity). 3-night total ~$390-550. Revised 2026-05-01 from observed dryrun behavior + A1/FU#62 decisions | §"Cost & Envelope" below |
+| **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]`. **Athens production:** always pass `--skip-step3` (A1 decision 2026-05-01); add `--skip-validation` on Nights 2/3 (FU#62 path B). | §"Implementation" below |
 
 **Stable from v1:**
 - Two-step logic (private reasoning → public expression) preserved as Step 1 → Step 2
@@ -82,14 +82,14 @@ The Voice Pipeline is the third agent in the overnight pipeline. It receives the
 
 1. **Step 1 — Private Reasoning.** Per formulation: voice reasons through the provocation in its characteristic mode of knowing. ~3 detailed responses per voice; ~30 per night. Nobody encounters this output except the voice itself (in Step 2) and downstream extraction.
 2. **Step 2 — First-Draft Artifact.** Per voice: voice reads back its detailed responses, picks a focus + stance + form-from-family, and produces a single creative artifact in its native medium. 10 first-draft artifacts per night.
-3. **Step 3 — Amended Artifact.** Per voice: voice reads other voices' first-draft artifacts on themes it shares with them, and decides whether to amend its own — extending its framework, marking its limit, or sharpening disagreement. 10 amended (or stand-pat) artifacts per night.
+3. **Step 3 — Amended Artifact.** *(SKIPPED for Athens per OPEN_ITEMS A1 decision 2026-05-01 — Option A; pipeline ships Steps 1+2 only via `--skip-step3`. Cross-voice visibility moves to editor layer + Substack. Module dormant; re-add path documented.)* Original framing: per voice, voice reads other voices' first-draft artifacts on themes it shares with them, and decides whether to amend its own — extending its framework, marking its limit, or sharpening disagreement.
 
 Plus two supporting flows:
 
 - **Validation nodes** (optional, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). Default ON for Athens Night 1.
 - **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice Sonnet call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
 
-**Per-night envelope:** ~$40-50 API cost, ~25-35 min wall time on a 10-voice panel.
+**Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$130-190 / ~45-75 min wall (validation ON); Nights 2+3 ~$130-180 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$390-550. See §"Cost & Envelope" for breakdown.
 
 The Voice Pipeline runs once per night across three Athens nights. On Night 2 + Night 3, the continuity override is loaded as a card supplement; otherwise the pipeline shape is identical.
 
@@ -321,8 +321,8 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 | Stage | Step | Tool | Script | Output |
 |---|---|---|---|---|
 | **Step 1** | Private Reasoning per formulation | **Opus 4.7 + adaptive thinking**, max 64K | `step1_private_reasoning.py` | `04_voice/step1_detailed_responses/<voice_slug>__<theme_id>.json` |
-| **Validation A** (optional) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K | `step1_validation.py:check_anachronism` | inline flag → trigger 1 retry, then ship |
-| **Validation B** (optional) | Constitutional self-reflection | **OpenAI ladder** (same as A) | `step1_validation.py:check_constitution` | inline flag → trigger 1 retry, then ship |
+| **Validation A** (optional, Night 1 only) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K | `step1_validation.py:check_anachronism` | diagnostic flag → manifest.validation_failures[] for operator review |
+| **Validation B** (optional, Night 1 only) | Constitutional self-reflection | **OpenAI ladder** (same as A) | `step1_validation.py:check_constitution` | diagnostic flag → manifest.validation_failures[] for operator review |
 | **Step 2** | First-Draft Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K | `step2_first_draft_artifact.py` | `04_voice/step2_first_draft_artifacts/<voice_slug>.json` |
 | **Step 3** | Amended Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K | `step3_amended_artifact.py` | `04_voice/step3_amended_artifacts/<voice_slug>.json` |
 | **Continuity** (Night 2+3) | Per-voice summary of prior night | Sonnet 4.6 + adaptive thinking, max 8K | `continuity.py` | `<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json` |
@@ -337,7 +337,7 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 
 **Streaming is REQUIRED on Steps 1/2/3** — Opus + thinking + max_tokens=64K is well past the SDK's non-streaming timeout heuristic (10 min). Validation + continuity may use non-streaming.
 
-**Per-voice cost (10-voice panel, per night):** Step 1 ~$2.50/call × 30-50 calls = ~$75-125; validation (if on) ~$30-50; Step 2 ~$5/call × 10 calls = ~$50; Step 3 ~$5/call × 10 calls = ~$50; continuity ~$3 per night (Night 2+3 only). **Per-night total: ~$210-280; Athens 3-night total: ~$630-840.** Wall time per night: ~30-50 minutes (Opus + thinking is slower per call than Sonnet but parallelism + batched submission keeps total wall manageable).
+**Per-voice cost (10-voice panel, per night, Athens production with Step 3 skipped per A1 2026-05-01):** Step 1 ~$2.50/call × 30-50 calls = ~$75-125; validation (Night 1 only) ~$3-15; Step 2 ~$5/call × 10 calls = ~$50; ~~Step 3~~ skipped ($0; was ~$50); continuity ~$3 per night (Night 2+3 only). **Night 1 total: ~$130-190; Nights 2+3: ~$130-180 each; Athens 3-night total: ~$390-550.** Wall time: Night 1 ~45-75 min (validation per-voice serial); Nights 2+3 ~25-40 min. See §"Cost & Envelope" for full breakdown.
 
 ---
 
@@ -563,22 +563,28 @@ System prompt:
 
 ### Regeneration policy
 
-If either validator returns issues:
+**Validation is diagnostic only.** Both validators run, write their results to per-pair validation files, and surface flags in the run-level manifest under `validation_failures[]` for human review. The pipeline does not regenerate, retry, or stall on flags — it proceeds to Step 2 with the original Step 1 output regardless.
 
-1. **First failure:** regenerate the Step 1 call with the validator's critique appended to the user prompt: *"Your previous response contained the following issues: [issues]. Regenerate, addressing them. Continue to commit and take a position."* Re-run validators on the regenerated output.
-2. **Second failure:** ship the regenerated output AND flag in the run-level `04_voice/manifest.json` under `validation_failures[]` for human review. The pipeline does not stall.
+**Why diagnostic-only** (decided 2026-05-01, FU#62 path B):
+- Operator presence at Athens makes morning-review the natural correction loop; autonomous regen has limited additional value before Athens.
+- A regen path is a new code path introduced under production pressure; diagnostic-only is the boring, working path.
+- Pairs with the Night 1-only validation policy below — running validation on Nights 2/3 without regen is pure cost without remediation.
+
+If autonomous regen is wanted post-Athens for future deployments, file as a new item in `_workspace/planning/runtime/OPEN_ITEMS.md` and implement against this contract.
 
 ### Default policy for Athens
 
 | Night | Anachronism | Constitutional |
 |---|---|---|
 | Night 1 | ON for all 10 voices | ON for all 10 voices |
-| Night 2 | ON for voices that flagged on Night 1 | ON for voices that flagged on Night 1 |
-| Night 3 | ON for voices that flagged on Nights 1 OR 2 | ON for voices that flagged on Nights 1 OR 2 |
+| Night 2 | OFF | OFF |
+| Night 3 | OFF | OFF |
 
-CLI flag `--skip-validation` disables both nodes (development use only).
+Rationale: validation is diagnostic-only (no regen-on-flag). Night 1 catches drift in fresh card deployment — operator reviews flags morning of Day 2 and intervenes voice-side if material. Nights 2 + 3 with no regen mechanism = wall-time + API cost without remediation; operator morning-review handles correction.
 
-**Validation outputs** are written to `04_voice/validation/<voice_slug>__<theme_id>.json` with `{anachronism: PASS|<issues>, constitution: PASS|<issues>, regen_count: 0|1, final_status: clean|flagged}`.
+CLI flag `--skip-validation` disables both nodes. Always use it for dryrun work — Step 1 outputs are checkpoint-cached, so re-running validation against unchanged outputs reproduces the same flags and burns ~20-40 min/voice for nothing.
+
+**Validation outputs** are written to `04_voice/validation/<voice_slug>__<theme_id>.json` with `{anachronism: PASS|<issues>, constitution: PASS|<issues>, regen_count: 0, final_status: clean|flagged}`. `regen_count` is hardcoded `0` (no regen); `final_status: flagged` means the operator should review the file.
 
 ---
 
@@ -749,6 +755,16 @@ Each detailed response is rendered with a header naming its `theme_id`, `theme_d
 ---
 
 ## Step 3 — Amended Artifact
+
+> **⚠️ ATHENS PRODUCTION: SKIPPED** (decided 2026-05-01, see `_workspace/planning/runtime/OPEN_ITEMS.md` A1 — Option A).
+>
+> Athens runs ship Steps 1+2 only via the existing `--skip-step3` CLI flag (was DEV-USE-ONLY warning; now Athens production default). Cross-voice visibility moves to the editor layer (per A2) + Substack walkthrough. Editor reads peer Step 2 artifacts on shared themes via the `themes_to_voices` map and authors cross-voice contrast text in editorial register.
+>
+> **Trade made:** Briefing line 177-179's claim that voices read each other and decide whether to amend at the artifact layer is deferred. Cross-voice conversation becomes editor-narrated for Athens. Provotype framing absorbs the cost; visible construction is a feature.
+>
+> **Module + prompt + `_build_responded_to_graph` stay in codebase, dormant.** Re-enable cost ~2 days against the B+ shape (engaged_peers metadata + optional postscript appended below body, body untouched). See OPEN_ITEMS A1 for the full re-add path.
+>
+> **The Step 3 spec text below is preserved verbatim from the FU#49E correspondence-shape design and is STALE on framing** (the original "amendment as letter-back" framing was dropped 2026-04-29 evening). When Step 3 re-enables, this section needs full rewrite per B+ shape.
 
 **Input:**
 
@@ -1165,11 +1181,16 @@ Per Anthropic Opus 4.7 / Sonnet 4.6 rate limits, default batch size 4 with 20-se
 
 ```bash
 python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]
-# Example:
-python flows/voice_flow.py runs/athens_2026 --night 1
+# Athens production — Night 1 (validation ON, Step 3 skipped per A1 decision 2026-05-01):
+python flows/voice_flow.py runs/athens_2026_2026_05_07_night1 --night 1 --skip-step3
+# Athens production — Nights 2 and 3 (validation OFF per FU#62 path B; Step 3 skipped):
+python flows/voice_flow.py runs/athens_2026_2026_05_08_night2 --night 2 --skip-step3 --skip-validation
 ```
 
-Required arg `--night N` ∈ {1, 2, 3} — controls continuity override loading. `--skip-validation` disables both validation nodes. `--skip-step3` runs Steps 1+2 only (development use; do NOT use for Athens production runs — Step 3 is load-bearing for the deliberation claim).
+Required arg `--night N` ∈ {1, 2, 3} — controls continuity override loading.
+
+- `--skip-validation` disables both validation nodes. Required on Athens Nights 2/3 per FU#62 path B (validation is diagnostic-only, no regen; running on Nights 2/3 is pure cost without remediation). Always use for dryrun work (Step 1 outputs are cached → validation re-runs against unchanged outputs → ~20-40 min wasted).
+- `--skip-step3` runs Steps 1+2 only. **Required on all Athens production runs** per A1 decision 2026-05-01 (Option A). Cross-voice visibility moves to editor layer + Substack. Step 3 module + prompt remain in codebase, dormant; re-add path is ~2 days against B+ shape, documented in `_workspace/planning/runtime/OPEN_ITEMS.md` A1.
 
 `<run_dir>` must contain `03_provocateur/briefings/*.json` (Provocateur output). Otherwise the flow exits with a clear message.
 
@@ -1228,13 +1249,18 @@ Per night, 10-voice panel. Costs reflect Opus 4.7 + adaptive thinking on Steps 1
 | Stage | Calls | Model | Per-call cost | Stage total |
 |---|---|---|---|---|
 | Step 1 (Opus 4.7 + thinking, max 64K) | ~30-50 | claude-opus-4-7 | ~$2.50 | **~$75-125** |
-| Validation A + B (if on) | ~60-100 | OpenAI ladder | ~$0.50 | **~$30-50** |
+| Validation A + B (Night 1 only, diagnostic) | ~60-100 | OpenAI ladder | ~$0.05-0.15 | **~$3-15** |
 | Step 2 (Opus 4.7 + thinking, max 64K) | 10 | claude-opus-4-7 | ~$5 | **~$50** |
-| Step 3 (Opus 4.7 + thinking, max 64K) | 10 | claude-opus-4-7 | ~$5 | **~$50** |
+| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | — | — | **$0** (was ~$50) |
 | Continuity (Sonnet 4.6 + thinking, max 8K, Night 2+3 only) | 10 | claude-sonnet-4-6 | ~$0.30 | **~$3** |
-| **Per-night total** | | | | **~$210-280** |
+| **Per-night total — Night 1** (validation ON, Step 3 skipped) | | | | **~$130-190** |
+| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | | | **~$130-180** |
 
-**Athens 3-night total:** ~$630-840 in API costs. (Continuity runs only on Nights 1 and 2 — its output is consumed on Nights 2 and 3.)
+**Athens 3-night total:** ~$390-550 in API costs (Step 3 skipped per A1 2026-05-01 saves ~$150 across 3 nights). Continuity runs only on Nights 1 and 2 — its output is consumed on Nights 2 and 3. Validation runs only on Night 1 per FU#62 path B decision.
+
+If Step 3 re-enables post-editor/microsite, add ~$50/night × 3 nights = ~$150 back.
+
+Per-validation-call costs revised 2026-05-01 from prior ~$0.50/call estimate down to ~$0.05-0.15/call based on observed dryrun behavior (gpt-5.4 reasoning_effort=high on ~5K-token prompts).
 
 This is meaningfully higher than a Sonnet-on-everything build (~$120-150 total) but is the calibration the operator chose because Steps 1/2/3 are the load-bearing creative-reasoning calls of the entire overnight pipeline. Getting them wrong fails Briefing v3.1's Layer 2 ("could a well-read human essayist have arrived here?") and Layer 3 (does the conversation become more-than). Opus + thinking is the price of the experiment; it is not the place to economise.
 
@@ -1243,11 +1269,14 @@ Wall time per night, with parallelism + Anthropic batch wait. Opus + thinking is
 | Stage | Parallel | Wall time |
 |---|---|---|
 | Step 1 (parallel across pairs, batched 4 + 20s wait, ~90-120s per call) | ~30-50 calls in batches of 4 | ~22-30 min |
-| Validation (chained per response, parallel across pairs, OpenAI is fast) | ~60-100 calls | ~3-5 min (overlaps Step 1 tail) |
+| Validation (Night 1 only — per-voice serial, gpt-5.4 reasoning is slower than expected) | ~60-100 calls | ~20-40 min on Night 1; OFF on Nights 2/3 |
 | Step 2 (parallel across voices, ~120-180s per call) | 10 calls | ~3-5 min |
-| Step 3 (parallel across voices, ~120-180s per call) | 10 calls | ~3-5 min |
+| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | 0 min (was ~3-5 min) |
 | Continuity (parallel across voices, Nights 2+3 only, Sonnet is fast) | 10 calls | ~2-3 min |
-| **Per-night total** | | **~30-50 min** |
+| **Per-night total — Night 1** (validation ON, per-voice serial, Step 3 skipped) | | **~45-75 min** |
+| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | **~25-40 min** |
+
+Wall-time revised 2026-05-01 from prior ~30-50 min envelope. Validation observed at 20-40 min/night on Night 1 (per-voice serial, not the per-pair-parallel-overlapping-Step-1 originally specified). Athens Night 1 morning-of-Day-2 wall budget should plan for the ~50-80 min envelope.
 
 Rate limits: Anthropic Opus 4.7 tier currently has tighter tokens-per-minute caps than Sonnet 4.6, which is why default `VOICE_STEP1_BATCH=4` with 20-second wait between batches is conservative. Monitor the first dry run; if rate limits relax pre-Athens, raise `VOICE_STEP1_BATCH` to 6-8 first.
 

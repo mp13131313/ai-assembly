@@ -44,7 +44,7 @@ runtime/flows/
 │   ├── step1_private_reasoning.py
 │   ├── step1_validation.py
 │   ├── step2_first_draft_artifact.py
-│   ├── step3_amended_artifact.py    ⚠️ being redesigned (FU#49E framing dropped; A1 in OPEN_ITEMS)
+│   ├── step3_amended_artifact.py    💤 DORMANT for Athens (A1 RESOLVED 2026-05-01: Option A skip; module preserved for ~2-day re-add post-Athens)
 │   ├── continuity.py
 │   └── publish.py
 ├── publish_flow.py                  ✅ built — cross-pipeline aggregation
@@ -56,8 +56,8 @@ runtime/flows/
 | Flow | Validated end-to-end | Evidence |
 |---|---|---|
 | Voice Pipeline Steps 1+2 | ✅ Plato solo + Plato/Cleopatra dual | dryruns #2, #3, #4 (2026-04-29) |
-| Voice Pipeline Step 3 | ⚠️ mechanics validated; framing being redesigned | dryrun #4 (2026-04-29) — current FU#49E correspondence shape produces letter-back artifacts; redesign in flight |
-| Validation nodes (anachronism + constitutional) | ✅ on Plato + Cleopatra | dryruns #2 + the FU#61 v3 test (2026-04-30); regen-on-flag NOT implemented (FU#62) |
+| Voice Pipeline Step 3 | 💤 DORMANT for Athens (A1 RESOLVED 2026-05-01 — Option A skip; module/prompt preserved for ~2-day re-add post-editor/microsite) | dryrun #4 (2026-04-29) validated mechanics in old FU#49E correspondence-shape framing; framing dropped 2026-04-29; option A chosen 2026-05-01 |
+| Validation nodes (anachronism + constitutional) | ✅ on Plato + Cleopatra; diagnostic-only by spec (FU#62 path B 2026-05-01) | dryruns #2 + the FU#61 v3 test (2026-04-30) |
 | Continuity flow | ❌ never exercised end-to-end | OPEN_ITEMS C4 |
 | publish_flow.py | ❌ never run against real Researcher/Provocateur outputs | OPEN_ITEMS C3 |
 | Multi-night sequence | ❌ never exercised | OPEN_ITEMS C4 (Convention A documented but untested) |
@@ -67,10 +67,10 @@ runtime/flows/
 
 | Component | Status |
 |---|---|
-| Editor / Frame layer | ❌ NOT BUILT — design in PIPELINE_DOWNSTREAM_DESIGN doc; A2 decision pending |
-| Microsite | ❌ NOT BUILT |
-| Broadsheet / Edition Pipeline | ❌ NOT BUILT |
-| Substack draft pipeline pass | ❌ NOT BUILT |
+| Editor / Frame layer | ❌ NOT BUILT — A2 architecture settled 2026-05-01 (per-theme article; all-AI drafting; voice artifacts ship as-is). Output schema gated on microsite design (operator) per A2 F |
+| Microsite | ❌ NOT BUILT — operator designing; design specifies editor output schema per A2 F |
+| Broadsheet / Edition Pipeline | ❌ NOT BUILT — consumes editor + voice outputs |
+| Substack draft pipeline pass | ❌ NOT BUILT — drafting model TBD (A2 C resolved editor as all-AI; Substack not yet decided) |
 | Closing-show pipelines (theme ID, matrix mapping, video) | ❌ UNSPECIFIED + NOT BUILT |
 | Day 4 goodbye | ❌ UNSPECIFIED |
 | Render layer for non-text artifacts (Marley → Suno; Octopus → shader) | ⚠️ structured handoff in publish layer; rendering itself not implemented |
@@ -154,14 +154,15 @@ Voice Pipeline reads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.jso
 4. Drop `curated_corpus_passages.corpus_metadata` (nested; FU#41 strip rule)
 5. Drop `bold_engagement_topics` always (FU#57 — pre-loaded courage menu pulled reasoning toward predetermined topics)
 
-### Validation policy (Athens production recommendation)
+### Validation policy (Athens production — per FU#62 path B, 2026-05-01)
 
-Per FU#62 finding + recommendation:
-- **Night 1: ON** for all voices (catches drift in fresh card deployment)
-- **Nights 2 + 3: OFF** (no regen mechanism; pure cost without remediation)
-- **Dryrun work: always `--skip-validation`** (Step 1 outputs are cached → validation re-runs against unchanged outputs → same flags → 8 min for nothing)
+Validation is **diagnostic-only**: flags are recorded in `04_voice/manifest.json` `validation_failures[]` for operator morning-review; no regen, no retry, the pipeline ships flagged outputs to Step 2 unchanged.
 
-This contradicts the spec's "Default policy for Athens" which says Night 2/3 ON for previously-flagged voices. The contradiction is real (spec assumes regen exists; code doesn't implement it). Operator review per morning is the actual correction loop.
+- **Night 1: ON** for all voices (catches drift in fresh card deployment; operator reviews flags morning of Day 2 and intervenes voice-side if material)
+- **Nights 2 + 3: OFF** (no regen → pure cost without remediation; operator morning-review handles correction)
+- **Dryrun work: always `--skip-validation`** (Step 1 outputs are cached → validation re-runs against unchanged outputs → same flags → ~20-40 min/voice for nothing)
+
+Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default policy for Athens" + §"Cost & Envelope") was updated 2026-05-01 to match this; spec/impl now aligned.
 
 ---
 
@@ -197,11 +198,13 @@ Branch is shared with persona thread; both threads cohabited cleanly with zero c
 ```bash
 cd "/Users/aienvironment/Desktop/AI Assembly/code"
 
-# Full Voice Pipeline (Steps 1 + validation + 2 + 3 + continuity + publish)
+# Athens production (Steps 1+2 + validation Night 1 only + continuity Nights 2+3 + publish)
+# Step 3 SKIPPED per A1 decision 2026-05-01; --skip-validation on Nights 2/3 per FU#62 path B
 runtime/venv/bin/python runtime/flows/voice_flow.py \
   "/Users/aienvironment/Desktop/AI Assembly/projects/<project>/runs/<run_dir>" \
   --night 1 \
-  --project "/Users/aienvironment/Desktop/AI Assembly/projects/<project>"
+  --project "/Users/aienvironment/Desktop/AI Assembly/projects/<project>" \
+  --skip-step3
 
 # Single voice only (dryrun pattern)
 runtime/venv/bin/python runtime/flows/voice_flow.py \
@@ -219,7 +222,7 @@ CLI flags:
 - `--voices SLUG[,SLUG...]` — filter to specific voices
 - `--project PATH` — explicit PROJECT_ROOT (overrides env var)
 - `--skip-validation` — disable both validation nodes (DEV USE; Athens Night 1 should NOT skip)
-- `--skip-step3` — DEV USE ONLY; Step 3 is load-bearing for the deliberation claim
+- `--skip-step3` — **Athens production default per A1 decision 2026-05-01.** Cross-voice visibility moves to editor layer + Substack. Step 3 is dormant for Athens; re-add post-editor/microsite if budget permits.
 - `--skip-continuity` — DEV USE for testing; Athens Nights 1+2 should NOT skip
 
 PROJECT_ROOT resolves via `--project` > `AI_ASSEMBLY_PROJECT_ROOT` env > hard fail (per Tier 3 convention — no silent default).
@@ -317,9 +320,11 @@ researcher_flow.py + provocateur_flow.py have NOT yet been brought into this com
 
 See OPEN_ITEMS A3 + Validation policy section above.
 
-### Step 3 — being redesigned (UNRESOLVED)
+### Step 3 — SKIPPED for Athens (RESOLVED 2026-05-01 — Option A)
 
-The original FU#49E correspondence-shape Step 3 (each voice writes a letter back to peers) is dropped. Redesign in flight. Four options on the table; B+ recommended (metadata + optional postscript). See OPEN_ITEMS A1 for full state.
+Athens runs ship Steps 1+2 only via `--skip-step3`. The original FU#49E correspondence-shape was dropped 2026-04-29; rather than redesign-then-ship in 6 days, A1 chose to skip Step 3 for Athens entirely and route cross-voice visibility through the editor layer (A2) + Substack walkthrough. Module + prompt + `_build_responded_to_graph` stay in codebase, dormant. Re-add path is ~2 days against B+ shape (engaged_peers metadata + optional postscript appended below body, body untouched). See OPEN_ITEMS A1 for full re-add steps.
+
+**For Athens production runs, always pass `--skip-step3`** (along with `--skip-validation` on Nights 2/3 per FU#62 path B). The orchestrator no longer treats `--skip-step3` as DEV-USE-ONLY — it's the documented Athens production setting.
 
 ---
 
@@ -353,7 +358,7 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 - **Layer 1 / 2 / 3** — briefing's three-layer test (Encounter / Content / Expansion). Layer 1 = does audience engage; Layer 2 = could only this voice produce this; Layer 3 = did the conversation become more-than
 - **Family-of-forms** — per Card v2.1 §H, voices may emit default form + 3-6 native variations within their corpus repertoire (Plato dialogue + Apology speech + Cave image; Cleopatra prostagma + ordinance + embassy speech). Step 2 picks per matter; Step 3 may reselect.
 - **Postscript** (proposed Step 3) — voice-written addendum to artifact body, recording reading-of-peers without rewriting body
-- **Editor / Frame layer** — proposed pipeline pass between Step 3 and audience surfaces; produces title + subtitle + curatorial preamble + pull-quotes + cross-voice contrast (NOT BUILT)
+- **Editor / Frame layer** — pipeline pass between Step 2 and audience surfaces. **Per-theme** (not per-voice) per A2 decision 2026-05-01: produces a theme-level article framing one theme + the voices' positions on it. Voice artifacts ship as-is from Step 2, with their Provocateur formulation as micro-header. All-AI drafting (no operator polish). Output schema gated on microsite design. (NOT BUILT)
 
 ---
 
