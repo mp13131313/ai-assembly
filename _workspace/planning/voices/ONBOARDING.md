@@ -160,6 +160,7 @@ These recur across voices — pattern-recognize them quickly:
 ### Always skip (false positives)
 
 - **`council_member_name` "missing"** — validator hallucinates this on every voice. Field is unambiguously present. Don't waste cycles patching.
+- **`[experiential_reconstruction]` / `[projection_warning: ...]` bracket tags inline in long-form fields** — these are CONTENT (Boddice biocultural epistemic-status annotations) preserved by Pass 6.5-clean's allowlist (FU#33 P1) and required by Pass 7-pre's boddice check. Schema-taxonomy brackets (e.g. `[ontological]` / `[epistemological]`) DO get stripped — those are scaffolding. If the validator flags a `[experiential_reconstruction]` or `[projection_warning]` as "leakage", skip the patch.
 
 ### Sometimes skip (register-strict, not runtime-blocking)
 
@@ -239,6 +240,8 @@ Empirically:
 | `persona_coherence_threading.md` | CT compress — summarizes prior pass outputs for next-pass context |
 
 **Most-edited prompt this period:** `persona_pass_4b_artifact.md` — landed FU#49A v2 quality_criteria scaffold (`0ca02f5`) + FU#61 audience-engagement +1 (`91947a7`).
+
+**Pre-hardened prompts (informational):** `persona_pass_6_corpus.md` carries FU#43 source-side hardening (minimal `corpus_metadata` emission, paraphrase-safer caution at generation time) and the patcher-family prompts carry FU#44 register-drift extension. Both landed pre-revert; effect on operator workflow is fewer corpus_metadata + register-drift patches needed at the gate.
 
 ---
 
@@ -415,7 +418,13 @@ python scripts/sentinel_regen.py regen \
   --baseline-snapshot _workspace/sentinel_baselines/2026-MM-DD-pre-X
 ```
 
+`--baseline-snapshot` takes a parent dir; per FU#50(2) the runner auto-resolves `<DIR>/<voice_slug>/<filename>` per voice, so a single arg works for multi-voice regen.
+
 After regen: inspect diff. If smoke-test (not real generation), restore baseline.
+
+### Pass 0b templates are de-anchored from panel exemplars (FU#19)
+
+Pass 0b non-human / fictional templates were genericized 2026-04-26: they no longer self-anchor to Octopus / Whanganui / Scheherazade as single exemplars but pair them with multi-class parallels (e.g., Scheherazade with Hamlet / Antigone / Aeneas / Don Quixote). Effect on unbuilt voices: Whanganui's and Scheherazade's DR generation will not be self-referential to the existing panel exemplars — cleaner research output. No operator action needed; informational.
 
 ### archive/first_run/ pattern
 
