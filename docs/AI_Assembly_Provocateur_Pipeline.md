@@ -119,9 +119,33 @@ The audience profile is a single paragraph loaded into every Stage 1/Stage 3 LLM
 
 The project maps governance thinking along two axes: **Power & Agency** (human↔nonhuman / many↔one) and **Change & Actor** (rupture↔progression / individual↔collective). The Provocateur uses these in Triage Part B and in Selection's theme-quality scoring as an implicit check that the surviving set covers different parts of this terrain — not to predict where responses will land, but to ensure the set isn't narrow. In v3 this is not modeled as a hard constraint; the audience_friction and fault_line_present flags plus the quality multipliers deliver the same effect.
 
-### 4. Night 2
+### 4. Night 2 + Night 3 cross-night exclusion (C9, implemented 2026-05-01)
 
-On Night 2, the Provocateur receives Night 1's formulations and assignments. It knows what was already asked and who already responded to what, so it doesn't repeat territory per member. In v3 this is not yet plumbed through Selection's Python algorithm — it is a pending enhancement. For the Athens deployment, a simple exclusion list keyed on (theme_id, member) from Night 1 is sufficient and will be added before first production run.
+On Night 2 (and Night 3), the Provocateur receives prior night(s)' formulations and assignments and avoids repeating territory per member. Implemented as the **C9 cross-night exclusion filter** in Selection.
+
+**Mechanism.** On Night 2/3 the runner passes `--prior-nights <run_dir>[,<run_dir>...]` to `provocateur_flow.py`. The flow loads each prior night's `selection.json` + `02_researcher/grouping.json`, builds a per-member set of normalized theme titles already assigned, and threads it through `python_select(prior_assignments_by_member=...)`. Inside Selection (Step 4), each voice's candidate list is filtered: themes whose **normalized title** matches a prior assignment for that member are dropped before quorum + cascade run.
+
+**Why title, not theme_id.** Theme_ids are not stable across Researcher runs — each Researcher run generates fresh sequential `theme_001`..`theme_NNN` IDs from its own clusters. The spec language "exclusion list keyed on (theme_id, member)" is informal; actual implementation matches by content (normalized title — lowercased, whitespace-collapsed) so a theme with substantively the same title across nights counts as the same territory regardless of its per-night ID.
+
+**Force-fit honors exclusions.** If a voice's entire ranked + flat lists are exclusion-filtered, the voice ends with zero assignments rather than re-deploying covered territory. Recorded in `prior_exclusions_blocked` for operator visibility — usually a signal that the conference content overlapped heavily across nights.
+
+**Diagnostics.** `selection.json` includes `prior_exclusions_applied` (deduped list of `{voice, theme_id, title}` filtered out), `prior_exclusions_blocked` (voices whose force-fit was blocked entirely), and `prior_nights_consumed` (count of prior run_dirs loaded).
+
+**CLI:**
+```bash
+# Night 1 (no priors)
+python flows/provocateur_flow.py runs/athens_2026_2026_05_07_night1
+
+# Night 2 (Night 1 priors)
+python flows/provocateur_flow.py runs/athens_2026_2026_05_08_night2 \
+    --prior-nights runs/athens_2026_2026_05_07_night1
+
+# Night 3 (Nights 1 + 2 priors)
+python flows/provocateur_flow.py runs/athens_2026_2026_05_09_night3 \
+    --prior-nights runs/athens_2026_2026_05_07_night1,runs/athens_2026_2026_05_08_night2
+```
+
+Tests: `runtime/tests/test_provocateur_selection.py` covers the filter end-to-end (15 cases including the loader). Always pass `--prior-nights` on Athens Nights 2 + 3.
 
 ---
 
@@ -453,7 +477,7 @@ Voices with zero assignments still get a briefing file (empty `formulations[]` a
 
 **Reproducibility.** Given identical Triage inputs, Selection always produces identical assignments — pure deterministic Python. Triage and Formulation are not reproducible (LLM sampling), but their outputs are cached per-voice and per-pair, so a single pipeline run produces a single canonical set of briefings that downstream code can trust.
 
-**Night 2 is different from Night 1.** On Night 2, the Provocateur receives the Researcher's new themes plus Night 1's formulations and assignments. It should avoid repeating (theme, member) pairs Night 1 already covered. In v3, this is enforced by a simple (theme_id, member) exclusion filter applied in Selection between Step 1 (veto) and Step 4 (candidate lists) — a pending implementation ahead of first production run. No LLM involvement; the Python algorithm just drops already-assigned pairs from candidate consideration.
+**Night 2 + Night 3 are different from Night 1.** Implemented 2026-05-01 (C9): on Night 2/3, pass `--prior-nights <run_dir>[,<run_dir>...]` to `provocateur_flow.py`. The flow loads prior nights' `selection.json` + `grouping.json`, builds a per-member exclusion set keyed on **normalized theme title** (lowercased, whitespace-collapsed — theme_ids are not stable across Researcher runs, so content-based matching is the canonical key), and applies the filter inside `python_select` Step 4 (candidate-list construction). Step 7 force-fit also honors the exclusions — a voice with all candidates filtered ends with zero assignments rather than re-deploying covered territory. No LLM involvement. Diagnostics: `prior_exclusions_applied`, `prior_exclusions_blocked`, `prior_nights_consumed` in `selection.json`. See §"Night 2 + Night 3 cross-night exclusion" above for details + CLI examples.
 
 **Incremental restart.** Every LLM call writes its checkpoint before returning. A crashed run resumes from the last completed checkpoint. There is no `PROVOCATEUR_CACHE` flag — the checkpoints ARE the cache. To force a clean run, delete `runs/<run>/03_provocateur/` or the specific checkpoint files that need re-running. Selection always recomputes against whatever Triage data and `selection_parameters` are on disk at the moment.
 

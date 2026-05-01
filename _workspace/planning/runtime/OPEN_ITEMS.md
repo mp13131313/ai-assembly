@@ -421,17 +421,43 @@ From dryrun #2 (Plato solo) validator findings:
 
 **None blocking.** Could sharpen via Plato card patches OR via Step 1 closing-instruction guards. Operator-side judgment call.
 
-### C9. Provocateur Night 2 / Night 3 (theme_id, member) exclusion filter 🔴
+### C9. Provocateur Night 2 / Night 3 (theme_id, member) exclusion filter ✅ LANDED 2026-05-01
 
-**Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 210 ("Night 2/3 plumbing: not plumbed"). Confirmed by `docs/AI_Assembly_Provocateur_Pipeline.md` §"Night 2 is different from Night 1" — flagged as pending implementation.
+**Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 210 ("Night 2/3 plumbing: not plumbed"). Confirmed by `docs/AI_Assembly_Provocateur_Pipeline.md` §"Night 2 is different from Night 1" — was flagged as pending implementation.
 
-**Problem:** Provocateur Selection on Night 2 must avoid repeating per-voice (theme_id, member) pairs already assigned on Night 1. Night 3 must avoid pairs from Nights 1 + 2. Per Briefing v3.1 §"Stage 1b": *"On Night 2, the Provocateur receives Night 1's assignments to avoid repeating territory. On Night 3, both previous nights."*
+**Problem:** Provocateur Selection on Night 2/3 must avoid repeating per-voice (theme, member) pairs already assigned on prior nights. Per Briefing v3.1 §"Stage 1b": *"On Night 2, the Provocateur receives Night 1's assignments to avoid repeating territory. On Night 3, both previous nights."*
 
-**Status:** unimplemented in `runtime/flows/provocateur_flow.py` Selection stage. The filter logic does not currently load prior nights' selections.
+**Resolution 2026-05-01 (after thorough spec + code read):**
 
-**Pre-Athens-must-do.** Without it, Night 2 + Night 3 risk repeating territory assigned on Night 1 + 2. Athens runs are 3 nights — this fires twice.
+Key insight: spec language "(theme_id, member) exclusion list" is informal — **theme_ids are NOT stable across Researcher runs** (each Researcher run generates fresh sequential `theme_001`..`theme_NNN` IDs from its own clusters). A literal theme_id match across nights would be meaningless. Implemented content-based matching via **normalized theme title** (lowercased, whitespace-collapsed).
 
-**Estimated:** ~2-3 hr (load prior `selection.json` files from previous nights' run_dirs; add exclusion filter to the deterministic Python Selection stage; tests).
+**Implementation:**
+- `runtime/flows/provocateur_flow.py`:
+  - New `_normalize_theme_title()` helper
+  - New `load_prior_assignments_by_member()` function (loads selection.json + grouping.json from each prior run_dir; builds `{member: [normalized_titles]}`)
+  - `python_select()` signature extended with `prior_assignments_by_member: dict[str, list[str]] | None = None`
+  - Step 4 candidate-list construction filters out themes whose normalized title matches a prior assignment for that member
+  - Step 7 force-fit honors the same exclusions — voice ends with zero rather than re-deploy covered territory
+  - New diagnostics in `selection.json`: `prior_exclusions_applied`, `prior_exclusions_blocked`, `prior_nights_consumed`
+  - CLI: new `--prior-nights <run_dir>[,<run_dir>...]` argument
+- `docs/AI_Assembly_Provocateur_Pipeline.md` §"Night 2" + §"Constraints" updated to reflect implementation
+- `runtime/tests/test_provocateur_selection.py` (new test file): 15 test cases covering normalization, no-prior-nights baseline, exact-title match, normalization tolerance (case + whitespace), force-fit blocked when all excluded, multiple prior nights cumulative, unrelated-member non-effect, loader file-error paths. **All 15 passing.**
+
+**Athens production CLI:**
+```bash
+# Night 1 (no priors):
+python flows/provocateur_flow.py runs/athens_2026_2026_05_07_night1
+
+# Night 2 (Night 1 priors):
+python flows/provocateur_flow.py runs/athens_2026_2026_05_08_night2 \
+    --prior-nights runs/athens_2026_2026_05_07_night1
+
+# Night 3 (Nights 1 + 2 priors):
+python flows/provocateur_flow.py runs/athens_2026_2026_05_09_night3 \
+    --prior-nights runs/athens_2026_2026_05_07_night1,runs/athens_2026_2026_05_08_night2
+```
+
+Without this filter, Athens Nights 2 + 3 risked re-deploying voices to territory they had already covered — defeating the cross-night progression the briefing requires.
 
 ### C10. Council config: replace `dev_stub_v2_with_selection_params` with real Provocateur Profiles 🔴
 
@@ -789,6 +815,7 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - ~~A2 (editor layer) architecture decided~~ ✅ done 2026-05-01 (per-theme; all-AI; D deferred; E elsewhere; parallel build per F)
 - B1 (editor implementation) — gated on microsite output schema landing
 - B2 (microsite) — operator designing; specifies editor output schema
+- ~~C9 (Provocateur Night 2/3 exclusion filter)~~ ✅ done 2026-05-01 (content-based by normalized title; tests + spec landed)
 - B2 (microsite) built and deployed
 - B3 (broadsheet / Edition Pipeline) built
 - B4 (Substack draft pass) built

@@ -188,6 +188,74 @@ def _format_member_profiles(members: list[dict]) -> str:
 _member_slug = member_slug  # canonical implementation lives in flows.shared.io
 
 
+def _normalize_theme_title(title: str) -> str:
+    """Normalize a theme title for cross-night exclusion matching.
+
+    Lowercased + whitespace-collapsed. Theme_ids are not stable across
+    Researcher runs (each run generates fresh `theme_001`..`theme_NNN`
+    IDs), so the cross-night exclusion filter (C9, spec §"Night 2 is
+    different from Night 1") matches by content via normalized title.
+    Two prior-night themes with semantically distinct titles count as
+    different territory; minor formatting differences don't cause misses.
+    """
+    if not title:
+        return ""
+    return re.sub(r"\s+", " ", title.strip().lower())
+
+
+def load_prior_assignments_by_member(
+    prior_run_dirs: list[Path],
+) -> dict[str, list[str]]:
+    """Load per-member theme titles already assigned in prior nights.
+
+    For the C9 cross-night exclusion filter (spec §"Night 2 is different
+    from Night 1"). Each prior run_dir is expected to be the parent of
+    `02_researcher/grouping.json` (for theme_id → title resolution) and
+    `03_provocateur/selection.json` (for assignments_by_member).
+
+    Returns: { member_name: [normalized_theme_title, ...], ... }
+
+    Member names are taken verbatim from the prior selection — the
+    caller is responsible for ensuring the same council membership
+    across nights (or accepting that renamed members won't filter).
+
+    On any prior-night load failure (missing files, bad JSON, missing
+    fields), raises a SystemExit with a clear message — silent partial
+    loading would mean the filter quietly under-applies, which is the
+    failure mode operator-side review can't catch.
+    """
+    out: dict[str, list[str]] = {}
+    for run_dir in prior_run_dirs:
+        sel_path = run_dir / "03_provocateur" / "selection.json"
+        gr_path = run_dir / "02_researcher" / "grouping.json"
+        if not sel_path.exists():
+            raise SystemExit(
+                f"Prior-night selection.json not found: {sel_path}\n"
+                f"  --prior-nights expects each path to be a Provocateur "
+                f"run_dir (containing 03_provocateur/selection.json)."
+            )
+        if not gr_path.exists():
+            raise SystemExit(
+                f"Prior-night grouping.json not found: {gr_path}\n"
+                f"  --prior-nights expects 02_researcher/grouping.json next "
+                f"to 03_provocateur/selection.json."
+            )
+        sel = json.loads(sel_path.read_text(encoding="utf-8"))
+        gr = json.loads(gr_path.read_text(encoding="utf-8"))
+        title_by_id = {
+            t["theme_id"]: t.get("title", "")
+            for t in gr.get("themes", [])
+        }
+        assignments = sel.get("assignments_by_member", {})
+        for member_name, theme_ids in assignments.items():
+            out.setdefault(member_name, [])
+            for tid in theme_ids:
+                title_norm = _normalize_theme_title(title_by_id.get(tid, ""))
+                if title_norm and title_norm not in out[member_name]:
+                    out[member_name].append(title_norm)
+    return out
+
+
 def _fill_template(template: str, substitutions: dict[str, str]) -> str:
     """Substitute {{placeholder}} values in a prompt template.
 
@@ -427,28 +495,47 @@ def python_select(
     triage_flags_result: dict,
     grouping: dict,
     council: dict,
+    prior_assignments_by_member: dict[str, list[str]] | None = None,
 ) -> dict:
     """Node 2: deterministic Python Selection. No LLM call.
 
-    Algorithm (v3):
+    Algorithm (v3, with C9 cross-night exclusion 2026-05-01):
     1. Drop themes Triage Part B vetoed (worth_surfacing=false)
     2. Convert per-voice activations to scores (strong=3, moderate=2)
     3. Compute theme_quality per theme:
          base = sum(scores across all voices)
          theme_quality = base * friction_mult * fault_line_mult
     4. Per-voice candidate list = themes scoring >= activation_threshold,
-       sorted by (own_score desc, theme_quality desc), capped at hard_cap
+       sorted by (own_score desc, theme_quality desc), capped at hard_cap.
+       **C9 exclusion**: when `prior_assignments_by_member` is supplied
+       (Night 2/3 production), themes whose title (normalized) was
+       already assigned to that member on a prior night are filtered out
+       of the candidate list. Theme_ids are not stable across Researcher
+       runs, so the match is by normalized title.
     5. Quorum pass: drop themes with < min_members_per_theme assigned
     6. Cascade: voices whose assignment was dropped pick the next
        candidate from their list. Iterate until stable.
     7. Force-fit min: any voice with 0 assignments gets their highest-
-       ranked surviving theme regardless of activation level.
+       ranked surviving theme regardless of activation level. **C9:
+       force-fit also honors exclusions** — a voice with all candidates
+       excluded ends with zero assignments rather than re-deploying
+       prior-night territory; recorded in `prior_exclusions_blocked`.
     8. Soft stretch swap: if a voice has zero is_stretch=true assignments
        and at least one stretch theme in their candidates, swap their
        lowest-quality assignment for the highest-scoring stretch theme.
-    9. Output assignments_by_member + kept_themes + dropped_themes.
+       Stretch swap candidates are also exclusion-filtered.
+    9. Output assignments_by_member + kept_themes + dropped_themes +
+       diagnostic blocks (forced_fits, stretch_swaps, prior_exclusions).
 
     All knobs read from council['selection_parameters'].
+
+    Args:
+        prior_assignments_by_member: optional dict { member_name: [
+            normalized_theme_title, ... ] } from prior nights. When
+            provided, candidates whose title matches a prior assignment
+            for that member are excluded. Spec §"Night 2 is different
+            from Night 1". Helper `load_prior_assignments_by_member`
+            builds this from prior-night run_dirs.
     """
     logger = _get_logger()
     params = council.get("selection_parameters", {})
@@ -465,6 +552,43 @@ def python_select(
 
     voice_names = [m["name"] for m in council["members"]]
     theme_by_id = {t["theme_id"]: t for t in grouping.get("themes", [])}
+
+    # ---- C9 exclusion setup: build per-member excluded-title sets ----
+    # Spec §"Night 2 is different from Night 1": on Night 2/3, exclude
+    # (member, theme) pairs that were already assigned on prior nights.
+    # Theme_ids are not stable across Researcher runs (each run generates
+    # fresh sequential IDs), so the match is by normalized title.
+    # Empty dict (default) means Night 1 behavior — no filtering.
+    prior_excluded_titles: dict[str, set[str]] = {}
+    if prior_assignments_by_member:
+        for member_name, titles in prior_assignments_by_member.items():
+            prior_excluded_titles[member_name] = set(titles)
+
+    # Build current theme title lookup (normalized) for fast exclusion.
+    current_title_by_id: dict[str, str] = {
+        tid: _normalize_theme_title(theme_by_id.get(tid, {}).get("title", ""))
+        for tid in theme_by_id
+    }
+
+    def _is_excluded(voice: str, theme_id: str) -> bool:
+        """True if (voice, theme_id) matches a prior-night assignment.
+
+        Uses normalized current title — if the current run has no title
+        for this theme_id (mis-shaped grouping), returns False (don't
+        accidentally exclude themes we can't identify).
+        """
+        excluded = prior_excluded_titles.get(voice)
+        if not excluded:
+            return False
+        cur_title = current_title_by_id.get(theme_id, "")
+        return bool(cur_title) and cur_title in excluded
+
+    # Track exclusion impacts for diagnostics. Use a set keyed on
+    # (voice, theme_id) for dedup — candidates_for() may be called
+    # multiple times during the cascade (Step 5-6) and would otherwise
+    # double-record. Realized as a list at the end of the algorithm.
+    _exclusion_pairs: set[tuple[str, str]] = set()
+    prior_exclusions_blocked: list[dict] = []  # voices that hit zero due to filter
 
     # ---- Step 1: Drop themes Triage vetoed --------------------------
     flags_by_theme = {
@@ -520,11 +644,20 @@ def python_select(
     # ---- Step 4: Per-voice candidate lists, capped at hard_cap ------
     def candidates_for(voice: str) -> list[str]:
         """Themes this voice scores >= threshold on, sorted by
-        (own_score desc, theme_quality desc, theme_id stable)."""
-        cands = [
-            tid for tid in alive_theme_ids
-            if voice_scores[voice].get(tid, 0) >= threshold
-        ]
+        (own_score desc, theme_quality desc, theme_id stable).
+
+        C9: prior-night assignments for this voice (matched by normalized
+        title) are excluded from the candidate pool. Each excluded
+        theme is recorded in `prior_exclusions_applied` for diagnostics.
+        """
+        cands = []
+        for tid in alive_theme_ids:
+            if voice_scores[voice].get(tid, 0) < threshold:
+                continue
+            if _is_excluded(voice, tid):
+                _exclusion_pairs.add((voice, tid))
+                continue
+            cands.append(tid)
         cands.sort(
             key=lambda tid: (
                 -voice_scores[voice].get(tid, 0),
@@ -576,28 +709,45 @@ def python_select(
         assignments[v] = [tid for tid in assignments[v] if tid in keep]
 
     # ---- Step 7: Force-fit minimum -----------------------------------
+    # C9: force-fit picks must also honor exclusions. A voice with all
+    # candidates filtered ends with zero rather than re-deploying
+    # prior-night territory.
     forced_fits: list[dict] = []
     for v in voice_names:
         if len(assignments[v]) >= min_per_voice:
             continue
-        # Find the highest-ranked surviving theme for this voice,
-        # regardless of activation level
         vr = voice_results_by_name.get(v, {})
+        # Highest-ranked surviving theme that ALSO isn't excluded
         surviving_ranked = [
             rt["theme_id"] for rt in vr.get("ranked_themes", [])
             if rt["theme_id"] in keep
+            and not _is_excluded(v, rt["theme_id"])
         ]
         if not surviving_ranked:
-            # Voice has nothing in their ranked list that survived —
-            # try flat themes as last resort (anything > nothing)
+            # Try flat themes as last resort, also exclusion-filtered
             surviving_flat = [
                 ft["theme_id"] for ft in vr.get("flat_themes", [])
                 if ft["theme_id"] in keep
+                and not _is_excluded(v, ft["theme_id"])
             ]
             if surviving_flat:
                 pick = surviving_flat[0]
                 assignments[v].append(pick)
                 forced_fits.append({"voice": v, "theme_id": pick, "from": "flat"})
+            else:
+                # Voice has zero non-excluded themes — record as
+                # blocked-by-prior-exclusions for operator visibility.
+                # Better to ship voice-with-zero than re-deploy already-
+                # covered territory.
+                if prior_excluded_titles.get(v):
+                    prior_exclusions_blocked.append({
+                        "voice": v,
+                        "reason": (
+                            "all surviving themes for this voice (ranked + flat) "
+                            "match prior-night assignments; voice ends with zero "
+                            "assignments rather than re-deploying covered territory"
+                        ),
+                    })
         else:
             pick = surviving_ranked[0]
             if pick not in assignments[v]:
@@ -687,6 +837,31 @@ def python_select(
             f"  below target ({target_per_voice}): {len(below_target)} voices — {names}"
         )
 
+    # C9 exclusion diagnostics (always emitted; empty when no prior nights).
+    # Materialize the deduped exclusion set into a sorted list with full
+    # context (voice, theme_id, title) for operator visibility.
+    prior_exclusions_applied = sorted(
+        [
+            {
+                "voice": v,
+                "theme_id": tid,
+                "title": theme_by_id.get(tid, {}).get("title", ""),
+            }
+            for (v, tid) in _exclusion_pairs
+        ],
+        key=lambda d: (d["voice"], d["theme_id"]),
+    )
+    if prior_exclusions_applied:
+        logger.info(
+            f"  prior-night exclusions applied: {len(prior_exclusions_applied)} "
+            f"(voice, theme) pairs filtered from candidate lists"
+        )
+    if prior_exclusions_blocked:
+        logger.warning(
+            f"  prior-night exclusions BLOCKED {len(prior_exclusions_blocked)} "
+            f"voice(s) from any assignment — operator review recommended"
+        )
+
     return {
         "assignments_by_member": assignments,
         "kept_themes": kept_themes_view,
@@ -695,6 +870,11 @@ def python_select(
         "forced_fits": forced_fits,
         "stretch_swaps": stretch_swaps,
         "below_target": below_target,
+        "prior_exclusions_applied": prior_exclusions_applied,
+        "prior_exclusions_blocked": prior_exclusions_blocked,
+        "prior_nights_consumed": (
+            len(prior_assignments_by_member or {})
+        ),
         "selection_parameters_used": {
             "activation_threshold": threshold,
             "min_members_per_theme": min_per_theme,
@@ -1091,7 +1271,10 @@ def package_voice_briefings(
 # --- Flow orchestrator ----------------------------------------------------
 
 @flow(name="provocateur-pipeline")
-def run_provocateur(run_root: str | Path) -> dict:
+def run_provocateur(
+    run_root: str | Path,
+    prior_run_dirs: list[str | Path] | None = None,
+) -> dict:
     """Run the v3 Provocateur pipeline end-to-end against a run directory.
 
     v3 architecture:
@@ -1226,12 +1409,32 @@ def run_provocateur(run_root: str | Path) -> dict:
     # whatever Triage data is currently on disk + whatever editorial knobs
     # are currently in council_config.json. Caching it would silently use
     # stale assignments when someone changes selection_parameters.
+    #
+    # C9 cross-night exclusion: if prior_run_dirs is supplied (Night 2/3),
+    # load (member, theme_title) assignments from each prior night's
+    # selection.json + grouping.json and pass into Selection. The filter
+    # uses normalized titles since theme_ids are not stable across runs.
+    prior_assignments: dict[str, list[str]] = {}
+    if prior_run_dirs:
+        prior_paths = [Path(p) for p in prior_run_dirs]
+        logger.info(
+            f"  Loading prior-night assignments from {len(prior_paths)} "
+            f"run_dir(s) for C9 exclusion filter"
+        )
+        prior_assignments = load_prior_assignments_by_member(prior_paths)
+        n_pairs = sum(len(v) for v in prior_assignments.values())
+        logger.info(
+            f"    {n_pairs} (member, theme) pair(s) carried forward "
+            f"across {len(prior_assignments)} member(s)"
+        )
+
     selection_path = out_dir / "selection.json"
     selection_result = python_select(
         triage_voice_results=triage_voice_results,
         triage_flags_result=triage_flags_result,
         grouping=grouping,
         council=council,
+        prior_assignments_by_member=prior_assignments,
     )
     write_json_atomic(selection_path, selection_result)
     logger.info(f"  wrote {selection_path}")
@@ -1385,9 +1588,47 @@ def run_provocateur(run_root: str | Path) -> dict:
 
 # --- CLI -----------------------------------------------------------------
 
+def _parse_args(argv: list[str]) -> tuple[Path, list[Path]]:
+    """Parse argv into (run_root, prior_run_dirs).
+
+    Supported forms:
+        python flows/provocateur_flow.py <run_root>
+        python flows/provocateur_flow.py <run_root> --prior-nights <run_dir>[,<run_dir>...]
+
+    --prior-nights is a comma-separated list of prior-night run_dir paths
+    (the parent directories of 02_researcher/ + 03_provocateur/). Used
+    on Night 2/3 to apply the C9 exclusion filter — (member, theme_title)
+    pairs from prior nights are excluded from this night's candidate
+    pool. Spec §"Night 2 is different from Night 1".
+    """
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Run the Provocateur Pipeline against a run directory."
+    )
+    parser.add_argument(
+        "run_root",
+        type=Path,
+        help="Run directory containing 02_researcher/ output.",
+    )
+    parser.add_argument(
+        "--prior-nights",
+        type=str,
+        default=None,
+        help=(
+            "Comma-separated list of prior-night run_dirs. On Night 2 or 3, "
+            "apply the C9 cross-night exclusion filter so a voice doesn't "
+            "re-deploy territory it already covered on a prior night. "
+            "Match is by normalized theme title (theme_ids are not stable "
+            "across Researcher runs)."
+        ),
+    )
+    args = parser.parse_args(argv)
+    prior: list[Path] = []
+    if args.prior_nights:
+        prior = [Path(p.strip()) for p in args.prior_nights.split(",") if p.strip()]
+    return args.run_root, prior
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python flows/provocateur_flow.py <run_root>")
-        print("Example: python flows/provocateur_flow.py runs/dev_msc_test")
-        sys.exit(1)
-    run_provocateur(sys.argv[1])
+    run_root, prior_run_dirs = _parse_args(sys.argv[1:])
+    run_provocateur(run_root, prior_run_dirs=prior_run_dirs or None)
