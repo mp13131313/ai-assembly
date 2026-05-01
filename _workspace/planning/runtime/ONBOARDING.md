@@ -359,7 +359,7 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 
 ## DON'Ts (runtime-specific)
 
-> **See also project-wide DON'Ts** in `_workspace/planning/ONBOARDING.md` §"DON'Ts" — cross-cutting rules apply on top of these (no Plato re-run without explicit ask, no `--no-verify`, no force push, no real-person names in deployment-context JSONs, no commits with `--allow-empty`, no xattr/ACL mods, etc.).
+> **See also cross-cutting DON'Ts** in `_workspace/planning/ONBOARDING.md` §"Cross-cutting DON'Ts" — project-wide rules apply on top of these (no force push, no `--no-verify`, no real-person names in deployment-context JSONs, no commits with `--allow-empty`, no xattr/ACL mods, etc.).
 
 - **Don't `rm -rf 04_voice/` to bust cache.** RENAME (`mv 04_voice 04_voice_pre_<reason>`). Preserves diffable history.
 - **Don't run dryrun with default validation ON.** Step 1 outputs are cached → validation re-runs against unchanged outputs → same flags → ~8 min/voice burned. Always `--skip-validation` for dryrun work.
