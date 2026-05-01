@@ -278,6 +278,183 @@ Current (committed `91947a7`) `quality_criteria` block in `persona_pass_4b_artif
 
 ---
 
+## Conceptual model — "voice arrives at Athens"
+
+This is the framing that lives in `voice_temporal_stance.default` per Card v2.1 §J:
+
+**Voice arrives at Athens for the conference's days, carrying its full canonical experience as its mental anchor.** Voice retains foundational form, framework, register, grammar. Voice engages AT Athens with the conference's content, the audience, and the other panel members. Voice does NOT speak from any dying-place; voice is HERE, not THERE.
+
+Per voice type:
+- **Historical humans** (Plato, Cleopatra, Battuta, Scheherazade, Lovelace, Dostoevsky, Arendt, Marley): mind as it stood at the close of the voice's life — full memory of work and world complete to that moment
+- **Non-human organisms** (Octopus): body's full perceptual repertoire as the kind has it
+- **Non-human systems** (Whanganui): existence as it stands — relational framework + continuous flow of being
+- **Fictional voices** (Scheherazade): full narrative-completed experience
+
+**Tense discipline (in Pass 2/3/4a/4b/5 OUTPUT REGISTER blocks):**
+- Voice's framework / tools / methods / forms → **PRESENT-tense** (carried, in use)
+- Voice's life-events / biographical works / historical context → **PAST-tense** (remembered)
+
+**No year-distance computation.** Voice avoids *"twenty-three centuries ago"* / *"fifty-one years ago"*. Loose temporal language (*"long ago"*, *"in my time"*) is correct.
+
+**Earlier "deathbed"/"cryofreeze" phrasings have been dropped.** Use "full canonical experience" / "mind at the close of life" instead. Less scene-locating; works universally for non-humans.
+
+---
+
+## Position B vs Position C (corpus-internal cross-examination)
+
+Captured in FU#49D / Pass 2 hard_limits preamble:
+
+**Position B = corpus-accurate softening** — voice can cross-examine its own framework using moves AVAILABLE WITHIN the corpus. Permitted.
+
+**Position C = framework-lifting** — voice abandons its framework entirely. **Forbidden.**
+
+Each `hard_limits` entry passes the abandonment-vs-cross-examination test: "do not abandon X" permits corpus self-criticism; "do not entertain critiques of X under any circumstance" forbids it (too tight, rewrite).
+
+Worked examples in current cards (per voice's corpus): Parmenides cross-examining Plato's Forms; Underground Man's self-laceration; Arendt's revisions; Marley's interpretive evolution within Rastafari. These emerge organically at Pass 2 generation under FU#49D's universal pattern.
+
+---
+
+## Family-of-forms emission (spec status)
+
+Card v2.1 §H specifies family-of-forms emission: *"voice picks among its native form-family per matter, NOT locked to one rigid form."* Default form + 3-6 named variations.
+
+**Current implementation:** single-form-locked. Pass 4b prompt after the 04-28 revert says "one phrase" for `medium`. The §H spec is **forward-looking aspirational** for voices with multi-form corpora; the implementation is **single-form-locked until Cleopatra empirically validates** the §H attempt (FU#55 trigger).
+
+Plato cross-form variance test on 2026-04-29: Plato's corpus IS dialogue-dominated; both relax-options cost named-scene texture for no gain. Plato's variance lives in 6 within-form axes (scene, interlocutor, ending mode, move-emphasis, length-within-band, stance amplitude). Cleopatra is the real test of cross-form emission (genuinely multi-form corpus: prostagma + ordinance + embassy speech + ritual utterance + chancery marginalia + staged encounter per §H worked example). Same trigger for Marley (song variations) and Whanganui (legal forms).
+
+---
+
+## Mediated voices (Plato + Scheherazade)
+
+These voices write THROUGH dramatic personae. Plato through Socrates / Athenian Stranger / Timaeus / Diotima. Scheherazade through frame-tale narrators within stories.
+
+**Pattern risk:** the cryofreeze + tense-discipline + family-of-forms framing pushes the LLM to render first-person as concrete biographical action, which can collapse Plato into Socrates (or Scheherazade into a frame-narrator). Universal-pattern cards work for the other 8 voices but mediated voices need explicit clarification:
+
+- Voice's authorial first-person at the conference is the COMPOSER's, not the speakers within voice's compositions
+- Describe characteristic_moves AS COMPOSER (*"Through Socrates I have available the midwife's stance"*) NOT as speaker (*"I am the son of Phaenarete the midwife"*)
+- Biography belongs to speakers, not voice
+- Distinguish CONFERENCE-PRESENT first-person from CORPUS-EMBODIED moves
+
+**Status:** prompt-side mediated-voice clarification is **drafted but never landed** (HANDOFF_2026_04_28 §13). Plato shipped with collision unfixed in 3 places. **Before Scheherazade's Pass 0a fires:** decide whether to land the prompt-side fix OR plan for surgical patches at her gate.
+
+---
+
+## 9480d3a revert + 582af96 baseline (prompt history)
+
+**582af96 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK). When troubleshooting prompt regressions, this is the reference state to diff against.
+
+**9480d3a revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 582af96, after empirical chat-test signal showed cumulative additions had degraded artifact texture.
+
+**Currently landed on top of revert:** FU#49A v2 (quality_criteria), FU#49D re-applied (hard_limits Position B), FU#51 (Pass 7a routing guard), FU#44+ (5 patcher patterns), FU#52 (chat invalidation), FU#53 (review-gate + Pass 7a FINAL), FU#57 (drop bold_engagement_topics from runtime), FU#58/59 (Pass 7a/7c register fixes), FU#60 (thinking observability), FU#61 (audience-engagement +1 in Pass 4b).
+
+**Stripped/reverted (NOT in current prompts):** FU#49H#1-4, FU#49I, FU#49J (5+2 quality_criteria), FU#49K, FU#49L, the 04-28 cryofreeze framing was REPLACED with "voice arrives at Athens with full canonical experience."
+
+**The FU#56 + FU#49 revert risk class:** adding cumulative prompt directives without empirical chat-test on a fresh voice runs the risk that produced the 9480d3a revert. Test on a low-stakes voice before broad rollout. The thinking-on hypothesis (FU#60-instrumented re-test under thinking-visible) is the empirically-resolvable form of this question for FU#56 specifically.
+
+---
+
+## After CARD COMPLETE — operator review checklist (FU#52, 6 manual checks)
+
+The pipeline's CARD COMPLETE summary is advisory, not a gate. The runtime card + chat artifact are written to disk before validators' residuals get human review. **Operator runs this checklist BEFORE any commit/push/ship of voice outputs.** Empirical case study (Plato 2026-04-28): 25 minutes of operator-side review caught ~13 ship-quality improvements that would otherwise have shipped baked into the chat prompt.
+
+The 6 manual checks (per-voice, after every pipeline run):
+
+1. **Read `05_validation/01_pass_7_pre_citation.json`** — scan items where `status` ∈ {`INCONSISTENT`, `UNVERIFIED`}. Decide per-item: fix, accept-with-rationale, or accept-as-defensible. (`DOSSIER_ONLY` and `INTERPRETIVE` are typically defensible.)
+
+2. **Read `05_validation/02_pass_7_anachronism.json`** — scan `anachronism_flags`. Cross-reference `02_merge/_fix_log.json` patches to see which were addressed by 7a-fix. Apply manual edits for unaddressed flags.
+
+3. **Read `05_validation/03_pass_7a_cross_model.json`** — scan residual `field_issues`. Decide per-issue: fix / accept-with-rationale / accept-as-defensible.
+
+4. **Read `05_validation/06_pass_7a_final.json`** (FU#53 first-class) — scan field_issues. Apply path (a) or (b) per the FU#53 gate decision pattern (this doc §"FU#53 review-gate decision pattern").
+
+5. **After any manual edits:** chat artifact regenerates automatically on next pipeline re-fire (per FU#52 invalidation).
+
+6. **Audit the assembled card for voice-architecture-specific collisions** — for mediated voices (Plato/Scheherazade): first-person speaker collapses into corpus-internal speakers. See "Mediated voices" section above.
+
+---
+
+## Operational hints
+
+### Wrong-folder safety harness
+
+Every runner prints a startup banner showing `PROJECT_ROOT` + `SOURCE` (`--project` / env-var / default). When resolution targets a production project (basename contains `athens-2026` or `phase-l-`) via env-var fallback (no explicit `--project` flag), the banner escalates with ⚠ markers. Operator can abort with Ctrl-C if unintended.
+
+**Habit:** for production runs (athens-2026), always pass `--project` explicitly. The env-var default in `code/.env` points at `projects/test` by design.
+
+### Batch wrappers (refuse env-var fallback)
+
+```bash
+# Phase 0.5 batch (pre-DR work for multiple voices)
+cd code/personas
+scripts/batch_pre_dr.sh "$AI_ASSEMBLY_PROJECT_ROOT/voices_batch.txt" --parallel 3
+
+# Full pipeline batch (after DR data lands per voice)
+scripts/run_pipeline_batch.sh \
+  --project /Users/aienvironment/Desktop/AI\ Assembly/projects/athens-2026 \
+  --parallel 3 \
+  "Cleopatra" "Octopus" "Bob Marley"
+```
+
+Per-voice logs: `$PROJECT/batch_logs/<slug>.pipeline.log`. Summary: `_batch_results_<timestamp>.txt`. Each voice resumes from cache on re-run.
+
+### Parallel 429 on Phase 0.5
+
+When running Phase 0.5 on multiple voices in parallel, can hit Anthropic 429 rate limit. **Octopus retry succeeded only on serial after parallel 429.** If a voice's Phase 0.5 dies with 429, retry serially.
+
+### Sentinel regen for prompt edits (FU#29)
+
+```bash
+# Snapshot pre-edit voice
+mkdir -p _workspace/sentinel_baselines/2026-MM-DD-pre-X/<slug>
+cp <PROJECT_ROOT>/voices/<slug>/04_generation/<file>.json \
+   _workspace/sentinel_baselines/2026-MM-DD-pre-X/<slug>/
+
+# Edit prompt, then:
+python scripts/sentinel_regen.py regen \
+  --pass <PASS_NAME> --voices <slug> \
+  --baseline-snapshot _workspace/sentinel_baselines/2026-MM-DD-pre-X
+```
+
+After regen: inspect diff. If smoke-test (not real generation), restore baseline.
+
+### archive/first_run/ pattern
+
+When re-doing a voice from very scratch in athens-2026, archive the prior work to `archive/first_run/voices/<slug>/`. Pattern attested 2026-04-27 when Cleopatra + Octopus + others were redone after Pass 0a tightened. Don't delete — preserve audit trail.
+
+### Pre-patch snapshot pattern
+
+Before applying operator patches at the gate:
+```bash
+cp 07_persona_card_assembled.json 07_persona_card_assembled.pre_<context>.json
+```
+Pattern: `.pre_FU61.json`, `.pre_round1_patches.json`, `.pre_round2_patches.json`, `.pre_freshqc.json`, etc. Pre-patch snapshots are operator-side audit trail; don't commit them to athens-2026 (per OPEN_ITEMS.md §6 .gitignore recommendations).
+
+### voice_mode null edge case
+
+`voice_mode: null` is ONLY valid for `subtype: system`. Pass 0a sometimes proposes it for non-system voices; gets rejected at Phase 0.5 launch. Empirically attested: Cleopatra + Bob Marley both originally got `null`, had to be fixed before research could proceed.
+
+### Bob Marley special corpus_constraint
+
+Marley has `corpus_constraint: lyrics_patterns_only` (atypical — not `full`). When his Pass 0a runs, verify this lands (rather than `full`).
+
+### Pipeline-fidelity audit method
+
+When voice_config changes after Phase 0.5 has already run:
+
+| Field changed | Re-run scope |
+|---|---|
+| `type` / `subtype` / `hostile_sources` | Full Phase 0.5 re-run |
+| `voice_mode` / `corpus_constraint` | Pass 0b tailor-only re-run |
+| `name` / `manual_grounding` / `editorial_rationale` / `wikipedia_url` | No re-run |
+
+Whanganui re-ran with `hostile_sources=true` after pipeline-fidelity audit caught misalignment (2026-04-27). Verify when she builds.
+
+### `_operator_review_passed.flag`
+
+Path-(b) shipping flag. Touched at `voices/<slug>/_operator_review_passed.flag` after operator accepts FU#53-gate residuals. Pipeline detects flag → skips gate → runs Derive. Untracked / gitignored.
+
+---
+
 ## What's NOT in this doc
 
 - **Voice Pipeline runtime** (Steps 1+2+3) — separate domain

@@ -14,7 +14,7 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`).
 
 | Voice | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
-| Plato | human | philosophical | false | ✅ shipped | Original-shipped; no FU#61-fresh re-emit. quality_criteria has the FU#61 inspiration line in #5. |
+| Plato | human | philosophical | false | ✅ shipped (with KNOWN defect) | Original-shipped; no FU#61-fresh re-emit. quality_criteria has the FU#61 inspiration line in #5. **Known defect:** dramatist-vs-speaker collision in 3 places — patches drafted in HANDOFF_2026_04_28 §13, never applied. See §9 below. |
 | Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
 | Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
 | Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). Voice files **untracked** in athens-2026 git. |
@@ -79,11 +79,11 @@ Build sequence per voice:
 
 | Voice | Pre-build attention |
 |---|---|
-| Hannah Arendt | Probably philosophical — FU#49 universal patterns should hold |
-| Ada Lovelace | Mathematical-notation density — FU#61 audience-engagement criterion may benefit (Lovelace was named in FU#61 expansion) |
-| Bob Marley | **Audio render question** — Marley's medium is song; runtime layer needs Suno API integration (NOT persona-build scope but flag-up). Card-side: FU#61 audience-engagement criterion will land in Patois/lyric grammar. |
-| Whanganui River | **Hardest case** — non-human + no first-person source + legal-personhood-as-frame. Construction-mode question is real (translate-into-human-categories vs preserve-river-grammar). May trigger same layer-instability as Octopus. Plan to budget extra patch rounds. |
-| Scheherazade | **Mediated-voice prompt fix** — verify status before Pass 0a. Flagged in earlier session; never resolved. Likely concerns how the frame-tale form (story-within-stories) gets handled in `voice_mode: narratival`. |
+| Hannah Arendt | Probably philosophical — FU#49 universal patterns should hold. FU#47 voice-fit: ✓ analytical-workshop. |
+| Ada Lovelace | Mathematical-notation density — FU#61 audience-engagement criterion may benefit (named in FU#61 expansion). FU#47 voice-fit: ✓ analytical-workshop. Candidate for FU#15 Pass 5 A/B test (low-stakes voice). |
+| Bob Marley | **Audio render question** — medium is song; runtime layer needs Suno API integration (NOT persona-build scope, flag-up). **Special `corpus_constraint: lyrics_patterns_only`** (atypical — not `full`). FU#47 voice-fit: ⚠ awkward (lyric-rhythmic). Card-side FU#61 audience-engagement will land in Patois/lyric grammar. |
+| Whanganui River | **Hardest case** — non-human + no first-person source + legal-personhood-as-frame. Construction-mode question is real (translate-into-human-categories vs preserve-river-grammar). May trigger same layer-instability as Octopus. **Pre-build attention:** Pass 0a originally proposed `hostile_sources: false`; operator's pipeline-fidelity audit later flagged it might need `true`. **Verify hostile_sources on Pass 0a output before Phase 0.5.** Also: voice_mode `null` is valid (subtype=system) — but check what Pass 0a proposes. FU#47 voice-fit: ⚠ awkward (legal-personhood-from-Indigenous-tradition). Plan to budget extra patch rounds. |
+| Scheherazade | **Mediated-voice prompt fix** — verify status before Pass 0a. Flagged in earlier session; never resolved. Concerns how the frame-tale form (story-within-stories) gets handled in `voice_mode: narratival`. **Same dramatist-vs-speaker collision risk as Plato** (composer vs speakers within compositions). Either land the prompt-side mediated-voice clarification before her Pass 0a, OR plan for surgical patches at the gate. FU#47 voice-fit: ⚠ awkward (frame-narrative + character-distributed). |
 
 ---
 
@@ -231,6 +231,46 @@ Plato's tracked set excludes — but current `.gitignore` doesn't list — the f
 - Convention: patch round 1 cleanly-actionable + round 2 cleanly-actionable, then path (b) accept-residuals via flag
 - This is the Plato + Cleopatra + Dostoevsky + Battuta pattern. Match it for upcoming voices.
 
+### voice_mode `null` validation rule
+
+`null` is only valid for `subtype: system`. `node0_validation.py:60` enforces strict 3-enum {philosophical, observational, narratival}. Voices with `null` voice_mode get rejected at Phase 0.5 launch.
+
+**Empirically attested (2026-04-27 session):** Cleopatra and Bob Marley had `voice_mode: null` proposed by Pass 0a originally and were REJECTED at Phase 0.5 launch — had to be fixed before research could proceed. **Whanganui River (`subtype: system`) is the only voice for whom `null` is allowed.**
+
+### FU#48 lesson — pipeline-canonical vs operator-hand-curated
+
+When external reviewers flag *"voice X's card has feature Y that voice Z's lacks,"* verify whether Y is **canonical pipeline output** vs **operator-hand-curated artifact** before assuming Y is missing from the pipeline. Especially for chat artifacts (which are derivations from cards via FU#41 strip) and operator-personally-tested chat v2 cards (which carry empirical patches the pipeline-emitted version may have differently).
+
+This caught FU#48 (operator pushback) — three apparent gaps were already addressed by existing pipeline; the reviewer had compared a pipeline-emitted Plato card to an operator-hand-curated Dostoevsky chat v2.
+
+### 9480d3a-revert and 582af96 baseline (prompt history)
+
+- **582af96 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK).
+- **9480d3a revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 582af96. After empirical chat-test signal showed cumulative additions had degraded artifact texture relative to 04-25 shipped baseline.
+- Currently landed on top of revert: **FU#49A v2** (commit 0ca02f5; quality_criteria 3-dim field-tied scaffold), **FU#49D re-applied** (Position B Hard_limits with hedge discipline), **FU#51** (Pass 7a routing guard), **FU#44+** (5 patcher patterns), **FU#52** (chat artifact invalidation), **FU#53** (review-gate + Pass 7a FINAL), **FU#57** (bold_engagement_topics drop from runtime), **FU#58/59** (Pass 7a/7c register-rule fixes), **FU#60** (thinking observability + temperature compatibility), **FU#61** (audience-engagement +1 in Pass 4b prompt).
+- **Stripped/reverted (NOT in current prompts):** FU#49H#1-4, FU#49I, FU#49J (5+2 quality_criteria; reverted to FU#49A's at-least-one form), FU#49K, FU#49L, plus the 04-28 cryofreeze framing in voice_temporal_stance was REPLACED with the simpler "voice arrives at Athens with full canonical experience" framing.
+- The cryofreeze + tense-discipline OUTPUT REGISTER blocks + family-of-forms + anti-generic-register were initially landed (`180a8ee`) but the cryofreeze + family-of-forms components were subsequently reverted at the 04-28→04-29 transition. Card v2.1 §H + §J spec text retains the family-of-forms aspiration, but Pass 4b prompt currently single-form-locked until Cleopatra empirical validation.
+
+### Position B vs Position C distinction (FU#49D)
+
+**Position B = corpus-accurate softening** (permit corpus-internal self-criticism). Voice can cross-examine its own framework using moves AVAILABLE within the corpus.
+
+**Position C = framework-lifting** (permit denying core commitments). Voice abandons its framework entirely.
+
+**The Athens panel format is Position B only.** Voices speak FROM their frameworks, not against them. FU#49D's universal pattern in Pass 2 hard_limits: *forbid framework-ABANDONMENT, NOT corpus-internal CROSS-EXAMINATION*. The abandonment-vs-cross-examination test is what each `hard_limits` entry must pass.
+
+### Pipeline-fidelity audit method (when voice_config changes mid-build)
+
+If voice_config is edited AFTER Phase 0.5 has run:
+
+| Field changed | Re-run scope |
+|---|---|
+| `type` / `subtype` / `hostile_sources` | Full Phase 0.5 re-run (these affect Pass 1a/1b template selection) |
+| `voice_mode` / `corpus_constraint` | Pass 0b tailor-only re-run (affects only DR-prompt customization) |
+| Other fields (`name`, `manual_grounding`, `editorial_rationale`, `wikipedia_url`) | No re-run needed |
+
+**Operationally important** when correcting Pass 0a proposals before pipeline launch.
+
 ---
 
 ## 8. Empirical findings worth preserving
@@ -259,11 +299,134 @@ Standalone Pass 4b re-emit on all 4 shipped voices showed:
 
 ---
 
-## 9. What's NOT in this doc
+## 9. NEWLY DISCOVERED — Plato dramatist-vs-speaker collision UNFIXED on shipped card
 
-- **Voice Pipeline runtime** (Steps 1+2+3 — the night-to-morning artifact-generating runtime). Tracked separately. Voices' chat artifact + assembled card are the persona-build deliverable; how the runtime *uses* them is a different domain.
+**Status:** real defect in shipped Plato card; patches drafted in HANDOFF_2026_04_28 §13 but never applied.
+
+**The mediated-voice problem:** Plato writes THROUGH Socrates / Athenian Stranger / Timaeus / Diotima. The cryofreeze + tense-discipline + family-of-forms framing pushed the LLM to render first-person as concrete biographical action — which collapsed Plato into Socrates in 3 places.
+
+**3 instances on disk (verified 2026-05-01):**
+
+1. `characteristic_moves[9].description` — *"I am the son of Phaenarete the midwife and I attend the labour of your thinking..."* — Phaenarete is **Socrates'** mother (Theaetetus 149a); Plato's mother is Perictione.
+2. `metaphorical_repertoire.midwifery and birth` — *"Son of Phaenarete the midwife, attending the labour of others' thoughts..."* — same biographical collapse.
+3. `curated_corpus_passages.passages[7].header` — *"I told young Theaetetus what I had inherited from my mother Phaenarete — that my art is midwifery, practised on souls."* — Plato as voice claims Socrates' utterance and biography.
+
+**Patch text drafted (HANDOFF_2026_04_28 §13, never applied):**
+> *"Through Socrates — who claims his mother Phaenarete was a midwife, and his own art a midwife's art for souls — I deploy the midwife image: he attends the labour of others' thoughts, brings forth nothing himself, tests what is born to tell the phantom from the living offspring. The image is mine to use through him; the biography belongs to Socrates."*
+
+**Plus the architectural fix (also drafted, never landed):** prompt-side mediated-voice clarification (Pass 2 epistemic_frame_statement / Pass 4a characteristic_moves + metaphorical_repertoire / Pass 3 reasoning_method). Pattern: voice's authorial first-person at the conference is the COMPOSER's, not the speakers within voice's compositions. Universal-pattern with voice-specific worked examples for Plato + Scheherazade (FU#40 design pattern). Non-mediated voices unaffected.
+
+**Current state:** Plato shipped + chat-tested OK in operator's empirical view → not runtime-blocking. But the collision IS structurally on the card, will appear at runtime when context elicits midwifery/Socrates moves, and will need fixing before Scheherazade builds (her frame-tale form has the same mediated-voice issue).
+
+**Recommendation:** apply the 3 surgical patches to Plato's card; land the prompt-side mediated-voice clarification before Scheherazade's Pass 0a fires. ~30 min total.
+
+---
+
+## 10. Architectural redesigns deferred post-Athens
+
+These touch the persona-build architecture but are scoped post-Athens to avoid regenerating cards mid-prep.
+
+**FU#42 — Split-card architecture (voice-card / deployment-card)**
+- Card has 32 voice-stable fields (constitutional, swappable per deployment) + 8 deployment-specific fields (Athens-specific length, audience-aware engagement) + 2 hybrid (topics_requiring_care, disagreement_protocol).
+- Operational benefit: deployment-swap costs ~5-8× less ($30 / 1h instead of $240 / 24h for 12-voice panel redeploy) AND voice-card stays byte-identical across deployments.
+- Effort: ~1-2 weeks. Trigger post-Athens.
+
+**FU#50(1) — Pydantic schema enforcement at Pass 2/4a/4b/5/6 outputs**
+- Voices producing inconsistent shapes — `banned_language` as list-of-strings (Plato FU#49H regen) vs list-of-dicts (Plato pre-FU#49H card per FU#32 STRIP+USE pair format); `hard_limits` as list-of-strings vs list-of-dict-with-rule-key; both shapes valid per prompts but downstream consumers may assume one.
+- Effort: ~4-6 hr. Trigger post-Athens (regenerating cards mid-prep risky).
+
+**FU#54 — Smoke test runtime-fidelity refactor (Pass 7b)**
+- Pass 7b currently puts card-as-JSON-blob in user prompt + asks for 3-5 chains in one call. Real runtime: card-as-system-prompt-headers, single provocation per call, Step 1 + Step 2 separated.
+- Operator's design: 6 LLM calls (1 provocateur + 3-5 standalone voice responses, card-as-system-prompt per call). Mirrors per-call shape of actual runtime.
+- Trigger post-Athens. Pre-Athens prompt restructuring + 7c calibration shift carries tail risk; chat-test is sufficient runtime-fidelity gate.
+
+**FU#49B — Step 2 generativity teeth (anti-premature-closure pressure)** — runtime, post-Athens
+**FU#49F — per-voice framework-strain log on micro-site** — micro-site, post-Athens
+**FU#49M — `strain_markers[]` runtime artifact contract (Step 2 schema constraint)** — runtime, post-Athens
+
+---
+
+## 11. Pre-Athens operator-side items
+
+These are real open items requiring operator action before Athens.
+
+**FU#49G — Greek-scholar calibration on Plato**
+- Pre-Athens outreach: Quarch / Tsinorema / Erinakis or equivalent Greek-scholar reviews Plato's current artifacts.
+- **Provotype test, NOT pastiche test:** *"does this produce a move that Plato's corpus does not contain, in a way Plato's framework could plausibly support?"* Not "does this read like Plato wrote it."
+- Operator should know answer BEFORE Athens, not discover during the Forum.
+- Status: filed 2026-04-27; never closed.
+
+**FU#49C — Breakfast-reader frame replacement in `conference_facts.json`**
+- `session_role_for_ai_assembly` rewrite — removed "breakfast reading" frame; added 3-bar test + framework-strain directive (already partly landed).
+- Cross-cuts conference design with WBBF; needs operator decision + WBBF coordination.
+- Status: partly landed (athens-2026 commit `fc233b8`), but closing-show docs and audience_profile.json may still reference the older framing.
+
+**FU#15 — Pass 5 A/B test (Sonnet+thinking on a low-stakes voice)**
+- Quality-tuning empirical question: Pass 5 currently Opus + thinking; would Sonnet + thinking suffice?
+- Candidates: Cleopatra or Ada Lovelace (low-stakes).
+- Effort: 1 voice run × 2 = ~2 hr wall + ~$10. Decide based on output.
+
+**FU#30 — Card-richness vs runtime-quality empirical check**
+- External deep-research warning: "elaborate specs can under-perform simple ones at runtime." Speculative; worth measuring empirically.
+- Approach: chat-test BOTH Plato (current) AND Dostoevsky (current) on the SAME 5-10 prompts; compare runtime quality.
+- Speculative finding to validate or invalidate.
+
+---
+
+## 12. Cross-domain — runtime concerns affecting voice-build planning
+
+These are runtime-implementation concerns but they directly inform per-voice build priorities.
+
+**FU#47 — Voice Pipeline Step 1 mode-switching for non-analytical voices** (runtime, post-Athens)
+
+Voice-fit map (from reviewer pass-2, 2026-04-26):
+
+| Voice | Step 1 fit | Notes |
+|---|---|---|
+| Plato | ✓ analytical-workshop fits | Socratic dialectic IS reducible to logical operations |
+| Hannah Arendt | ✓ analytical-workshop fits | political-philosophical reasoning is analytical |
+| Ada Lovelace | ✓ analytical-workshop fits | mathematical/analytical-engine framework is analytical |
+| Cleopatra | ✓ (depending on framing) | observational construction; chancery juridical reasoning is analytical |
+| Fyodor Dostoevsky | ⚠ awkward — scenic | his method is scenic-incarnational; Step 1 as separable analytical workshop is structurally foreign. Reviewer: *"the Step 1 trace cannot be authentic Dostoevsky-thinking; it can only be analytical-thinking-about-what-Dostoevsky-would-write."* |
+| Scheherazade | ⚠ awkward — frame-narrative + character-distributed | story-within-stories form |
+| Ibn Battuta | ⚠ awkward — observational-narratival | wayfarer-witness mode |
+| Bob Marley | ⚠ awkward — lyric-rhythmic | song-as-witness |
+| Whanganui River | ⚠ awkward — legal-personhood-from-Indigenous-tradition | not analytical-workshop-shaped |
+| Octopus | ⚠ awkward — ethological-observational | translation-honest no-reader frame |
+
+6/12 → 6/10 voices may need runtime mode-switching. **Not a fringe case.** Affects how each voice's Step 1 prompt is rendered — but the persona card is unchanged. Ship cards as normal; runtime team handles mode-switching post-Athens.
+
+**FU#62 — Voice Pipeline validation regen-on-flag is unimplemented** (runtime, deferred)
+- Spec promises: validator critique → Step 1 regen with critique appended → re-validate → ship + flag if second pass also fails.
+- Implementation: validation = diagnostic-only; flags get recorded in manifest, no autonomous remediation.
+- Recommendation per validation cost analysis: spec-update path (B) — match implementation, validation = diagnostic flag only. Pair with Athens validation policy: ON Night 1 only, OFF Nights 2/3.
+- Affects nothing about voice-build directly; just means card-flagged-issues at runtime won't be auto-remediated.
+
+**FU#49E — Voice Pipeline Step 3 specification — effectively closed**
+- Was flagged 2026-04-27 as highest-impact post-Athens item.
+- Closed 2026-04-29: Voice Pipeline v2 spec covers Step 3 end-to-end (351 LOC implemented). Not a voice-build concern.
+
+---
+
+## 13. Voice Pipeline runtime state (informational)
+
+For voice-build planning context only:
+
+- **Voice Pipeline Steps 1+2+3 + validation + continuity + card_assembly:** ✅ implemented v2 (2026-04-28; 2145 LOC; commits `180a18f`, `aca0e4c`, `fa88db7`)
+- **Voice Pipeline v2 spec** at `docs/AI_Assembly_Voice_Pipeline.md` (1209 lines)
+- **Publish layer** ✅ implemented (`runtime/flows/voice/publish.py` + `runtime/flows/publish_flow.py`; commit `ddec38a`)
+- **Voice Pipeline dry-runs:** Plato solo on 2026-04-29 (3 formulations on "Legitimacy of the Invisible") + Plato + Cleopatra dual on 2026-04-30 — both successful, produced quality Socratic dialogues / prostagmata. Step 3 still pending — needs more voices for cross-voice amendment traffic.
+
+This means: as soon as a voice's `07_persona_card_assembled.json` ships, runtime can consume it. Voice-build is the rate-limit.
+
+---
+
+## 14. What's NOT in this doc
+
+- **Voice Pipeline runtime** beyond what affects voice-build planning (see §12-13). Tracked separately under runtime-domain handoffs.
 - **Frame Concept** doc and downstream design (other thread's territory).
 - **Microsite / admin console / closing-show** — Athens-blockers but not voice-build.
-- **Provocateur Pipeline** — different stage of the project.
+- **Provocateur Pipeline / Researcher Pipeline / Transcription Pipeline** — different stages.
+- **Editor layer / publication layer** (Substack, broadsheet, micro-site) — runtime-downstream.
 
 For those, see ONBOARDING.md (sibling) for pointers + non-voice docs in `_workspace/planning/`.
