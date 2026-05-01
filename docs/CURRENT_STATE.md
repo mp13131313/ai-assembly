@@ -51,10 +51,9 @@
 │   │   └── HANDOFF.md                  # cross-repo contract (production, current)
 │   ├── research/                       # PRESERVED Deep Research compass artifacts (5)
 │   ├── _workspace/
-│   │   ├── planning/                   # active: HANDOFF_2026_04_27, FOLLOW_UPS, ONBOARDING
-│   │   ├── archive/                    # historical (planning_2026_04_consolidation/, specs/, fix-plans/)
-│   │   ├── arch_03_baseline_snapshot/  # gitignored: Phase L pre/post snapshots
-│   │   └── sentinel_baselines/         # gitignored: per-prompt-edit snapshots
+│   │   ├── planning/                   # active: ONBOARDING (thin index), FOLLOW_UPS, runtime/, voices/, dated handoffs
+│   │   └── archive/                    # historical (planning_2026_04_consolidation/, runtime_consolidation_2026_05_01/, specs/, fix-plans/)
+│   │   # arch_03_baseline_snapshot/ + sentinel_baselines/ relocated to umbrella ~/Desktop/AI Assembly/archive/ on 2026-05-01
 │   ├── .env                            # shared secrets (gitignored at code/.env)
 │   ├── README.md, CLAUDE.md
 │   └── (other top-level files)

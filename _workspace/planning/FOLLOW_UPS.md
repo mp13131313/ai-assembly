@@ -226,11 +226,12 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Trigger:** when active development settles (Phase L sign-off + Plato + a few more voices).
 - **Action:** tighten back to read-only-only after architecture work fully lands.
 
-#### FU#11 — Workspace archive cleanup ✅ APPLIED 2026-04-27
+#### FU#11 — Workspace archive cleanup ✅ APPLIED 2026-04-27 (relocated 2026-05-01)
 - **Trigger:** Plato shipped + chat-test validated 2026-04-26 = Phase L sign-off.
 - **Pruned:** `_workspace/arch_03_baseline_snapshot/{fu32_complete_20260424_0817, phase_1_complete_20260423_2251, phase_3_fu2_complete_20260424_0844}` — the intermediate post-FU#32 / Phase 1 / post-FU#2 snapshots. Findings absorbed into FOLLOW_UPS.md as completed FU# items; snapshots no longer needed.
 - **Kept:** `baseline_04_generation/` + `baseline_05_validation/` + `baseline_06_derive/` + `baseline_07_persona_card_assembled.json` + `baseline_08_merged_dossier.json` + `baseline_arch_03_audit_sonnet_run.json` (Phase L pre-arch-03 reference) + `stage1_v4_run/` (final Stage 1 output). Total ~1.5MB local-only reference.
 - **Gitignored:** `_workspace/arch_03_baseline_snapshot/` added to `.gitignore` — these are dev artifacts for backward comparison, not pipeline code or project data.
+- **Relocated 2026-05-01:** moved out of `code/_workspace/` to umbrella `~/Desktop/AI Assembly/archive/arch_03_baseline_snapshot/` (per CLAUDE.md "frozen historical runs — NEVER pushed" convention). Same applied to `_workspace/sentinel_baselines/` (per FU#29 sentinel_regen tooling) → `~/Desktop/AI Assembly/archive/sentinel_baselines/`. Both still gitignored locally; relocation removes them from the code repo's `_workspace/` tree where they were never tracked but added clutter. New sentinel_regen runs continue to write to `_workspace/sentinel_baselines/` per existing tooling defaults; relocate to umbrella archive when accumulated.
 - **Original definition (preserved for archival):**
   - **Problem:** `_workspace/arch_03_baseline_snapshot/` accumulated archives from multiple Stage 2 attempts. Useful while debugging; bloat after Phase L sign-off.
 - **Trigger:** Phase L verdict.
