@@ -24,8 +24,8 @@
 | Plato | ✅ shipped (KNOWN defect — dramatist-vs-speaker collision in 3 places, see OPEN_ITEMS §9; patches drafted but unapplied) |
 | Cleopatra | ✅ shipped at FU#61 v3 (committed `c89d186` + `54cd20a`) |
 | Dostoevsky | ✅ shipped via path (b) + FU#61-fresh quality_criteria patched (committed `5088d67`) |
-| Battuta | ✅ shipped via path (b) — voice files **untracked** in athens-2026 git (sweep-commit pending) |
-| Octopus | ⏸ **paused at FU#53 review-gate**, layer-instability finding, path A/B/C deferred |
+| Battuta | ✅ shipped via path (b) — pipeline trail tracked in athens-2026 (`e300508`) |
+| Octopus | ✅ shipped via Path A surgical 6-patch + path (b) — committed `8bb9981` |
 | Hannah Arendt | ❌ not started |
 | Ada Lovelace | ❌ not started |
 | Bob Marley | ❌ not started |

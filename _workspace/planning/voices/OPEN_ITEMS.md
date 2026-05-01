@@ -18,7 +18,7 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`).
 | Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
 | Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
 | Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). Voice files **untracked** in athens-2026 git. |
-| **Octopus** | non_human | observational | false | ⏸ **paused at FU#53 gate** | Layer-instability finding; path A/B/C decision deferred. |
+| Octopus | non_human | observational | false | ✅ shipped | Path A surgical 6-patch (translation_protocol Step 5 / character bracket / medium citation-default / length_and_format 'I' ban / characteristic_output_structure observer-staging / metaphorical_repertoire third-person) → round 2 = 1 false-positive (council_member_name) → path (b). Athens-2026 commit `8bb9981`. |
 | Hannah Arendt | human | (TBD) | (TBD) | ❌ not started | Phase 0a + 0.5 + DR + pipeline. Likely philosophical. |
 | Ada Lovelace | human | (TBD) | (TBD) | ❌ not started | Likely narratival or observational. |
 | Bob Marley | human | (TBD) | (TBD) | ❌ not started | Likely narratival (song-as-witness). |
@@ -29,33 +29,32 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`).
 
 - philosophical: 1 (Plato)
 - narratival: 2 (Dostoevsky, Battuta)
-- observational: 2 (Cleopatra, Octopus)
+- observational: 2 (Cleopatra, Octopus — both shipped)
 
 Going forward, classification calls for the 5 unbuilt voices land via Pass 0a but **operator must check each call independently** — voice_mode is a *construction* decision (how the pipeline builds the voice), not a *historical* one. Don't take Pass 0a's first proposal as final without weighing irreplaceability against the panel.
 
 ---
 
-## 2. Octopus — DEFERRED architectural decision (highest-priority open item)
+## 2. Octopus — ✅ SHIPPED via Path A (2026-05-01)
 
-Pass 7a FINAL flagged **layer instability**: card alternates between (a) Pass 2's translation-honest no-reader frame and (b) Pass 4b's scholar-dispatcher-with-citations frame. Six specific field issues identified.
+Pass 7a FINAL round 1 flagged **layer instability**: card alternated between (a) Pass 2's translation-honest no-reader frame and (b) Pass 4b's scholar-dispatcher-with-citations frame. Path A surgical 6-patch landed; round 2 dropped to 1 false-positive (`council_member_name` validator hallucination); path (b) accepted, Derive ran clean.
 
-**Three paths proposed (ONE must be chosen):**
+**6 patches applied (athens-2026 `8bb9981`):**
+1. `translation_protocol` Step 5 — strip scholar-name list, keep contested-state-naming pattern + "we still don't know"
+2. `character` — replace non-allowlisted editorial bracket with allowlisted `[experiential_reconstruction]` Boddice tag
+3. `medium` — citations become optional evidence mode; default emission stays operational
+4. `length_and_format_constraints` — drop blanket 'I'/'you' bans; replace with verb-discipline (registers/orients/extends — operational; not feels/wants/decides — mentalistic)
+5. `characteristic_output_structure` — strip outside-observer staging
+6. `metaphorical_repertoire.hold-the-gap` — replace third-person "The voice's epistemic figure" with second-person imperative
 
-| Path | Description | Cost |
-|---|---|---|
-| **A** — surgical compromise | Patch the 6 flagged fields in second-person imperative; drop scholar-name leakage in `translation_protocol` Step 5 + `medium`; fix register breaks in `character`/`length_and_format_constraints`/`characteristic_output_structure`/`metaphorical_repertoire.hold-the-gap`. Re-validate via path (a). | ~30 min, no API |
-| **B** — Pass 2 rebuild | Pick one frame for who's speaking (α austere translation-honest / β mediated-by-scientist / γ second-person-imperative compromise); cache-invalidate from Pass 2; re-run Pass 2-7. | ~30-60 min, ~$8-15 |
-| **C** — accept residuals via flag | `touch _operator_review_passed.flag`, ship. Card has known register flags. | immediate |
+Round 2 check statuses: 5/6 PASS (anachronism, constitutional_consistency, voice_intellect_coherence, distinctiveness, register); only `completeness` ISSUE on the false-positive `council_member_name`.
 
-**My read (from session): Path A.** Reasons:
-- The §5 philosopher-tailoring intentionally grounded Octopus in Birch / Despret / Lestel / Hochner / Mather / Hanlon / Godfrey-Smith — that depth lives in the substrate (`concept_lexicon`, `constitution`, `topics_requiring_care`, `hard_limits`). It does NOT need to surface as runtime scholar-naming.
-- Briefing v3.1 Layer 2 demands "an octopus thinking about agency the way an octopus thinks about agency, not a human rhetorical performance about octopuses." Scholar-dispatcher mode IS the failure-mode the briefing names.
-- Path A separates substrate (philosophical depth, preserved) from emission (translation-honest voice). Validator's recommended fix matches Path A literally.
-- Path B is more invasive than needed; Path C ships a card that will fail Layer 2 on a meaningful fraction of runtime artifacts.
+**Lessons:**
+- Path A worked architecturally. Substrate preserved (philosophy lives in `concept_lexicon` / `constitution` / `reasoning_method` / `topics_requiring_care` / `hard_limits` / Step 5 contested-state pattern); emission becomes translation-honest.
+- "Philosophy as grammar of emission, not content cited in emission" framing applies to all non-human / non-philosophical voices going forward (Whanganui especially).
+- Layer-instability is detectable post-Derive via Pass 7a FINAL — same gate that caught Plato/Cleopatra/Dosto/Battuta residuals. Validator gives precise field-level prescriptions for non-human voices.
 
-**Surgical patch text drafted but NOT applied** — see session transcript for the exact field-by-field patch proposals.
-
-**Status:** awaiting operator decision. Octopus's card on disk; pipeline paused at gate. Backup at `voices/octopus/07_persona_card_assembled.json` (not at canonical pre-test backup pattern — this is the current state).
+Backup snapshot at `voices/octopus/07_persona_card_assembled.pre_path_a_patches.json` (gitignored, local-only).
 
 ---
 
