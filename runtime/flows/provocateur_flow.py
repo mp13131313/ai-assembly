@@ -88,8 +88,10 @@ if str(_REPO_ROOT) not in sys.path:
 
 # Load .env from the repo root so ANTHROPIC_API_KEY is available when
 # the flow runs as a script. Same pattern as researcher_flow and
-# transcription_flow.
-load_dotenv(_REPO_ROOT.parent / ".env")
+# transcription_flow. `override=True` defends against the Claude Code
+# agent-shell empty-env bug (parent shell pre-sets API keys to empty
+# strings; default load_dotenv keeps them).
+load_dotenv(_REPO_ROOT.parent / ".env", override=True)
 
 from flows.shared.io import (
     extract_json,
@@ -129,10 +131,16 @@ FORMULATION_MAX_TOKENS = 40000
 
 
 def _thinking_kwargs() -> dict[str, Any]:
-    """Return the thinking block kwargs if thinking is enabled."""
+    """Return the thinking block kwargs if thinking is enabled.
+
+    `display: "summarized"` makes the model's thinking trace visible in
+    the streamed response (Opus 4.7 default is `omitted`, which returns
+    no thinking content). Matches the persona + voice pipeline pattern
+    landed under FU#60.
+    """
     if not PROVOCATEUR_THINKING:
         return {}
-    return {"thinking": {"type": "adaptive"}}
+    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def _get_logger() -> Any:

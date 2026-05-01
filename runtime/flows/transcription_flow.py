@@ -53,7 +53,7 @@ try:
     from prefect import flow, task, get_run_logger
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
-    load_dotenv(_REPO_ROOT.parent / ".env")
+    load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import load_prompt, get_logger, extract_json, write_json_atomic
 except ImportError as e:
     sys.stderr.write(

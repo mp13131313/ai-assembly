@@ -44,7 +44,7 @@ try:
     from prefect import flow, task, get_run_logger
     from prefect.tasks import exponential_backoff
     from dotenv import load_dotenv
-    load_dotenv(_REPO_ROOT.parent / ".env")
+    load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import (
         extract_json,
         get_logger,
@@ -113,17 +113,18 @@ def _thinking_kwargs(budget_tokens: int) -> dict:
     adaptive mode (it's documented in the per-task constants for future
     reference and fallback).
 
-    Extended thinking requires temperature=1.0. This matches the SDK
-    default but is set explicitly for safety against default drift.
+    `display: "summarized"` makes the model's thinking trace visible in
+    the streamed response (Opus 4.7 default is `omitted`, which returns
+    no thinking content). Matches the persona + voice pipeline pattern
+    landed under FU#60.
+
+    Per Anthropic docs §"Feature compatibility": thinking is incompatible
+    with `temperature` and `top_k` modifications — Opus 4.7 returns
+    400 BadRequestError if `temperature` is set on a thinking call.
     """
     if not THINKING_ENABLED:
         return {}
-    return {
-        "thinking": {
-            "type": "adaptive",
-        },
-        "temperature": 1.0,
-    }
+    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 # --- Logger shim ----------------------------------------------------------
