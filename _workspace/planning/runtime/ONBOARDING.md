@@ -55,13 +55,17 @@ runtime/flows/
 
 | Flow | Validated end-to-end | Evidence |
 |---|---|---|
-| Voice Pipeline Steps 1+2 | ✅ Plato solo + Plato/Cleopatra dual | dryruns #2, #3, #4 (2026-04-29) |
+| Voice Pipeline Steps 1+2 | ✅ Plato solo + Plato/Cleopatra dual + 4-voice (Plato/Cleopatra/Dostoevsky/Battuta) | dryruns #2, #3, #4 (2026-04-29) + Legitimacy Tests (2026-05-01) |
 | Voice Pipeline Step 3 | 💤 DORMANT for Athens (A1 RESOLVED 2026-05-01 — Option A skip; module/prompt preserved for ~2-day re-add post-editor/microsite) | dryrun #4 (2026-04-29) validated mechanics in old FU#49E correspondence-shape framing; framing dropped 2026-04-29; option A chosen 2026-05-01 |
 | Validation nodes (anachronism + constitutional) | ✅ on Plato + Cleopatra; diagnostic-only by spec (FU#62 path B 2026-05-01) | dryruns #2 + the FU#61 v3 test (2026-04-30) |
-| Continuity flow | ❌ never exercised end-to-end | OPEN_ITEMS C4 |
-| publish_flow.py | ❌ never run against real Researcher/Provocateur outputs | OPEN_ITEMS C3 |
-| Multi-night sequence | ❌ never exercised | OPEN_ITEMS C4 (Convention A documented but untested) |
-| Multi-voice 3+ engagement | ❌ only 2-voice (Plato + Cleopatra) tested | OPEN_ITEMS C5 |
+| Continuity flow | ✅ verified end-to-end after `ccc6229` bugfix (was broken under `--skip-step3` Athens production CLI) | Legitimacy Test 1, 3-night sequence (2026-05-01) |
+| Multi-night sequence | ✅ exercised (Convention A run_dir-per-night, continuity overlay loads correctly) | Legitimacy Test 1 (2026-05-01) |
+| Multi-voice 4-voice engagement | ✅ all 4 shipped voices in parallel | Legitimacy Test 1 + 2 + 2 v2 (2026-05-01) |
+| Step 2 `focus_decision` synthesis branch | ✅ verified (4/4 voices weave under conceptually-converging input) | Legitimacy Test 2 + 2 v2 |
+| Step 2 `focus_decision` focus-on-one branch | ❌ untested (synthesis bias appears even with distinct titles) | OPEN_ITEMS C18 — Test 3 with truly-divergent topics recommended |
+| `thinking_tokens` runtime accounting | ✅ fixed (was always 0; now computed via count_tokens subtraction) | commit `8c47e1f`; verified live in Test 2 v2 |
+| Anthropic prompt caching | ❌ NOT enabled — Athens-eligible optimization | OPEN_ITEMS C19a (~$60-75 savings across 3 nights) |
+| publish_flow.py | ❌ never run against real Researcher/Provocateur outputs | OPEN_ITEMS C3 (gated on editor + microsite) |
 
 ### Downstream of Voice Pipeline
 
@@ -168,9 +172,20 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `voice-pipeline-v2.1-align-revert` — 20+ commits ahead of `main`. Pushed.
+**Branch:** `voice-pipeline-v2.1-align-revert` — 30+ commits ahead of `main`. Pushed.
 
 **Branch history (chronological — most recent first):**
+- `ee824be` docs(planning): C19 audit + C20 memo + Plato Socrates-death anachronism
+- `1a62043` docs(planning): C15 closed — misdiagnosed (lineage IS populated under .lineage.*)
+- `69372b7` docs(planning): C18 Test 2 v2 result — title-only fix insufficient
+- `366dfe2` docs(planning): external review findings on legitimacy test
+- `8c47e1f` fix(voice + personas): thinking_tokens always 0 across both pipelines (count_tokens subtraction approach)
+- `1c83034` voices/ONBOARDING: DO interrogate Pass 0a review_doc framings (persona thread)
+- `fe8159a` docs(planning): legitimacy-test verification + C15 (Step 2 metadata gap)
+- `ccc6229` fix(voice_flow): continuity must fire after Step 2 when Step 3 is skipped (A1) ⚠️ Athens-blocking
+- `80ac3f1` docs(planning): A1+A2+A3 decisions + C-section closures + Voice Pipeline spec updates
+- `242de7b` feat(runtime/scripts): speaker enrichment + ai_assembly schedule from program data
+- `d4cea03` fix(runtime): FU#60 compliance across researcher + provocateur + transcription
 - `9eb0222` docs(planning): FU#61 v3 LANDED — prompt-driven approach validated end-to-end
 - `91947a7` feat(personas/Pass-4b): FU#61 land — audience-engagement outcome question
 - `a6fa848` fix(personas/clients): retry-on-stream-drop for streaming Claude calls
@@ -340,8 +355,11 @@ All in `<PROJECT_ROOT>/voice-pipeline-dryrun/runs/`:
 | #4 | Plato + Cleopatra dual, Step 3 enabled | ~5:47 | First successful Step 3 cross-voice amendment. Both decided amend. Plato wrote a Socratic dialogue continuation; Cleopatra issued a prostagma back. Honest disagreement at framework level. **In FU#49E correspondence shape — that framing has since been dropped.** |
 | FU#61 v1 (2026-04-30 11:09) | Cleopatra Step 2 only, --skip-validation | ~70 sec | Cold-reader hand-patch (criterion 6 v1). Mostly worked, over-corrected at salutation (lost Greek alphabet + Egyptian transliteration) |
 | FU#61 v3 (2026-04-30 23:24) | Cleopatra Step 2 only, --skip-validation | ~80 sec | 5-criteria reshape (prompt-driven Pass 4b modification). **Best version** — Greek script preserved, inline glosses, plus issue-not-argue mode + honest mark-of-limit + direct queenly speaker acknowledgment |
+| Legitimacy Test 1 (2026-05-01) | 4 voices × 3 nights × 1 formulation, --skip-step3 --skip-validation | ~11 min total | Verified continuity-after-Step-2 bugfix (`ccc6229`) end-to-end. Cross-night memory observed. All 12 artifacts in correct native register. |
+| Legitimacy Test 2 (2026-05-01) | 4 voices × 1 night × 3 formulations, same flags | ~7 min | All 4 voices chose `focus_decision: "woven across all three"` — synthesis branch verified |
+| Legitimacy Test 2 v2 (2026-05-01) | Same as Test 2 with distinct theme_display_titles | ~7 min | Still all wove. Diagnosis: synthesis bias goes deeper than title shape. Verified `thinking_tokens` fix (`8c47e1f`) live |
 
-Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopatra.<version>.json` for diffing.
+Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopatra.<version>.json` for diffing. Test 2 / 2 v2 artifacts at `legitimacy_test1_night{1,2,3}/`, `legitimacy_test2_single_night/`, `legitimacy_test2_v2_divergent_titles/`. Full report: `voice-pipeline-dryrun/legitimacy_test_report.md`.
 
 ---
 
