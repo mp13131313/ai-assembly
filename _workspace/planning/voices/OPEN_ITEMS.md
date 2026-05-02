@@ -498,6 +498,24 @@ Source: `voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (fu
 
 Path of least friction (per runtime memo): persona thread reads test report (`legitimacy_test_report.md` ~423K markdown), considers each finding, decides per-voice resolution. Most are small voice-card patches. **Plato Socrates-death anachronism is load-bearing for Athens** — recommend treating as priority before next promotion to athens-2026.
 
+### 16.5 Decisions (2026-05-02)
+
+Persona thread walked all 4 findings + the inherited dramatist-vs-speaker collision (§9) on 2026-05-02. Decisions:
+
+| # | Item | Decision | Status |
+|---|---|---|---|
+| 16.1 | Plato Socrates-self-referencing-death anachronism 🔴 | **Path A** — sharpen existing `banned_modes[10]` to add "post-character knowledge bleeding into character's first-person speech" subclass with worked example (Socrates does not refer to his own death/trial/cup as past event; does not speak of himself in third person) | ✅ Landed athens-2026 (uncommitted) |
+| §9 | Plato dramatist-vs-speaker collision (3 Phaenarete + 4 blurred headers) | **Path A comprehensive** — 7 patches: `characteristic_moves[9].description` + `metaphorical_repertoire["midwifery and birth"]` (Phaenarete-as-Socrates'-mother corrected) + 5 passage headers ([2] Republic V, [3] Republic X, [4] Phaedrus, [6] Apology, [7] Theaetetus) switched from first-person Plato-as-Socrates to third-person Socrates / composer-frame. 3 borderline headers ([0], [1], [5]) left alone (back halves are clean composer-frame). The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) lands later, before Scheherazade's Pass 0a, but doesn't help already-shipped Plato — surgical patches were the only route. | ✅ Landed athens-2026 (uncommitted) |
+| 16.2 | Plato Theuth/Thamus reach 🟡 | **Path B** — runtime continuity overlay (cross-night recurrence is fundamentally a continuity-state problem; card-side hedging risks false-suppressing the move when matter genuinely calls for it) | Owned by runtime/OPEN_ITEMS C20 |
+| 16.3 | Battuta Tughluq beard-plucking 🟡 | **Path B** — same architecture as Theuth/Thamus | Owned by runtime/OPEN_ITEMS C20 |
+| 16.4 | Dostoevsky closing-on-suspended-judgment 🟡 | **Path B** — same architecture (lowest-stakes of the 5; shape is correct, only phrasing might calcify, continuity overlay catches naturally) | Owned by runtime/OPEN_ITEMS C20 |
+
+**Plato chat artifact** (`06_derive/03_chat_system_prompt.json`) is now stale relative to the patched assembled card. FU#52 invalidates it on next pipeline re-fire (Derive-only via `_operator_review_passed.flag`). **Pending operator decision on whether to re-fire now or batch with future Plato changes.**
+
+**Snapshots preserved** (operator audit trail, gitignored via `.pre_*.json`):
+- `voices/plato/07_persona_card_assembled.pre_socrates_death_patch.json`
+- `voices/plato/07_persona_card_assembled.pre_dramatist_speaker_patch.json`
+
 ---
 
 ## 17. Whanganui transmission-faithful rebuild (in progress, 2026-05-02)

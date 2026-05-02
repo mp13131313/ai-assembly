@@ -783,6 +783,108 @@ if _clean_summary['files_touched'] > 0:
     pass6 = _re_pass6
 
 
+# ---------- PATH-(b) DERIVE-ONLY FAST EXIT (2026-05-02) ----------
+# When `_operator_review_passed.flag` is present at pipeline start AND the
+# assembled card exists on disk, the operator has already accepted the card
+# (path-(b) ship). Subsequent runs (e.g. surgical patches → chat-artifact
+# regen) should skip the validator + fix-pass + register-check + assembly +
+# Pass 7a FINAL + gate cascade entirely and jump straight to Derive. Two
+# reasons this matters:
+#
+# 1. UX/cost — re-running the full validator cascade against a card the
+#    operator has already accepted is ~5 min wall + ~$2 of wasted work
+#    that just re-emits the same diagnoses the operator already decided
+#    to accept via path-(b).
+#
+# 2. Safety — re-running validators risks the auto-patcher applying false-
+#    positive patches against operator-protected content (e.g. Boddice
+#    `[experiential_reconstruction]` / `[projection_warning]` tags allowed-
+#    list-protected by Pass 6.5-clean per FU#33 P1, but flagged as
+#    "leakage" by Pass 7a — ONBOARDING line 165 explicitly says skip the
+#    patch when this fires; auto-patcher has no operator-discretion layer
+#    so the protective guidance only works pre-path-(b)).
+#
+# The existing `fix_log_path.exists()` guard at L1287 handles re-firing
+# fix-pass on a per-voice basis but doesn't cover the wider "validator
+# re-run is wasteful + risky on shipped cards" concern. This fast-exit
+# does.
+operator_flag = _paths.operator_review_flag(SLUG, PROJECT_ROOT)
+_assembled_card_path = _paths.assembled_card(SLUG, PROJECT_ROOT)
+SKIP_TO_DERIVE = operator_flag.exists() and _assembled_card_path.exists()
+if SKIP_TO_DERIVE:
+    print()
+    stamp("=" * 60)
+    stamp("PATH-(b) DERIVE-ONLY FAST EXIT")
+    stamp("=" * 60)
+    stamp(f"  _operator_review_passed.flag + assembled card both present.")
+    stamp(f"  Operator has already accepted the card via path-(b) ship.")
+    stamp(f"  Skipping Pass 7-pre / 7-anach / 7a / fix-pass / 7b / 7c /")
+    stamp(f"  register-check / assembly / Pass 7a FINAL / gate.")
+    stamp(f"  Regenerating Derive (provocateur_profile + evaluation_rubric +")
+    stamp(f"  chat_system_prompt) against operator-accepted card on disk.")
+    stamp("=" * 60)
+
+    # Inline minimal Derive (matches canonical _derive() at L1837).
+    def _derive_fast():
+        assembled = json.loads(_assembled_card_path.read_text())
+        EXCLUDE_FROM_DERIVE = {
+            "metadata",
+            "voice_name", "voice_mode", "pipeline_version", "generated_date",
+            "continuity_block_if_night_2", "continuity_block_artifact_if_night_2",
+        }
+        full_card_for_derive = {k: v for k, v in assembled.items()
+                                if k not in EXCLUDE_FROM_DERIVE}
+        sysp = load_prompt("persona_derive")
+        userp = render("persona_derive_user",
+                       persona_card_json=json.dumps(full_card_for_derive,
+                                                    ensure_ascii=False, indent=2))
+        r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
+                        max_tokens=24000, temperature=1.0, thinking=True,
+                        response_format_json=True)
+        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
+                "model": r["model"], "usage": r["usage"], "result": r["json"]}
+
+    # Force fresh derive — surgical patches mean prior derive is stale.
+    _derive_raw_path = _paths.derive_raw(SLUG, PROJECT_ROOT)
+    if _derive_raw_path.exists():
+        _derive_raw_path.unlink()
+    stamp("DERIVE: Provocateur Profile + Evaluation Rubric (Opus + thinking)")
+    derive_fast = call_or_cache(_derive_raw_path, "Derive (path-b fast)",
+                                 _derive_fast)
+    prov_profile = derive_fast["result"].get("provocateur_profile", {})
+    eval_rubric = derive_fast["result"].get("evaluation_rubric", {})
+    write_json_atomic(_paths.provocateur_profile(SLUG, PROJECT_ROOT),
+                      prov_profile)
+    write_json_atomic(_paths.evaluation_rubric(SLUG, PROJECT_ROOT),
+                      eval_rubric)
+    stamp(f"  provocateur_profile: {len(prov_profile)} fields | "
+          f"evaluation_rubric: {len(eval_rubric.get('identity_tests', []))} identity, "
+          f"{len(eval_rubric.get('reasoning_tests', []))} reasoning, "
+          f"{len(eval_rubric.get('stress_tests', []))} stress")
+    stamp(f"  saved → voices/{SLUG}/06_derive/")
+
+    # Regen chat artifact (FU#41 / FU#52 — mechanical strip from card).
+    _assembled_dict = json.loads(_assembled_card_path.read_text())
+    _chat_path = (_paths.voice_root(SLUG, PROJECT_ROOT) / "06_derive"
+                  / "03_chat_system_prompt.json")
+    write_chat_system_prompt(_assembled_dict, _chat_path)
+    stamp(f"Chat-ready system prompt -> "
+          f"{_chat_path.relative_to(PROJECT_ROOT)}")
+
+    print()
+    stamp("=" * 60)
+    stamp(f"PATH-(b) DERIVE-ONLY COMPLETE for {vi['name']}")
+    stamp("=" * 60)
+    stamp(f"  Voice slug:           {SLUG}")
+    stamp(f"  Card on disk:         preserved (operator-accepted, no fix-pass)")
+    stamp(f"  Derive:               regenerated (3 files in 06_derive/)")
+    stamp(f"  Validators:           skipped (path-(b) fast exit)")
+    stamp(f"  Card path:            voices/{SLUG}/07_persona_card_assembled.json")
+    stamp(f"  Chat prompt:          voices/{SLUG}/06_derive/03_chat_system_prompt.json")
+    stamp("=" * 60)
+    sys.exit(0)
+
+
 # ---------- PASS 7-pre (Citation Verification) — FU#2 chunked 2026-04-24 ----
 # FU#2 2026-04-24: replaced single-shot call that hit Sonnet 4.6's 128K
 # output ceiling on rich cards (empirically hit twice on 2026-04-24
