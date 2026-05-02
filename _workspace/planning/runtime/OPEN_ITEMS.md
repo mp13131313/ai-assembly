@@ -521,7 +521,9 @@ Without this filter, Athens Nights 2 + 3 risked re-deploying voices to territory
 
 **Estimated:** ~30 min once profiles are ready (mostly mechanical concatenation + selection_parameters preserved).
 
-**Sequencing decision 2026-05-01 (operator):** wait until all 10 voices are shipped, then do single-pass population. Operator confirmed all 10 will be ready pre-Athens, so partial-now + re-run-later isn't worth the churn — single mechanical pass when voices track is complete. Currently 4 shipped (Plato, Cleopatra, Dostoevsky, Battuta) + Octopus paused at FU#53 review; 5 unbuilt (Arendt, Lovelace, Marley, Whanganui, Scheherazade).
+**Sequencing decision 2026-05-01 (operator):** wait until all 10 voices are shipped, then do single-pass population.
+
+**Reversed 2026-05-02 PM (athens-2026 `98ca525`):** partial wiring done for the 6 currently shipped voices (Plato, Cleopatra, Dostoevsky, Ibn Battuta, Octopus, Hannah Arendt). Triggered by an empirical correctness issue surfaced during today's Octopus compass rebuild — pre-pipeline council_config Octopus entry used "nine brains" framing that the post-rebuild Octopus card explicitly bans (`banned_language[5]`: "sensationalist; commits to a strong distributed-consciousness claim that the unity-question leaves open"). Runtime Provocateur reading the stale council_config would have been fed framings the voice itself disowns. Same risk less acute but real for the other 5 shipped voices. Plus removed Audrey Tang + Peter Thiel per panel_change_note 2026-04-28. Council_config now has 10 members matching panel_roster.json. Remaining 4 (Ada Lovelace, Bob Marley, Whanganui River, Scheherazade) entries still hold pre-build hand-written content; will be wired when their voice cards ship.
 
 ### C11. Speaker bios in `projects/athens-2026/reference/speakers.json` ✅ FULLY CLOSED 2026-05-01 (219/224 active enriched 97.8%; remaining 5 are not in any recording session — no transcription impact)
 
