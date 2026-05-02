@@ -328,10 +328,10 @@ These are real open items requiring operator action before Athens.
 - Operator should know answer BEFORE Athens, not discover during the Forum.
 - Status: filed 2026-04-27; never closed.
 
-**FU#49C — Breakfast-reader frame replacement in `conference_facts.json`**
-- `session_role_for_ai_assembly` rewrite — removed "breakfast reading" frame; added 3-bar test + framework-strain directive (already partly landed).
-- Cross-cuts conference design with WBBF; needs operator decision + WBBF coordination.
-- Status: partly landed (athens-2026 commit `fc233b8`), but closing-show docs and audience_profile.json may still reference the older framing.
+**FU#49C — Breakfast-reader frame replacement in `conference_facts.json`** ✅ DONE (verified 2026-05-02)
+- `session_role_for_ai_assembly` rewrite landed in athens-2026 `fc233b8` (2026-04-26): removed "breakfast reading" digestible-content frame; added 3-bar test + framework-strain directive + "performing reception without being changed" failure mode.
+- Verified clean across athens-2026 deployment JSONs: `conference_facts.json` carries the new framing (and explicitly distinguishes from the deprecated frame); `audience_profile.json` carries the matched "deepest vulnerability: their well-curated openness is itself how they avoid being changed" register; `panel_roster.json` + `council_config.json` clean of the deprecated frame. No closing-show docs exist in active tree to sweep.
+- Remaining (operator-side, outside code/data repos): WBBF program copy / attendee-facing materials may still describe the AIssembly with the old "breakfast reading" framing — coordinate with WBBF to confirm or update.
 
 **FU#15 — Pass 5 A/B test (Sonnet+thinking on a low-stakes voice)**
 - Quality-tuning empirical question: Pass 5 currently Opus + thinking; would Sonnet + thinking suffice?
