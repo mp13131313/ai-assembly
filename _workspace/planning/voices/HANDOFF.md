@@ -25,7 +25,7 @@ Plato shipped state was patched today (8 surgical patches: Socrates-death anachr
 | Cleopatra | human / observational | ✅ shipped at FU#61 v3 (`c89d186` + `54cd20a`) |
 | Dostoevsky | human / narratival | ✅ shipped via path (b) + FU#61-fresh (`5088d67`); KNOWN: closing-on-suspended-judgment phrase tic — owned by runtime continuity overlay (Path B) |
 | Battuta | human / narratival | ✅ shipped via path (b) (`e300508`); KNOWN: Tughluq beard-plucking stock-anecdote tic — owned by runtime continuity overlay (Path B) |
-| **Octopus** | non_human / observational | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **compass rebuild in progress in current-tests** — voice_config + 6-layer chain + manual TAILORING preamble in DR prompts; awaiting operator's claude.ai DR sessions |
+| **Octopus** | non_human / observational | ✅ **compass rebuild SHIPPED 2026-05-02** to athens-2026 (`04da2c8`) — 4 validation rounds + 16 surgical patches + chromatophore display JSON-emission contract. Validator's final verdict: "very high-quality card... strongly aligned across ontology, lexicon, reasoning, voice, and engagement." Backup of pre-promotion state at `~/Desktop/AI Assembly/archive/athens-2026_octopus_pre_compass_promotion_2026-05-02/` |
 | Hannah Arendt | human / philosophical | 🟡 Pass 0a + Phase 0.5 done in current-tests; auto-generated DR prompts ready for claude.ai paste |
 | Ada Lovelace | human / philosophical | 🟡 Pass 0a + Phase 0.5 done; auto-generated DR prompts ready |
 | Bob Marley | human / **narratival** ✓ flipped | 🟡 Pass 0a + Phase 0.5 done; voice_mode flipped observational→narratival (Pass 0a hallucinated Card v2 reference per ONBOARDING DO-list); DR prompts ready; lyrics_patterns_only corpus_constraint |

@@ -393,7 +393,22 @@ This means: as soon as a voice's `07_persona_card_assembled.json` ships, runtime
 
 ---
 
-## 15. Octopus compass rebuild (in progress, 2026-05-02)
+## 15. Octopus compass rebuild (✅ COMPLETE, 2026-05-02)
+
+**Status:** ✅ shipped to athens-2026 (`04da2c8`). Backup of pre-promotion state preserved at `~/Desktop/AI Assembly/archive/athens-2026_octopus_pre_compass_promotion_2026-05-02/`.
+
+**4 validation rounds + 16 surgical patches landed:**
+- Round 1: 6 issues → 5 register patches (world / formative_experience / constitution / concept_lexicon / reasoning_method) + 4 JSON-emission patches (medium / technical_capabilities / characteristic_output_structure / quality_criteria)
+- Round 2: 4 issues → 4 patches (length_and_format_constraints two-channel + character "decide" verb + constitution kinship grammar + corpus passages "intelligent alien" removal)
+- Round 3: 4 issues → 5 patches (banned_language register + characteristic_moves anti-examples + quality_criteria phrasing + 2 corpus passage texts)
+- Round 4: 4 issues (1 false-positive council_member_name + 3 actionable) → 3 patches (formative_experience.primary_candidate + hard_limits[0] + banned_modes[13]) + path-(b) flag → SKIP_TO_DERIVE fast-exit ship
+
+**Validator's final verdict:** *"very high-quality card: intellectually rigorous, unusually distinctive, and strongly aligned across ontology, lexicon, reasoning, voice, and engagement."*
+
+**Chromatophore display engine integration:** card declares JSON-emission contract (display primary, prose translation). Runtime implementation owned by runtime/OPEN_ITEMS B7-Octopus sub-tasks (JSON extraction + WebGL renderer + microsite consumption + Substack fallback).
+
+**Original rebuild content (preserved below for context — 2026-05-02 morning):**
+
 
 **Trigger:** chat-test of shipped Octopus card revealed it produced "scholarly translator reporting on the body from outside" rather than the experiment-in-mind voice the operator had originally blueprinted (March 2026 mock card + compass DR). Shipped card was internally coherent + validator-passed but not the build the operator wanted.
 

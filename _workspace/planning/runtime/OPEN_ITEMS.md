@@ -270,9 +270,19 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 **State:** Publish layer handles structured handoff, but rendering itself not implemented:
 - **Marley → Suno API** — text artifact → audio file (Suno API call; needs audio hosting on microsite)
-- **Octopus → client-side shader params** — chromatophore shader JSON → Three.js or similar in browser
+- **Octopus → client-side shader params** — chromatophore shader JSON → Three.js / WebGL in browser
 
-**Triggers on:** voice cards finalized (Marley, Octopus); microsite (B2) able to play audio + render shader.
+**Octopus update 2026-05-02:** persona card now declares the JSON-emission contract explicitly. The shipped Octopus card's `medium` / `technical_capabilities` / `characteristic_output_structure` / `length_and_format_constraints` / `quality_criteria[7]` describe a **two-channel emission**: a `chromatophore_display` JSON parameter block (display **primary** — schema spelled out: orientation / arousal / valence / pattern_mode / palette / dynamics / focal_points / transitions, mapped to 5 biological layers) **plus** a 350-550 word tank-side prose translation. The card's instruction to Voice Pipeline Step 2's LLM is to emit BOTH in every artifact.
+
+**What runtime needs to implement (B7-Octopus sub-tasks):**
+1. **Voice Pipeline Step 2 JSON extraction** — parse the ```json``` fence from Step 2 LLM output, validate against the chromatophore_display schema (required: orientation, arousal, valence, pattern_mode), persist as a separate artifact alongside the prose. Spec doc: `~/Desktop/AI_Assembly_Chromatophore_Display_Engine.md`. Fallback: if LLM omits or malforms, use default parameter set per spec doc §"Fallback".
+2. **WebGL renderer** — consume the JSON parameter block, render 10-15s looping animation. Prototype lives at `~/Desktop/chromatophore_display.jsx` (React + WebGL fragment shader). Output formats: live WebGL embed (primary) / MP4-WebM video / animated GIF (fallback chain).
+3. **Microsite consumption** — display chromatophore animation ABOVE the prose artifact (per spec doc §"Integration with Morning Delivery": "the display IS the Octopus's primary output. The text is the translation. The audience encounters the native medium first.")
+4. **Substack/print fallback** — degrade gracefully when display can't render: prose stands alone; optional caption noting the display existed.
+
+**Triggers on:** voice cards finalized (Marley pending; Octopus ✅ shipped athens-2026 `04da2c8`); microsite (B2) able to render shader.
+
+**Cross-thread:** persona-thread side complete. Card declares the contract; runtime owns consumption. Cross-references `voices/OPEN_ITEMS.md` §15 (Octopus compass rebuild).
 
 ### B8. Admin console 🔴
 
@@ -684,54 +694,70 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **Decision needed:** which variant? Or defer entirely. If building, recommend Manual-fire wrapper as the minimum-viable path — full orchestrator is post-Athens hygiene unless operator wants to sleep through nights.
 
-### C19a. Anthropic prompt caching ✅ LANDED 2026-05-01
+### C19a. Anthropic prompt caching ✅ LANDED 2026-05-01 (extended 2026-05-02 with prefix caching)
 
-**Surfaced 2026-05-01 by C19 audit.** No `cache_control` calls anywhere in `runtime/flows/`. Each voice's identical 40K-token system prompt is paid at full price across ~5-7 calls per voice per night (Step 1 ×3-5 + Step 2 ×1 + Step 3 ×1 when enabled).
+**Surfaced 2026-05-01 by C19 audit.** No `cache_control` calls anywhere in `runtime/flows/`. Each voice's identical 40K-token system prompt was paid at full price across ~5-7 calls per voice per night (Step 1 ×3-5 + Step 2 ×1 + Step 3 ×1 when enabled).
 
-**With Anthropic prompt caching:**
-- Add `"cache_control": {"type": "ephemeral"}` on system prompt blocks
-- Cache write: 1.25× normal input price (one-time per voice per night)
-- Cache reads: 0.1× normal input price (5-min TTL; subsequent calls within window)
-- **Net: ~87% savings on system-prompt portion across reads 2-N**
+**Pricing (Claude Opus 4.7, per platform.claude.com/docs/en/about-claude/pricing as of 2026-05-02):**
+- Base input: **$5/MTok**, output **$25/MTok**
+- 1h cache write: 2.0× base input = $10/MTok
+- Cache read: 0.1× base input = $0.50/MTok
+- *(Earlier C19a version cited $15/$75 — that's Opus 4.1/4-deprecated pricing, not Opus 4.7. All cost figures revised below.)*
 
-**Athens projection:**
+### Two-stage caching strategy
 
-| Stage | Without cache (current) | With cache |
-|---|---|---|
-| Step 1 input (3 nights) | ~$50-70 | ~$10-15 |
-| Step 2 input (3 nights) | ~$22 | ~$5-7 |
-| Step 3 input | $0 (skipped per A1) | $0 |
-| Continuity | ~$3 | ~$1 |
-| **Total input** | **~$75-95** | **~$16-23** |
+**Stage 1 (2026-05-01):** Single `cache_control` breakpoint at end of system prompt. Helps Step 1 reuse (3-5 calls per voice with identical system) but PENALIZES Step 2 + Continuity (single-call flows where 2.0× write has no reads to amortize).
 
-Plus output tokens (~$50-100 across 3 nights) which caching doesn't affect.
+**Stage 2 (2026-05-02):** Prefix caching with **two breakpoints** + continuity opt-out:
+- `assemble_system_prompt` returns `(prefix, tail)` tuple
+- `prefix` = name + IDENTITY + CONSTITUTION + BOUNDARIES (~20-25K tokens; byte-identical across Step 1/2/3 for the same voice)
+- `tail` = step-specific (reference_passages OR artifact fields) + reasoning + voice + continuity + closing prompt
+- `stream_voice_call` places `cache_control` on BOTH blocks with 1h TTL
+- `cache_system: bool = True` kwarg added — continuity passes `False` (1 call/voice/transition; no reads to amortize the 2× write penalty)
 
-**Implementation 2026-05-01:**
-
-- `runtime/flows/voice/_anthropic_call.py`: `stream_voice_call` now wraps the system prompt in a `cache_control` block with **1-hour TTL** (`{"type": "ephemeral", "ttl": "1h"}`). 1-hour chosen because Athens Night 1 wall envelope (50-80 min including validation gap) exceeds the 5-min default. Covers Steps 1, 2, 3, and continuity (all go through `stream_voice_call`).
-- `runtime/flows/provocateur_flow.py`: `_stream_and_parse` accepts new `cache_system: bool` parameter; enabled (default 5-min TTL) only on `formulate_for_member` calls where one voice's 3-5 formulations share the same voice-profile-filled system prompt. Triage A/B don't benefit (per-call unique system) — kept uncached to avoid pure write cost.
-
-**Live verification 2026-05-01:**
+**Live verification 2026-05-02:**
 ```
-Call 1: cache_creation_input_tokens=8424, cache_read_input_tokens=0
-Call 2: cache_creation_input_tokens=0,    cache_read_input_tokens=8424  ✓ CACHE HIT
+Plato Step 1 (first call):  cache_creation=38,288  cache_read=0
+Plato Step 2 (same prefix): cache_creation=19,665  cache_read=20,086  ✓ PREFIX HIT
 ```
 
-Both Anthropic SDK Usage fields populate correctly. The 1h TTL accepted without beta headers (per Anthropic docs as of 2026-05).
+Step 2 reads the 20K prefix Step 1 wrote, only writes the 20K Step 2-specific tail.
 
-**Math (Voice Pipeline, per voice per night):**
-- Without cache: 5 calls × 40K-token system × $15/M = $3.00
-- With 1h cache: 1 write × 2.0× ($1.20) + 4 reads × 0.1× ($0.24) = $1.44
-- **Savings: $1.56 per voice per night × 12 voices × 3 nights = ~$56**
+### Empirical Athens cost (revised 2026-05-02 with corrected pricing + Test 3 measurement)
 
-Plus Provocateur Formulation (5-min cache, smaller system but more calls): another ~$15 savings.
+Test 3 (4 voices × 1 night × 3 formulations) actual cost: **~$5-6**.
 
-**Total Athens 3-night savings: ~$60-75.** Voice Pipeline doc's $130-190/night Night 1 forecast remains correct as upper bound (without caching); actual cost with caching enabled drops by ~25-35%.
+**Athens 3-night extrapolation (12 voices × 3 nights = 36 voice-nights):**
 
-**Files changed:**
-- `runtime/flows/voice/_anthropic_call.py` (cache_control on system block, 1h TTL)
-- `runtime/flows/voice/continuity.py` (latent bug fix from `8c47e1f`: was unpacking 3-tuple from updated 4-tuple-returning `stream_voice_call`; not surfaced in tests because Test 2 v2's continuity hit cache)
-- `runtime/flows/provocateur_flow.py` (`_stream_and_parse` cache_system param; enabled on Formulation)
+| Stage | Without cache | Stage 1 (single breakpoint) | Stage 2 (prefix cache) |
+|---|---|---|---|
+| Step 1 input (5 calls/voice/night) | ~$34 | ~$19 | ~$19 |
+| Step 2 input (1 call/voice/night) | ~$7 | ~$16 ⬆ | ~$8 |
+| Continuity (24 transitions) | ~$3 | ~$7 ⬆ | ~$4 (opt-out: uncached) |
+| **Total input** | **~$44** | **~$42** | **~$31** |
+
+Plus output (~$70-90 across 3 nights at $25/MTok — caching does not affect output).
+
+**Total Athens Voice Pipeline cost: ~$100-120 across 3 nights (Stage 2 caching).** Validation Night 1 adds ~$2-5.
+
+**Total Athens caching savings (Stage 2 vs no caching): ~$13.** Modest in absolute terms — cost ceiling is dominated by output tokens (~$70-90), which caching does not touch.
+
+### Provocateur Formulation caching
+
+`runtime/flows/provocateur_flow.py`: `_stream_and_parse` accepts `cache_system: bool` parameter; enabled (5-min TTL) on `formulate_for_member` where one voice's 3-5 formulations share the same voice-profile-filled system prompt. Triage A/B don't benefit (per-call unique system) — kept uncached. Estimated savings: ~$5-10 across Athens at corrected pricing.
+
+### Files changed across both stages
+
+**2026-05-01 (Stage 1 — `c4804d6`):**
+- `runtime/flows/voice/_anthropic_call.py` — initial cache_control wrapping
+- `runtime/flows/voice/continuity.py` — latent unpack-tuple fix
+- `runtime/flows/provocateur_flow.py` — `cache_system` param on Formulation
+
+**2026-05-02 (Stage 2 — pending commit):**
+- `runtime/flows/voice/card_assembly.py` — `assemble_system_prompt` returns `(prefix, tail)` tuple
+- `runtime/flows/voice/_anthropic_call.py` — accepts `str | tuple[str, str]`, two-breakpoint caching + `cache_system` kwarg
+- `runtime/flows/voice/continuity.py` — passes `cache_system=False`
+- `runtime/flows/voice/step{1,2,3}_*.py` + `continuity.py` — saved schema now persists `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost tracking
 
 **Risk:** very low. Cache is an Anthropic SDK feature, not custom code. Falls back gracefully on cache miss (just pays full input price). No new failure modes introduced.
 
