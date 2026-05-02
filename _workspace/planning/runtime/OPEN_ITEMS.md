@@ -841,6 +841,10 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 
 | Date | Item | Location |
 |---|---|---|
+| 2026-05-02 | **Defensive `--night` check + automation orchestrator design (C22)** (`c0d724e`) — `assert_run_dir_night_matches()` shared helper refuses to run voice_flow / publish_flow when --night doesn't match run_dir's embedded night number; both naming conventions handled; 9 unit tests. Catches silent cross-night corruption: wrong --night writes `continuity_night_<N+1>.json` from wrong-night data. Plus full orchestrator design doc (`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) — event-driven via 1-min polling on filesystem-as-state; tonight-derivation via date → DATE_TO_NIGHT + sessions.json `ai_assembly=true` filter. Three Athens scope options (manual-fire wrapper / full / defer); operator decision pending | runtime/flows/shared/io.py + voice_flow.py + publish_flow.py + tests/test_run_dir_night_check.py + AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md |
+| 2026-05-02 | **publish_flow.py per-night theme path fix** (`e0921de`) — `published_artifacts/themes/<theme_id>.json` flat path overwrote across nights (theme_ids reset per Researcher run; Night 2 silently destroyed Night 1 theme aggregations). Athens-eligible bug — operator-caught when challenging the "won't fire during Athens" claim. Fixed: per-night sub-dir `published_artifacts/themes/night_<N>/<theme_id>.json`. Other publish_flow outputs already collision-safe. | runtime/flows/publish_flow.py + runtime/flows/voice/publish.py docstrings |
+| 2026-05-01 (late) | **C19a Anthropic prompt caching enabled** (`c4804d6`) — Voice Pipeline (1h TTL) + Provocateur Formulation (5min TTL); ~$60-75 Athens 3-night savings projected. Live verification: `cache_creation_input_tokens=8424` on call 1 → `cache_read_input_tokens=8424` on call 2. **Latent bug also fixed in same commit:** `voice/continuity.py:183` was unpacking 3-tuple from `stream_voice_call()` that became 4-tuple in commit `8c47e1f` (thinking_tokens fix); Test 2 v2's continuity hit cache so the bug didn't surface until proper run. | runtime/flows/voice/_anthropic_call.py + continuity.py + provocateur_flow.py |
+| 2026-05-01 (late) | **C9 cross-night exclusion filter LANDED** (`99759cb`) — Provocateur `python_select()` extended with `prior_assignments_by_member` parameter; Step 4 candidate filter + Step 7 force-fit honor exclusions; new diagnostics in `selection.json`; CLI `--prior-nights` arg. Spec language "(theme_id, member) exclusion" was informal — theme_ids are NOT stable across Researcher runs, so implementation matches by **normalized theme title** (lowercased, whitespace-collapsed). 15 unit tests in `runtime/tests/test_provocateur_selection.py`. Fires twice during Athens (Nights 2 + 3). | runtime/flows/provocateur_flow.py + tests/test_provocateur_selection.py + docs/AI_Assembly_Provocateur_Pipeline.md |
 | 2026-04-30 | FU#61 v3 (5-criteria reshape) on Cleopatra | athens-2026 commit `c89d186` |
 | 2026-04-30 | FU#61-fresh pattern propagated to Dostoevsky | athens-2026 commit `5088d67` |
 | 2026-04-30 | FU#61 Pass 4b prompt addition (panel-wide propagation) | code commit `91947a7` |
@@ -872,35 +876,43 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 
 Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 
-**Must land before Athens Night 1:**
-- ~~A1 (Step 3 shape) decided + implemented~~ ✅ done 2026-05-01 (Option A — skipped for Athens)
-- ~~A2 (editor layer) architecture decided~~ ✅ done 2026-05-01 (per-theme; all-AI; D deferred; E elsewhere; parallel build per F)
-- B1 (editor implementation) — gated on microsite output schema landing
-- B2 (microsite) — operator designing; specifies editor output schema
-- ~~C9 (Provocateur Night 2/3 exclusion filter)~~ ✅ done 2026-05-01 (content-based by normalized title; tests + spec landed)
-- B2 (microsite) built and deployed
-- B3 (broadsheet / Edition Pipeline) built
-- B4 (Substack draft pass) built
-- **C9 (Provocateur Night 2/3 exclusion filter)** — fires twice during Athens
-- **C10 (council_config.json populated from real Provocateur Profiles)** — runtime infrastructure
-- ~~C1 + C2 (cross-pipeline compliance) landed~~ ✅ done 2026-05-01 (also C2a load_dotenv override on all three flows including transcription)
-- C3 (publish_flow.py end-to-end exercise) completed
-- C4 (multi-night sequence dry-run) completed
-- ~~A3 / FU#62 path decided~~ ✅ done 2026-05-01 (path B; Athens Night 1 only validation policy)
-- All 10 persona cards finalized (persona thread; not in scope here but blocks runtime end-to-end testing)
+**Architecture-side gates: ALL CLOSED ✅** (A1 + A2 + A3 — see top of doc).
 
-**Should land before Athens (high-value, not strictly blocking):**
-- B5 (closing-show pipelines) at least specified; build can land Day 1-3
-- B6 (Day 4 goodbye) specified
-- B9 (per-voice headline poetics) specified
-- A4 (Frame Concept doc revision)
-- E1 (Voice Pipeline doc Step 3 + cost/wall-time updates)
-- E3 (LLM_CALL_INVENTORY refresh)
-- C5 (multi-voice 3+ dry-run)
-- C6 (naming inconsistency cleanup) — quality-of-life for ops
-- ~~**C11 (speaker bios populated)** — transcription accuracy~~ ✅ largely done 2026-05-01 (193/202 enriched; 13 name mismatches for operator review). C11a follow-up open for 33 new speakers + sessions.json scaffold refresh
-- **C12 (HoBB email tool API investigation)** — newsletter delivery
-- **C13 (recording protocol coordination)** — operator/WBBF side; raises ASR accuracy
+**Athens-blocking runtime items: ALL LANDED 2026-05-01/02 ✅:**
+- ~~Continuity-after-Step-2 bugfix~~ ✅ commit `ccc6229`
+- ~~thinking_tokens=0 bugfix~~ ✅ commit `8c47e1f`
+- ~~C1 + C2 + C2a runtime FU#60 compliance~~ ✅ commit `d4cea03`
+- ~~C9 Provocateur Night 2/3 exclusion filter~~ ✅ commit `99759cb`
+- ~~C19a Anthropic prompt caching~~ ✅ commit `c4804d6` (~$60-75 Athens savings)
+- ~~publish_flow per-night theme path~~ ✅ commit `e0921de`
+- ~~Defensive `--night` check (cross-night corruption guard)~~ ✅ commit `c0d724e`
+- ~~Latent continuity unpack-tuple bug~~ ✅ fixed in commit `c4804d6`
+- ~~Speaker bios + recording schedule (athens-2026)~~ ✅ commit `4ad86df`
+
+**Still gating Athens (operator-side):**
+- B1 editor implementation — gated on microsite design (operator-side; persona thread + operator)
+- B2 microsite — operator designing; specifies editor output schema
+- B3 broadsheet — gated on B1 + microsite
+- B4 Substack draft pass — gated on B1
+- All 12 persona cards finalized (4 of 12 shipped; 5 unbuilt; Octopus FU#53 review)
+- Persona-thread voice card patches per C20 memo (Plato Socrates-death anachronism + recurrence patterns)
+- C10 council_config.json populated from real Profiles — gated on all 12 cards shipped (per operator decision earlier this session)
+
+**Still open runtime-side (high-value, not strictly blocking):**
+- C18 — Test 3 with truly-divergent formulations (~7 min wall + ~$15 API)
+- C22 — automation orchestrator scope decision (manual-fire / full / defer)
+- Path A from external review — Step 2 prompt tighten to default-to-focus-on-one (~30 min)
+- C3 — publish_flow.py end-to-end exercise (now safe to run after `e0921de`)
+- C4 — multi-night sequence dry-run (covered partially by Legitimacy Test 1; full panel test needs more cards)
+- B5 closing-show pipelines spec
+- B6 Day 4 goodbye spec
+- B9 per-voice headline poetics
+- A4 Frame Concept doc revision
+- E1 Voice Pipeline doc updates (Step 3 spec, cost/wall-time post-caching)
+- E3 LLM_CALL_INVENTORY refresh
+- C5 multi-voice 3+ dry-run (legitimacy tests covered 4-voice; expansion as more cards ship)
+- C12 HoBB email tool API investigation (operator/HoBB conversation)
+- C13 recording protocol coordination (operator/WBBF)
 
 **Can land during/after Athens:**
 - B7 (render layer) — only matters when Marley/Octopus voices ship

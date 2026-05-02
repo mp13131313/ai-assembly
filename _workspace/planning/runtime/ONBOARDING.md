@@ -62,10 +62,14 @@ runtime/flows/
 | Multi-night sequence | ✅ exercised (Convention A run_dir-per-night, continuity overlay loads correctly) | Legitimacy Test 1 (2026-05-01) |
 | Multi-voice 4-voice engagement | ✅ all 4 shipped voices in parallel | Legitimacy Test 1 + 2 + 2 v2 (2026-05-01) |
 | Step 2 `focus_decision` synthesis branch | ✅ verified (4/4 voices weave under conceptually-converging input) | Legitimacy Test 2 + 2 v2 |
-| Step 2 `focus_decision` focus-on-one branch | ❌ untested (synthesis bias appears even with distinct titles) | OPEN_ITEMS C18 — Test 3 with truly-divergent topics recommended |
+| Step 2 `focus_decision` focus-on-one branch | ❌ untested (synthesis bias appears even with distinct titles); external review 2026-05-02 found single-input mode produces materially stronger artifacts for 3 of 4 voices | OPEN_ITEMS C18 + Path A from external review |
 | `thinking_tokens` runtime accounting | ✅ fixed (was always 0; now computed via count_tokens subtraction) | commit `8c47e1f`; verified live in Test 2 v2 |
-| Anthropic prompt caching | ❌ NOT enabled — Athens-eligible optimization | OPEN_ITEMS C19a (~$60-75 savings across 3 nights) |
-| publish_flow.py | ❌ never run against real Researcher/Provocateur outputs | OPEN_ITEMS C3 (gated on editor + microsite) |
+| Anthropic prompt caching | ✅ ENABLED 2026-05-02 (1h TTL on Voice Pipeline; 5min on Provocateur Formulation; verified live cache_creation/cache_read populate correctly) | commit `c4804d6`; ~$60-75 Athens savings projected |
+| Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `99759cb`; 15 unit tests passing |
+| publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `e0921de` |
+| Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `c0d724e`; 9 unit tests passing |
+| Automation orchestrator | 📐 DESIGNED 2026-05-02; build deferred pending operator scope decision | `AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md` + OPEN_ITEMS C22 |
+| publish_flow.py end-to-end exercise | ❌ never run against real Researcher/Provocateur outputs (collision bug now fixed; safe to exercise) | OPEN_ITEMS C3 |
 
 ### Downstream of Voice Pipeline
 
@@ -172,9 +176,19 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `voice-pipeline-v2.1-align-revert` — 30+ commits ahead of `main`. Pushed.
+**Branch:** `voice-pipeline-v2.1-align-revert` — 35+ commits ahead of `main`. Pushed.
 
 **Branch history (chronological — most recent first):**
+
+*2026-05-02:*
+- `c0d724e` feat(runtime): defensive --night check + automation orchestrator design (C22)
+- `a6755d9` personas/Pass-0b: amend non_human_organism template to be compass-permissive (persona thread)
+- `e0921de` fix(publish_flow): per-night subdirectory for per-theme files
+- `c4804d6` feat(voice + provocateur): C19a Anthropic prompt caching enabled + latent continuity unpack-tuple bugfix
+- `99759cb` feat(provocateur): C9 cross-night (member, theme) exclusion filter ⚠️ Athens-blocking
+- `4f0b3a0` docs(planning): HANDOFF + ONBOARDING reflect Phase 2 late-session work
+
+*2026-05-01:*
 - `ee824be` docs(planning): C19 audit + C20 memo + Plato Socrates-death anachronism
 - `1a62043` docs(planning): C15 closed — misdiagnosed (lineage IS populated under .lineage.*)
 - `69372b7` docs(planning): C18 Test 2 v2 result — title-only fix insufficient
