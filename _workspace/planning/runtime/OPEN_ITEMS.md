@@ -200,13 +200,13 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 ### B1. Editor / Frame layer 🟡 SPECIFIED 2026-05-02 PM (Editor Pipeline v1 spec landed; Claudia card + implementation pending)
 
-**State:** spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1, ~890 lines, 20 sections). Implementation pending three items:
+**State:** spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1, ~890 lines, 20 sections). Two of three pending items have moved:
 
-1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`.
-2. **`editor_dossier.md` closing prompt** at `runtime/flows/shared/prompts/editor_dossier.md`. Structure sketched in spec §11; needs full draft.
-3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish). Estimated ~6-10 hr engineering once card + prompt land.
+1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`. *Operator-side.*
+2. ~~**`editor_dossier.md` closing prompt**~~ ✅ LANDED 2026-05-02 PM at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines). Mirrors `voice_step2_artifact.md` structure: input → task → weighing → composition → boundaries → output. Output JSON schema concrete (front + article + theme_page + headnotes). Quality criteria for article body listed (5 tests). Length envelopes specified per component.
+3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish). Estimated ~6-10 hr engineering. **Athens-eligible to start now**, can run smoke tests with placeholder card while operator authors final.
 
-**Triggers on:** Operator authoring Claudia's card + closing prompt; then implementation.
+**Triggers on:** Operator authoring Claudia's card; implementation can proceed in parallel.
 
 **Architecture (full spec at `docs/AI_Assembly_Editor_Pipeline.md`):**
 
