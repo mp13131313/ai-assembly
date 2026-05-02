@@ -590,6 +590,34 @@ For those, see ONBOARDING.md (sibling) for pointers + non-voice docs in `_worksp
 
 ---
 
+## 19. Pass 0b tailoring fabricates follow-up source citations (DR session signal, 2026-05-02)
+
+**Surfaced:** Lovelace DR session (2026-05-02 PM) flagged 4 phantom/non-existent source citations across sections 2, 3, 4 of her DR prompts:
+- Bensaude-Vincent in *Romantisme* 177
+- Hollings/Martin/Rice 2020 Clay edition
+- Martin/Miller 2022 in *Notes and Records*
+- Anderson's *Renaissance of Imagination* 2023
+
+DR Claude's diagnosis (verbatim): *"the pattern looks like it's affecting follow-up references for the more 'interpretive' sections (2, 3, 4) more than the more 'documentary' ones (1, 5) — worth a glance at whatever generates those."* Section 5's two follow-up references (Boddice biocultural framework + Cooter 1984) verified clean — first time in the dossier that happened.
+
+**Likely origin:** Pass 0b tailoring (PB#2, hybrid LLM step) — when it personalizes per-section briefs, it cites scholarly follow-up sources and the LLM hallucinates citations for the more interpretive territory. Pass 0b has no verification step; what it emits goes straight into the operator's claude.ai DR session prompt.
+
+**Why it matters:** the operator's DR session burns time chasing phantom sources before realizing they don't exist. If a DR session DIDN'T verify (e.g., operator runs without manually fact-checking citations), the phantom references would propagate into the dossier → into Pass 1.x merge → into the assembled card → into runtime artifacts. Quality + trust risk.
+
+**Three resolution paths to consider:**
+
+1. **Strip specific scholar citations from Pass 0b tailoring** — emit topic/question framings only; no named scholarly follow-up sources. Cleanest cut.
+2. **Add web-verification to Pass 0b tailoring** — tailoring LLM uses Anthropic web_search tool to verify each citation before emitting. Per-call cost increase but kills the phantom-source mode entirely.
+3. **Add discipline instruction to Pass 0b prompt** — *"Do not cite specific scholars or work titles unless you can verify the citation. Where you would cite a source, name the territory + research question, not the work."* Cheap; depends on LLM compliance, may still leak phantoms.
+
+Path 3 is the cheapest first step + trivial to test on the next voice (Marley/Whanganui/Scheherazade). If Path 3 doesn't fully cure, escalate to Path 1 or 2.
+
+**Status:** filed; not blocking Lovelace's ship. Investigation/fix is a separate session.
+
+**Cross-reference:** voice-build pattern observation; not yet replicated for other voices but worth attention on the next 3 builds — note any phantom-source flags from those DR sessions.
+
+---
+
 ## 18. "Voice of X" naming convention rollout — DEFERRED until all 10 voices ship
 
 **Decision 2026-05-02:** standardize panel-member references as "Voice of X" (Voice of Plato / Voice of Hannah Arendt / Voice of Octopus etc.) across all structured fields that name the panel member. The construction-acknowledged-at-frame principle should be visible at every reference point — the panel member IS a constructed voice, not the historical figure.
