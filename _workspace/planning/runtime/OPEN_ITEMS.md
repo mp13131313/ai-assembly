@@ -765,6 +765,24 @@ Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect out
 
 **Side-validation:** the `count_tokens` API used by C16 (thinking_tokens fix) also exercised here — both fixes use the same Anthropic SDK paths.
 
+### C19b. Anthropic prompt caching for personas pipeline — DEFERRED 2026-05-02
+
+**Question raised 2026-05-02:** apply runtime's prompt-caching pattern (C19a) to `personas/run_persona_pipeline.py` to save cost on the 5 remaining voice builds (Arendt, Lovelace, Marley, Whanganui, Scheherazade)?
+
+**Analysis:** personas pipeline has only ONE point with multi-call shared-prefix architecture: **Pass 7-pre Stage 2 batched verify** (parallel Sonnet calls sharing system + primary_texts + merged_dossier prefix; only `claim_items` varies per batch). Every other Anthropic call (Pass 2/3/4a/4b/5/6/7b/7a-FIX/Derive) has unique inputs — passes feed forward via cumulative threading-compress (CT) state, not appendable prefix. Heavy validators (Pass 7-anachronism/7a/7c) use OpenAI/Gemini, not Anthropic.
+
+**Realistic savings (Octopus actuals, 5-min TTL on Stage 2):**
+- Pass 7-pre Stage 2: 6 batches × 118K tokens (system 1.1K + primary_texts 15.3K + merged_dossier 100.9K + claims 1.5K) per call × $3/MTok Sonnet base = $2.12/voice without cache
+- With 5-min TTL caching (1 write + 5 reads, best case): $0.64/voice — saves $1.48
+- Realistic with parallel-cache-write race (max_workers=4, 4 simultaneous calls compete for same hash): **~$0.80-1.00/voice savings**
+- **Total across 5 remaining voices: $4-7**
+
+**Decision:** SKIP. Implementation is ~45 min; savings are $4-7 immediate; no rebuild cycles planned post-Athens. ROI doesn't warrant the work right now.
+
+**Re-open if:** Card v3 schema change forces all 10 voices to re-build, OR persona pipeline runs 10+ more voice builds over the next year, OR significant validation-treadmill cycles emerge requiring repeated Pass 7-pre fires per voice. At those scales the compounding savings ($15-25+) clear the implementation cost.
+
+**Pattern note:** when re-opened, lift the `_anthropic_call.stream_voice_call`'s `system: str | tuple[str, str]` + `cache_system: bool` pattern into `personas/flows/shared/clients.py:call_claude`. Apply opt-in caching at `pass_7pre_chunked.py:verify_batch` (restructure user prompt so primary_texts + merged_dossier come first as cached prefix, claim_items_json after the breakpoint). Use 5-min TTL (parallel batches fire within seconds; 1h TTL's 2× write penalty doesn't pay off).
+
 ### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism (handoff to persona thread) 🟡 (filed 2026-05-01)
 
 External reviewer flagged three voice-side moves that recurred across Test 1 nights. Operator added a fourth on inspection: a Plato anachronism that --skip-validation didn't catch.
