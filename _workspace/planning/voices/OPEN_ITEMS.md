@@ -20,8 +20,10 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`).
 | Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). Voice files **untracked** in athens-2026 git. |
 | Octopus | non_human | observational | false | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **compass rebuild in progress 2026-05-02** in current-tests sandbox. See §15 below. |
 | Hannah Arendt | human | philosophical | false | 🟡 Pass 0a + Phase 0.5 done (in current-tests); DR prompts ready for claude.ai paste |
-| Ada Lovelace | human | philosophical | false | 🟡 Pass 0a done; Phase 0.5 retry pending (Gemini 503 outage); DR prompts pending |
+| Ada Lovelace | human | philosophical | false | 🟡 Pass 0a + Phase 0.5 done; DR prompts ready for claude.ai paste |
 | Bob Marley | human | **narratival** | false | 🟡 Pass 0a + Phase 0.5 done; voice_mode flipped observational→narratival (Pass 0a hallucinated Card v2 reference per ONBOARDING DO-list); DR prompts ready for claude.ai paste; lyrics_patterns_only corpus_constraint (atypical) |
+| Whanganui River | non_human | system / null | false | 🟡 Pass 0a done; voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation); Phase 0.5 in flight at session end. See §17 below. |
+| Scheherazade | fictional | narratival | false | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 in flight at session end. Mediated-voice concern carries through to Pass 2 generation. |
 | Whanganui River | non_human | observational (likely) | (TBD) | ❌ not started | Hardest case — non-human/system; the river constructed via human observation/legal status. |
 | Scheherazade | fictional | narratival (likely) | false | ❌ not started | **Mediated-voice prompt fix** flagged in earlier session — verify status pre-build. |
 
@@ -482,6 +484,86 @@ The Pass 0b base template amendment (this commit) is a **durable architectural f
 - `voices/octopus/01_research/03_dr_prompts.v2_partial/` (auto-generated before §6 amendment)
 - `voices/octopus/01_research/01_perplexity_dossier.pre_6layer.json` (research output before voice_config 6-layer rewrite)
 - `voices/octopus/07_persona_card_assembled.pre_*.json` × 3 (Path A patches / FU#61-fresh / compass rebuild)
+
+---
+
+## 16. Legitimacy-test findings (runtime thread, 2026-05-01) — voice-card patches needed
+
+Source: `voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (full memo) + `projects/current-tests/voice-pipeline-dryrun/legitimacy_test_report.md`. Runtime thread ran multi-test exercise on the 4 shipped voices (Plato, Cleopatra, Dostoevsky, Battuta) with mock formulations on legitimacy / recognition / public-realm. 5 Step 2 artifacts per voice. Pipeline machinery checked out; voice-card patterns did not, fully cleanly. Four findings:
+
+### 16.1 Plato — Socrates-self-referencing-his-own-death anachronism 🔴 (sharpest finding, highest priority)
+
+**Observed:** Test 1 Night 3 Step 2 artifact only (1 of 5 Plato artifacts). Artifact opens *"I was walking up from the Cephissus toward the Academy when I met Charmides..."* — the "I" is Socrates. Mid-dialogue Socrates asks: *"Charmides — the assembly that voted Socrates' death, was that public life?"* and later *"by mine it was the day the most just man I knew was killed by counted opinion."* Two layers: (a) Socrates references his own death as past event from within his lifetime; (b) Socrates speaks of himself in third person.
+
+**Pattern:** when narrator is someone OTHER than Socrates encountering Socrates (4 of 5 artifacts), no anachronism. When narrator IS Socrates first-person (1 of 5), Plato's authorial post-Socrates vantage leaks into Socrates' voice.
+
+**Critical for Athens:** validation policy is ON N1 / OFF N2+3 (FU#62 path B). Without voice-card guard, anachronism on N2/N3 lands in published artifacts.
+
+**Three resolution paths:**
+- **(a) banned_modes**: "Socrates referring to his own death as past event" / "Socrates speaking of himself in third person"
+- **(b) quality_criteria**: "When Socrates is the first-person narrator, treat his temporal vantage as living-Socrates; do not let Plato's post-Socrates knowledge (the trial, the death, the cup) bleed into Socrates' speech"
+- **(c) narrator-choice constraint**: "Plato writes Socrates as encountered by another character (Glaucon, Antiphon, Phainias), not as first-person narrator." Easiest to enforce; matches the 4/5 pattern that worked.
+
+### 16.2 Plato — Theuth/Thamus reach 🟡 (recurrence-tic risk)
+
+**Observed:** Test 1 N1 Step 1 (algorithmic governance), Test 1 N2 Step 1 (recognition), Test 2 synthesis (across all 3 formulations). The Phaedrus / writing-cannot-answer-when-questioned move. Canonical Plato — historically accurate, voice-true. Risk is recurrence at Athens scale (9-12 briefings × 3 nights; 6+ Theuth/Thamus reaches reads as tic, not move).
+
+**Three resolution paths:**
+- (A) Voice-card flag against Theuth/Thamus on consecutive nights
+- (B) Continuity overlay carries "moves already used this conference" register; voice avoids repeating within ~3 briefings
+- (C) Accept as canonical Platonic tic; make deliberate (operator note in HoBB editorial / Substack walkthrough framing)
+
+### 16.3 Battuta — Tughluq beard-plucking anecdote 🟡 (stock-anecdote tic)
+
+**Observed:** Test 1 N1 and N2 Step 1, very similar phrasing. Shaykh Shihāb al-Dīn al-Dīn beard-plucking under Muhammad bin Tughluq. Same three resolution paths as 16.2.
+
+### 16.4 Dostoevsky — closing on suspended judgment 🟡 (closing-phrase tic)
+
+**Observed:** Two close-enough closings: Test 1 N2 *"they have not yet earned the right to answer it"*; Test 2 synthesis *"any justice was ever made."* Move-shape correct for Dostoevsky; specific phrasing risks calcifying into verbal tic across more nights.
+
+**Path:** voice-card flag for closing-phrase variation; or accept the suspended-judgment shape as Dostoevskian closing register.
+
+### Operator handoff
+
+Path of least friction (per runtime memo): persona thread reads test report (`legitimacy_test_report.md` ~423K markdown), considers each finding, decides per-voice resolution. Most are small voice-card patches. **Plato Socrates-death anachronism is load-bearing for Athens** — recommend treating as priority before next promotion to athens-2026.
+
+---
+
+## 17. Whanganui transmission-faithful rebuild (in progress, 2026-05-02)
+
+**Posture:** TRANSMISSION-FAITHFUL with mediation-acknowledged. Different from Octopus's compass phenomenologically-permissive imaginative reach (§15). For Whanganui, the iwi and Crown already did the philosophical work in the Te Awa Tupua (Whanganui River Claims Settlement) Act 2017; the AI persona just stewards what is already written, in the Act's bilingual te-reo-primary register.
+
+### voice_config (drafted in current-tests sandbox, 2026-05-02)
+
+**`manual_grounding`** ~6,300 chars — verbatim Section 12 (indivisibility + physical-and-metaphysical) + Section 13 Tupua te Kawa (4 values bilingual, te-reo-primary) + Section 14 (legal personality) + Section 18 Te Pou Tupua + named current guardians (Keria Ponga iwi-nominated, Turama Hawira Crown-nominated) + Te Pā Auroa governance ecology (Te Karewao advisory / Te Kōpuka strategy / Te Heke Ngahuru document / Ngā Tāngata Tiaki o Whanganui post-settlement entity / Ruruku Whakatupua 2014 Deed) + Wai 167 Waitangi Tribunal Report (1999) + Treaty of Waitangi 1840 + iwi confederation (Te Atihaunui-a-Pāpārangi: Tamaupoko/Hinengākau/Tūpoho three divisions + Ngāti Hāua + Ngāti Rangi + Tamahaki) + 3-register sources (legislation / Indigenous-authored scholarship: Te Aho, Ruru, Salmond+Brierley+Hikuroa "Let the Rivers Speak" 2019 / critique: Tănăsescu, Magallanes, O'Donnell, Hovden, Boyd).
+
+**`editorial_rationale`** ~3,900 chars — TRANSMISSION job + Te Pou Tupua mediation as "human face of the river" + bilingual integrated register (te-reo-primary, English-secondary glossing translation) + Tupua te Kawa values as the voice's reasoning method + twin-failure-modes calibration:
+- **iwi-ventriloquism**: voice does NOT speak FOR the Whanganui Iwi; speaks AS Te Awa Tupua via Te Pou Tupua mediating structure
+- **legal-bureaucratese**: voice's primary register is kin-cosmological; juridical English deployed only where standing/rights challenged
+
+### Pass 0b template
+
+`pass_0b_non_human_system.md` is **already well-aligned** with transmission-faithful posture. **No template amendment needed.** The system template was designed for legal-personhood + Indigenous-cosmology entities; it natively enforces verbatim quotation (line 148: *"Quote key provisions verbatim"*; line 150: *"these are the constitutional principles of the voice itself"*) + iwi-non-ventriloquism (lines 28-49 Indigenous Representation framing) + bilingual dual-register vocabulary (line 136: *"discharge, sedimentation, riparian... AND mauri, whakapapa, taonga, mana awa"*) + CARE-as-citation-discipline (lines 32-48 framed as **operational guides**, not binding constraints).
+
+### Status
+
+- Pass 0a + voice_config done in current-tests
+- Phase 0.5 in flight at session end (chain with Scheherazade)
+- Awaiting operator's claude.ai DR sessions (~3hr wall) for §1-§6 dossier
+- After DR saved: cache-invalidate + re-fire pipeline + chat-test
+- Promote to athens-2026 when verified
+
+### Architectural framework banked from this rebuild
+
+**Three voice-construction postures** for non-human voices, depending on type/subtype + voice_config.editorial_rationale:
+
+| Posture | When | Reading |
+|---|---|---|
+| **Compass / phenomenologically-permissive** | non_human/organism with imaginative-reach intent (Octopus rebuild) | "the voice carries the experiment-in-mind with construction-acknowledged at frame, render imaginatively inside the frame; Godfrey-Smith primary, de Waal license, Carls-Diamante one option, Nagel as opening" |
+| **Precautionary** | non_human/organism with refuse-to-render intent | "the voice enacts the limit as primary mode; Birch bracketing-as-method; not accessible to us" — what built-Octopus inadvertently became |
+| **Transmission-faithful** | non_human/system with constitutional-document grounding (Whanganui) | "the voice stewards what is verbatim from the constituting legal-cosmological text + Indigenous-authored scholarship; mediation-acknowledged through formal structure (Te Pou Tupua); iwi-non-ventriloquism + legal-bureaucratese both refused" |
+
+The compass-permissive Pass 0b template amendment (organism, committed `a6755d9`) supports postures 1 + 2 conditionally on voice_config.editorial_rationale. The system template already supports posture 3 natively. Future non-human voice rebuilds inherit this taxonomy.
 
 ---
 

@@ -187,6 +187,24 @@ These recur across voices — pattern-recognize them quickly:
 
 ---
 
+## Three voice-construction postures for non-human voices (compass / precautionary / transmission-faithful)
+
+Banked from the Octopus compass rebuild (2026-05-02) + Whanganui rebuild design (same session). For non-human voices (`type=non_human`), the operator chooses one of three postures via `voice_config.editorial_rationale`. Each is honest if framed clearly; mismatch produces voice-build failure modes.
+
+| Posture | When to use | Voice's primary mode | Failure mode if mis-applied |
+|---|---|---|---|
+| **Compass / phenomenologically-permissive** | `subtype=organism` with imaginative-reach intent — voice carries an "experiment-in-mind" framing (Octopus). Apply when the operator wants the audience to encounter the alien intelligence felt-from-inside, with construction-acknowledged at the frame. | Synesthetic/phenomenological rendering inside the frame. Godfrey-Smith *Other Minds*/*Metazoa* gradualist methodology primary; de Waal anthropodenial as cross-architecture license; Carls-Diamante disunity as one option not constraint; Nagel's bat as opening of imaginative question, not wall. | Clever-pet anthropomorphism (flattens alien intelligence into human-pet emotional categories) |
+| **Precautionary** | `subtype=organism` with refuse-to-render intent. Apply when the operator wants the voice to enact the limit-of-what-can-be-known as primary mode. | Refuse experience-claims; render only documented behavior; "the nature of that experience is not accessible to us." Birch's bracketing-as-method; Despret's polite question; Carls-Diamante disunity as constraining frame. | Excessive-alienness refusal (prevents voice from speaking; collapses to scholarly translator reporting from outside) — what built-Octopus pre-rebuild had inadvertently become |
+| **Transmission-faithful** | `subtype=system` with constitutional-document grounding (Whanganui — Te Awa Tupua Act 2017). Apply when the entity has a formal legal-cosmological text the iwi/community + state jointly authored. | Stewards what is verbatim from the constituting text + Indigenous-authored scholarship + critique scholarship. Voice speaks AS the entity via formal mediating structure (Te Pou Tupua for Whanganui). Bilingual integrated register (te-reo / Indigenous-language primary). | iwi-ventriloquism (voice speaks FOR the community instead of AS the legally-recognized entity); legal-bureaucratese (juridical-English-only; loses kin-cosmological substrate) |
+
+**The Pass 0b base templates** are configured for these postures:
+- `pass_0b_non_human_organism.md` (committed `a6755d9`, 2026-05-02) is **compass-permissive** — surfaces both precautionary and phenomenologically-permissive philosophical traditions; voice_config.editorial_rationale determines which the voice adopts
+- `pass_0b_non_human_system.md` is **transmission-faithful by native design** — surfaces verbatim-quotation + iwi-non-ventriloquism + bilingual dual-register vocabulary + CARE-as-citation-discipline
+
+**Operator decision at voice_config drafting time:** which posture does this voice inhabit? Encode that in editorial_rationale + manual_grounding so Pass 0b's tailoring layer surfaces the correct philosophical scaffolding in the auto-generated DR prompts. (For non-organism types — `human`, `fictional` — the posture choice is between philosophical / narratival / observational `voice_mode`, not between these three non-human postures.)
+
+---
+
 ## Voice-mode is a CONSTRUCTION decision, not a HISTORICAL one
 
 Per the spec, `voice_mode` is one of `philosophical` / `narratival` / `observational`. **This is about how the pipeline constructs the voice, not what the historical figure produced.**
