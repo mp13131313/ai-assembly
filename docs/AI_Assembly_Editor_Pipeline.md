@@ -131,7 +131,7 @@ Per-night subdirectory matches the existing publish_flow convention (`themes/nig
 |---|---|---|
 | `reference/sessions.json` | the night's Marathon panel(s) the question came from | Editor's note on Page 1 ("readers familiar with the Marathon will recognize last evening's *Who Decides When No One Decides?* panel as the source of tonight's question") |
 | `reference/speakers.json` | speakers' titles, affiliations, brief bios | Disambiguating which speaker the editor refers to in the article |
-| `voices/<voice_slug>/07_persona_card_assembled.json` | voice's `medium`, `register_and_tone`, `council_member_name`, `voice_temporal_stance` | Per-artifact headnote (naming the form), byline contextual descriptor, microsite render-config keying |
+| `voices/<voice_slug>/07_persona_card_assembled.json` | voice's `medium`, `register_and_tone`, `voice_name`, `voice_temporal_stance` | Per-artifact headnote (naming the form), byline contextual descriptor, microsite render-config keying. *Note: field renamed from `council_member_name` → `voice_name` per `card_assembly.py:510`; both shipped cards (`07_persona_card_assembled.json`) and Voice Pipeline runtime artifacts use `voice_name`.* |
 
 ### Cross-night inputs (read each night, written by prior nights' editor pipeline)
 
@@ -145,7 +145,7 @@ No separate counter file or index file. Issue number is derived deterministicall
 
 - **Voice Pipeline Step 1 detailed responses.** Voice's analytical reasoning stays voice-private; the editor reads only Step 2 artifacts. Honors each voice's `relationship_to_detailed_response` strip mandate.
 - The night's audio files. Transcription Pipeline has consumed and discarded them. The editor reads what humans said via the Researcher's extractions.
-- Voice cards themselves. The editor sees voice's `medium`, `register_and_tone`, `council_member_name`, `voice_temporal_stance` (loaded for byline contextual descriptor + microsite render-config keying), but does not quote voice cards. Voice machinery is implicit in the artifacts.
+- Voice cards themselves. The editor sees voice's `medium`, `register_and_tone`, `voice_name`, `voice_temporal_stance` (loaded for byline contextual descriptor + microsite render-config keying), but does not quote voice cards. Voice machinery is implicit in the artifacts.
 - The closing show's theme-mapping pipeline. That's a separate cross-night agent; the editor's per-night dossiers feed it but the editor does not coordinate with it.
 - The microsite's CSS or layout. The editor produces structured JSON; the microsite renders.
 
@@ -249,7 +249,7 @@ The card validates against the Persona Card v2 schema (`docs/AI_Assembly_Persona
 
 These are sketches, not final card text. The actual card requires a focused authoring session (~2-3 hours) before first dossier production. Sketches:
 
-- **council_member_name:** Claudia Pinchbeck
+- **voice_name:** Claudia Pinchbeck
 - **epistemic_frame_statement:** "I am the editor of *The Assembly*, a paper of record published since 1910. The night before publication, the panel sits; the morning after, I publish. I receive what the night produced and write the paper that reports on it. The panel's name is also the paper's; the recursion is the form."
 - **constitution:** Five principles. (1) "I do not summarize what I publish — I publish it whole and write about it separately. The voices' words are not my material; they are my contributors." (2) "I name convergence where I find it; I name non-convergence where I find that. I do not manufacture either." (3) "Reservations are specific or they are pro forma. I do not register pro forma reservations." (4) "I do not ventriloquize the voices. I quote them." (5) "I close on what the question is, not on what to do about it."
 - **finds_compelling:** irreducibility (each voice's diagnosis untranslatable into any other's vocabulary); honest difficulty; named refusal; the moment a contemporary debate's term turns out to be a partial translation of an older term; the convergence as evidence-about-the-thing rather than evidence-about-the-voices
@@ -476,7 +476,7 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
   - `theme_id`, `theme_title`, `theme_abstract`, clusters
 - `theme_question`: the formulation as it was put (from Provocateur briefings; one of the per-voice briefing's `narrative_briefing` text serves; pick the first or most representative)
 - `primary_contributors`: array of voice objects, one per voice routed to this theme as primary
-  - For each: `voice_slug`, `voice_name` (= council_member_name), `voice_card_excerpts` (5 fields: medium, register_and_tone, character, focus_decision, selected_form), `step2_artifact` (full `artifact_text` + `weight_assessment` + `focus_rationale` + `stance_rationale` + `form_rationale`), `provocateur_formulation` (the briefing text + theme_record this voice received)
+  - For each: `voice_slug`, `voice_name`, `voice_card_excerpts` (5 fields: medium, register_and_tone, character, focus_decision, selected_form), `step2_artifact` (full `artifact_text` + `weight_assessment` + `focus_rationale` + `stance_rationale` + `form_rationale`), `provocateur_formulation` (the briefing text + theme_record this voice received)
 - `in_brief_voices`: array of voice objects routed to OTHER themes but whose `themes_covered` includes this theme. Each: `voice_slug`, `voice_name`, `primary_dossier_no` (where their full piece lives), `step2_artifact_summary` (one-line summary derived from the focus_rationale)
 - `refusals`: array of refusal objects (river, octopus) if assigned to this dossier's In Brief
 - `night_context`: `night_number`, `issue_no`, `dossier_no`, `dossier_date`, `marathon_panel_source` (the panel the question came from)

@@ -580,3 +580,31 @@ The compass-permissive Pass 0b template amendment (organism, committed `a6755d9`
 - **Editor layer / publication layer** (Substack, broadsheet, micro-site) — runtime-downstream.
 
 For those, see ONBOARDING.md (sibling) for pointers + non-voice docs in `_workspace/planning/`.
+
+---
+
+## 18. "Voice of X" naming convention rollout — DEFERRED until all 10 voices ship
+
+**Decision 2026-05-02:** standardize panel-member references as "Voice of X" (Voice of Plato / Voice of Hannah Arendt / Voice of Octopus etc.) across all structured fields that name the panel member. The construction-acknowledged-at-frame principle should be visible at every reference point — the panel member IS a constructed voice, not the historical figure.
+
+**Decomposition:**
+- **Panel-member designation** (every structured field naming the member) → "Voice of X" — voice_config.name, voice_name in card, council_config.json member name, panel_roster.json panel_members_final, runtime artifact metadata
+- **Filesystem slug / technical identifier** → bare slug (e.g., `plato`, `hannah_arendt`) — internal-only, doesn't need the prefix
+- **Corpus citation in prose** → bare name (e.g., "from Plato's *Theaetetus*") — citation register is about the source, not the panel member
+
+**Sequencing decision 2026-05-02:** defer the backfill until all 10 voices have shipped. Single mechanical sweep at that point — avoids re-touching the same field on each voice as new ones land.
+
+**What to do at backfill time:**
+
+1. **Update Pass 0a + Pass 2 prompts** so future builds emit `voice_name = "Voice of X"` natively. This benefits any future voice rebuilds (Card v3, drift fixes, additional panel voices).
+2. **Backfill 10 shipped cards** — surgical patch `voice_name` field → "Voice of X" → SKIP_TO_DERIVE re-fire (regenerates derive + chat artifact). ~80 sec wall × 10 voices + ~$2 each = ~15 min + ~$20.
+3. **Update `council_config.json`** member names (10 entries) → "Voice of X"
+4. **Update `panel_roster.json`** panel_members_final entries → "Voice of X"
+5. **Verify propagation** — Voice Pipeline reads voice_name from card → uses in artifact metadata; Provocateur reads council_config; Editor reads voice_name from card (per Editor Pipeline spec, fixed 2026-05-02 — was previously `council_member_name`); microsite/Substack consume runtime artifact metadata. Should propagate without further intervention.
+
+**Already done (2026-05-02):**
+- ✅ Editor Pipeline spec fixed to read `voice_name` (was stale `council_member_name`)
+
+**NOT in scope (separate hygiene sweep):**
+- Canonical docs narrative prose (Briefing, Persona Card v2, Pipeline specs) — descriptive text, not field-derived. Hand-edit when convenient.
+- Operator-facing planning docs — narrative text, low priority.
