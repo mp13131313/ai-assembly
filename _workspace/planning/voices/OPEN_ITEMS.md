@@ -154,46 +154,17 @@ Build sequence per voice:
 
 ---
 
-## 6. Cleanup / hygiene gaps
+## 6. Cleanup / hygiene gaps — RETIRED 2026-05-02
 
-### athens-2026 git tracking
-- **Battuta:** entire voice folder UNTRACKED (245+ pipeline files). Plato is the reference pattern.
-- **Dostoevsky:** card + chat artifact tracked (from `5088d67`); ~240 pipeline files UNTRACKED.
-- **Octopus:** intake + DR prompts tracked; merge / corpus / generation / validation / assembled card UNTRACKED.
-- **Cleopatra:** main artifacts tracked; snapshots (`*.pre_*.json`) untracked.
-- **Plato:** clean (full pipeline trail tracked, ~245 files).
+All 2026-05-01 cleanup items swept. Verified state:
+- **athens-2026 git tracking:** Plato 245 / Cleopatra 116 / Dostoevsky 80 / Battuta 80 / Octopus 80 tracked, 0 untracked across all 5 voices. (The 80-vs-245 delta is `.gitignore` correctly catching `_pipeline_logs/` + `*.pre_*.json`.)
+- **athens-2026 `.gitignore`:** all four targets (`_pipeline_logs/`, `*.pre_*.json`, `*.pre_*.md`, `_operator_review_passed.flag`) present.
+- **/tmp/ cleanup:** `standalone_pass4b_test.py` promoted to `code/personas/scripts/`; transient pass4b/anthropic_thinking artifacts gone.
+- **LLM_CALL_INVENTORY.md:** refreshed `bd15f84` 2026-05-01 (FU#53 + Pass 4b standalone test).
+- **"Phase L" sweep:** active docs cleared 2026-05-02. Archived HANDOFFs (`_workspace/archive/voices_consolidation_2026_05_01/`) intentionally retain historical references.
+- **Octopus athens-2026 `07_section_5_dr_prompt.compass.md` stray** (mid-rewrite artifact pre-rebuild decision): deleted 2026-05-02. Canonical rebuild DR prompts live in `projects/current-tests/voices/octopus/01_research/03_dr_prompts/`.
 
-**Action:** sweep-commit Dostoevsky + Battuta + Octopus pipeline trails. Match Plato pattern (245 files per voice). ~700 files total.
-
-### athens-2026 `.gitignore` gaps
-Plato's tracked set excludes — but current `.gitignore` doesn't list — the following, which are now accumulating across voices:
-- `_pipeline_logs/` (per-voice run logs)
-- `*.pre_*.json` (operator-patch snapshots: `pre_FU61.json`, `pre_test.json`, `pre_round1_patches.json`, `pre_round2_patches.json`, `pre_freshqc.json`, `pre_v3_qc_test.json`, `pre_freshrun.json`)
-- `_operator_review_passed.flag`
-
-**Action:** add these to athens-2026 `.gitignore` before sweep-commit, so they don't enter history.
-
-### `/tmp/` cleanup material
-- `/tmp/standalone_pass4b_test.py` (the standalone test script — useful pattern; could move to `personas/scripts/` if we want to keep it)
-- `/tmp/pass4b_test_*.json` (4 fresh-test outputs — empirical-comparison data; can be deleted, the FU#61 verdict captures findings)
-- `/tmp/pass4b_test_*.log`
-- `/tmp/anthropic_thinking_truth*.py` (older diagnostic scripts from FU#60 work)
-
-**Action:** delete `/tmp/pass4b_test_*` files; consider promoting `standalone_pass4b_test.py` to `personas/scripts/standalone_pass_test.py` if useful for future per-pass empirical work.
-
-### Code repo (athens) tracking gaps
-- `docs/AI_Assembly_Frame_Concept_v1.md` — was committed by other thread; verify current state
-- LLM_CALL_INVENTORY.md stale since 04-27 — needs update for FU#57/58/59/60/61
-
-### Documentation drift
-- "Phase L sign-off" framing — operator explicitly said to drop it. Sweep references in:
-  - HANDOFF_2026_04_27.md
-  - HANDOFF_2026_04_27_evening.md
-  - HANDOFF_2026_04_28.md
-  - HANDOFF_2026_04_29.md (and LATE / NIGHT variants)
-  - ONBOARDING.md (line 96 mentions "Phase L empirical: 4.6 produces reader's-intro on §6" — also stale: operator now uses 4.7 across §1-§6)
-- HANDOFF_2026_04_29_*.md docs are stale since major FU#61 work landed since
-- Old voice-pipeline-runtime handoffs (DRYRUN, DUAL_DRYRUN) — unrelated to persona-build; keep under runtime tracking, not voices/
+Section retained as audit trail; no active items.
 
 ---
 

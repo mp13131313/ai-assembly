@@ -64,7 +64,7 @@ Standing rules. Operator-level ones come from `~/.claude/CLAUDE.md` (global) and
 - **No real-person names in the 4 deployment-context JSONs** at `<PROJECT_ROOT>/`: `conference_facts.json`, `audience_profile.json`, `panel_roster.json`, `council_config.json`. Use generic descriptions ("a former PM," "a leading cognitive-warfare theorist").
 - **No Plato re-run without explicit ask.** Card shipped per chat-test 2026-04-26.
 - **No Dostoevsky full re-run.** Phase 2 + G10 Derive re-fire on disk in `~/Desktop/AI Assembly/archive/phase-l-dostoevsky/` (relocated from `projects/` 2026-05-01; voices shipped to athens-2026).
-- **No Opus 4.6 for §6 of any voice's DR.** Per model-per-section policy: §6 uses Opus 4.7 (Phase L empirical: 4.6 produces reader's-intro on §6).
+- **No Opus 4.6 for any DR section.** Use Opus 4.7 across §1-§6. (Older "§1-§5 use 4.6, §6 uses 4.7" spec is stale.)
 - **No hand-authoring voice_configs bypassing Pass 0a.** If review disagrees, edit and re-run Pass 0a.
 - **Reflections are vendor JSON, not audio.** Stage 0 transcription does not apply.
 - **Never optimize FOR chat-test.** Voice Pipeline (runtime) consumes specific card fields via API per-step; that's the production target. Chat-test is a development feedback instrument.
