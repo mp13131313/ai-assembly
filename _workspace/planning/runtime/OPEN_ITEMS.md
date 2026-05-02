@@ -103,7 +103,20 @@ Files to change:
 
 ---
 
-### A2. Editor / Frame layer architecture ✅ RESOLVED 2026-05-01 (mostly — D deferred, microsite output schema TBD)
+### A2. Editor / Frame layer architecture ✅ FULLY RESOLVED 2026-05-02 PM (full spec landed; ratifies + supersedes 2026-05-01 architectural decisions)
+
+**2026-05-02 PM update:** Full Editor Pipeline spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1, ~890 lines, 20 sections). Architecture committed beyond A2's earlier decisions:
+
+- **Unit of publication: dossier** (not per-theme article alone). 5-section swipeable structure: front + article + theme + artifacts × N. The editor produces dossier components in one Anthropic call per dossier; microsite renders the structure.
+- **Editor as 13th Assembly member:** Claudia Pinchbeck has a full persona card (35 fields per Persona Card v2 schema), system prompt assembled the same way as voice cards. Hand-authored skeleton + persona-pipeline-style smoke-test validation. Card lives at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`.
+- **Substack bridge dropped entirely.** Micro-site only. The Assembly speaks for itself. Bridge function performed *inside the fiction* by Claudia's bastard form (institutional + warm).
+- **Voice artifacts inviolate** (per A2 B from 2026-05-01); Provocateur formulation as micro-header REPLACED by editor's headnote (3-5 sentences in Claudia's voice).
+- **Theme routing is mechanical** (Stage 1, deterministic from `focus_decision` parser); editor pipeline focuses on prose generation (Stage 2, one Anthropic call per dossier).
+- **Cost revised with corrected Opus 4.7 pricing:** Editor pipeline ~$3-5 across Athens 3 nights (was estimated ~$20-30 at A2 baseline; corrected with $5/$25 + prefix caching).
+
+**Original A2 decisions ratified, with revisions:**
+
+
 
 **Resolution per operator 2026-05-01:**
 
@@ -136,11 +149,15 @@ Files to change:
 - Updates: `docs/AI_Assembly_Frame_Concept_v1.md` (per-theme article framing; strip rule deferred per D)
 - Updates: `docs/AI_Assembly_Voice_Pipeline.md` (downstream consumer reference)
 
-**Status of editor build:**
-- ✅ Architecture settled (A + B + C + F decided 2026-05-01)
-- 🔵 Editor output schema gated on microsite design (operator working elsewhere per E + F)
-- 🔵 D (curatorial preamble) deferred; re-open if microsite design surfaces a need
-- ⏳ Once microsite design specifies editor output schema → editor build proceeds (~6-10 hr engineering + 5 register prompts collapsed to 1 theme-article prompt = simpler than originally scoped)
+**Status of editor build (post-2026-05-02 PM):**
+- ✅ Architecture settled (2026-05-01) + ratified 2026-05-02 PM
+- ✅ Full pipeline spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1)
+- ✅ Output schema concrete (dossier JSON; see spec §"Output Schema")
+- ✅ Microsite render contract specified (spec §13)
+- 🟡 Claudia Pinchbeck's persona card (35 fields) — sketched in spec §7; full card requires ~2-3 hr focused authoring (TBD: `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md`)
+- 🟡 `editor_dossier.md` closing prompt — sketched in spec §11; full prompt requires drafting at `runtime/flows/shared/prompts/editor_dossier.md`
+- 🟡 Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` — not yet built; estimated ~6-10 hr engineering
+- ⏳ Once Claudia's card + closing prompt + implementation land → editor pipeline runs end-to-end on Test 3 inputs to validate; expected ~$5-6 for one-night test run
 
 ---
 
@@ -181,28 +198,37 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 ## Section B — Athens-blocking items not yet built
 
-### B1. Editor / Frame layer 🔴 (NEW — see A2)
+### B1. Editor / Frame layer 🟡 SPECIFIED 2026-05-02 PM (Editor Pipeline v1 spec landed; Claudia card + implementation pending)
 
-**State:** unspecified; conceptual reasoning in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md`. **No code; no detailed spec.**
+**State:** spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1, ~890 lines, 20 sections). Implementation pending three items:
 
-**Triggers on:** Microsite design specifying editor output schema (per A2 F decision 2026-05-01 — parallel build, microsite specifies).
+1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`.
+2. **`editor_dossier.md` closing prompt** at `runtime/flows/shared/prompts/editor_dossier.md`. Structure sketched in spec §11; needs full draft.
+3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish). Estimated ~6-10 hr engineering once card + prompt land.
 
-**Architecture (per A2 decisions 2026-05-01 — A + B + C + F):**
-- **Per-theme** (not per-voice). One editor call per theme that has voices on it.
-- **All-AI** drafting; no operator polish phase.
-- **Voice artifacts ship as-is** (Step 2 untouched). Voice's Provocateur formulation appears as micro-header above the artifact on display surfaces.
-- **Cross-voice work happens in the theme article**, not in per-voice editorial chrome.
+**Triggers on:** Operator authoring Claudia's card + closing prompt; then implementation.
 
-**Implementation scope (revised under per-theme):**
-- `runtime/flows/editor_flow.py` — orchestrator (parallel across themes)
-- `runtime/flows/voice/editor.py` — per-theme editor call (~3-5/night). Naming may change from `voice/editor.py` to `theme/editor.py` since unit is theme not voice.
-- `runtime/flows/shared/prompts/editor_theme_article.md` — single template (not per-register taxonomy; voice register is now carried by voice's own as-is artifact)
-- **Input:** one theme record + all voices' Step 2 artifacts on that theme + each voice's Provocateur formulation + audience context
-- **Output:** theme-level article. **Schema TBD — gated on microsite design output (per F).**
-- **Model:** Sonnet 4.6 + adaptive thinking v1 default; flag for Opus 4.7 if quality observation suggests escalation (since all-AI with no polish raises the quality bar on the model output).
-- **Estimated:** ~6-10 hr build for v1 once microsite output schema lands; ~$2/call × 3-5 themes/night = ~$6-10/night; ~$20-30 across 3 Athens nights.
+**Architecture (full spec at `docs/AI_Assembly_Editor_Pipeline.md`):**
 
-**Per-voice frame register taxonomy (originally proposed):** REMOVED under per-theme architecture. Voice artifacts ship in their native form with their Provocateur formulation as micro-header — no per-voice editorial chrome. Headline poetics may still matter for broadsheet display of voice names; that's a broadsheet/microsite concern, not editor's.
+- **Unit of publication: dossier** (not just per-theme article). 5-section swipeable structure: front + article + theme + artifacts × N. Each dossier organized around a theme.
+- **Editor as 13th Assembly member** with full persona card + system prompt assembled the same way as panel voices.
+- **Self-reportage recursion:** *The Assembly* (panel) ≡ *The Assembly* (publication). Editor reports on what the Assembly produced.
+- **One Anthropic call per dossier** (Claudia generates all components in structured output). Theme routing pre-pass is mechanical (Stage 1, no API call).
+- **Voice artifacts inviolate.** Editor pipeline reads Step 2 only; does not modify voice's `artifact_text`.
+- **Bastard form:** institutional editorial (we-heavy) + Beauty Shot's structural warmth (warmth in moves not pronouns). New Yorker "Comment" page 1940s-50s precedent.
+- **Substack bridge dropped.** Micro-site only.
+- **Confected pedigree:** Vol. CXVI (114-year-old paper since 1910), Issue No. 42,193 → 42,195 across Athens (Night 3 = marathon distance in metres, the Athens-to-Athens joke).
+
+**Implementation scope (revised + concrete):**
+- `runtime/flows/editor_flow.py` — orchestrator (parallel across dossiers within a night)
+- `runtime/flows/editor/card_assembly.py` — Claudia's card → editor system prompt
+- `runtime/flows/editor/routing.py` — Stage 1 theme routing (deterministic from `focus_decision` parser)
+- `runtime/flows/editor/dossier_generation.py` — Stage 2 per-dossier Anthropic call
+- `runtime/flows/editor/publish.py` — write to `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/`
+- `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt for Stage 2
+- `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json` — Claudia's card (operator-authored)
+
+**Estimated cost (corrected Opus 4.7 pricing):** ~$3-5 across Athens 3 nights (vs A2's earlier $20-30 estimate, which used Opus 4-deprecated $15/$75). Wall ~5-10 min per night with parallel dossier calls.
 
 ### B2. Microsite 🔴
 
@@ -898,6 +924,7 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 
 | Date | Item | Location |
 |---|---|---|
+| 2026-05-02 (PM, late) | **Editor Pipeline v1 spec landed** — `docs/AI_Assembly_Editor_Pipeline.md` (892 lines, 20 sections). Full pipeline contract including: editor as 13th Assembly member (Claudia Pinchbeck) with full persona card + system prompt assembled like panel voices; dossier-by-theme as unit of publication; 5-section swipeable structure (front + article + theme + artifacts × N); marathon-distance issue numbering (Vol. CXVI, No. 42,193 → 42,195 across Athens); bastard editor voice (institutional we + Beauty Shot warmth); deterministic theme routing (Stage 1) → one Anthropic call per dossier (Stage 2); Substack bridge dropped, micro-site only; voice artifacts inviolate, editor reads Step 2 only; ~$3-5 across Athens. Pending: Claudia's full 35-field card; `editor_dossier.md` closing prompt; implementation. Resolves OPEN_ITEMS A2 fully + moves B1 from 🔴 NOT BUILT to 🟡 SPEC LANDED. | docs/AI_Assembly_Editor_Pipeline.md + this doc A2 + B1 |
 | 2026-05-02 (PM) | **Voice Pipeline architecture session — routing refactor + prompt rewrites + prefix caching + cost correction** (`d9ca3f9` + `dfb46f7`) — Field-routing refactor: voice/expression fields (rhetorical_mode, characteristic_moves, register_and_tone, metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes) now load Step 1 + 2 + 3; reasoning fields (reasoning_method, finds_compelling, resists, default_questions, disagreement_protocol) now load Step 2. Closes the prompt/system mismatch where Step 2's decision_1 cited fields that weren't loaded — root cause of Test 2 v2's 4/4 woven synthesis bias. Step 1 + Step 2 closing prompts rewritten under Haltung framing (Step 1: 9 sections core/grounding/register/boundaries/engaging/commitment/output, operational machinery leads, first-person climax; Step 2: weighing→focus→stance→form→boundaries→composition with Apply/Ground/Pass triplet + new weight_assessment first-class field). Prefix caching extended to two breakpoints (prefix ~20-25K tokens shared across Step 1/2/3 for same voice/night) with continuity opt-out. Cache token tracking persisted in step1/step2/step3/continuity artifact schemas. **Cost correction:** Opus 4.7 is $5/$25 per platform.claude.com/docs (was citing deprecated Opus 4 / $15/$75 throughout); Athens 3-night Voice Pipeline cost ~$60-80, not $540-700. **Test 3 empirical validation:** 4 voices × 1 night × 3 formulations measured at ~$5-6; synthesis-bias structural fix working (2/4 fully focused; 1/4 anchored synthesis; 1/4 earned synthesis with field-grounded weight_assessment). Voice fidelity preserved across all 4 artifacts (Plato Socratic dialogue, Cleopatra prostagma, Dostoevsky Diary entry, Battuta riḥla scenic-cell). 24/24 tests passing. See HANDOFF_2026_05_02.md for full session detail. | runtime/flows/voice/{card_assembly,_anthropic_call,continuity,step1_private_reasoning,step2_first_draft_artifact,step3_amended_artifact}.py + runtime/flows/shared/prompts/voice_step{1,2}*.md + docs/AI_Assembly_Voice_Pipeline.md + this doc C19a |
 | 2026-05-02 | **Defensive `--night` check + automation orchestrator design (C22)** (`c0d724e`) — `assert_run_dir_night_matches()` shared helper refuses to run voice_flow / publish_flow when --night doesn't match run_dir's embedded night number; both naming conventions handled; 9 unit tests. Catches silent cross-night corruption: wrong --night writes `continuity_night_<N+1>.json` from wrong-night data. Plus full orchestrator design doc (`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) — event-driven via 1-min polling on filesystem-as-state; tonight-derivation via date → DATE_TO_NIGHT + sessions.json `ai_assembly=true` filter. Three Athens scope options (manual-fire wrapper / full / defer); operator decision pending | runtime/flows/shared/io.py + voice_flow.py + publish_flow.py + tests/test_run_dir_night_check.py + AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md |
 | 2026-05-02 | **publish_flow.py per-night theme path fix** (`e0921de`) — `published_artifacts/themes/<theme_id>.json` flat path overwrote across nights (theme_ids reset per Researcher run; Night 2 silently destroyed Night 1 theme aggregations). Athens-eligible bug — operator-caught when challenging the "won't fire during Athens" claim. Fixed: per-night sub-dir `published_artifacts/themes/night_<N>/<theme_id>.json`. Other publish_flow outputs already collision-safe. | runtime/flows/publish_flow.py + runtime/flows/voice/publish.py docstrings |

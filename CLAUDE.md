@@ -236,17 +236,28 @@ All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Transcription_Pipeline.md` — audio to clean transcript
   pipeline
 - `AI_Assembly_Voice_Pipeline.md` — Voice Pipeline Steps 1+2+3 (v2.1,
-  updated 2026-05-01). **Step 3 SKIPPED for Athens** per OPEN_ITEMS A1
-  decision 2026-05-01 (Option A); cross-voice visibility moves to editor
-  layer + Substack. Module dormant; ~2-day re-add path documented for
-  post-editor/microsite. Validation diagnostic-only (FU#62 path B); Athens
-  policy Night 1 ON / Nights 2+3 OFF. Athens production CLI:
-  `voice_flow.py <run_dir> --night N --skip-step3 [--skip-validation if Night 2/3]`.
-  **Editor / Frame layer** architecture settled 2026-05-01 (OPEN_ITEMS A2):
-  per-theme article (not per-voice editorial chrome); all-AI drafting (no
-  polish phase); voice artifacts ship as-is with Provocateur formulation as
-  micro-header. Editor output schema gated on microsite design (operator
-  building elsewhere; specifies editor output per A2 F decision).
+  updated 2026-05-01; cost figures corrected 2026-05-02 with Opus 4.7
+  $5/$25 pricing). **Step 3 SKIPPED for Athens** per OPEN_ITEMS A1
+  decision 2026-05-01 (Option A). Validation diagnostic-only (FU#62
+  path B); Athens policy Night 1 ON / Nights 2+3 OFF. Athens production
+  CLI: `voice_flow.py <run_dir> --night N --skip-step3 [--skip-validation
+  if Night 2/3]`. Routing refactor + prompt rewrites + prefix caching +
+  cache token tracking landed 2026-05-02 PM (commits `d9ca3f9` + `dfb46f7`);
+  synthesis-bias structurally addressed; Test 3 validated. Athens 3-night
+  cost ~$60-80 (was claimed $540-700 under deprecated $15/$75 pricing).
+- `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline v1 (landed 2026-05-02
+  PM). Implements Frame Concept v1's broadsheet surface as a runtime
+  contract. **Editor as 13th Assembly member** (Claudia Pinchbeck) with
+  full persona card; system prompt assembled same way as panel voices.
+  **Unit of publication is the dossier** (5-section swipeable: front +
+  article + theme + artifacts × N), organized by theme. **Substack bridge
+  dropped**, micro-site only. **Self-reportage recursion** — *The Assembly*
+  (panel) ≡ *The Assembly* (publication). One Anthropic call per dossier
+  on Opus 4.7. Marathon-distance issue numbering (Vol. CXVI . No. 42,193
+  → 42,195 across Athens; Night 3 = marathon distance in metres). Athens
+  cost ~$3-5 across 3 nights. Pending: Claudia's full 35-field card,
+  closing prompt, implementation. See OPEN_ITEMS A2 (✅ fully resolved)
+  + B1 (🟡 specified).
 - `AUDIENCE_BRIEF.md` — audience characterization
 - `LLM_CALL_INVENTORY.md` — call inventory (needs update for new
   passes since 2026-04-21)

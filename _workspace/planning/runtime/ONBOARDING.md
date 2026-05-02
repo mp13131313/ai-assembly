@@ -68,6 +68,7 @@ runtime/flows/
 | Cache token tracking persisted in artifacts | ✅ LANDED 2026-05-02 PM — step1/step2/step3/continuity all persist `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost reconciliation | commit `d9ca3f9` |
 | Voice Pipeline field routing (voice/expression in Step 1; reasoning fields in Step 2) | ✅ REFACTORED 2026-05-02 PM — closes the prompt/system mismatch where Step 2's decision_1 cited `finds_compelling`/`resists` but the fields weren't loaded | commit `d9ca3f9` |
 | Voice Pipeline closing prompts (Step 1 + Step 2) | ✅ REWRITTEN 2026-05-02 PM under Haltung lens — section-by-section word-by-word challenge; Step 2 adds `<weighing>` discrete pre-focus phase + `weight_assessment` first-class field | commit `d9ca3f9` + `dfb46f7` |
+| Editor Pipeline (Claudia Pinchbeck → dossier) | 🟡 SPEC LANDED 2026-05-02 PM — `docs/AI_Assembly_Editor_Pipeline.md` v1 (892 lines, 20 §); Claudia card + closing prompt + implementation pending | OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟡 specified) |
 | Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `99759cb`; 15 unit tests passing |
 | publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `e0921de` |
 | Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `c0d724e`; 9 unit tests passing |
@@ -179,11 +180,13 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `voice-pipeline-v2.1-align-revert` — 37+ commits ahead of `main`. Pushed.
+**Branch:** `voice-pipeline-v2.1-align-revert` — 38+ commits ahead of `main`. Pushed.
 
 **Branch history (chronological — most recent first):**
 
-*2026-05-02 (afternoon — voice pipeline architecture session):*
+*2026-05-02 (afternoon — voice pipeline + editor pipeline session):*
+- *(pending commit)* docs(editor-pipeline): Editor Pipeline v1 spec + OPEN_ITEMS A2/B1 updates — full editor pipeline contract; Claudia Pinchbeck as named 13th Assembly member; dossier-by-theme architecture; marathon-distance issue numbering; ~$3-5 Athens cost. Resolves A2 fully, moves B1 from NOT BUILT to SPEC LANDED.
+- `c4d8346` docs(planning): HANDOFF 2026-05-02 + ONBOARDING + OPEN_ITEMS for voice pipeline session
 - `dfb46f7` voice(step2): restore stripped 'transform form, carry substance' guardrail
 - `d9ca3f9` voice: routing refactor + prompt rewrite + prefix caching + cost correction (10 files; +286/-182). Synthesis-bias structurally addressed. Test 3 validated.
 
