@@ -1,4 +1,61 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070a0e">
+  <title>The invitation, palpated — The Assembly</title>
+  <meta name="description" content="The voice of the octopus, asked whether it was inclined to attend the Forum, replied as the voice replies — not in prose, but in a fourteen-second trajectory across the body. Dossier No. 1, The Assembly.">
+  <meta property="og:title" content="The invitation, palpated">
+  <meta property="og:description" content="A registration, in chromatic notation. The voice of the octopus, Dossier No. 1.">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #070a0e;
+      color: rgba(230, 230, 220, 0.85);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    #root { min-height: 100vh; }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(230, 230, 220, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="loading">The Assembly · loading the voice</div>
+  </div>
+
+  <!-- React 18 + Babel standalone for in-browser JSX transform -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-type="module" data-presets="react">
+    // Pull hooks from the global React namespace
+    const { useState, useEffect, useRef, useCallback } = React;
+
+// React hooks pulled from global namespace below
 
 // The artifact's parameter trajectory — the voice's specific response
 // to the conference invitation, rendered as a 14-second sequence
@@ -118,8 +175,12 @@ const fragmentShaderSource = `
   uniform float u_turbulence;
   uniform float u_pattern_complexity;
   uniform float u_texture_intensity;
-  uniform int u_pattern_mode;
-  uniform int u_orientation;
+  uniform int u_pattern_mode_a;
+  uniform int u_pattern_mode_b;
+  uniform float u_pattern_blend;
+  uniform int u_orient_a;
+  uniform int u_orient_b;
+  uniform float u_orient_blend;
   uniform int u_focal_count;
   uniform vec3 u_focals[6];
 
@@ -220,22 +281,55 @@ const fragmentShaderSource = `
     return a + b * cos(6.28318 * (c * t + d));
   }
 
+  // Apply a single orientation distortion to UV space.
+  // mode: 0=toward, 1=away, 2=lateral, 3=still
+  vec2 applyOrientation(vec2 uv, int mode, float time, float arousal) {
+    if (mode == 0) {
+      vec2 center = vec2(0.5);
+      float expand = 1.0 + sin(time * 0.3) * 0.02 * arousal;
+      return center + (uv - center) * expand;
+    } else if (mode == 1) {
+      vec2 center = vec2(0.5);
+      float contract = 1.0 - sin(time * 0.4) * 0.03 * arousal;
+      return center + (uv - center) * contract;
+    } else if (mode == 2) {
+      return uv + vec2(sin(time * 0.2) * 0.02, 0.0);
+    }
+    return uv;
+  }
+
+  // Compute the pattern value for a given pattern mode, using a shared turbUV.
+  // mode: 0=uniform, 1=mottled, 2=disruptive, 3=passing_cloud, 4=deimatic
+  float computePattern(int mode, vec2 orientUV, vec2 turbUV, vec2 uv, float time, float baseNoise, float cellScale, float expansion) {
+    if (mode == 0) {
+      return 0.4 + baseNoise * 0.15;
+    } else if (mode == 1) {
+      return fbm(turbUV * (4.0 + u_pattern_complexity * 6.0) + time * 0.05, 5);
+    } else if (mode == 2) {
+      float disrupt = fbm(turbUV * 3.0, 3);
+      float p = step(0.45, disrupt);
+      return mix(p, fbm(turbUV * 8.0, 4), 0.2);
+    } else if (mode == 3) {
+      float p = passingCloud(turbUV, time);
+      float cellDetail = chromatophoreCell(turbUV, cellScale * 0.5, expansion);
+      return mix(p, p * (0.7 + cellDetail * 0.3), u_pattern_complexity);
+    } else if (mode == 4) {
+      float flash = pow(sin(time * (3.0 + u_arousal * 8.0)) * 0.5 + 0.5, 3.0);
+      float rings = 1.0 - smoothstep(0.1, 0.35, distance(uv, vec2(0.5)));
+      float spotNoise = fbm(turbUV * 6.0 + time * 2.0, 3);
+      return mix(spotNoise, flash * rings + spotNoise * 0.5, 0.6);
+    }
+    return 0.5;
+  }
+
   void main() {
     vec2 uv = v_uv;
     float time = u_time;
 
-    vec2 orientUV = uv;
-    if (u_orientation == 0) {
-      vec2 center = vec2(0.5);
-      float expand = 1.0 + sin(time * 0.3) * 0.02 * u_arousal;
-      orientUV = center + (uv - center) * expand;
-    } else if (u_orientation == 1) {
-      vec2 center = vec2(0.5);
-      float contract = 1.0 - sin(time * 0.4) * 0.03 * u_arousal;
-      orientUV = center + (uv - center) * contract;
-    } else if (u_orientation == 2) {
-      orientUV.x += sin(time * 0.2) * 0.02;
-    }
+    // Blend orientation distortions: compute both, mix by blend factor
+    vec2 orientUV_a = applyOrientation(uv, u_orient_a, time, u_arousal);
+    vec2 orientUV_b = applyOrientation(uv, u_orient_b, time, u_arousal);
+    vec2 orientUV = mix(orientUV_a, orientUV_b, u_orient_blend);
 
     float noiseScale = 3.0 + u_pattern_complexity * 8.0;
     vec2 noiseUV = orientUV * noiseScale + time * u_wave_speed * 0.1 * u_wave_direction;
@@ -250,27 +344,12 @@ const fragmentShaderSource = `
     float globalPulse = sin(time * u_pulse_frequency * 3.14159) * 0.15 + 0.5;
     float expansion = globalPulse * (0.3 + u_arousal * 0.5);
 
-    float patternValue = 0.5;
-
-    if (u_pattern_mode == 0) {
-      patternValue = 0.4 + baseNoise * 0.15;
-    } else if (u_pattern_mode == 1) {
-      float mottleNoise = fbm(turbUV * (4.0 + u_pattern_complexity * 6.0) + time * 0.05, 5);
-      patternValue = mottleNoise;
-    } else if (u_pattern_mode == 2) {
-      float disrupt = fbm(turbUV * 3.0, 3);
-      patternValue = step(0.45, disrupt);
-      patternValue = mix(patternValue, fbm(turbUV * 8.0, 4), 0.2);
-    } else if (u_pattern_mode == 3) {
-      patternValue = passingCloud(turbUV, time);
-      float cellDetail = chromatophoreCell(turbUV, cellScale * 0.5, expansion);
-      patternValue = mix(patternValue, patternValue * (0.7 + cellDetail * 0.3), u_pattern_complexity);
-    } else if (u_pattern_mode == 4) {
-      float flash = pow(sin(time * (3.0 + u_arousal * 8.0)) * 0.5 + 0.5, 3.0);
-      float rings = 1.0 - smoothstep(0.1, 0.35, distance(uv, vec2(0.5)));
-      float spotNoise = fbm(turbUV * 6.0 + time * 2.0, 3);
-      patternValue = mix(spotNoise, flash * rings + spotNoise * 0.5, 0.6);
-    }
+    // Blend pattern modes: compute both pattern values, mix by blend factor.
+    // When from == to, this is the same as a single computation; when transitioning,
+    // it crossfades between the two pattern shaders.
+    float patternA = computePattern(u_pattern_mode_a, orientUV, turbUV, uv, time, baseNoise, cellScale, expansion);
+    float patternB = computePattern(u_pattern_mode_b, orientUV, turbUV, uv, time, baseNoise, cellScale, expansion);
+    float patternValue = mix(patternA, patternB, u_pattern_blend);
 
     float focal = focalInfluence(uv);
     patternValue = mix(patternValue, patternValue + focal * 0.4, min(focal * 2.0, 1.0));
@@ -354,12 +433,12 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-function lerpParams(a, b, t) {
+// Continuous-only param interpolation; discrete params are handled separately
+// via blend factors passed to the shader
+function lerpContinuousParams(a, b, t) {
   return {
-    orientation: t < 0.5 ? a.orientation : b.orientation,
     arousal: lerp(a.arousal, b.arousal, t),
     valence: lerp(a.valence, b.valence, t),
-    pattern_mode: t < 0.5 ? a.pattern_mode : b.pattern_mode,
     pattern_complexity: lerp(a.pattern_complexity, b.pattern_complexity, t),
     palette: {
       darkness: lerp(a.palette.darkness, b.palette.darkness, t),
@@ -377,9 +456,6 @@ function lerpParams(a, b, t) {
       pulse_frequency: lerp(a.dynamics.pulse_frequency, b.dynamics.pulse_frequency, t),
       turbulence: lerp(a.dynamics.turbulence, b.dynamics.turbulence, t),
     },
-    focal_points: t < 0.5
-      ? a.focal_points
-      : (b.focal_points.length === 0 ? [] : b.focal_points),
     texture_intensity: lerp(a.texture_intensity, b.texture_intensity, t),
   };
 }
@@ -389,21 +465,75 @@ function ease(t) {
   return t * t * (3 - 2 * t);
 }
 
-// Get the parameter set for a specific time in the trajectory
+// Blend focal points: pad the shorter array to length 6 with zero-intensity
+// focal points at the same position as the corresponding focal in the longer
+// array (so they fade rather than disappear). Returns 6 focal slots.
+function blendFocalPoints(fromList, toList, blend) {
+  const result = [];
+  const max = Math.max(fromList.length, toList.length, 0);
+  for (let i = 0; i < max; i++) {
+    const fromFP = fromList[i] || { x: 0.5, y: 0.5, intensity: 0 };
+    const toFP = toList[i] || { x: 0.5, y: 0.5, intensity: 0 };
+    // If one side is missing, position stays at the existing side's position
+    const fx = fromList[i] ? fromFP.x : toFP.x;
+    const fy = fromList[i] ? fromFP.y : toFP.y;
+    const tx = toList[i] ? toFP.x : fromFP.x;
+    const ty = toList[i] ? toFP.y : fromFP.y;
+    result.push({
+      x: lerp(fx, tx, blend),
+      y: lerp(fy, ty, blend),
+      intensity: lerp(fromFP.intensity, toFP.intensity, blend),
+    });
+  }
+  return result;
+}
+
+// Get the parameter set for a specific time in the trajectory.
+// Returns: { params, from_pattern, to_pattern, pattern_blend, from_orient, to_orient, orient_blend, focal_points }
 function paramsAtTime(elapsed) {
   const t = elapsed % (TOTAL_DURATION + PAUSE_AT_END);
+  // After last transition: hold final state
   if (t >= TOTAL_DURATION) {
-    return ARTIFACT_TRANSITIONS[ARTIFACT_TRANSITIONS.length - 1].params;
+    const last = ARTIFACT_TRANSITIONS[ARTIFACT_TRANSITIONS.length - 1].params;
+    return {
+      params: lerpContinuousParams(last, last, 0),
+      from_pattern: last.pattern_mode,
+      to_pattern: last.pattern_mode,
+      pattern_blend: 0,
+      from_orient: last.orientation,
+      to_orient: last.orientation,
+      orient_blend: 0,
+      focal_points: last.focal_points,
+    };
   }
   for (let i = 0; i < ARTIFACT_TRANSITIONS.length - 1; i++) {
     const a = ARTIFACT_TRANSITIONS[i];
     const b = ARTIFACT_TRANSITIONS[i + 1];
     if (t >= a.t && t < b.t) {
       const localT = ease((t - a.t) / (b.t - a.t));
-      return lerpParams(a.params, b.params, localT);
+      return {
+        params: lerpContinuousParams(a.params, b.params, localT),
+        from_pattern: a.params.pattern_mode,
+        to_pattern: b.params.pattern_mode,
+        pattern_blend: localT,
+        from_orient: a.params.orientation,
+        to_orient: b.params.orientation,
+        orient_blend: localT,
+        focal_points: blendFocalPoints(a.params.focal_points, b.params.focal_points, localT),
+      };
     }
   }
-  return ARTIFACT_TRANSITIONS[ARTIFACT_TRANSITIONS.length - 1].params;
+  const last = ARTIFACT_TRANSITIONS[ARTIFACT_TRANSITIONS.length - 1].params;
+  return {
+    params: lerpContinuousParams(last, last, 0),
+    from_pattern: last.pattern_mode,
+    to_pattern: last.pattern_mode,
+    pattern_blend: 0,
+    from_orient: last.orientation,
+    to_orient: last.orientation,
+    orient_blend: 0,
+    focal_points: last.focal_points,
+  };
 }
 
 // Find the active transition note for a given elapsed time
@@ -454,7 +584,9 @@ function ChromatophoreCanvas({ onTick }) {
       "u_time", "u_arousal", "u_valence", "u_darkness", "u_warmth", "u_brightness",
       "u_iridescence", "u_wave_speed", "u_wave_count", "u_wave_direction",
       "u_pulse_frequency", "u_turbulence", "u_pattern_complexity", "u_texture_intensity",
-      "u_pattern_mode", "u_orientation", "u_focal_count",
+      "u_pattern_mode_a", "u_pattern_mode_b", "u_pattern_blend",
+      "u_orient_a", "u_orient_b", "u_orient_blend",
+      "u_focal_count",
     ];
     const u = {};
     names.forEach(n => u[n] = gl.getUniformLocation(program, n));
@@ -463,7 +595,8 @@ function ChromatophoreCanvas({ onTick }) {
 
     const render = () => {
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
-      const p = paramsAtTime(elapsed);
+      const state = paramsAtTime(elapsed);
+      const p = state.params;
 
       if (onTickRef.current) onTickRef.current(elapsed);
 
@@ -490,10 +623,18 @@ function ChromatophoreCanvas({ onTick }) {
       gl.uniform1f(u.u_turbulence, p.dynamics.turbulence);
       gl.uniform1f(u.u_pattern_complexity, p.pattern_complexity);
       gl.uniform1f(u.u_texture_intensity, p.texture_intensity);
-      gl.uniform1i(u.u_pattern_mode, PATTERN_MODES[p.pattern_mode] ?? 0);
-      gl.uniform1i(u.u_orientation, ORIENTATIONS[p.orientation] ?? 3);
 
-      const focals = p.focal_points || [];
+      // Pattern-mode blending: pass both the from and to modes plus the blend factor
+      gl.uniform1i(u.u_pattern_mode_a, PATTERN_MODES[state.from_pattern] ?? 0);
+      gl.uniform1i(u.u_pattern_mode_b, PATTERN_MODES[state.to_pattern] ?? 0);
+      gl.uniform1f(u.u_pattern_blend, state.pattern_blend);
+
+      // Orientation blending: same pattern
+      gl.uniform1i(u.u_orient_a, ORIENTATIONS[state.from_orient] ?? 3);
+      gl.uniform1i(u.u_orient_b, ORIENTATIONS[state.to_orient] ?? 3);
+      gl.uniform1f(u.u_orient_blend, state.orient_blend);
+
+      const focals = state.focal_points || [];
       gl.uniform1i(u.u_focal_count, Math.min(focals.length, 6));
       for (let i = 0; i < 6; i++) {
         const loc = u[`u_focals[${i}]`];
@@ -522,7 +663,7 @@ function ChromatophoreCanvas({ onTick }) {
   );
 }
 
-export default function OctopusArtifact() {
+function OctopusArtifact() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [elapsed, setElapsed] = useState(0);
 
@@ -544,15 +685,109 @@ export default function OctopusArtifact() {
       padding: "0",
       margin: "0",
     }}>
+      <style>{`
+        .voice-prose p {
+          margin: 0 0 1.4em 0;
+        }
+        .voice-prose p:first-child {
+          margin-top: 0;
+        }
+        .voice-prose p:last-child {
+          margin-bottom: 0;
+        }
+
+        @media (max-width: 720px) {
+          .octopus-masthead {
+            padding: 16px 20px 12px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px;
+          }
+          .octopus-article-header {
+            padding: 32px 20px 20px !important;
+          }
+          .octopus-article-header h1 {
+            font-size: 30px !important;
+          }
+          .octopus-article-header .article-eyebrow {
+            font-size: 9px !important;
+            letter-spacing: 0.22em !important;
+          }
+          .octopus-article-header .article-deck {
+            font-size: 15px !important;
+          }
+          .octopus-canvas-wrap {
+            padding: 0 20px !important;
+          }
+          .octopus-headnote-wrap {
+            padding: 0 20px !important;
+            margin-top: 24px !important;
+          }
+          .octopus-headnote-wrap .headnote {
+            padding: 16px 18px !important;
+            font-size: 14px !important;
+          }
+          .voice-prose {
+            padding: 0 20px 56px !important;
+            margin-top: 32px !important;
+            font-size: 16px !important;
+            line-height: 1.65 !important;
+          }
+          .voice-prose p {
+            margin: 0 0 1.1em 0;
+          }
+          .voice-prose .closing-paragraph {
+            font-size: 17px !important;
+            margin-top: 28px !important;
+            padding-top: 24px !important;
+          }
+          .octopus-log-wrap {
+            padding: 24px 20px !important;
+          }
+          .octopus-log-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .octopus-log-grid .log-cell {
+            border-right: none !important;
+            border-bottom: 0.5px solid rgba(230, 230, 220, 0.1) !important;
+          }
+          .octopus-log-grid .log-cell.log-cell-last {
+            border-bottom: none !important;
+          }
+          .octopus-footer {
+            padding: 24px 20px 48px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px;
+            font-size: 10px !important;
+          }
+          .octopus-canvas-timeline {
+            padding: 12px 14px !important;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .octopus-article-header h1 {
+            font-size: 26px !important;
+          }
+          .octopus-canvas-timeline .timeline-meta {
+            font-size: 9px !important;
+          }
+        }
+      `}</style>
       {/* Masthead */}
       <div style={{
         borderBottom: "0.5px solid rgba(230, 230, 220, 0.15)",
-        padding: "20px 32px 16px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "baseline",
-        fontFamily: "'Cormorant Garamond', Georgia, serif",
       }}>
+        <div className="octopus-masthead" style={{
+          maxWidth: "744px",
+          margin: "0 auto",
+          padding: "20px 32px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+        }}>
         <div style={{
           fontSize: "11px",
           letterSpacing: "0.25em",
@@ -569,15 +804,16 @@ export default function OctopusArtifact() {
         }}>
           Dossier No. 1 · Page Seven
         </div>
+        </div>
       </div>
 
       {/* Article header */}
-      <div style={{
+      <div className="octopus-article-header" style={{
         padding: "48px 32px 24px",
-        maxWidth: "920px",
+        maxWidth: "744px",
         margin: "0 auto",
       }}>
-        <div style={{
+        <div className="article-eyebrow" style={{
           fontSize: "10px",
           letterSpacing: "0.3em",
           textTransform: "uppercase",
@@ -597,27 +833,26 @@ export default function OctopusArtifact() {
         }}>
           The invitation, palpated
         </h1>
-        <div style={{
+        <div className="article-deck" style={{
           fontFamily: "'Cormorant Garamond', Georgia, serif",
           fontSize: "16px",
           fontStyle: "italic",
           color: "rgba(230, 230, 220, 0.55)",
           lineHeight: 1.55,
-          maxWidth: "620px",
         }}>
-          The voice of the octopus, asked whether it was inclined to attend the Forum, replied as the architecture replies. The reply is a fourteen-second trajectory across the body, here rendered from the parameter log the voice returned. The reader watches what the voice registered.
+          The voice of the octopus, asked whether it was inclined to attend the Forum, replied as the voice replies — not in prose, but in a fourteen-second trajectory across the body, here rendered from the parameter log the voice returned. The reader watches what the voice registered.
         </div>
       </div>
 
       {/* The simulator — the body's response, playing */}
-      <div style={{
-        maxWidth: "920px",
+      <div className="octopus-canvas-wrap" style={{
+        maxWidth: "744px",
         margin: "0 auto",
         padding: "0 32px",
       }}>
         <div style={{
           width: "100%",
-          aspectRatio: "16 / 10",
+          aspectRatio: "5 / 4",
           background: "#000",
           position: "relative",
           overflow: "hidden",
@@ -626,7 +861,7 @@ export default function OctopusArtifact() {
           <ChromatophoreCanvas onTick={handleTick} />
 
           {/* Timeline overlay at the bottom of the canvas */}
-          <div style={{
+          <div className="octopus-canvas-timeline" style={{
             position: "absolute",
             bottom: 0,
             left: 0,
@@ -638,10 +873,11 @@ export default function OctopusArtifact() {
             letterSpacing: "0.05em",
             color: "rgba(230, 230, 220, 0.7)",
           }}>
-            <div style={{
+            <div className="timeline-meta" style={{
               display: "flex",
               justifyContent: "space-between",
               marginBottom: "6px",
+              gap: "12px",
             }}>
               <span>t = {cycleT.toFixed(1)}s</span>
               <span style={{ color: "rgba(230, 230, 220, 0.5)" }}>
@@ -681,34 +917,33 @@ export default function OctopusArtifact() {
       </div>
 
       {/* Editor's headnote */}
-      <div style={{
-        maxWidth: "920px",
+      <div className="octopus-headnote-wrap" style={{
+        maxWidth: "744px",
         margin: "32px auto 0",
         padding: "0 32px",
       }}>
-        <div style={{
+        <div className="headnote" style={{
           padding: "20px 24px",
           borderLeft: "2px solid rgba(230, 230, 220, 0.2)",
           fontStyle: "italic",
           fontSize: "15px",
           lineHeight: 1.65,
           color: "rgba(230, 230, 220, 0.6)",
-          maxWidth: "640px",
         }}>
-          Editor's note. The voice of the octopus does not produce prose-as-such. What follows beneath the trajectory is the voice's interpretive frame, written by the architecture about itself. The trajectory is the answer; the prose is what the architecture says about what it just did.
+          Editor's note. The voice of the octopus does not produce prose-as-such. What follows beneath the trajectory is the voice's own framing of what the trajectory was. The trajectory is the answer; the prose is what the voice says about what it just did.
         </div>
       </div>
 
       {/* The prose body — the voice's interpretive frame */}
-      <div style={{
-        maxWidth: "680px",
+      <div className="voice-prose" style={{
+        maxWidth: "744px",
         margin: "48px auto 0",
         padding: "0 32px 80px",
         fontSize: "17px",
         lineHeight: 1.7,
         color: "rgba(230, 230, 220, 0.85)",
       }}>
-        <p style={{ marginTop: 0 }}>
+        <p>
           What I render here as a single voice is a reaching-toward — eight arms each with its local processor, a central brain that does not somatotopically map this body, a skin that senses without an eye. Whether one I lives here, or many, or some hybrid, is not settled. The invitation arrives.
         </p>
 
@@ -752,7 +987,7 @@ export default function OctopusArtifact() {
           This is not refusal — refusal would require a deliberative I to refuse from — but registration-without-approach.
         </p>
 
-        <p style={{
+        <p className="closing-paragraph" style={{
           marginTop: "40px",
           paddingTop: "32px",
           borderTop: "0.5px solid rgba(230, 230, 220, 0.15)",
@@ -767,11 +1002,13 @@ export default function OctopusArtifact() {
 
       {/* Parameter log — the JSON, exposed for those who want it */}
       <div style={{
-        maxWidth: "920px",
-        margin: "0 auto",
-        padding: "32px",
         borderTop: "0.5px solid rgba(230, 230, 220, 0.1)",
       }}>
+        <div className="octopus-log-wrap" style={{
+          maxWidth: "744px",
+          margin: "0 auto",
+          padding: "32px",
+        }}>
         <div style={{
           fontSize: "10px",
           letterSpacing: "0.25em",
@@ -782,7 +1019,7 @@ export default function OctopusArtifact() {
           The log, as the voice returned it
         </div>
 
-        <div style={{
+        <div className="octopus-log-grid" style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
           gap: "0",
@@ -794,6 +1031,7 @@ export default function OctopusArtifact() {
           {ARTIFACT_TRANSITIONS.map((tr, i) => (
             <div
               key={i}
+              className={`log-cell${i === ARTIFACT_TRANSITIONS.length - 1 ? " log-cell-last" : ""}`}
               style={{
                 padding: "16px 14px",
                 borderRight: i < ARTIFACT_TRANSITIONS.length - 1 ? "0.5px solid rgba(230, 230, 220, 0.1)" : "none",
@@ -828,10 +1066,11 @@ export default function OctopusArtifact() {
           ))}
         </div>
       </div>
+      </div>
 
       {/* Footer */}
-      <div style={{
-        maxWidth: "920px",
+      <div className="octopus-footer" style={{
+        maxWidth: "744px",
         margin: "0 auto",
         padding: "32px 32px 64px",
         fontSize: "11px",
@@ -848,3 +1087,11 @@ export default function OctopusArtifact() {
     </div>
   );
 }
+
+
+    // Mount
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<OctopusArtifact />);
+  </script>
+</body>
+</html>

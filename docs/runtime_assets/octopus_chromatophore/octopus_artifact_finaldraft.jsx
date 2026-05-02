@@ -719,14 +719,18 @@ export default function OctopusArtifact() {
         }
       `}</style>
       {/* Masthead */}
-      <div className="octopus-masthead" style={{
+      <div style={{
         borderBottom: "0.5px solid rgba(230, 230, 220, 0.15)",
-        padding: "20px 32px 16px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "baseline",
-        fontFamily: "'Cormorant Garamond', Georgia, serif",
       }}>
+        <div className="octopus-masthead" style={{
+          maxWidth: "744px",
+          margin: "0 auto",
+          padding: "20px 32px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+        }}>
         <div style={{
           fontSize: "11px",
           letterSpacing: "0.25em",
@@ -743,12 +747,13 @@ export default function OctopusArtifact() {
         }}>
           Dossier No. 1 · Page Seven
         </div>
+        </div>
       </div>
 
       {/* Article header */}
       <div className="octopus-article-header" style={{
         padding: "48px 32px 24px",
-        maxWidth: "920px",
+        maxWidth: "744px",
         margin: "0 auto",
       }}>
         <div className="article-eyebrow" style={{
@@ -777,7 +782,6 @@ export default function OctopusArtifact() {
           fontStyle: "italic",
           color: "rgba(230, 230, 220, 0.55)",
           lineHeight: 1.55,
-          maxWidth: "620px",
         }}>
           The voice of the octopus, asked whether it was inclined to attend the Forum, replied as the voice replies — not in prose, but in a fourteen-second trajectory across the body, here rendered from the parameter log the voice returned. The reader watches what the voice registered.
         </div>
@@ -785,14 +789,12 @@ export default function OctopusArtifact() {
 
       {/* The simulator — the body's response, playing */}
       <div className="octopus-canvas-wrap" style={{
-        maxWidth: "920px",
+        maxWidth: "744px",
         margin: "0 auto",
         padding: "0 32px",
       }}>
         <div style={{
           width: "100%",
-          maxWidth: "640px",
-          margin: "0 auto",
           aspectRatio: "5 / 4",
           background: "#000",
           position: "relative",
@@ -859,7 +861,7 @@ export default function OctopusArtifact() {
 
       {/* Editor's headnote */}
       <div className="octopus-headnote-wrap" style={{
-        maxWidth: "920px",
+        maxWidth: "744px",
         margin: "32px auto 0",
         padding: "0 32px",
       }}>
@@ -870,7 +872,6 @@ export default function OctopusArtifact() {
           fontSize: "15px",
           lineHeight: 1.65,
           color: "rgba(230, 230, 220, 0.6)",
-          maxWidth: "640px",
         }}>
           Editor's note. The voice of the octopus does not produce prose-as-such. What follows beneath the trajectory is the voice's own framing of what the trajectory was. The trajectory is the answer; the prose is what the voice says about what it just did.
         </div>
@@ -878,7 +879,7 @@ export default function OctopusArtifact() {
 
       {/* The prose body — the voice's interpretive frame */}
       <div className="voice-prose" style={{
-        maxWidth: "680px",
+        maxWidth: "744px",
         margin: "48px auto 0",
         padding: "0 32px 80px",
         fontSize: "17px",
@@ -943,12 +944,14 @@ export default function OctopusArtifact() {
       </div>
 
       {/* Parameter log — the JSON, exposed for those who want it */}
-      <div className="octopus-log-wrap" style={{
-        maxWidth: "920px",
-        margin: "0 auto",
-        padding: "32px",
+      <div style={{
         borderTop: "0.5px solid rgba(230, 230, 220, 0.1)",
       }}>
+        <div className="octopus-log-wrap" style={{
+          maxWidth: "744px",
+          margin: "0 auto",
+          padding: "32px",
+        }}>
         <div style={{
           fontSize: "10px",
           letterSpacing: "0.25em",
@@ -1006,10 +1009,11 @@ export default function OctopusArtifact() {
           ))}
         </div>
       </div>
+      </div>
 
       {/* Footer */}
       <div className="octopus-footer" style={{
-        maxWidth: "920px",
+        maxWidth: "744px",
         margin: "0 auto",
         padding: "32px 32px 64px",
         fontSize: "11px",
