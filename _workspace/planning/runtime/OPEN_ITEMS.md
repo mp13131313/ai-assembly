@@ -754,7 +754,18 @@ External reviewer flagged three voice-side moves that recurred across Test 1 nig
 - **Path B:** continuity overlay carries a "stock examples / closing phrases already deployed" register so voices don't lean on the same moves night after night.
 - **Path C:** accept some moves as deliberately-recognized canonical tics; voice-card the others.
 
-**Belongs to persona thread for voice-card resolution.** Filed here (runtime workstream) as a cross-thread observation. Memo for persona thread: `_workspace/planning/voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (next).
+**Persona-thread decisions (2026-05-02):**
+
+| Item | Decision | Rationale |
+|---|---|---|
+| Plato Socrates-self-referencing-death anachronism 🔴 | **Path A landed** — banned_modes[10] sharpened with "post-character knowledge bleed" subclass + worked example (Socrates does not refer to his own death/trial/cup as past event; does not speak of himself in third person). athens-2026 commit `cf283bf`. | Plato shipped + chat-tested Apr 26. Card-level surgical guard catches the 1-of-5 first-person-Socrates anachronism mode. |
+| Plato Theuth/Thamus reach 🟡 | **Path B (runtime)** | Cross-night recurrence is fundamentally a continuity-state problem; card-side hedging risks false-suppressing the move when matter genuinely calls for it. |
+| Battuta Tughluq beard-plucking 🟡 | **Path B (runtime)** | Same architecture as Theuth/Thamus. |
+| Dostoevsky closing-tic 🟡 | **Path B (runtime)** | Lowest-stakes of the 4. Move-shape (suspended judgment) is correct for Dostoevsky; only specific phrasing risks calcifying. Continuity overlay catches phrasing recurrence naturally. |
+
+**Three of the four findings (Theuth/Thamus + Tughluq + Dostoevsky-closing) now require runtime-side continuity-overlay implementation** carrying "stock examples / signature moves / closing phrases already deployed this conference" register. Voice continuity-after-Step-2 bugfix already landed (`ccc6229` voice_flow.py:458); the question now is whether the continuity overlay format carries used-moves register.
+
+**Cross-reference:** persona-thread tracking at `voices/OPEN_ITEMS.md` §16.5. Memo: `_workspace/planning/voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`.
 
 ---
 

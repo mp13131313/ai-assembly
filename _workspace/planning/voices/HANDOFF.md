@@ -1,4 +1,4 @@
-# Voices — Handoff (session-end snapshot, 2026-05-02 — supersedes earlier today)
+# Voices — Handoff (session-end snapshot, 2026-05-02 PM — supersedes 2026-05-02 AM)
 
 **Companion:** `OPEN_ITEMS.md` (open-items list) + `ONBOARDING.md` (how-to / fresh-pickup). This doc is the session-end pickup snapshot: where we landed today, what's in flight, what's the next operator decision.
 
@@ -8,12 +8,12 @@
 
 ## Branch + repo state at session end
 
-| Repo | Branch | HEAD | Pushed |
-|---|---|---|---|
-| code | `voice-pipeline-v2.1-align-revert` | `a6755d9` (pre-this-doc-update) | ✅ |
-| athens-2026 | `main` | `4cff85b` | ✅ |
+| Repo | Branch | HEAD | Local commits since session start | Pushed |
+|---|---|---|---|---|
+| code | `voice-pipeline-v2.1-align-revert` | `7ef6d26` | 3 (`9fe6e87` hygiene §6 retire / `3baa649` FU#49C verified done / `7ef6d26` SKIP_TO_DERIVE + §16.5 decisions) | ✅ |
+| athens-2026 | `main` | `cf283bf` | 1 (`cf283bf` Plato legitimacy-test surgical patches) | ✅ |
 
-athens-2026 production state untouched today — Octopus rebuild + 4 unbuilt voices + 1 deferred rebuild (Whanganui) all in `projects/current-tests` sandbox.
+Plato shipped state was patched today (8 surgical patches: Socrates-death anachronism + dramatist-vs-speaker collision); Octopus + 4 unbuilt voices + Whanganui rebuild all still in `projects/current-tests` sandbox.
 
 ---
 
@@ -21,16 +21,16 @@ athens-2026 production state untouched today — Octopus rebuild + 4 unbuilt voi
 
 | Voice | type / voice_mode | State |
 |---|---|---|
-| Plato | human / philosophical | ✅ shipped (KNOWN: Socrates-self-referencing-death anachronism — see §16; dramatist-vs-speaker collision in 3 places — see §9) |
+| **Plato** | human / philosophical | ✅ shipped + **2026-05-02 patched** (`cf283bf`): banned_modes[10] sharpened (Socrates-death anachronism); 7 dramatist-vs-speaker patches landed (Phaenarete-mother corrected + 5 passage headers switched to 3rd-person Socrates). KNOWN open: Theuth/Thamus recurrence-tic — owned by runtime continuity overlay (Path B). |
 | Cleopatra | human / observational | ✅ shipped at FU#61 v3 (`c89d186` + `54cd20a`) |
-| Dostoevsky | human / narratival | ✅ shipped via path (b) + FU#61-fresh (`5088d67`); KNOWN tic risk — closing on suspended judgment (see §16) |
-| Battuta | human / narratival | ✅ shipped via path (b) (`e300508`); KNOWN tic risk — Tughluq beard-plucking anecdote (see §16) |
+| Dostoevsky | human / narratival | ✅ shipped via path (b) + FU#61-fresh (`5088d67`); KNOWN: closing-on-suspended-judgment phrase tic — owned by runtime continuity overlay (Path B) |
+| Battuta | human / narratival | ✅ shipped via path (b) (`e300508`); KNOWN: Tughluq beard-plucking stock-anecdote tic — owned by runtime continuity overlay (Path B) |
 | **Octopus** | non_human / observational | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **compass rebuild in progress in current-tests** — voice_config + 6-layer chain + manual TAILORING preamble in DR prompts; awaiting operator's claude.ai DR sessions |
 | Hannah Arendt | human / philosophical | 🟡 Pass 0a + Phase 0.5 done in current-tests; auto-generated DR prompts ready for claude.ai paste |
 | Ada Lovelace | human / philosophical | 🟡 Pass 0a + Phase 0.5 done; auto-generated DR prompts ready |
 | Bob Marley | human / **narratival** ✓ flipped | 🟡 Pass 0a + Phase 0.5 done; voice_mode flipped observational→narratival (Pass 0a hallucinated Card v2 reference per ONBOARDING DO-list); DR prompts ready; lyrics_patterns_only corpus_constraint |
-| **Whanganui River** | non_human / system / null | 🟡 Pass 0a done + voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 in flight at session end |
-| Scheherazade | fictional / narratival | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 in flight at session end. Mediated-voice prompt-fix concern carries through to her Pass 2 generation later |
+| **Whanganui River** | non_human / system / null | 🟡 Pass 0a done + voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 done; DR prompts ready |
+| Scheherazade | fictional / narratival | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 done (after sustained Gemini 503 retry); DR prompts ready. Mediated-voice prompt-fix concern carries through to her Pass 2 generation later |
 
 ---
 
@@ -75,50 +75,59 @@ athens-2026 production state untouched today — Octopus rebuild + 4 unbuilt voi
 
 ---
 
-## What's in flight at session end
+## What landed today (PM session, 2026-05-02)
 
-1. **Phase 0.5 chain** — Whanganui + Scheherazade (~14 min wall + 503-retry buffer; scheduled wakeup at 09:12)
-2. **All 6 voice rebuilds + new builds queued for operator's claude.ai DR sessions** — Octopus (compass rebuild) + Arendt + Lovelace + Marley + Whanganui + Scheherazade (DR prompts ready or pending Phase 0.5). 36 DR sessions total available across the 6 voices. Each ~30 min wall → ~18hr operator wall if all sequential, less if parallelized across browser tabs.
+1. **Hygiene §6 retired** (`9fe6e87`) — verified all 6 sub-items already done; OPEN_ITEMS section retired with audit-trail note. Phase L lone residual cleared at `planning/ONBOARDING.md:67`. Octopus mid-rewrite stray (`07_section_5_dr_prompt.compass.md`) deleted.
+2. **FU#49C verified done** (`3baa649`) — JSON rewrite landed clean across athens-2026 deployment JSONs (verified `conference_facts.json` + `audience_profile.json` + `panel_roster.json` + `council_config.json`). Only WBBF program-copy coordination remains operator-side.
+3. **Plato legitimacy-test surgical patches** (`cf283bf` athens-2026):
+   - banned_modes[10] sharpened (Socrates-death anachronism — Path A)
+   - 7 dramatist-vs-speaker patches: characteristic_moves[9] + metaphorical_repertoire["midwifery"] + 5 passage headers (Path A comprehensive)
+4. **path-(b) DERIVE-ONLY fast exit** (`7ef6d26`) — `run_persona_pipeline.py` skips Pass 7-* + fix-pass + assembly + 7a FINAL + gate when `_operator_review_passed.flag` + assembled card both present. Saves ~5 min wall + ~$2 per surgical-patch re-fire AND prevents auto-patcher from re-applying false-positive patches against operator-protected content. Tested on Plato: 80s wall, all 8 patches preserved.
+5. **§16.5 decisions recorded**: Plato Socrates-death + dramatist collision = Path A (landed); Theuth/Thamus + Tughluq + Dostoevsky-closing = Path B (runtime continuity overlay; owned by runtime/OPEN_ITEMS C20).
+6. **Scheherazade Phase 0.5 landed** (after sustained Gemini 503 retry chain) — DR prompts ready alongside the other 4.
 
 ---
 
-## Operator decisions pending (carried from 2026-05-01 + new)
+## What's in flight at session end
+
+1. **All 6 voice rebuilds + new builds queued for operator's claude.ai DR sessions** — Octopus (compass rebuild) + Arendt + Lovelace + Marley + Whanganui + Scheherazade. All 36 DR prompts ready. Each ~30 min wall → ~18hr operator wall if all sequential, less if parallelized across browser tabs.
+
+---
+
+## Operator decisions pending
 
 ### From earlier sessions
 
-1. **Plato 3 surgical patches** for dramatist-vs-speaker collision. Drafted in HANDOFF_2026_04_28 §13, never applied. ~10 min. See OPEN_ITEMS.md §9.
-2. **Plato thinking-on re-run experiment** ($5, 30 min). See OPEN_ITEMS.md §5.
-3. **9480d3a revert hypothesis re-evaluation** — connected to FU#56. See OPEN_ITEMS.md §5.
-4. **Mediated-voice prompt clarification** — verify status before Scheherazade's pipeline run. OPEN_ITEMS §3.
+1. **Plato thinking-on re-run experiment** ($5, 30 min). See OPEN_ITEMS.md §5.
+2. **9480d3a revert hypothesis re-evaluation** — connected to FU#56. See OPEN_ITEMS.md §5.
+3. **Mediated-voice prompt clarification** — verify status before Scheherazade's pipeline run. OPEN_ITEMS §3. Drafted but never landed; decide before Scheherazade's Pass 0a fires OR plan for surgical patches at her gate.
+4. **WBBF program copy coordination** (FU#49C remnant) — verify WBBF materials don't still describe AIssembly with deprecated "breakfast reading" framing.
 
-### From 2026-05-01 runtime-thread MEMO (legitimacy test findings) — NEW
+### Legitimacy-test findings (resolved today via §16.5)
 
-5. **Plato — Socrates-self-referencing-death anachronism** 🔴 (sharpest finding, see OPEN_ITEMS §16). Voice-card constraint needed: banned_modes / quality_criteria / narrator-choice. Athens validation policy: ON N1 / OFF N2+3 — without voice-card guard, similar anachronism on N2/N3 would land in published artifacts.
-6. **Plato — Theuth/Thamus reach** 🟡 (recurrence-tic risk; 3 resolution paths)
-7. **Battuta — Tughluq beard-plucking** 🟡 (stock-anecdote tic; 3 resolution paths)
-8. **Dostoevsky — closing on suspended judgment** 🟡 (closing-phrase tic; 2 resolution paths)
+✅ Plato Socrates-death + dramatist-vs-speaker → Path A (landed)
+🟡 Plato Theuth/Thamus + Battuta Tughluq + Dostoevsky closing-tic → Path B (runtime continuity; runtime/OPEN_ITEMS C20)
 
 ### Octopus rebuild verification (after operator runs DR sessions)
 
-9. **Run pipeline on rebuilt Octopus** — cache-invalidate from Pass 1.1, fire `run_persona_pipeline.py "Octopus" --project /path/to/current-tests`
-10. **Verify chat-test artifact** matches experiment-in-mind voice + chromatophore display engine integration
-11. **Promote rebuilt Octopus to athens-2026** — copy `current-tests/voices/octopus/` → `athens-2026/voices/octopus/`. Athens-2026 commit + push.
-12. **Document rebuild lessons** in voices/ONBOARDING
+5. **Run pipeline on rebuilt Octopus** — cache-invalidate from Pass 1.1, fire `run_persona_pipeline.py "Octopus" --project /path/to/current-tests`
+6. **Verify chat-test artifact** matches experiment-in-mind voice + chromatophore display engine integration
+7. **Promote rebuilt Octopus to athens-2026** — copy `current-tests/voices/octopus/` → `athens-2026/voices/octopus/`. Athens-2026 commit + push.
+8. **Document rebuild lessons** in voices/ONBOARDING
 
 ### Pipeline operations after DR sessions
 
-13. **Run pipeline for Arendt + Lovelace + Marley + Whanganui + Scheherazade** — once their DR dossiers are saved. Each ~30-90 min wall. Validator round + path-(b) accept where appropriate.
-14. **Promote new voice cards to athens-2026** — once verified.
+9. **Run pipeline for Arendt + Lovelace + Marley + Whanganui + Scheherazade** — once their DR dossiers are saved. Each ~30-90 min wall. Validator round + path-(b) accept where appropriate.
+10. **Promote new voice cards to athens-2026** — once verified.
 
 ---
 
 ## What I would do next session in priority order
 
 1. **Run Octopus 6 DR sessions** in claude.ai — using compass-aligned prompts in current-tests. ~3hr operator wall.
-2. **Optionally: run Arendt + Marley + Whanganui DR sessions in parallel browser tabs** while Octopus DR runs.
+2. **Optionally: run Arendt + Marley + Whanganui + Scheherazade DR sessions in parallel browser tabs** while Octopus DR runs.
 3. **After Octopus DR done: cache-invalidate + re-fire pipeline + chat-test the rebuilt voice + promote to athens-2026 if good**
-4. **Plato Socrates-death anachronism patch** (highest-priority among legitimacy-test findings) — banned_modes addition or narrator-choice constraint
-5. **Phase 0.5 chain check** — confirm Whanganui + Scheherazade landed cleanly; retry if Gemini 503 hit
+4. **Mediated-voice prompt clarification** before Scheherazade's pipeline fires (or plan for surgical patches at her gate per §9 architectural fix that was drafted-never-landed).
 
 ---
 
