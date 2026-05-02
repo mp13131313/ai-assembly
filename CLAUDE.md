@@ -258,6 +258,15 @@ All canonical pipeline specs are in `docs/`:
   cost ~$3-5 across 3 nights. Pending: Claudia's full 35-field card,
   closing prompt, implementation. See OPEN_ITEMS A2 (✅ fully resolved)
   + B1 (🟡 specified).
+- `AI_Assembly_Infrastructure.md` — Athens 2026 deployment spec (v1
+  draft, 2026-05-02). Supersedes archived `Infrastructure_Setup.md`.
+  Three reasons for VM (ingest + safety + operator-detachment); three
+  systemd units (ingest + orchestrator + prefect-server) plus interactive
+  Claude Code via mosh+tmux; Hetzner CX22 + Ubuntu 24.04; PROJECT_ROOT
+  = clone of athens-2026 private repo at `/opt/ai-assembly-athens2026/`;
+  total event cost ~€110-150 + €10-15 VM. Open decisions: domain,
+  microsite hosting, backup strategy, Claude-Code-on-VM auth. See
+  OPEN_ITEMS B10 (🟡 specified, awaiting operator input on items 1+2).
 - `AUDIENCE_BRIEF.md` — audience characterization
 - `LLM_CALL_INVENTORY.md` — call inventory (needs update for new
   passes since 2026-04-21)
@@ -266,7 +275,8 @@ All canonical pipeline specs are in `docs/`:
 - `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` — STALE
   (archived; n8n vs Prefect)
 - `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` — STALE
-  (archived; rclone/Drive vs FastAPI upload)
+  (archived; rclone/Drive vs FastAPI upload). **Superseded** by
+  `AI_Assembly_Infrastructure.md` 2026-05-02. Do not consult.
 
 Forward-looking design + active tracking lives in
 `_workspace/planning/`. Executed fix plans and prior session artifacts

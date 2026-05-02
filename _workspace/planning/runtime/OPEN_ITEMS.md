@@ -341,6 +341,55 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 ---
 
+### B10. VM provisioning + infrastructure deployment 🟡 SPECIFIED 2026-05-02 PM
+
+**Status:** Fresh infrastructure spec landed at [`docs/AI_Assembly_Infrastructure.md`](../../../docs/AI_Assembly_Infrastructure.md). Supersedes archived `_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md` (which assumed n8n + Prefect-server + rclone-Drive — none of which match the current codebase). Awaiting operator input on two blocking decisions before provisioning.
+
+**Why it's a VM:** three reasons established in spec — ingest must be a network-accessible server during the panel (HoBB uploads HTTP); safety (process survival across multi-hour overnight pipelines, data preservation, recovery access); operator detachment (operator should not be tied to laptop for 4-8 hours of post-panel processing each night).
+
+**Architecture:**
+
+- VM = Hetzner CX22 (4 vCPU / 8 GB / 80 GB) running Ubuntu 24.04, ~€6/mo, ~€10-15 across the Athens window.
+- Three systemd units: `ingest.service` (exists, ready to deploy) + `orchestrator.service` (script designed at `AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`, not built) + `prefect-server.service` (one-line install; flows already Prefect-decorated as library).
+- Plus interactive: Claude Code installed on VM, reached via `mosh + tmux + claude`. Operator's runtime-ops surface — laptop Claude Code stays for code/dev; VM Claude Code is for live state inspection + intervention.
+- Caddy fronts ingest + Prefect dashboard on subdomains with Basic Auth.
+- Filesystem: `/opt/ai-assembly/` = code repo clone; `/opt/ai-assembly-athens2026/` = PROJECT_ROOT (athens-2026 private repo clone).
+
+**What's ready vs. what's not:**
+
+- ✅ Ingest service code + deploy assets ([`runtime/ingest/deploy/`](../../../runtime/ingest/deploy/README.md))
+- ✅ All downstream flows built (transcription, researcher, provocateur, voice)
+- ❌ Orchestrator script (designed, not built — see C22)
+- ❌ `orchestrator.service` + `prefect-server.service` systemd units
+- ❌ VM provisioned
+- ❌ athens-2026 private repo cloned on VM
+- ❌ Claude Code installed on VM
+- ❌ End-to-end dry-run on VM with real audio
+
+**Two decisions blocking provisioning:**
+
+1. **Domain / DNS.** What domain for `ingest.<domain>` / `prefect.<domain>`? Operator-owned, or Hetzner-provided hostname for the Athens window?
+2. **PROJECT_ROOT clone strategy.** Confirm: clone athens-2026 private repo to `/opt/ai-assembly-athens2026/` on VM (recommended). Operator pushes from laptop; VM pulls.
+
+**Five additional decisions (not blocking but to settle before T-2):**
+
+3. Microsite hosting (Vercel / GitHub Pages / something else) — out of VM scope but on critical path
+4. Backup strategy (Hetzner snapshots only vs. + per-night rsync to laptop)
+5. VM size confirmation (CX22 vs. CX32 if headroom desired)
+6. Optional status page (one-line "what's the state of tonight's pipeline" — yes / skip)
+7. Claude Code on VM auth (same key as `.env` / separate)
+
+**Lifecycle:** provision T-5 → T-4 (May 2-3); stage downstream flows + build orchestrator T-4 → T-2; full dry-run T-2 (May 5); buffer T-1 (May 6); live Athens Nights 1-3 (May 7-9); post-event window through T+14; tear down May 23.
+
+**Independence from Editor Pipeline (B1):** VM provisioning is independent of editor build. Each downstream flow deploys to VM as it becomes ready; if editor isn't deployed in time, run editor from laptop against rsync'd run_dir. No coupling.
+
+**Risks:**
+
+- The mandatory full dry-run at T-2 eats one calendar day. Plan accordingly.
+- HoBB needs the final ingest URL before May 7. Delay on Decision 1 cascades into HoBB coordination delay.
+
+---
+
 ## Section C — Smaller open items / hygiene
 
 ### C1. researcher_flow.py cross-pipeline compliance ✅ LANDED 2026-05-01
