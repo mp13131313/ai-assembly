@@ -97,6 +97,31 @@ The 6 dated persona-thread handoffs (`HANDOFF_2026_04_27.md … _NIGHT.md`) and 
 
 ---
 
+## Doc hygiene — what lives where, what gets archived
+
+To keep this folder load-bearing rather than archival, follow these rules. They apply to both workstream subfolders.
+
+**Stays here:**
+
+- **One current HANDOFF per workstream.** Append within the day; spawn a new dated HANDOFF only when starting a fresh day's work. Within `runtime/`, name it `HANDOFF_<YYYY_MM_DD>.md`. Within `voices/`, single rolling `HANDOFF.md` is fine (different convention, both work).
+- **OPEN_ITEMS.md** (per workstream) — authoritative, durable.
+- **ONBOARDING.md** (per workstream + this root one) — durable; updates are surgical, not append-only.
+
+**Gets archived (move to `_workspace/archive/session-artifacts/`):**
+
+- **Yesterday's HANDOFF** when today's HANDOFF supersedes it via "Predecessor handoff:" header. Keep only the latest in `_workspace/planning/<workstream>/`.
+- **Design docs** (e.g., `*_DESIGN_*.md`) once the thing they spec exists. Their content migrates to: implementation + a lifecycle/operations doc + an OPEN_ITEMS entry. The design doc itself becomes historical context.
+- **One-off briefs / audits** (`BRIEF_*.md`, `*_AUDIT_*.md`) once their findings have been actioned.
+
+**Stays under `docs/` (not here):**
+
+- Canonical pipeline specs.
+- Operational/lifecycle docs.
+
+**Trigger:** when proposing a new doc, ask first whether the content can live in OPEN_ITEMS, ONBOARDING, or an existing pipeline doc. Default is no new top-level doc. Spec → archive once shipped.
+
+---
+
 ## When this doc goes stale
 
 - After workstream restructuring (third subfolder added, naming convention changes): update §"Two workstreams" + add new pointers.
