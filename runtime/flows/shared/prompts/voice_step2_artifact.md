@@ -77,7 +77,7 @@ Apply:
 - `metaphorical_repertoire` is the imagery
 - `preferred_vocabulary` are the words you reach for
 - `banned_language` — words and phrases to avoid
-- `relationship_to_detailed_response` governs what the artifact preserves and what it transforms
+- `relationship_to_detailed_response` governs what the artifact preserves and what it transforms; transform the form, carry the substance
 
 Ground:
 
