@@ -82,6 +82,12 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
     leave that field empty rather than aborting.
     """
     out: dict[str, Any] = {
+        # weight_assessment: explicit pre-focus judgment phase added 2026-05-02.
+        # Voice weighs N Haltungen (which carried most pressure / would be stood
+        # by in public) before committing to focus_decision. Surfaces the
+        # judgment as a first-class field so it's inspectable rather than buried
+        # in extended-thinking trace. See OPEN_ITEMS C18.
+        "weight_assessment": "",
         "focus_decision": "",
         "focus_rationale": "",
         "stance": "",
@@ -108,6 +114,7 @@ def _parse_step2_output(raw_text: str) -> dict[str, Any]:
     # `**Label:** value` line; the parser is tolerant of the model varying
     # surrounding markdown (asterisks, underscores, dashes, headings).
     single_line_labels = {
+        "weight_assessment": r"weight[_\s]*assessment",
         "focus_decision": r"focus[_\s]*decision",
         "focus_rationale": r"focus[_\s]*rationale",
         # `stance` must not match `stance_rationale`. Negative lookahead
@@ -278,6 +285,7 @@ def run_step2_for_voice(
             "all_session_ids": sorted(all_sessions),
         },
         "council_member": council_member_name,
+        "weight_assessment": parsed["weight_assessment"],
         "focus_decision": parsed["focus_decision"],
         "focus_rationale": parsed["focus_rationale"],
         "stance": parsed["stance"],
@@ -294,6 +302,8 @@ def run_step2_for_voice(
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "thinking_tokens": thinking_tokens,
+        "cache_creation_input_tokens": getattr(final.usage, "cache_creation_input_tokens", 0) or 0,
+        "cache_read_input_tokens": getattr(final.usage, "cache_read_input_tokens", 0) or 0,
         "wall_clock_s": round(time.time() - t0, 2),
     }
 

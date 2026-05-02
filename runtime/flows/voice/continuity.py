@@ -188,6 +188,7 @@ def generate_continuity(
         user=user,
         thinking_kwargs=_thinking_kwargs(),
         logger=logger,
+        cache_system=False,  # single-call flow; 2.0× write with no reads is net cost
     )
 
     # The model returns JSON with two keys, with the night number
@@ -214,6 +215,8 @@ def generate_continuity(
         "model": CONTINUITY_MODEL,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
+        "cache_creation_input_tokens": getattr(final.usage, "cache_creation_input_tokens", 0) or 0,
+        "cache_read_input_tokens": getattr(final.usage, "cache_read_input_tokens", 0) or 0,
         "wall_clock_s": round(time.time() - t0, 2),
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)

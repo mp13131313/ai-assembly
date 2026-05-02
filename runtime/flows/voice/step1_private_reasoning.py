@@ -236,6 +236,8 @@ def run_step1_for_pair(
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "thinking_tokens": thinking_tokens,
+        "cache_creation_input_tokens": getattr(final.usage, "cache_creation_input_tokens", 0) or 0,
+        "cache_read_input_tokens": getattr(final.usage, "cache_read_input_tokens", 0) or 0,
         "wall_clock_s": round(time.time() - t0, 2),
     }
 

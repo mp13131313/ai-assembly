@@ -17,17 +17,37 @@ table"):
     constitution, concept_lexicon, curated_corpus_passages,
     knowledge_boundary, translation_protocol, topics_requiring_care,
     hard_limits, voice_temporal_stance.
-  Reasoning/engagement (Step 1 + Step 3): reasoning_method,
-    finds_compelling, resists, default_questions, disagreement_protocol.
-    Plus unique_contribution which also appears in Step 2 (anchor focus
-    decision). FU#57 (2026-04-29): bold_engagement_topics is NOT loaded
-    into runtime system prompts — empirical observation that chat-test
-    performs better stripped (pre-loaded courage menu pulls reasoning
-    toward predetermined topics rather than letting the matter drive).
-    Field is still emitted by Pass 5 for build-side audit value.
-  Voice (Step 2 + Step 3): rhetorical_mode, characteristic_moves,
-    register_and_tone, metaphorical_repertoire, preferred_vocabulary,
-    banned_language, banned_modes.
+  Reasoning method (3 fields, ALL steps as of 2026-05-02): reasoning_method,
+    finds_compelling, resists.
+  Engagement (3 fields, ALL steps as of 2026-05-02): default_questions,
+    disagreement_protocol, unique_contribution.
+    Routing change 2026-05-02: previously Step 1 + Step 3 only (Step 2
+    received only unique_contribution as a "focus anchor"). Extended to
+    Step 2 because voice_step2_artifact.md decision_1_focus explicitly
+    cites finds_compelling and resists as focus anchors for the
+    artifact's focus decision — but those fields were not in Step 2's
+    system prompt scope. Test 2 v2 retrospective showed all 4 voices
+    chose "weave across all" focus decisions; the broad anchors that
+    WERE loaded (formative_experience, constitution, unique_contribution)
+    apply to all detailed responses, while the sharp discriminators
+    (finds_compelling, resists) were missing. This was a prompt/system
+    mismatch, not a prompt-engineering concern. See OPEN_ITEMS C18+C20.
+    FU#57 (2026-04-29): bold_engagement_topics is NOT loaded into
+    runtime system prompts — empirical observation that chat-test
+    performs better stripped. Field is still emitted by Pass 5 for
+    build-side audit value.
+  Voice/expression (7 fields, ALL steps as of 2026-05-02):
+    rhetorical_mode, characteristic_moves, register_and_tone,
+    metaphorical_repertoire, preferred_vocabulary, banned_language,
+    banned_modes.
+    Routing change 2026-05-02: previously Step 2 + Step 3 only.
+    Extended to Step 1 so voice register, banned modes, and
+    characteristic moves are present from the cold-start of detailed
+    reasoning — not added in a downstream wrapping step. Aligns with
+    cold-start conditioning research (briefing 2026-05-02): voice
+    fidelity benefits from voice machinery being declared at the
+    point of generation, not deferred. Token cost ~+5K cached/voice;
+    cached reads thereafter negligible.
   Artifact (Step 2 + Step 3, except relationship_to_detailed_response
     which is Step 2 only): medium, technical_capabilities,
     characteristic_output_structure, relationship_to_detailed_response,
@@ -75,24 +95,36 @@ _FOUNDATIONAL = (
     "voice_temporal_stance",
 )
 
-# Step 1 reasoning/engagement (Step 3 also reads these).
-_STEP1_REASONING = (
+# Reasoning method — rendered as REASONING METHOD section in all steps
+# (1, 2, 3) as of 2026-05-02 routing refactor. Previously Step 1 + 3 only.
+# finds_compelling + resists are sharp focus discriminators that Step 2's
+# decision_1 prompt explicitly anchors in but were not in scope before.
+_REASONING_METHOD = (
     "reasoning_method",
     "finds_compelling",
     "resists",
-    "default_questions",
-    "disagreement_protocol",
 )
 
-# Routed to Step 2 (focus anchor) + Step 3. FU#57 (2026-04-29): dropped
-# bold_engagement_topics from runtime — empirical observation that chat-test
-# performs better stripped. Pass 5 still emits the field; it stays in the
-# persona card for build-side audit value, but the runtime system prompt
-# does not load it.
-_FOCUS_ANCHOR = ("unique_contribution",)
+# Engagement — rendered as ENGAGEMENT section in all steps (1, 2, 3) as of
+# 2026-05-02 routing refactor. Previously Step 1 + 3 received the full
+# triple; Step 2 received only unique_contribution as a "focus anchor" via
+# the now-removed _FOCUS_ANCHOR set. unique_contribution stays in this
+# group as the focus discriminator the prompt cites.
+# FU#57 (2026-04-29): bold_engagement_topics dropped from runtime — see
+# header docstring.
+_ENGAGEMENT = (
+    "default_questions",
+    "disagreement_protocol",
+    "unique_contribution",
+)
 
-# Voice / expression (Step 2 + Step 3).
-_STEP2_VOICE = (
+# Voice / expression — rendered as VOICE section in all steps (1, 2, 3)
+# as of 2026-05-02 routing refactor. Previously Step 2 + 3 only. Loading
+# in Step 1 puts banned_modes / banned_language / register_and_tone in
+# scope at the cold-start of detailed reasoning so the voice produces
+# in-register from the first token (vs default-AI register that Step 2
+# then has to translate).
+_VOICE = (
     "rhetorical_mode",
     "characteristic_moves",
     "register_and_tone",
@@ -301,8 +333,23 @@ def assemble_system_prompt(
     card: dict[str, Any],
     step: int,
     night: int = 1,
-) -> str:
+) -> tuple[str, str]:
     """Assemble the system prompt for one step.
+
+    Returns a `(prefix, tail)` tuple to enable prefix-cache-control:
+      - `prefix` is the byte-identical-across-steps shared portion
+        (name + IDENTITY + CONSTITUTION + BOUNDARIES). All Step 1, 2,
+        and 3 calls for the same voice on the same night share this
+        exact prefix string.
+      - `tail` is the step-specific portion (reference_only_passages
+        for Step 1; reasoning + engagement + voice + artifact for
+        Step 2/3; continuity overlay; closing prompt).
+
+    `stream_voice_call` places `cache_control` on both blocks (1h TTL),
+    so all calls on the same voice/night hit the prefix cache regardless
+    of step (~20-25K tokens of cached input shared across Step 1's 3-5
+    calls, Step 2's 1 call, and Step 3's 1 call when enabled). See
+    OPEN_ITEMS C19a + 2026-05-02 prefix-caching extension.
 
     step: 1 (Private Reasoning) | 2 (First-Draft Artifact) | 3 (Amended Artifact).
     night: 1 | 2 | 3 — controls continuity-block inclusion.
@@ -331,13 +378,17 @@ def assemble_system_prompt(
     if step in (2, 3):
         filtered.pop("reference_only_passages", None)
 
-    # Render foundational sections (header per spec).
-    parts = []
+    # ----- Shared prefix (byte-identical across Step 1/2/3) ---------
+    # Render the foundational sections that every step receives identically.
+    # This is the cache-eligible shared prefix; placing a cache_control
+    # breakpoint at its end (in stream_voice_call) lets Step 2 + Step 3
+    # calls READ the prefix that Step 1's first call wrote.
+    prefix_parts = []
     name = filtered.get("council_member_name", "this voice")
-    parts.append(f"You are {name}.\n")
+    prefix_parts.append(f"You are {name}.\n")
 
     # IDENTITY (5 fields, but council_member_name already opened the prompt).
-    parts.append(
+    prefix_parts.append(
         _render_section(
             filtered,
             "IDENTITY",
@@ -350,7 +401,7 @@ def assemble_system_prompt(
         )
     )
     # CONSTITUTION (3 fields).
-    parts.append(
+    prefix_parts.append(
         _render_section(
             filtered,
             "CONSTITUTION",
@@ -358,7 +409,7 @@ def assemble_system_prompt(
         )
     )
     # BOUNDARIES + TEMPORAL STANCE (5 fields including voice_temporal_stance).
-    parts.append(
+    prefix_parts.append(
         _render_section(
             filtered,
             "BOUNDARIES",
@@ -372,12 +423,17 @@ def assemble_system_prompt(
         )
     )
 
+    # ----- Step-specific tail ----------------------------------------
+    # Everything after BOUNDARIES diverges by step. Rendered separately
+    # so the prefix above can be cached and shared.
+    tail_parts = []
+
     # reference_only_passages is Step 1 only — render it as its own
     # section after CONSTITUTION so the voice can ground reasoning in
     # its actual words. The runtime_contract_note inside the field
     # already carries its own warning.
     if step == 1 and "reference_only_passages" in filtered:
-        parts.append(
+        tail_parts.append(
             _render_section(
                 filtered,
                 "REFERENCE-ONLY PASSAGES (your actual words; ground reasoning here)",
@@ -385,46 +441,24 @@ def assemble_system_prompt(
             )
         )
 
-    # Step 1 + Step 3: reasoning + engagement.
-    if step in (1, 3):
-        parts.append(
-            _render_section(
-                filtered,
-                "REASONING METHOD",
-                ("reasoning_method", "finds_compelling", "resists"),
-            )
-        )
-        parts.append(
-            _render_section(
-                filtered,
-                "ENGAGEMENT",
-                (
-                    "default_questions",
-                    "disagreement_protocol",
-                    "unique_contribution",
-                ),
-            )
-        )
+    # Reasoning method + engagement — all steps (2026-05-02 refactor;
+    # previously Step 1 + Step 3 only, with Step 2 receiving only
+    # unique_contribution as a "focus anchor"). See header docstring.
+    tail_parts.append(_render_section(filtered, "REASONING METHOD", _REASONING_METHOD))
+    tail_parts.append(_render_section(filtered, "ENGAGEMENT", _ENGAGEMENT))
 
-    # Step 2: unique_contribution as focus anchor. FU#57: bold_engagement_topics
-    # dropped from runtime — see header docstring.
-    if step == 2:
-        parts.append(
-            _render_section(
-                filtered,
-                "ENGAGEMENT (anchor for focus decision)",
-                _FOCUS_ANCHOR,
-            )
-        )
+    # Voice / expression — all steps (2026-05-02 refactor; previously
+    # Step 2 + Step 3 only). banned_modes / banned_language / register
+    # in scope from cold-start of Step 1 reasoning.
+    tail_parts.append(_render_section(filtered, "VOICE", _VOICE))
 
-    # Step 2 + Step 3: voice + artifact fields.
+    # Artifact — Step 2 + Step 3 only (artifact-specific fields).
     if step in (2, 3):
-        parts.append(_render_section(filtered, "VOICE", _STEP2_VOICE))
         artifact_fields = _STEP2_ARTIFACT if step == 2 else _STEP3_ARTIFACT
-        parts.append(_render_section(filtered, "ARTIFACT", artifact_fields))
+        tail_parts.append(_render_section(filtered, "ARTIFACT", artifact_fields))
 
     # Continuity (Night 2+).
-    parts.append(_render_continuity(filtered, night, step))
+    tail_parts.append(_render_continuity(filtered, night, step))
 
     # Closing instruction (XML-tagged) loaded from prompts/.
     closing_prompt_name = {
@@ -433,9 +467,9 @@ def assemble_system_prompt(
         3: "voice_step3_amendment",
     }[step]
     closing = load_prompt(closing_prompt_name)
-    parts.append(f"\n---\n\n# YOUR TASK\n\n{closing}\n")
+    tail_parts.append(f"\n---\n\n# YOUR TASK\n\n{closing}\n")
 
-    return "".join(parts)
+    return "".join(prefix_parts), "".join(tail_parts)
 
 
 # --- User-prompt filters (strip pipeline-meta from upstream JSON) ----

@@ -57,11 +57,12 @@ def stream_voice_call(
     *,
     model: str,
     max_tokens: int,
-    system: str,
+    system: str | tuple[str, str],
     user: str,
     thinking_kwargs: dict | None = None,
     retry_backoff_s: int = 5,
     logger: logging.Logger | None = None,
+    cache_system: bool = True,
 ) -> tuple[str, str, Any, int]:
     """Stream a messages call; extract text + thinking from final.content.
 
@@ -90,21 +91,38 @@ def stream_voice_call(
     """
     if thinking_kwargs is None:
         thinking_kwargs = {}
-    # C19a: prompt caching on the system prompt block. Voice Pipeline
-    # makes 5-7 calls per voice per night with identical system prompts
-    # (the persona card). 1-hour TTL covers Athens Night 1's full wall
-    # envelope (validation gap can push Step 1 → Step 2 beyond 5-min
-    # default TTL); subsequent reads cost 0.1× normal input vs 1× full.
-    # Voice card system prompts are 35-44K tokens, well above Opus's
-    # 4096-token cache minimum. See OPEN_ITEMS C19a + provocateur_flow
-    # parallel change.
-    cached_system = [
-        {
-            "type": "text",
-            "text": system,
-            "cache_control": {"type": "ephemeral", "ttl": "1h"},
-        }
-    ]
+    # Prompt caching on the system prompt. Two strategies:
+    #   - tuple `(prefix, tail)`: place breakpoints on BOTH blocks (1h TTL)
+    #     so Step 2/3 calls READ the prefix Step 1's first call wrote.
+    #     Used by voice Step 1/2/3 via assemble_system_prompt's tuple return.
+    #   - plain string with cache_system=True: single-breakpoint cache
+    #     (Provocateur formulation reuse; legacy callers).
+    #   - cache_system=False: no cache_control (continuity, single-call
+    #     flows where the 2.0× write penalty exceeds 0.10× read benefit
+    #     given there are no subsequent reads to amortize).
+    # 1h TTL chosen because Athens Night 1's wall envelope (~50-80 min
+    # including validation gap) exceeds the 5-min default TTL.
+    # See OPEN_ITEMS C19a + 2026-05-02 prefix-caching extension.
+    cache_block = {"type": "ephemeral", "ttl": "1h"}
+    if isinstance(system, tuple):
+        prefix, tail = system
+        if cache_system:
+            cached_system = [
+                {"type": "text", "text": prefix, "cache_control": cache_block},
+                {"type": "text", "text": tail, "cache_control": cache_block},
+            ]
+        else:
+            cached_system = [
+                {"type": "text", "text": prefix},
+                {"type": "text", "text": tail},
+            ]
+    else:
+        if cache_system:
+            cached_system = [
+                {"type": "text", "text": system, "cache_control": cache_block},
+            ]
+        else:
+            cached_system = system  # plain string; SDK accepts directly
     last_err: Exception | None = None
     for attempt in range(2):  # initial + 1 retry
         try:

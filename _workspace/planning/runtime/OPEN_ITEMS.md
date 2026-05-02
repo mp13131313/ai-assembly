@@ -151,7 +151,7 @@ Files to change:
 `docs/AI_Assembly_Voice_Pipeline.md` updated:
 - §"Regeneration policy" rewritten — validation is diagnostic-only; no regen, no retry; flagged outputs ship to Step 2 with manifest entries for operator review
 - §"Default policy for Athens" — Night 1 ON for all 10 voices; **Nights 2+3 OFF** (no regen → pure cost on Nights 2+3 without remediation; operator morning-review handles correction)
-- §"Cost & Envelope" — split into Night 1 (~$180-240, ~50-80 min wall — validation per-voice serial) vs Nights 2+3 (~$180-230, ~30-45 min wall, validation OFF, continuity ON). 3-night Athens total ~$540-700.
+- §"Cost & Envelope" — split into Night 1 (~$20-40, ~50-80 min wall — validation per-voice serial) vs Nights 2+3 (~$15-30, ~30-45 min wall, validation OFF, continuity ON). 3-night Athens total ~$60-80. *(Originally cited $540-700 — that used Opus 4-deprecated $15/$75 pricing; revised 2026-05-02 with Opus 4.7's actual $5/$25 + prefix caching landed.)*
 - v1→v2.1 changes table + Overview envelope statement updated to match.
 
 **Background (preserved for context):** Voice Pipeline spec previously promised *"First failure: regenerate the Step 1 call with the validator's critique appended… Second failure: ship the regenerated output AND flag in the run-level manifest."* Implementation reality: orchestrator collects flagged results into `validation_failures[]`, hardcodes `regen_count: 0`, proceeds to Step 2 unchanged. **No regen ever fires.** Spec now matches implementation.
@@ -665,7 +665,7 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **85-88% of Step 2 input is the persona card (system prompt).** User prompt (Step 1 responses) is only 5-7K — small and reasonable.
 
-**Reviewer's $400-600/night estimate was high.** Voice Pipeline doc's current $130-190/night Night 1 forecast is closer; with prompt caching enabled (see C19a), it would drop further to ~$70-120/night Night 1. Athens 3-night total: ~$200-300 with caching vs ~$390-550 currently.
+**Reviewer's $400-600/night estimate was inflated.** Voice Pipeline doc's $130-190/night Night 1 figure was ALSO inflated (used Opus 4-deprecated $15/$75; Opus 4.7 is actually $5/$25). Revised 2026-05-02: Night 1 ~$20-40 with prefix caching; Athens 3-night total ~$60-80. See C19a for detailed math + Test 3 empirical anchor (~$5-6 measured for 4 voices × 1 night × 3 formulations).
 
 ### C22. Overnight pipeline orchestrator (automation) 🟡 (filed 2026-05-02)
 
@@ -736,11 +736,13 @@ Test 3 (4 voices × 1 night × 3 formulations) actual cost: **~$5-6**.
 | Continuity (24 transitions) | ~$3 | ~$7 ⬆ | ~$4 (opt-out: uncached) |
 | **Total input** | **~$44** | **~$42** | **~$31** |
 
-Plus output (~$70-90 across 3 nights at $25/MTok — caching does not affect output).
+Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect output; per-voice output per night ~24-36K from Test 3 measurement, scaled for 4-5 formulations).
 
-**Total Athens Voice Pipeline cost: ~$100-120 across 3 nights (Stage 2 caching).** Validation Night 1 adds ~$2-5.
+**Total Athens Voice Pipeline cost: ~$60-80 across 3 nights (Stage 2 caching).** Validation Night 1 adds ~$2-5.
 
-**Total Athens caching savings (Stage 2 vs no caching): ~$13.** Modest in absolute terms — cost ceiling is dominated by output tokens (~$70-90), which caching does not touch.
+**Total Athens caching savings (Stage 2 vs no caching): ~$13.** Modest in absolute terms — cost is dominated by output tokens, which caching does not touch.
+
+**Test 3 empirical anchor (2026-05-02):** 4 voices × 1 night × 3 formulations measured at ~$5-6 actual. Per voice per night ≈ $1.39. Scaling to Athens (12 voices × 3 nights = 36 voice-nights, with 4-5 formulations vs Test 3's 3): ~$60-80.
 
 ### Provocateur Formulation caching
 
@@ -829,7 +831,7 @@ These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain
 
 **State:** v2.1, last touched 2026-05-01. Remaining staleness:
 - **Step 3 section** — written assuming FU#49E correspondence-shape; needs rewrite once A1 decides (probably to B+ shape with engaged_peers metadata + optional postscript)
-- ~~**Validation policy + cost/wall-time**~~ ✅ updated 2026-05-01 (FU#62 path B): Night 1 ~$180-240/~50-80 min wall; Nights 2+3 ~$180-230/~30-45 min wall; Athens 3-night total ~$540-700.
+- ~~**Validation policy + cost/wall-time**~~ ✅ updated 2026-05-01 (FU#62 path B); ✅ cost figures corrected 2026-05-02 with Opus 4.7 actual pricing $5/$25: Night 1 ~$20-40/~50-80 min wall; Nights 2+3 ~$15-30/~30-45 min wall; Athens 3-night total ~$60-80.
 - ~~**Regeneration policy**~~ ✅ updated 2026-05-01: rewritten to "diagnostic only"; if post-Athens autonomous regen wanted, file new item against the contract documented in spec.
 
 ### E2. `docs/AI_Assembly_Frame_Concept_v1.md` 🟡
@@ -880,7 +882,7 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 |---|---|---|
 | 2026-05-02 | **Defensive `--night` check + automation orchestrator design (C22)** (`c0d724e`) — `assert_run_dir_night_matches()` shared helper refuses to run voice_flow / publish_flow when --night doesn't match run_dir's embedded night number; both naming conventions handled; 9 unit tests. Catches silent cross-night corruption: wrong --night writes `continuity_night_<N+1>.json` from wrong-night data. Plus full orchestrator design doc (`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) — event-driven via 1-min polling on filesystem-as-state; tonight-derivation via date → DATE_TO_NIGHT + sessions.json `ai_assembly=true` filter. Three Athens scope options (manual-fire wrapper / full / defer); operator decision pending | runtime/flows/shared/io.py + voice_flow.py + publish_flow.py + tests/test_run_dir_night_check.py + AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md |
 | 2026-05-02 | **publish_flow.py per-night theme path fix** (`e0921de`) — `published_artifacts/themes/<theme_id>.json` flat path overwrote across nights (theme_ids reset per Researcher run; Night 2 silently destroyed Night 1 theme aggregations). Athens-eligible bug — operator-caught when challenging the "won't fire during Athens" claim. Fixed: per-night sub-dir `published_artifacts/themes/night_<N>/<theme_id>.json`. Other publish_flow outputs already collision-safe. | runtime/flows/publish_flow.py + runtime/flows/voice/publish.py docstrings |
-| 2026-05-01 (late) | **C19a Anthropic prompt caching enabled** (`c4804d6`) — Voice Pipeline (1h TTL) + Provocateur Formulation (5min TTL); ~$60-75 Athens 3-night savings projected. Live verification: `cache_creation_input_tokens=8424` on call 1 → `cache_read_input_tokens=8424` on call 2. **Latent bug also fixed in same commit:** `voice/continuity.py:183` was unpacking 3-tuple from `stream_voice_call()` that became 4-tuple in commit `8c47e1f` (thinking_tokens fix); Test 2 v2's continuity hit cache so the bug didn't surface until proper run. | runtime/flows/voice/_anthropic_call.py + continuity.py + provocateur_flow.py |
+| 2026-05-01 (late) | **C19a Anthropic prompt caching Stage 1** (`c4804d6`) — Voice Pipeline (1h TTL) + Provocateur Formulation (5min TTL). Originally claimed ~$60-75 Athens savings; revised 2026-05-02 to ~$2-5 (Stage 1 alone) after correcting Opus 4.7 pricing ($5/$25 not $15/$75) — Stage 1 helps Step 1 reuse but penalizes Step 2/Continuity writes. Stage 2 (2026-05-02 prefix caching) saves additional ~$13. Live verification: `cache_creation_input_tokens=8424` on call 1 → `cache_read_input_tokens=8424` on call 2. **Latent bug also fixed in same commit:** `voice/continuity.py:183` was unpacking 3-tuple from `stream_voice_call()` that became 4-tuple in commit `8c47e1f` (thinking_tokens fix); Test 2 v2's continuity hit cache so the bug didn't surface until proper run. | runtime/flows/voice/_anthropic_call.py + continuity.py + provocateur_flow.py |
 | 2026-05-01 (late) | **C9 cross-night exclusion filter LANDED** (`99759cb`) — Provocateur `python_select()` extended with `prior_assignments_by_member` parameter; Step 4 candidate filter + Step 7 force-fit honor exclusions; new diagnostics in `selection.json`; CLI `--prior-nights` arg. Spec language "(theme_id, member) exclusion" was informal — theme_ids are NOT stable across Researcher runs, so implementation matches by **normalized theme title** (lowercased, whitespace-collapsed). 15 unit tests in `runtime/tests/test_provocateur_selection.py`. Fires twice during Athens (Nights 2 + 3). | runtime/flows/provocateur_flow.py + tests/test_provocateur_selection.py + docs/AI_Assembly_Provocateur_Pipeline.md |
 | 2026-04-30 | FU#61 v3 (5-criteria reshape) on Cleopatra | athens-2026 commit `c89d186` |
 | 2026-04-30 | FU#61-fresh pattern propagated to Dostoevsky | athens-2026 commit `5088d67` |
@@ -920,7 +922,7 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - ~~thinking_tokens=0 bugfix~~ ✅ commit `8c47e1f`
 - ~~C1 + C2 + C2a runtime FU#60 compliance~~ ✅ commit `d4cea03`
 - ~~C9 Provocateur Night 2/3 exclusion filter~~ ✅ commit `99759cb`
-- ~~C19a Anthropic prompt caching~~ ✅ commit `c4804d6` (~$60-75 Athens savings)
+- ~~C19a Anthropic prompt caching~~ ✅ commit `c4804d6` (Stage 1, 2026-05-01) + Stage 2 prefix caching (2026-05-02 pending commit) — total Athens savings ~$13 (revised down from inflated $60-75 after correcting Opus 4.7 pricing)
 - ~~publish_flow per-night theme path~~ ✅ commit `e0921de`
 - ~~Defensive `--night` check (cross-night corruption guard)~~ ✅ commit `c0d724e`
 - ~~Latent continuity unpack-tuple bug~~ ✅ fixed in commit `c4804d6`

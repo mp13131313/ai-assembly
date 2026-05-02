@@ -65,7 +65,7 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
 | **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop) | §"Validation Nodes" below |
 | **Continuity block generation** | Sketched in Step 2 system prompt | **Separate flow** with defined runtime trigger (after Night N Step 3 artifacts written, before Night N+1 Provocateur reads them); per-voice override file | §"Continuity Block Generation" below |
-| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). **Night 1: ~$130-190, ~45-75 min wall** (validation ON); **Nights 2+3: ~$130-180, ~25-40 min wall** (validation OFF, +continuity). 3-night total ~$390-550. Revised 2026-05-01 from observed dryrun behavior + A1/FU#62 decisions | §"Cost & Envelope" below |
+| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). **Night 1: ~$20-40, ~45-75 min wall** (validation ON); **Nights 2+3: ~$15-30, ~25-40 min wall** (validation OFF, +continuity). 3-night total ~$60-80. Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25 not deprecated $15/$75) + Test 3 empirical anchor + prefix caching | §"Cost & Envelope" below |
 | **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]`. **Athens production:** always pass `--skip-step3` (A1 decision 2026-05-01); add `--skip-validation` on Nights 2/3 (FU#62 path B). | §"Implementation" below |
 
 **Stable from v1:**
@@ -89,7 +89,7 @@ Plus two supporting flows:
 - **Validation nodes** (optional, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). Default ON for Athens Night 1.
 - **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice Sonnet call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
 
-**Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$130-190 / ~45-75 min wall (validation ON); Nights 2+3 ~$130-180 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$390-550. See §"Cost & Envelope" for breakdown.
+**Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$20-40 / ~45-75 min wall (validation ON); Nights 2+3 ~$15-30 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$60-80. *Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25, not deprecated $15/$75 used previously) + prefix caching landed.* See §"Cost & Envelope" for breakdown.
 
 The Voice Pipeline runs once per night across three Athens nights. On Night 2 + Night 3, the continuity override is loaded as a card supplement; otherwise the pipeline shape is identical.
 
@@ -337,7 +337,7 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 
 **Streaming is REQUIRED on Steps 1/2/3** — Opus + thinking + max_tokens=64K is well past the SDK's non-streaming timeout heuristic (10 min). Validation + continuity may use non-streaming.
 
-**Per-voice cost (10-voice panel, per night, Athens production with Step 3 skipped per A1 2026-05-01):** Step 1 ~$2.50/call × 30-50 calls = ~$75-125; validation (Night 1 only) ~$3-15; Step 2 ~$5/call × 10 calls = ~$50; ~~Step 3~~ skipped ($0; was ~$50); continuity ~$3 per night (Night 2+3 only). **Night 1 total: ~$130-190; Nights 2+3: ~$130-180 each; Athens 3-night total: ~$390-550.** Wall time: Night 1 ~45-75 min (validation per-voice serial); Nights 2+3 ~25-40 min. See §"Cost & Envelope" for full breakdown.
+**Per-voice cost (10-voice panel, per night, Athens production with Step 3 skipped per A1 2026-05-01; revised 2026-05-02 with correct Opus 4.7 pricing $5/$25 + prefix caching):** Step 1 ~$0.30-0.50/call × 30-50 calls = ~$10-25; validation (Night 1 only) ~$3-15; Step 2 ~$0.30-0.50/call × 10 calls = ~$3-5; ~~Step 3~~ skipped ($0; was ~$15-20); continuity ~$1 per night (Night 2+3 only). **Night 1 total: ~$20-40; Nights 2+3: ~$15-30 each; Athens 3-night total: ~$60-80.** Wall time: Night 1 ~45-75 min (validation per-voice serial); Nights 2+3 ~25-40 min. See §"Cost & Envelope" for full breakdown.
 
 ---
 
@@ -1244,25 +1244,27 @@ Continuity overrides (per-voice, written by `continuity.py`):
 
 ## Cost & Envelope
 
-Per night, 10-voice panel. Costs reflect Opus 4.7 + adaptive thinking on Steps 1/2/3 (the load-bearing creative-reasoning calls) and OpenAI ladder (gpt-5.4 high → fallbacks) on validation. Generous max_tokens ceilings let thinking run without truncating the final response.
+Per night, 10-voice panel. Costs reflect Opus 4.7 (`$5/MTok input, $25/MTok output`) + adaptive thinking on Steps 1/2/3 (the load-bearing creative-reasoning calls) and OpenAI ladder (gpt-5.4 high → fallbacks) on validation. Prefix caching enabled per OPEN_ITEMS C19a (1h TTL on shared prefix + step-specific tail blocks; ~20-25K shared tokens cached across Step 1+Step 2 within a voice/night). Continuity opt-out of caching (single-call flow). Generous max_tokens ceilings let thinking run without truncating final response.
+
+**Cost figures revised 2026-05-02** with corrected Opus 4.7 pricing ($5/$25, not the deprecated Opus 4 / $15/$75 used in earlier versions of this doc) + Test 3 empirical anchor (4 voices × 1 night × 3 formulations measured at ~$5-6 actual; per voice per night ≈ $1.40).
 
 | Stage | Calls | Model | Per-call cost | Stage total |
 |---|---|---|---|---|
-| Step 1 (Opus 4.7 + thinking, max 64K) | ~30-50 | claude-opus-4-7 | ~$2.50 | **~$75-125** |
+| Step 1 (Opus 4.7 + thinking, max 64K) | ~30-50 | claude-opus-4-7 | ~$0.30-0.50 | **~$10-25** |
 | Validation A + B (Night 1 only, diagnostic) | ~60-100 | OpenAI ladder | ~$0.05-0.15 | **~$3-15** |
-| Step 2 (Opus 4.7 + thinking, max 64K) | 10 | claude-opus-4-7 | ~$5 | **~$50** |
-| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | — | — | **$0** (was ~$50) |
-| Continuity (Sonnet 4.6 + thinking, max 8K, Night 2+3 only) | 10 | claude-sonnet-4-6 | ~$0.30 | **~$3** |
-| **Per-night total — Night 1** (validation ON, Step 3 skipped) | | | | **~$130-190** |
-| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | | | **~$130-180** |
+| Step 2 (Opus 4.7 + thinking, max 64K) | 10 | claude-opus-4-7 | ~$0.30-0.50 | **~$3-5** |
+| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | — | — | **$0** (was ~$15-20) |
+| Continuity (Sonnet 4.6 + thinking, max 8K, Night 2+3 only) | 10 | claude-sonnet-4-6 | ~$0.05-0.15 | **~$1** |
+| **Per-night total — Night 1** (validation ON, Step 3 skipped) | | | | **~$20-40** |
+| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | | | **~$15-30** |
 
-**Athens 3-night total:** ~$390-550 in API costs (Step 3 skipped per A1 2026-05-01 saves ~$150 across 3 nights). Continuity runs only on Nights 1 and 2 — its output is consumed on Nights 2 and 3. Validation runs only on Night 1 per FU#62 path B decision.
+**Athens 3-night total:** ~$60-80 in API costs (Step 3 skipped per A1 2026-05-01 saves ~$45 across 3 nights at corrected pricing). Continuity runs only on Nights 1 and 2 — its output is consumed on Nights 2 and 3. Validation runs only on Night 1 per FU#62 path B decision.
 
-If Step 3 re-enables post-editor/microsite, add ~$50/night × 3 nights = ~$150 back.
+If Step 3 re-enables post-editor/microsite, add ~$15/night × 3 nights = ~$45 back.
 
 Per-validation-call costs revised 2026-05-01 from prior ~$0.50/call estimate down to ~$0.05-0.15/call based on observed dryrun behavior (gpt-5.4 reasoning_effort=high on ~5K-token prompts).
 
-This is meaningfully higher than a Sonnet-on-everything build (~$120-150 total) but is the calibration the operator chose because Steps 1/2/3 are the load-bearing creative-reasoning calls of the entire overnight pipeline. Getting them wrong fails Briefing v3.1's Layer 2 ("could a well-read human essayist have arrived here?") and Layer 3 (does the conversation become more-than). Opus + thinking is the price of the experiment; it is not the place to economise.
+The original "this is meaningfully higher than Sonnet-on-everything ($120-150)" claim was based on inflated Opus 4.7 pricing. Under corrected pricing, Opus 4.7 + thinking on Steps 1/2/3 is ~$60-80 across Athens 3 nights — only modestly above a Sonnet build. Steps 1/2/3 are the load-bearing creative-reasoning calls; getting them wrong fails Briefing v3.1's Layer 2 ("could a well-read human essayist have arrived here?") and Layer 3 (does the conversation become more-than). Opus + thinking is the right calibration regardless of cost.
 
 Wall time per night, with parallelism + Anthropic batch wait. Opus + thinking is slower per call than Sonnet (more reasoning tokens to generate); parallelism + batched submission keeps total wall manageable but the per-night envelope grows from ~25-35 min to:
 
