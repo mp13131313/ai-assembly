@@ -350,7 +350,7 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 **Architecture:**
 
 - VM = Hetzner CX22 (4 vCPU / 8 GB / 80 GB) running Ubuntu 24.04, ~€6/mo, ~€10-15 across the Athens window.
-- Three systemd units: `ingest.service` (exists, ready to deploy) + `orchestrator.service` (script designed at `AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`, not built) + `prefect-server.service` (one-line install; flows already Prefect-decorated as library).
+- Three systemd units: `ingest.service` (exists, ready to deploy) + `orchestrator@.service` (templated unit; script + unit shipped 2026-05-02 PM with 22 tests) + `prefect-server.service` (one-line install; flows already Prefect-decorated as library).
 - Plus interactive: Claude Code installed on VM, reached via `mosh + tmux + claude`. Operator's runtime-ops surface — laptop Claude Code stays for code/dev; VM Claude Code is for live state inspection + intervention.
 - Caddy fronts ingest + Prefect dashboard on subdomains with Basic Auth.
 - Filesystem: `/opt/ai-assembly/` = code repo clone; `/opt/ai-assembly-athens2026/` = PROJECT_ROOT (athens-2026 private repo clone).

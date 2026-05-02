@@ -164,7 +164,7 @@ The existing [`runtime/ingest/deploy/README.md`](../runtime/ingest/deploy/README
 
 4. **Install Prefect server** + write `prefect-server.service` + Caddyfile entry for `prefect.<domain>` + Basic Auth. Verify the dashboard renders.
 
-5. **Build orchestrator** (separate work item; ~3-4 hr per [`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`](../_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md)). Add `orchestrator.service`.
+5. **Install orchestrator systemd unit** — script + unit already shipped ([`runtime/scripts/overnight_orchestrator.py`](../runtime/scripts/overnight_orchestrator.py) + [`runtime/scripts/deploy/orchestrator@.service`](../runtime/scripts/deploy/orchestrator@.service)). 22 trigger-path tests passing. `cp` + `systemctl daemon-reload` per deploy README.
 
 6. **Install Claude Code on VM** + auth + verify mosh+tmux+claude flow from operator's laptop and phone.
 
@@ -309,5 +309,5 @@ Tracked at [`_workspace/planning/runtime/OPEN_ITEMS.md`](../_workspace/planning/
 - [Editor Pipeline](AI_Assembly_Editor_Pipeline.md) — runs on the VM as one stage (when built)
 - [Researcher Pipeline](AI_Assembly_Researcher_Pipeline.md), [Provocateur Pipeline](AI_Assembly_Provocateur_Pipeline.md), [Transcription Pipeline](AI_Assembly_Transcription_Pipeline.md) — same
 - [Ingest deploy README](../runtime/ingest/deploy/README.md) — canonical provisioning checklist (sections 1–6)
-- [Orchestrator design](../_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md) — to be implemented
+- [Orchestrator script](../runtime/scripts/overnight_orchestrator.py) — implemented + 22 tests; design history at [archived design doc](../_workspace/archive/specs/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md)
 - [Archived infra spec](../_workspace/archive/specs/AI_Assembly_Infrastructure_Setup.md) — superseded by this doc; do not consult

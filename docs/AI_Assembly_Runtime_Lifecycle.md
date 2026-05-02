@@ -458,5 +458,5 @@ sudo systemctl start orchestrator@3.service
 - [Infrastructure spec](AI_Assembly_Infrastructure.md) — VM layout, deployment, services
 - [Ingest deploy README](../runtime/ingest/deploy/README.md) — provisioning checklist
 - [Orchestrator script](../runtime/scripts/overnight_orchestrator.py) — implementation
-- [Orchestrator design doc](../_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md) — design decisions + corrections
+- [Orchestrator design doc](../_workspace/archive/specs/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md) — historical design + corrections (archived 2026-05-02 PM after implementation landed; superseded by this lifecycle doc + the script + tests)
 - [Orchestrator tests](../runtime/tests/test_orchestrator.py) — 22 trigger-path tests

@@ -72,21 +72,22 @@ runtime/flows/
 | Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `99759cb`; 15 unit tests passing |
 | publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `e0921de` |
 | Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `c0d724e`; 9 unit tests passing |
-| Automation orchestrator | 📐 DESIGNED 2026-05-02; build deferred pending operator scope decision | `AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md` + OPEN_ITEMS C22 |
+| Automation orchestrator | ✅ BUILT 2026-05-02 PM — full orchestrator with 22 trigger-path tests + templated systemd unit + path-prefix Caddyfile + lifecycle doc | `runtime/scripts/overnight_orchestrator.py` + `docs/AI_Assembly_Runtime_Lifecycle.md` + OPEN_ITEMS C22 |
 | publish_flow.py end-to-end exercise | ❌ never run against real Researcher/Provocateur outputs (collision bug now fixed; safe to exercise) | OPEN_ITEMS C3 |
 
 ### Downstream of Voice Pipeline
 
 | Component | Status |
 |---|---|
-| Editor / Frame layer | ❌ NOT BUILT — A2 architecture settled 2026-05-01 (per-theme article; all-AI drafting; voice artifacts ship as-is). Output schema gated on microsite design (operator) per A2 F |
-| Microsite | ❌ NOT BUILT — operator designing; design specifies editor output schema per A2 F |
-| Broadsheet / Edition Pipeline | ❌ NOT BUILT — consumes editor + voice outputs |
-| Substack draft pipeline pass | ❌ NOT BUILT — drafting model TBD (A2 C resolved editor as all-AI; Substack not yet decided) |
-| Closing-show pipelines (theme ID, matrix mapping, video) | ❌ UNSPECIFIED + NOT BUILT |
-| Day 4 goodbye | ❌ UNSPECIFIED |
-| Render layer for non-text artifacts (Marley → Suno; Octopus → shader) | ⚠️ structured handoff in publish layer; rendering itself not implemented |
-| Admin console | ❌ NOT BUILT |
+| Editor / Frame layer | 🟡 SPEC LANDED 2026-05-02 PM (`docs/AI_Assembly_Editor_Pipeline.md` v1, 892 lines). Implementation pending: Claudia card + `editor_flow.py` + modules (~7-11 hr). See OPEN_ITEMS B1. |
+| Microsite | ❌ NOT BUILT — operator designing; consumes `published_artifacts/`. See OPEN_ITEMS B2 |
+| Broadsheet / Edition Pipeline | ❌ NOT BUILT — folded into Editor Pipeline (B1) |
+| Substack draft pipeline pass | ✅ DROPPED 2026-05-02 PM per Editor Pipeline spec (microsite-only) |
+| Closing-show pipelines (theme ID, matrix mapping, video) | ❌ UNSPECIFIED + NOT BUILT — see OPEN_ITEMS B5 |
+| Day 4 goodbye | ❌ UNSPECIFIED — see OPEN_ITEMS B6 |
+| Render layer for non-text artifacts (Marley → Suno; Octopus → shader) | ⚠️ Octopus WebGL renderer substantially built 2026-05-02 PM; Marley TBD. See OPEN_ITEMS B7 |
+| Admin console | ❌ NOT BUILT — see OPEN_ITEMS B8 |
+| **VM infrastructure / orchestration** | ✅ SPEC + IMPLEMENTATION LANDED 2026-05-02 PM. `docs/AI_Assembly_Infrastructure.md` (deployment) + `docs/AI_Assembly_Runtime_Lifecycle.md` (operations) + orchestrator script + 22 tests + multi-service Caddyfile + dual-repo deploy keys. Awaiting operator hands for VM provisioning. See OPEN_ITEMS B10. |
 
 ---
 
