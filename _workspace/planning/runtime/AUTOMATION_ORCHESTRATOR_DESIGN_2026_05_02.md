@@ -1,9 +1,24 @@
 # Automation orchestrator — design
 
-**Date:** 2026-05-02
-**Status:** Draft for review
+**Date:** 2026-05-02 (updated 2026-05-02 PM with corrections after code-grounded verification)
+**Status:** Draft for review — corrections applied
 **Author:** runtime thread
 **Filed:** as `runtime/OPEN_ITEMS.md` C22 (pre-Athens-eligible build)
+
+---
+
+## Corrections applied 2026-05-02 PM
+
+Verified the original draft against the actual code, not just intent. Four bugs found + fixed in this revision:
+
+1. **Run name pattern was wrong.** Draft said `athens_2026_<YYYY_MM_DD>_night<N>`. Ingest actually writes `athens_night_<N>` per [`runtime/ingest/config.py:80-87`](../../../runtime/ingest/config.py) `DAY_TO_RUN`. If orchestrator computed the wrong run_dir name, it would poll a directory that never appears.
+2. **Transcription `error` state was unhandled.** Draft's "wait until state=done for all sessions" missed that [`runtime/ingest/pipeline.py:41-45`](../../../runtime/ingest/pipeline.py) defines five states: `received | normalizing | transcribing | done | error`. If even one session errors out, draft's logic waits 14h then hard-halts. Corrected: detect error state, halt immediately, escalate to operator.
+3. **Editor stage missing.** Draft predates the editor pipeline spec ([`docs/AI_Assembly_Editor_Pipeline.md`](../../../docs/AI_Assembly_Editor_Pipeline.md), 2026-05-02 PM). Dependency graph corrected to `Voice → Editor → Publish` with graceful "skip if `editor_flow.py` not yet built" handling.
+4. **Machine-agnosticism wasn't explicit.** Orchestrator runs unchanged on laptop or VM. Concrete: subprocess paths via `Path(__file__).resolve().parent.parent / "flows" / "X.py"` (not `/opt/...`); Python interpreter via `sys.executable` (not bare `python`); PROJECT_ROOT via `--project` arg with env var fallback (not hardcoded); log to file in `<run_dir>/_orchestrator_logs/` (not journald-assumed); no Athens-TZ default — operator passes `--night N` explicitly OR `--date YYYY-MM-DD` for date-derivation.
+
+Trigger granularity decision (from same review): **coarse-grained orchestration for Athens.** Each stage fires once at completion of upstream stage; per-session per-X parallelism within each stage stays the stage's responsibility. Fine-grained (per-session Researcher Node 1 firing as transcriptions complete) would save 30-60 min/night but requires refactoring `run_researcher()` into split entry points — risky at T-5. Filed as post-Athens optimization candidate.
+
+---
 
 ## What this is
 
@@ -35,16 +50,21 @@ So the orchestrator's job: **bridge the gap from "all sessions transcribed" to "
 
 ```
 session.upload  ─►  per-session.normalize  ─►  per-session.transcribe
-                                                  │
-                          (all sessions for night done)
+                                                  │   (auto-fired by ingest pipeline.py;
+                                                  │    orchestrator does NOT fire this)
+                          (all sessions for night state=done; halt if any state=error)
                                                   ▼
                                               researcher
-                                                  │
+                                                  │   (per-session Node 1 + cluster + theme,
+                                                  │    coarse-grained for now — see corrections §1)
                                                   ▼
-                                              provocateur ◄── (prior nights' selection.json)
+                                              provocateur ◄── (prior nights' run_dirs for C9 exclusion)
                                                   │
                                                   ▼
                                               voice_flow
+                                                  │
+                                                  ▼
+                                              editor ◄── (skip if editor_flow.py not built)
                                                   │
                                                   ▼
                                                publish
@@ -80,7 +100,9 @@ No database. Each stage's "is it done?" is answered by checking for its output f
 
 This matches the existing pattern (Voice Pipeline + Provocateur both use checkpoint-as-cache; manifests are end-of-stage sentinels). No new conventions.
 
-### Tonight-derivation: date → night number
+### Tonight-derivation: night number + run_dir
+
+**Corrected 2026-05-02 PM** — orchestrator does NOT derive `today` from system clock by default (machine-agnosticism: laptop and VM may be in different time zones). Operator passes `--night N` (1, 2, or 3) explicitly OR `--date YYYY-MM-DD` for date-based lookup.
 
 ```python
 DATE_TO_NIGHT = {
@@ -89,14 +111,15 @@ DATE_TO_NIGHT = {
     "2026-05-09": 3,  # Day Three
 }
 
-DAY_TO_NIGHT = {
-    "Day One": 1,
-    "Day Two": 2,
-    "Day Three": 3,
-}
+NIGHT_TO_DAY = {1: "Day One", 2: "Day Two", 3: "Day Three"}
 ```
 
-Orchestrator reads `today` (Athens local time, EEST) → derives `tonight_night`. Run_dir name: `athens_2026_<YYYY_MM_DD>_night<N>` per Convention A.
+**Run_dir name (corrected):** `athens_night_<N>` — matches what `runtime/ingest/config.py:80-87` `DAY_TO_RUN` writes. NOT `athens_2026_<date>_night<N>` as originally drafted.
+
+```python
+def run_dir_for_night(project_root: Path, night: int) -> Path:
+    return project_root / "runs" / f"athens_night_{night}"
+```
 
 ### Tonight's session set: derive from sessions.json
 
@@ -175,16 +198,48 @@ def sessions_for_tonight(project_root: Path, night: int) -> list[str]:
     )
 
 
-def all_transcriptions_done(run_dir: Path, session_ids: list[str]) -> bool:
-    """All required sessions have status.json with state=done."""
+def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
+    """Classify transcription state across required sessions.
+
+    Returns dict with keys:
+      - all_done: bool — every session state=done
+      - any_error: bool — at least one state=error
+      - error_sessions: list[str] — session_ids in error state
+      - pending_sessions: list[str] — session_ids not yet in done|error
+    """
+    error_sessions = []
+    pending_sessions = []
+    done_count = 0
     for sid in session_ids:
         status_path = run_dir / "01_transcription" / sid / "status.json"
         if not status_path.exists():
-            return False
+            pending_sessions.append(sid)
+            continue
         status = json.loads(status_path.read_text())
-        if status.get("state") != "done":
-            return False
-    return True
+        state = status.get("state")
+        if state == "done":
+            done_count += 1
+        elif state == "error":
+            error_sessions.append(sid)
+        else:  # received | normalizing | transcribing | None
+            pending_sessions.append(sid)
+    return {
+        "all_done": done_count == len(session_ids),
+        "any_error": bool(error_sessions),
+        "error_sessions": error_sessions,
+        "pending_sessions": pending_sessions,
+    }
+```
+
+**Trigger logic for Researcher (corrected to handle error state):**
+
+```python
+state = transcription_state(run_dir, session_ids)
+if state["any_error"]:
+    return f"failed:transcription:{','.join(state['error_sessions'])}"
+if not state["all_done"]:
+    return "idle"  # waiting for pending sessions
+# else: fire researcher
 
 
 def fire_stage(cmd: list[str], stage_name: str, log_dir: Path) -> bool:

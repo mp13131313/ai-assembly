@@ -746,32 +746,41 @@ External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding:
 
 **Reviewer's $400-600/night estimate was inflated.** Voice Pipeline doc's $130-190/night Night 1 figure was ALSO inflated (used Opus 4-deprecated $15/$75; Opus 4.7 is actually $5/$25). Revised 2026-05-02: Night 1 ~$20-40 with prefix caching; Athens 3-night total ~$60-80. See C19a for detailed math + Test 3 empirical anchor (~$5-6 measured for 4 voices × 1 night × 3 formulations).
 
-### C22. Overnight pipeline orchestrator (automation) 🟡 (filed 2026-05-02)
+### C22. Overnight pipeline orchestrator (automation) ✅ LANDED 2026-05-02 PM (full orchestrator)
 
 **Source:** operator question 2026-05-02 — *"if we automate the pipeline, which I want — how does it know which night it is in?"*
 
-**Design landed at:** `_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md` — full event-driven design that fires each stage when its inputs are ready (per-session transcription → researcher → provocateur → voice → publish). Trigger model: 1-min polling on filesystem-as-state. No new infra, no database, idempotent restart-safe.
+**Decision (2026-05-02 PM):** Built the full orchestrator (not the manual-fire wrapper). Operator can sleep through nights; orchestrator self-monitors, halts cleanly on stage failure, idempotent restart picks up where it left off.
 
-**Three scope options for Athens (T-5 days at filing):**
+**Implementation:**
+- [`runtime/scripts/overnight_orchestrator.py`](../../../runtime/scripts/overnight_orchestrator.py) — single Python script, ~310 lines. Polls filesystem at 1-min cadence; fires each stage when inputs ready.
+- [`runtime/scripts/deploy/orchestrator@.service`](../../../runtime/scripts/deploy/orchestrator@.service) — templated systemd unit. Operator starts per-night via `sudo systemctl start orchestrator@1.service` etc.
+- [`runtime/ingest/deploy/Caddyfile`](../../../runtime/ingest/deploy/Caddyfile) updated for path-prefix routing on Hetzner-default hostname (single-host serving ingest + Prefect dashboard + optional status JSON).
 
-| Variant | Effort | Tradeoff |
-|---|---|---|
-| **Manual-fire wrapper** | ~30 min | One command per morning runs the 4-stage chain. Operator monitors. |
-| **Full orchestrator** | ~3-4 hr | Unattended. Operator wakes up to either ✅ complete or ❌ stage failure. |
-| **Defer post-Athens** | – | Operator runs each flow manually per documented Athens production CLI. 4 commands per night. |
+**Design corrections vs. earlier draft (verified against actual code):**
+- Run_dir name = `athens_night_<N>` (matches `runtime/ingest/config.py:80-87` `DAY_TO_RUN`), NOT `athens_2026_<date>_night<N>`.
+- Transcription `error` state escalates immediately (halts orchestrator, surfaces failed sessions to operator) rather than waiting indefinitely.
+- Editor stage included in chain with graceful skip-if-`editor_flow.py`-not-built (B1 in flight).
+- Machine-agnostic: subprocess paths via `Path(__file__).resolve().parent.parent / "flows"`; Python via `sys.executable`; PROJECT_ROOT via `--project` arg w/ env fallback; logs to file in `<run_dir>/_orchestrator_logs/` (journald on VM, `tail -f` on laptop).
+- No automatic Athens-TZ derivation — operator passes `--night N` explicitly OR `--date YYYY-MM-DD`.
 
-**Defensive infrastructure already landed 2026-05-02:**
-- `runtime/flows/shared/io.py:assert_run_dir_night_matches()` — refuses to run voice_flow / publish_flow when `--night` doesn't match run_dir's embedded night number. Catches the silent cross-night corruption failure mode (wrong --night → continuity_night_<N+1>.json overwritten with wrong-night data).
+**Trigger granularity decision (coarse-grained for Athens):**
+
+Each stage fires once at upstream completion. Per-session per-X parallelism within each stage stays the stage's responsibility. Researcher's per-session Node 1 (extraction) could in principle fire per-transcription-completion (saves 30-60 min/night), but requires splitting `run_researcher()` — risky at T-5. Filed as post-Athens optimization.
+
+**Smoke tests (2026-05-02 PM):**
+- `--help` loads cleanly
+- `--once` against athens-2026 PROJECT_ROOT → returns `idle` (run_dirs don't exist yet)
+- `--date 2026-05-08` resolves to night 2 → looks for `athens_night_2` correctly
+- `sessions_for_tonight` against real sessions.json: 10 + 9 + 6 = 25 sessions matches schedule
+
+**Defensive infrastructure already in place:**
+- `runtime/flows/shared/io.py:assert_run_dir_night_matches()` — refuses to run voice_flow / publish_flow when `--night` doesn't match run_dir's embedded night number. Defends against orchestrator firing wrong-night flag.
 - 9 unit tests in `runtime/tests/test_run_dir_night_check.py`.
-- Wired into `voice_flow.run_voice` + `publish_flow.run_publish`.
 
-**How the orchestrator would know which night (per design doc):**
-- Date → night mapping (`2026-05-07 → 1`, `2026-05-08 → 2`, `2026-05-09 → 3`)
-- Tonight's session set: `sessions.json` filter by `day == NIGHT_TO_DAY[night]` AND `ai_assembly == true` (already populated per `recording_sessions.csv` → 25 sessions across 3 nights)
-- Run_dir name: `athens_2026_<YYYY_MM_DD>_night<N>` (Convention A)
-- All flows trust the run_dir + explicit `--night` flag; defensive check above prevents misalignment
-
-**Decision needed:** which variant? Or defer entirely. If building, recommend Manual-fire wrapper as the minimum-viable path — full orchestrator is post-Athens hygiene unless operator wants to sleep through nights.
+**Pending:**
+- End-to-end exercise on real run_dir with synthetic transcription state (no real Athens audio yet).
+- VM deploy testing (after VM provisioned per B10).
 
 ### C19a. Anthropic prompt caching ✅ LANDED 2026-05-01 (extended 2026-05-02 with prefix caching)
 

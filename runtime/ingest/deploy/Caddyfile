@@ -1,39 +1,78 @@
-# Caddy reverse proxy config for the AI Assembly ingest app.
+# Caddy reverse proxy config for the AI Assembly VM.
 #
 # Place at /etc/caddy/Caddyfile (or include into your existing Caddyfile).
-# Replace `ingest.example.com` with your real hostname before enabling.
-# TLS is issued automatically via Let's Encrypt.
+# Replace `your-hostname.example` with the VM's real hostname before reload.
+#
+# For Athens 2026 we use the Hetzner-provided default hostname (something
+# like `static.123-45-67-89.clients.your-server.de`). Caddy gets a Let's
+# Encrypt cert for it on first request — known-working pattern. No DNS
+# config required.
+#
+# All three services live on the single hostname under different path
+# prefixes:
+#
+#   /              → ingest (FastAPI upload UI; auth handled by the app)
+#   /prefect/*     → Prefect server dashboard (optional; Caddy enforces basic auth)
+#   /status/*      → static status JSON written by the orchestrator (optional;
+#                    Caddy enforces basic auth)
 
-# REQUIRED: replace `ingest.example.com` below with your real hostname
-# before `systemctl reload caddy`. See deploy/README.md step 5 for the
-# sed command. If you leave the placeholder, Caddy will issue a cert
-# for example.com (which will fail) and the site will not be reachable.
-ingest.example.com {
+your-hostname.example {
+    # ----- Static status endpoint (optional) ---------------------------
+    # The orchestrator writes status.json to <run_dir>/_orchestrator_logs/
+    # for each night. Symlink the most relevant one into /var/www/status/
+    # if you want this to surface anything useful; otherwise this returns
+    # an empty 404 and does no harm.
+    handle_path /status/* {
+        basicauth {
+            # Generate with: caddy hash-password
+            # Replace this placeholder before enabling.
+            ops $2a$14$REPLACE_WITH_CADDY_HASH_PASSWORD_OUTPUT
+        }
+        root * /var/www/status
+        file_server browse
+    }
+
+    # ----- Prefect dashboard (optional) --------------------------------
+    handle_path /prefect/* {
+        basicauth {
+            ops $2a$14$REPLACE_WITH_CADDY_HASH_PASSWORD_OUTPUT
+        }
+        reverse_proxy 127.0.0.1:4200 {
+            # Prefect's UI uses websockets for live updates.
+            transport http {
+                read_timeout 5m
+                write_timeout 5m
+            }
+        }
+    }
+
+    # ----- Ingest (catch-all) ------------------------------------------
     # HTTP Basic Auth and IP-based failed-attempt rate limiting are enforced
     # by the app itself (ingest/auth.py). Caddy's rate_limit directive requires
     # the xcaddy plugin and is not used here; app-level limiting is sufficient
     # for this internal tool.
-    #
-    # Large bodies: audio can be up to ~500 MB per session.
-    request_body {
-        max_size 2GB
-    }
-
-    reverse_proxy 127.0.0.1:8000 {
-        # Long timeouts tolerate slow conference-venue wifi during big uploads.
-        transport http {
-            read_timeout    30m
-            write_timeout   30m
-            response_header_timeout 30m
+    handle {
+        # Audio can be up to ~500 MB per session.
+        request_body {
+            max_size 2GB
         }
 
-        # Pass the real client IP through to the app.
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
+        reverse_proxy 127.0.0.1:8000 {
+            # Long timeouts tolerate slow conference-venue wifi during big uploads.
+            transport http {
+                read_timeout    30m
+                write_timeout   30m
+                response_header_timeout 30m
+            }
+
+            # Pass the real client IP through to the app.
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+        }
     }
 
     log {
-        output file /var/log/caddy/ingest-access.log {
+        output file /var/log/caddy/access.log {
             roll_size   100mb
             roll_keep   5
         }

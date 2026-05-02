@@ -1,0 +1,63 @@
+# systemd unit for the AI Assembly overnight orchestrator.
+#
+# Install:
+#   sudo cp orchestrator.service /etc/systemd/system/orchestrator.service
+#   sudo systemctl daemon-reload
+#
+# Enable per night (operator manually, since the night number is per-night):
+#   sudo systemctl start orchestrator@1.service   # before/during Night 1
+#   sudo systemctl start orchestrator@2.service   # before/during Night 2
+#   sudo systemctl start orchestrator@3.service   # before/during Night 3
+#
+# This is a templated unit (note the `@` in the filename below). The instance
+# name (1, 2, or 3) is passed to the orchestrator as --night.
+#
+# To watch:
+#   sudo journalctl -u orchestrator@1 -f
+#
+# The orchestrator is idempotent — restart picks up where the last poll left
+# off via filesystem-as-state. Stop with `systemctl stop` if you need to
+# intervene; restart when ready.
+#
+# Default deadline is 14h. The orchestrator exits 0 (complete), 1 (failed
+# stage), or 2 (deadline). systemd Restart=on-failure restarts only on
+# unclean exit (signal kill); clean exits (1, 2) leave the unit stopped so
+# the operator can investigate.
+
+[Unit]
+Description=AI Assembly Overnight Orchestrator (Night %i)
+After=network-online.target ingest.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ingest
+Group=ingest
+WorkingDirectory=/opt/ai-assembly/runtime
+EnvironmentFile=/opt/ai-assembly/.env
+ExecStart=/opt/ai-assembly/runtime/venv/bin/python \
+    /opt/ai-assembly/runtime/scripts/overnight_orchestrator.py \
+    --night %i \
+    --project /opt/ai-assembly-athens2026
+
+Restart=on-failure
+RestartSec=30
+
+StandardOutput=journal
+StandardError=journal
+
+# Hardening (matches ingest.service profile)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+ReadWritePaths=/opt/ai-assembly-athens2026/runs /opt/ai-assembly-athens2026/published_artifacts
+
+[Install]
+WantedBy=multi-user.target
