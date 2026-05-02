@@ -151,7 +151,7 @@ python3 run_persona_pipeline.py "<Voice Name>" --project ...
 
 **Round 3+:** Path (b). The validator never reaches zero — round 3+ produces register-strict critiques that aren't runtime-blocking. Accept and ship.
 
-**Operator pattern across 4 voices:** every shipped voice (Plato, Cleopatra, Dostoevsky, Battuta) hit 2 patch rounds + path (b). Match this; budget 2 rounds.
+**Operator pattern across 7 shipped voices:** Plato / Cleopatra / Dostoevsky / Battuta / Octopus / Hannah Arendt / Ada Lovelace. Most landed at 2-3 rounds + path (b). Octopus = 4 rounds (compass rebuild surfaced more); Ada = **5 rounds during the build, then 4 over-patches rolled back** (`c025914`) after operator caught the §7-convention deviation. **Budget 2 rounds; surface verdict + ask operator before any round 3.** The post-Ada discipline note: round 1 patch cleanly-actionable; round 2 patch cleanly-actionable; end of round 2 — surface verdict + ask explicitly *"ship now via path-(b) or another round?"*. Don't keep patching unilaterally; the validator treadmill never zeros and patches beyond round 2 trend toward editorial expansion rather than validator-faithful fixes.
 
 ---
 

@@ -10,10 +10,13 @@ includes chunked Pass 1.1–1.7 merge, Phase B per-voice folder layout,
 Tier 3 code/project separation, and the FU#1–62 follow-up family
 (closed/frozen as of 2026-05-01).
 
-Voice-build state for athens-2026: 4 of 10 panel voices shipped (Plato,
-Cleopatra, Dostoevsky, Battuta); Octopus paused at FU#53 review-gate;
-5 unbuilt (Arendt, Lovelace, Marley, Whanganui, Scheherazade — each
-~3-4 hr operator wall for manual claude.ai DR sessions).
+Voice-build state for athens-2026 (2026-05-02 late-night): 7 of 10
+panel voices shipped (Plato, Cleopatra, Dostoevsky, Battuta, Octopus
+[compass-rebuilt], Hannah Arendt, Ada Lovelace); Marley pipeline
+mid-flight in current-tests with 35 verbatim-lyric passages populated;
+2 awaiting operator DR sessions (Whanganui, Scheherazade — each ~3-4 hr
+operator wall for manual claude.ai DR sessions). council_config.json
+wired with 7/10 voices' pipeline-built provocateur_profiles.
 
 **Pickup pattern:** two workstreams, two subfolders.
 - For voice-build work: `_workspace/planning/voices/{ONBOARDING,OPEN_ITEMS,HANDOFF}.md`

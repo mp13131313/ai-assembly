@@ -1,8 +1,8 @@
-# Voices — Open Items (authoritative, 2026-05-02)
+# Voices — Open Items (authoritative, 2026-05-02 late-night)
 
 **Scope:** EVERYTHING still open or undecided that pertains to the **persona pipeline / voice cards** for athens-2026. Distinct from the Voice Pipeline runtime (Steps 1+2+3) which has its own tracking.
 
-**Date stamp:** 2026-05-01. Supersedes voice-related items in HANDOFF_2026_04_27.md, HANDOFF_2026_04_28.md, HANDOFF_2026_04_29.md (all variants), HANDOFF_2026_04_30.md if any, FU61_DRYRUN_VERDICT_2026_04_30.md, and the voice-relevant FUs in FOLLOW_UPS.md. Read this doc + ONBOARDING.md (sibling) instead of trawling those.
+**Date stamp:** 2026-05-02 late-night. Supersedes voice-related items in HANDOFF_2026_04_27.md through HANDOFF_2026_04_30.md (all variants), FU61_DRYRUN_VERDICT_2026_04_30.md, and the voice-relevant FUs in FOLLOW_UPS.md. Read this doc + ONBOARDING.md (sibling) instead of trawling those.
 
 **Truth source:** When this doc disagrees with another, this doc is right (or fix this doc).
 
@@ -10,30 +10,28 @@
 
 ## 1. Per-voice build state
 
-Panel is **10 voices** (per `athens-2026/panel_roster.json`).
+Panel is **10 voices** (per `athens-2026/panel_roster.json`). **7 of 10 shipped to athens-2026.** 1 in flight; 2 awaiting operator DR sessions.
 
 | Voice | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
-| Plato | human | philosophical | false | ✅ shipped (with KNOWN defect) | Original-shipped; no FU#61-fresh re-emit. quality_criteria has the FU#61 inspiration line in #5. **Known defect:** dramatist-vs-speaker collision in 3 places — patches drafted in HANDOFF_2026_04_28 §13, never applied. See §9 below. |
+| Plato | human | philosophical | false | ✅ shipped + 2026-05-02 patched | Surgical patches landed (`cf283bf`): banned_modes[10] sharpened (Socrates-death anachronism) + 7 dramatist-vs-speaker patches. §9 closed via §16.5; runtime-side tics owned by runtime/OPEN_ITEMS C20. |
 | Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
 | Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
-| Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). Voice files **untracked** in athens-2026 git. |
-| Octopus | non_human | observational | false | ✅ shipped 2026-05-01 (`8bb9981` + `4cff85b`); 🔄 **compass rebuild in progress 2026-05-02** in current-tests sandbox. See §15 below. |
-| Hannah Arendt | human | philosophical | false | 🟡 Pass 0a + Phase 0.5 done (in current-tests); DR prompts ready for claude.ai paste |
-| Ada Lovelace | human | philosophical | false | 🟡 Pass 0a + Phase 0.5 done; DR prompts ready for claude.ai paste |
-| Bob Marley | human | **narratival** | false | 🟡 Pass 0a + Phase 0.5 done; voice_mode flipped observational→narratival (Pass 0a hallucinated Card v2 reference per ONBOARDING DO-list); DR prompts ready for claude.ai paste; lyrics_patterns_only corpus_constraint (atypical) |
-| Whanganui River | non_human | system / null | false | 🟡 Pass 0a done; voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation); Phase 0.5 in flight at session end. See §17 below. |
-| Scheherazade | fictional | narratival | false | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 in flight at session end. Mediated-voice concern carries through to Pass 2 generation. |
-| Whanganui River | non_human | observational (likely) | (TBD) | ❌ not started | Hardest case — non-human/system; the river constructed via human observation/legal status. |
-| Scheherazade | fictional | narratival (likely) | false | ❌ not started | **Mediated-voice prompt fix** flagged in earlier session — verify status pre-build. |
+| Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). |
+| Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
+| Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
+| Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
+| Bob Marley | human | **narratival** | false | 🟠 **pipeline mid-flight** (task `bcroaoa2t`, at Pass 3 as of session-end) with **35 verbatim-lyric passages** populated in `02_merge/pass_1_6/reference_only_passages.json` (operator-supplied). lyrics_patterns_only corpus_constraint (atypical). When gate hits: §7 convention strictly (max 2 rounds + path-(b) ship). |
+| Whanganui River | non_human | system / null | false | 🟡 Pass 0a done + voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 done; DR prompts ready for operator's claude.ai sessions. See §17 below. |
+| Scheherazade | fictional | narratival | false | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 done (after sustained Gemini 503 retry); DR prompts ready. Mediated-voice prompt-fix concern carries through to her Pass 2 generation. |
 
-### Voice-mode coverage so far
+### Voice-mode coverage so far (7 shipped)
 
-- philosophical: 1 (Plato)
+- philosophical: 3 (Plato, Hannah Arendt, Ada Lovelace)
 - narratival: 2 (Dostoevsky, Battuta)
-- observational: 2 (Cleopatra, Octopus — both shipped)
+- observational: 2 (Cleopatra, Octopus)
 
-Going forward, classification calls for the 5 unbuilt voices land via Pass 0a but **operator must check each call independently** — voice_mode is a *construction* decision (how the pipeline builds the voice), not a *historical* one. Don't take Pass 0a's first proposal as final without weighing irreplaceability against the panel.
+Marley = narratival in build; Whanganui = system/null; Scheherazade = narratival. Pass 0a calls for the 3 remaining voices already landed but **operator must re-check each call independently** — voice_mode is a *construction* decision (how the pipeline builds the voice), not a *historical* one. Don't take Pass 0a's first proposal as final without weighing irreplaceability against the panel.
 
 ---
 
@@ -60,7 +58,7 @@ Backup snapshot at `voices/octopus/07_persona_card_assembled.pre_path_a_patches.
 
 ---
 
-## 3. Five unbuilt voices — operator-bounded work
+## 3. Three remaining voices — operator-bounded work
 
 Build sequence per voice:
 
@@ -76,15 +74,13 @@ Build sequence per voice:
 4. Persona pipeline (~30-90 min) — chunked merge → Pass 1c review gate → Pass 2-7 → 7a FINAL gate → operator decision (a/b) → Derive
 ```
 
-**Per-voice flags worth checking before starting:**
+**Per-voice flags worth checking:**
 
-| Voice | Pre-build attention |
+| Voice | Status / pre-build attention |
 |---|---|
-| Hannah Arendt | Probably philosophical — FU#49 universal patterns should hold. FU#47 voice-fit: ✓ analytical-workshop. **Pass 1d will pull richer primary-text excerpts** (FU#46 raised budget 30K→60K for richer-corpus voices like Plato/Arendt); expect more anchored claims than early-Plato runs. |
-| Ada Lovelace | Mathematical-notation density — FU#61 audience-engagement criterion may benefit (named in FU#61 expansion). FU#47 voice-fit: ✓ analytical-workshop. Candidate for FU#15 Pass 5 A/B test (low-stakes voice). |
-| Bob Marley | **Audio render question** — medium is song; runtime layer needs Suno API integration (NOT persona-build scope, flag-up). **Special `corpus_constraint: lyrics_patterns_only`** (atypical — not `full`). FU#47 voice-fit: ⚠ awkward (lyric-rhythmic). Card-side FU#61 audience-engagement will land in Patois/lyric grammar. |
-| Whanganui River | **Hardest case** — non-human + no first-person source + legal-personhood-as-frame. Construction-mode question is real (translate-into-human-categories vs preserve-river-grammar). May trigger same layer-instability as Octopus. **Pre-build attention:** Pass 0a originally proposed `hostile_sources: false`; operator's pipeline-fidelity audit later flagged it might need `true`. **Verify hostile_sources on Pass 0a output before Phase 0.5.** Also: voice_mode `null` is valid (subtype=system) — but check what Pass 0a proposes. FU#47 voice-fit: ⚠ awkward (legal-personhood-from-Indigenous-tradition). Plan to budget extra patch rounds. |
-| Scheherazade | **Mediated-voice prompt fix** — verify status before Pass 0a. Flagged in earlier session; never resolved. Concerns how the frame-tale form (story-within-stories) gets handled in `voice_mode: narratival`. **Same dramatist-vs-speaker collision risk as Plato** (composer vs speakers within compositions). Either land the prompt-side mediated-voice clarification before her Pass 0a, OR plan for surgical patches at the gate. FU#47 voice-fit: ⚠ awkward (frame-narrative + character-distributed). FU#46 may apply (rich primary-text corpus → 60K excerpt budget). |
+| Bob Marley | **Pipeline mid-flight at session-end** (task `bcroaoa2t`). 35 verbatim-lyric passages populated in reference_only_passages (operator-supplied via lyrics archive parser). Special `corpus_constraint: lyrics_patterns_only` (atypical — not `full`). FU#47 voice-fit: ⚠ awkward (lyric-rhythmic). Card-side FU#61 audience-engagement will land in Patois/lyric grammar. **At gate:** §7 convention strictly — max 2 rounds + path-(b) ship; surface verdict + ask operator before each round (Ada over-patching post-mortem). |
+| Whanganui River | **Hardest case** — non-human + no first-person source + legal-personhood-as-frame. Construction-mode question is real (translate-into-human-categories vs preserve-river-grammar). May trigger same layer-instability as Octopus. voice_config rewritten transmission-faithful (Tupua te Kawa verbatim + Te Pou Tupua mediation); Phase 0.5 DR prompts ready. **voice_mode `null` is valid** (subtype=system). FU#47 voice-fit: ⚠ awkward. Plan to budget extra patch rounds. See §17. |
+| Scheherazade | **Mediated-voice prompt fix** — verify status before pipeline fires. Flagged in earlier session; never resolved. Concerns how the frame-tale form (story-within-stories) gets handled in `voice_mode: narratival`. **Same dramatist-vs-speaker collision risk as Plato** (composer vs speakers within compositions). Either land the prompt-side mediated-voice clarification before her pipeline fires, OR plan for surgical patches at the gate. FU#47 voice-fit: ⚠ awkward. FU#46 may apply (rich primary-text corpus → 60K excerpt budget). |
 
 ---
 
@@ -93,8 +89,8 @@ Build sequence per voice:
 ### Active / conditional
 
 **FU#55 — Form-variance test, rolling per-voice (Pass 4b fork-test pattern)** 🟡 IN PROGRESS
-- Plato + Cleopatra populated (both declined permission)
-- 8 voices remaining (now 7: Octopus done; Battuta done; 5 unbuilt + Octopus pending decision)
+- 7 of 10 voices shipped (Plato/Cleo/Dosto/Battuta/Octopus/Hannah/Ada). Plato + Cleopatra explicitly populated (both declined permission); other shipped voices haven't been individually fork-tested.
+- 3 voices remaining (Marley in flight, Whanganui + Scheherazade pending DR)
 - Resolution criteria: 0/10 → close §H aspirational; 1-2/10 → opt-in flag; 3+/10 → re-evaluate landing
 - Continues per-voice as cards ship
 
@@ -271,9 +267,11 @@ Standalone Pass 4b re-emit on all 4 shipped voices showed:
 
 ---
 
-## 9. NEWLY DISCOVERED — Plato dramatist-vs-speaker collision UNFIXED on shipped card
+## 9. Plato dramatist-vs-speaker collision — ✅ RESOLVED 2026-05-02 (`cf283bf`)
 
-**Status:** real defect in shipped Plato card; patches drafted in HANDOFF_2026_04_28 §13 but never applied.
+**Status:** ✅ RESOLVED via §16.5 Path A comprehensive (athens-2026 `cf283bf`). 7 surgical patches landed: characteristic_moves[9].description + metaphorical_repertoire["midwifery and birth"] (Phaenarete-as-Socrates'-mother corrected) + 5 passage headers ([2] Republic V, [3] Republic X, [4] Phaedrus, [6] Apology, [7] Theaetetus) switched from first-person Plato-as-Socrates to third-person Socrates / composer-frame. 3 borderline headers ([0], [1], [5]) left alone. The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) is **still pending for Scheherazade's Pass 0a** — see §3 Scheherazade row.
+
+**Section retained for historical context** (the `Status` line above is the live truth):
 
 **The mediated-voice problem:** Plato writes THROUGH Socrates / Athenian Stranger / Timaeus / Diotima. The cryofreeze + tense-discipline + family-of-forms framing pushed the LLM to render first-person as concrete biographical action — which collapsed Plato into Socrates in 3 places.
 
