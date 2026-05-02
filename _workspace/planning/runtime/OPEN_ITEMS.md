@@ -359,9 +359,11 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 - ✅ Ingest service code + deploy assets ([`runtime/ingest/deploy/`](../../../runtime/ingest/deploy/README.md))
 - ✅ All downstream flows built (transcription, researcher, provocateur, voice)
-- ❌ Orchestrator script (designed, not built — see C22)
-- ❌ `orchestrator.service` + `prefect-server.service` systemd units
-- ❌ VM provisioned
+- ✅ Orchestrator script + templated systemd unit + 22 trigger-path tests (C22 ✅)
+- ✅ Multi-service Caddyfile (path-prefix routing on Hetzner-default hostname)
+- ✅ Runtime lifecycle doc ([`docs/AI_Assembly_Runtime_Lifecycle.md`](../../../docs/AI_Assembly_Runtime_Lifecycle.md)) — what happens during a night, end to end
+- ✅ Deploy README updated for dual-repo deploy keys + orchestrator + Prefect server install
+- ❌ VM provisioned (operator hands)
 - ❌ athens-2026 private repo cloned on VM
 - ❌ Claude Code installed on VM
 - ❌ End-to-end dry-run on VM with real audio

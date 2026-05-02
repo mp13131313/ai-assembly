@@ -258,6 +258,11 @@ All canonical pipeline specs are in `docs/`:
   cost ~$3-5 across 3 nights. Pending: Claudia's full 35-field card,
   closing prompt, implementation. See OPEN_ITEMS A2 (✅ fully resolved)
   + B1 (🟡 specified).
+- `AI_Assembly_Runtime_Lifecycle.md` — what happens during an Athens
+  night, end to end (v1, 2026-05-02). Stage-by-stage anatomy (trigger,
+  reads, writes, sentinel), full filesystem layout, cross-night threading,
+  failure modes, manual intervention, Athens 2026 specifics. Read this
+  first if you need to understand the runtime as a whole.
 - `AI_Assembly_Infrastructure.md` — Athens 2026 deployment spec (v1
   draft, 2026-05-02). Supersedes archived `Infrastructure_Setup.md`.
   Three reasons for VM (ingest + safety + operator-detachment); three

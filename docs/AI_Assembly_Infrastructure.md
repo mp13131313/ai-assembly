@@ -36,7 +36,7 @@ Reason 3 is sometimes folded into Reason 2; whether you treat them as two reason
 ### On the VM (deployed as ready, fall back to laptop until then)
 
 - **Researcher / Provocateur / Voice / Editor / Publish flows** — code already in `/opt/ai-assembly/runtime/flows/`. Each runs as a standalone CLI invocation against a `run_dir`. They use Prefect as a library (`@flow`/`@task` decorators give retry, exponential backoff, task-input-hash caching, run logger) — not as a server. Each `python flows/X.py <run_dir>` is a self-contained Prefect run.
-- **Orchestrator** — `runtime/scripts/overnight_orchestrator.py` (designed at [`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`](../_workspace/planning/runtime/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md), not yet built). Polls filesystem at 1-min cadence; fires each downstream stage when its inputs are present.
+- **Orchestrator** — [`runtime/scripts/overnight_orchestrator.py`](../runtime/scripts/overnight_orchestrator.py) (landed 2026-05-02 PM with 22 trigger-path tests). Polls filesystem at 1-min cadence; fires each downstream stage when its inputs are present. See [`docs/AI_Assembly_Runtime_Lifecycle.md`](AI_Assembly_Runtime_Lifecycle.md) for what it does end-to-end.
 - **Prefect server** — provides the browser-accessible dashboard for live flow runs, task retries, durations, failures. The flows are already decorated; turning the server on is config, not code.
 - **Claude Code** — installed on the VM (`npm install -g @anthropic-ai/claude-code`) and reached via SSH/mosh into a long-lived tmux session. The operator's runtime-ops surface for "why did Night 2 fail at 02:14?" / "show me the live state of tonight's run_dir" / "restart the orchestrator."
 
@@ -286,12 +286,15 @@ These are unresolved as of 2026-05-02. Items 1 + 2 block provisioning; 3–7 can
 
 ## Implementation status
 
-- [x] Ingest service code + deploy assets (`runtime/ingest/`)
+- [x] Ingest service code + deploy assets ([`runtime/ingest/`](../runtime/ingest/))
 - [x] All downstream flows built (transcription, researcher, provocateur, voice)
+- [x] Orchestrator script + templated systemd unit ([`runtime/scripts/overnight_orchestrator.py`](../runtime/scripts/overnight_orchestrator.py) + [`runtime/scripts/deploy/orchestrator@.service`](../runtime/scripts/deploy/orchestrator@.service)), 22 trigger-path tests passing
+- [x] Multi-service Caddyfile for path-prefix routing ([`runtime/ingest/deploy/Caddyfile`](../runtime/ingest/deploy/Caddyfile))
+- [x] Deploy README updated for orchestrator + Prefect server + dual-repo deploy keys ([`runtime/ingest/deploy/README.md`](../runtime/ingest/deploy/README.md))
+- [x] Runtime lifecycle doc ([`docs/AI_Assembly_Runtime_Lifecycle.md`](AI_Assembly_Runtime_Lifecycle.md))
 - [ ] Editor pipeline implementation (separate work item; see [Editor Pipeline doc](AI_Assembly_Editor_Pipeline.md))
-- [ ] Orchestrator script + systemd unit
-- [ ] Prefect server systemd unit + Caddyfile entry
-- [ ] VM provisioned
+- [ ] Prefect server systemd unit installed (instructions in deploy README, but not yet verified end-to-end)
+- [ ] VM provisioned (operator hands)
 - [ ] athens-2026 private repo cloned on VM
 - [ ] Claude Code installed on VM
 - [ ] End-to-end dry-run on VM with real audio
