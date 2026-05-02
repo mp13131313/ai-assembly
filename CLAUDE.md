@@ -1,14 +1,19 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-01)
+## Current branch state (2026-05-03)
 
-Active branch: `voice-pipeline-v2.1-align-revert` (22+ commits ahead of
-`main`, merge decision deferred). Persona pipeline at **v4**
-(`docs/AI_Assembly_Persona_Pipeline_v4.md`); `pipeline_version` string in
-code: `"4.0"`. v3.10 archived at `docs/_archive/`. Pipeline architecture
-includes chunked Pass 1.1–1.7 merge, Phase B per-voice folder layout,
-Tier 3 code/project separation, and the FU#1–62 follow-up family
-(closed/frozen as of 2026-05-01).
+Active branch: `main`. The `voice-pipeline-v2.1-align-revert` feature
+branch (92 commits) was fast-forward merged into `main` on 2026-05-03
+and deleted (local + remote). All work — voice pipeline v2.1 + persona
+pipeline FU#55-62 + editor pipeline spec + infrastructure spec +
+orchestrator + lifecycle doc + 4 new shipped persona cards (Octopus
+rebuild, Plato patches, Hannah Arendt, Ada Lovelace) — is now on `main`.
+
+Persona pipeline at **v4** (`docs/AI_Assembly_Persona_Pipeline_v4.md`);
+`pipeline_version` string in code: `"4.0"`. v3.10 archived at
+`docs/_archive/`. Pipeline architecture includes chunked Pass 1.1–1.7
+merge, Phase B per-voice folder layout, Tier 3 code/project separation,
+and the FU#1–62 follow-up family (closed/frozen as of 2026-05-01).
 
 Voice-build state for athens-2026 (2026-05-02 late-night): 7 of 10
 panel voices shipped (Plato, Cleopatra, Dostoevsky, Battuta, Octopus
