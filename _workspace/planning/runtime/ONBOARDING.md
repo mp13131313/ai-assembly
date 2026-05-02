@@ -61,10 +61,13 @@ runtime/flows/
 | Continuity flow | ✅ verified end-to-end after `ccc6229` bugfix (was broken under `--skip-step3` Athens production CLI) | Legitimacy Test 1, 3-night sequence (2026-05-01) |
 | Multi-night sequence | ✅ exercised (Convention A run_dir-per-night, continuity overlay loads correctly) | Legitimacy Test 1 (2026-05-01) |
 | Multi-voice 4-voice engagement | ✅ all 4 shipped voices in parallel | Legitimacy Test 1 + 2 + 2 v2 (2026-05-01) |
-| Step 2 `focus_decision` synthesis branch | ✅ verified (4/4 voices weave under conceptually-converging input) | Legitimacy Test 2 + 2 v2 |
-| Step 2 `focus_decision` focus-on-one branch | ❌ untested (synthesis bias appears even with distinct titles); external review 2026-05-02 found single-input mode produces materially stronger artifacts for 3 of 4 voices | OPEN_ITEMS C18 + Path A from external review |
+| Step 2 `focus_decision` synthesis branch | ✅ verified (4/4 voices weave under conceptually-converging input on Test 2 v2; under post-2026-05-02 routing+prompt refactor, Test 3 shows synthesis must now be earned with explicit weight-equal reasoning + through-line claim) | Legitimacy Test 2 + 2 v2 + Test 3 |
+| Step 2 `focus_decision` focus-on-one branch | ✅ structurally fixed 2026-05-02 (routing refactor + prompt rewrite); Test 3 shows 2/4 voices fully focused on a single response, 1/4 anchored synthesis, 1/4 earned synthesis with field-grounded weight_assessment | commits `d9ca3f9` + `dfb46f7`; OPEN_ITEMS C18 |
 | `thinking_tokens` runtime accounting | ✅ fixed (was always 0; now computed via count_tokens subtraction) | commit `8c47e1f`; verified live in Test 2 v2 |
-| Anthropic prompt caching | ✅ ENABLED 2026-05-02 (1h TTL on Voice Pipeline; 5min on Provocateur Formulation; verified live cache_creation/cache_read populate correctly) | commit `c4804d6`; ~$60-75 Athens savings projected |
+| Anthropic prompt caching | ✅ ENABLED 2026-05-02 — Stage 1 single-breakpoint (commit `c4804d6`); ✅ EXTENDED 2026-05-02 PM — Stage 2 prefix caching with two breakpoints + continuity opt-out (commit `d9ca3f9`). Live verified: Step 2 reads prefix Step 1 wrote (cache_read=20,086 tokens). Athens savings ~$13 across 3 nights (modest in absolute terms; see C19a for corrected pricing math). | commits `c4804d6` + `d9ca3f9` |
+| Cache token tracking persisted in artifacts | ✅ LANDED 2026-05-02 PM — step1/step2/step3/continuity all persist `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost reconciliation | commit `d9ca3f9` |
+| Voice Pipeline field routing (voice/expression in Step 1; reasoning fields in Step 2) | ✅ REFACTORED 2026-05-02 PM — closes the prompt/system mismatch where Step 2's decision_1 cited `finds_compelling`/`resists` but the fields weren't loaded | commit `d9ca3f9` |
+| Voice Pipeline closing prompts (Step 1 + Step 2) | ✅ REWRITTEN 2026-05-02 PM under Haltung lens — section-by-section word-by-word challenge; Step 2 adds `<weighing>` discrete pre-focus phase + `weight_assessment` first-class field | commit `d9ca3f9` + `dfb46f7` |
 | Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `99759cb`; 15 unit tests passing |
 | publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `e0921de` |
 | Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `c0d724e`; 9 unit tests passing |
@@ -176,11 +179,15 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `voice-pipeline-v2.1-align-revert` — 35+ commits ahead of `main`. Pushed.
+**Branch:** `voice-pipeline-v2.1-align-revert` — 37+ commits ahead of `main`. Pushed.
 
 **Branch history (chronological — most recent first):**
 
-*2026-05-02:*
+*2026-05-02 (afternoon — voice pipeline architecture session):*
+- `dfb46f7` voice(step2): restore stripped 'transform form, carry substance' guardrail
+- `d9ca3f9` voice: routing refactor + prompt rewrite + prefix caching + cost correction (10 files; +286/-182). Synthesis-bias structurally addressed. Test 3 validated.
+
+*2026-05-02 (morning):*
 - `c0d724e` feat(runtime): defensive --night check + automation orchestrator design (C22)
 - `a6755d9` personas/Pass-0b: amend non_human_organism template to be compass-permissive (persona thread)
 - `e0921de` fix(publish_flow): per-night subdirectory for per-theme files

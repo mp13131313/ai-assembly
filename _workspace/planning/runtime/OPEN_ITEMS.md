@@ -898,6 +898,7 @@ These items closed within the last 2 weeks. Listed here so the runtime onboardin
 
 | Date | Item | Location |
 |---|---|---|
+| 2026-05-02 (PM) | **Voice Pipeline architecture session — routing refactor + prompt rewrites + prefix caching + cost correction** (`d9ca3f9` + `dfb46f7`) — Field-routing refactor: voice/expression fields (rhetorical_mode, characteristic_moves, register_and_tone, metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes) now load Step 1 + 2 + 3; reasoning fields (reasoning_method, finds_compelling, resists, default_questions, disagreement_protocol) now load Step 2. Closes the prompt/system mismatch where Step 2's decision_1 cited fields that weren't loaded — root cause of Test 2 v2's 4/4 woven synthesis bias. Step 1 + Step 2 closing prompts rewritten under Haltung framing (Step 1: 9 sections core/grounding/register/boundaries/engaging/commitment/output, operational machinery leads, first-person climax; Step 2: weighing→focus→stance→form→boundaries→composition with Apply/Ground/Pass triplet + new weight_assessment first-class field). Prefix caching extended to two breakpoints (prefix ~20-25K tokens shared across Step 1/2/3 for same voice/night) with continuity opt-out. Cache token tracking persisted in step1/step2/step3/continuity artifact schemas. **Cost correction:** Opus 4.7 is $5/$25 per platform.claude.com/docs (was citing deprecated Opus 4 / $15/$75 throughout); Athens 3-night Voice Pipeline cost ~$60-80, not $540-700. **Test 3 empirical validation:** 4 voices × 1 night × 3 formulations measured at ~$5-6; synthesis-bias structural fix working (2/4 fully focused; 1/4 anchored synthesis; 1/4 earned synthesis with field-grounded weight_assessment). Voice fidelity preserved across all 4 artifacts (Plato Socratic dialogue, Cleopatra prostagma, Dostoevsky Diary entry, Battuta riḥla scenic-cell). 24/24 tests passing. See HANDOFF_2026_05_02.md for full session detail. | runtime/flows/voice/{card_assembly,_anthropic_call,continuity,step1_private_reasoning,step2_first_draft_artifact,step3_amended_artifact}.py + runtime/flows/shared/prompts/voice_step{1,2}*.md + docs/AI_Assembly_Voice_Pipeline.md + this doc C19a |
 | 2026-05-02 | **Defensive `--night` check + automation orchestrator design (C22)** (`c0d724e`) — `assert_run_dir_night_matches()` shared helper refuses to run voice_flow / publish_flow when --night doesn't match run_dir's embedded night number; both naming conventions handled; 9 unit tests. Catches silent cross-night corruption: wrong --night writes `continuity_night_<N+1>.json` from wrong-night data. Plus full orchestrator design doc (`AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) — event-driven via 1-min polling on filesystem-as-state; tonight-derivation via date → DATE_TO_NIGHT + sessions.json `ai_assembly=true` filter. Three Athens scope options (manual-fire wrapper / full / defer); operator decision pending | runtime/flows/shared/io.py + voice_flow.py + publish_flow.py + tests/test_run_dir_night_check.py + AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md |
 | 2026-05-02 | **publish_flow.py per-night theme path fix** (`e0921de`) — `published_artifacts/themes/<theme_id>.json` flat path overwrote across nights (theme_ids reset per Researcher run; Night 2 silently destroyed Night 1 theme aggregations). Athens-eligible bug — operator-caught when challenging the "won't fire during Athens" claim. Fixed: per-night sub-dir `published_artifacts/themes/night_<N>/<theme_id>.json`. Other publish_flow outputs already collision-safe. | runtime/flows/publish_flow.py + runtime/flows/voice/publish.py docstrings |
 | 2026-05-01 (late) | **C19a Anthropic prompt caching Stage 1** (`c4804d6`) — Voice Pipeline (1h TTL) + Provocateur Formulation (5min TTL). Originally claimed ~$60-75 Athens savings; revised 2026-05-02 to ~$2-5 (Stage 1 alone) after correcting Opus 4.7 pricing ($5/$25 not $15/$75) — Stage 1 helps Step 1 reuse but penalizes Step 2/Continuity writes. Stage 2 (2026-05-02 prefix caching) saves additional ~$13. Live verification: `cache_creation_input_tokens=8424` on call 1 → `cache_read_input_tokens=8424` on call 2. **Latent bug also fixed in same commit:** `voice/continuity.py:183` was unpacking 3-tuple from `stream_voice_call()` that became 4-tuple in commit `8c47e1f` (thinking_tokens fix); Test 2 v2's continuity hit cache so the bug didn't surface until proper run. | runtime/flows/voice/_anthropic_call.py + continuity.py + provocateur_flow.py |
@@ -940,11 +941,14 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - ~~thinking_tokens=0 bugfix~~ ✅ commit `8c47e1f`
 - ~~C1 + C2 + C2a runtime FU#60 compliance~~ ✅ commit `d4cea03`
 - ~~C9 Provocateur Night 2/3 exclusion filter~~ ✅ commit `99759cb`
-- ~~C19a Anthropic prompt caching~~ ✅ commit `c4804d6` (Stage 1, 2026-05-01) + Stage 2 prefix caching (2026-05-02 pending commit) — total Athens savings ~$13 (revised down from inflated $60-75 after correcting Opus 4.7 pricing)
+- ~~C19a Anthropic prompt caching~~ ✅ commits `c4804d6` (Stage 1) + `d9ca3f9` (Stage 2 prefix caching) — total Athens savings ~$13
 - ~~publish_flow per-night theme path~~ ✅ commit `e0921de`
 - ~~Defensive `--night` check (cross-night corruption guard)~~ ✅ commit `c0d724e`
 - ~~Latent continuity unpack-tuple bug~~ ✅ fixed in commit `c4804d6`
 - ~~Speaker bios + recording schedule (athens-2026)~~ ✅ commit `4ad86df`
+- ~~Voice Pipeline routing refactor + prompt rewrites + synthesis-bias structural fix~~ ✅ commits `d9ca3f9` + `dfb46f7` (validated by Test 3, 2026-05-02 PM)
+- ~~Cache token tracking persisted in artifact schemas~~ ✅ commit `d9ca3f9`
+- ~~Voice Pipeline cost figures corrected ($60-80 Athens, was claimed $540-700)~~ ✅ commit `d9ca3f9`
 
 **Still gating Athens (operator-side):**
 - B1 editor implementation — gated on microsite design (operator-side; persona thread + operator)
@@ -956,20 +960,21 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - C10 council_config.json populated from real Profiles — gated on all 12 cards shipped (per operator decision earlier this session)
 
 **Still open runtime-side (high-value, not strictly blocking):**
-- C18 — Test 3 with truly-divergent formulations (~7 min wall + ~$15 API)
+- C18 — Test 3 ✅ same-shape-as-Test-2-v2 RUN 2026-05-02 PM (synthesis-bias structurally fixed); the truly-divergent-formulations variant (different conceptual territories per reviewer recommendation) still optional ~$5-15 API
 - C22 — automation orchestrator scope decision (manual-fire / full / defer)
-- Path A from external review — Step 2 prompt tighten to default-to-focus-on-one (~30 min)
+- ~~Path A from external review — Step 2 prompt tighten~~ ✅ SUPERSEDED 2026-05-02 PM by routing refactor + Step 2 prompt rewrite (commits `d9ca3f9` + `dfb46f7`)
 - C3 — publish_flow.py end-to-end exercise (now safe to run after `e0921de`)
 - C4 — multi-night sequence dry-run (covered partially by Legitimacy Test 1; full panel test needs more cards)
 - B5 closing-show pipelines spec
 - B6 Day 4 goodbye spec
 - B9 per-voice headline poetics
 - A4 Frame Concept doc revision
-- E1 Voice Pipeline doc updates (Step 3 spec, cost/wall-time post-caching)
+- E1 ✅ Voice Pipeline doc updates landed 2026-05-02 PM (Cost & Envelope corrected with $5/$25 pricing + prefix caching note)
 - E3 LLM_CALL_INVENTORY refresh
 - C5 multi-voice 3+ dry-run (legitimacy tests covered 4-voice; expansion as more cards ship)
 - C12 HoBB email tool API investigation (operator/HoBB conversation)
 - C13 recording protocol coordination (operator/WBBF)
+- Reviewer's Step 1 → Step 2 compression concern — addressed Path A 2026-05-02 PM (restored "transform form, carry substance" guardrail in `<composition>`); Path B (publish Step 1 detailed responses on microsite alongside artifacts) is post-Athens architectural conversation
 
 **Can land during/after Athens:**
 - B7 (render layer) — only matters when Marley/Octopus voices ship
