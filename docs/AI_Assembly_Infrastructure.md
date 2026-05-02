@@ -45,8 +45,7 @@ Reason 3 is sometimes folded into Reason 2; whether you treat them as two reason
 - **Operator's laptop Claude Code session** — for code edits, bug fixes, prompt rewrites, planning, design. Pushes to GitHub; VM pulls.
 - **Persona pipeline** — build-time work, runs against the operator's `personas/venv/`, not on the VM.
 - **Microsite hosting** — separate concern (Vercel / GitHub Pages / wherever); consumes `published_artifacts/` after each night.
-- **The `code/` repo's authoritative remote** — GitHub. The VM holds a clone.
-- **The `athens-2026` private repo's authoritative remote** — GitHub (`mp13131313/ai-assembly-athens2026-voices`). The VM holds a clone.
+- **Both repos' authoritative remotes** — GitHub (`mp13131313/ai-assembly` + `mp13131313/ai-assembly-athens2026-voices`, both private). The VM holds clones, accessing each via a per-repo deploy key.
 
 ---
 
@@ -66,7 +65,7 @@ Reason 3 is sometimes folded into Reason 2; whether you treat them as two reason
 ## Filesystem layout on the VM
 
 ```
-/opt/ai-assembly/                          # code repo clone (this repo, public)
+/opt/ai-assembly/                          # code repo clone (private — needs deploy key)
 ├── .env                                    # mode 0600, owned by service user
 ├── runtime/venv/                           # runtime venv
 ├── runtime/ingest/                         # ingest app + deploy assets
