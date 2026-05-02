@@ -122,17 +122,17 @@ Auth: separate Anthropic API key in `~/.config/claude-code/` for the VM (or the 
 
 ## Network surface
 
-Caddy fronts everything, terminates TLS, enforces Basic Auth, proxies to `127.0.0.1` ports.
+Caddy fronts everything on the **single Hetzner-default hostname**, terminates TLS, enforces Basic Auth on protected paths, reverse-proxies by URL path:
 
 ```
-ingest.<domain>     →  127.0.0.1:8000   (ingest.service)
-prefect.<domain>    →  127.0.0.1:4200   (prefect-server.service)
-status.<domain>     →  static file written by orchestrator     (optional)
+https://<hetzner-hostname>/             →  127.0.0.1:8000  (ingest.service)
+https://<hetzner-hostname>/prefect/*    →  127.0.0.1:4200  (prefect-server.service, Basic Auth)
+https://<hetzner-hostname>/status/*     →  static file written by orchestrator (optional, Basic Auth)
 ```
 
-Firewall: 22 (SSH/mosh), 80 (HTTP for cert renewal redirects), 443 (HTTPS). Nothing else.
+Firewall: 22 (SSH/mosh), 80 (HTTP for cert renewal), 443 (HTTPS). Nothing else.
 
-DNS: A records on each subdomain pointing at the VM's public IP. Caddy gets Let's Encrypt certs automatically on first request.
+DNS: none required. Hetzner's default reverse DNS for the VM (`static.<dashed-ip>.clients.your-server.de`) resolves out-of-the-box. Caddy gets Let's Encrypt certs for it automatically on first request — known-working pattern.
 
 ---
 
@@ -268,7 +268,7 @@ The big numbers are API usage, not infrastructure. The VM is rounding error.
 
 These are unresolved as of 2026-05-02. Items 1 + 2 block provisioning; 3–7 can be settled before/after.
 
-1. **Domain / DNS.** What domain are we using for `ingest.<domain>` / `prefect.<domain>`? Operator-owned domain, or Hetzner-provided hostname for the Athens window?
+1. **Domain / DNS.** ✅ Decided 2026-05-02: use Hetzner-provided default hostname (e.g. `static.<ip-with-dashes>.clients.your-server.de`). Caddy gets a Let's Encrypt cert for it on first request — known-working pattern. Subdomains for `prefect.` and `status.` not available with this approach; instead, run all services on path prefixes (`/`, `/prefect/`, `/status/`) on the same hostname. Microsite hosting (separate Decision 3) gets its own URL — Vercel-default or operator-owned domain, decided when microsite work starts.
 
 2. **PROJECT_ROOT clone strategy.** Confirm: clone athens-2026 private repo to `/opt/ai-assembly-athens2026/` on VM. Operator pushes from laptop; VM pulls. (Alternative: keep PROJECT_ROOT laptop-only and rsync run_dirs both ways. Worse — recommend against.)
 

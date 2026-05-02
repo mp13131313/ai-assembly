@@ -366,10 +366,10 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 - ❌ Claude Code installed on VM
 - ❌ End-to-end dry-run on VM with real audio
 
-**Two decisions blocking provisioning:**
+**Two decisions blocking provisioning — both resolved 2026-05-02:**
 
-1. **Domain / DNS.** What domain for `ingest.<domain>` / `prefect.<domain>`? Operator-owned, or Hetzner-provided hostname for the Athens window?
-2. **PROJECT_ROOT clone strategy.** Confirm: clone athens-2026 private repo to `/opt/ai-assembly-athens2026/` on VM (recommended). Operator pushes from laptop; VM pulls.
+1. ✅ **Domain / DNS.** Use Hetzner default hostname (`static.<dashed-ip>.clients.your-server.de`). Caddy gets Let's Encrypt cert for it on first request. Single-hostname path-prefix routing for the three services. No registrar, no DNS config. Microsite gets its own URL when microsite work starts (separate decision).
+2. ✅ **Both repos cloned to VM via deploy keys.** Code repo (`mp13131313/ai-assembly`, private) at `/opt/ai-assembly/`; PROJECT_ROOT (`mp13131313/ai-assembly-athens2026-voices`, private) at `/opt/ai-assembly-athens2026/`. Per-repo deploy keys (minimum privilege).
 
 **Five additional decisions (not blocking but to settle before T-2):**
 
