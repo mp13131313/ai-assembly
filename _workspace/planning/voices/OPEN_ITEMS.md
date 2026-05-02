@@ -463,13 +463,20 @@ The middle is **experiment-in-mind**: alien-but-engaging, first-person-with-cons
 
 The Pass 0b base template amendment (this commit) is a **durable architectural fix**, not just an Octopus-specific intervention. Future non-human-organism voice rebuilds (especially Whanganui — same "no-first-person-source" structural challenge) inherit the compass-permissive template automatically. They get to choose precautionary OR phenomenologically-permissive posture via voice_config.editorial_rationale — both supported, both honest.
 
-### Rebuild backup snapshots preserved
+### Rebuild backup snapshots — CLEANED 2026-05-02 PM (single source of truth in athens-2026)
 
-- `voices/octopus_pre_compass_rebuild_2026-05-01/` (full athens-2026 shipped state — 93 files, 9.1MB)
-- `voices/octopus/01_research/03_dr_prompts.surgical_v1/` (manual surgical edits before template amendment)
-- `voices/octopus/01_research/03_dr_prompts.v2_partial/` (auto-generated before §6 amendment)
-- `voices/octopus/01_research/01_perplexity_dossier.pre_6layer.json` (research output before voice_config 6-layer rewrite)
-- `voices/octopus/07_persona_card_assembled.pre_*.json` × 3 (Path A patches / FU#61-fresh / compass rebuild)
+After Octopus shipped to athens-2026 + verified, the working-state snapshots in `current-tests/voices/octopus*` were cleaned up. Single canonical historical snapshot retained:
+
+- `~/Desktop/AI Assembly/archive/athens-2026_octopus_pre_compass_promotion_2026-05-02/` — full athens-2026 state right before today's compass-rebuild promotion (the audit-trail snapshot; outside repo per Tier 3 layout)
+
+Removed (redundant working state):
+- ~~`current-tests/voices/octopus_pre_compass_rebuild_2026-05-01/`~~ (was full athens-2026 shipped state — equivalent content now lives in archive/ snapshot above)
+- ~~`current-tests/voices/octopus/01_research/03_dr_prompts.surgical_v1/`~~ (manual surgical edits before template amendment)
+- ~~`current-tests/voices/octopus/01_research/03_dr_prompts.v2_partial/`~~ (auto-generated before §6 amendment)
+- ~~`current-tests/voices/octopus/01_research/01_perplexity_dossier.pre_6layer.json`~~ (research output before voice_config 6-layer rewrite)
+- ~~`current-tests/voices/octopus/07_persona_card_assembled.pre_*.json` × 3~~ (Path A patches / FU#61-fresh / compass rebuild — the rebuild itself superseded these)
+
+Athens-2026 git history is the recovery mechanism for any pre-promotion state if needed.
 
 ---
 
