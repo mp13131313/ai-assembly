@@ -176,11 +176,12 @@ def _flow_cmd(name: str, *args: str) -> list[str]:
 
     Uses sys.executable (not bare 'python') and resolves the flow path relative
     to this script's location, so it works unchanged on laptop and VM.
+
+    No existence pre-check — if the file is missing at subprocess time, the
+    subprocess fails with returncode 2 and fire_stage reports `failed:STAGE`
+    with the log path. That's the same surface as any other stage failure.
     """
-    script = _FLOWS_DIR / name
-    if not script.exists():
-        raise FileNotFoundError(f"Flow script not found: {script}")
-    return [_PYTHON, str(script), *args]
+    return [_PYTHON, str(_FLOWS_DIR / name), *args]
 
 
 def editor_flow_exists() -> bool:
