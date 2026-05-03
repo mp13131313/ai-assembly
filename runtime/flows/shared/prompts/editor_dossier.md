@@ -1,3 +1,36 @@
+<!--
+⚠️ STALE — v1 PROMPT, MUST BE REWRITTEN TO v2 BEFORE PRODUCTION USE.
+
+This prompt was written 2026-05-02 against Editor Pipeline v1 input/output
+contracts. Editor Pipeline v2 (canonical at docs/AI_Assembly_Editor_Pipeline.md,
+landed 2026-05-03 PM) replaced most of those contracts:
+
+  Input fields v1 announces (NOT in v2):
+    - theme_question, primary_contributors with voice_card_excerpts (5 fields),
+      in_brief_voices, refusals as input, night_context.marathon_panel_source
+
+  Output fields v1 emits (NOT in v2 schema):
+    - front (theme_banner, subbanner, lead_headline, lead_subdeck, lead_teaser,
+      in_brief, editors_note), article (single body string + signature),
+      theme_page (separate section), primary_contributors (with byline_descriptor +
+      artifact_title + headnote_body)
+
+  v2 input shape: {night, theme: deduped from briefings, engaged_voices:
+    [{voice_slug, voice_name, mode, narrative_briefing, artifact_text}],
+    prior_editions: [...]}
+  v2 output shape: {kicker, headline, subline, body_paragraphs[], headnotes:
+    [{voice_slug, framing_text}], front_abstract}
+
+This v1 prompt produces output the v2 parser cannot extract cleanly. Real
+Anthropic calls against this prompt will land malformed dossiers.
+
+Until the rewrite ships, mocked Anthropic responses (in tests) and the v2
+parser are decoupled — tests pass, real calls produce v1-shaped output.
+
+Rewrite scope: ~30-60 min, mechanical against v2 spec §"Output Schema (v2)"
++ §"Stage 2 — Per-call inputs (v2 contract)". See OPEN_ITEMS B1.
+-->
+
 <input>
 You will receive everything the editor pipeline has gathered for one dossier — one theme, the voices that engaged it, what they wrote, how they reached it, and the night's masthead context. Specifically:
 

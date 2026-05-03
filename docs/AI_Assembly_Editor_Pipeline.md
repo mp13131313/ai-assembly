@@ -3,7 +3,7 @@
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
 **Status:** v2 — refinements landed 2026-05-03 PM (this version is canonical). Supersedes v1 (2026-05-02) + the runtime memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` (now archivable). Implementation: not yet built. Replaces conceptual sketches in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` (now archived) and OPEN_ITEMS A2 (which set architectural direction; this doc fills the spec).
-**Purpose:** Specifies the runtime Editor Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract for the Editor Pipeline end-to-end** — it defines what the pipeline reads, what it writes, in what order, with which model, in which prompt, at which checkpoint. Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (not yet built).
+**Purpose:** Specifies the runtime Editor Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract for the Editor Pipeline end-to-end** — it defines what the pipeline reads, what it writes, in what order, with which model, in which prompt, at which checkpoint. Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (shipped 2026-05-03 PM in commit `1437dfc`; closing prompt rewrite to v2 contract still pending).
 
 **Predecessor:** `docs/AI_Assembly_Frame_Concept_v1.md` — the architectural document that names *The Assembly* (panel) ≡ *The Assembly* (publication) recursion, the broadsheet form, the per-voice render registers, the strikethrough discipline, and the five frame moves the editor pipeline operationalizes. The Editor Pipeline doc instantiates the broadsheet surface; closely related surfaces (microsite, broadsheet print run, closing show) live in their own concept docs.
 
@@ -985,6 +985,6 @@ Q1, Q2, Q5, Q6, Q7, Q8 are settled. Q3 + Q4 deferred for separate reasoning.
 - `docs/AI_Assembly_Briefing_v3_1.md` — project briefing (this pipeline's success criteria derive from §"Layer 1 / 2 / 3" tests)
 - `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` *(now archivable)* — predecessor memo capturing per-call input/output contract refinements; superseded by v2 of this spec
 - `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` *(to be written)* — full draft of Claudia's 35-field card
-- `runtime/flows/editor_flow.py` *(not yet built)* — implementation entry point
+- `runtime/flows/editor_flow.py` — implementation entry point (shipped 2026-05-03 PM, commit `1437dfc`)
 - `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt; **needs rewrite to v2 contract before first build** (currently encodes v1 contract with v1 input/output fields)
 

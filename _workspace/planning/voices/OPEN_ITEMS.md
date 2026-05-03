@@ -739,7 +739,7 @@ When verified:
 
 ### Companion runtime memo
 
-**`runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md`** — cross-thread memo to runtime on the editor flow input/output contract that surfaced during Claudia persona session. Carries: cleaned input shape (per-dossier user prompt structure, hallucinated fields removed, lead-theme decision moved out to layout layer), structured-output JSON shape per dossier, per-voice torque placement (`translation_protocol`, no schema extension), form-fit honesty as runtime metadata, byline-split decision options, 6 open questions for runtime to settle (lead-theme decision layer; asterism encoding; byline implementation; dossier numbering reset; cross-night summary; microsite consumption).
+**`_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)`** — cross-thread memo to runtime on the editor flow input/output contract that surfaced during Claudia persona session. Carries: cleaned input shape (per-dossier user prompt structure, hallucinated fields removed, lead-theme decision moved out to layout layer), structured-output JSON shape per dossier, per-voice torque placement (`translation_protocol`, no schema extension), form-fit honesty as runtime metadata, byline-split decision options, 6 open questions for runtime to settle (lead-theme decision layer; asterism encoding; byline implementation; dossier numbering reset; cross-night summary; microsite consumption).
 
 ### Architectural summary
 

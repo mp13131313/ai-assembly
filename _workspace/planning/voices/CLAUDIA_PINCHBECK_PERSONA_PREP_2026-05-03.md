@@ -8,7 +8,7 @@
 
 1. Read this document in full.
 2. Read `voices/ONBOARDING.md` + `voices/HANDOFF.md` for cross-thread context.
-3. Read this paired memo: `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` — input/output spec for the editor flow Claudia plugs into.
+3. Read this paired memo: `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)` — input/output spec for the editor flow Claudia plugs into.
 4. Confirm Marley pipeline status before resuming (DR sessions running in operator's claude.ai when this doc was written; Claudia work was running in parallel during the ~3hr Marley DR window).
 5. Receive Beauty Shot dossier file from operator (operator said they have the full version; not yet shared as of 2026-05-03).
 6. Begin drafting per "Recommended workflow" below.
@@ -257,7 +257,7 @@ The v2 `artifact` field cluster (`medium` + `technical_capabilities` + `characte
 
 Claudia produces **N theme dossiers per night**, each a **structured JSON object** with sub-pieces.
 
-**Resolution:** the persona card describes the compound output **prose-style** in the v2 fields. The Editor Pipeline runtime defines the **JSON shape** as a structured-output contract on `editor_dossier.md`. Two layers, no breaking conflict. See paired memo `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` for the runtime side of this contract.
+**Resolution:** the persona card describes the compound output **prose-style** in the v2 fields. The Editor Pipeline runtime defines the **JSON shape** as a structured-output contract on `editor_dossier.md`. Two layers, no breaking conflict. See paired memo `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)` for the runtime side of this contract.
 
 ### 3. type / subtype
 
@@ -438,7 +438,7 @@ Most of the time is operator-side (curation + review). Pipeline-side is ~3 hr un
 ## What's NOT in scope here
 
 - Editor Pipeline runtime implementation (`runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py`) — runtime-thread work
-- The structured JSON output contract — covered in paired memo `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md`
+- The structured JSON output contract — covered in paired memo `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)`
 - Per-night publishing logistics (microsite render, PDF export, etc.) — runtime / microsite concerns
 - The 10 panel voices' dossier consumption mechanics — runtime-thread
 
@@ -452,7 +452,7 @@ This document is purely about **constructing Claudia's persona card**.
 - `docs/AI_Assembly_Frame_Concept_v1.md` — Frame layer; Assembly-as-publication-of-itself recursion
 - `docs/AI_Assembly_Briefing_v3_1.md` — project source of truth
 - `~/Desktop/Briefing.html` — Assembly v2 Design Briefing v3 (second Matthias pass; supersedes Editor Pipeline v1 on dossier shape)
-- `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` — paired memo for runtime thread on input/output contract
+- `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)` — paired memo for runtime thread on input/output contract
 - `voices/ONBOARDING.md` — voice-build conventions; §7 review-gate convention applies
 - `voices/HANDOFF.md` — current voices session state
 - `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` — referenced in Editor Pipeline v1 as "to be written"; this document supersedes it for prep purposes

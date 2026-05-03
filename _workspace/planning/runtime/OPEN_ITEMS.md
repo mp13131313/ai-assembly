@@ -198,13 +198,28 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 ## Section B — Athens-blocking items not yet built
 
-### B1. Editor / Frame layer 🟡 SPECIFIED v2 2026-05-03 PM (canonical spec; Claudia card + closing-prompt rewrite + implementation pending)
+### B1. Editor / Frame layer 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (closing-prompt rewrite + Claudia card still pending)
 
-**State:** spec at `docs/AI_Assembly_Editor_Pipeline.md` is now at **v2** (refinements landed 2026-05-03 PM; canonical). Predecessor memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` archived to `_workspace/archive/`. Three pending items:
+**State:** spec at `docs/AI_Assembly_Editor_Pipeline.md` at **v2** (canonical; refinements landed 2026-05-03 PM). Predecessor memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` archived to `_workspace/archive/`. Implementation **shipped** 2026-05-03 PM in commit `1437dfc`. Two items remain:
 
-1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`. *Operator-side / voices thread per memo §10.*
-2. **`editor_dossier.md` closing prompt rewrite to v2 contract.** A v1 version exists at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines, 2026-05-02) but is written against v1 input/output fields (in_brief_voices, primary_contributors, refusals as input, marathon_panel_source, lead_headline + lead_subdeck + lead_teaser, single article body string, etc.) — all of which v2 dropped or replaced. **The current closing prompt MUST NOT be used with v2 implementation;** rewrite needed (~30-60 min, mechanical against §"Output Schema (v2)" + §"Stage 2 — Per-call inputs (v2 contract)").
-3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish, card_assembly). Estimated ~6-10 hr engineering. **Athens-eligible to start now**, can run smoke tests with placeholder card while operator authors final.
+1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; voices thread is constructing per `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. *Operator-side.* Until shipped, runtime uses the schema-valid stub at `runtime/tests/fixtures/claudia_pinchbeck_stub.json` for smoke tests.
+2. **`editor_dossier.md` closing prompt rewrite to v2 contract.** A v1 version exists at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines, 2026-05-02) but is written against v1 input/output fields (in_brief_voices, primary_contributors, refusals as input, marathon_panel_source, lead_headline + lead_subdeck + lead_teaser, single article body string, etc.) — all of which v2 dropped or replaced. **The current closing prompt MUST NOT be used for production v2 calls;** rewrite needed (~30-60 min, mechanical against §"Output Schema (v2)" + §"Stage 2 — Per-call inputs (v2 contract)").
+
+**Implementation shipped (commit `1437dfc`):**
+
+- `runtime/flows/editor_flow.py` — CLI entry + orchestrator (parallel ThreadPoolExecutor across dossiers within a night)
+- `runtime/flows/editor/routing.py` — Stage 1 deterministic theme routing; Cases A/B/C/D classifier with v2 regex (matches "Response N" anywhere; catches synthesis-anchored hybrids)
+- `runtime/flows/editor/card_assembly.py` — Claudia's card → editor system prompt; mirrors voice pipeline pattern with editor-specific differences (2-field ENGAGEMENT, no continuity, single step)
+- `runtime/flows/editor/dossier_generation.py` — Stage 2 per-dossier Anthropic call: build_dossier_briefing (deduplicates K voice briefings into one per-theme payload), parse_dossier_output (prose-and-parse), stamp_runtime_fields (enriches headnotes + fills metadata + computes colophon)
+- `runtime/flows/editor/publish.py` — write_dossier (run_dir + published_artifacts copies); load_prior_editions (trims to articles only on Night 2/3)
+- `runtime/ingest/dashboard.py` `_editor_summary` updated for v2 manifest shape
+- `runtime/ingest/dashboard.py` `collect_editor_detail` — drilldown helper
+- `runtime/ingest/app.py` `/admin/tonight/editor` + `.json` routes
+- `runtime/ingest/templates/admin_editor.html` — drilldown template
+- `runtime/ingest/templates/admin_tonight.html` — Editor stage column header now links to drilldown
+- 38 new tests (30 editor unit + 8 admin editor route); 209/209 runtime tests passing
+
+**Sonnet 4.6 LLM-assisted Case C routing helper** (~30 min implementation, ~$0.50 across Athens) — flagged TODO in this entry; not in baseline. Eliminates manual review of mechanical lowest-numbered tiebreaker for synthesis-only voices ("Synthesise.").
 
 **Triggers on:** Operator authoring Claudia's card; implementation can proceed in parallel.
 

@@ -33,7 +33,7 @@ Plus a NEW 13th persona staged: **`claudia_pinchbeck`** (the editor) — archite
 | **Bob Marley** | human / **observational** ✓ flipped this session | 🟠 **REBUILD KICKED OFF 2026-05-03**. Prior-state snapshot at `bob_marley_pre_song_rebuild_2026-05-03/` preserves the 35 verbatim-lyric passages (operator-supplied via lyrics archive parser) + the 6 prior DR sections + all generation/validation state. Fresh Pass 0a + new operator-authored voice_config (~1,950 chars total: manual_grounding + editorial_rationale encoding song-as-artifact mandate) + Phase 0.5 done (Pass 0b tailor explicitly registered the song-mandate as load-bearing config direction; injected 18 song-aware questions across 6 DR sections). DR prompts staged at `01_research/03_dr_prompts/`. Awaiting operator's 6 claude.ai DR sessions (~3hr wall). |
 | Whanganui River | non_human / system / null | 🟡 Pass 0a done + voice_config rewritten transmission-faithful (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 done; DR prompts ready (from 2026-05-02) |
 | Scheherazade | fictional / narratival | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 done (after sustained Gemini 503 retry); DR prompts ready (from 2026-05-02). Mediated-voice prompt-fix concern carries through to her Pass 2 generation later |
-| **Claudia Pinchbeck** *(editor; 13th persona)* | human / TBD (recommend `observational`) | 🟡 **NEW THIS SESSION.** Persona-construction architecture landed; documented in `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. Hybrid pipeline path agreed (skip Phase 0.5 claude.ai DR; hand-curate 6 dossier sections from existing materials; run Pass 1.x → 2-6 → validation → Derive). Companion runtime memo at `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md`. Awaiting operator share of Beauty Shot dossier file + voice_mode/byline decisions to begin Stage A. ~7-9 hr Stages A-F when work resumes. |
+| **Claudia Pinchbeck** *(editor; 13th persona)* | human / TBD (recommend `observational`) | 🟡 **NEW THIS SESSION.** Persona-construction architecture landed; documented in `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. Hybrid pipeline path agreed (skip Phase 0.5 claude.ai DR; hand-curate 6 dossier sections from existing materials; run Pass 1.x → 2-6 → validation → Derive). Companion runtime memo at `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)`. Awaiting operator share of Beauty Shot dossier file + voice_mode/byline decisions to begin Stage A. ~7-9 hr Stages A-F when work resumes. |
 
 ---
 
@@ -69,7 +69,7 @@ Plus a NEW 13th persona staged: **`claudia_pinchbeck`** (the editor) — archite
 
 **Comprehensive prep document:** `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`
 
-**Companion runtime memo:** `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md`
+**Companion runtime memo:** `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)`
 
 **Architecture summary:**
 - Claudia is the **13th member** of the Assembly — the editor of *The Assembly*'s news organ. Functionally distinct from panel voices (she edits; they contribute). Her medium is the dossier (compound publication structure), not a single artifact.
@@ -98,7 +98,7 @@ Plus a NEW 13th persona staged: **`claudia_pinchbeck`** (the editor) — archite
 
 4. **Claudia Pinchbeck persona-construction architecture landed** — see "Claudia Pinchbeck" section above. Two new docs filed:
    - `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` (persona prep state, 462 lines)
-   - `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` (cross-thread memo, 345 lines)
+   - `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)` (cross-thread memo, 345 lines)
 
 5. **Commit + push** — `98d7e04` on `main`. Both docs diff-suppressed by `.gitattributes`'s `_workspace/** -diff` rule per project convention.
 
@@ -156,7 +156,7 @@ See OPEN_ITEMS §18. Single mechanical sweep of voice_name + council_config + pa
 2. `voices/HANDOFF.md` — this doc
 3. `voices/OPEN_ITEMS.md` (status snapshot — especially §1 per-voice state for Marley rebuild status)
 4. **For Marley pipeline resumption:** the snapshot + injection mechanics are documented in this doc's "Bob Marley song-rebuild" section; no separate pickup doc needed
-5. **For Claudia work resumption:** `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` is the comprehensive pickup doc; pair with `runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` for the runtime-contract context
+5. **For Claudia work resumption:** `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` is the comprehensive pickup doc; pair with `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md (archived; v2 spec canonical at docs/AI_Assembly_Editor_Pipeline.md)` for the runtime-contract context
 6. `voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` — runtime-thread findings doc (historical)
 
 That's ~30 min to working knowledge for picking up voice-build work cold.

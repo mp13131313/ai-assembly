@@ -268,10 +268,13 @@ All canonical pipeline specs are in `docs/`:
   with shared kicker/headline; no in_brief cross-references; lead-vs-grid
   is publish concern; closing prompt rewrite pending). Predecessor memo at
   `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md`
-  is **archived** (folded into v2 spec). Pending: Claudia's full 35-field
-  card, closing prompt rewrite to v2 contract, implementation. See
-  OPEN_ITEMS A2 (✅ fully resolved)
-  + B1 (🟡 specified).
+  is **archived** (folded into v2 spec). **Implementation shipped
+  2026-05-03 PM** (commit `1437dfc`): `runtime/flows/editor_flow.py` +
+  `runtime/flows/editor/*.py` (routing/card_assembly/dossier_generation/
+  publish) + `/admin/tonight/editor` drilldown + 38 tests. Pending:
+  Claudia's full 35-field card (voices thread), closing prompt rewrite
+  to v2 contract. See OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢
+  implementation shipped).
 - `AI_Assembly_Runtime_Lifecycle.md` — what happens during an Athens
   night, end to end (v1, 2026-05-02). Stage-by-stage anatomy (trigger,
   reads, writes, sentinel), full filesystem layout, cross-night threading,
