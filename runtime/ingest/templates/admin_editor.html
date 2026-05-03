@@ -85,7 +85,12 @@
     <tbody>
       {% for v in payload.voices_routing %}
         <tr>
-          <td><strong>{{ v.voice_slug }}</strong>{% if v.voice_name and v.voice_name != v.voice_slug %} <span class="muted">{{ v.voice_name }}</span>{% endif %}</td>
+          <td>
+            <strong>{{ v.voice_name or v.voice_slug }}</strong>
+            {% if v.voice_name and v.voice_name != v.voice_slug %}
+              <br><span class="muted">{{ v.voice_slug }}</span>
+            {% endif %}
+          </td>
           <td><code>{{ v.primary_theme }}</code></td>
           <td>{{ v.primary_dossier }}</td>
           <td class="muted">{{ v.primary_theme_source }}</td>
@@ -103,8 +108,8 @@
   <ul>
     {% for r in payload.refusals %}
       <li>
-        <strong>{{ r.voice_slug }}</strong>
-        {% if r.voice_name and r.voice_name != r.voice_slug %} — {{ r.voice_name }}{% endif %}
+        <strong>{{ r.voice_name or r.voice_slug }}</strong>
+        {% if r.voice_name and r.voice_name != r.voice_slug %} <span class="muted">({{ r.voice_slug }})</span>{% endif %}
         <br><span class="muted">form: <code>{{ r.form }}</code> · {{ r.focus_decision[:120] }}{% if r.focus_decision|length > 120 %}…{% endif %}</span>
       </li>
     {% endfor %}
@@ -152,7 +157,7 @@
               {% if d.input_tokens %}<br>{{ d.input_tokens }}/{{ d.output_tokens }} tok{% endif %}
             </td>
             <td class="muted file-links">
-              <a href="/admin/file?path=runs/{{ payload.run_id }}/05_editor/dossiers/{{ d.filename }}">{{ d.filename }}</a>
+              <a href="/admin/render?path=runs/{{ payload.run_id }}/05_editor/dossiers/{{ d.filename }}">{{ d.filename }}</a>
             </td>
           </tr>
         {% endfor %}
@@ -162,7 +167,4 @@
 </section>
 
 {% endif %}
-{% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
 {% endblock %}

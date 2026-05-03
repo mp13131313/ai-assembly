@@ -70,9 +70,9 @@
         {% for v in payload.voices %}
           <tr>
             <td>
-              <strong>{{ v.voice_slug }}</strong>
+              <strong>{{ v.voice_name or v.voice_slug }}</strong>
               {% if v.voice_name and v.voice_name != v.voice_slug %}
-                <br><span class="muted">{{ v.voice_name[:50] }}{% if v.voice_name|length > 50 %}…{% endif %}</span>
+                <br><span class="muted">{{ v.voice_slug }}</span>
               {% endif %}
             </td>
             <td>
@@ -105,7 +105,7 @@
             <td>{{ v.word_count or '—' }}</td>
             <td class="muted file-links">
               {% if v.has_per_voice_file %}
-                <a href="/admin/file?path=published_artifacts/nights/night_{{ night }}/{{ v.voice_slug }}.json">
+                <a href="/admin/render?path=published_artifacts/nights/night_{{ night }}/{{ v.voice_slug }}.json">
                   {{ v.voice_slug }}.json
                 </a>
               {% else %}
@@ -120,7 +120,4 @@
 </section>
 
 {% endif %}
-{% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
 {% endblock %}
