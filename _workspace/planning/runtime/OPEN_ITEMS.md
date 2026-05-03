@@ -646,16 +646,16 @@ The follow-up was completed inline as part of C11. Sessions.json regenerated fro
 
 **Pre-Athens-eligible.** Needs operator-side conversation with whoever runs HoBB's list.
 
-### C13. Recording protocol pre-Athens 🟡
+### C13. Recording protocol pre-Athens ✅ CLOSED 2026-05-03 (code part done; ops coordination tracked elsewhere)
 
 **Source:** `docs/AI_Assembly_Briefing_v3_1.md` §"Operational workstreams" + archive `specs/AI_Assembly_Architecture_v1.md` §"Recording Protocol".
 
 Three procedural items raise transcription accuracy from ~50% to 70-85%:
-1. Moderators introduce all panelists by full name at the start of every session
-2. Walking-session participants state their names at the start of each reflection recording
-3. All panelist names + affiliations + session-specific terminology pre-loaded into AssemblyAI custom vocabulary before the conference
+1. Moderators introduce all panelists by full name at the start of every session — operator/WBBF coordination
+2. Walking-session participants state their names at the start of each reflection recording — operator/WBBF + vendor coordination
+3. All panelist names + affiliations + session-specific terminology pre-loaded into AssemblyAI custom vocabulary before the conference — **solved by code**: [`transcription_flow.py:123`](../../../runtime/flows/transcription_flow.py:123) `build_vocabulary()` auto-walks each session's `roster` (names + affiliations from `sessions.json` + `speakers.json`) and feeds it to AssemblyAI Universal-3 Pro as `keyterms_prompt` at line 337. C11 closed speakers.json bio enrichment at 219/224 (97.8%), so vocab is populated for every flagged session at transcription time.
 
-**Operator-side / WBBF coordination.** Out of strict runtime-code scope but pre-Athens infrastructure.
+**Closing rationale:** items 1 and 2 are pre-event coordination with WBBF moderators and the vendor — operator-domain work, not engineering. They belong on the operator's pre-Athens checklist, not in runtime OPEN_ITEMS. The pipeline also degrades gracefully if intros are skipped (per the speaker-ID fallback chain — Unidentified Speaker N + low confidence flow downstream as first-class labels; the night doesn't fail), so 1+2 are quality optimizations not blockers. Item 3 (the only piece code can affect) is shipped.
 
 ### C14. Runtime doc-hygiene minor gaps 🟢
 
