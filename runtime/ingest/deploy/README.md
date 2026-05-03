@@ -115,9 +115,12 @@ both roles:       /  /session/{id}  /session/{id}/upload (POST)
                                            best-effort cred clear
 admin only:       /status  /status.json  ← legacy cross-night view
                   /session/{id}/status.json  /session/{id}/retry (POST)
-                  /admin/tonight  /admin/tonight.json     ← Pipeline overview
-                  /admin/tonight/transcription[?night=N]  ← stage drilldown
-                  /admin/tonight/voice[?night=N]  + .json ← stage drilldown
+                  /admin/tonight  /admin/tonight.json       ← Pipeline overview
+                  /admin/tonight/transcription[?night=N]    ← stage drilldown
+                  /admin/tonight/researcher[?night=N]  + .json
+                  /admin/tonight/provocateur[?night=N] + .json
+                  /admin/tonight/voice[?night=N]       + .json
+                  /admin/tonight/publish[?night=N]     + .json
                   /admin/file?path=<rel>          ← read-only file viewer
 ```
 
@@ -136,17 +139,19 @@ the realm change as a fresh challenge and drop the cached creds. If a
 browser hangs onto cached creds, the reliable fallback is to close the
 tab/window. Logout link in the top nav, role-aware label.
 
-### Phase C still open
+### Phase C drilldowns shipped 2026-05-03
 
-Three more stage drilldowns pending:
-- `/admin/tonight/researcher`
-- `/admin/tonight/provocateur`
-- `/admin/tonight/publish`
+Five stage drilldowns are live, all admin-only, all read-only, all with a
+JSON twin polled by 30s meta-refresh:
 
-Plus `/admin/tonight/editor` once `runtime/flows/editor_flow.py` (B1) ships.
+- `/admin/tonight/transcription[?night=N]` — per-session ASR/speaker-ID/cleaning state
+- `/admin/tonight/researcher[?night=N]` + `.json` — theme/cluster tree + per-session extractions + isolates
+- `/admin/tonight/provocateur[?night=N]` + `.json` — voice × theme triage matrix + formulation grid + theme flags + below-target warnings
+- `/admin/tonight/voice[?night=N]` + `.json` — Step 1 grid + validation grid + Step 2 + continuity
+- `/admin/tonight/publish[?night=N]` + `.json` — per-voice publish artifacts + index
 
-If Phase C doesn't land before Athens, the operator falls back to the
-existing CLI surface (`status.json` + `journalctl` + Prefect dashboard).
+`/admin/tonight/editor` still pending — gated on B1 (`flows/editor_flow.py`);
+trivial once that ships (~2 hr to mirror the Voice pattern).
 
 ### Vendor-supplied sessions (audio_source: "vendor")
 

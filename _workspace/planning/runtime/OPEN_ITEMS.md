@@ -905,9 +905,9 @@ External reviewer flagged three voice-side moves that recurred across Test 1 nig
 
 ---
 
-### C23. Read-only progress dashboard + producer/admin auth split 🟢 PHASE A+B DONE, UX iterated, Phase C open (filed 2026-05-03)
+### C23. Read-only progress dashboard + producer/admin auth split ✅ PHASE A+B+C+UX SHIPPED 2026-05-03 (Editor drilldown pending B1)
 
-**State:** filed 2026-05-03; **Phase A + Phase B + UX iteration shipped same day** (commits `cbaf3aa`, `83102a6`, `02a406d`). Phase C drilldowns (Researcher / Provocateur / Publish) still open per spec. Pre-Athens-eligible.
+**State:** filed 2026-05-03; **all four phases shipped same day** (Phase A `cbaf3aa`, Phase B `83102a6`, UX iteration `02a406d`, Phase C `49f3d24`). Editor drilldown is the only piece remaining and is gated on B1 (editor_flow.py implementation).
 
 #### Done (2026-05-03, three commits on main)
 
@@ -946,20 +946,30 @@ both roles:       /  /session/{id}  /session/{id}/upload (POST)
                   /logout                ← always 401, fresh realm
 admin only:       /status  /status.json  ← legacy cross-night view
                   /session/{id}/status.json  /session/{id}/retry (POST)
-                  /admin/tonight  /admin/tonight.json     ← Tier 1 meta
-                  /admin/tonight/transcription[?night=N]  ← stage drilldown
-                  /admin/tonight/voice[?night=N]  + .json ← stage drilldown
+                  /admin/tonight  /admin/tonight.json       ← Tier 1 meta
+                  /admin/tonight/transcription[?night=N]    ← stage drilldown
+                  /admin/tonight/researcher[?night=N]  + .json
+                  /admin/tonight/provocateur[?night=N] + .json
+                  /admin/tonight/voice[?night=N]       + .json
+                  /admin/tonight/publish[?night=N]     + .json
                   /admin/file?path=<rel>          ← read-only viewer
 ```
 
-#### Still open: Phase C drilldowns
+#### Phase C ✅ shipped 2026-05-03 PM (`49f3d24`)
 
-- **`/admin/tonight/researcher`** — per-session extraction table + clusters/themes drilldown tree (~4-6 hr)
-- **`/admin/tonight/provocateur`** — triage matrix (10 voices × N themes) + formulation grid (~6-8 hr)
-- **`/admin/tonight/publish`** — per-voice publish status + per-night index status (~2-3 hr)
-- **`/admin/tonight/editor`** — gated on B1 editor implementation; trivial once that ships (~2 hr)
+Three drilldowns landed in one commit, mirroring the Phase B Voice pattern:
 
-Phase C target T-2 (May 5) if budget; otherwise post-Athens. Athens is operable on Phase A+B alone — operator can `cat grouping.json | jq` for Researcher state during overnight wall.
+- **`/admin/tonight/researcher`** + `.json` — theme/cluster tree from `grouping.json`, per-session extraction summary, isolates list. Live-verified: 6 themes / 25 clusters / 102 extractions / 4 isolates against dev_msc_test (matches v2.4 ground truth).
+- **`/admin/tonight/provocateur`** + `.json` — voice × theme triage matrix (●/○/·/⊕/— for activation strength + stretch + flat), voice × theme formulation grid (✓ written / · pending), per-theme worth-surfacing/friction/fault-line flags table, "below target" warnings. Live-verified: 12 voices × 6 themes = 72 triage cells, 40 formulation cells.
+- **`/admin/tonight/publish`** + `.json` — per-voice published-artifact rows (title/subtitle/form/stance/themes/decision/word_count) + per-voice file links. Live-verified: 2 voices with their artifacts.
+
+Pipeline overview's column headers wire through to all six drilldowns now (Transcription, Researcher, Provocateur, Voice, Editor, Publish). Editor link still pending B1.
+
+`runtime/ingest/dashboard.py` adds `collect_researcher_detail`, `collect_provocateur_detail`, `collect_publish_detail` helpers + their internal pieces. STATIC_VERSION 17 → 18.
+
+**Test coverage**: 19 new tests in `test_admin_phase_c.py` (3 dashboard collectors × empty + full + JSON shape, 6 routes × admin-only auth gate, full + empty render per route, Pipeline overview link presence). 171/171 runtime tests passing.
+
+**Editor drilldown still pending**: gated on B1 (editor_flow.py implementation); trivial once Claudia's persona card lands (~2 hr to mirror Voice pattern).
 
 #### Decisions made during iteration (worth preserving)
 
