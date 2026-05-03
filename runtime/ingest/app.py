@@ -508,3 +508,38 @@ def admin_tonight_json(
     """Machine-readable mirror of /admin/tonight. Polled by auto-refresh."""
     n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
     return JSONResponse(dashboard.collect_night_state(n))
+
+
+@app.get("/admin/tonight/voice", response_class=HTMLResponse)
+def admin_tonight_voice(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Voice Pipeline drilldown: Step 1 grid + validation grid + Step 2 +
+    continuity. C23 Phase B (2026-05-03)."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_voice_detail(n)
+    # Build a (voice, theme) → step1_cell index for fast template lookup.
+    s1_index = {(c["voice_slug"], c["theme_id"]): c for c in payload["step1_cells"]}
+    v_index = {(c["voice_slug"], c["theme_id"]): c for c in payload["validation_cells"]}
+    return templates.TemplateResponse(
+        request, "admin_voice.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "s1_index": s1_index,
+            "v_index": v_index,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight/voice.json")
+def admin_tonight_voice_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_voice_detail(n))

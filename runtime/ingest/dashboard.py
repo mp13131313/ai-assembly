@@ -298,6 +298,224 @@ def collect_night_state(night: int) -> dict[str, Any]:
     return payload
 
 
+# --- Voice Pipeline detail view (C23 Phase B, 2026-05-03) -------------------
+#
+# Reads files under <run_dir>/04_voice/ and <PROJECT_ROOT>/voices/<slug>/ to
+# build the per-pair Step 1 grid + validation grid + per-voice Step 2 +
+# continuity list. Athens working envelope: 30-60 (voice, theme) pairs for
+# Step 1; 60-120 (pair × {anachronism, constitution}) cells for validation;
+# 10 voices for Step 2 + continuity.
+
+
+def _step1_pair_state(path: Path) -> dict[str, Any]:
+    """Extract a compact cell record from one step1_detailed_responses/*.json."""
+    data = _read_json_or_none(path) or {}
+    lineage = data.get("lineage", {}) or {}
+    voice_slug = lineage.get("voice_slug") or ""
+    theme_id = lineage.get("theme_id") or ""
+    if not voice_slug or not theme_id:
+        # Fall back to filename (voice__theme.json)
+        stem = path.stem
+        if "__" in stem:
+            voice_slug, theme_id = stem.split("__", 1)
+    return {
+        "voice_slug": voice_slug,
+        "theme_id": theme_id,
+        "council_member": data.get("council_member", voice_slug),
+        "theme_display_title": data.get("theme_display_title", theme_id),
+        "mode": data.get("mode"),
+        "state": "done" if data else "missing",
+        "model": data.get("model"),
+        "input_tokens": data.get("input_tokens"),
+        "output_tokens": data.get("output_tokens"),
+        "thinking_tokens": data.get("thinking_tokens"),
+        "wall_clock_s": data.get("wall_clock_s"),
+        "mtime": _file_mtime_iso(path),
+        "extractions_engaged": data.get("extractions_engaged", []) or [],
+    }
+
+
+def voice_step1_grid(run_dir: Path) -> list[dict[str, Any]]:
+    """Return one cell record per (voice, theme) Step 1 file on disk.
+
+    Cells with no file yet are not returned; the renderer fills the grid
+    by cross-joining voices × themes and looking up cells by (voice, theme).
+    Sorted by voice_slug, theme_id for stable rendering.
+    """
+    s1_dir = run_dir / "04_voice" / "step1_detailed_responses"
+    if not s1_dir.exists():
+        return []
+    cells = [_step1_pair_state(p) for p in sorted(s1_dir.glob("*.json"))]
+    return cells
+
+
+def voice_validation_grid(run_dir: Path) -> list[dict[str, Any]]:
+    """One cell record per validated (voice, theme) pair.
+
+    Each record carries both anachronism + constitution sub-states. The
+    final_status is the orchestrator's roll-up (`flagged` if either failed).
+    """
+    val_dir = run_dir / "04_voice" / "validation"
+    if not val_dir.exists():
+        return []
+    out = []
+    for p in sorted(val_dir.glob("*.json")):
+        data = _read_json_or_none(p) or {}
+        stem = p.stem  # voice__theme
+        voice_slug, _, theme_id = stem.partition("__")
+        anach = data.get("anachronism", {}) or {}
+        const = data.get("constitution", {}) or {}
+        out.append({
+            "voice_slug": voice_slug,
+            "theme_id": theme_id,
+            "anachronism_status": anach.get("status"),  # "PASS" | "ISSUES" | None
+            "constitution_status": const.get("status"),
+            "final_status": data.get("final_status"),    # "clean" | "flagged"
+            "regen_count": data.get("regen_count", 0),
+            "anachronism_text": (anach.get("text") or "").strip(),
+            "constitution_text": (const.get("text") or "").strip(),
+            "mtime": _file_mtime_iso(p),
+        })
+    return out
+
+
+def voice_step2_list(run_dir: Path) -> list[dict[str, Any]]:
+    """One row per voice that wrote a Step 2 first-draft artifact."""
+    s2_dir = run_dir / "04_voice" / "step2_first_draft_artifacts"
+    if not s2_dir.exists():
+        return []
+    out = []
+    for p in sorted(s2_dir.glob("*.json")):
+        data = _read_json_or_none(p) or {}
+        lineage = data.get("lineage", {}) or {}
+        out.append({
+            "voice_slug": lineage.get("voice_slug") or p.stem,
+            "council_member": data.get("council_member", p.stem),
+            "focus_decision": data.get("focus_decision"),
+            "focus_rationale": data.get("focus_rationale"),
+            "stance": data.get("stance"),
+            "stance_rationale": data.get("stance_rationale"),
+            "selected_form": data.get("selected_form"),
+            "form_rationale": data.get("form_rationale"),
+            "themes_covered": lineage.get("themes_covered", []) or [],
+            "word_count": data.get("word_count"),
+            "wall_clock_s": data.get("wall_clock_s"),
+            "input_tokens": data.get("input_tokens"),
+            "output_tokens": data.get("output_tokens"),
+            "mtime": _file_mtime_iso(p),
+        })
+    return out
+
+
+def voice_continuity_list(
+    project_root: Path, night: int, voice_slugs: list[str],
+) -> list[dict[str, Any]]:
+    """Per-voice continuity-overlay status for the NEXT night (N+1).
+
+    Continuity flow runs after Night N completes and writes
+    `<PROJECT_ROOT>/voices/<slug>/continuity_night_<N+1>.json` for each
+    voice that finished Night N. (Skipped on Night 3 — no Night 4.)
+    """
+    out = []
+    next_night = night + 1
+    for slug in voice_slugs:
+        cont_path = (
+            project_root / "voices" / slug
+            / f"continuity_night_{next_night}.json"
+        )
+        out.append({
+            "voice_slug": slug,
+            "for_night": next_night,
+            "written": cont_path.exists() if next_night <= 3 else False,
+            "skipped_last_night": next_night > 3,  # Night 3 is the last
+            "mtime": _file_mtime_iso(cont_path),
+            "path": str(cont_path),
+        })
+    return out
+
+
+def collect_voice_detail(night: int) -> dict[str, Any]:
+    """Top-level payload for /admin/tonight/voice.
+
+    Combines Step 1 grid + validation grid + Step 2 list + continuity list.
+    Cross-joins voice × theme dimensions so the renderer can build a stable
+    matrix even when cells are missing.
+    """
+    run_dir = run_dir_for_night(night)
+    if not run_dir.exists():
+        return {
+            "night": night,
+            "run_id": run_dir.name,
+            "run_exists": False,
+            "voices": [],
+            "themes": [],
+            "step1_cells": [],
+            "validation_cells": [],
+            "step2_voices": [],
+            "continuity_voices": [],
+            "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
+
+    s1_cells = voice_step1_grid(run_dir)
+    val_cells = voice_validation_grid(run_dir)
+    s2_voices = voice_step2_list(run_dir)
+
+    # Voices and themes — derived from Step 1 cells (most complete view) +
+    # Step 2 voices (in case Step 2 ran for more voices than Step 1 cells
+    # we picked up). Order: voices alphabetically by slug; themes by id.
+    voices_set: set[str] = set()
+    themes_set: set[str] = set()
+    voice_council: dict[str, str] = {}
+    theme_titles: dict[str, str] = {}
+    for c in s1_cells:
+        voices_set.add(c["voice_slug"])
+        themes_set.add(c["theme_id"])
+        voice_council[c["voice_slug"]] = c["council_member"]
+        theme_titles[c["theme_id"]] = c["theme_display_title"]
+    for v in s2_voices:
+        voices_set.add(v["voice_slug"])
+        voice_council[v["voice_slug"]] = v["council_member"]
+        for tid in v["themes_covered"]:
+            themes_set.add(tid)
+
+    voices = [
+        {"voice_slug": s, "council_member": voice_council.get(s, s)}
+        for s in sorted(voices_set)
+    ]
+    themes = [
+        {"theme_id": t, "theme_display_title": theme_titles.get(t, t)}
+        for t in sorted(themes_set)
+    ]
+
+    cont_list = voice_continuity_list(
+        PROJECT_ROOT, night, [v["voice_slug"] for v in voices],
+    )
+
+    # Manifest for top-line counts (validation_failures, etc.).
+    manifest = _read_json_or_none(run_dir / "04_voice" / "manifest.json") or {}
+
+    return {
+        "night": night,
+        "run_id": run_dir.name,
+        "run_dir": str(run_dir),
+        "run_exists": True,
+        "voices": voices,
+        "themes": themes,
+        "step1_cells": s1_cells,
+        "validation_cells": val_cells,
+        "step2_voices": s2_voices,
+        "continuity_voices": cont_list,
+        "manifest": {
+            "counts": manifest.get("counts", {}),
+            "validation_failures_count": len(
+                manifest.get("validation_failures", [])
+            ),
+            "wall_clock_s": manifest.get("wall_clock_s"),
+        },
+        "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
 def latest_active_night() -> int:
     """Pick the right night to default to.
 

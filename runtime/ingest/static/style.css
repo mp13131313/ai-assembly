@@ -699,3 +699,118 @@ table.stages-table th {
 .state-none {
   color: var(--warm-light);
 }
+
+/* --- /admin/tonight/voice grids + tables (C23 Phase B) --- */
+
+.voice-summary {
+  margin: 12px 0 24px;
+}
+
+.grid-block,
+.list-block {
+  margin: 32px 0;
+}
+
+table.cell-grid {
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 11px;
+}
+table.cell-grid th,
+table.cell-grid td {
+  border: 1px solid var(--hairline);
+  padding: 0;
+  text-align: center;
+}
+table.cell-grid .row-header {
+  text-align: right;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--cream-2);
+  white-space: nowrap;
+}
+table.cell-grid .col-header {
+  padding: 6px 8px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  background: var(--cream-2);
+  color: var(--warm-mid);
+  text-align: center;
+  vertical-align: middle;
+}
+table.cell-grid .col-header-sub {
+  padding: 2px 4px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+  background: var(--cream-2);
+  color: var(--warm-light);
+  text-align: center;
+  width: 18px;
+}
+table.cell-grid .sub-header th {
+  border-top: 0;
+}
+table.cell-grid .cell {
+  width: 28px;
+  height: 22px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+}
+table.cell-grid .cell.state-done {
+  background: var(--state-done);
+  color: white;
+}
+table.cell-grid .cell.state-error {
+  background: var(--state-error);
+  color: white;
+}
+table.cell-grid .cell.state-pending {
+  color: var(--warm-light);
+  background: var(--cream-2);
+}
+table.cell-grid .cell.state-running {
+  background: var(--state-active);
+  color: white;
+  animation: pulse 1.2s infinite;
+}
+table.validation-grid .cell {
+  width: 18px;
+}
+table.validation-grid .col-header {
+  text-align: center;
+}
+
+table.step2-table,
+table.continuity-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 13px;
+}
+table.step2-table th,
+table.step2-table td,
+table.continuity-table th,
+table.continuity-table td {
+  text-align: left;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+table.step2-table th,
+table.continuity-table th {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warm-mid);
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 11px;
+}
+.warn {
+  color: var(--state-error);
+  font-weight: 500;
+}

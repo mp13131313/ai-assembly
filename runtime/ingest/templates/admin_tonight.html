@@ -56,17 +56,23 @@
     </thead>
     <tbody>
       {% set stage_meta = [
-        ('transcription', 'Transcription'),
-        ('researcher',    'Researcher'),
-        ('provocateur',   'Provocateur'),
-        ('voice',         'Voice'),
-        ('editor',        'Editor'),
-        ('publish',       'Publish'),
+        ('transcription', 'Transcription', '/status'),
+        ('researcher',    'Researcher',    none),
+        ('provocateur',   'Provocateur',   none),
+        ('voice',         'Voice',         '/admin/tonight/voice?night=' ~ night),
+        ('editor',        'Editor',        none),
+        ('publish',       'Publish',       none),
       ] %}
-      {% for key, display in stage_meta %}
+      {% for key, display, drilldown in stage_meta %}
         {% set s = payload.stages[key] %}
         <tr class="stage-row state-{{ s.state }}">
-          <td><strong>{{ display }}</strong></td>
+          <td>
+            {% if drilldown %}
+              <a href="{{ drilldown }}"><strong>{{ display }}</strong></a>
+            {% else %}
+              <strong>{{ display }}</strong>
+            {% endif %}
+          </td>
           <td><span class="state-pill state-{{ s.state }}">{{ s.state }}</span></td>
           <td>{{ s.label or '' }}</td>
           <td class="muted">{{ s.mtime or s.last_done_mtime or '' }}</td>

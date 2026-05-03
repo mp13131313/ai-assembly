@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Voice · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Tonight (Night {{ night }})</a>
+</p>
+
+<h1>Voice Pipeline — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/voice?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">· run dir: <code>{{ payload.run_id }}</code></span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.run_exists %}
+  <div class="empty">
+    <p>No run directory for Night {{ night }} yet.</p>
+  </div>
+{% else %}
+
+{% set counts = payload.manifest.counts %}
+<section class="voice-summary">
+  <p class="muted">
+    Step 1: {{ counts.get('step1_pairs_succeeded', 0) }}/{{ counts.get('step1_pairs_attempted', 0) }} ·
+    Step 2: {{ counts.get('step2_voices_succeeded', 0) }} voices ·
+    Continuity: {{ counts.get('continuity_voices_succeeded', 0) }} voices
+    {% if counts.get('step3_voices_succeeded', 0) %}
+      · Step 3: {{ counts.step3_voices_succeeded }} voices
+    {% endif %}
+    {% if payload.manifest.validation_failures_count %}
+      · <span class="warn">⚠ {{ payload.manifest.validation_failures_count }} validation flag(s)</span>
+    {% endif %}
+  </p>
+</section>
+
+{# --- Step 1 grid: voice × theme matrix ----------------------------- #}
+<section class="grid-block">
+  <h2>Step 1 — Private Reasoning</h2>
+
+  {% if not payload.voices or not payload.themes %}
+    <p class="muted">Step 1 has not produced any (voice, theme) pairs yet.</p>
+  {% else %}
+    <table class="cell-grid">
+      <thead>
+        <tr>
+          <th class="row-header">Voice / Theme</th>
+          {% for t in payload.themes %}
+            <th class="col-header" title="{{ t.theme_display_title }}">
+              {{ t.theme_id }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.voices %}
+          <tr>
+            <td class="row-header" title="{{ v.council_member }}">
+              <strong>{{ v.voice_slug }}</strong>
+            </td>
+            {% for t in payload.themes %}
+              {% set cell = s1_index.get((v.voice_slug, t.theme_id)) %}
+              {% if cell %}
+                <td class="cell state-done"
+                    title="{{ cell.theme_display_title }}{% if cell.mode %} ({{ cell.mode }}){% endif %}{% if cell.input_tokens %} · in: {{ cell.input_tokens }} tok · out: {{ cell.output_tokens }} tok · wall: {{ cell.wall_clock_s }}s{% endif %}">
+                  ✓
+                </td>
+              {% else %}
+                <td class="cell state-pending" title="not yet started">·</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted hint">
+      ✓ done · · pending. Hover for theme title + token/wall metadata.
+      Cells map to <code>04_voice/step1_detailed_responses/&lt;voice&gt;__&lt;theme&gt;.json</code>.
+    </p>
+  {% endif %}
+</section>
+
+{# --- Validation grid: pair × {anachronism, constitution} ----------- #}
+<section class="grid-block">
+  <h2>Validation</h2>
+
+  {% if not payload.validation_cells %}
+    <p class="muted">
+      No validation outputs on disk. Either validation was skipped
+      (<code>--skip-validation</code>; expected on Athens Nights 2/3)
+      or Step 1 hasn't completed yet.
+    </p>
+  {% else %}
+    <table class="cell-grid validation-grid">
+      <thead>
+        <tr>
+          <th class="row-header">Voice / Theme</th>
+          {% for t in payload.themes %}
+            <th class="col-header" colspan="2" title="{{ t.theme_display_title }}">
+              {{ t.theme_id }}
+            </th>
+          {% endfor %}
+        </tr>
+        <tr class="sub-header">
+          <th class="row-header"></th>
+          {% for t in payload.themes %}
+            <th class="col-header-sub" title="anachronism">A</th>
+            <th class="col-header-sub" title="constitution">C</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.voices %}
+          <tr>
+            <td class="row-header"><strong>{{ v.voice_slug }}</strong></td>
+            {% for t in payload.themes %}
+              {% set cell = v_index.get((v.voice_slug, t.theme_id)) %}
+              {% if cell %}
+                {% set a = cell.anachronism_status %}
+                <td class="cell {% if a == 'PASS' %}state-done{% elif a == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
+                    title="anachronism: {{ a or 'pending' }}{% if cell.anachronism_text %} · {{ cell.anachronism_text[:200] }}{% endif %}">
+                  {% if a == 'PASS' %}✓{% elif a == 'ISSUES' %}⚠{% else %}·{% endif %}
+                </td>
+                {% set c = cell.constitution_status %}
+                <td class="cell {% if c == 'PASS' %}state-done{% elif c == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
+                    title="constitution: {{ c or 'pending' }}{% if cell.constitution_text %} · {{ cell.constitution_text[:200] }}{% endif %}">
+                  {% if c == 'PASS' %}✓{% elif c == 'ISSUES' %}⚠{% else %}·{% endif %}
+                </td>
+              {% else %}
+                <td class="cell state-pending">·</td>
+                <td class="cell state-pending">·</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted hint">
+      A = anachronism · C = constitution. ✓ PASS · ⚠ ISSUES · · pending.
+      Hover for the validator's flag text (truncated at 200 chars).
+      Files: <code>04_voice/validation/&lt;voice&gt;__&lt;theme&gt;.json</code>.
+    </p>
+  {% endif %}
+</section>
+
+{# --- Step 2 list: per-voice first-draft artifact decisions --------- #}
+<section class="list-block">
+  <h2>Step 2 — First-Draft Artifacts</h2>
+
+  {% if not payload.step2_voices %}
+    <p class="muted">No Step 2 artifacts on disk yet.</p>
+  {% else %}
+    <table class="step2-table">
+      <thead>
+        <tr>
+          <th>Voice</th>
+          <th>Focus</th>
+          <th>Stance</th>
+          <th>Form</th>
+          <th>Words</th>
+          <th>Wall</th>
+          <th>Tokens (in/out)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.step2_voices %}
+          <tr>
+            <td><strong>{{ v.voice_slug }}</strong></td>
+            <td title="{{ v.focus_rationale or '' }}">{{ v.focus_decision or '—' }}</td>
+            <td title="{{ v.stance_rationale or '' }}">{{ v.stance or '—' }}</td>
+            <td title="{{ v.form_rationale or '' }}">{{ v.selected_form or '—' }}</td>
+            <td>{{ v.word_count or '—' }}</td>
+            <td>{{ ('%.0fs' % v.wall_clock_s) if v.wall_clock_s else '—' }}</td>
+            <td class="muted">
+              {{ v.input_tokens or '—' }} / {{ v.output_tokens or '—' }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted hint">
+      Hover over Focus / Stance / Form for the rationale.
+      Files: <code>04_voice/step2_first_draft_artifacts/&lt;voice&gt;.json</code>.
+    </p>
+  {% endif %}
+</section>
+
+{# --- Continuity list: per-voice next-night overlay status --------- #}
+<section class="list-block">
+  <h2>Continuity → Night {{ night + 1 if night < 3 else 'N/A' }}</h2>
+
+  {% if night >= 3 %}
+    <p class="muted">
+      Last night of the run; no continuity overlay generated
+      (no Night {{ night + 1 }} to feed).
+    </p>
+  {% elif not payload.continuity_voices %}
+    <p class="muted">No voice continuity outputs yet.</p>
+  {% else %}
+    <table class="continuity-table">
+      <thead>
+        <tr>
+          <th>Voice</th>
+          <th>Continuity for Night {{ night + 1 }}</th>
+          <th>Last write</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in payload.continuity_voices %}
+          <tr>
+            <td><strong>{{ c.voice_slug }}</strong></td>
+            <td>
+              {% if c.written %}
+                <span class="state-done">✓ written</span>
+              {% else %}
+                <span class="state-none">— pending</span>
+              {% endif %}
+            </td>
+            <td class="muted">{{ c.mtime or '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted hint">
+      Files at <code>&lt;PROJECT_ROOT&gt;/voices/&lt;voice&gt;/continuity_night_{{ night + 1 }}.json</code>.
+      Loaded as a card overlay on Night {{ night + 1 }}'s system prompt.
+    </p>
+  {% endif %}
+</section>
+
+{% endif %}
+
+{% endblock %}
