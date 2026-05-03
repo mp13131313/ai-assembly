@@ -1327,6 +1327,126 @@ Re-run sweep as many times as needed across the night as files trickle in. No ne
 
 ---
 
+### C25. Researcher Node 1 extraction is sequential — should parallelise 🟡 (filed 2026-05-03 dryrun, ~$25 in flight)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** `researcher_flow.py:762-768` runs Node 1 (per-session extraction) in a sequential `for` loop — one Anthropic call per session, blocking. The Voice Pipeline parallelises across (voice, theme) pairs via `ThreadPoolExecutor`; Researcher does not. Looks like an oversight, not a deliberate design — extraction calls are independent and `validate_and_concat` operates on the full list at the end (order-agnostic).
+
+**Athens scale impact:**
+- 15 sessions × ~2-3 min/extraction (Opus 4.7 with thinking) = **30-45 min** sequential on Node 1
+- Parallelised (concurrency cap ~4-5) ≈ **6-9 min**
+- Per-night savings: ~25-35 min wall
+
+**Fix size:** ~20-30 min — wrap the extraction loop in `ThreadPoolExecutor(max_workers=4)` with `as_completed`, write each result atomically as it lands (write_json_atomic already idempotent). Mirror the pattern in voice/step1.py.
+
+**Trade-off:** more concurrent Anthropic load (4× per Researcher run); Anthropic Tier 4 limits comfortably accommodate.
+
+**Status:** filed; not blocking dryrun; should land before Athens to halve overnight wall.
+
+---
+
+### C26. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 (filed 2026-05-03 dryrun, architecture suggestion)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** Operator observed that the runtime currently has **two distinct trigger paths** for transcription firing:
+- **Ingest layer** (FastAPI app `runtime/ingest/app.py`): producer uploads audio → ingest writes `status.json` (state=received → normalizing → transcribing) + spawns `transcription_flow.py` as detached subprocess.
+- **Orchestrator** (`runtime/scripts/overnight_orchestrator.py`): polls per-session `status.json` for state=done; only fires Stages 2-5 (researcher → provocateur → voice → editor → publish). Does NOT fire transcription.
+
+This split means transcription is fire-and-forget from upload (no rate-limiting, no centralised retry, no orchestrator visibility into when transcription started or how many are concurrent). The dashboard reads status.json which is ingest-written; if transcription is run via CLI (bypassing ingest) the dashboard goes blind.
+
+**Cleaner architecture suggestion (operator):**
+- Producer upload only marks `state=received` + writes session_package.json input shell
+- Orchestrator scans for `received` sessions and fires `transcription_flow.py` in its own concurrency-bounded queue
+- Orchestrator writes status.json updates as it spawns/monitors transcription jobs
+- Dashboard reads same status.json — same surface, single writer
+
+**Benefits:**
+- Single state machine (orchestrator) drives all 6 stages
+- Concurrency control on transcription (rate-limit AssemblyAI calls)
+- Centralised retry / error recovery
+- Dashboard mirrors the orchestrator's view directly
+- CLI use of `transcription_flow.py` (e.g. dryruns) doesn't need separate status.json plumbing
+
+**Trade-off:** decouples upload UX from transcription timing — producer no longer sees "your audio is being transcribed" immediately, only "your audio was received". May be desirable (less latency in upload UI) or undesirable (producer wants real-time progress feedback).
+
+**Status:** filed; not Athens-blocking; touches both `ingest/app.py` and `overnight_orchestrator.py`. Estimated ~3-5 hr engineering. Defer until post-Athens unless dryrun reveals concurrency pain.
+
+---
+
+### C30. Voice Step 1 inter-batch sleep is over-conservative 🟡 (filed 2026-05-03 dryrun)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** Voice Step 1 runner sleeps `VOICE_BATCH_WAIT_S=20s` between each batch of 4 Anthropic calls ([voice_flow.py:165](runtime/flows/voice_flow.py:165)) "to respect Anthropic rate limits". Empirical reality at Athens scale:
+
+- Athens: 10 voices × ~3 themes ≈ 30 (voice, theme) pairs ÷ 4 per batch = 8 batches
+- 7 inter-batch sleeps × 20s = **~2.3 min of pure wait time per night**
+- Anthropic Tier 4 limits (4000 ITPM input / 80,000 OPM output) comfortably accommodate 4 parallel Opus 4.7 calls (each ~25K input + 2K output tokens) — 100K input/min + 8K output/min is well below ceiling
+
+**Fix:** lower `VOICE_BATCH_WAIT_S` to 5s (or 0). Already exposed as env var, so trivially overridable at runtime (`VOICE_BATCH_WAIT_S=5 voice_flow.py ...`).
+
+**Wall savings:** ~2 min/night = ~6 min across 3 Athens nights. Cost: $0 (no extra Anthropic load — same call count, same per-call latency, just less idle time between).
+
+**Status:** filed; near-trivial fix. Default change (in voice_flow.py L79) preferable to env-var override since orchestrator doesn't currently set it. ~5 min change.
+
+---
+
+### C29. Voice validation phase is partly serial — should parallelise 🟡 (filed 2026-05-03 dryrun)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** Voice pipeline Stage 4 took 32 min wall against 19 pairs (38 validation calls). Two bottlenecks in the validation phase:
+
+1. **Within each voice** (`voice_flow.py:171 _run_validation_for_voice`): `for s1 in step1_outputs: validate(s1)` — themes for that voice processed sequentially.
+2. **Within each pair** (`voice/step1_validation.py:230 run_validation_for_step1_output`): `anach = check_anachronism(...); const = check_constitution(...)` — also sequential.
+
+Only parallelism: outer ThreadPoolExecutor(max_workers=VOICE_STEP1_BATCH=4) running 4 voices concurrently. Bottleneck = the slowest voice's serial chain × 2 calls. Plato/Hannah Arendt with 4 themes each = 8 sequential calls ≈ 8 min wall just for them.
+
+**Athens scale impact:**
+- 10 voices × ~3-5 themes × 2 calls (anach + const) = **60-100 validation calls**
+- Currently: bottleneck voice = max(themes_per_voice) × 2 × ~1 min = **~10-15 min wall**
+- Fully parallel (concurrency cap ~8): **~3-5 min wall**
+- Per-night savings: ~7-10 min on Night 1 (Nights 2+3 skip validation per FU#62)
+
+**Fix size:** ~30-45 min — two changes:
+1. Parallelise themes within voice: replace `for s1 in step1_outputs` with `ThreadPoolExecutor(max_workers=N).submit` over the same list, write each result atomically as it lands (`write_json_atomic` already idempotent).
+2. Parallelise anach + const within pair: small `ThreadPoolExecutor(max_workers=2).map([check_anachronism, check_constitution])` — both calls are independent.
+
+**Trade-off:** more concurrent Anthropic load (10-20× per validation phase). Anthropic Tier 4 limits comfortably accommodate.
+
+**Status:** filed; not blocking dryrun. Same pattern as C25 (Researcher Node 1). Should ship before Athens — saves ~10 min Night 1 wall.
+
+---
+
+### C28. High volume of voice validation flags on MSC dryrun — audit 🟡 (filed 2026-05-03 dryrun)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** Running 7 athens-2026 voices × 4 MSC themes through Voice pipeline Step 1 + validation, the validation pass produces a high volume of ISSUES flags across both anachronism + constitution checks. Sample (Ada Lovelace × "What 'the West' is"):
+
+- **Anachronism flagged** ~10 distinct phrases as untranslated modern terms: "the West", "populist bullying", "Eurocentric", "Wests", "rules-based order", "developing world", "executable", "computable", "in Gaza, in Ukraine, in Greenland" (treated as self-evident contemporary instances)
+- **Constitution flagged** specific Lovelace doctrinal violations (Principle 2 — formal expression test slid into vague analogy; Principle 4 — card-class architecture collapsed to two-part metaphor)
+
+**Pre-Athens audit needed:**
+1. Are validators **calibrated correctly**, or are they over-flagging? Compare against prior dryrun #4 (Plato + Cleopatra dual on athens-friendly themes) — if flag density was much lower there, MSC content surfaces actual voice-card gaps; if similar density, validators may be too strict.
+2. Per-voice anachronism guardrails: voice cards' translation_protocol may need stronger directives for genuinely off-domain content (or the briefings may need stronger reframing prompts to translate modern terms BEFORE the voice sees them).
+3. Constitution check vocabulary: does Lovelace's constitution doc need clearer Principle-2/4 enforcement language, or is the violation real and the response just bad in this case?
+4. **Flag-output schema audit**: is the volume of detail in `text` field the right target for editor consumption, or should validators output structured per-issue records the editor can iterate over?
+
+**Triage path:** Start with sample-level read-through after the dryrun completes. Open `04_voice/validation/<voice>__<theme>.json` for a few problematic pairs. Decide: is the voice misbehaving (voice-card patch) or is the validator hyperactive (validator prompt tuning) or both?
+
+**Status:** filed; not blocking dryrun. Athens has tighter on-domain content (WBBF panels) where this gap should narrow naturally; MSC is the worst-case off-domain stress test.
+
+**See also:** `04_voice/validation/*.json` written during 2026-05-03 dryrun — under `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/04_voice/validation/`.
+
+---
+
+### C27. Researcher drilldown progressive rendering 🟢 SHIPPED 2026-05-03 PM (dryrun)
+
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** Operator wanted to see per-session extractions appear one at a time during Node 1, then clusters when Node 2 lands, then themes when Node 3 (grouping.json) lands. Previous behaviour: drilldown gated entirely on `grouping.json` existing — empty page until full Researcher complete.
+
+**Shipped same session:**
+- `dashboard.py` `_researcher_summary`: detects mid-flight states (Node 1 sessions extracted, Node 2 clusters present) and reports `state=running` with descriptive label instead of greyed-out `pending`
+- `dashboard.py` `collect_researcher_detail`: pre-populates per_session list from `01_transcription/*/session_package.json` so all expected sessions show with `extracted=False` initially, then flip to `extracted=True` as `<sid>_extractions.json` lands
+- `admin_researcher.html`: removed early-return on `not grouping_present`; renders Node 1 / Node 2 / Node 3 sections with status pills + placeholders so operator sees where the pipeline is
+- Pipeline overview Researcher column now shows "Node 1 (extraction) X sessions done" while running
+
+**Status:** ✅ shipped during 2026-05-03 dryrun. No commit yet (still in flight; will commit alongside dryrun cleanup).
+
+---
+
 ## Section D — Existing FU#s, runtime-relevant
 
 These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain to runtime. Cross-referenced; full text in FOLLOW_UPS.md. (Persona-internal FUs not listed here.)
