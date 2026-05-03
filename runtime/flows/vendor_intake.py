@@ -29,10 +29,23 @@ same way as a transcription error.
 
 Usage
 -----
+Single-file mode (one session at a time):
+
     python -m flows.vendor_intake \\
         /path/to/vendor_session_007.json \\
         --run-dir runs/athens_night_1 \\
         --session-id day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330
+
+Sweep mode (all vendor sessions for a night in one shot):
+
+    python -m flows.vendor_intake --night 1 --sweep [--inbox <dir>]
+
+Sweep reads PROJECT_ROOT/reference/sessions.json, finds every session with
+``audio_source: "vendor"`` AND ``day`` mapping to ``--night``, and for each
+looks for ``<inbox>/<session_id>.json`` (default inbox:
+``<PROJECT_ROOT>/vendor_inbox``). Each found file is validated + landed via
+the same path as single-file mode; missing files are reported but don't
+abort the sweep.
 
 If --run-dir is relative, it is resolved under PROJECT_ROOT.
 
@@ -74,6 +87,12 @@ from flows.shared.project_root import resolve_project_root  # noqa: E402
 
 VALID_CONFIDENCES = {"high", "medium", "low"}
 VALID_ROLES = {"moderator", "panelist", "audience"}
+
+# Athens night → "day" string in sessions.json + run_dir name. Matches
+# DAY_TO_RUN in runtime/ingest/config.py and the orchestrator. Kept inline
+# rather than imported so flows/ doesn't depend on ingest/.
+NIGHT_TO_DAY = {1: "Day One", 2: "Day Two", 3: "Day Three"}
+NIGHT_TO_RUN_DIR = {1: "athens_night_1", 2: "athens_night_2", 3: "athens_night_3"}
 
 
 # --- Validation outcome types ------------------------------------------------
@@ -371,6 +390,95 @@ def land(
 # --- CLI ---------------------------------------------------------------------
 
 
+def _vendor_sessions_for_night(
+    project_root: Path, night: int
+) -> list[str]:
+    """Return session_ids of all audio_source=='vendor' sessions for `night`,
+    by reading PROJECT_ROOT/reference/sessions.json.
+
+    Empty list if none match (or if sessions.json is missing/malformed —
+    sweep callers see "0 vendor sessions for night N" rather than a crash).
+    """
+    sessions_path = project_root / "reference" / "sessions.json"
+    if not sessions_path.exists():
+        return []
+    try:
+        sessions = json.loads(sessions_path.read_text(encoding="utf-8")).get("sessions", [])
+    except (OSError, json.JSONDecodeError):
+        return []
+    target_day = NIGHT_TO_DAY.get(night)
+    if target_day is None:
+        return []
+    return [
+        s["session_id"]
+        for s in sessions
+        if s.get("audio_source") == "vendor"
+        and s.get("day") == target_day
+        and s.get("ai_assembly")
+        and "session_id" in s
+    ]
+
+
+def sweep(
+    *,
+    project_root: Path,
+    night: int,
+    inbox_dir: Path,
+    run_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Land every vendor session for `night` whose file is present in `inbox_dir`.
+
+    Convention: each vendor file is named ``<session_id>.json`` at the top
+    of inbox_dir. Sessions whose file is missing are reported as "missing"
+    but do not abort the sweep.
+
+    Returns a summary dict with per-session outcome and aggregate counts.
+    Uses the same `land()` function as single-file mode, so validation
+    semantics, sidecar files, and status.json shape are all identical.
+    """
+    if run_dir is None:
+        run_dir = project_root / "runs" / NIGHT_TO_RUN_DIR[night]
+
+    session_ids = _vendor_sessions_for_night(project_root, night)
+    landed: list[dict[str, Any]] = []
+    missing: list[str] = []
+    errors: list[dict[str, Any]] = []
+    warnings_total = 0
+
+    for sid in session_ids:
+        candidate = inbox_dir / f"{sid}.json"
+        if not candidate.exists():
+            missing.append(sid)
+            continue
+        sessions_json_roster = _load_sessions_json_roster(project_root, sid)
+        result = land(
+            vendor_file=candidate,
+            run_dir=run_dir,
+            session_id=sid,
+            sessions_json_roster=sessions_json_roster,
+        )
+        if result["state"] == "error":
+            errors.append({"session_id": sid, "error": result.get("error")})
+        else:
+            landed.append({
+                "session_id": sid,
+                "n_turns": result.get("n_turns"),
+                "n_warnings": len(result.get("warnings", [])),
+            })
+            warnings_total += len(result.get("warnings", []))
+
+    return {
+        "night": night,
+        "inbox_dir": str(inbox_dir),
+        "run_dir": str(run_dir),
+        "expected_count": len(session_ids),
+        "landed": landed,
+        "missing": missing,
+        "errors": errors,
+        "warnings_total": warnings_total,
+    }
+
+
 def _load_sessions_json_roster(
     project_root: Path, session_id: str
 ) -> list[dict[str, str]] | None:
@@ -412,20 +520,78 @@ def _load_sessions_json_roster(
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("vendor_file", type=Path,
-                    help="Path to the vendor-supplied session_package JSON.")
-    ap.add_argument("--run-dir", type=Path, required=True,
+    ap.add_argument("vendor_file", nargs="?", type=Path, default=None,
+                    help="Path to the vendor-supplied session_package JSON "
+                         "(single-file mode). Omit when using --sweep.")
+    ap.add_argument("--run-dir", type=Path, default=None,
                     help="Run directory (e.g. runs/athens_night_1). "
+                         "Required for single-file mode; in sweep mode, "
+                         "defaults to runs/athens_night_<N> under PROJECT_ROOT. "
                          "Resolved under PROJECT_ROOT if relative.")
-    ap.add_argument("--session-id", required=True,
-                    help="Expected session_id; must match metadata.session_id.")
+    ap.add_argument("--session-id", default=None,
+                    help="Expected session_id; must match metadata.session_id. "
+                         "Required for single-file mode; ignored in sweep mode.")
     ap.add_argument("--project", default=None,
                     help="PROJECT_ROOT override (else AI_ASSEMBLY_PROJECT_ROOT).")
     ap.add_argument("--no-roster-check", action="store_true",
                     help="Skip the roster cross-check against sessions.json.")
+    ap.add_argument("--sweep", action="store_true",
+                    help="Sweep mode: read sessions.json, find every vendor "
+                         "session for --night, look for <session_id>.json "
+                         "files in --inbox, and land each one. Misses are "
+                         "reported but don't abort the sweep.")
+    ap.add_argument("--night", type=int, choices=(1, 2, 3), default=None,
+                    help="Athens night (1, 2, 3). Required with --sweep.")
+    ap.add_argument("--inbox", type=Path, default=None,
+                    help="Vendor inbox dir (sweep mode). Defaults to "
+                         "<PROJECT_ROOT>/vendor_inbox/.")
     args = ap.parse_args(argv)
 
     project_root = resolve_project_root(args.project)
+
+    if args.sweep:
+        if args.night is None:
+            ap.error("--sweep requires --night")
+        if args.vendor_file is not None or args.session_id is not None:
+            ap.error("--sweep is mutually exclusive with positional vendor_file "
+                     "and --session-id (sweep discovers files via convention)")
+        inbox_dir = args.inbox if args.inbox else (project_root / "vendor_inbox")
+        if args.run_dir is not None:
+            run_dir = args.run_dir if args.run_dir.is_absolute() else (project_root / args.run_dir)
+        else:
+            run_dir = None  # sweep() picks the convention path
+        summary = sweep(
+            project_root=project_root,
+            night=args.night,
+            inbox_dir=inbox_dir,
+            run_dir=run_dir,
+        )
+        # Human-readable report.
+        print(f"sweep night={summary['night']} inbox={summary['inbox_dir']}")
+        print(f"  expected: {summary['expected_count']} vendor session(s)")
+        print(f"  landed:   {len(summary['landed'])} "
+              f"({summary['warnings_total']} warning(s) total)")
+        for item in summary["landed"]:
+            warn_note = f", {item['n_warnings']} warning(s)" if item["n_warnings"] else ""
+            print(f"    OK {item['session_id']} ({item['n_turns']} turns{warn_note})")
+        if summary["missing"]:
+            print(f"  missing:  {len(summary['missing'])} "
+                  f"(no <session_id>.json in inbox)")
+            for sid in summary["missing"]:
+                print(f"    -- {sid}")
+        if summary["errors"]:
+            print(f"  errors:   {len(summary['errors'])}")
+            for e in summary["errors"]:
+                print(f"    !! {e['session_id']}: {e['error']}")
+        # Exit code: non-zero only if any session in the sweep had an
+        # error. Missing files are normal (vendor hasn't sent yet) — they
+        # don't fail the sweep.
+        return 2 if summary["errors"] else 0
+
+    # Single-file mode
+    if args.vendor_file is None or args.session_id is None or args.run_dir is None:
+        ap.error("single-file mode requires vendor_file (positional), "
+                 "--session-id, and --run-dir. For batch mode, use --sweep --night N.")
 
     run_dir = args.run_dir if args.run_dir.is_absolute() else (project_root / args.run_dir)
 

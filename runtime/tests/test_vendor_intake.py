@@ -349,3 +349,156 @@ def _ensure_subdir_parents(tmp_path):
     """Some tests write a second vendor file at tmp_path/<subdir>/vendor.json;
     pre-create the subdirs so write doesn't ENOENT."""
     (tmp_path / "good_dir").mkdir(exist_ok=True)
+
+
+# --- Sweep mode -------------------------------------------------------------
+
+
+@pytest.fixture
+def sweep_project_root(tmp_path: Path, good_payload: dict) -> Path:
+    """Build a minimal PROJECT_ROOT with reference/sessions.json containing
+    three vendor sessions across two nights, plus an audio session that
+    sweep should ignore."""
+    pr = tmp_path / "project"
+    (pr / "reference").mkdir(parents=True)
+    (pr / "vendor_inbox").mkdir()
+    (pr / "runs" / "athens_night_1").mkdir(parents=True)
+    (pr / "runs" / "athens_night_2").mkdir(parents=True)
+    sessions = {
+        "sessions": [
+            {
+                "session_id": "n1_vendor_a", "ai_assembly": True,
+                "day": "Day One", "audio_source": "vendor",
+                "speakers": ["Christoph Quarch"],
+            },
+            {
+                "session_id": "n1_vendor_b", "ai_assembly": True,
+                "day": "Day One", "audio_source": "vendor",
+                "speakers": ["Christoph Quarch"],
+            },
+            {
+                "session_id": "n1_audio", "ai_assembly": True,
+                "day": "Day One", "audio_source": "audio",
+                "speakers": ["Christoph Quarch"],
+            },
+            {
+                "session_id": "n2_vendor", "ai_assembly": True,
+                "day": "Day Two", "audio_source": "vendor",
+                "speakers": ["Christoph Quarch"],
+            },
+        ]
+    }
+    (pr / "reference" / "sessions.json").write_text(json.dumps(sessions))
+    return pr
+
+
+def _good_payload_for(session_id: str, base: dict) -> dict:
+    p = json.loads(json.dumps(base))
+    p["metadata"]["session_id"] = session_id
+    return p
+
+
+class TestSweep:
+    def test_sweep_lands_all_present_files(self, sweep_project_root, good_payload):
+        # Drop both Night 1 vendor files into the inbox, but only one Night 2.
+        inbox = sweep_project_root / "vendor_inbox"
+        for sid in ("n1_vendor_a", "n1_vendor_b"):
+            (inbox / f"{sid}.json").write_text(
+                json.dumps(_good_payload_for(sid, good_payload))
+            )
+
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        assert summary["expected_count"] == 2
+        assert len(summary["landed"]) == 2
+        assert summary["missing"] == []
+        assert summary["errors"] == []
+        # Both session_packages should be on disk.
+        for sid in ("n1_vendor_a", "n1_vendor_b"):
+            assert (sweep_project_root / "runs" / "athens_night_1"
+                    / "01_transcription" / sid / "session_package.json").exists()
+
+    def test_sweep_reports_missing_files(self, sweep_project_root, good_payload):
+        # Only one of two Night 1 vendor files is in the inbox.
+        inbox = sweep_project_root / "vendor_inbox"
+        (inbox / "n1_vendor_a.json").write_text(
+            json.dumps(_good_payload_for("n1_vendor_a", good_payload))
+        )
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        assert len(summary["landed"]) == 1
+        assert summary["missing"] == ["n1_vendor_b"]
+        assert summary["errors"] == []
+
+    def test_sweep_ignores_audio_sessions(self, sweep_project_root, good_payload):
+        # Even if the operator puts a file with an audio-session's id in the
+        # inbox, sweep should skip it — sweep is filtered by audio_source.
+        inbox = sweep_project_root / "vendor_inbox"
+        (inbox / "n1_audio.json").write_text(
+            json.dumps(_good_payload_for("n1_audio", good_payload))
+        )
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        # Only the 2 vendor sessions are expected; the audio session is ignored.
+        assert summary["expected_count"] == 2
+        assert all(item["session_id"] != "n1_audio" for item in summary["landed"])
+        # And no session_dir was created for the audio session via sweep.
+        assert not (sweep_project_root / "runs" / "athens_night_1"
+                    / "01_transcription" / "n1_audio").exists()
+
+    def test_sweep_filters_by_night(self, sweep_project_root, good_payload):
+        # Drop a Day Two vendor file and run sweep night=1 — should be ignored.
+        inbox = sweep_project_root / "vendor_inbox"
+        (inbox / "n2_vendor.json").write_text(
+            json.dumps(_good_payload_for("n2_vendor", good_payload))
+        )
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        assert summary["expected_count"] == 2  # only Night 1 vendor sessions
+        assert summary["missing"] == ["n1_vendor_a", "n1_vendor_b"]
+
+    def test_sweep_collects_validation_errors(self, sweep_project_root, good_payload):
+        # One file good, one file with session_id mismatch (hard-fail).
+        inbox = sweep_project_root / "vendor_inbox"
+        (inbox / "n1_vendor_a.json").write_text(
+            json.dumps(_good_payload_for("n1_vendor_a", good_payload))
+        )
+        # Inject mismatched session_id into the second file.
+        bad = _good_payload_for("n1_vendor_b", good_payload)
+        bad["metadata"]["session_id"] = "wrong"
+        (inbox / "n1_vendor_b.json").write_text(json.dumps(bad))
+
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        assert len(summary["landed"]) == 1
+        assert len(summary["errors"]) == 1
+        assert summary["errors"][0]["session_id"] == "n1_vendor_b"
+
+    def test_sweep_default_run_dir(self, sweep_project_root, good_payload):
+        # Without explicit run_dir, sweep derives it as
+        # <PROJECT_ROOT>/runs/athens_night_<N>.
+        inbox = sweep_project_root / "vendor_inbox"
+        (inbox / "n1_vendor_a.json").write_text(
+            json.dumps(_good_payload_for("n1_vendor_a", good_payload))
+        )
+        summary = vendor_intake.sweep(
+            project_root=sweep_project_root,
+            night=1,
+            inbox_dir=inbox,
+        )
+        assert summary["run_dir"].endswith("athens_night_1")
