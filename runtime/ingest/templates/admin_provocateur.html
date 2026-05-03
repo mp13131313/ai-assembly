@@ -126,11 +126,14 @@
 <section class="grid-block">
   <h2>Per-voice triage — does this voice want to engage this theme?</h2>
   <p class="muted">
-    Each voice ranks every theme by how strongly it activates their framework.
-    <strong>Strong</strong> = direct fit with their core commitment.
-    <strong>Moderate</strong> = engages but at an angle.
-    <strong>Stretch</strong> = beyond their normal range, but worth attempting.
-    <strong>Skip</strong> = framework doesn't reach the topic; voice declines.
+    Two orthogonal signals per cell:
+    <br>
+    <strong>Activation</strong> (strong / moderate / weak) — how directly the theme fits the voice's core commitment.
+    <br>
+    <strong>Stretch</strong> — whether the theme falls in the voice's designated stretch territory (the per-voice <code>stretch</code> field in council_config: where the framework "becomes a live blade and the question is genuinely open"). A theme can be <em>both</em> strongly-activating AND stretch.
+    <br>
+    <strong>Skip</strong> — framework doesn't reach the topic; voice declines (a flat-themes entry, not ranked).
+    <br>
     Hover any cell for the voice's reason.
   </p>
 
