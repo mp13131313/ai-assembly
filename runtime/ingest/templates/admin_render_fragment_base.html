@@ -1,0 +1,9 @@
+{# Minimal wrapper for /admin/render?fragment=1 — no nav/header chrome.
+   Used by the modal overlay JS that fetches just the rendered body.
+   Mirrors the block names base.html exposes ({% block content %}, etc.) so
+   templates extending admin_render_base.html render identically into
+   either parent. #}
+<div class="modal-content">
+  {% block scripts %}{% endblock %}
+  {% block content %}{% endblock %}
+</div>

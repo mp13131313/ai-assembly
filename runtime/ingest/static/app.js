@@ -350,4 +350,164 @@
     pollTimer = setInterval(poll, 3000);
     setInterval(tickElapsed, 1000);
   }
+
+  // --- (6) Modal overlay for any artifact link -----------------------------
+  // Click any link to /admin/render?path=... or /admin/file?path=... →
+  // open in a modal overlay so operator doesn't lose dashboard context.
+  // .json paths route through /admin/render?fragment=1 (schema-aware view
+  // with fallback to pretty-printed JSON). Non-json paths (.log .md .txt
+  // .flag) fetch via /admin/file and display as <pre>. ESC closes;
+  // backdrop click closes; Cmd/Ctrl/Shift-click bypasses (new tab).
+
+  function ensureOverlay() {
+    let modal = document.getElementById("render-modal");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = "render-modal";
+    modal.className = "render-modal";
+    modal.innerHTML =
+      '<div class="render-modal-backdrop"></div>' +
+      '<div class="render-modal-card">' +
+        '<button class="render-modal-close" aria-label="Close" type="button">×</button>' +
+        '<div class="render-modal-body"><p class="muted">Loading…</p></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.querySelector(".render-modal-close")
+      .addEventListener("click", closeOverlay);
+    modal.querySelector(".render-modal-backdrop")
+      .addEventListener("click", closeOverlay);
+    return modal;
+  }
+
+  function openOverlay(href) {
+    const modal = ensureOverlay();
+    const body = modal.querySelector(".render-modal-body");
+    body.innerHTML = '<p class="muted">Loading…</p>';
+    modal.classList.add("open");
+    document.body.classList.add("modal-open");
+
+    // Parse href: extract route + path query param.
+    let url;
+    try {
+      url = new URL(href, window.location.origin);
+    } catch (e) {
+      body.innerHTML = '<p class="warn">Invalid URL: ' + href + '</p>';
+      return;
+    }
+    const path = url.searchParams.get("path") || "";
+    const isJson = path.toLowerCase().endsWith(".json");
+
+    if (isJson) {
+      // Always use /admin/render with fragment=1 — schema-aware view
+      // with fallback to pretty-printed JSON for unknown shapes.
+      const renderUrl = "/admin/render?path=" +
+        encodeURIComponent(path) + "&fragment=1";
+      fetch(renderUrl, { credentials: "same-origin" })
+        .then(r => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.text();
+        })
+        .then(html => { body.innerHTML = html; })
+        .catch(err => {
+          body.innerHTML = '<p class="warn">Failed to load: ' +
+            err.message + '</p>';
+        });
+    } else {
+      // Non-JSON: fetch raw via /admin/file, wrap in <pre>.
+      const fileUrl = "/admin/file?path=" + encodeURIComponent(path);
+      fetch(fileUrl, { credentials: "same-origin" })
+        .then(r => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.text();
+        })
+        .then(text => {
+          const fname = path.split("/").pop();
+          body.innerHTML =
+            '<div class="modal-content">' +
+              '<h3 style="margin-top:0;">' + escapeHtml(fname) + '</h3>' +
+              '<p class="muted"><code>' + escapeHtml(path) + '</code> · ' +
+                '<a href="' + fileUrl + '">view raw</a></p>' +
+              '<hr>' +
+              '<pre class="json-pretty">' + escapeHtml(text) + '</pre>' +
+            '</div>';
+        })
+        .catch(err => {
+          body.innerHTML = '<p class="warn">Failed to load: ' +
+            err.message + '</p>';
+        });
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function closeOverlay() {
+    const modal = document.getElementById("render-modal");
+    if (modal) {
+      modal.classList.remove("open");
+      document.body.classList.remove("modal-open");
+    }
+  }
+
+  document.addEventListener("click", (ev) => {
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+    if (ev.button !== undefined && ev.button !== 0) return;
+    const link = ev.target.closest(
+      'a[href*="/admin/render?path="], a[href*="/admin/file?path="]'
+    );
+    if (!link) return;
+    // Don't intercept clicks inside an already-open overlay (so the
+    // "view raw" link there still navigates).
+    if (link.closest(".render-modal")) return;
+    ev.preventDefault();
+    openOverlay(link.getAttribute("href"));
+  });
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeOverlay();
+  });
+
+  // --- (7) JS-driven auto-refresh that pauses while modal is open ---------
+  // Replaces <meta http-equiv="refresh"> (which couldn't be paused). Templates
+  // opt in by including <meta name="auto-refresh-seconds" content="30">.
+  // When modal is open: pending reload deferred. When closed: reschedule.
+
+  const refreshMeta = document.querySelector('meta[name="auto-refresh-seconds"]');
+  if (refreshMeta) {
+    const refreshMs = (parseInt(refreshMeta.getAttribute("content"), 10) || 30) * 1000;
+    let refreshTimer = null;
+    let pendingReload = false;
+
+    function scheduleRefresh() {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        const modalOpen = document.body.classList.contains("modal-open");
+        if (modalOpen) {
+          // Defer until modal closes.
+          pendingReload = true;
+        } else {
+          window.location.reload();
+        }
+      }, refreshMs);
+    }
+
+    // Wrap closeOverlay so closing flushes a deferred reload (or restarts
+    // the refresh clock if no reload was pending).
+    const _origClose = closeOverlay;
+    closeOverlay = function() {
+      _origClose();
+      if (pendingReload) {
+        pendingReload = false;
+        window.location.reload();
+      } else {
+        scheduleRefresh();
+      }
+    };
+
+    scheduleRefresh();
+  }
 })();

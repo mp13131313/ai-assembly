@@ -1,0 +1,76 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+<section class="grid-block">
+  <h2>Voice briefing — {{ data.formulations | length }} formulation{{ '' if data.formulations|length == 1 else 's' }}</h2>
+  <p class="muted">
+    The Provocateur's per-voice bundle: every (theme, voice) formulation this voice will respond to in Stage 4.
+    Expand each to read the formulation as it'll be put to the voice.
+  </p>
+</section>
+
+{% for f in data.formulations %}
+  <section class="grid-block">
+    <details {% if loop.index == 1 %}open{% endif %}>
+      <summary>
+        <strong>{{ f.theme_display_title or f.theme_id or '—' }}</strong>
+        <span class="muted">
+          · <code>{{ f.theme_id }}</code>
+          · mode: {{ f.mode or '—' }}
+          {% if f.full_theme_record and f.full_theme_record.theme_title_from_researcher %}
+            · researcher theme: <em>{{ f.full_theme_record.theme_title_from_researcher }}</em>
+          {% endif %}
+          · <a href="/admin/render?path=runs/{{ rel_path.split('/')[1] }}/03_provocateur/formulations/{{ f.theme_id }}__{{ rel_path.split('/')[-1].replace('.json', '') }}.json">open formulation</a>
+        </span>
+      </summary>
+
+      {% if f.narrative_briefing %}
+      <h4>Narrative briefing</h4>
+      <div class="prose-block">{{ f.narrative_briefing }}</div>
+      {% endif %}
+
+      {% if f.formulation_text %}
+      <h4>Formulation as put to voice</h4>
+      <div class="prose-block">{{ f.formulation_text }}</div>
+      {% endif %}
+
+      {% if f.context_narrative %}
+      <h4>Context narrative</h4>
+      <div class="prose-block">{{ f.context_narrative }}</div>
+      {% endif %}
+
+      {% if f.selected_quotes %}
+      <h4>Selected quotes ({{ f.selected_quotes | length }})</h4>
+      {% for q in f.selected_quotes %}
+        <div style="border-left:3px solid var(--state-active); padding-left:1em; margin-bottom:.75em;">
+          <p>{{ q.text or q }}</p>
+          {% if q is mapping %}
+          <p class="muted">
+            {% if q.speaker %}— <strong>{{ q.speaker }}</strong>{% endif %}
+            {% if q.session %}, {{ q.session }}{% endif %}
+            {% if q.extraction_id %} (<code>{{ q.extraction_id }}</code>){% endif %}
+          </p>
+          {% endif %}
+        </div>
+      {% endfor %}
+      {% endif %}
+
+      {% if f.full_theme_record %}
+      <h4>Researcher theme record</h4>
+      <p class="muted">
+        <strong>Title:</strong> {{ f.full_theme_record.theme_title_from_researcher or '—' }}
+      </p>
+      {% if f.full_theme_record.theme_abstract_from_researcher %}
+      <p class="prose-block">{{ f.full_theme_record.theme_abstract_from_researcher }}</p>
+      {% endif %}
+      {% if f.full_theme_record.co_assigned_voices %}
+      <p class="muted">
+        <strong>Co-assigned voices:</strong> {{ f.full_theme_record.co_assigned_voices | join(', ') }}
+      </p>
+      {% endif %}
+      {% endif %}
+    </details>
+  </section>
+{% endfor %}
+
+{% endblock %}

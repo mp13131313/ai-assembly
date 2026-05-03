@@ -1,0 +1,48 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+<section class="grid-block">
+  <h2>{{ data.voice or '—' }} — triage</h2>
+  <p class="muted">
+    {{ data.ranked_themes | length }} ranked theme{{ '' if data.ranked_themes|length == 1 else 's' }}
+    {% if data.flat_themes | length %} · {{ data.flat_themes | length }} flat theme{{ '' if data.flat_themes|length == 1 else 's' }}{% endif %}
+  </p>
+</section>
+
+{% if data.ranked_themes %}
+<section class="grid-block">
+  <h2>Ranked themes (in priority order)</h2>
+  <p class="muted">Themes the voice wants to engage, with activation strength + rationale.</p>
+  <ol>
+    {% for rt in data.ranked_themes %}
+      <li style="margin-bottom:1em;">
+        <strong>{{ rt.theme_id }}</strong>
+        &nbsp;
+        <span class="state-pill state-{{ 'done' if rt.activation == 'strong' else ('running' if rt.activation == 'moderate' else 'skipped') }}">
+          {{ rt.activation }}{% if rt.is_stretch %} · stretch{% endif %}
+        </span>
+        <br>
+        <span class="muted">{{ rt.reason }}</span>
+      </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+{% if data.flat_themes %}
+<section class="grid-block">
+  <h2>Flat themes (declined)</h2>
+  <p class="muted">Themes the voice's framework doesn't reach. Reason given for each.</p>
+  <ul>
+    {% for ft in data.flat_themes %}
+      <li style="margin-bottom:1em;">
+        <strong>{{ ft.theme_id }}</strong>
+        <br>
+        <span class="muted">{{ ft.reason }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Voice · Night {{ night }}{% endblock %}
 {% block head_extra %}
-  <meta http-equiv="refresh" content="30">
+  <meta name="auto-refresh-seconds" content="30">
 {% endblock %}
 {% block content %}
 
@@ -50,18 +50,19 @@
 
 {# --- Step 1 grid: voice × theme matrix ----------------------------- #}
 <section class="grid-block">
-  <h2>Step 1 — Private Reasoning</h2>
+  <h2>Step 1 — private reasoning</h2>
 
   {% if not payload.voices or not payload.themes %}
     <p class="muted">Step 1 has not produced any (voice, theme) pairs yet.</p>
   {% else %}
+    {% set expected = payload.expected_pairs | default([]) %}
     <table class="cell-grid">
       <thead>
         <tr>
-          <th class="row-header">Voice / Theme</th>
+          <th class="row-header">Voice ↓ &nbsp; Theme →</th>
           {% for t in payload.themes %}
-            <th class="col-header" title="{{ t.theme_display_title }}">
-              {{ t.theme_id }}
+            <th class="col-header" title="{{ t.theme_id }} — {{ t.theme_display_title }}">
+              {{ t.theme_display_title[:32] }}{% if t.theme_display_title|length > 32 %}…{% endif %}
             </th>
           {% endfor %}
         </tr>
@@ -70,20 +71,23 @@
         {% for v in payload.voices %}
           <tr>
             <td class="row-header" title="{{ v.council_member }}">
-              <strong>{{ v.voice_slug }}</strong>
+              <strong>{{ v.council_member }}</strong>
             </td>
             {% for t in payload.themes %}
               {% set cell = s1_index.get((v.voice_slug, t.theme_id)) %}
+              {% set is_expected = (v.voice_slug ~ "|" ~ t.theme_id) in expected %}
               {% if cell %}
                 <td class="cell state-done"
-                    title="{{ cell.theme_display_title }}{% if cell.mode %} ({{ cell.mode }}){% endif %}{% if cell.input_tokens %} · in: {{ cell.input_tokens }} tok · out: {{ cell.output_tokens }} tok · wall: {{ cell.wall_clock_s }}s{% endif %}">
+                    title="{{ v.council_member }} on '{{ t.theme_display_title }}'{% if cell.mode %} ({{ cell.mode }}){% endif %}{% if cell.input_tokens %} · in: {{ cell.input_tokens }} tok · out: {{ cell.output_tokens }} tok · wall: {{ cell.wall_clock_s }}s{% endif %}">
                   <a class="cell-link"
-                     href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/step1_detailed_responses/{{ v.voice_slug }}__{{ t.theme_id }}.json">
+                     href="/admin/render?path=runs/{{ payload.run_id }}/04_voice/step1_detailed_responses/{{ v.voice_slug }}__{{ t.theme_id }}.json">
                     ✓
                   </a>
                 </td>
+              {% elif is_expected %}
+                <td class="cell state-pending" title="expected — Anthropic call pending">·</td>
               {% else %}
-                <td class="cell state-pending" title="not yet started">·</td>
+                <td class="cell state-skipped" title="not selected by Provocateur for this voice">—</td>
               {% endif %}
             {% endfor %}
           </tr>
@@ -91,8 +95,8 @@
       </tbody>
     </table>
     <p class="muted hint">
-      ✓ done · · pending. Hover for theme title + token/wall metadata.
-      Cells map to <code>04_voice/step1_detailed_responses/&lt;voice&gt;__&lt;theme&gt;.json</code>.
+      <strong>✓</strong> done · <strong>·</strong> expected, pending Anthropic call · <strong>—</strong> not selected by Provocateur (this voice doesn't engage this theme).
+      Hover for token/wall metadata. Cells map to <code>04_voice/step1_detailed_responses/&lt;voice&gt;__&lt;theme&gt;.json</code>.
     </p>
   {% endif %}
 </section>
@@ -127,30 +131,35 @@
         </tr>
       </thead>
       <tbody>
+        {% set expected = payload.expected_pairs | default([]) %}
         {% for v in payload.voices %}
           <tr>
-            <td class="row-header"><strong>{{ v.voice_slug }}</strong></td>
+            <td class="row-header"><strong>{{ v.council_member }}</strong></td>
             {% for t in payload.themes %}
               {% set cell = v_index.get((v.voice_slug, t.theme_id)) %}
+              {% set is_expected = (v.voice_slug ~ "|" ~ t.theme_id) in expected %}
               {% if cell %}
                 {% set vfile = "runs/" ~ payload.run_id ~ "/04_voice/validation/" ~ v.voice_slug ~ "__" ~ t.theme_id ~ ".json" %}
                 {% set a = cell.anachronism_status %}
                 <td class="cell {% if a == 'PASS' %}state-done{% elif a == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
                     title="anachronism: {{ a or 'pending' }}{% if cell.anachronism_text %} · {{ cell.anachronism_text[:200] }}{% endif %}">
-                  <a class="cell-link" href="/admin/file?path={{ vfile }}">
+                  <a class="cell-link" href="/admin/render?path={{ vfile }}">
                     {% if a == 'PASS' %}✓{% elif a == 'ISSUES' %}⚠{% else %}·{% endif %}
                   </a>
                 </td>
                 {% set c = cell.constitution_status %}
                 <td class="cell {% if c == 'PASS' %}state-done{% elif c == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
                     title="constitution: {{ c or 'pending' }}{% if cell.constitution_text %} · {{ cell.constitution_text[:200] }}{% endif %}">
-                  <a class="cell-link" href="/admin/file?path={{ vfile }}">
+                  <a class="cell-link" href="/admin/render?path={{ vfile }}">
                     {% if c == 'PASS' %}✓{% elif c == 'ISSUES' %}⚠{% else %}·{% endif %}
                   </a>
                 </td>
+              {% elif is_expected %}
+                <td class="cell state-pending" title="expected — pending">·</td>
+                <td class="cell state-pending" title="expected — pending">·</td>
               {% else %}
-                <td class="cell state-pending">·</td>
-                <td class="cell state-pending">·</td>
+                <td class="cell state-skipped" title="not selected">—</td>
+                <td class="cell state-skipped" title="not selected">—</td>
               {% endif %}
             {% endfor %}
           </tr>
@@ -158,8 +167,7 @@
       </tbody>
     </table>
     <p class="muted hint">
-      A = anachronism · C = constitution. ✓ PASS · ⚠ ISSUES · · pending.
-      Hover for the validator's flag text (truncated at 200 chars).
+      A = anachronism · C = constitution. <strong>✓</strong> PASS · <strong>⚠</strong> ISSUES · <strong>·</strong> expected, pending · <strong>—</strong> not selected by Provocateur.
       Files: <code>04_voice/validation/&lt;voice&gt;__&lt;theme&gt;.json</code>.
     </p>
   {% endif %}
@@ -167,7 +175,7 @@
 
 {# --- Step 2 list: per-voice first-draft artifact decisions --------- #}
 <section class="list-block">
-  <h2>Step 2 — First-Draft Artifacts</h2>
+  <h2>Step 2 — first-draft artifacts</h2>
 
   {% if not payload.step2_voices %}
     <p class="muted">No Step 2 artifacts on disk yet.</p>
@@ -199,7 +207,7 @@
             </td>
             <td>
               <a class="muted file-link"
-                 href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/step2_first_draft_artifacts/{{ v.voice_slug }}.json">
+                 href="/admin/render?path=runs/{{ payload.run_id }}/04_voice/step2_first_draft_artifacts/{{ v.voice_slug }}.json">
                 json
               </a>
             </td>

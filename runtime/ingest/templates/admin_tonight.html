@@ -2,7 +2,7 @@
 {% block title %}Pipeline · Night {{ night }}{% endblock %}
 {% block head_extra %}
   {# 30s auto-refresh — matches orchestrator's 1-min poll cadence. #}
-  <meta http-equiv="refresh" content="30">
+  <meta name="auto-refresh-seconds" content="30">
 {% endblock %}
 {% block content %}
 

@@ -1,0 +1,82 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+{% set lin = data.lineage or {} %}
+
+<section class="grid-block">
+  <h2>Lineage</h2>
+  <p class="muted">
+    <strong>Voice:</strong> {{ lin.voice_slug or '—' }}
+    &nbsp;·&nbsp; <strong>Theme:</strong> {{ lin.theme_id or '—' }}
+    &nbsp;·&nbsp; <strong>Mode:</strong> {{ data.mode or '—' }}
+    &nbsp;·&nbsp; <strong>Night:</strong> {{ lin.night or '—' }}
+    &nbsp;·&nbsp; <strong>Run:</strong> <code>{{ lin.run_id or '—' }}</code>
+  </p>
+  <p class="muted">
+    <strong>Theme as put to voice:</strong> {{ data.theme_display_title or '—' }}
+  </p>
+  <p class="muted">
+    <strong>Model:</strong> {{ data.model or '—' }}
+    {% if data.thinking_enabled %}· thinking ON{% endif %}
+    {% if data.input_tokens %}
+      &nbsp;·&nbsp; <strong>Tokens:</strong> {{ data.input_tokens }} in / {{ data.output_tokens }} out
+      {% if data.thinking_tokens %}· {{ data.thinking_tokens }} thinking{% endif %}
+      {% if data.cache_read_input_tokens %}· {{ data.cache_read_input_tokens }} cache-read{% endif %}
+    {% endif %}
+    {% if data.wall_clock_s %} &nbsp;·&nbsp; <strong>Wall:</strong> {{ '%.1fs' % data.wall_clock_s }}{% endif %}
+  </p>
+  {% if lin.co_assigned_voices %}
+  <p class="muted">
+    <strong>Co-assigned voices on same theme:</strong> {{ lin.co_assigned_voices | join(', ') }}
+  </p>
+  {% endif %}
+  {% if lin.session_ids %}
+  <p class="muted">
+    <strong>Source sessions:</strong> {{ lin.session_ids | join(', ') }}
+    {% if lin.grounding_extraction_ids %}
+      &nbsp;·&nbsp; <strong>Grounded in {{ lin.grounding_extraction_ids | length }} extractions</strong>
+    {% endif %}
+  </p>
+  {% endif %}
+</section>
+
+{% if data.formulation_text %}
+<section class="grid-block">
+  <h2>Formulation as put to voice</h2>
+  <p class="muted">The Provocateur's framing of the theme for this voice. The voice's reasoning + response (below) is the answer to this.</p>
+  <div class="prose-block">{{ data.formulation_text }}</div>
+</section>
+{% endif %}
+
+{% if data.thinking_trace %}
+<section class="grid-block">
+  <h2>Thinking trace</h2>
+  <p class="muted">The voice's private reasoning before composing the response. Not published.</p>
+  <details>
+    <summary class="muted">Show thinking trace ({{ data.thinking_trace | length }} chars)</summary>
+    <div class="prose-block thinking-trace">{{ data.thinking_trace }}</div>
+  </details>
+</section>
+{% endif %}
+
+{% if data.detailed_response %}
+<section class="grid-block">
+  <h2>Step 1 detailed response</h2>
+  <p class="muted">The voice's substantive answer in its own register.</p>
+  <div class="prose-block">{{ data.detailed_response }}</div>
+</section>
+{% endif %}
+
+{% if data.extractions_engaged %}
+<section class="grid-block">
+  <h2>Extractions engaged</h2>
+  <p class="muted">The grounding extraction IDs the voice cites or builds on.</p>
+  <ul>
+    {% for eid in data.extractions_engaged %}
+      <li><code>{{ eid }}</code></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

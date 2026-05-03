@@ -936,3 +936,60 @@ def admin_file(
             "Content-Disposition": f'inline; filename="{target.name}"',
         },
     )
+
+
+# --- /admin/render: schema-aware artifact viewer (2026-05-03 dryrun) --------
+
+
+@app.get("/admin/render", response_class=HTMLResponse)
+def admin_render(
+    request: Request,
+    path: str,
+    fragment: int = 0,
+    _: str = Depends(require_admin),
+):
+    """Schema-aware HTML view of a known runtime artifact JSON.
+
+    Detects file type by PROJECT_ROOT-relative path pattern (Step 1 reasoning,
+    Step 2 artifact, formulation, validation, etc.) and renders the prose-heavy
+    fields cleanly instead of dumping raw JSON. Unknown types fall back to a
+    pretty-printed JSON view.
+
+    `?fragment=1` returns just the rendered body (no base.html nav/header) —
+    used by the modal-overlay JS in app.js so operators can peek at an
+    artifact without losing dashboard context.
+
+    Reuses _resolve_under_project_root() for the same security guarantees as
+    /admin/file (admin-gated, traversal-protected, .json only here).
+    """
+    target = _resolve_under_project_root(path)
+    if target.suffix.lower() != ".json":
+        raise HTTPException(
+            http.HTTP_400_BAD_REQUEST,
+            detail="render only supports .json files",
+        )
+    try:
+        data = json.loads(target.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise HTTPException(
+            http.HTTP_400_BAD_REQUEST,
+            detail=f"file is not valid JSON: {e}",
+        )
+
+    from .render import detect_artifact
+    template_name, label = detect_artifact(path)
+
+    return templates.TemplateResponse(
+        request,
+        template_name,
+        {
+            "rel_path": path,
+            "label": label,
+            "data": data,
+            "json_pretty": json.dumps(data, indent=2, ensure_ascii=False),
+            "static_version": STATIC_VERSION,
+            "parent_template": (
+                "admin_render_fragment_base.html" if fragment else "base.html"
+            ),
+        },
+    )

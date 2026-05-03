@@ -1,0 +1,78 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+{% set lin = data.lineage or {} %}
+
+<section class="grid-block">
+  <h2>Lineage</h2>
+  <p class="muted">
+    <strong>Voice:</strong> {{ lin.voice_slug or '—' }}
+    &nbsp;·&nbsp; <strong>Council member:</strong> {{ data.council_member or '—' }}
+    &nbsp;·&nbsp; <strong>Night:</strong> {{ lin.night or '—' }}
+  </p>
+  {% if lin.themes_covered %}
+  <p class="muted">
+    <strong>Themes covered:</strong> {{ lin.themes_covered | join(', ') }}
+  </p>
+  {% endif %}
+  <p class="muted">
+    <strong>Model:</strong> {{ data.model or '—' }}
+    {% if data.input_tokens %}
+      &nbsp;·&nbsp; <strong>Tokens:</strong> {{ data.input_tokens }} in / {{ data.output_tokens }} out
+      {% if data.cache_read_input_tokens %}· {{ data.cache_read_input_tokens }} cache-read{% endif %}
+    {% endif %}
+    {% if data.wall_clock_s %} &nbsp;·&nbsp; <strong>Wall:</strong> {{ '%.1fs' % data.wall_clock_s }}{% endif %}
+    {% if data.word_count %} &nbsp;·&nbsp; <strong>Words:</strong> {{ data.word_count }}{% endif %}
+  </p>
+</section>
+
+<section class="grid-block">
+  <h2>Editorial decisions</h2>
+  <table class="overview">
+    <tbody>
+      <tr>
+        <td style="width:140px;"><strong>Focus</strong></td>
+        <td>{{ data.focus_decision or '—' }}</td>
+      </tr>
+      {% if data.focus_rationale %}
+      <tr><td colspan="2" class="muted">{{ data.focus_rationale }}</td></tr>
+      {% endif %}
+      <tr>
+        <td><strong>Stance</strong></td>
+        <td>{{ data.stance or '—' }}</td>
+      </tr>
+      {% if data.stance_rationale %}
+      <tr><td colspan="2" class="muted">{{ data.stance_rationale }}</td></tr>
+      {% endif %}
+      <tr>
+        <td><strong>Form</strong></td>
+        <td>{{ data.selected_form or '—' }}</td>
+      </tr>
+      {% if data.form_rationale %}
+      <tr><td colspan="2" class="muted">{{ data.form_rationale }}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</section>
+
+{% if data.artifact_text %}
+<section class="grid-block">
+  <h2>Artifact (final first-draft)</h2>
+  <p class="muted">The voice's published artifact. This is what the editor will read for dossier composition.</p>
+  <div class="prose-block">{{ data.artifact_text }}</div>
+</section>
+{% endif %}
+
+{% if lin.voices_read %}
+<section class="grid-block">
+  <h2>Voices read</h2>
+  <p class="muted">Other voices' Step 1 responses this voice consulted before composing.</p>
+  <ul>
+    {% for vr in lin.voices_read %}
+      <li>{{ vr }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

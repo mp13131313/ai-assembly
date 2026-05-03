@@ -1,0 +1,54 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+{% set anach = data.anachronism or {} %}
+{% set const = data.constitution or {} %}
+
+<section class="grid-block">
+  <h2>Validation summary</h2>
+  <p class="muted">
+    <strong>Final status:</strong>
+    {% if data.final_status == 'clean' %}<span class="state-pill state-done">clean</span>
+    {% elif data.final_status == 'flagged' %}<span class="state-pill state-error">flagged</span>
+    {% else %}<span class="state-pill state-pending">{{ data.final_status or 'pending' }}</span>{% endif %}
+    {% if data.regen_count %} · {{ data.regen_count }} regen{{ '' if data.regen_count == 1 else 's' }}{% endif %}
+  </p>
+</section>
+
+<section class="grid-block">
+  <h2>
+    Anachronism check
+    {% if anach.status == 'PASS' %}<span class="state-pill state-done">PASS</span>
+    {% elif anach.status == 'ISSUES' %}<span class="state-pill state-error">ISSUES</span>
+    {% else %}<span class="state-pill state-pending">{{ anach.status or 'pending' }}</span>{% endif %}
+  </h2>
+  <p class="muted">
+    Did the voice say anything inconsistent with its temporal stance / world / formative experience?
+    {% if anach.model %}<br><small>model: {{ anach.model }} · wall {{ '%.1fs' % (anach.wall_clock_s or 0) }}</small>{% endif %}
+  </p>
+  {% if anach.text %}
+    <div class="prose-block">{{ anach.text }}</div>
+  {% else %}
+    <p class="muted">No flag text.</p>
+  {% endif %}
+</section>
+
+<section class="grid-block">
+  <h2>
+    Constitution check
+    {% if const.status == 'PASS' %}<span class="state-pill state-done">PASS</span>
+    {% elif const.status == 'ISSUES' %}<span class="state-pill state-error">ISSUES</span>
+    {% else %}<span class="state-pill state-pending">{{ const.status or 'pending' }}</span>{% endif %}
+  </h2>
+  <p class="muted">
+    Did the voice's response hold to its constitution + characteristic moves + banned modes?
+    {% if const.model %}<br><small>model: {{ const.model }} · wall {{ '%.1fs' % (const.wall_clock_s or 0) }}</small>{% endif %}
+  </p>
+  {% if const.text %}
+    <div class="prose-block">{{ const.text }}</div>
+  {% else %}
+    <p class="muted">No flag text.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends parent_template | default("base.html") %}
+{% block title %}{{ label }} · {{ rel_path }}{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="javascript:history.back()">← back</a>
+  &nbsp;·&nbsp;
+  <strong>{{ label }}</strong>
+</p>
+
+<h1 style="margin-bottom:0;">{{ rel_path.split('/')[-1] }}</h1>
+<p class="muted" style="margin-top:.25em;">
+  <code>{{ rel_path }}</code>
+  &nbsp;·&nbsp;
+  <a href="/admin/file?path={{ rel_path }}">view raw JSON</a>
+</p>
+
+<hr>
+
+{% block render_body %}
+<p class="muted">No body block.</p>
+{% endblock %}
+
+{% endblock %}

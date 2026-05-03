@@ -289,10 +289,11 @@ def test_voice_route_full_render(client: TestClient, tmp_path: Path, monkeypatch
         assert v in body
     for t in ("theme_001", "theme_002", "theme_003"):
         assert t in body
-    # Section headers from template:
-    assert "Step 1 — Private Reasoning" in body
+    # Section headers from template (sentence-case per 2026-05-04
+    # consistency pass — matches Researcher's "Node X — descriptor").
+    assert "Step 1 — private reasoning" in body
     assert "Validation" in body
-    assert "Step 2 — First-Draft Artifacts" in body
+    assert "Step 2 — first-draft artifacts" in body
     assert "Continuity" in body
     # Validation cells rendered (PASS markers):
     assert "anachronism: PASS" in body

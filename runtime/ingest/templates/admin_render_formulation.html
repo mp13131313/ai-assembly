@@ -1,0 +1,82 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+<section class="grid-block">
+  <h2>{{ data.theme_display_title or '—' }}</h2>
+  <p class="muted">
+    <strong>Voice:</strong> {{ data.member or '—' }}
+    &nbsp;·&nbsp; <strong>Theme:</strong> <code>{{ data.theme_id or '—' }}</code>
+    &nbsp;·&nbsp; <strong>Mode:</strong> <span class="state-pill state-done">{{ data.mode or '—' }}</span>
+  </p>
+</section>
+
+{% if data.rationale %}
+<section class="grid-block">
+  <h2>Rationale</h2>
+  <p class="muted">Why this theme is being put to this voice in this mode.</p>
+  <div class="prose-block">{{ data.rationale }}</div>
+</section>
+{% endif %}
+
+{% if data.context_narrative %}
+<section class="grid-block">
+  <h2>Context narrative</h2>
+  <p class="muted">The Researcher-derived context this formulation rests on.</p>
+  <div class="prose-block">{{ data.context_narrative }}</div>
+</section>
+{% endif %}
+
+{% if data.formulation %}
+<section class="grid-block">
+  <h2>Formulation as put to voice</h2>
+  <p class="muted">The actual question / proposition / scenario the voice will respond to in Step 1.</p>
+  <div class="prose-block">{{ data.formulation }}</div>
+</section>
+{% elif data.formulation_text %}
+<section class="grid-block">
+  <h2>Formulation as put to voice</h2>
+  <p class="muted">The actual question / proposition / scenario the voice will respond to in Step 1.</p>
+  <div class="prose-block">{{ data.formulation_text }}</div>
+</section>
+{% endif %}
+
+{% if data.narrative_briefing %}
+<section class="grid-block">
+  <h2>Narrative briefing</h2>
+  <p class="muted">The full briefing wrapping the formulation — what the voice sees as Stage 4 input.</p>
+  <div class="prose-block">{{ data.narrative_briefing }}</div>
+</section>
+{% endif %}
+
+{% if data.selected_quotes %}
+<section class="grid-block">
+  <h2>Selected quotes ({{ data.selected_quotes | length }})</h2>
+  <p class="muted">Source quotes from the panel transcripts the voice may build on.</p>
+  {% for q in data.selected_quotes %}
+    <div class="quote-card" style="border-left:3px solid var(--state-active); padding-left:1em; margin-bottom:1em;">
+      <p>{{ q.text or q }}</p>
+      {% if q is mapping %}
+      <p class="muted">
+        {% if q.speaker %}— <strong>{{ q.speaker }}</strong>{% endif %}
+        {% if q.session %}, {{ q.session }}{% endif %}
+        {% if q.extraction_id %} (<code>{{ q.extraction_id }}</code>){% endif %}
+      </p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if data.grounding_extraction_ids %}
+<section class="grid-block">
+  <h2>Grounding extractions</h2>
+  <p class="muted">Researcher extractions this formulation builds on.</p>
+  <ul>
+    {% for eid in data.grounding_extraction_ids %}
+      <li><code>{{ eid }}</code></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

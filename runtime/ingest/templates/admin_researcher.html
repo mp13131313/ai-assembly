@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Researcher · Night {{ night }}{% endblock %}
 {% block head_extra %}
-  <meta http-equiv="refresh" content="30">
+  <meta name="auto-refresh-seconds" content="30">
 {% endblock %}
 {% block content %}
 
@@ -31,43 +31,73 @@
   <div class="empty">
     <p>No run directory for Night {{ night }} yet.</p>
   </div>
-{% elif not payload.grouping_present %}
-  <div class="empty">
-    <p>Researcher hasn't produced <code>grouping.json</code> yet.</p>
-    <p class="muted">Will appear here once the orchestrator fires Stage 2.</p>
-  </div>
 {% else %}
 
 {% set t = payload.totals %}
+{% set n_extracted = payload.per_session | selectattr("extracted") | list | length %}
+{% set n_total = payload.per_session | length %}
+{% set node1_done = n_extracted == n_total and n_total > 0 %}
+{% set node2_done = payload.clusters_present %}
+{% set node3_done = payload.grouping_present %}
+
 <section class="voice-summary">
+  <p>
+    <strong>Node 1</strong>
+    {% if node1_done %}<span class="state-pill state-done">done</span>
+    {% elif n_extracted > 0 %}<span class="state-pill state-running">running ({{ n_extracted }}/{{ n_total }})</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+    &nbsp;·&nbsp;
+    <strong>Node 2</strong>
+    {% if node2_done %}<span class="state-pill state-done">done</span>
+    {% elif node1_done %}<span class="state-pill state-running">running</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+    &nbsp;·&nbsp;
+    <strong>Node 3</strong>
+    {% if node3_done %}<span class="state-pill state-done">done</span>
+    {% elif node2_done %}<span class="state-pill state-running">running</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+  </p>
   <p class="muted">
-    {{ t.n_themes }} theme{{ '' if t.n_themes == 1 else 's' }} ·
-    {{ t.n_clusters }} cluster{{ '' if t.n_clusters == 1 else 's' }} ·
-    {{ t.n_extractions_in_clusters }} extraction{{ '' if t.n_extractions_in_clusters == 1 else 's' }} in clusters
-    {% if t.n_isolates %}
-      · {{ t.n_isolates }} isolate{{ '' if t.n_isolates == 1 else 's' }}
-    {% endif %}
-    {% if t.n_extractions_total %}
-      · {{ t.n_extractions_total }} extraction{{ '' if t.n_extractions_total == 1 else 's' }} total
-    {% endif %}
+    {{ n_extracted }}/{{ n_total }} session{{ '' if n_total == 1 else 's' }} extracted
+    {% if node2_done %} · {{ t.n_clusters }} cluster{{ '' if t.n_clusters == 1 else 's' }}{% endif %}
+    {% if node3_done %} · {{ t.n_themes }} theme{{ '' if t.n_themes == 1 else 's' }}{% endif %}
+    {% if t.n_extractions_in_clusters %} · {{ t.n_extractions_in_clusters }} extractions in clusters{% endif %}
+    {% if t.n_isolates %} · {{ t.n_isolates }} isolate{{ '' if t.n_isolates == 1 else 's' }}{% endif %}
+    {% if t.n_extractions_total %} · {{ t.n_extractions_total }} extraction{{ '' if t.n_extractions_total == 1 else 's' }} total{% endif %}
   </p>
 </section>
 
 {# --- Per-session extraction summary -------------------------------- #}
 {% if payload.per_session %}
 <section class="grid-block">
-  <h2>Per-session extractions</h2>
+  <h2>
+    Node 1 — Per-session extractions
+    {% if node1_done %}<span class="state-pill state-done">done</span>
+    {% elif n_extracted > 0 %}<span class="state-pill state-running">{{ n_extracted }}/{{ n_total }}</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+  </h2>
   <table class="overview">
     <thead>
-      <tr><th>Session</th><th>Extractions</th><th>File</th></tr>
+      <tr><th>Session</th><th>Status</th><th>Extractions</th><th>File</th></tr>
     </thead>
     <tbody>
       {% for ps in payload.per_session %}
         <tr>
           <td><strong>{{ ps.session_slug }}</strong></td>
-          <td>{{ ps.n_extractions }}</td>
+          <td>
+            {% if ps.extracted %}
+              <span class="state-pill state-done">extracted</span>
+            {% else %}
+              <span class="state-pill state-pending">pending</span>
+            {% endif %}
+          </td>
+          <td>{{ ps.n_extractions if ps.n_extractions is not none else "—" }}</td>
           <td class="muted file-links">
-            <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/{{ ps.filename }}">{{ ps.filename }}</a>
+            {% if ps.extracted %}
+              <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/{{ ps.filename }}">{{ ps.filename }}</a>
+            {% else %}
+              <span class="muted">—</span>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}
@@ -76,22 +106,75 @@
 </section>
 {% endif %}
 
-{# --- Theme tree ---------------------------------------------------- #}
+{# --- Node 2 — Clusters (always shown when Node 2 has produced clusters) #}
+{% if payload.clusters_present %}
 <section class="grid-block">
-  <h2>Themes</h2>
+  <h2>
+    Node 2 — Clusters ({{ payload.all_clusters | length }})
+    <span class="state-pill state-done">done</span>
+  </h2>
+  <p class="muted">Affinity-grouped extractions. <strong>Sessions</strong> = number of distinct panels the cluster's extractions came from (1 = single-panel; >1 = cross-panel).</p>
+  <table class="overview">
+    <thead>
+      <tr><th>Cluster</th><th>Title</th><th>Abstract</th><th>Extractions</th><th>Sessions</th></tr>
+    </thead>
+    <tbody>
+      {% for c in payload.all_clusters %}
+        <tr>
+          <td><code>{{ c.cluster_id }}</code></td>
+          <td><strong>{{ c.cluster_title }}</strong></td>
+          <td class="muted">{{ c.cluster_abstract }}</td>
+          <td>{{ c.n_extractions }}</td>
+          <td>{{ c.n_sessions }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% else %}
+<section class="grid-block">
+  <h2>
+    Node 2 — Clustering
+    {% if node1_done %}<span class="state-pill state-running">running</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+  </h2>
+  <p class="muted">Clusters appear here after Node 1 finishes for all sessions.</p>
+</section>
+{% endif %}
+
+{# --- Node 3 placeholder (themes not yet present) ------------------- #}
+{% if not payload.grouping_present %}
+<section class="grid-block">
+  <h2>
+    Node 3 — Theming
+    {% if node2_done %}<span class="state-pill state-running">running</span>
+    {% else %}<span class="state-pill state-pending">pending</span>{% endif %}
+  </h2>
+  <p class="muted">Themes appear after Node 2 (clustering) completes.</p>
+</section>
+{% endif %}
+
+{# --- Theme tree (only when Node 3 grouping.json has landed) -------- #}
+{% if payload.grouping_present %}
+<section class="grid-block">
+  <h2>
+    Node 3 — Themes
+    <span class="state-pill state-done">done</span>
+  </h2>
   {% for theme in payload.themes %}
     <div class="theme-block">
       <h3>
         {{ theme.theme_id }} — {{ theme.title }}
         <span class="muted">({{ theme.n_clusters }} cluster{{ '' if theme.n_clusters == 1 else 's' }} ·
-          {{ theme.n_extractions }} extraction{{ '' if theme.n_extractions == 1 else 's' }})</span>
+          {{ theme.n_extractions }} extraction{{ '' if theme.n_extractions == 1 else 's' }} ·
+          {{ theme.n_sessions }} session{{ '' if theme.n_sessions == 1 else 's' }})</span>
       </h3>
       {% if theme.abstract %}
         <p class="theme-abstract">{{ theme.abstract }}</p>
       {% endif %}
       <table class="overview">
         <thead>
-          <tr><th>Cluster</th><th>Title</th><th>Extractions</th></tr>
+          <tr><th>Cluster</th><th>Title</th><th>Extractions</th><th>Sessions</th></tr>
         </thead>
         <tbody>
           {% for c in theme.clusters %}
@@ -104,6 +187,7 @@
                 {% endif %}
               </td>
               <td>{{ c.n_extractions }}</td>
+              <td>{{ c.n_sessions }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -111,6 +195,7 @@
     </div>
   {% endfor %}
 </section>
+{% endif %}
 
 {# --- Isolates ------------------------------------------------------ #}
 {% if payload.isolates %}
@@ -135,7 +220,4 @@
 {% endif %}
 
 {% endif %}
-{% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
 {% endblock %}

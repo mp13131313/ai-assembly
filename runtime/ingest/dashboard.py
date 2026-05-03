@@ -151,8 +151,30 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
 
 
 def _researcher_summary(run_dir: Path) -> dict[str, Any]:
-    grouping = _read_json_or_none(run_dir / "02_researcher" / "grouping.json")
+    rsr_dir = run_dir / "02_researcher"
+    grouping = _read_json_or_none(rsr_dir / "grouping.json")
     if grouping is None:
+        # Detect mid-flight states: per-session *_extractions.json files
+        # appear during Node 1; all_extractions.json after Node 1 finishes
+        # for all sessions; clusters.json after Node 2; grouping.json
+        # after Node 3. Surface progress so operator isn't staring at grey.
+        per_session_files = [
+            p for p in rsr_dir.glob("*_extractions.json")
+            if p.name != "all_extractions.json"
+        ] if rsr_dir.exists() else []
+        clusters_present = (rsr_dir / "clusters.json").exists()
+        all_extractions_present = (rsr_dir / "all_extractions.json").exists()
+        if clusters_present:
+            return _stage_summary("running", "Node 3 (theming) in progress")
+        if all_extractions_present:
+            return _stage_summary("running", "Node 2 (clustering) in progress")
+        if per_session_files:
+            return _stage_summary(
+                "running",
+                f"Node 1 (extraction) {len(per_session_files)} session{'' if len(per_session_files) == 1 else 's'} done"
+            )
+        # Still pending — Researcher hasn't written anything yet, but if
+        # transcription is done it should be running soon.
         return _stage_summary("pending")
     themes = grouping.get("themes", [])
     n_themes = len(themes)
@@ -171,19 +193,58 @@ def _researcher_summary(run_dir: Path) -> dict[str, Any]:
         label += f" · {n_isolates} isolates"
     return _stage_summary(
         "done", label,
-        mtime=_file_mtime_iso(run_dir / "02_researcher" / "grouping.json"),
+        mtime=_file_mtime_iso(rsr_dir / "grouping.json"),
         themes=n_themes, clusters=n_clusters, extractions=n_extractions,
     )
 
 
 def _provocateur_summary(run_dir: Path) -> dict[str, Any]:
-    manifest = _read_json_or_none(run_dir / "03_provocateur" / "manifest.json")
+    prov_dir = run_dir / "03_provocateur"
+    manifest = _read_json_or_none(prov_dir / "manifest.json")
     if manifest is None:
-        # Was Researcher already done? If so, Provocateur is "running" (it should
-        # have started); if not, "pending".
-        if (run_dir / "02_researcher" / "grouping.json").exists():
-            return _stage_summary("running")
-        return _stage_summary("pending")
+        if not (run_dir / "02_researcher" / "grouping.json").exists():
+            return _stage_summary("pending")
+        # Provocateur is running; report which sub-phase based on what files
+        # exist on disk. Phases (in order, per provocateur_flow.py):
+        #   1. triage_flags.json — global theme flags
+        #   2. triage_voices/<slug>.json — per-voice triage (N files, one per
+        #      council member, written in parallel)
+        #   3. selection.json — kept/dropped + assignments
+        #   4. briefings/<slug>.json — per-voice (one per voice)
+        #   5. formulations/<theme>__<voice>.json — per (theme, voice) pair
+        #   6. manifest.json — final, signals done
+        formulations_done = (
+            len(list((prov_dir / "formulations").glob("*.json")))
+            if (prov_dir / "formulations").exists() else 0
+        )
+        if formulations_done > 0:
+            return _stage_summary(
+                "running",
+                f"formulating ({formulations_done} pair{'' if formulations_done == 1 else 's'} done)"
+            )
+        briefings_done = (
+            len(list((prov_dir / "briefings").glob("*.json")))
+            if (prov_dir / "briefings").exists() else 0
+        )
+        if briefings_done > 0:
+            return _stage_summary(
+                "running",
+                f"briefing voices ({briefings_done} written)"
+            )
+        if (prov_dir / "selection.json").exists():
+            return _stage_summary("running", "selection complete; briefings starting")
+        triage_voices_done = (
+            len(list((prov_dir / "triage_voices").glob("*.json")))
+            if (prov_dir / "triage_voices").exists() else 0
+        )
+        if triage_voices_done > 0:
+            return _stage_summary(
+                "running",
+                f"triaging voices ({triage_voices_done}/{_council_size(run_dir)})"
+            )
+        if (prov_dir / "triage_flags.json").exists():
+            return _stage_summary("running", "theme flags done; per-voice triage starting")
+        return _stage_summary("running", "starting (theme flags pending)")
     out = manifest.get("outputs", {})
     n_themes = out.get("selected_themes", 0)
     n_dropped = out.get("dropped_themes", 0)
@@ -198,9 +259,60 @@ def _provocateur_summary(run_dir: Path) -> dict[str, Any]:
         label += f" · {n_dropped} dropped"
     return _stage_summary(
         "done", label,
-        mtime=_file_mtime_iso(run_dir / "03_provocateur" / "manifest.json"),
+        mtime=_file_mtime_iso(prov_dir / "manifest.json"),
         themes=n_themes, formulations=n_formulations,
     )
+
+
+def _build_coverage_by_slug(
+    sel: dict, voices: list, *, council_name_to_slug: dict
+) -> dict:
+    """Build a {voice_slug: {got, target, below}} lookup from selection data.
+
+    `sel.below_target` carries (voice_display_name, got, target) entries;
+    `sel.coverage_per_member` carries (voice_display_name → got). Combine
+    + map back to slugs so the Provocateur drilldown can render per-voice
+    coverage without the operator having to scroll to the warning section.
+    """
+    target_default = 0
+    for bt in sel.get("below_target", []) or []:
+        if isinstance(bt, dict) and bt.get("target"):
+            target_default = bt["target"]
+            break
+
+    out: dict = {}
+    coverage = sel.get("coverage_per_member", {}) or {}
+    below_set = {
+        bt["voice"] for bt in (sel.get("below_target", []) or [])
+        if isinstance(bt, dict) and bt.get("voice")
+    }
+    for voice_row in voices:
+        slug = voice_row["voice_slug"]
+        # Reverse-lookup display name from slug.
+        display = None
+        for nm, sl in council_name_to_slug.items():
+            if sl == slug:
+                display = nm
+                break
+        got = coverage.get(display, 0) if display else 0
+        out[slug] = {
+            "got": got,
+            "target": target_default,
+            "below": display in below_set if display else False,
+        }
+    return out
+
+
+def _council_size(run_dir: Path) -> int:
+    """Try to read the council member count from PROJECT_ROOT/council_config.json."""
+    try:
+        from .config import PROJECT_ROOT
+        cfg = _read_json_or_none(PROJECT_ROOT / "council_config.json")
+        if cfg and isinstance(cfg.get("members"), list):
+            return len(cfg["members"])
+    except Exception:
+        pass
+    return 0
 
 
 def _voice_summary(run_dir: Path) -> dict[str, Any]:
@@ -488,26 +600,82 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
     val_cells = voice_validation_grid(run_dir)
     s2_voices = voice_step2_list(run_dir)
 
-    # Voices and themes — derived from Step 1 cells (most complete view) +
-    # Step 2 voices (in case Step 2 ran for more voices than Step 1 cells
-    # we picked up). Order: voices alphabetically by slug; themes by id.
+    # Voices and themes — seed from upstream Provocateur (briefings/<slug>.json
+    # one per voice; full_theme_record for each (voice, theme) pair). This
+    # ensures the matrix shows ALL expected voices/themes from the start of
+    # Step 1, not only the ones whose Step 1 outputs have already landed.
+    # Step 1 / Step 2 cells overlay actual progress on top.
     voices_set: set[str] = set()
     themes_set: set[str] = set()
-    voice_council: dict[str, str] = {}
+    voice_display: dict[str, str] = {}
     theme_titles: dict[str, str] = {}
+
+    # Build a slug → council display name lookup from PROJECT_ROOT
+    # council_config.json. The council uses display names ("Ada Lovelace");
+    # voice slugs are folder names ("ada_lovelace"). Match by lowercased
+    # name with underscores → spaces.
+    from .config import PROJECT_ROOT
+    council = _read_json_or_none(PROJECT_ROOT / "council_config.json") or {}
+    council_name_by_slug: dict[str, str] = {}
+    for m in council.get("members", []) or []:
+        nm = m.get("name") or ""
+        slug = nm.lower().replace(" ", "_").replace("'", "")
+        if slug and nm:
+            council_name_by_slug[slug] = nm
+
+    # Seed voices from briefings/ directory + collect EXPECTED (voice, theme)
+    # pairs (the ones the Provocateur selected for formulation). The Voice
+    # pipeline only runs Step 1 for these pairs — every other cell in the
+    # voice × theme matrix should render as "not selected" rather than
+    # "pending forever".
+    expected_pairs: set[tuple[str, str]] = set()
+    briefings_dir = run_dir / "03_provocateur" / "briefings"
+    if briefings_dir.exists():
+        for bp in sorted(briefings_dir.glob("*.json")):
+            slug = bp.stem
+            voices_set.add(slug)
+            voice_display[slug] = (
+                council_name_by_slug.get(slug)
+                or slug.replace("_", " ").title()
+            )
+            data = _read_json_or_none(bp) or {}
+            for f in data.get("formulations", []) or []:
+                tid = f.get("theme_id")
+                if tid:
+                    themes_set.add(tid)
+                    expected_pairs.add((slug, tid))
+
+    # Seed themes from Researcher's grouping.json — stable titles, one per
+    # theme. Matches what we did for Provocateur drilldown.
+    grouping = _read_json_or_none(run_dir / "02_researcher" / "grouping.json")
+    if grouping is not None:
+        for t in grouping.get("themes", []) or []:
+            tid = t.get("theme_id")
+            if tid:
+                theme_titles[tid] = t.get("title") or tid
+
+    # Overlay actual Step 1 / Step 2 progress. Don't overwrite voice_display
+    # — council_member from Step 1/2 is the long identity-prefix opening
+    # ("I am Augusta Ada King…") which is unsuitable as a display name.
     for c in s1_cells:
         voices_set.add(c["voice_slug"])
         themes_set.add(c["theme_id"])
-        voice_council[c["voice_slug"]] = c["council_member"]
-        theme_titles[c["theme_id"]] = c["theme_display_title"]
+        voice_display.setdefault(
+            c["voice_slug"],
+            council_name_by_slug.get(c["voice_slug"], c["voice_slug"].replace("_", " ").title()),
+        )
+        theme_titles.setdefault(c["theme_id"], c["theme_display_title"])
     for v in s2_voices:
         voices_set.add(v["voice_slug"])
-        voice_council[v["voice_slug"]] = v["council_member"]
+        voice_display.setdefault(
+            v["voice_slug"],
+            council_name_by_slug.get(v["voice_slug"], v["voice_slug"].replace("_", " ").title()),
+        )
         for tid in v["themes_covered"]:
             themes_set.add(tid)
 
     voices = [
-        {"voice_slug": s, "council_member": voice_council.get(s, s)}
+        {"voice_slug": s, "council_member": voice_display.get(s, s)}
         for s in sorted(voices_set)
     ]
     themes = [
@@ -522,6 +690,10 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
     # Manifest for top-line counts (validation_failures, etc.).
     manifest = _read_json_or_none(run_dir / "04_voice" / "manifest.json") or {}
 
+    # Expose expected pairs as a flat list of "voice_slug|theme_id" strings
+    # — Jinja2 lookups with tuple keys are awkward; strings work cleanly.
+    expected_pairs_list = sorted(f"{v}|{t}" for v, t in expected_pairs)
+
     return {
         "night": night,
         "run_id": run_dir.name,
@@ -529,6 +701,7 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         "run_exists": True,
         "voices": voices,
         "themes": themes,
+        "expected_pairs": expected_pairs_list,
         "step1_cells": s1_cells,
         "validation_cells": val_cells,
         "step2_voices": s2_voices,
@@ -571,60 +744,125 @@ def collect_researcher_detail(night: int) -> dict[str, Any]:
         return {**base, "run_exists": False, "themes": [], "isolates": [],
                 "per_session": [], "totals": {}}
 
-    grouping = _read_json_or_none(run_dir / "02_researcher" / "grouping.json")
-    if grouping is None:
-        return {**base, "run_exists": True, "themes": [], "isolates": [],
-                "per_session": [], "totals": {},
-                "grouping_present": False}
+    rsr_dir = run_dir / "02_researcher"
+    grouping = _read_json_or_none(rsr_dir / "grouping.json")
+    clusters_only = _read_json_or_none(rsr_dir / "clusters.json")
 
-    themes = []
-    n_clusters_total = 0
-    n_extractions_in_clusters = 0
-    for t in grouping.get("themes", []):
-        clusters = []
-        for c in t.get("clusters", []):
+    # Helper: extraction IDs are namespaced `<session_slug>:<NNN>`. Count
+    # distinct session_slug prefixes — exposes how many panels each cluster
+    # or theme draws from (1 = single-panel cluster; >1 = cross-panel).
+    def _n_sessions(ext_ids: list[str]) -> int:
+        return len({eid.split(":", 1)[0] for eid in ext_ids if isinstance(eid, str) and ":" in eid})
+
+    # Always-rendered clusters list — built from clusters.json (preferred,
+    # raw Node 2 output) or grouping.json (fallback, when clusters.json is
+    # absent but grouping.json reconstructs it). Shown in its own section so
+    # the operator can see what Node 2 produced even after Node 3 has wrapped
+    # the clusters into themes.
+    all_clusters: list[dict[str, Any]] = []
+    if clusters_only is not None:
+        for c in clusters_only.get("clusters", []) or []:
             ext_ids = c.get("extraction_ids", []) or []
-            n_extractions_in_clusters += len(ext_ids)
-            n_clusters_total += 1
-            clusters.append({
+            all_clusters.append({
                 "cluster_id": c.get("cluster_id"),
                 "cluster_title": c.get("cluster_title"),
                 "cluster_abstract": c.get("cluster_abstract"),
                 "n_extractions": len(ext_ids),
+                "n_sessions": _n_sessions(ext_ids),
             })
-        themes.append({
-            "theme_id": t.get("theme_id"),
-            "title": t.get("title"),
-            "abstract": t.get("abstract"),
-            "n_clusters": len(clusters),
-            "n_extractions": sum(c["n_extractions"] for c in clusters),
-            "clusters": clusters,
-        })
-    isolates = grouping.get("isolates", []) or []
+        cluster_isolates = clusters_only.get("isolates", []) or []
+    elif grouping is not None:
+        for t in grouping.get("themes", []):
+            for c in t.get("clusters", []):
+                ext_ids = c.get("extraction_ids", []) or []
+                all_clusters.append({
+                    "cluster_id": c.get("cluster_id"),
+                    "cluster_title": c.get("cluster_title"),
+                    "cluster_abstract": c.get("cluster_abstract"),
+                    "n_extractions": len(ext_ids),
+                    "n_sessions": _n_sessions(ext_ids),
+                    "theme_id": t.get("theme_id"),
+                })
+        cluster_isolates = grouping.get("isolates", []) or []
+    else:
+        cluster_isolates = []
 
-    # Per-session extraction summary — every <session_id>_extractions.json or
-    # <session_id>/extractions.json the Researcher input reading produced.
-    # The naming convention is loose (<some_slug>_extractions.json), so we
-    # glob and report whatever's there.
-    per_session = []
-    rsr_dir = run_dir / "02_researcher"
+    # Themes are only knowable from grouping.json (Node 3 output).
+    themes = []
+    n_clusters_total = len(all_clusters)
+    n_extractions_in_clusters = sum(c["n_extractions"] for c in all_clusters)
+    if grouping is not None:
+        for t in grouping.get("themes", []):
+            clusters = []
+            theme_ext_ids: list[str] = []
+            for c in t.get("clusters", []):
+                ext_ids = c.get("extraction_ids", []) or []
+                theme_ext_ids.extend(ext_ids)
+                clusters.append({
+                    "cluster_id": c.get("cluster_id"),
+                    "cluster_title": c.get("cluster_title"),
+                    "cluster_abstract": c.get("cluster_abstract"),
+                    "n_extractions": len(ext_ids),
+                    "n_sessions": _n_sessions(ext_ids),
+                })
+            themes.append({
+                "theme_id": t.get("theme_id"),
+                "title": t.get("title"),
+                "abstract": t.get("abstract"),
+                "n_clusters": len(clusters),
+                "n_extractions": sum(c["n_extractions"] for c in clusters),
+                "n_sessions": _n_sessions(theme_ext_ids),
+                "clusters": clusters,
+            })
+        isolates = grouping.get("isolates", []) or []
+    else:
+        isolates = cluster_isolates
+
+    # Per-session extraction summary — pre-populate one row per upstream
+    # transcription session_package.json so the operator sees the full
+    # expected session list mid-Node-1, with each row's status flipping
+    # from "pending" to extracted as <sid>_extractions.json files appear.
+    per_session: list[dict[str, Any]] = []
+    expected_sids: list[str] = []
+    transcription_dir = run_dir / "01_transcription"
+    if transcription_dir.exists():
+        for sd in sorted(transcription_dir.iterdir()):
+            if not sd.is_dir():
+                continue
+            if (sd / "session_package.json").exists():
+                expected_sids.append(sd.name)
+
+    for sid in expected_sids:
+        per_session.append({
+            "session_slug": sid,
+            "filename": f"{sid}_extractions.json",
+            "n_extractions": None,
+            "mtime": None,
+            "extracted": False,
+        })
+
+    # Overlay actual extraction file data when present.
+    by_slug = {row["session_slug"]: row for row in per_session}
     for p in sorted(rsr_dir.glob("*_extractions.json")):
         if p.name == "all_extractions.json":
             continue
         data = _read_json_or_none(p) or {}
-        # The per-session extractions file may be a dict with `extractions`
-        # or a top-level list. Handle both.
         if isinstance(data, list):
             n_ext = len(data)
         elif isinstance(data, dict):
             n_ext = len(data.get("extractions", []) or data.get("items", []) or [])
         else:
             n_ext = 0
-        per_session.append({
+        slug = p.stem.replace("_extractions", "")
+        row = by_slug.get(slug)
+        if row is None:
+            row = {"session_slug": slug}
+            per_session.append(row)
+        row.update({
             "filename": p.name,
-            "session_slug": p.stem.replace("_extractions", ""),
             "n_extractions": n_ext,
             "mtime": _file_mtime_iso(p),
+            "extracted": True,
         })
 
     all_ext_path = rsr_dir / "all_extractions.json"
@@ -648,9 +886,14 @@ def collect_researcher_detail(night: int) -> dict[str, Any]:
     return {
         **base,
         "run_exists": True,
-        "grouping_present": True,
-        "grouping_mtime": _file_mtime_iso(rsr_dir / "grouping.json"),
+        "grouping_present": grouping is not None,
+        "clusters_present": clusters_only is not None or grouping is not None,
+        "grouping_mtime": (
+            _file_mtime_iso(rsr_dir / "grouping.json") if grouping is not None else None
+        ),
+        "clusters_mtime": _file_mtime_iso(rsr_dir / "clusters.json"),
         "themes": themes,
+        "all_clusters": all_clusters,
         "isolates": isolates,
         "per_session": per_session,
         "totals": totals,
@@ -780,13 +1023,28 @@ def collect_provocateur_detail(night: int) -> dict[str, Any]:
         voice_name.setdefault(fc["voice_slug"], fc["council_member"])
         if fc["theme_id"]:
             themes_set.add(fc["theme_id"])
-            theme_titles[fc["theme_id"]] = fc["theme_display_title"]
 
     # Theme flags — list of per-theme metadata.
     theme_flags = (triage_flags or {}).get("theme_flags", []) or []
     for tf in theme_flags:
         if tf.get("theme_id"):
             themes_set.add(tf["theme_id"])
+
+    # Use the Researcher's stable theme titles from grouping.json (one per
+    # theme) for column headers — NOT the Provocateur's per-(voice, theme)
+    # `theme_display_title` (which is a voice-flavored reframing that varies
+    # by voice and would make the matrix headers inconsistent across rows).
+    grouping = _read_json_or_none(run_dir / "02_researcher" / "grouping.json")
+    if grouping is not None:
+        for t in grouping.get("themes", []) or []:
+            tid = t.get("theme_id")
+            if tid:
+                theme_titles[tid] = t.get("title") or tid
+    # Fallback for any theme_id not in grouping (e.g. Provocateur dropped
+    # or renamed) — use the Provocateur's title as a last resort.
+    for fc in formulation_cells:
+        if fc["theme_id"] and fc["theme_id"] not in theme_titles:
+            theme_titles[fc["theme_id"]] = fc["theme_display_title"]
 
     voices = [
         {"voice_slug": s, "voice_name": voice_name.get(s, s)}
@@ -821,6 +1079,15 @@ def collect_provocateur_detail(night: int) -> dict[str, Any]:
             "stretch_swaps": sel.get("stretch_swaps", []) or [],
             "below_target": sel.get("below_target", []) or [],
         },
+        # Per-voice {got, target} keyed by voice_slug — surfaces in the
+        # Formulations grid row header so operator sees per-voice coverage
+        # at a glance instead of having to scroll to the warning section.
+        "coverage_by_slug": _build_coverage_by_slug(
+            sel, voices, council_name_to_slug={
+                m.get("name"): m.get("name", "").lower().replace(" ", "_").replace("'", "")
+                for m in (_read_json_or_none(PROJECT_ROOT / "council_config.json") or {}).get("members", [])
+            },
+        ),
         "counts": {
             "n_themes_selected": counts.get("selected_themes", 0),
             "n_themes_dropped": counts.get("dropped_themes", 0),

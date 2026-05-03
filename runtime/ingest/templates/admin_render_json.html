@@ -1,0 +1,9 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+<section class="grid-block">
+  <p class="muted">No schema-aware view for this artifact type yet — pretty-printed JSON below.</p>
+  <pre class="json-pretty" style="background:var(--ink-bg-soft); padding:1em; overflow-x:auto; font-size:.85em; line-height:1.4;">{{ json_pretty }}</pre>
+</section>
+
+{% endblock %}
