@@ -205,6 +205,21 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; voices thread is constructing per `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. *Operator-side.* Until shipped, runtime uses the schema-valid stub at `runtime/tests/fixtures/claudia_pinchbeck_stub.json` for smoke tests.
 2. **`editor_dossier.md` closing prompt rewrite to v2 contract.** A v1 version exists at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines, 2026-05-02) but is written against v1 input/output fields (in_brief_voices, primary_contributors, refusals as input, marathon_panel_source, lead_headline + lead_subdeck + lead_teaser, single article body string, etc.) — all of which v2 dropped or replaced. **The current closing prompt MUST NOT be used for production v2 calls;** rewrite needed (~30-60 min, mechanical against §"Output Schema (v2)" + §"Stage 2 — Per-call inputs (v2 contract)").
 
+**Wiring proof — single-dossier live test 2026-05-04** (~$1.50 spent against real Anthropic):
+
+Ran `editor_flow.py <run_dir> --night 1 --single-dossier theme_001` against the MSC dryrun output (PROJECT_ROOT at `projects/current-tests/dev_msc_dryrun_1777840771/`) with the schema-valid stub Claudia card staged at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`.
+
+Result:
+- ✅ **Stage 1 routing**: 7 voices → 3 dossiers; theme_001 dossier got 3 voices (the ones whose `focus_decision` parsed to theme_001 as primary). 2 parser fall-throughs (Battuta + Octopus due to long focus_decision strings) recovered correctly via `voices_covered` fallback.
+- ✅ **Stage 2 Anthropic call**: 177s wall, 11954 output tokens — Claudia did write a substantive v1-shaped dossier.
+- ❌ **v2 parser extraction**: kicker / headline / subline all empty strings; `body_paragraphs` empty; `front_abstract` empty length; only 3 headnotes (the runtime-stamped voice slots, not Claudia's text).
+- ✅ **Dual write**: file landed at both `runs/athens_night_1/05_editor/dossiers/dossier_001.json` AND `published_artifacts/dossiers/night_1/dossier_001.json`.
+- ✅ **No crashes**: pipeline ran end-to-end; manifest written correctly; `dossiers_succeeded=1, dossiers_failed=0`.
+
+**Verdict:** wiring is sound; the closing-prompt rewrite (item 2 above) is the actual blocker for first usable editor output. Stage 1 routing + Stage 2 mechanics + dual-write + manifest contract all empirically validated against real (paid) Anthropic call.
+
+---
+
 **Implementation shipped (commit `1437dfc`):**
 
 - `runtime/flows/editor_flow.py` — CLI entry + orchestrator (parallel ThreadPoolExecutor across dossiers within a night)
