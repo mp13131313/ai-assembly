@@ -48,16 +48,21 @@ ADMIN_AUTH = ("admin", "admin_pw")  # for routes that became admin-only post-C23
 
 @pytest.fixture
 def flagged_session_id() -> str:
-    """Return the session_id of the first ai_assembly-flagged Day One session.
+    """Return the session_id of the first ai_assembly-flagged, audio-source
+    Day One session.
 
-    Skips the test if none are flagged (prevents false failures when the dev
-    is running a clean checkout).
+    Vendor-source sessions (audio_source: "vendor") skip Stage 0 + the
+    upload UI entirely and return 409 from /session/{id}/upload — those
+    aren't a fit for the upload-path tests in this file.
+
+    Skips the test if no eligible session exists (prevents false failures
+    when the dev is running a clean checkout).
     """
     from ingest.sessions import load_sessions
     for s in load_sessions():
-        if s.ai_assembly and s.day == "Day One":
+        if s.ai_assembly and s.day == "Day One" and not s.is_vendor:
             return s.session_id
-    pytest.skip("no ai_assembly=true session found; flag one to run this test")
+    pytest.skip("no ai_assembly=true audio session found; flag one to run this test")
 
 
 @pytest.fixture
@@ -231,3 +236,83 @@ def test_overwrite_requires_flag(
         content=data, auth=AUTH,
     )
     assert r3.status_code == 200
+
+
+# --- Vendor-aware session routes (audio_source: "vendor", 2026-05-03) -------
+
+
+@pytest.fixture
+def vendor_session_id() -> str:
+    """Return the session_id of the first ai_assembly + vendor-source session.
+
+    Vendor sessions land via flows/vendor_intake.py at the 01_transcription
+    boundary; the upload UI must refuse audio for them. These tests pin
+    that contract.
+    """
+    from ingest.sessions import load_sessions
+    for s in load_sessions():
+        if s.ai_assembly and s.is_vendor:
+            return s.session_id
+    pytest.skip("no audio_source=vendor session found")
+
+
+def test_producer_index_excludes_vendor_sessions(
+    client: TestClient, vendor_session_id: str
+):
+    # Producer's index should not surface vendor sessions — they're not the
+    # producer's responsibility (no audio to upload).
+    r = client.get("/", auth=AUTH)
+    assert r.status_code == 200
+    assert vendor_session_id not in r.text
+
+
+def test_admin_index_includes_vendor_sessions(
+    client: TestClient, vendor_session_id: str
+):
+    # Admin sees everything for situational awareness.
+    r = client.get("/", auth=ADMIN_AUTH)
+    assert r.status_code == 200
+    assert vendor_session_id in r.text
+
+
+def test_producer_get_vendor_session_detail_403(
+    client: TestClient, vendor_session_id: str
+):
+    r = client.get(f"/session/{vendor_session_id}", auth=AUTH)
+    assert r.status_code == 403
+    assert "vendor" in r.json()["detail"].lower()
+
+
+def test_admin_get_vendor_session_detail_ok(
+    client: TestClient, vendor_session_id: str
+):
+    r = client.get(f"/session/{vendor_session_id}", auth=ADMIN_AUTH)
+    assert r.status_code == 200
+
+
+def test_upload_to_vendor_session_409_for_admin(
+    client: TestClient, vendor_session_id: str
+):
+    # Even admin can't accidentally upload audio to a vendor session — the
+    # bytes would be orphaned (no Stage 0 trigger) and would muddy the
+    # dashboard.
+    r = client.post(
+        f"/session/{vendor_session_id}/upload",
+        params={"filename": "x.m4a"}, content=b"junk", auth=ADMIN_AUTH,
+    )
+    assert r.status_code == 409
+    assert "vendor" in r.json()["detail"].lower()
+
+
+def test_retry_on_vendor_session_409(
+    client: TestClient, vendor_session_id: str, tmp_path: Path
+):
+    # Pre-create a session_dir so retry doesn't 404 first.
+    sdir = pipeline.RUNS_DIR / "athens_night_1" / "01_transcription" / vendor_session_id
+    sdir.mkdir(parents=True, exist_ok=True)
+    (sdir / "status.json").write_text(
+        json.dumps({"state": "done", "source": "vendor"})
+    )
+    r = client.post(f"/session/{vendor_session_id}/retry", auth=ADMIN_AUTH)
+    assert r.status_code == 409
+    assert "vendor_intake" in r.json()["detail"]

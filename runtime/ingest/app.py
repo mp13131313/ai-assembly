@@ -114,6 +114,20 @@ def _require_session_and_dir(session_id: str) -> tuple[Session, Path]:
     return sess, sdir
 
 
+def _forbid_producer_on_vendor(sess: Session, role: str) -> None:
+    """Vendor sessions land via flows/vendor_intake.py — there is no producer
+    audio for them. Producers hitting these routes by URL get 403 with a
+    clear message rather than a confusing upload form they can't usefully fill."""
+    if role != "admin" and sess.is_vendor:
+        raise HTTPException(
+            http.HTTP_403_FORBIDDEN,
+            detail=(
+                "this session is vendor-supplied (no producer upload). "
+                "the operator lands the transcript via flows/vendor_intake.py."
+            ),
+        )
+
+
 def _validate_extension(filename: str) -> str:
     """Return the lowercased extension including the dot, or 400."""
     ext = Path(filename).suffix.lower()
@@ -215,7 +229,14 @@ def logout() -> Response:
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, role: str = Depends(require_auth)):
     sessions = load_sessions()
-    flagged = [s for s in sessions if s.ai_assembly]
+    # Producers see only audio-source sessions — vendor sessions land via
+    # flows/vendor_intake.py at the 01_transcription boundary, not via this
+    # upload UI, so showing them as "missing upload" rows would mislead.
+    # Admins see everything (vendor rows render with a distinct pill).
+    if role == "admin":
+        flagged = [s for s in sessions if s.ai_assembly]
+    else:
+        flagged = [s for s in sessions if s.ai_assembly and not s.is_vendor]
     # Group by day_index for the template; also pass a list of days present.
     by_day: dict[str, list[Session]] = {}
     for s in flagged:
@@ -305,6 +326,7 @@ def overview_json(_: str = Depends(require_admin)):
 @app.get("/session/{session_id}", response_class=HTMLResponse)
 def session_detail(session_id: str, request: Request, role: str = Depends(require_auth)):
     sess, sdir = _require_session_and_dir(session_id)
+    _forbid_producer_on_vendor(sess, role)
     speakers = load_speakers()
     roster, missing_bios = derive_roster(sess, speakers)
     existing = _existing_audio_info(sdir) if sdir.exists() else None
@@ -337,7 +359,7 @@ async def upload(
     session_id: str,
     request: Request,
     background: BackgroundTasks,
-    _: str = Depends(require_auth),  # both roles can upload
+    role: str = Depends(require_auth),  # both roles can upload audio
 ):
     """Stream request body to disk, validate, kick off pipeline.
 
@@ -346,6 +368,17 @@ async def upload(
       overwrite: "true" to allow replacing an existing audio.m4a
     """
     sess, sdir = _require_session_and_dir(session_id)
+    # Vendor sessions take no audio — block any uploader (incl. admin via
+    # browser quirks) from accidentally writing audio bytes that would
+    # never be processed and would just confuse the dashboard.
+    if sess.is_vendor:
+        raise HTTPException(
+            http.HTTP_409_CONFLICT,
+            detail=(
+                "this session is vendor-supplied (audio_source=vendor); "
+                "transcripts land via flows/vendor_intake.py, not the upload form."
+            ),
+        )
 
     filename = request.query_params.get("filename", "")
     overwrite = request.query_params.get("overwrite", "").lower() == "true"
@@ -520,6 +553,14 @@ def session_retry(session_id: str, _: str = Depends(require_admin)):
     sess, sdir = _require_session_and_dir(session_id)
     if not sdir.exists():
         raise HTTPException(http.HTTP_404_NOT_FOUND, detail="no session dir")
+    if sess.is_vendor:
+        raise HTTPException(
+            http.HTTP_409_CONFLICT,
+            detail=(
+                "vendor session — retry by re-running flows/vendor_intake.py "
+                "from tmux on the VM, not via this endpoint."
+            ),
+        )
     # Rebuild session.json too — speakers.json may have been updated with new bios.
     speakers = load_speakers()
     session_json_path = sdir / "session.json"
@@ -594,7 +635,16 @@ def admin_tonight_transcription(
         if not sdir:
             continue
         st = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
-        rows.append({"session": s, "status": st})
+        # Vendor sidecars: flag the presence so the template can show a
+        # "warnings" / "error" file link without re-reading the files.
+        has_vendor_warnings = sdir.exists() and (sdir / "vendor.warnings").exists()
+        has_vendor_error = sdir.exists() and (sdir / "vendor.error").exists()
+        rows.append({
+            "session": s,
+            "status": st,
+            "has_vendor_warnings": has_vendor_warnings,
+            "has_vendor_error": has_vendor_error,
+        })
     order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
     rows.sort(key=lambda r: (
         order.get(r["status"].get("state"), 9),

@@ -681,6 +681,14 @@ table.stages-table th {
 .state-pill.state-error    { background: var(--state-error);  color: white; border-color: transparent; }
 .state-pill.state-skipped  { color: var(--warm-light); }
 .state-pill.state-pending  { color: var(--warm-light); }
+/* Source-pill: vendor-supplied sessions skip Stage 0 + audio upload. Distinct
+   from state-pill colors so it composes (a vendor session can also be done). */
+.state-pill.state-pill-vendor {
+  margin-left: 6px;
+  background: var(--cream-1);
+  color: var(--warm-mid);
+  border-color: var(--warm-light);
+}
 
 .received-box {
   background: var(--cream-2);

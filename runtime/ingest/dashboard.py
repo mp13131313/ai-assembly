@@ -84,18 +84,29 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
 
     counts = {"done": 0, "error": 0, "transcribing": 0, "normalizing": 0,
               "received": 0, "unknown": 0}
+    # Per-source totals so the admin dashboard can show "X audio · Y vendor"
+    # at a glance. Vendor sessions land via flows/vendor_intake.py with
+    # status.json source: "vendor"; everything else (including pre-vendor
+    # session_packages without a source field) defaults to "audio".
+    by_source = {"audio": 0, "vendor": 0}
+    by_source_done = {"audio": 0, "vendor": 0}
     last_done_mtime: str | None = None
     error_sessions: list[str] = []
 
     for sdir in sessions:
         status = _read_json_or_none(sdir / "status.json")
         st = (status or {}).get("state", "unknown")
+        source = (status or {}).get("source", "audio")
+        if source not in by_source:
+            source = "audio"  # defensive — unknown source treated as audio
+        by_source[source] += 1
         # Substates start with "transcribing"; collapse to the parent.
         bucket = "transcribing" if st.startswith("transcribing") else st
         counts[bucket] = counts.get(bucket, 0) + 1
         if bucket == "error":
             error_sessions.append(sdir.name)
         if bucket == "done":
+            by_source_done[source] += 1
             mt = _file_mtime_iso(sdir / "status.json")
             if mt and (last_done_mtime is None or mt > last_done_mtime):
                 last_done_mtime = mt
@@ -111,6 +122,13 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
         state = "pending"
 
     label = f"{counts['done']}/{total} done"
+    if by_source["vendor"]:
+        # Always surface vendor count when present so operators can tell at
+        # a glance how many sessions arrived via flows/vendor_intake.py.
+        label += (
+            f" ({by_source_done['audio']}/{by_source['audio']} audio · "
+            f"{by_source_done['vendor']}/{by_source['vendor']} vendor)"
+        )
     if counts["error"]:
         label += f" · {counts['error']} error"
     if counts["transcribing"]:
@@ -124,6 +142,8 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
         state,
         label,
         counts=counts,
+        by_source=by_source,
+        by_source_done=by_source_done,
         total=total,
         last_done_mtime=last_done_mtime,
         error_sessions=error_sessions,

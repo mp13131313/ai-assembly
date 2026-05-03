@@ -40,6 +40,9 @@ class Session:
     partner: str = ""
     limited_capacity: bool = False
     capacity: int | None = None
+    audio_source: str = "audio"  # "audio" | "vendor" — vendor sessions
+    # land session_package.json directly via flows/vendor_intake.py and skip
+    # producer upload + Stage 0/1.
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "Session":
@@ -62,7 +65,12 @@ class Session:
             partner=d.get("partner", ""),
             limited_capacity=bool(d.get("limited_capacity", False)),
             capacity=d.get("capacity"),
+            audio_source=d.get("audio_source", "audio"),
         )
+
+    @property
+    def is_vendor(self) -> bool:
+        return self.audio_source == "vendor"
 
 
 @dataclass

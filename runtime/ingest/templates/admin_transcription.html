@@ -13,6 +13,10 @@
 <p class="muted">
   {{ target_day or 'No day mapped' }} ·
   per-session ASR + speaker ID + cleaning state for tonight's flagged sessions.
+  {% set vendor_count = rows|selectattr('session.is_vendor')|list|length %}
+  {% if vendor_count %}
+    <br>{{ vendor_count }} vendor-supplied session{{ '' if vendor_count == 1 else 's' }} (no audio — landed via <code>flows/vendor_intake.py</code>).
+  {% endif %}
 </p>
 
 <nav class="night-picker">
@@ -45,10 +49,15 @@
     {% for r in rows %}
     {% set st = r.status.get('state') %}
     {% set sub = r.status.get('substate') %}
+    {% set is_vendor = r.session.is_vendor %}
+    {% set base = 'runs/athens_night_' ~ night ~ '/01_transcription/' ~ r.session.session_id %}
     <tr data-session-id="{{ r.session.session_id }}">
       <td>
         <span class="dot dot-{{ st or 'none' }}"></span>
         <span class="state-label">{{ (sub or st) | state_label }}</span>
+        {% if is_vendor %}
+          <span class="state-pill state-pill-vendor" title="vendor-supplied (no audio)">vendor</span>
+        {% endif %}
       </td>
       <td>{{ r.session.start_time }}</td>
       <td>
@@ -57,17 +66,28 @@
       <td class="muted">{{ r.session.venue }}</td>
       <td class="muted file-links">
         {% if st %}
-          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/status.json">status</a>
-          ·
-          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/pipeline.log">log</a>
-          {% if st == 'done' %}
-          ·
-          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/session_package.json">pkg</a>
+          <a href="/admin/file?path={{ base }}/status.json">status</a>
+          {% if is_vendor %}
+            · <a href="/admin/file?path={{ base }}/vendor.flag">flag</a>
+            {% if st == 'done' %}
+              · <a href="/admin/file?path={{ base }}/session_package.json">pkg</a>
+            {% endif %}
+            {% if r.has_vendor_warnings %}
+              · <a href="/admin/file?path={{ base }}/vendor.warnings">warnings</a>
+            {% endif %}
+            {% if r.has_vendor_error %}
+              · <a href="/admin/file?path={{ base }}/vendor.error">error</a>
+            {% endif %}
+          {% else %}
+            · <a href="/admin/file?path={{ base }}/pipeline.log">log</a>
+            {% if st == 'done' %}
+              · <a href="/admin/file?path={{ base }}/session_package.json">pkg</a>
+            {% endif %}
           {% endif %}
         {% endif %}
       </td>
       <td>
-        {% if st %}
+        {% if st and not is_vendor %}
           <a href="/session/{{ r.session.session_id }}/status">details →</a>
         {% endif %}
       </td>
