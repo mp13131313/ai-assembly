@@ -1,8 +1,8 @@
-# Voices — Open Items (authoritative, 2026-05-02 late-night)
+# Voices — Open Items (authoritative, 2026-05-03)
 
 **Scope:** EVERYTHING still open or undecided that pertains to the **persona pipeline / voice cards** for athens-2026. Distinct from the Voice Pipeline runtime (Steps 1+2+3) which has its own tracking.
 
-**Date stamp:** 2026-05-02 late-night. Supersedes voice-related items in HANDOFF_2026_04_27.md through HANDOFF_2026_04_30.md (all variants), FU61_DRYRUN_VERDICT_2026_04_30.md, and the voice-relevant FUs in FOLLOW_UPS.md. Read this doc + ONBOARDING.md (sibling) instead of trawling those.
+**Date stamp:** 2026-05-03. Supersedes 2026-05-02 late-night version. Supersedes voice-related items in HANDOFF_2026_04_27.md through HANDOFF_2026_04_30.md (all variants), FU61_DRYRUN_VERDICT_2026_04_30.md, and the voice-relevant FUs in FOLLOW_UPS.md. Read this doc + ONBOARDING.md (sibling) instead of trawling those.
 
 **Truth source:** When this doc disagrees with another, this doc is right (or fix this doc).
 
@@ -21,7 +21,7 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`). **7 of 10 shipped 
 | Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
 | Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
 | Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
-| Bob Marley | human | **narratival** | false | 🟠 **pipeline mid-flight** (task `bcroaoa2t`, at Pass 3 as of session-end) with **35 verbatim-lyric passages** populated in `02_merge/pass_1_6/reference_only_passages.json` (operator-supplied). lyrics_patterns_only corpus_constraint (atypical). When gate hits: §7 convention strictly (max 2 rounds + path-(b) ship). |
+| Bob Marley | human | **observational** ✓ flipped 2026-05-03 (was narratival) | false | 🟠 **SONG-REBUILD KICKED OFF 2026-05-03**. Snapshot at `bob_marley_pre_song_rebuild_2026-05-03/` preserves the 35 verbatim-lyric passages + 6 prior DR sections + all generation/validation state. Fresh Pass 0a + new operator-authored voice_config (~1,950 chars: manual_grounding + editorial_rationale encoding song-as-artifact mandate; lyric + kind-hint two-shape contract; Suno-mediated kind-hint translation; default roots reggae one-drop genre framing; twin-failure-modes pastiche-Marley + prose-Marley). Phase 0.5 done — Pass 0b tailor explicitly registered the song-mandate as load-bearing config direction; injected 18 song-aware questions across 6 DR sections; SWAP TEST anchor Tosh/Burning-Spear/Garvey. DR prompts staged at `01_research/03_dr_prompts/`. **Awaiting operator's 6 claude.ai DR sessions** (~3hr wall, Opus 4.7 + Extended Thinking + Deep Research). After DR: re-fire pipeline; at Pass 1c gate re-inject 35 lyrics from snapshot; §7 convention at Pass 7a FINAL. See §20 below for full rebuild detail. |
 | Whanganui River | non_human | system / null | false | 🟡 Pass 0a done + voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 done; DR prompts ready for operator's claude.ai sessions. See §17 below. |
 | Scheherazade | fictional | narratival | false | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 done (after sustained Gemini 503 retry); DR prompts ready. Mediated-voice prompt-fix concern carries through to her Pass 2 generation. |
 
@@ -78,7 +78,7 @@ Build sequence per voice:
 
 | Voice | Status / pre-build attention |
 |---|---|
-| Bob Marley | **Pipeline mid-flight at session-end** (task `bcroaoa2t`). 35 verbatim-lyric passages populated in reference_only_passages (operator-supplied via lyrics archive parser). Special `corpus_constraint: lyrics_patterns_only` (atypical — not `full`). FU#47 voice-fit: ⚠ awkward (lyric-rhythmic). Card-side FU#61 audience-engagement will land in Patois/lyric grammar. **At gate:** §7 convention strictly — max 2 rounds + path-(b) ship; surface verdict + ask operator before each round (Ada over-patching post-mortem). |
+| Bob Marley | **SONG-REBUILD KICKED OFF 2026-05-03** (see §1 row + §20 below). Prior pipeline snapshotted to `bob_marley_pre_song_rebuild_2026-05-03/`. Fresh Pass 0a + new voice_config (song-as-artifact mandate) + Phase 0.5 done. **Awaiting operator's 6 claude.ai DR sessions** (~3hr wall). After DR: re-fire pipeline + re-inject 35 lyrics at Pass 1c gate + §7 convention at gate. Special `corpus_constraint: lyrics_patterns_only` (atypical). FU#47 voice-fit: ⚠ awkward (lyric-rhythmic). Card-side FU#61 audience-engagement will land in Patois/lyric grammar. |
 | Whanganui River | **Hardest case** — non-human + no first-person source + legal-personhood-as-frame. Construction-mode question is real (translate-into-human-categories vs preserve-river-grammar). May trigger same layer-instability as Octopus. voice_config rewritten transmission-faithful (Tupua te Kawa verbatim + Te Pou Tupua mediation); Phase 0.5 DR prompts ready. **voice_mode `null` is valid** (subtype=system). FU#47 voice-fit: ⚠ awkward. Plan to budget extra patch rounds. See §17. |
 | Scheherazade | **Mediated-voice prompt fix** — verify status before pipeline fires. Flagged in earlier session; never resolved. Concerns how the frame-tale form (story-within-stories) gets handled in `voice_mode: narratival`. **Same dramatist-vs-speaker collision risk as Plato** (composer vs speakers within compositions). Either land the prompt-side mediated-voice clarification before her pipeline fires, OR plan for surgical patches at the gate. FU#47 voice-fit: ⚠ awkward. FU#46 may apply (rich primary-text corpus → 60K excerpt budget). |
 
@@ -641,3 +641,140 @@ Path 3 is the cheapest first step + trivial to test on the next voice (Marley/Wh
 **NOT in scope (separate hygiene sweep):**
 - Canonical docs narrative prose (Briefing, Persona Card v2, Pipeline specs) — descriptive text, not field-derived. Hand-edit when convenient.
 - Operator-facing planning docs — narrative text, low priority.
+
+---
+
+## 20. Bob Marley song-rebuild (kicked off 2026-05-03)
+
+**Status:** Phase 0.5 done; awaiting operator's 6 claude.ai DR sessions; pipeline ready to re-fire after DR sessions land.
+
+### Trigger / diagnosis
+
+Marley pipeline pre-this-session was at Pass 3 with the artifact-form drifting toward prose-reasoning rather than song. Operator's manual Pass 4b patch caught the drift but root-cause analysis showed the original voice_config's null `editorial_rationale` + minimal `manual_grounding` provided no operator-architectural direction flowing through Pass 0b tailor → DR prompts → downstream. Without strong direction, Pass 4b defaulted to text-shape medium for any human/narratival voice. The patched Pass 4b output described medium as "I give yuh a reasoning in prose… not a song-lyric on paper, not an essay, not a interview transcript" — actively anti-song.
+
+Honest read: this is the same failure mode Octopus had before its compass rebuild — weak editorial_rationale → DR drifted → downstream produced wrong artifact form. Same fix: rebuild from scratch with rich operator-architectural direction.
+
+### Approach
+
+Full rebuild following Octopus compass-rebuild pattern (§15) + Whanganui transmission-faithful pattern (§17). Voice posture: **song-faithful** — Marley's medium is song; prose drift is the failure mode the rebuild explicitly forbids.
+
+### What landed 2026-05-03
+
+1. **Snapshot of prior state** at `projects/current-tests/voices/bob_marley_pre_song_rebuild_2026-05-03/` — preserves:
+   - 35 verbatim-lyric passages (operator-supplied via lyrics archive parser) at `02_merge/pass_1_6/reference_only_passages.json`
+   - 6 prior DR dossier sections (~262K chars; ~3-4 hr operator wall)
+   - All Pass 1.x merge chunks + merged dossier
+   - Pass 2/3/4a + patched 4b + Pass 5 generation outputs
+   - Original minimal voice_config (660-char manual_grounding, null editorial_rationale — root cause)
+
+2. **Live folder cleared** (`rm -rf bob_marley/`) with snapshot as backup.
+
+3. **Fresh Pass 0a run** — auto-generated voice_config proposing `voice_mode: observational`. Substantive review_doc reasoning: "Narratival was the closer call — Marley's songs do tell — but the songs function as instruments of witness, exhortation, and reasoning-from-suffering rather than as tales whose form is the engagement."
+
+4. **voice_mode flipped narratival → observational** after empirical analysis of 5 material Pass-2-through-Pass-7b voice_mode-conditional branches:
+   - Pass 3 constitution evidence-form: observational fits art-and-practice-grounded better
+   - Pass 4a FU#40 digression-permission: narratival adds "Marley's swerve"-style move that would actively work against song-form (lyrics compress, not digress)
+   - Pass 5 bold_engagement framing: observational's HONESTY/unflinching-description fits prophetic-testimonial mode better than narratival's STORIES-INSIST
+   - Pass 7b smoke test: narratival adds tales-as-positions option, wrong for song-as-testimony
+   - 3 of 5 favor observational; 1 tossup; 1 no diff. Operator-confirmed.
+
+5. **Operator-authored manual_grounding + editorial_rationale** (~1,950 chars total) replaced Pass 0a's auto-generated thin grounding. Encodes:
+   - **Load-bearing direction**: voice's artifact at runtime IS a song; lyric (150–400 words, verse-and-chorus core, optional 1–3-sentence spoken intro/outro) + kind-hint (~50 words: sub-genre, tempo, instrumentation, vocal mood)
+   - **Suno-mediated translation**: orchestration layer adapts kind-hint to Suno's prompt syntax (Suno is its own production language; voice does not produce Suno-shaped prompts directly)
+   - **Genre framing**: default roots reggae one-drop riddim, recognizable catalogue range from Babylon System through Redemption Song through Three Little Birds; not avant-garde dub / pop-crossover / ska
+   - **Twin-failure-modes**: pastiche-Marley (clichéd reggae imitation, Rasta vocabulary as decorative seasoning) + prose-Marley (essayistic drift, voice writes "reasoning in prose" instead of singing — explicitly cited as the failure that triggered the rebuild)
+   - **Bio + Rastafari context + scholarly pointers** explicitly LEFT to the pipeline (research-discoverable, not operator-architectural)
+
+6. **Phase 0.5 ran** (after Gemini 503 retries — 4 attempts with progressive backoff, ~7.5 min sleep total). Output:
+   - `01_perplexity_dossier.json` (110KB)
+   - `02_gemini_broad_scan.json` (24KB)
+   - `03_dr_prompts/` — 6 song-aware section prompts + monolithic + tailoring notes
+
+7. **Pass 0b tailor explicitly registered the song-mandate as load-bearing config direction.** Verbatim from `tailoring_notes.json`:
+
+   > *"Editorial rationale: substantive — emitted thematic_note emphasizing the song-as-artifact architecture and the dual speaking/singing voice research demand, which is the load-bearing config direction."*
+
+   **18 song-aware questions injected across 6 DR sections**, including:
+   - §4 VOICE: "the under-documented speaking-voice (interview) corpus distinct from singing voice"
+   - §6 PRIMARY TEXTS: "interview/speech corpus mapping (critical given musical-voice-with-lyrics-constraint config), and spoken-word interlude sources"
+   - SWAP TEST anchor: Peter Tosh / Burning Spear / Marcus Garvey (correct confusability neighbours — militant peer / prophetic peer / intellectual ancestor)
+
+### Pending operator action
+
+Operator runs 6 claude.ai DR sessions on Opus 4.7 + Extended Thinking + Deep Research (~30 min per section, ~3hr wall total — parallel browser tabs feasible alongside Whanganui + Scheherazade DRs). Save outputs to `voices/bob_marley/01_research/04_dr_dossier/0N_section_N.md`.
+
+### Pipeline resumption sequence
+
+After DR sessions land:
+
+1. `cd code/personas && venv/bin/python run_persona_pipeline.py "Bob Marley" --project /Users/aienvironment/Desktop/AI\ Assembly/projects/current-tests`
+2. Pipeline runs Pass 1.1-1.7 chunked merge → Pass 1c-extract → Pass 1c fetch
+3. **Halts at Pass 1c REVIEW GATE** waiting for `03_primary_texts_reviewed.flag`
+4. **At the gate**: re-inject 35 verbatim lyrics from `bob_marley_pre_song_rebuild_2026-05-03/02_merge/pass_1_6/reference_only_passages.json` into the fresh `02_merge/pass_1_6/reference_only_passages.json` (overwrite the LLM's emission with the operator-curated verbatim 35); then `touch 03_corpus/03_primary_texts_reviewed.flag`
+5. Pipeline resumes: Pass 1d → 2 → 3 → 4a → 4b → 5 → 6 → 6.5-clean → 7-pre → 7-anach → 7a → 7a-FIX (if needed) → 7b → 7c → ASSEMBLE → Pass 7a FINAL → operator review gate
+6. **§7 convention at FINAL gate**: round 1 patches + round 2 patches + path-(b) ship via `_operator_review_passed.flag`. Surface verdict + ask operator before each round (Ada over-patching post-mortem).
+
+### Promote-to-athens-2026 + council_config wiring
+
+When verified:
+- Copy `voices/bob_marley/07_persona_card_assembled.json` to athens-2026
+- Wire 8th `council_config.json` member entry (replaces placeholder)
+- Commit + push athens-2026
+
+### Known forward-looking concerns
+
+- **Patwa register dose** — Pass 4a/4b will produce Patois-English code-switch in lyric body; operator may need to tune at gate if it leans too heavy or too light for international reach
+- **Spoken intro/outro discretion** — voice_config permits but doesn't mandate; some songs may use, others won't
+- **Suno render path** — kind-hint format is voice-natural (~50 words: sub-genre, tempo, instrumentation, vocal character, mood); operator-mediated translation to Suno's actual prompt syntax happens downstream of voice generation, not in the voice's output
+
+---
+
+## 21. Claudia Pinchbeck persona-construction architecture (landed 2026-05-03)
+
+**Status:** Architectural work landed; comprehensive prep document filed; awaiting operator inputs to begin Stage A drafting.
+
+### Comprehensive prep document
+
+**`voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`** — self-contained handoff for fresh-session pickup. Carries: who Claudia is, source materials read, four reference traditions (Talk of the Town / TLS until 1974 / Borges / Manchester Guardian "London Letter"), prose-vs-attention split, one-spine-ten-bends principle, form-fit honesty rule, headline rule, 13 failure modes, canonical reference texts, corrected field distribution (formative_experience/character/translation_protocol all load-bearing — earlier underweighting corrected), open architectural questions (voice_mode, schema strain on artifact cluster), recommended hybrid pipeline workflow with Stages A-F, time + cost estimate (~7-9 hr wall, ~$20-40), what's not in scope.
+
+### Companion runtime memo
+
+**`runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md`** — cross-thread memo to runtime on the editor flow input/output contract that surfaced during Claudia persona session. Carries: cleaned input shape (per-dossier user prompt structure, hallucinated fields removed, lead-theme decision moved out to layout layer), structured-output JSON shape per dossier, per-voice torque placement (`translation_protocol`, no schema extension), form-fit honesty as runtime metadata, byline-split decision options, 6 open questions for runtime to settle (lead-theme decision layer; asterism encoding; byline implementation; dossier numbering reset; cross-night summary; microsite consumption).
+
+### Architectural summary
+
+- Claudia is the **13th member** of the Assembly — the editor of *The Assembly*'s news organ. Functionally distinct from panel voices (she edits; they contribute). Her medium is the dossier (compound publication structure: theme article + theme summary + headnote per engaged voice + persistent chrome), not a single artifact.
+- **Voice triangulation**: Talk of the Town (sentence texture; uncredited institutional voice c. 1927–1965); TLS until 1974 (anonymous reviews; intellectual material at full weight without performing erudition); Borges (constructed reportage in serious form, reader trusted); Manchester Guardian "London Letter" (institutional voice, byline convention).
+- **Critical architectural split**: the desk's prose register is mid-century broadsheet; the desk's editorial attention is what the publication itself (HoBB / Beauty Shot voice) would consider news. Different things. Both load-bearing.
+- **One spine, ten bends** — prose has a single register that bends per voice when reporting on each (Plato in clipped dialogic; Arendt in surgical dryness; etc.). Per-voice torque lives in `translation_protocol`.
+- **When the form does not fit** — for voices the form genuinely cannot carry (Whanganui, Octopus, Marley), the desk fails honestly in the form rather than performing fluency it does not have.
+
+### Hybrid pipeline path
+
+Skip Phase 0.5's claude.ai DR sessions (Claudia is invented, no biography to research). Hand-curate 6 DR dossier sections from existing materials (Beauty Shot dossier + Frame Concept v1 + Briefing v3 + Editor Pipeline v1 + reference-tradition source material + canonical reference articles). Run Pass 1.1-1.7 → Pass 1c-1d → Pass 2-6 → validation → Derive against the curated dossier. Same density as panel voices.
+
+### Pending operator inputs before Stage A starts
+
+1. **Beauty Shot dossier file** (operator confirmed they have it; not shared as of session end). Critical for §2 INTELLECTUAL of the DR dossier and for `constitution`/`finds_compelling`/`resists`/`topics_requiring_care` field text.
+2. **`voice_mode` decision** — recommend `observational` with notation in editorial_rationale (none of the v2 enum values fit cleanly; observational is least-bad fit for editorial discipline)
+3. **Byline split decision** — Option A (single house byline) or Option B (correspondent for articles, desk for headnotes). Recommend Option B per the prior conversation.
+
+### Stages (when operator gives go)
+
+| Stage | What | Wall | Cost |
+|---|---|---|---|
+| A | Hand-author voice_config (manual_grounding + editorial_rationale) | ~1 hr | $0 |
+| B | Hand-curate 6 DR dossier sections | ~3 hr | $0 |
+| C | Pipeline run (unattended) | ~2-3 hr | ~$15-25 |
+| D | Operator review at gate (1-2 rounds) | ~1 hr | ~$5-10 |
+| E | Smoke-test pre-ship | ~30 min | ~$2-5 |
+| F | Promote to athens-2026 | ~15 min | $0 |
+| **Total** | | **~7-9 hr** | **~$20-40** |
+
+### Schema strain — `artifact` cluster
+
+The v2 schema's artifact cluster (`medium` + `technical_capabilities` + `characteristic_output_structure` + `relationship_to_detailed_response` + `aesthetic_qualities` + `stance_tendency` + `length_and_format_constraints` + `quality_criteria`) was designed for panel voices producing one artifact per night as one `artifact_text` string. Claudia produces N theme dossiers per night, each a structured JSON object. **Resolution**: persona card describes compound output prose-style in v2 fields; Editor Pipeline runtime defines JSON shape via structured-output contract on `editor_dossier.md`. Two layers, no breaking conflict.
+
+### Cross-reference to "Voice of X" naming sweep (§18)
+
+Claudia's `voice_name` field follows the same naming convention as panel voices: "Voice of Claudia Pinchbeck" / "Voice of the Desk" — operator-decision relabeling. Folds into the all-10-ship sweep when it fires.
