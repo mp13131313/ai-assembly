@@ -914,6 +914,36 @@ Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect out
 
 **Pattern note:** when re-opened, lift the `_anthropic_call.stream_voice_call`'s `system: str | tuple[str, str]` + `cache_system: bool` pattern into `personas/flows/shared/clients.py:call_claude`. Apply opt-in caching at `pass_7pre_chunked.py:verify_batch` (restructure user prompt so primary_texts + merged_dossier come first as cached prefix, claim_items_json after the breakpoint). Use 5-min TTL (parallel batches fire within seconds; 1h TTL's 2× write penalty doesn't pay off).
 
+### C19c. Caching gaps in Researcher / Provocateur triage / Transcription 🔵 POST-ATHENS HYGIENE (filed 2026-05-03 PM)
+
+**State:** caching audit during 2026-05-03 PM editor B1 session surfaced these gaps. Total Athens savings if filled: ~$3-8. Implementation: ~80 min. Marginal ROI; **skipped pre-Athens**.
+
+**Where the gaps are** (measured prompt + input sizes from codebase + Anthropic Opus 4.7 pricing $5/MTok input, $0.50/MTok cache read):
+
+| Stage | Cacheable size | Calls/Athens | Reads after 1st write | Savings/Athens |
+|---|---|---|---|---|
+| Provocateur triage_voices | ~22K (theme records w/ extractions, identical across 10 voices' calls per night) | 30 | 27 | ~$2.50 |
+| Researcher Node 1 | ~1.5-2K (system prompt; roster is per-session unique) | 24 | 21 | ~$0.20 |
+| Transcription speaker_id | 1.7K (system only) | 20 | 19 | ~$0.15 |
+| Transcription cleaning | 0.4K | 20 | 19 | ~$0.04 |
+| **Total** | | | | **~$3** (upper bound ~$8 if Athens themes are larger than dev_msc_test's ~22K) |
+
+**Why caching is NOT a high-leverage Athens cost optimization:**
+
+1. The cacheable portions (system prompts) are 3-10K tokens. The unique per-call inputs (transcripts, voice cards) are 2-5x larger. Most input tokens get re-paid even with caching.
+2. **Cost is dominated by output tokens** (per OPEN_ITEMS C19a empirical: "cost is dominated by output tokens, which caching does not touch"). Voice pipeline output ~$25-40 of the ~$60-80 voice cost is OUTPUT, not input.
+3. The high-leverage caches are **already implemented** — voice prefix (saves ~$13/Athens), Provocateur formulation (~$5-10/Athens), Editor (~$1-2/Athens).
+
+**Implementation order if/when re-opened:**
+
+1. **Provocateur triage_voices** (~$2.50/Athens, ~20 min code): mirror the formulation caching pattern in `provocateur_flow.py::_stream_and_parse`. Theme records + flags as cacheable prefix; voice card excerpts as unique tail.
+2. **Researcher Node 1** (~$0.20/Athens, ~30 min code): wrap system prompt in `cache_control: ephemeral` block; one cache_control breakpoint per `researcher_flow.py` Node 1 call.
+3. **Transcription speaker_id + cleaning** (~$0.20 combined, ~30 min code): same pattern; small enough that even cache write penalty (1.25× input rate for 5-min TTL) leaves marginal savings.
+
+**Re-open if:** Athens cost runs hot (>$300 actual) AND post-Athens runs are planned (subsequent Forum events; closing-show pipeline iterations). At those scales the gaps compound.
+
+**Cross-reference:** OPEN_ITEMS C19a (Anthropic prompt caching, voice + Provocateur formulation already cached) + C19b (personas pipeline caching, deferred).
+
 ### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism (handoff to persona thread) 🟡 (filed 2026-05-01)
 
 External reviewer flagged three voice-side moves that recurred across Test 1 nights. Operator added a fourth on inspection: a Plato anachronism that --skip-validation didn't catch.
