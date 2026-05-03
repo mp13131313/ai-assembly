@@ -264,7 +264,7 @@ All knobs are declared in a single `selection_parameters` block and read by the 
 | `fault_line_multiplier` | `{absent:1.0, present:1.5}` | Theme-quality boost from council fault lines. |
 | `stretch_swap_enabled` | true | Whether step 8 runs. Disable for conservative runs that don't push voices into stretch. |
 
-**Tuning guidance.** The defaults validated well on `dev_msc_test` (12 voices, 20 themes → ~4 assignments per voice, 2-3 kept themes per voice's territory). For the Athens deployment, the first knob likely to need adjustment is `target_formulations_per_voice` — if Night 1 produces thin briefings for narrow voices, lowering this to 3 acknowledges that honesty beats force-fill. The friction and fault-line multipliers are symbolic in expressing editorial priority more than numerically load-bearing; doubling them produces different rankings only when theme_quality is close between competing themes.
+**Tuning guidance.** The defaults validated well on `dev_msc_test` (12 voices, 6 themes → ~4 assignments per voice, 2-3 kept themes per voice's territory). For the Athens deployment, the first knob likely to need adjustment is `target_formulations_per_voice` — if Night 1 produces thin briefings for narrow voices, lowering this to 3 acknowledges that honesty beats force-fill. The friction and fault-line multipliers are symbolic in expressing editorial priority more than numerically load-bearing; doubling them produces different rankings only when theme_quality is close between competing themes.
 
 ### Why Python, not LLM
 
@@ -471,7 +471,7 @@ Voices with zero assignments still get a briefing file (empty `formulations[]` a
 
 ## Constraints
 
-**Time window.** The Provocateur runs after the Researcher completes. It must finish fast enough that the Voice Pipeline and all downstream processing can complete before breakfast. The five-stage architecture is the key enabler here — Triage's 13 parallel LLM calls collapse to ~1-2 minutes wall time, Selection is instant, and Formulation's parallel batches scale with (themes × voices) pairs up to the rate-limit ceiling. On `dev_msc_test` (20 themes, 12 voices, ~40 surviving pairs), total wall time was roughly 12-18 minutes on Opus 4.7 with adaptive thinking.
+**Time window.** The Provocateur runs after the Researcher completes. It must finish fast enough that the Voice Pipeline and all downstream processing can complete before breakfast. The five-stage architecture is the key enabler here — Triage's 13 parallel LLM calls collapse to ~1-2 minutes wall time, Selection is instant, and Formulation's parallel batches scale with (themes × voices) pairs up to the rate-limit ceiling. On `dev_msc_test` (6 themes, 12 voices, ~40 surviving pairs), total wall time was roughly 12-18 minutes on Opus 4.7 with adaptive thinking.
 
 **Rate limits.** Anthropic's Opus 4.7 tier caps output tokens per minute. Formulation generates ~3K output tokens per call, so the default batch size of 4 parallel calls with a 20-second wait between batches keeps the pipeline well inside the rate window. If Anthropic raises the tier or a future model lifts the cap, increasing `PROVOCATEUR_FORMULATION_BATCH` is the first place to recover time.
 
@@ -545,7 +545,7 @@ Expects the Researcher to have already written `runs/<run>/02_researcher/all_ext
 
 ## Validation Notes
 
-This architecture was validated end-to-end on the `dev_msc_test` corpus (MSC 2026 panels: Breaking Point, Vox Populi, West-West Divide — 106 extractions, 20 themes, 12 voices) with the Researcher Pipeline's v2.4 output. Key observations:
+This architecture was validated end-to-end on the `dev_msc_test` corpus (MSC 2026 panels: Breaking Point, Vox Populi, West-West Divide — 106 extractions, 6 themes, 12 voices) with the Researcher Pipeline's v2.4 output. Key observations:
 
 - **Triage split (1A/1B) produced sharper output than v1's combined prompt.** Per-voice rankings cited specific `activates_on` phrases; editorial flags correctly identified 6 themes with cross-council fault lines (e.g., West-East framing, expert-vs-lay epistemic authority) that Selection's multipliers then boosted.
 
