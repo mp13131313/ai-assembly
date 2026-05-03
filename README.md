@@ -143,7 +143,7 @@ Start with [`docs/README.md`](docs/README.md) — staleness index for canonical 
 - [Researcher Pipeline](docs/AI_Assembly_Researcher_Pipeline.md)
 - [Provocateur Pipeline](docs/AI_Assembly_Provocateur_Pipeline.md)
 - [Voice Pipeline v2.1](docs/AI_Assembly_Voice_Pipeline.md)
-- [Editor Pipeline v1](docs/AI_Assembly_Editor_Pipeline.md) — spec landed; implementation pending
+- [Editor Pipeline v2](docs/AI_Assembly_Editor_Pipeline.md) — spec + implementation shipped 2026-05-03; closing-prompt rewrite to v2 still pending
 
 **Runtime / operations:**
 

@@ -8,7 +8,7 @@
 
 ## What runtime is, in one paragraph
 
-The overnight pipeline that consumes the day's human sessions and produces voice artifacts the next morning. Five stages: transcription (audio → text), researcher (text → themes), provocateur (themes → per-voice formulations), Voice Pipeline (formulations → voice artifacts in three steps + validation + continuity), publish (handoff to downstream). Plus downstream of voice — editor, broadsheet, microsite, Substack, closing show — most of which are not yet built.
+The overnight pipeline that consumes the day's human sessions and produces voice artifacts the next morning. Six stages: transcription (audio → text), researcher (text → themes), provocateur (themes → per-voice formulations), Voice Pipeline (formulations → voice artifacts in three steps + validation + continuity), **editor (voices → dossiers; shipped 2026-05-03 PM)**, publish (handoff to downstream). Plus broadsheet, microsite, Substack, closing show — still not built.
 
 Implementation lives at `runtime/`. The persona pipeline (which builds the cards runtime consumes) lives at `personas/`. They are separate workstreams with separate venvs. This doc covers `runtime/` only.
 
