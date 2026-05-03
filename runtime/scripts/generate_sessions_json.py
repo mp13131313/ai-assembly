@@ -196,6 +196,7 @@ def transform(row: dict) -> dict | Skipped:
         "partner": (row.get("partner") or "").strip(),
         "limited_capacity": parse_bool(row.get("limitedCapacity") or ""),
         "capacity": parse_capacity(row.get("capacity") or ""),
+        "audio_source": "audio",
     }
 
 
@@ -230,15 +231,34 @@ def main() -> int:
     html = args.input.read_text(encoding="utf-8")
     raw_sessions = extract_sessions_array(html)
 
-    # Preserve existing ai_assembly flags so hand-flipped values survive re-runs.
-    # Same philosophy as generate_speakers_json.py preserving bios.
-    existing_flags: dict[str, bool] = {}
+    # Preserve operator-edited fields across re-runs so hand-corrections
+    # survive regeneration from program HTML. ai_assembly was the original
+    # such field; audio_source (added when vendor sessions were introduced),
+    # session_format (when promoted from "inferred" → "manual"), and
+    # capacity (manually corrected from program drift) follow the same
+    # philosophy as generate_speakers_json.py preserving bios.
+    existing_overrides: dict[str, dict] = {}
     if args.output.exists():
         try:
             prior = json.loads(args.output.read_text(encoding="utf-8"))
             for s in prior.get("sessions", []):
-                if "session_id" in s:
-                    existing_flags[s["session_id"]] = bool(s.get("ai_assembly", False))
+                sid = s.get("session_id")
+                if not sid:
+                    continue
+                row_overrides: dict = {}
+                if s.get("ai_assembly"):
+                    row_overrides["ai_assembly"] = True
+                if s.get("audio_source") and s["audio_source"] != "audio":
+                    row_overrides["audio_source"] = s["audio_source"]
+                if s.get("session_format_confidence") == "manual":
+                    row_overrides["session_format"] = s.get("session_format")
+                    row_overrides["session_format_confidence"] = "manual"
+                if s.get("capacity_confidence") == "manual":
+                    row_overrides["capacity"] = s.get("capacity")
+                    row_overrides["limited_capacity"] = bool(s.get("limited_capacity"))
+                    row_overrides["capacity_confidence"] = "manual"
+                if row_overrides:
+                    existing_overrides[sid] = row_overrides
         except (json.JSONDecodeError, OSError):
             pass  # ignore a malformed prior file; treat as first run
 
@@ -251,12 +271,14 @@ def main() -> int:
         else:
             kept.append(result)
 
-    # Re-apply preserved ai_assembly flags by session_id.
+    # Re-apply preserved overrides by session_id.
     preserved = 0
     for s in kept:
-        if existing_flags.get(s["session_id"]):
-            s["ai_assembly"] = True
-            preserved += 1
+        ov = existing_overrides.get(s["session_id"])
+        if not ov:
+            continue
+        s.update(ov)
+        preserved += 1
 
     # Sort kept sessions by day_index then start_time for readable output.
     kept.sort(key=lambda s: (s["day_index"], s.get("start_time") or "", s["title"]))
