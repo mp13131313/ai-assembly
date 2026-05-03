@@ -19,7 +19,9 @@ landed 2026-05-03 PM) replaced most of those contracts:
     [{voice_slug, voice_name, mode, narrative_briefing, artifact_text}],
     prior_editions: [...]}
   v2 output shape: {kicker, headline, subline, body_paragraphs[], headnotes:
-    [{voice_slug, framing_text}], front_abstract}
+    [{voice_slug, artifact_title, framing_text}], front_abstract}
+    (artifact_title was restored 2026-05-03 PM after the initial v2 simplification
+     dropped it; per-voice paper-voice headline applying B9 register torques)
 
 This v1 prompt produces output the v2 parser cannot extract cleanly. Real
 Anthropic calls against this prompt will land malformed dossiers.

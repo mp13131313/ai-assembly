@@ -154,8 +154,10 @@ The convergence, then, is on what is dissolved.
 
 **headnotes:**
 voice_slug: plato
+artifact_title: DOCTORS OR COOKS?
 framing_text: Plato wrote a dialogue rather than an essay.
 voice_slug: cleopatra
+artifact_title: A PROSTAGMA, ISSUED AT NIGHT
 framing_text: Cleopatra issued a prostagma.
 
 **front_abstract:** Four voices, in different vocabularies, declined to call faceless sortings governance; the editor names a convergence she will not call agreement.
@@ -168,6 +170,8 @@ framing_text: Cleopatra issued a prostagma.
         assert "* * *" in parsed["body_paragraphs"]
         assert len(parsed["headnotes"]) == 2
         assert parsed["headnotes"][0]["voice_slug"] == "plato"
+        assert parsed["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
+        assert parsed["headnotes"][1]["artifact_title"] == "A PROSTAGMA, ISSUED AT NIGHT"
         assert "front_abstract" in parsed
         assert parsed["front_abstract"].startswith("Four voices")
 
@@ -197,7 +201,9 @@ class TestStampRuntime:
             "headline": "H",
             "subline": "S",
             "body_paragraphs": ["p1", "p2"],
-            "headnotes": [{"voice_slug": "plato", "framing_text": "F-plato"}],
+            "headnotes": [{"voice_slug": "plato",
+                           "artifact_title": "DOCTORS OR COOKS?",
+                           "framing_text": "F-plato"}],
             "front_abstract": "FA",
         }
         dossier = dg.stamp_runtime_fields(
@@ -216,6 +222,7 @@ class TestStampRuntime:
         # Headnote enriched with voice_name + formulation_text
         assert dossier["headnotes"][0]["voice_name"] == "the voice of Plato"
         assert dossier["headnotes"][0]["formulation_text"] == "<formulation>"
+        assert dossier["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
         assert dossier["headnotes"][0]["framing_text"] == "F-plato"
         # Metadata
         assert dossier["metadata"]["theme_id"] == "theme_001"
@@ -228,12 +235,15 @@ class TestStampRuntime:
 
     def test_stamp_missing_voice_in_parsed_headnotes(self):
         """Routing routed plato + cleopatra here; Claudia's parsed output
-        only had a framing for plato. The other voice still appears in
-        headnotes (with empty framing_text) — never silently drop."""
+        only had artifact_title + framing for plato. The other voice still
+        appears in headnotes (with empty artifact_title + framing_text) —
+        never silently drop."""
         parsed = {
             "kicker": "K", "headline": "H", "subline": "S",
             "body_paragraphs": [],
-            "headnotes": [{"voice_slug": "plato", "framing_text": "F-plato"}],
+            "headnotes": [{"voice_slug": "plato",
+                           "artifact_title": "DOCTORS OR COOKS?",
+                           "framing_text": "F-plato"}],
             "front_abstract": "",
         }
         dossier = dg.stamp_runtime_fields(
@@ -245,11 +255,15 @@ class TestStampRuntime:
         )
         slugs = [h["voice_slug"] for h in dossier["headnotes"]]
         assert slugs == ["plato", "cleopatra"]
-        # Cleopatra has empty framing_text but voice_name + formulation_text stamped
+        # Cleopatra has empty artifact_title + framing_text but voice_name +
+        # formulation_text stamped
         cleo = dossier["headnotes"][1]
         assert cleo["voice_name"] == "C"
         assert cleo["formulation_text"] == "fc"
+        assert cleo["artifact_title"] == ""
         assert cleo["framing_text"] == ""
+        # Plato's artifact_title preserved
+        assert dossier["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
 
     def test_issue_numbers_per_night(self):
         for night, expected in ((1, 42193), (2, 42194), (3, 42195)):
@@ -287,8 +301,10 @@ Second paragraph.
 
 **headnotes:**
 voice_slug: plato
+artifact_title: TEST PLATO TITLE
 framing_text: Plato framed thus.
 voice_slug: cleopatra
+artifact_title: A TEST PROSTAGMA
 framing_text: Cleopatra framed otherwise.
 
 **front_abstract:** Test teaser drawn from article opening.
@@ -317,7 +333,9 @@ framing_text: Cleopatra framed otherwise.
         assert len(dossier["body_paragraphs"]) == 2
         assert len(dossier["headnotes"]) == 2
         assert dossier["headnotes"][0]["voice_name"] == "the voice of Plato"
+        assert dossier["headnotes"][0]["artifact_title"] == "TEST PLATO TITLE"
         assert dossier["headnotes"][1]["voice_name"] == "the voice of Cleopatra"
+        assert dossier["headnotes"][1]["artifact_title"] == "A TEST PROSTAGMA"
         assert dossier["metadata"]["input_tokens"] == 1000
         assert dossier["metadata"]["output_tokens"] == 500
         assert dossier["metadata"]["model"]   # set

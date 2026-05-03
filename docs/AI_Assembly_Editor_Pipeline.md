@@ -22,7 +22,7 @@ This version supersedes v1 + the runtime memo on per-call input/output contracts
 - **Per-call output is article-first, derivative-teaser.** Single `kicker` and single `headline` are shared between the article page and the front-page teaser; teaser body is a derived 30-50-word abstract drawn from the article's opening. Lead-vs-grid is publish-pipeline concern, NOT editor's; editor produces uniform layout-agnostic dossiers.
 - **Refusals are not per-call input.** Tracked as flat list in routing.json; surfaced only by microsite + publish layer. (The earlier form-fit-honesty premise that some voices like Octopus or Whanganui produce non-prose artifacts has been dropped — those voices produce prose: Octopus's chromatophore display is a separate microsite render layer; Whanganui emits legal text; Marley emits lyric-prose. Claudia's broadsheet form carries them all.)
 - **Stage 1 routing parser** has four cases (A: Response N anchor anywhere; B: explicit theme_id mention; C: pure synthesis; D: fall-through). Case C is mechanically tiebroken (lowest-numbered theme) but operator review of `theme_routing.json` is the safety valve. **Athens-feasible enhancement: an LLM-assisted pass (Sonnet 4.6, ~$0.50 across Athens) for Case C voices** — flagged as TODO in OPEN_ITEMS B1; not in v2 baseline.
-- **Per-voice headnote** carries only `voice_slug` + `framing_text` from Claudia; `voice_name` + `formulation_text` are runtime-stamped from the per-voice briefing. Old `byline_descriptor` field collapsed into `framing_text`.
+- **Per-voice headnote** carries `voice_slug` + `artifact_title` + `framing_text` from Claudia; `voice_name` + `formulation_text` are runtime-stamped from the per-voice briefing. `artifact_title` (4-12 words, paper-voice, B9-torqued per voice register) was restored 2026-05-03 PM after the initial v2 simplification dropped it over-aggressively. Old `byline_descriptor` field collapsed into `framing_text`.
 - **Asterism breaks** encoded as inline `"* * *"` array elements in `body_paragraphs[]`. Microsite renders any element matching as a separator.
 - **Output mode: prose-and-parse** (mirrors voice pipeline). Claudia emits prose with field labels; runtime parses. Gives her the freedom to think in prose-shaped chunks before settling on the JSON.
 - **Closing prompt placement: system-message tail** (Placement A — same as voice pipeline). The instruction is invariant across the night's per-dossier calls and prefix-cache-eligible.
@@ -686,12 +686,14 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
       "voice_slug":       "cleopatra",
       "voice_name":       "the voice of Cleopatra",
       "formulation_text": "[runtime stamp from briefing's narrative_briefing]",
+      "artifact_title":   "A PROSTAGMA, ISSUED AT NIGHT",
       "framing_text":     "Cleopatra Thea Philopator declines to weigh three matters as three. Read for the move at the centre."
     },
     {
       "voice_slug":       "ibn_battuta",
       "voice_name":       "the voice of Ibn Battuta",
       "formulation_text": "[runtime stamp]",
+      "artifact_title":   "A HALT RECALLED IN ANSWER",
       "framing_text":     "..."
     }
   ],
@@ -725,7 +727,7 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
 | Field | Source |
 |---|---|
 | `kicker`, `headline`, `subline`, `body_paragraphs`, `front_abstract` | Claudia emits (article-first; front_abstract derived from article opening) |
-| `headnotes[i].voice_slug`, `headnotes[i].framing_text` | Claudia emits (1-2 sentence framing per voice; voice_slug is her disambiguator) |
+| `headnotes[i].voice_slug`, `headnotes[i].artifact_title`, `headnotes[i].framing_text` | Claudia emits (artifact_title is paper-voice, B9-torqued per voice register; framing_text is 1-2 sentence editorial framing; voice_slug is her disambiguator) |
 | `headnotes[i].voice_name` | Runtime stamps from artifact's `council_member` ("the voice of " + name) |
 | `headnotes[i].formulation_text` | Runtime stamps from `briefings/<voice>.json` (`narrative_briefing` for this theme) |
 | `colophon` | Runtime stamps from a near-static template (per "Pending operator decisions") |
@@ -741,6 +743,7 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
 | `headline` | 8-15 words; sentence about an event; uses "the voice of X" naming where appropriate |
 | `subline` | 25-60 words; italic deck; semicolon-chained 1910s broadsheet register |
 | `body_paragraphs` total | **350-500 words single-voice / 500-700 multi-voice** (where multi-voice = ≥2 engaged voices) |
+| `headnotes[i].artifact_title` | 4-12 words; paper-voice; B9-torqued per voice register (Plato → Gorgias-style question; Dostoevsky → compound, occasionally with strikethrough; Whanganui → wire-service terse; Marley → song-title-grammar; Octopus → chromatic/sensory; etc.). Examples: "DOCTORS OR COOKS?" (Plato), "A LETTER ON THE DOORMAT" (Dostoevsky), "A HALT RECALLED IN ANSWER" (Battuta), "A PROSTAGMA, ISSUED AT NIGHT" (Cleopatra). Per-voice torque content lives in Claudia's `translation_protocol` field on her persona card. |
 | `headnotes[i].framing_text` | 1-2 sentences; light poetic editorial framing |
 | `front_abstract` | 30-50 words; drawn from article's opening |
 

@@ -227,13 +227,18 @@ def _parse_body_paragraphs(raw_text: str) -> list[str]:
 
 
 def _parse_headnotes(raw_text: str) -> list[dict[str, str]]:
-    """Extract headnotes[] — each headnote has voice_slug + framing_text.
+    """Extract headnotes[] — each headnote has voice_slug + artifact_title +
+    framing_text.
 
-    Closing prompt format (when rewritten to v2): a `headnotes:` block
-    with one `voice_slug: <slug>` line followed by `framing_text: <text>`.
-    Defensive: missing field → empty strings, no crash.
+    Closing prompt format (when rewritten to v2): a `headnotes:` block with,
+    per voice, three labelled lines in this order:
+        voice_slug:     <slug>
+        artifact_title: <4-12 words, paper-voice, B9-torqued per voice register>
+        framing_text:   <1-2 sentences>
+
+    Defensive: missing fields → empty strings, no crash. Pairing is by
+    interleaved alternation (slugs / titles / framings parallel arrays).
     """
-    # Look for a `headnotes:` block header, then parse pairs within.
     rx = re.compile(
         r"^\s*[*_#\-]*\s*headnotes\s*[*_]*\s*[:=]\s*\n?(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+\s*[:=]|\Z)",
         re.I | re.M | re.S,
@@ -243,18 +248,22 @@ def _parse_headnotes(raw_text: str) -> list[dict[str, str]]:
         return []
     block = m.group(1)
 
-    # Each headnote entry: voice_slug + framing_text (in any order; usually
-    # voice_slug first). Pair them up by simple alternation.
     slugs = re.findall(r"voice[_\s]*slug\s*[:=]\s*(.+?)(?:\n|$)", block, re.I)
+    titles = re.findall(
+        r"artifact[_\s]*title\s*[:=]\s*(.+?)(?:\n|$)",
+        block, re.I,
+    )
     framings = re.findall(
-        r"framing[_\s]*text\s*[:=]\s*(.+?)(?=\n\s*voice[_\s]*slug|\Z)",
+        r"framing[_\s]*text\s*[:=]\s*(.+?)(?=\n\s*voice[_\s]*slug|\n\s*artifact[_\s]*title|\Z)",
         block, re.I | re.S,
     )
     out = []
-    for slug, framing in zip(slugs, framings):
+    n = len(slugs)
+    for i, slug in enumerate(slugs):
         out.append({
-            "voice_slug": _strip_chrome(slug),
-            "framing_text": _strip_chrome(framing),
+            "voice_slug":     _strip_chrome(slug),
+            "artifact_title": _strip_chrome(titles[i]) if i < len(titles) else "",
+            "framing_text":   _strip_chrome(framings[i]) if i < len(framings) else "",
         })
     return out
 
@@ -322,12 +331,12 @@ def stamp_runtime_fields(
     issue_no = ATHENS_BASE_ISSUE + night
 
     # Enrich headnotes with runtime-stamped voice_name + formulation_text.
-    # Slot Claudia's framing_text into the right position by matching
-    # voice_slug. Voices Claudia missed get an empty framing_text but still
-    # appear in the headnotes list (so the article doesn't silently drop
-    # someone routed here).
-    framing_by_slug = {
-        h.get("voice_slug", ""): h.get("framing_text", "")
+    # Slot Claudia's artifact_title + framing_text into the right position
+    # by matching voice_slug. Voices Claudia missed get empty values but
+    # still appear in the headnotes list (so the dossier doesn't silently
+    # drop someone routed here).
+    parsed_by_slug = {
+        h.get("voice_slug", ""): h
         for h in parsed.get("headnotes", [])
     }
     enriched_headnotes = [
@@ -335,7 +344,8 @@ def stamp_runtime_fields(
             "voice_slug":       slug,
             "voice_name":       voice_name_by_slug.get(slug, slug),
             "formulation_text": formulation_by_slug.get(slug, ""),
-            "framing_text":     framing_by_slug.get(slug, ""),
+            "artifact_title":   parsed_by_slug.get(slug, {}).get("artifact_title", ""),
+            "framing_text":     parsed_by_slug.get(slug, {}).get("framing_text", ""),
         }
         for slug in voice_slugs
     ]

@@ -356,20 +356,29 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 **Spec status:** undocumented. Needs operator product decisions on workflow.
 
-### B9. Per-voice headline poetics 🟡
+### B9. Per-voice headline poetics 🟢 ARCHITECTURE RESOLVED 2026-05-03 PM (content authoring belongs to voices thread)
 
-**State:** Per Frame Concept §"production implications" — needs spec. Either lives in persona card (new field) or in editor's per-voice config.
+**State:** architectural placement settled. Per-voice headline torques live in **two surfaces**:
 
-**Per Frame Concept §"newspaper" headlines paragraph:**
+1. **Per-dossier headnote `artifact_title`** (4-12 words, paper-voice) — Claudia emits one per voice in each dossier she writes. Restored to v2 dossier output schema 2026-05-03 PM after the initial v2 simplification over-aggressively dropped it. Implementation lands at `runtime/flows/editor/dossier_generation.py` parser + stamp.
+2. **Per-voice broadsheet headline** (B3 territory; one headline per voice per night, cross-theme) — when B3 broadsheet ships, it consumes voice + editor outputs and lays out a per-night front page with ten voice headlines + reportage paragraphs. Currently unbuilt.
+
+**Where the torque CONTENT lives:** Claudia's `translation_protocol` field on her persona card (per memo §4 — "the 10 voices' torque descriptions live in Claudia's translation_protocol"). One spine, ten bends.
+
+**Per Frame Concept §"newspaper" headline poetics paragraph (the content):**
 - Plato: Gorgias-style rhetorical questions
 - Dostoevsky: affectionate-toward-suffering compound headlines, occasionally with strikethrough
 - Whanganui River: wire-service terseness ("WHANGANUI RIVER ARRIVES; SAYS NOTHING")
 - Marley: song-title-grammar
 - Octopus: chromatic or sensory description
+- Each headline passes a 9-word substance test (Quarch-clearance)
 
-**Each headline = 9-word substance test (Quarch-clearance).**
+**Implementation status:**
+- ✅ Editor pipeline structurally supports the field (`headnotes[i].artifact_title` in v2 schema; parser + stamp shipped 2026-05-03 PM)
+- 🟡 Closing prompt rewrite to v2 contract must instruct Claudia to emit `artifact_title` (pending)
+- 🟡 Per-voice torque content (one paragraph + 3-5 examples per voice) belongs in Claudia's `translation_protocol` field — voices thread authoring (folded into B1's Claudia card construction; no separate work item)
 
-**Implementation:** one-paragraph specification per voice with 3-5 examples. Build-side (persona-pipeline-adjacent) or editor-config — operator decision when A2 lands.
+**Net:** B9 is structurally done at the runtime level. What remains is content authoring, which lives inside Claudia's persona card construction (B1's Claudia card task). No separate B9 work item.
 
 ---
 

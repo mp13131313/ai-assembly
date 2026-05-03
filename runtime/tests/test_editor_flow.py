@@ -183,8 +183,10 @@ Second.
 
 **headnotes:**
 voice_slug: plato
+artifact_title: TEST PLATO HEADLINE
 framing_text: F-plato
 voice_slug: cleopatra
+artifact_title: A TEST PROSTAGMA
 framing_text: F-cleopatra
 
 **front_abstract:** Test abstract.
