@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Publish · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
+</p>
+
+<h1>Publish — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/publish?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">·
+    <a href="/admin/file?path=published_artifacts/nights/night_{{ night }}/_index.json">
+      <code>published_artifacts/nights/night_{{ night }}/_index.json</code>
+    </a>
+  </span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.index_present %}
+  <div class="empty">
+    <p>Publish hasn't produced <code>_index.json</code> for Night {{ night }} yet.</p>
+    <p class="muted">Will appear here once the orchestrator fires Stage 7 (publish_flow.py).</p>
+  </div>
+{% else %}
+
+<section class="voice-summary">
+  <p class="muted">
+    {{ payload.totals.n_voices }} voice{{ '' if payload.totals.n_voices == 1 else 's' }} published
+    {% if payload.url_path %}
+      · <code>{{ payload.url_path }}</code>
+    {% endif %}
+    {% if payload.generated_at %}
+      · generated {{ payload.generated_at }}
+    {% endif %}
+  </p>
+</section>
+
+{# --- Per-voice publish artifacts ---------------------------------- #}
+<section class="grid-block">
+  <h2>Per-voice artifacts</h2>
+
+  {% if not payload.voices %}
+    <p class="muted">No voice rows in the index.</p>
+  {% else %}
+    <table class="overview">
+      <thead>
+        <tr>
+          <th>Voice</th>
+          <th>Title</th>
+          <th>Form</th>
+          <th>Stance</th>
+          <th>Themes</th>
+          <th>Decision</th>
+          <th>Words</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.voices %}
+          <tr>
+            <td>
+              <strong>{{ v.voice_slug }}</strong>
+              {% if v.voice_name and v.voice_name != v.voice_slug %}
+                <br><span class="muted">{{ v.voice_name[:50] }}{% if v.voice_name|length > 50 %}…{% endif %}</span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ v.title or '—' }}</strong>
+              {% if v.subtitle %}
+                <br><span class="muted">{{ v.subtitle }}</span>
+              {% endif %}
+            </td>
+            <td class="muted">{{ v.selected_form or '—' }}</td>
+            <td class="muted">{{ v.stance or '—' }}</td>
+            <td class="muted">
+              {% for tid in v.themes_addressed %}
+                <code>{{ tid }}</code>{% if not loop.last %} {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% if v.decision == 'amend' %}
+                <span class="state-pill state-running" title="amended">amend</span>
+                {% if v.amendment_count %}
+                  <span class="muted">×{{ v.amendment_count }}</span>
+                {% endif %}
+              {% elif v.decision == 'no_change' %}
+                <span class="state-pill" title="no change">none</span>
+              {% elif v.decision %}
+                <span class="state-pill">{{ v.decision }}</span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>{{ v.word_count or '—' }}</td>
+            <td class="muted file-links">
+              {% if v.has_per_voice_file %}
+                <a href="/admin/file?path=published_artifacts/nights/night_{{ night }}/{{ v.voice_slug }}.json">
+                  {{ v.voice_slug }}.json
+                </a>
+              {% else %}
+                <span class="muted">missing</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
+{% endblock %}

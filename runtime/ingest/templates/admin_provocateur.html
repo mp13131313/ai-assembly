@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Provocateur · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
+</p>
+
+<h1>Provocateur — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/provocateur?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/manifest.json">
+      <code>{{ payload.run_id }}/03_provocateur/manifest.json</code>
+    </a>
+    ·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/selection.json">
+      <code>selection.json</code>
+    </a>
+    ·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/triage_flags.json">
+      <code>triage_flags.json</code>
+    </a>
+  </span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.run_exists %}
+  <div class="empty">
+    <p>No run directory for Night {{ night }} yet.</p>
+  </div>
+{% elif not payload.manifest_present %}
+  <div class="empty">
+    <p>Provocateur hasn't produced <code>manifest.json</code> yet.</p>
+    <p class="muted">Will appear here once the orchestrator fires Stage 3.</p>
+  </div>
+{% else %}
+
+{% set c = payload.counts %}
+<section class="voice-summary">
+  <p class="muted">
+    {{ c.n_themes_selected }} theme{{ '' if c.n_themes_selected == 1 else 's' }} selected ·
+    {{ c.n_formulations }} pair{{ '' if c.n_formulations == 1 else 's' }} ·
+    {{ c.n_briefings_written }} briefing{{ '' if c.n_briefings_written == 1 else 's' }}
+    {% if c.n_themes_dropped %}
+      · {{ c.n_themes_dropped }} dropped
+    {% endif %}
+    {% if c.n_forced_fits %}
+      · {{ c.n_forced_fits }} forced-fit
+    {% endif %}
+    {% if c.n_stretch_swaps %}
+      · {{ c.n_stretch_swaps }} stretch-swap
+    {% endif %}
+    {% if c.n_voices_below_target %}
+      · ⚠ {{ c.n_voices_below_target }} voice{{ '' if c.n_voices_below_target == 1 else 's' }} below target
+    {% endif %}
+  </p>
+</section>
+
+{# --- Theme flags table -------------------------------------------- #}
+{% if payload.theme_flags %}
+<section class="grid-block">
+  <h2>Theme flags</h2>
+  <p class="muted">From the per-theme worth-surfacing / friction / fault-line triage.</p>
+  <table class="overview">
+    <thead>
+      <tr><th>Theme</th><th>Worth surfacing</th><th>Friction</th><th>Fault line</th></tr>
+    </thead>
+    <tbody>
+      {% for tf in payload.theme_flags %}
+        <tr>
+          <td>
+            <code>{{ tf.theme_id }}</code>
+            {% if tf.theme_id in payload.selection.dropped_themes %}
+              <span class="state-pill state-error" title="dropped">dropped</span>
+            {% elif tf.theme_id in payload.selection.kept_themes %}
+              <span class="state-pill state-done" title="kept">kept</span>
+            {% endif %}
+          </td>
+          <td>{% if tf.worth_surfacing %}✓{% else %}—{% endif %}</td>
+          <td class="muted">{{ tf.audience_friction or '—' }}</td>
+          <td class="muted">
+            {% if tf.fault_line_present %}
+              <strong>yes</strong>
+              {% if tf.fault_line_description %}
+                · <span title="{{ tf.fault_line_description }}">{{ tf.fault_line_description[:80] }}{% if tf.fault_line_description|length > 80 %}…{% endif %}</span>
+              {% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{# --- Triage matrix: voice × theme activation --------------------- #}
+<section class="grid-block">
+  <h2>Triage — Voice × Theme activation</h2>
+  <p class="muted">
+    ● strong · ○ moderate · · weak · ⊕ stretch · — flat (skip)
+  </p>
+
+  {% if not payload.voices or not payload.themes %}
+    <p class="muted">No triage cells yet.</p>
+  {% else %}
+    <table class="cell-grid">
+      <thead>
+        <tr>
+          <th class="row-header">Voice / Theme</th>
+          {% for t in payload.themes %}
+            <th class="col-header" title="{{ t.theme_display_title }}">
+              {{ t.theme_id }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.voices %}
+          <tr>
+            <td class="row-header" title="{{ v.voice_name }}">
+              <a href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/triage_voices/{{ v.voice_slug }}.json">
+                <strong>{{ v.voice_slug }}</strong>
+              </a>
+            </td>
+            {% for t in payload.themes %}
+              {% set cell = triage_index.get((v.voice_slug, t.theme_id)) %}
+              {% if cell and cell.kind == 'ranked' %}
+                {% set glyph = '●' if cell.activation == 'strong' else ('○' if cell.activation == 'moderate' else '·') %}
+                {% if cell.is_stretch %}{% set glyph = '⊕' %}{% endif %}
+                <td class="cell state-{{ 'done' if cell.activation == 'strong' else 'running' }}"
+                    title="{{ cell.activation }}{% if cell.is_stretch %} · stretch{% endif %}{% if cell.reason %} — {{ cell.reason }}{% endif %}">
+                  {{ glyph }}
+                </td>
+              {% elif cell and cell.kind == 'flat' %}
+                <td class="cell state-skipped"
+                    title="flat{% if cell.reason %} — {{ cell.reason }}{% endif %}">—</td>
+              {% else %}
+                <td class="cell state-pending" title="not in triage">·</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+{# --- Formulation grid: voice × theme written? -------------------- #}
+<section class="grid-block">
+  <h2>Formulations — Voice × Theme</h2>
+  <p class="muted">
+    ✓ formulation written · · pending. Hover for mode + quote count.
+  </p>
+
+  {% if not payload.voices or not payload.themes %}
+    <p class="muted">No formulation cells yet.</p>
+  {% else %}
+    <table class="cell-grid">
+      <thead>
+        <tr>
+          <th class="row-header">Voice / Theme</th>
+          {% for t in payload.themes %}
+            <th class="col-header" title="{{ t.theme_display_title }}">
+              {{ t.theme_id }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in payload.voices %}
+          <tr>
+            <td class="row-header" title="{{ v.voice_name }}">
+              <a href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/briefings/{{ v.voice_slug }}.json">
+                <strong>{{ v.voice_slug }}</strong>
+              </a>
+            </td>
+            {% for t in payload.themes %}
+              {% set cell = formulation_index.get((v.voice_slug, t.theme_id)) %}
+              {% if cell %}
+                <td class="cell state-done"
+                    title="{{ cell.mode or '—' }} · {{ cell.n_quotes }} quote(s) · {{ cell.n_grounding }} grounding ext.{% if cell.rationale %} — {{ cell.rationale[:120] }}{% endif %}">
+                  <a class="cell-link"
+                     href="/admin/file?path=runs/{{ payload.run_id }}/03_provocateur/formulations/{{ t.theme_id }}__{{ v.voice_slug }}.json">
+                    ✓
+                  </a>
+                </td>
+              {% else %}
+                <td class="cell state-pending" title="not yet written">·</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+{# --- Below-target voices ------------------------------------------ #}
+{% if payload.selection.below_target %}
+<section class="grid-block">
+  <h2>⚠ Voices below target</h2>
+  <p class="muted">Couldn't reach the configured target_formulations_per_voice.</p>
+  <ul>
+    {% for bt in payload.selection.below_target %}
+      <li>
+        {% if bt is mapping %}
+          <strong>{{ bt.member }}</strong>
+          {% if bt.actual is defined %}
+            — {{ bt.actual }}/{{ bt.target }} formulations
+          {% endif %}
+          {% if bt.reason %}
+            <br><span class="muted">{{ bt.reason }}</span>
+          {% endif %}
+        {% else %}
+          <strong>{{ bt }}</strong>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# --- Per-voice triage detail (collapsed, read on demand) -------- #}
+{% if payload.triage_voices %}
+<section class="grid-block">
+  <h2>Per-voice triage rationales</h2>
+  <p class="muted">
+    Click a voice's filename above to read the full ranked + flat lists with rationales.
+  </p>
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
+{% endblock %}

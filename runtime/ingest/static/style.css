@@ -690,6 +690,21 @@ table.stages-table th {
   border-color: var(--warm-light);
 }
 
+/* C23 Phase C: Researcher per-theme block — visual separation between themes
+   so the cluster tables underneath each theme don't merge into one wall. */
+.theme-block {
+  margin: 24px 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--hairline);
+}
+.theme-block:first-of-type { border-top: none; padding-top: 0; }
+.theme-block h3 { margin-top: 0; }
+.theme-abstract {
+  color: var(--warm-mid);
+  font-style: italic;
+  margin: 6px 0 12px;
+}
+
 .received-box {
   background: var(--cream-2);
   border: 1px solid var(--hairline);

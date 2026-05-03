@@ -54,11 +54,11 @@
   <h2>Stages</h2>
   {% set stage_meta = [
     ('transcription', 'Transcription', '/admin/tonight/transcription?night=' ~ night),
-    ('researcher',    'Researcher',    none),
-    ('provocateur',   'Provocateur',   none),
+    ('researcher',    'Researcher',    '/admin/tonight/researcher?night=' ~ night),
+    ('provocateur',   'Provocateur',   '/admin/tonight/provocateur?night=' ~ night),
     ('voice',         'Voice',         '/admin/tonight/voice?night=' ~ night),
     ('editor',        'Editor',        none),
-    ('publish',       'Publish',       none),
+    ('publish',       'Publish',       '/admin/tonight/publish?night=' ~ night),
   ] %}
   {# Transposed table: stages as columns, attributes as rows.
      Wraps in scroll container so 6 columns survive narrow viewports. #}
@@ -106,8 +106,8 @@
     </table>
   </div>
   <p class="muted hint">
-    Stages flow left → right. Click <em>Transcription</em> or <em>Voice</em>
-    to drill into stage detail. Other drilldowns land in Phase C.
+    Stages flow left → right. Click any stage header to drill into per-stage detail.
+    <em>Editor</em> drilldown lands once <code>editor_flow.py</code> ships (B1).
   </p>
 </section>
 

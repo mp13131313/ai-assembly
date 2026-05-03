@@ -698,6 +698,110 @@ def admin_tonight_voice_json(
     return JSONResponse(dashboard.collect_voice_detail(n))
 
 
+# --- C23 Phase C drilldowns: Researcher / Provocateur / Publish ------------
+
+
+@app.get("/admin/tonight/researcher", response_class=HTMLResponse)
+def admin_tonight_researcher(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Researcher Pipeline drilldown: theme/cluster tree + per-session
+    extraction summary. C23 Phase C (2026-05-03)."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_researcher_detail(n)
+    return templates.TemplateResponse(
+        request, "admin_researcher.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight/researcher.json")
+def admin_tonight_researcher_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_researcher_detail(n))
+
+
+@app.get("/admin/tonight/provocateur", response_class=HTMLResponse)
+def admin_tonight_provocateur(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Provocateur Pipeline drilldown: triage matrix + formulation grid +
+    theme flags + per-voice triage detail. C23 Phase C (2026-05-03)."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_provocateur_detail(n)
+    # Build (voice, theme) → cell indices for fast template lookup.
+    triage_index = {(c["voice_slug"], c["theme_id"]): c
+                    for c in payload.get("triage_cells", [])}
+    formulation_index = {(c["voice_slug"], c["theme_id"]): c
+                         for c in payload.get("formulation_cells", [])}
+    theme_flag_index = {tf.get("theme_id"): tf
+                        for tf in payload.get("theme_flags", [])
+                        if tf.get("theme_id")}
+    return templates.TemplateResponse(
+        request, "admin_provocateur.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "triage_index": triage_index,
+            "formulation_index": formulation_index,
+            "theme_flag_index": theme_flag_index,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight/provocateur.json")
+def admin_tonight_provocateur_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_provocateur_detail(n))
+
+
+@app.get("/admin/tonight/publish", response_class=HTMLResponse)
+def admin_tonight_publish(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Publish stage drilldown: per-voice publish artifact rows +
+    night-level index. C23 Phase C (2026-05-03)."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_publish_detail(n)
+    return templates.TemplateResponse(
+        request, "admin_publish.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight/publish.json")
+def admin_tonight_publish_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_publish_detail(n))
+
+
 # --- /admin/file: read-only file viewer (C23 UX feedback, 2026-05-03) -------
 
 

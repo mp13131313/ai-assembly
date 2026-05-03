@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Researcher · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
+</p>
+
+<h1>Researcher — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/researcher?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/grouping.json">
+      <code>{{ payload.run_id }}/02_researcher/grouping.json</code>
+    </a>
+  </span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.run_exists %}
+  <div class="empty">
+    <p>No run directory for Night {{ night }} yet.</p>
+  </div>
+{% elif not payload.grouping_present %}
+  <div class="empty">
+    <p>Researcher hasn't produced <code>grouping.json</code> yet.</p>
+    <p class="muted">Will appear here once the orchestrator fires Stage 2.</p>
+  </div>
+{% else %}
+
+{% set t = payload.totals %}
+<section class="voice-summary">
+  <p class="muted">
+    {{ t.n_themes }} theme{{ '' if t.n_themes == 1 else 's' }} ·
+    {{ t.n_clusters }} cluster{{ '' if t.n_clusters == 1 else 's' }} ·
+    {{ t.n_extractions_in_clusters }} extraction{{ '' if t.n_extractions_in_clusters == 1 else 's' }} in clusters
+    {% if t.n_isolates %}
+      · {{ t.n_isolates }} isolate{{ '' if t.n_isolates == 1 else 's' }}
+    {% endif %}
+    {% if t.n_extractions_total %}
+      · {{ t.n_extractions_total }} extraction{{ '' if t.n_extractions_total == 1 else 's' }} total
+    {% endif %}
+  </p>
+</section>
+
+{# --- Per-session extraction summary -------------------------------- #}
+{% if payload.per_session %}
+<section class="grid-block">
+  <h2>Per-session extractions</h2>
+  <table class="overview">
+    <thead>
+      <tr><th>Session</th><th>Extractions</th><th>File</th></tr>
+    </thead>
+    <tbody>
+      {% for ps in payload.per_session %}
+        <tr>
+          <td><strong>{{ ps.session_slug }}</strong></td>
+          <td>{{ ps.n_extractions }}</td>
+          <td class="muted file-links">
+            <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/{{ ps.filename }}">{{ ps.filename }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{# --- Theme tree ---------------------------------------------------- #}
+<section class="grid-block">
+  <h2>Themes</h2>
+  {% for theme in payload.themes %}
+    <div class="theme-block">
+      <h3>
+        {{ theme.theme_id }} — {{ theme.title }}
+        <span class="muted">({{ theme.n_clusters }} cluster{{ '' if theme.n_clusters == 1 else 's' }} ·
+          {{ theme.n_extractions }} extraction{{ '' if theme.n_extractions == 1 else 's' }})</span>
+      </h3>
+      {% if theme.abstract %}
+        <p class="theme-abstract">{{ theme.abstract }}</p>
+      {% endif %}
+      <table class="overview">
+        <thead>
+          <tr><th>Cluster</th><th>Title</th><th>Extractions</th></tr>
+        </thead>
+        <tbody>
+          {% for c in theme.clusters %}
+            <tr>
+              <td><code>{{ c.cluster_id }}</code></td>
+              <td>
+                <strong>{{ c.cluster_title }}</strong>
+                {% if c.cluster_abstract %}
+                  <br><span class="muted">{{ c.cluster_abstract }}</span>
+                {% endif %}
+              </td>
+              <td>{{ c.n_extractions }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+</section>
+
+{# --- Isolates ------------------------------------------------------ #}
+{% if payload.isolates %}
+<section class="grid-block">
+  <h2>Isolates ({{ payload.isolates|length }})</h2>
+  <p class="muted">Extractions that didn't cluster — kept as singletons.</p>
+  <table class="overview">
+    <thead>
+      <tr><th>Cluster</th><th>Title</th><th>Abstract</th></tr>
+    </thead>
+    <tbody>
+      {% for iso in payload.isolates %}
+        <tr>
+          <td><code>{{ iso.cluster_id }}</code></td>
+          <td><strong>{{ iso.cluster_title }}</strong></td>
+          <td class="muted">{{ iso.cluster_abstract }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
+{% endblock %}

@@ -536,6 +536,351 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
     }
 
 
+# --- Researcher Pipeline detail view (C23 Phase C, 2026-05-03) -------------
+#
+# Reads <run_dir>/02_researcher/grouping.json (canonical Researcher output)
+# plus the per-session extraction inputs to render the theme/cluster tree
+# and a per-session extraction summary. Athens working envelope: 200-400
+# extractions, 25-50 clusters, 10-18 themes (revised up from 7-10 per
+# v2.4 ratios applied to a 13-hour / 15-session night).
+
+
+def collect_researcher_detail(night: int) -> dict[str, Any]:
+    """Top-level payload for /admin/tonight/researcher.
+
+    Renders themes (with their clusters and abstracts) plus the isolates list
+    and a per-session extraction-count summary read from the per-session
+    *_extractions.json files the Researcher writes alongside grouping.json.
+    """
+    run_dir = run_dir_for_night(night)
+    base = {
+        "night": night,
+        "run_id": run_dir.name,
+        "run_dir": str(run_dir),
+        "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    if not run_dir.exists():
+        return {**base, "run_exists": False, "themes": [], "isolates": [],
+                "per_session": [], "totals": {}}
+
+    grouping = _read_json_or_none(run_dir / "02_researcher" / "grouping.json")
+    if grouping is None:
+        return {**base, "run_exists": True, "themes": [], "isolates": [],
+                "per_session": [], "totals": {},
+                "grouping_present": False}
+
+    themes = []
+    n_clusters_total = 0
+    n_extractions_in_clusters = 0
+    for t in grouping.get("themes", []):
+        clusters = []
+        for c in t.get("clusters", []):
+            ext_ids = c.get("extraction_ids", []) or []
+            n_extractions_in_clusters += len(ext_ids)
+            n_clusters_total += 1
+            clusters.append({
+                "cluster_id": c.get("cluster_id"),
+                "cluster_title": c.get("cluster_title"),
+                "cluster_abstract": c.get("cluster_abstract"),
+                "n_extractions": len(ext_ids),
+            })
+        themes.append({
+            "theme_id": t.get("theme_id"),
+            "title": t.get("title"),
+            "abstract": t.get("abstract"),
+            "n_clusters": len(clusters),
+            "n_extractions": sum(c["n_extractions"] for c in clusters),
+            "clusters": clusters,
+        })
+    isolates = grouping.get("isolates", []) or []
+
+    # Per-session extraction summary — every <session_id>_extractions.json or
+    # <session_id>/extractions.json the Researcher input reading produced.
+    # The naming convention is loose (<some_slug>_extractions.json), so we
+    # glob and report whatever's there.
+    per_session = []
+    rsr_dir = run_dir / "02_researcher"
+    for p in sorted(rsr_dir.glob("*_extractions.json")):
+        if p.name == "all_extractions.json":
+            continue
+        data = _read_json_or_none(p) or {}
+        # The per-session extractions file may be a dict with `extractions`
+        # or a top-level list. Handle both.
+        if isinstance(data, list):
+            n_ext = len(data)
+        elif isinstance(data, dict):
+            n_ext = len(data.get("extractions", []) or data.get("items", []) or [])
+        else:
+            n_ext = 0
+        per_session.append({
+            "filename": p.name,
+            "session_slug": p.stem.replace("_extractions", ""),
+            "n_extractions": n_ext,
+            "mtime": _file_mtime_iso(p),
+        })
+
+    all_ext_path = rsr_dir / "all_extractions.json"
+    n_extractions_total = None
+    if all_ext_path.exists():
+        all_data = _read_json_or_none(all_ext_path) or {}
+        if isinstance(all_data, list):
+            n_extractions_total = len(all_data)
+        elif isinstance(all_data, dict):
+            n_extractions_total = len(
+                all_data.get("extractions", []) or all_data.get("items", []) or []
+            )
+
+    totals = {
+        "n_themes": len(themes),
+        "n_clusters": n_clusters_total,
+        "n_extractions_in_clusters": n_extractions_in_clusters,
+        "n_isolates": len(isolates),
+        "n_extractions_total": n_extractions_total,
+    }
+    return {
+        **base,
+        "run_exists": True,
+        "grouping_present": True,
+        "grouping_mtime": _file_mtime_iso(rsr_dir / "grouping.json"),
+        "themes": themes,
+        "isolates": isolates,
+        "per_session": per_session,
+        "totals": totals,
+    }
+
+
+# --- Provocateur Pipeline detail view (C23 Phase C, 2026-05-03) ------------
+#
+# Reads <run_dir>/03_provocateur/{manifest.json, selection.json, triage_flags.json,
+# triage_voices/<slug>.json, formulations/<theme>__<voice>.json, briefings/<slug>.json}
+# to build:
+#   - Triage matrix: voices × themes — activation strength + is_stretch
+#   - Formulation grid: voices × themes — which pairs got assigned + written
+#   - Theme flags table: per-theme worth_surfacing / audience_friction / fault_line
+#   - Per-voice triage detail: ranked + flat themes with rationales
+# Athens working envelope: 10 voices × 10-18 themes = 100-180 cells per matrix.
+
+
+def _provocateur_triage_voices(prov_dir: Path) -> list[dict[str, Any]]:
+    """One row per voice that wrote a triage_voices/<slug>.json."""
+    tdir = prov_dir / "triage_voices"
+    if not tdir.exists():
+        return []
+    out = []
+    for p in sorted(tdir.glob("*.json")):
+        data = _read_json_or_none(p) or {}
+        out.append({
+            "voice_slug": p.stem,
+            "voice_name": data.get("voice", p.stem),
+            "ranked_themes": data.get("ranked_themes", []) or [],
+            "flat_themes": data.get("flat_themes", []) or [],
+            "mtime": _file_mtime_iso(p),
+        })
+    return out
+
+
+def _provocateur_triage_cells(
+    triage_voices: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Flatten triage to a list of (voice, theme, activation, is_stretch, reason)
+    cells suitable for matrix lookup."""
+    cells = []
+    for tv in triage_voices:
+        for rt in tv["ranked_themes"]:
+            cells.append({
+                "voice_slug": tv["voice_slug"],
+                "theme_id": rt.get("theme_id"),
+                "kind": "ranked",
+                "activation": rt.get("activation"),  # "strong" / "moderate" / "weak"
+                "is_stretch": bool(rt.get("is_stretch")),
+                "reason": rt.get("reason"),
+            })
+        for ft in tv["flat_themes"]:
+            cells.append({
+                "voice_slug": tv["voice_slug"],
+                "theme_id": ft.get("theme_id"),
+                "kind": "flat",
+                "activation": "flat",
+                "is_stretch": False,
+                "reason": ft.get("reason"),
+            })
+    return cells
+
+
+def _provocateur_formulation_cells(prov_dir: Path) -> list[dict[str, Any]]:
+    """One cell per formulations/<theme>__<voice>.json on disk."""
+    fdir = prov_dir / "formulations"
+    if not fdir.exists():
+        return []
+    out = []
+    for p in sorted(fdir.glob("*.json")):
+        if "__" not in p.stem:
+            continue
+        theme_id, _, voice_slug = p.stem.partition("__")
+        data = _read_json_or_none(p) or {}
+        out.append({
+            "voice_slug": voice_slug,
+            "theme_id": theme_id,
+            "mode": data.get("mode"),
+            "council_member": data.get("member", voice_slug),
+            "theme_display_title": data.get("theme_display_title", theme_id),
+            "n_quotes": len(data.get("selected_quotes", []) or []),
+            "n_grounding": len(data.get("grounding_extraction_ids", []) or []),
+            "rationale": (data.get("rationale") or "").strip(),
+            "mtime": _file_mtime_iso(p),
+        })
+    return out
+
+
+def collect_provocateur_detail(night: int) -> dict[str, Any]:
+    """Top-level payload for /admin/tonight/provocateur."""
+    run_dir = run_dir_for_night(night)
+    base = {
+        "night": night,
+        "run_id": run_dir.name,
+        "run_dir": str(run_dir),
+        "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    if not run_dir.exists():
+        return {**base, "run_exists": False}
+
+    prov_dir = run_dir / "03_provocateur"
+    manifest = _read_json_or_none(prov_dir / "manifest.json")
+    selection = _read_json_or_none(prov_dir / "selection.json")
+    triage_flags = _read_json_or_none(prov_dir / "triage_flags.json")
+
+    if manifest is None and not (prov_dir.exists() and prov_dir.is_dir()):
+        return {**base, "run_exists": True, "manifest_present": False}
+
+    triage_voices = _provocateur_triage_voices(prov_dir)
+    triage_cells = _provocateur_triage_cells(triage_voices)
+    formulation_cells = _provocateur_formulation_cells(prov_dir)
+
+    # Voices and themes — union from triage_voices + formulation_cells +
+    # selection.assignments_by_member (in case some voice is in selection
+    # but didn't write a triage_voices file, or vice versa).
+    voices_set: set[str] = {tv["voice_slug"] for tv in triage_voices}
+    voice_name: dict[str, str] = {tv["voice_slug"]: tv["voice_name"]
+                                   for tv in triage_voices}
+    themes_set: set[str] = set()
+    theme_titles: dict[str, str] = {}
+    for c in triage_cells:
+        if c["theme_id"]:
+            themes_set.add(c["theme_id"])
+    for fc in formulation_cells:
+        voices_set.add(fc["voice_slug"])
+        voice_name.setdefault(fc["voice_slug"], fc["council_member"])
+        if fc["theme_id"]:
+            themes_set.add(fc["theme_id"])
+            theme_titles[fc["theme_id"]] = fc["theme_display_title"]
+
+    # Theme flags — list of per-theme metadata.
+    theme_flags = (triage_flags or {}).get("theme_flags", []) or []
+    for tf in theme_flags:
+        if tf.get("theme_id"):
+            themes_set.add(tf["theme_id"])
+
+    voices = [
+        {"voice_slug": s, "voice_name": voice_name.get(s, s)}
+        for s in sorted(voices_set)
+    ]
+    themes = [
+        {"theme_id": t, "theme_display_title": theme_titles.get(t, t)}
+        for t in sorted(themes_set)
+    ]
+
+    # Selection — which themes got kept, dropped, and which voices fell short.
+    sel = selection or {}
+    counts = (manifest or {}).get("outputs", {})
+
+    return {
+        **base,
+        "run_exists": True,
+        "manifest_present": manifest is not None,
+        "manifest_mtime": _file_mtime_iso(prov_dir / "manifest.json"),
+        "voices": voices,
+        "themes": themes,
+        "triage_voices": triage_voices,
+        "triage_cells": triage_cells,
+        "formulation_cells": formulation_cells,
+        "theme_flags": theme_flags,
+        "selection": {
+            "kept_themes": sel.get("kept_themes", []) or [],
+            "dropped_themes": sel.get("dropped_themes", []) or [],
+            "assignments_by_member": sel.get("assignments_by_member", {}) or {},
+            "coverage_per_member": sel.get("coverage_per_member", {}) or {},
+            "forced_fits": sel.get("forced_fits", []) or [],
+            "stretch_swaps": sel.get("stretch_swaps", []) or [],
+            "below_target": sel.get("below_target", []) or [],
+        },
+        "counts": {
+            "n_themes_selected": counts.get("selected_themes", 0),
+            "n_themes_dropped": counts.get("dropped_themes", 0),
+            "n_formulations": counts.get("formulations", 0),
+            "n_briefings_written": counts.get("briefings_written", 0),
+            "n_forced_fits": counts.get("forced_fits", 0),
+            "n_stretch_swaps": counts.get("stretch_swaps", 0),
+            "n_voices_below_target": counts.get("voices_below_target", 0),
+        },
+    }
+
+
+# --- Publish detail view (C23 Phase C, 2026-05-03) -------------------------
+#
+# Reads <PROJECT_ROOT>/published_artifacts/nights/night_<N>/{_index.json,
+# <voice_slug>.json} for each voice. The index is the one Researcher /
+# Provocateur / Voice all feed into via publish_flow.py.
+
+
+def collect_publish_detail(night: int) -> dict[str, Any]:
+    """Top-level payload for /admin/tonight/publish."""
+    base = {
+        "night": night,
+        "run_id": run_dir_for_night(night).name,
+        "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    pub_dir = PROJECT_ROOT / "published_artifacts" / "nights" / f"night_{night}"
+    index_path = pub_dir / "_index.json"
+    if not index_path.exists():
+        return {
+            **base,
+            "index_present": False,
+            "voices": [],
+            "totals": {"n_voices": 0},
+        }
+
+    idx = _read_json_or_none(index_path) or {}
+    raw_voices = idx.get("voices", []) or []
+    voices = []
+    for vrow in raw_voices:
+        slug = vrow.get("voice_slug")
+        per_voice_path = pub_dir / f"{slug}.json"
+        voices.append({
+            "voice_slug": slug,
+            "voice_name": vrow.get("voice_name") or slug,
+            "url_path": vrow.get("url_path"),
+            "title": vrow.get("title"),
+            "subtitle": vrow.get("subtitle"),
+            "selected_form": vrow.get("selected_form"),
+            "stance": vrow.get("stance"),
+            "themes_addressed": vrow.get("themes_addressed", []) or [],
+            "decision": vrow.get("decision"),
+            "amendment_count": vrow.get("amendment_count", 0),
+            "word_count": vrow.get("word_count"),
+            "has_per_voice_file": per_voice_path.exists(),
+            "per_voice_mtime": _file_mtime_iso(per_voice_path),
+        })
+    return {
+        **base,
+        "index_present": True,
+        "index_mtime": _file_mtime_iso(index_path),
+        "url_path": idx.get("url_path"),
+        "generated_at": idx.get("generated_at"),
+        "voices": voices,
+        "totals": {"n_voices": len(voices)},
+    }
+
+
 def latest_active_night() -> int:
     """Pick the right night to default to.
 
