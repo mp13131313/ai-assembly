@@ -601,6 +601,67 @@ pass1d = call_or_cache(_paths.excerpt_selections(SLUG, PROJECT_ROOT), "Pass 1d",
 primary_block = pass1d["selected_text"]
 stamp(f"  primary_texts block: {len(primary_block)} chars from {pass1d.get('selection_count', 0)} curated selections")
 
+# (c.1) — For voices with corpus_constraint=lyrics_patterns_only (Marley pattern),
+# the public-tier primary corpus is incomplete because verbatim lyrics aren't
+# legally fetchable as full text (copyright). Pass 1d still curates whatever
+# IS in pass1c (e.g. Marley's interview transcripts), but Pass 4a's voice
+# modeling needs the lyrics too — they're the canonical pattern-source. This
+# block AUGMENTS primary_block_for_voice with reference_only_passages content,
+# so Pass 4a sees BOTH the Pass-1d-curated public corpus AND the operator-
+# curated private corpus. Pass 6's primary_block stays unchanged (still just
+# Pass 1d output) so curated_corpus_passages remains free of verbatim lyric
+# snippets — the runtime contract stays intact: lyrics inform build-time voice
+# modeling but never appear on the public card or in Step 2 runtime context.
+# The runner code's pre-existing TODO in _pass_1d flagged this gap: "Pass 4a/6
+# handle the lyrics-constraint path correctly."
+primary_block_for_voice = primary_block
+if vi.get("corpus_constraint") == "lyrics_patterns_only":
+    ref_only_path = _paths.merge_dir(SLUG, PROJECT_ROOT) / "pass_1_6" / "reference_only_passages.json"
+    if ref_only_path.exists():
+        try:
+            ref_data = json.loads(ref_only_path.read_text())
+            ref_passages = ref_data.get("passages", [])
+            if ref_passages:
+                _ref_texts = []
+                for _p in ref_passages:
+                    _work = _p.get("work_title", "?")
+                    _canref = _p.get("canonical_reference", "")
+                    _header = _p.get("contextual_header", "")
+                    _content = _p.get("content", "")
+                    if _content:
+                        _ref_texts.append(
+                            f"--- {_work} ({_canref}) ---\n"
+                            + (f"{_header}\n\n" if _header else "")
+                            + _content
+                        )
+                if _ref_texts:
+                    _ref_block = "\n\n".join(_ref_texts)
+                    # Determine whether primary_block has real content (Pass 1d
+                    # ran) or is the SKIPPED placeholder. If placeholder,
+                    # substitute; if real content, augment via concatenation
+                    # with a clear separator.
+                    _placeholder_marker = "[NO PRIMARY TEXTS"
+                    if _placeholder_marker in primary_block:
+                        primary_block_for_voice = _ref_block
+                        _mode = "substituted"
+                    else:
+                        primary_block_for_voice = (
+                            primary_block
+                            + "\n\n=== ADDITIONAL CORPUS (private-tier reference_only_passages — "
+                              "operator-curated; build-time voice modeling only; "
+                              "never quoted in Step-2 public output) ===\n\n"
+                            + _ref_block
+                        )
+                        _mode = "augmented"
+                    stamp(
+                        f"  (c.1) corpus_constraint=lyrics_patterns_only — "
+                        f"Pass 4a primary_text {_mode} with reference_only_passages: "
+                        f"{len(_ref_block):,} chars from {len(_ref_texts)} passages "
+                        f"(total primary_block_for_voice now {len(primary_block_for_voice):,} chars)"
+                    )
+        except Exception as _e:
+            stamp(f"  (c.1) WARN: failed to load reference_only_passages: {_e}")
+
 def _pass_4a():
     sysp = render("persona_pass_4a_voice", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
@@ -619,7 +680,7 @@ def _pass_4a():
         available_pathe=chunk_vars["available_pathe"],
         reasoning_method_summary=chunk_vars["reasoning_method_summary"],
         cross_disciplinary_frames=chunk_vars["cross_disciplinary_frames"],
-        primary_texts=primary_block,
+        primary_texts=primary_block_for_voice,  # (c.1): augmented for lyrics_patterns_only voices
         pass_2_3_summary=pass_2_3_summary,
     )
     # Opus + adaptive thinking: long-context pattern recognition across primary

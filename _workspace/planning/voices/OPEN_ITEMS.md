@@ -778,3 +778,35 @@ The v2 schema's artifact cluster (`medium` + `technical_capabilities` + `charact
 ### Cross-reference to "Voice of X" naming sweep (§18)
 
 Claudia's `voice_name` field follows the same naming convention as panel voices: "Voice of Claudia Pinchbeck" / "Voice of the Desk" — operator-decision relabeling. Folds into the all-10-ship sweep when it fires.
+
+---
+
+## 22. 2026-05-03 evening session — Whanganui shipped + Scheherazade ROUND6 + Marley (c.1) code change
+
+Three-voice parallel build session. State at session end:
+
+### Whanganui River — ✅ SHIPPED via path-(b) at ROUND6
+- 6 rounds of validator walk-through; converged to 3 architectural residuals (appropriation-safety language is load-bearing, not a defect).
+- Operator-applied `_operator_review_passed.flag` to ship; all 3 Derive outputs present in `06_derive/` (provocateur_profile, runtime_card_minimal, chat_system_prompt).
+- Mid-session reset: ROUND5 patches over-corrected appropriation-safety language; reverted to PRE-ROUND1 (post-auto-FIX baseline) per operator override before resuming.
+
+### Scheherazade — 🟡 ROUND6 walk-through complete; run14 in flight
+- Seale-Horta 2021 corpus acquired (operator-purchased Thalia DRM-free EPUB) → 14 chapters extracted to `01_primary_texts.json` (1.22M chars) for Pass 1d to curate. Fixes Burton/Lane register conflict that surfaced at FINAL gate.
+- ROUND6 patches: kawa-typo fix (templated from Whanganui — caught by validator), Bencheikh French strip (`constitution[6]`), closing-frame `quotation_framing` add (`curated_corpus_passages[6]`).
+- Per-fix decisions: [1][4][5] left as architectural (mediated-voice / dramatist-vs-speaker per §9 — third-person preserved); [2][3][6] patched.
+- **§9 carry-over confirmed**: Scheherazade hits the same dramatist-vs-speaker collision as Plato. `banned_language[6]` and `banned_modes[7]` first-person rewrites were REVERTED to third-person; `characteristic_moves[5]` trailing meta-sentence ("The motif is the voice's own epistemology made visible") restored as third-person architectural meta.
+
+### Bob Marley — 🟠 (c.1) code change landed; pipeline ready to walk through
+- **(c.1) `personas/run_persona_pipeline.py` Pass 4a augment behavior** for `corpus_constraint=lyrics_patterns_only`. When this constraint is set AND `pass_1_6/reference_only_passages.json` exists, Pass 4a's `primary_block_for_voice` is built as: substitute (if Pass 1d output is the placeholder `[NO PRIMARY TEXTS...]`) or augment (concat Pass 1d corpus + reference passages). Pass 6 still uses original `primary_block` to preserve no-public-quotation contract (lyrics never make it into the curated_corpus_passages emitted to athens-2026).
+- Initial implementation was REPLACE; operator caught and corrected to AUGMENT. The augment path concatenates with `=== ADDITIONAL CORPUS ... ===` separator so Pass 4a sees both the interview-curated pass-1d output and the 35 verbatim lyrics.
+- DR §4 `[quote:]` blocks trimmed to get past Pass 1.4 content filter (deterministic content-policy refusal on verbatim lyrics in dossier text).
+- 8 residuals queued for walk-through (apply dramatist-vs-speaker lens too — Marley songs are mediated; the lyrical "I" is performed-persona, not autobiographical).
+
+### Architectural pattern confirmation: §9 mediated-voice spans 4+ voices
+Plato (composer-vs-Socrates), Scheherazade (frame-tale teller-vs-tales-told), Marley (songwriter-vs-lyric-I), and Octopus (already shipped with two-channel JSON+prose contract) all instantiate the mediated-voice / dramatist-vs-speaker pattern. The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) is now demonstrably load-bearing for ≥3 voices in this build cohort. Filing for Pass 2 epistemic_frame_statement + Pass 4a characteristic_moves + Pass 3 reasoning_method clarifications stays open as a v4.1 prompt change — but surgical patches at the gate continue to work.
+
+### DR adaptive-thinking spot-test
+Operator flagged concern that Whanganui/Scheherazade/Marley DR dossiers may have run on Opus 4.7 *without* extended thinking. Spot-test compared compass artifact (thinking explicitly ON) vs original DR Section 1 line-by-line: differences are sampling-variance level, not thinking-on/off level. Most likely explanation — both done with Research feature (auto-enables thinking); operator's "thinking off" recall was UI display difference. **Practical implication: original DR dossiers solid; cards built on them are valid; no need to redo Phase 0.5.**
+
+### Snapshot preservation discipline
+For each round of validator walk-through on each voice, the Pass 7a FINAL output is preserved as `07_persona_card_assembled.ROUNDN.json` before patches are applied. This is now standing practice for any walk-through with ≥3 rounds.
