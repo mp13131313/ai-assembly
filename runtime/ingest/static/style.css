@@ -814,3 +814,159 @@ table.continuity-table th {
   color: var(--state-error);
   font-weight: 500;
 }
+
+/* --- C23 UX iteration (2026-05-03) --- */
+
+/* Sessions index: list view replaces grid (operator feedback). */
+ol.session-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 32px;
+  border-top: 1px solid var(--hairline);
+}
+.session-row {
+  border-bottom: 1px solid var(--hairline);
+  padding: 0;
+}
+.session-row .session-link {
+  display: grid;
+  grid-template-columns: 16px 70px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 4px;
+  text-decoration: none;
+  color: inherit;
+}
+.session-row .session-link:hover {
+  background: var(--cream-2);
+}
+.session-row .time {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--warm-mid);
+}
+.session-row .title {
+  font-weight: 500;
+}
+.session-row .track-tag {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--hairline);
+  color: var(--warm-mid);
+  white-space: nowrap;
+}
+.session-row .venue {
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+.session-row .speakers {
+  font-size: 11px;
+  padding: 0 16px 10px 102px;
+  margin-top: -8px;
+}
+@media (max-width: 720px) {
+  .session-row .session-link {
+    grid-template-columns: 16px 60px 1fr;
+  }
+  .session-row .track-tag,
+  .session-row .venue {
+    grid-column: 3;
+    text-align: left;
+    margin-top: 2px;
+  }
+}
+
+/* Pipeline overview: transposed stages grid (stages as columns). */
+.stages-scroll {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+table.stages-grid {
+  border-collapse: collapse;
+  min-width: 640px;
+  width: 100%;
+}
+table.stages-grid th,
+table.stages-grid td {
+  border: 1px solid var(--hairline);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+table.stages-grid .row-header {
+  background: var(--cream-2);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warm-mid);
+  font-weight: 500;
+  width: 100px;
+  white-space: nowrap;
+}
+table.stages-grid .stage-col-header {
+  background: var(--cream-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+table.stages-grid .stage-col-header a {
+  color: var(--warm-mid);
+  text-decoration: none;
+}
+table.stages-grid .stage-col-header a:hover {
+  color: var(--state-active);
+}
+table.stages-grid .stage-cell {
+  font-size: 12px;
+  min-width: 130px;
+}
+
+/* File-open links inside grids/tables. */
+.cell-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  padding: 0;
+}
+.file-link,
+.file-links a {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--warm-light);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+}
+.file-link:hover,
+.file-links a:hover {
+  color: var(--state-active);
+  border-bottom-color: var(--state-active);
+}
+.file-links {
+  font-size: 11px;
+}
+.night-picker code,
+.night-picker a code {
+  font-size: 11px;
+}
+.night-picker a:has(code) {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--warm-light);
+}
+
+/* Breadcrumb hover style. */
+.breadcrumb a:hover {
+  color: var(--state-active);
+}
+
+/* Log out link sits to the right of the rest of the nav. */
+header nav { display: flex; gap: 16px; align-items: center; }
+header nav .nav-logout {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--warm-light);
+}
+header nav .nav-logout:hover { color: var(--state-active); }

@@ -209,12 +209,52 @@ def test_admin_tonight_invalid_night_falls_back(client: TestClient):
 
 
 def test_index_admin_sees_pipeline_state_dots(client: TestClient):
-    """Admin index page renders dot classes (none of producer's overrides)."""
+    """Admin index page renders the Pipeline nav link.
+
+    Post-2026-05-03 UX cleanup: the top nav has "Sessions" + "Pipeline" only;
+    "All statuses" was removed (it's now reachable as the Transcription
+    drilldown from /admin/tonight).
+    """
     r = client.get("/", auth=ADMIN_AUTH)
     assert r.status_code == 200
-    # Admin index includes the "All statuses" + "Tonight" nav links:
-    assert "/status" in r.text
     assert "/admin/tonight" in r.text
+
+
+def test_logout_returns_401_with_different_realm(client: TestClient):
+    """`/logout` returns 401 with a fresh realm string.
+
+    Most browsers treat this as a fresh auth challenge and drop the
+    cached creds for the original realm. The body is a styled HTML
+    page with a "Sign in again" link.
+    """
+    # No auth header — /logout always returns 401, never 200.
+    r = client.get("/logout")
+    assert r.status_code == 401
+    # Different realm than the auth-protected routes use:
+    assert "AI Assembly Ingest (logged out)" in r.headers["www-authenticate"]
+    assert "Logged out" in r.text
+
+
+def test_logout_with_creds_still_returns_401(client: TestClient):
+    """Even if the user sends valid creds, /logout returns 401 — that's
+    the whole point. The 401 is what nudges the browser to forget."""
+    r = client.get("/logout", auth=ADMIN_AUTH)
+    assert r.status_code == 401
+
+
+def test_admin_nav_includes_logout(client: TestClient):
+    r = client.get("/", auth=ADMIN_AUTH)
+    assert r.status_code == 200
+    assert "/logout" in r.text
+    # Role-aware label:
+    assert "Log out (admin)" in r.text
+
+
+def test_producer_nav_includes_logout(client: TestClient):
+    r = client.get("/", auth=PRODUCER_AUTH)
+    assert r.status_code == 200
+    assert "/logout" in r.text
+    assert "Log out (producer)" in r.text
 
 
 def test_index_producer_no_admin_nav(client: TestClient):

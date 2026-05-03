@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Sessions · AI Assembly Ingest{% endblock %}
 {% block content %}
-<h1>Upload session audio</h1>
+<h1>Sessions</h1>
 
 {% if flagged_count == 0 %}
 <div class="empty">
@@ -40,29 +40,27 @@
 {% for day in days_ordered %}
   <section class="day-section" data-day="{{ day }}">
     <h2>{{ day }}</h2>
-    <ul class="session-grid">
+    <ol class="session-list">
       {% for s in by_day[day] %}
         {% set state = states.get(s.session_id) %}
-        <li class="session-card {{ s.track|track_css }}" data-venue="{{ s.venue }}" data-search="{{ s.title|lower }} {{ s.venue|lower }} {{ s.speakers|join(' ')|lower }}">
-          <a href="/session/{{ s.session_id }}">
-            <div class="card-top">
-              <span class="dot dot-{{ state or 'none' }}" title="{{ state or 'not started' }}"></span>
-              <span class="time">{{ s.start_time }}</span>
-              <span class="venue">{{ s.venue }}{% if s.venue_sub %} · {{ s.venue_sub }}{% endif %}</span>
-            </div>
-            <div class="track">{{ s.track }}</div>
-            <div class="title">{{ s.title }}</div>
-            <div class="speakers">
-              {% if s.speakers %}
-                {{ s.speakers|join(', ') }}
-              {% else %}
-                <span class="muted">no speakers listed</span>
-              {% endif %}
-            </div>
+        <li class="session-row {{ s.track|track_css }}"
+            data-venue="{{ s.venue }}"
+            data-search="{{ s.title|lower }} {{ s.venue|lower }} {{ s.speakers|join(' ')|lower }}">
+          <a class="session-link" href="/session/{{ s.session_id }}">
+            <span class="dot dot-{{ state or 'none' }}" title="{{ state or 'not started' }}"></span>
+            <span class="time">{{ s.start_time }}</span>
+            <span class="title">{{ s.title }}</span>
+            <span class="track-tag">{{ s.track }}</span>
+            <span class="venue muted">
+              {{ s.venue }}{% if s.venue_sub %} · {{ s.venue_sub }}{% endif %}
+            </span>
           </a>
+          {% if s.speakers %}
+          <div class="speakers muted">{{ s.speakers|join(', ') }}</div>
+          {% endif %}
         </li>
       {% endfor %}
-    </ul>
+    </ol>
   </section>
 {% endfor %}
 

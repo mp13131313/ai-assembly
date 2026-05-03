@@ -1,14 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Tonight · Night {{ night }}{% endblock %}
+{% block title %}Pipeline · Night {{ night }}{% endblock %}
 {% block head_extra %}
-  {# Auto-refresh: 30s cache window matches orchestrator's 1-min poll
-     cadence — fast enough to feel live, slow enough to not hammer the
-     filesystem reads. Operator can manually reload too. #}
+  {# 30s auto-refresh — matches orchestrator's 1-min poll cadence. #}
   <meta http-equiv="refresh" content="30">
 {% endblock %}
 {% block content %}
 
-<h1>Tonight — Night {{ night }}</h1>
+<h1>Pipeline — Night {{ night }}</h1>
 
 <nav class="night-picker">
   {% for n in all_nights %}
@@ -18,7 +16,11 @@
       <a class="chip" href="/admin/tonight?night={{ n }}">Night {{ n }}</a>
     {% endif %}
   {% endfor %}
-  <span class="muted">· run dir: <code>{{ payload.run_id }}</code></span>
+  <span class="muted">·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/_orchestrator_logs/status.json">
+      <code>{{ payload.run_id }}</code>
+    </a>
+  </span>
   <span class="muted">· polled {{ payload.polled_at }}</span>
 </nav>
 
@@ -50,36 +52,63 @@
 
 <section class="stages-block">
   <h2>Stages</h2>
-  <table class="stages-table">
-    <thead>
-      <tr><th>Stage</th><th>State</th><th>Summary</th><th>Last write</th></tr>
-    </thead>
-    <tbody>
-      {% set stage_meta = [
-        ('transcription', 'Transcription', '/status'),
-        ('researcher',    'Researcher',    none),
-        ('provocateur',   'Provocateur',   none),
-        ('voice',         'Voice',         '/admin/tonight/voice?night=' ~ night),
-        ('editor',        'Editor',        none),
-        ('publish',       'Publish',       none),
-      ] %}
-      {% for key, display, drilldown in stage_meta %}
-        {% set s = payload.stages[key] %}
-        <tr class="stage-row state-{{ s.state }}">
-          <td>
-            {% if drilldown %}
-              <a href="{{ drilldown }}"><strong>{{ display }}</strong></a>
-            {% else %}
-              <strong>{{ display }}</strong>
-            {% endif %}
-          </td>
-          <td><span class="state-pill state-{{ s.state }}">{{ s.state }}</span></td>
-          <td>{{ s.label or '' }}</td>
-          <td class="muted">{{ s.mtime or s.last_done_mtime or '' }}</td>
+  {% set stage_meta = [
+    ('transcription', 'Transcription', '/admin/tonight/transcription?night=' ~ night),
+    ('researcher',    'Researcher',    none),
+    ('provocateur',   'Provocateur',   none),
+    ('voice',         'Voice',         '/admin/tonight/voice?night=' ~ night),
+    ('editor',        'Editor',        none),
+    ('publish',       'Publish',       none),
+  ] %}
+  {# Transposed table: stages as columns, attributes as rows.
+     Wraps in scroll container so 6 columns survive narrow viewports. #}
+  <div class="stages-scroll">
+    <table class="stages-grid">
+      <thead>
+        <tr>
+          <th class="row-header"></th>
+          {% for key, display, drilldown in stage_meta %}
+            <th class="stage-col-header">
+              {% if drilldown %}
+                <a href="{{ drilldown }}">{{ display }} →</a>
+              {% else %}
+                {{ display }}
+              {% endif %}
+            </th>
+          {% endfor %}
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <tr>
+          <th class="row-header">State</th>
+          {% for key, display, drilldown in stage_meta %}
+            {% set s = payload.stages[key] %}
+            <td class="stage-cell state-{{ s.state }}">
+              <span class="state-pill state-{{ s.state }}">{{ s.state }}</span>
+            </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th class="row-header">Summary</th>
+          {% for key, display, drilldown in stage_meta %}
+            {% set s = payload.stages[key] %}
+            <td class="stage-cell">{{ s.label or '—' }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th class="row-header">Last write</th>
+          {% for key, display, drilldown in stage_meta %}
+            {% set s = payload.stages[key] %}
+            <td class="stage-cell muted">{{ s.mtime or s.last_done_mtime or '—' }}</td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted hint">
+    Stages flow left → right. Click <em>Transcription</em> or <em>Voice</em>
+    to drill into stage detail. Other drilldowns land in Phase C.
+  </p>
 </section>
 
 {% set vstage = payload.stages.voice %}
@@ -88,9 +117,14 @@
     <h2>⚠ Validation flags</h2>
     <p>
       {{ vstage.validation_flagged }} Step 1 output(s) flagged by the
-      anachronism / constitutional check. Open
-      <code>{{ payload.run_dir }}/04_voice/manifest.json</code>
-      → <code>validation_failures[]</code> for per-flag detail.
+      anachronism / constitutional check. See
+      <a href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/manifest.json">
+        <code>runs/{{ payload.run_id }}/04_voice/manifest.json</code>
+      </a>
+      → <code>validation_failures[]</code> for per-flag detail, or
+      drill into the
+      <a href="/admin/tonight/voice?night={{ night }}">Voice stage detail</a>
+      for the per-pair grid.
     </p>
   </section>
 {% endif %}
@@ -101,7 +135,17 @@
     <h2>⚠ Transcription errors</h2>
     <ul>
       {% for sid in tstage.error_sessions %}
-        <li><a href="/session/{{ sid }}">{{ sid }}</a></li>
+        <li>
+          <a href="/session/{{ sid }}/status">{{ sid }}</a>
+          ·
+          <a href="/admin/file?path=runs/{{ payload.run_id }}/01_transcription/{{ sid }}/status.json">
+            <code>status.json</code>
+          </a>
+          ·
+          <a href="/admin/file?path=runs/{{ payload.run_id }}/01_transcription/{{ sid }}/pipeline.log">
+            <code>pipeline.log</code>
+          </a>
+        </li>
       {% endfor %}
     </ul>
   </section>
@@ -110,9 +154,16 @@
 <section class="links-block">
   <h2>Surfaces</h2>
   <ul class="muted">
-    <li><a href="/status">Per-session transcription detail</a></li>
-    <li><code>{{ payload.run_dir }}/_orchestrator_logs/status.json</code> · raw orchestrator state</li>
-    <li><code>{{ payload.run_dir }}/_orchestrator_logs/*.log</code> · per-stage subprocess logs</li>
+    <li>
+      <a href="/admin/file?path=runs/{{ payload.run_id }}/_orchestrator_logs/status.json">
+        <code>runs/{{ payload.run_id }}/_orchestrator_logs/status.json</code>
+      </a>
+      · raw orchestrator state
+    </li>
+    <li>
+      <code>runs/{{ payload.run_id }}/_orchestrator_logs/*.log</code>
+      · per-stage subprocess logs (per-stage detail when Phase C lands)
+    </li>
     <li>Intervene: Claude Code on VM via <code>mosh + tmux</code> (per Infrastructure spec)</li>
   </ul>
 </section>

@@ -128,7 +128,7 @@ UPLOAD_LOCK_FILENAME = "upload.lock"
 # can swap in a fake flow that touches output files without burning credits.
 # Bumped whenever app.js or style.css changes materially. Include as
 # ?v={{ static_version }} in template <script> and <link> tags.
-STATIC_VERSION = "13"
+STATIC_VERSION = "16"
 
 # The app always appends <audio_path> <session_json_path> as positional args.
 # shlex.join quotes tokens so paths containing spaces (e.g. "AI Assembly/code")

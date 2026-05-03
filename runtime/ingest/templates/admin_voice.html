@@ -6,10 +6,10 @@
 {% block content %}
 
 <p class="breadcrumb">
-  <a href="/admin/tonight?night={{ night }}">← Tonight (Night {{ night }})</a>
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
 </p>
 
-<h1>Voice Pipeline — Night {{ night }}</h1>
+<h1>Voice — Night {{ night }}</h1>
 
 <nav class="night-picker">
   {% for n in all_nights %}
@@ -19,7 +19,11 @@
       <a class="chip" href="/admin/tonight/voice?night={{ n }}">Night {{ n }}</a>
     {% endif %}
   {% endfor %}
-  <span class="muted">· run dir: <code>{{ payload.run_id }}</code></span>
+  <span class="muted">·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/manifest.json">
+      <code>{{ payload.run_id }}/04_voice/manifest.json</code>
+    </a>
+  </span>
   <span class="muted">· polled {{ payload.polled_at }}</span>
 </nav>
 
@@ -73,7 +77,10 @@
               {% if cell %}
                 <td class="cell state-done"
                     title="{{ cell.theme_display_title }}{% if cell.mode %} ({{ cell.mode }}){% endif %}{% if cell.input_tokens %} · in: {{ cell.input_tokens }} tok · out: {{ cell.output_tokens }} tok · wall: {{ cell.wall_clock_s }}s{% endif %}">
-                  ✓
+                  <a class="cell-link"
+                     href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/step1_detailed_responses/{{ v.voice_slug }}__{{ t.theme_id }}.json">
+                    ✓
+                  </a>
                 </td>
               {% else %}
                 <td class="cell state-pending" title="not yet started">·</td>
@@ -126,15 +133,20 @@
             {% for t in payload.themes %}
               {% set cell = v_index.get((v.voice_slug, t.theme_id)) %}
               {% if cell %}
+                {% set vfile = "runs/" ~ payload.run_id ~ "/04_voice/validation/" ~ v.voice_slug ~ "__" ~ t.theme_id ~ ".json" %}
                 {% set a = cell.anachronism_status %}
                 <td class="cell {% if a == 'PASS' %}state-done{% elif a == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
                     title="anachronism: {{ a or 'pending' }}{% if cell.anachronism_text %} · {{ cell.anachronism_text[:200] }}{% endif %}">
-                  {% if a == 'PASS' %}✓{% elif a == 'ISSUES' %}⚠{% else %}·{% endif %}
+                  <a class="cell-link" href="/admin/file?path={{ vfile }}">
+                    {% if a == 'PASS' %}✓{% elif a == 'ISSUES' %}⚠{% else %}·{% endif %}
+                  </a>
                 </td>
                 {% set c = cell.constitution_status %}
                 <td class="cell {% if c == 'PASS' %}state-done{% elif c == 'ISSUES' %}state-error{% else %}state-pending{% endif %}"
                     title="constitution: {{ c or 'pending' }}{% if cell.constitution_text %} · {{ cell.constitution_text[:200] }}{% endif %}">
-                  {% if c == 'PASS' %}✓{% elif c == 'ISSUES' %}⚠{% else %}·{% endif %}
+                  <a class="cell-link" href="/admin/file?path={{ vfile }}">
+                    {% if c == 'PASS' %}✓{% elif c == 'ISSUES' %}⚠{% else %}·{% endif %}
+                  </a>
                 </td>
               {% else %}
                 <td class="cell state-pending">·</td>
@@ -170,6 +182,7 @@
           <th>Words</th>
           <th>Wall</th>
           <th>Tokens (in/out)</th>
+          <th>File</th>
         </tr>
       </thead>
       <tbody>
@@ -183,6 +196,12 @@
             <td>{{ ('%.0fs' % v.wall_clock_s) if v.wall_clock_s else '—' }}</td>
             <td class="muted">
               {{ v.input_tokens or '—' }} / {{ v.output_tokens or '—' }}
+            </td>
+            <td>
+              <a class="muted file-link"
+                 href="/admin/file?path=runs/{{ payload.run_id }}/04_voice/step2_first_draft_artifacts/{{ v.voice_slug }}.json">
+                json
+              </a>
             </td>
           </tr>
         {% endfor %}
@@ -213,6 +232,7 @@
           <th>Voice</th>
           <th>Continuity for Night {{ night + 1 }}</th>
           <th>Last write</th>
+          <th>File</th>
         </tr>
       </thead>
       <tbody>
@@ -227,6 +247,16 @@
               {% endif %}
             </td>
             <td class="muted">{{ c.mtime or '—' }}</td>
+            <td>
+              {% if c.written %}
+                <a class="muted file-link"
+                   href="/admin/file?path=voices/{{ c.voice_slug }}/continuity_night_{{ c.for_night }}.json">
+                  json
+                </a>
+              {% else %}
+                <span class="muted">—</span>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>

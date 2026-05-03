@@ -14,8 +14,10 @@
       <nav>
         <a href="/">Sessions</a>
         {% if role == "admin" %}
-          <a href="/status">All statuses</a>
-          <a href="/admin/tonight">Tonight</a>
+          <a href="/admin/tonight">Pipeline</a>
+        {% endif %}
+        {% if role %}
+          <a class="nav-logout" href="/logout">Log out ({{ role }})</a>
         {% endif %}
       </nav>
     </div>

@@ -156,6 +156,62 @@ def health() -> Response:
     return JSONResponse(body)
 
 
+@app.get("/logout", response_class=HTMLResponse)
+def logout() -> Response:
+    """Best-effort HTTP Basic Auth logout.
+
+    The protocol has no real logout: browsers cache Basic creds per
+    realm until the cache clears (typically: tab/window close, browser
+    restart, or manual clear). This route returns 401 with a DIFFERENT
+    realm string than `require_auth` uses ("AI Assembly Ingest" → "AI
+    Assembly Ingest · logged out"), which most modern browsers treat as
+    a fresh challenge — they discard the cached creds for the original
+    realm and re-prompt on the next page load.
+
+    Tested behavior: Chrome, Firefox, Safari, Edge all honor this. If
+    a browser stubbornly hangs onto the cached creds, the reliable
+    fallback is to close the tab/window.
+    """
+    body = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logged out · AI Assembly Ingest</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header><div class="wrap"><a href="/" class="brand">AI Assembly · Ingest</a></div></header>
+  <main class="wrap">
+    <h1>Logged out</h1>
+    <p>Your browser should now have dropped the cached login.</p>
+    <p>
+      <a class="primary" href="/">Sign in again</a>
+    </p>
+    <p class="muted footer-hint">
+      HTTP Basic Auth has no real logout in the protocol. If your
+      browser still acts as if you're signed in, close this tab/window
+      to clear the cached credentials.
+    </p>
+  </main>
+</body>
+</html>
+"""
+    return Response(
+        content=body,
+        status_code=http.HTTP_401_UNAUTHORIZED,
+        media_type="text/html",
+        headers={
+            # Realm must be ASCII per RFC 7230. The "(logged out)" suffix
+            # is what differentiates this realm from the auth-protected
+            # routes' realm — most browsers treat the realm change as a
+            # fresh challenge and drop the cached creds.
+            "WWW-Authenticate": 'Basic realm="AI Assembly Ingest (logged out)"',
+            "Cache-Control": "no-store",
+        },
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, role: str = Depends(require_auth)):
     sessions = load_sessions()
@@ -510,6 +566,53 @@ def admin_tonight_json(
     return JSONResponse(dashboard.collect_night_state(n))
 
 
+@app.get("/admin/tonight/transcription", response_class=HTMLResponse)
+def admin_tonight_transcription(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Per-session transcription stage detail, scoped to one night.
+
+    Replaces "All statuses" as the canonical operator-facing transcription
+    drilldown. Filters sessions by ai_assembly + day mapping for the
+    selected night, so the table reflects exactly the night the operator
+    was just looking at on /admin/tonight.
+    """
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    night_to_day = {1: "Day One", 2: "Day Two", 3: "Day Three"}
+    target_day = night_to_day.get(n)
+
+    sessions = load_sessions()
+    flagged = [
+        s for s in sessions
+        if s.ai_assembly and s.day == target_day
+    ]
+    rows = []
+    for s in flagged:
+        sdir = session_dir(s)
+        if not sdir:
+            continue
+        st = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
+        rows.append({"session": s, "status": st})
+    order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
+    rows.sort(key=lambda r: (
+        order.get(r["status"].get("state"), 9),
+        r["session"].day_index,
+        r["session"].date_time_start or r["session"].start_time,
+    ))
+    return templates.TemplateResponse(
+        request, "admin_transcription.html",
+        {
+            "rows": rows,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "target_day": target_day,
+            "role": "admin",
+        },
+    )
+
+
 @app.get("/admin/tonight/voice", response_class=HTMLResponse)
 def admin_tonight_voice(
     request: Request,
@@ -543,3 +646,109 @@ def admin_tonight_voice_json(
 ):
     n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
     return JSONResponse(dashboard.collect_voice_detail(n))
+
+
+# --- /admin/file: read-only file viewer (C23 UX feedback, 2026-05-03) -------
+
+
+_VIEWABLE_SUFFIXES = {".json", ".log", ".md", ".txt", ".flag"}
+_MAX_VIEWABLE_BYTES = 10 * 1024 * 1024  # 10 MiB
+
+
+def _resolve_under_project_root(rel_path: str) -> Path:
+    """Resolve `rel_path` (operator-supplied) under PROJECT_ROOT safely.
+
+    Traversal protection: normalize the relative path (collapse `..` /
+    `.`) and reject if it escapes the root via `..` segments. We do NOT
+    `.resolve()` symlinks — operators commonly stage their PROJECT_ROOT
+    via symlinks (e.g. `runs/athens_night_1` → an out-of-tree dryrun
+    dir, or `published_artifacts` → a network share). Resolving would
+    reject those as escapes.
+
+    Rejects:
+      - absolute paths
+      - paths whose normalized form escapes PROJECT_ROOT via `..`
+      - paths to non-regular files
+      - paths with disallowed suffixes
+      - files larger than _MAX_VIEWABLE_BYTES
+
+    Raises HTTPException on any rejection.
+    """
+    import os
+    from .config import PROJECT_ROOT
+
+    if not rel_path:
+        raise HTTPException(http.HTTP_400_BAD_REQUEST, detail="missing path")
+    p = Path(rel_path)
+    if p.is_absolute():
+        raise HTTPException(
+            http.HTTP_400_BAD_REQUEST,
+            detail="path must be relative to PROJECT_ROOT",
+        )
+    # Normalize without resolving symlinks. Reject any normalized path
+    # that begins with `..` (traversal) or contains `..` segments after
+    # normalization.
+    normalized = os.path.normpath(rel_path)
+    if normalized.startswith("..") or normalized == ".":
+        raise HTTPException(
+            http.HTTP_403_FORBIDDEN,
+            detail="path escapes PROJECT_ROOT",
+        )
+    parts = Path(normalized).parts
+    if any(part == ".." for part in parts):
+        raise HTTPException(
+            http.HTTP_403_FORBIDDEN,
+            detail="path escapes PROJECT_ROOT",
+        )
+    candidate = PROJECT_ROOT / normalized
+    if not candidate.exists():
+        raise HTTPException(http.HTTP_404_NOT_FOUND, detail="file not found")
+    if not candidate.is_file():
+        raise HTTPException(
+            http.HTTP_400_BAD_REQUEST, detail="not a regular file",
+        )
+    suffix = candidate.suffix.lower()
+    if suffix not in _VIEWABLE_SUFFIXES:
+        raise HTTPException(
+            http.HTTP_400_BAD_REQUEST,
+            detail=f"suffix {suffix!r} not viewable; allowed: {sorted(_VIEWABLE_SUFFIXES)}",
+        )
+    if candidate.stat().st_size > _MAX_VIEWABLE_BYTES:
+        raise HTTPException(
+            http.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"file exceeds {_MAX_VIEWABLE_BYTES} bytes",
+        )
+    return candidate
+
+
+@app.get("/admin/file")
+def admin_file(
+    path: str,
+    _: str = Depends(require_admin),
+):
+    """Read-only viewer for files under PROJECT_ROOT.
+
+    Used by dashboard templates to make file paths clickable. Restricted
+    to JSON / log / md / txt / flag files; max 10 MiB; admin-gated;
+    path-traversal-protected.
+    """
+    target = _resolve_under_project_root(path)
+    suffix = target.suffix.lower()
+    media_types = {
+        ".json": "application/json",
+        ".log":  "text/plain; charset=utf-8",
+        ".md":   "text/plain; charset=utf-8",
+        ".txt":  "text/plain; charset=utf-8",
+        ".flag": "text/plain; charset=utf-8",
+    }
+    media_type = media_types.get(suffix, "text/plain; charset=utf-8")
+    return Response(
+        content=target.read_bytes(),
+        media_type=media_type,
+        headers={
+            "Cache-Control": "no-store",
+            # Inline disposition so browsers render JSON/text in-tab,
+            # not download.
+            "Content-Disposition": f'inline; filename="{target.name}"',
+        },
+    )

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Transcription · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
+</p>
+
+<h1>Transcription — Night {{ night }}</h1>
+<p class="muted">
+  {{ target_day or 'No day mapped' }} ·
+  per-session ASR + speaker ID + cleaning state for tonight's flagged sessions.
+</p>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/transcription?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+</nav>
+
+{% if not rows %}
+  <div class="empty">
+    <p>No <code>ai_assembly: true</code> sessions for {{ target_day or 'this night' }}.</p>
+  </div>
+{% else %}
+<table class="overview" id="overview-table">
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Time</th>
+      <th>Title</th>
+      <th>Venue</th>
+      <th>Files</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    {% set st = r.status.get('state') %}
+    {% set sub = r.status.get('substate') %}
+    <tr data-session-id="{{ r.session.session_id }}">
+      <td>
+        <span class="dot dot-{{ st or 'none' }}"></span>
+        <span class="state-label">{{ (sub or st) | state_label }}</span>
+      </td>
+      <td>{{ r.session.start_time }}</td>
+      <td>
+        <a href="/session/{{ r.session.session_id }}">{{ r.session.title }}</a>
+      </td>
+      <td class="muted">{{ r.session.venue }}</td>
+      <td class="muted file-links">
+        {% if st %}
+          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/status.json">status</a>
+          ·
+          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/pipeline.log">log</a>
+          {% if st == 'done' %}
+          ·
+          <a href="/admin/file?path=runs/athens_night_{{ night }}/01_transcription/{{ r.session.session_id }}/session_package.json">pkg</a>
+          {% endif %}
+        {% endif %}
+      </td>
+      <td>
+        {% if st %}
+          <a href="/session/{{ r.session.session_id }}/status">details →</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
+{% endblock %}

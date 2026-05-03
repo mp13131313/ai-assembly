@@ -25,14 +25,18 @@
     const venue = activeValue(venueChips, "venue");
     const q = search ? search.value.trim().toLowerCase() : "";
 
+    // Selector covers both the legacy grid class and the post-2026-05-03
+    // list class. Either matches an item with `data-venue` + `data-search`
+    // attributes — the filter logic doesn't care about visual layout.
+    const itemSelector = ".session-card, .session-row";
     document.querySelectorAll(".day-section").forEach((sec) => {
       const matchDay = !day || sec.dataset.day === day;
       let anyVisible = false;
-      sec.querySelectorAll(".session-card").forEach((card) => {
-        const matchVenue = !venue || card.dataset.venue === venue;
-        const matchQ = !q || (card.dataset.search || "").includes(q);
+      sec.querySelectorAll(itemSelector).forEach((item) => {
+        const matchVenue = !venue || item.dataset.venue === venue;
+        const matchQ = !q || (item.dataset.search || "").includes(q);
         const show = matchDay && matchVenue && matchQ;
-        card.classList.toggle("hidden", !show);
+        item.classList.toggle("hidden", !show);
         if (show) anyVisible = true;
       });
       sec.classList.toggle("hidden", !anyVisible);
