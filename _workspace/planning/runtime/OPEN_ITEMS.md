@@ -198,13 +198,13 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 ## Section B — Athens-blocking items not yet built
 
-### B1. Editor / Frame layer 🟡 SPECIFIED 2026-05-02 PM (Editor Pipeline v1 spec landed; Claudia card + implementation pending)
+### B1. Editor / Frame layer 🟡 SPECIFIED v2 2026-05-03 PM (canonical spec; Claudia card + closing-prompt rewrite + implementation pending)
 
-**State:** spec landed at `docs/AI_Assembly_Editor_Pipeline.md` (v1, ~890 lines, 20 sections). Two of three pending items have moved:
+**State:** spec at `docs/AI_Assembly_Editor_Pipeline.md` is now at **v2** (refinements landed 2026-05-03 PM; canonical). Predecessor memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` archived to `_workspace/archive/`. Three pending items:
 
-1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`. *Operator-side.*
-2. ~~**`editor_dossier.md` closing prompt**~~ ✅ LANDED 2026-05-02 PM at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines). Mirrors `voice_step2_artifact.md` structure: input → task → weighing → composition → boundaries → output. Output JSON schema concrete (front + article + theme_page + headnotes). Quality criteria for article body listed (5 tests). Length envelopes specified per component.
-3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish). Estimated ~6-10 hr engineering. **Athens-eligible to start now**, can run smoke tests with placeholder card while operator authors final.
+1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; needs ~2-3 hr focused authoring at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`. *Operator-side / voices thread per memo §10.*
+2. **`editor_dossier.md` closing prompt rewrite to v2 contract.** A v1 version exists at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines, 2026-05-02) but is written against v1 input/output fields (in_brief_voices, primary_contributors, refusals as input, marathon_panel_source, lead_headline + lead_subdeck + lead_teaser, single article body string, etc.) — all of which v2 dropped or replaced. **The current closing prompt MUST NOT be used with v2 implementation;** rewrite needed (~30-60 min, mechanical against §"Output Schema (v2)" + §"Stage 2 — Per-call inputs (v2 contract)").
+3. **Implementation:** `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (orchestrator, routing, dossier_generation, publish, card_assembly). Estimated ~6-10 hr engineering. **Athens-eligible to start now**, can run smoke tests with placeholder card while operator authors final.
 
 **Triggers on:** Operator authoring Claudia's card; implementation can proceed in parallel.
 
@@ -222,11 +222,28 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 **Implementation scope (revised + concrete):**
 - `runtime/flows/editor_flow.py` — orchestrator (parallel across dossiers within a night)
 - `runtime/flows/editor/card_assembly.py` — Claudia's card → editor system prompt
-- `runtime/flows/editor/routing.py` — Stage 1 theme routing (deterministic from `focus_decision` parser)
+- `runtime/flows/editor/routing.py` — Stage 1 theme routing (deterministic from `focus_decision` parser; LLM-assisted for synthesis-only voices, see below)
 - `runtime/flows/editor/dossier_generation.py` — Stage 2 per-dossier Anthropic call
 - `runtime/flows/editor/publish.py` — write to `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/`
 - `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt for Stage 2
 - `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json` — Claudia's card (operator-authored)
+
+**Architecture refinements landed during 2026-05-03 PM design pass** (supersedes Editor Pipeline v1 + memo §1-2 on these specific points):
+
+- **Per-call input is one source family.** Editor reads Provocateur briefings + Voice Step 2 artifacts ONLY. No `grouping.json`, no `all_extractions.json`. Briefings already carry `full_theme_record` (Researcher's title + abstract + clusters with full extraction text + theme_flags) — Provocateur is a passthrough on theme metadata. Combine the K voice briefings for a theme into one deduplicated dossier briefing; theme-level data deduplicated, per-voice formulation + artifact kept all N.
+- **Per-call input shape:** `{night, theme: {deduped block from briefings}, engaged_voices: [{voice_slug, voice_name, mode, narrative_briefing, artifact_text}], prior_editions: [...] (Night 2/3 only)}`. Drop edition_metadata, voice_card_excerpts, focus_decision/stance/selected_form metadata, refusals (per-call). Runtime stamps masthead chrome (issue_no, vol, dates, kicker) post-generation; per-voice headnotes' formulation_text + voice_slug + voice_name also runtime-stamped.
+- **Lead-vs-grid is publish-pipeline concern, not editor.** Editor produces layout-agnostic per-theme dossier JSONs. Publish layer aggregates and decides front-page composition.
+- **Refusals are not per-call input.** Tracked as flat list in `theme_routing.json` for microsite/publish surface. Form-fit-honesty (memo §5) is voice-level: voices like Octopus/Whanganui engage with non-prose artifacts; Claudia frames them via her `relationship_to_detailed_response` on reading the artifact directly.
+
+**Routing parser (Stage 1):**
+
+- **Case A — `Response N` reference anywhere in `focus_decision`** (regex `r"response\s*(\d+)"` case-insensitive): primary = Nth theme_id in voice's briefings. Catches "Focus on Response 3", "Focus on response 2 (algorithmic governance)", AND "synthesise around Response 2's threshold-scene" (the synthesis-anchored hybrid).
+- **Case B — explicit theme_id mention** (e.g. `theme_001`): primary = that theme.
+- **Case C — pure synthesis without anchor** (e.g. "Synthesise."): **LLM-assisted routing pass — see below.**
+- **Case D — fall-through** (parser couldn't extract): primary = lowest-numbered, warn for operator review.
+- **Refusal** (empty `themes_covered` or refusal markers): no primary; flat refusals list.
+
+**🟡 TODO — synthesis-only voice routing helper (Athens-feasible, not yet built):** for Case C (~2-3 voices/night based on dev_msc_test sample), fire a small Sonnet 4.6 call that reads the voice's `artifact_text` + the night's themes and returns the theme_id the artifact lands hardest on. Eliminates mechanical lowest-numbered tiebreaker for synthesis-only voices. Cost: ~$0.05/call × ~3 calls/night × 3 nights ≈ $0.50 across Athens. Effort: ~30 min code + tests.
 
 **Estimated cost (corrected Opus 4.7 pricing):** ~$3-5 across Athens 3 nights (vs A2's earlier $20-30 estimate, which used Opus 4-deprecated $15/$75). Wall ~5-10 min per night with parallel dossier calls.
 

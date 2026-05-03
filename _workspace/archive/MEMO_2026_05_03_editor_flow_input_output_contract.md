@@ -1,3 +1,7 @@
+> **🗄 ARCHIVED 2026-05-03 PM.** This memo's content has been folded into `docs/AI_Assembly_Editor_Pipeline.md` v2 (canonical going forward). Open questions surfaced here have either been resolved (see v2 changelog) or migrated to v2's §"Open Questions" section. Do not consult this memo for current contracts — use the v2 spec.
+
+---
+
 # Memo: editor flow input/output contract — implications from Claudia persona-construction session
 
 **To:** runtime thread (Editor Pipeline implementation)

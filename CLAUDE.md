@@ -253,18 +253,24 @@ All canonical pipeline specs are in `docs/`:
   cache token tracking landed 2026-05-02 PM (commits `d9ca3f9` + `dfb46f7`);
   synthesis-bias structurally addressed; Test 3 validated. Athens 3-night
   cost ~$60-80 (was claimed $540-700 under deprecated $15/$75 pricing).
-- `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline v1 (landed 2026-05-02
-  PM). Implements Frame Concept v1's broadsheet surface as a runtime
-  contract. **Editor as 13th Assembly member** (Claudia Pinchbeck) with
-  full persona card; system prompt assembled same way as panel voices.
-  **Unit of publication is the dossier** (5-section swipeable: front +
-  article + theme + artifacts × N), organized by theme. **Substack bridge
-  dropped**, micro-site only. **Self-reportage recursion** — *The Assembly*
-  (panel) ≡ *The Assembly* (publication). One Anthropic call per dossier
-  on Opus 4.7. Marathon-distance issue numbering (Vol. CXVI . No. 42,193
-  → 42,195 across Athens; Night 3 = marathon distance in metres). Athens
-  cost ~$3-5 across 3 nights. Pending: Claudia's full 35-field card,
-  closing prompt, implementation. See OPEN_ITEMS A2 (✅ fully resolved)
+- `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline **v2** (refinements
+  landed 2026-05-03 PM; v1 was 2026-05-02). Implements Frame Concept v1's
+  broadsheet surface as a runtime contract. **Editor as 13th Assembly
+  member** (Claudia Pinchbeck) with full persona card; system prompt
+  assembled same way as panel voices. **Unit of publication is the dossier**,
+  organized by theme. **Substack bridge dropped**, micro-site only.
+  **Self-reportage recursion** — *The Assembly* (panel) ≡ *The Assembly*
+  (publication). One Anthropic call per dossier on Opus 4.7. Marathon-distance
+  issue numbering (Vol. CXVI . No. 42,193 → 42,195 across Athens; Night 3 =
+  marathon distance in metres). Athens cost ~$3-5 across 3 nights.
+  **v2 contract refinements** (single source family — Provocateur briefings
+  + Voice Step 2 artifacts; no Researcher direct read; article-first output
+  with shared kicker/headline; no in_brief cross-references; lead-vs-grid
+  is publish concern; closing prompt rewrite pending). Predecessor memo at
+  `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md`
+  is **archived** (folded into v2 spec). Pending: Claudia's full 35-field
+  card, closing prompt rewrite to v2 contract, implementation. See
+  OPEN_ITEMS A2 (✅ fully resolved)
   + B1 (🟡 specified).
 - `AI_Assembly_Runtime_Lifecycle.md` — what happens during an Athens
   night, end to end (v1, 2026-05-02). Stage-by-stage anatomy (trigger,
