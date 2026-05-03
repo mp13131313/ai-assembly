@@ -79,6 +79,7 @@ sudo -u ingest -H git clone github-athens:mp13131313/ai-assembly-athens2026-voic
 
 ```
 UPLOAD_APP_PASSWORD=<strong random, share with producers in Signal>
+ADMIN_APP_PASSWORD=<different strong random, operator only — keep in 1Password>
 ANTHROPIC_API_KEY=sk-ant-…
 ASSEMBLYAI_API_KEY=…
 
@@ -89,6 +90,24 @@ AI_ASSEMBLY_PROJECT_ROOT=/opt/ai-assembly-athens2026
 # CLAUDE_MODEL=claude-opus-4-7
 # TRANSCRIPTION_CACHE=0
 ```
+
+**Two roles, two credentials** (per C23, 2026-05-03):
+
+- `UPLOAD_APP_PASSWORD` → role `producer`. HoBB A/V producers' login. They see
+  the session list + their per-session upload page + a truncated post-upload
+  view ("Received: `<filename>` at `<timestamp>`"). They do NOT see pipeline
+  state, downstream stages, or other sessions' progress.
+- `ADMIN_APP_PASSWORD` → role `admin`. Operator login. Sees everything:
+  per-session pipeline state machine, the cross-session `/status` overview,
+  the `/admin/tonight` meta dashboard, and admin-only routes (`/retry`,
+  `/status.json`, `/admin/tonight.json`).
+
+Optional: if `ADMIN_APP_PASSWORD` is unset, admin role is unavailable and
+the app behaves exactly as the pre-2026-05-03 single-password setup. The
+`/admin/*` routes 401 for any caller. Producers continue to work normally.
+
+The dashboard at `https://<vm-hostname>/admin/tonight` is read-only —
+all change/intervention happens via Claude Code on the VM (mosh + tmux).
 
 ```bash
 sudo chmod 600 /opt/ai-assembly/.env

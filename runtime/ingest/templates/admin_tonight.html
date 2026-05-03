@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Tonight · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  {# Auto-refresh: 30s cache window matches orchestrator's 1-min poll
+     cadence — fast enough to feel live, slow enough to not hammer the
+     filesystem reads. Operator can manually reload too. #}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<h1>Tonight — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">· run dir: <code>{{ payload.run_id }}</code></span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.run_exists %}
+  <div class="empty">
+    <p>The run directory for Night {{ night }} does not exist yet.</p>
+    <p class="muted">
+      It will be created when the first audio file uploads against this
+      night's sessions, or when the orchestrator first fires.
+    </p>
+  </div>
+{% else %}
+
+<section class="orchestrator-block">
+  <h2>Orchestrator</h2>
+  {% set orch = payload.orchestrator %}
+  {% if orch.state %}
+    <p class="state-line">
+      <span class="state-{{ orch.state.split(':')[0] if ':' in orch.state else orch.state }}">
+        {{ orch.state }}
+      </span>
+      <span class="muted">{{ orch.detail or '' }}</span>
+    </p>
+    {% if orch.ts %}<p class="muted">last poll: {{ orch.ts }}</p>{% endif %}
+  {% else %}
+    <p class="muted">{{ orch.detail or 'orchestrator has not fired yet for this night' }}</p>
+  {% endif %}
+</section>
+
+<section class="stages-block">
+  <h2>Stages</h2>
+  <table class="stages-table">
+    <thead>
+      <tr><th>Stage</th><th>State</th><th>Summary</th><th>Last write</th></tr>
+    </thead>
+    <tbody>
+      {% set stage_meta = [
+        ('transcription', 'Transcription'),
+        ('researcher',    'Researcher'),
+        ('provocateur',   'Provocateur'),
+        ('voice',         'Voice'),
+        ('editor',        'Editor'),
+        ('publish',       'Publish'),
+      ] %}
+      {% for key, display in stage_meta %}
+        {% set s = payload.stages[key] %}
+        <tr class="stage-row state-{{ s.state }}">
+          <td><strong>{{ display }}</strong></td>
+          <td><span class="state-pill state-{{ s.state }}">{{ s.state }}</span></td>
+          <td>{{ s.label or '' }}</td>
+          <td class="muted">{{ s.mtime or s.last_done_mtime or '' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% set vstage = payload.stages.voice %}
+{% if vstage.validation_flagged and vstage.validation_flagged > 0 %}
+  <section class="validation-block">
+    <h2>⚠ Validation flags</h2>
+    <p>
+      {{ vstage.validation_flagged }} Step 1 output(s) flagged by the
+      anachronism / constitutional check. Open
+      <code>{{ payload.run_dir }}/04_voice/manifest.json</code>
+      → <code>validation_failures[]</code> for per-flag detail.
+    </p>
+  </section>
+{% endif %}
+
+{% set tstage = payload.stages.transcription %}
+{% if tstage.error_sessions %}
+  <section class="errors-block">
+    <h2>⚠ Transcription errors</h2>
+    <ul>
+      {% for sid in tstage.error_sessions %}
+        <li><a href="/session/{{ sid }}">{{ sid }}</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+<section class="links-block">
+  <h2>Surfaces</h2>
+  <ul class="muted">
+    <li><a href="/status">Per-session transcription detail</a></li>
+    <li><code>{{ payload.run_dir }}/_orchestrator_logs/status.json</code> · raw orchestrator state</li>
+    <li><code>{{ payload.run_dir }}/_orchestrator_logs/*.log</code> · per-stage subprocess logs</li>
+    <li>Intervene: Claude Code on VM via <code>mosh + tmux</code> (per Infrastructure spec)</li>
+  </ul>
+</section>
+
+{% endif %}
+
+{% endblock %}

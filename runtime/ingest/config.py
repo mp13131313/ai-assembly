@@ -64,10 +64,21 @@ def _required(name: str) -> str:
 
 
 def check_required_env() -> None:
-    """Call at app startup. Raises SystemExit with a clear message if missing."""
+    """Call at app startup. Raises SystemExit with a clear message if missing.
+
+    ADMIN_APP_PASSWORD is OPTIONAL: if unset, the admin role + admin-only
+    routes (/admin/*) are simply unavailable. Pre-2026-05-03 single-password
+    deployments keep working unchanged.
+    """
     _required("UPLOAD_APP_PASSWORD")
     _required("ANTHROPIC_API_KEY")
     _required("ASSEMBLYAI_API_KEY")
+    if not os.environ.get("ADMIN_APP_PASSWORD", "").strip():
+        print(
+            "ingest: ADMIN_APP_PASSWORD not set — admin role + /admin/* routes "
+            "disabled. Set it in .env to enable the operator dashboard.",
+            file=sys.stderr,
+        )
 
 
 UPLOAD_USERNAME = os.environ.get("UPLOAD_APP_USERNAME", "producer")
@@ -117,7 +128,7 @@ UPLOAD_LOCK_FILENAME = "upload.lock"
 # can swap in a fake flow that touches output files without burning credits.
 # Bumped whenever app.js or style.css changes materially. Include as
 # ?v={{ static_version }} in template <script> and <link> tags.
-STATIC_VERSION = "11"
+STATIC_VERSION = "12"
 
 # The app always appends <audio_path> <session_json_path> as positional args.
 # shlex.join quotes tokens so paths containing spaces (e.g. "AI Assembly/code")

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}AI Assembly Ingest{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  {% block head_extra %}{% endblock %}
 </head>
 <body>
   <header>
@@ -12,7 +13,10 @@
       <a href="/" class="brand">AI Assembly · Ingest</a>
       <nav>
         <a href="/">Sessions</a>
-        <a href="/status">All statuses</a>
+        {% if role == "admin" %}
+          <a href="/status">All statuses</a>
+          <a href="/admin/tonight">Tonight</a>
+        {% endif %}
       </nav>
     </div>
   </header>

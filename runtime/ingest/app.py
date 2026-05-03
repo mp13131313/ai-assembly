@@ -35,8 +35,8 @@ from fastapi.templating import Jinja2Templates
 
 from flows.shared.io import write_json_atomic  # noqa: E402 — sys.path set in config
 
-from . import pipeline
-from .auth import require_auth
+from . import dashboard, pipeline
+from .auth import require_admin, require_auth
 from .config import (
     ALLOWED_EXTENSIONS,
     MAX_UPLOAD_BYTES,
@@ -157,19 +157,36 @@ def health() -> Response:
 
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request, _: str = Depends(require_auth)):
+def index(request: Request, role: str = Depends(require_auth)):
     sessions = load_sessions()
     flagged = [s for s in sessions if s.ai_assembly]
     # Group by day_index for the template; also pass a list of days present.
     by_day: dict[str, list[Session]] = {}
     for s in flagged:
         by_day.setdefault(s.day, []).append(s)
-    # Attach current state per session so we can color-dot the cards.
+    # Attach current state per session so we can color-dot the cards (admin
+    # only; producers see "uploaded" boolean only — no pipeline state leak).
     states: dict[str, str | None] = {}
-    for s in flagged:
-        sdir = session_dir(s)
-        if sdir:
-            states[s.session_id] = pipeline.infer_state(sdir).get("state")
+    if role == "admin":
+        for s in flagged:
+            sdir = session_dir(s)
+            if sdir:
+                states[s.session_id] = pipeline.infer_state(sdir).get("state")
+    else:
+        # Producer: collapse pipeline state to a binary marker. Reuse the
+        # `done` CSS class (green) for "your upload is recorded" — the
+        # tooltip below reads "done" but, from the producer's mental
+        # model, that means "your task is taken care of." We don't show
+        # downstream pipeline state to producers.
+        for s in flagged:
+            sdir = session_dir(s)
+            if sdir and (
+                (sdir / "audio.m4a").exists()
+                or any(sdir.glob("audio.upload*"))
+            ):
+                states[s.session_id] = "done"
+            else:
+                states[s.session_id] = None
     days_ordered = [d for d in ["Day One", "Day Two", "Day Three"] if d in by_day]
     venues_ordered = sorted({s.venue for s in flagged if s.venue})
     return templates.TemplateResponse(
@@ -181,12 +198,15 @@ def index(request: Request, _: str = Depends(require_auth)):
             "venues_ordered": venues_ordered,
             "states": states,
             "flagged_count": len(flagged),
+            "role": role,
         },
     )
 
 
 @app.get("/status", response_class=HTMLResponse)
-def overview(request: Request, _: str = Depends(require_auth)):
+def overview(request: Request, role: str = Depends(require_admin)):
+    """Cross-session pipeline overview. Admin only — pipeline state is operator
+    concern, not producer concern (per C23, 2026-05-03)."""
     sessions = load_sessions()
     flagged = [s for s in sessions if s.ai_assembly]
     rows = []
@@ -206,12 +226,14 @@ def overview(request: Request, _: str = Depends(require_auth)):
         r["session"].day_index,
         r["session"].date_time_start or r["session"].start_time,
     ))
-    return templates.TemplateResponse(request, "overview.html", {"rows": rows})
+    return templates.TemplateResponse(
+        request, "overview.html", {"rows": rows, "role": role}
+    )
 
 
 @app.get("/status.json")
-def overview_json(_: str = Depends(require_auth)):
-    """Polled by the overview page to update state cells without a full reload."""
+def overview_json(_: str = Depends(require_admin)):
+    """Polled by the overview page to update state cells. Admin only."""
     sessions = load_sessions()
     flagged = [s for s in sessions if s.ai_assembly]
     result = []
@@ -225,12 +247,18 @@ def overview_json(_: str = Depends(require_auth)):
 
 
 @app.get("/session/{session_id}", response_class=HTMLResponse)
-def session_detail(session_id: str, request: Request, _: str = Depends(require_auth)):
+def session_detail(session_id: str, request: Request, role: str = Depends(require_auth)):
     sess, sdir = _require_session_and_dir(session_id)
     speakers = load_speakers()
     roster, missing_bios = derive_roster(sess, speakers)
     existing = _existing_audio_info(sdir) if sdir.exists() else None
-    current = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
+    # Producers only need to know "is something already uploaded?" — the
+    # downstream pipeline state is admin concern. infer_state still runs for
+    # admin so they see the current pipeline phase on the detail page.
+    if role == "admin":
+        current = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
+    else:
+        current = {"state": "uploaded" if existing else None}
     return templates.TemplateResponse(
         request,
         "session_detail.html",
@@ -243,6 +271,7 @@ def session_detail(session_id: str, request: Request, _: str = Depends(require_a
             "run_id": run_for_session(sess),
             "allowed_extensions": sorted(ALLOWED_EXTENSIONS),
             "max_upload_mb": MAX_UPLOAD_BYTES // (1024 * 1024),
+            "role": role,
         },
     )
 
@@ -252,7 +281,7 @@ async def upload(
     session_id: str,
     request: Request,
     background: BackgroundTasks,
-    _: str = Depends(require_auth),
+    _: str = Depends(require_auth),  # both roles can upload
 ):
     """Stream request body to disk, validate, kick off pipeline.
 
@@ -379,20 +408,45 @@ async def upload(
 
 
 @app.get("/session/{session_id}/status", response_class=HTMLResponse)
-def session_status(session_id: str, request: Request, _: str = Depends(require_auth)):
+def session_status(session_id: str, request: Request, role: str = Depends(require_auth)):
+    """Per-session post-upload state.
+
+    Producer view: truncated to "Received: <filename> at <timestamp>" only.
+    No pipeline state, no normalizing/transcribing/done/error. If something
+    fails, operator handles out-of-band (per C23, 2026-05-03).
+
+    Admin view: full state machine with substates, polled JS. Existing
+    behavior preserved.
+    """
     sess, sdir = _require_session_and_dir(session_id)
+    if role == "admin":
+        return templates.TemplateResponse(
+            request, "status.html",
+            {"session": sess, "run_id": run_for_session(sess), "role": role},
+        )
+    # Producer: render the stripped view server-side. No JS polling.
+    received = _existing_audio_info(sdir) if sdir.exists() else None
+    if received is None:
+        # Maybe the upload is still in flight — look for the .partial.
+        partials = sorted(sdir.glob("audio.upload*.partial")) if sdir.exists() else []
+        if partials:
+            stat = partials[0].stat()
+            received = {
+                "filename": partials[0].name.replace(".partial", ""),
+                "size_bytes": stat.st_size,
+                "mtime": datetime.fromtimestamp(
+                    stat.st_mtime, tz=timezone.utc
+                ).isoformat(timespec="seconds"),
+            }
     return templates.TemplateResponse(
-        request,
-        "status.html",
-        {
-            "session": sess,
-            "run_id": run_for_session(sess),
-        },
+        request, "status_producer.html",
+        {"session": sess, "received": received, "role": role},
     )
 
 
 @app.get("/session/{session_id}/status.json")
-def session_status_json(session_id: str, _: str = Depends(require_auth)):
+def session_status_json(session_id: str, _: str = Depends(require_admin)):
+    """Polled by the admin status page. Admin only — producers don't poll."""
     sess, sdir = _require_session_and_dir(session_id)
     if not sdir.exists():
         return JSONResponse({"state": None, "session_id": sess.session_id})
@@ -400,8 +454,13 @@ def session_status_json(session_id: str, _: str = Depends(require_auth)):
 
 
 @app.post("/session/{session_id}/retry")
-def session_retry(session_id: str, _: str = Depends(require_auth)):
-    """Re-spawn Stage 0 using the existing audio.m4a (after a transient error)."""
+def session_retry(session_id: str, _: str = Depends(require_admin)):
+    """Re-spawn Stage 0 using the existing audio.m4a (after a transient error).
+
+    Admin only — retry is an intervention surface. Per C23, all change/control
+    surfaces stay admin-side; producers re-upload via the upload endpoint
+    after operator out-of-band asks them to.
+    """
     sess, sdir = _require_session_and_dir(session_id)
     if not sdir.exists():
         raise HTTPException(http.HTTP_404_NOT_FOUND, detail="no session dir")
@@ -411,3 +470,41 @@ def session_retry(session_id: str, _: str = Depends(require_auth)):
     write_json_atomic(session_json_path, build_session_json(sess, speakers))
     st = pipeline.spawn_retry(sdir, session_json_path)
     return JSONResponse(st)
+
+
+# --- Admin meta dashboard (C23, 2026-05-03) ----------------------------------
+
+
+@app.get("/admin/tonight", response_class=HTMLResponse)
+def admin_tonight(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Read-only Athens-night meta view.
+
+    Reads filesystem state across the 8 stages (mirrors the orchestrator's
+    state model in runtime/scripts/overnight_orchestrator.py). No write
+    surfaces; control plane stays at Claude-on-VM via mosh+tmux.
+    """
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_night_state(n)
+    return templates.TemplateResponse(
+        request, "admin_tonight.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight.json")
+def admin_tonight_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Machine-readable mirror of /admin/tonight. Polled by auto-refresh."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_night_state(n))

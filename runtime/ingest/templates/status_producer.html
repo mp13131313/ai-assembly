@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ session.title }} · received{% endblock %}
+{% block content %}
+<p class="breadcrumb">
+  <a href="/">← all sessions</a> ·
+  <a href="/session/{{ session.session_id }}">session detail</a>
+</p>
+
+<h1>{{ session.title }}</h1>
+<p class="sub">{{ session.day }} · {{ session.start_time }} · {{ session.venue }}</p>
+
+<div class="received-box">
+  {% if received %}
+    <p class="state-line">
+      <span class="state-done">✓ Received</span>
+      <span class="muted">{{ received.filename }}</span>
+    </p>
+    <p class="muted">
+      {{ '%.1f'|format(received.size_bytes / 1024 / 1024) }} MB ·
+      uploaded {{ received.mtime }}
+    </p>
+  {% else %}
+    <p class="state-line">
+      <span class="state-none">— Not yet uploaded</span>
+    </p>
+    <p class="muted">
+      <a href="/session/{{ session.session_id }}">Upload audio</a>
+    </p>
+  {% endif %}
+</div>
+
+<p class="footer-hint muted">
+  Once your file is received, the AI Assembly team takes it from here.
+  If something needs your attention, you'll hear from us directly.
+</p>
+{% endblock %}

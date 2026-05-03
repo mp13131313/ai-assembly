@@ -615,3 +615,87 @@ table.overview tr:last-child td { border-bottom: 0; }
   font-size: 11px;
   letter-spacing: 0.04em;
 }
+
+/* --- /admin/tonight meta dashboard (C23) --- */
+
+.night-picker {
+  margin: 16px 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.night-picker .chip {
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  background: var(--cream-2);
+  color: var(--warm-mid);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.night-picker .chip.active {
+  background: var(--warm-mid);
+  color: var(--cream-2);
+}
+
+.orchestrator-block,
+.stages-block,
+.validation-block,
+.errors-block,
+.links-block {
+  margin: 24px 0;
+}
+
+table.stages-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+table.stages-table th,
+table.stages-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+table.stages-table th {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warm-mid);
+}
+
+.state-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  background: var(--cream-2);
+  border: 1px solid var(--hairline);
+  color: var(--warm-mid);
+}
+.state-pill.state-running  { background: var(--state-active); color: white; border-color: transparent; }
+.state-pill.state-done     { background: var(--state-done);   color: white; border-color: transparent; }
+.state-pill.state-error    { background: var(--state-error);  color: white; border-color: transparent; }
+.state-pill.state-skipped  { color: var(--warm-light); }
+.state-pill.state-pending  { color: var(--warm-light); }
+
+.received-box {
+  background: var(--cream-2);
+  border: 1px solid var(--hairline);
+  padding: 24px;
+  margin: 20px 0;
+}
+.received-box .state-line {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.state-done {
+  color: var(--state-done);
+  font-weight: 600;
+}
+.state-none {
+  color: var(--warm-light);
+}

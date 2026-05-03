@@ -19,6 +19,7 @@ from starlette.testclient import TestClient
 
 # Set required env BEFORE importing ingest.app (which validates at lifespan).
 os.environ.setdefault("UPLOAD_APP_PASSWORD", "testpw")
+os.environ.setdefault("ADMIN_APP_PASSWORD", "admin_pw")
 os.environ.setdefault("ANTHROPIC_API_KEY", "test")
 os.environ.setdefault("ASSEMBLYAI_API_KEY", "test")
 
@@ -39,8 +40,10 @@ from ingest import pipeline  # noqa: E402
 # above with whatever is in .env. Force-set post-import — auth.py reads the
 # env at request time, so this takes effect immediately.
 os.environ["UPLOAD_APP_PASSWORD"] = "testpw"
+os.environ["ADMIN_APP_PASSWORD"] = "admin_pw"
 
 AUTH = ("producer", "testpw")
+ADMIN_AUTH = ("admin", "admin_pw")  # for routes that became admin-only post-C23
 
 
 @pytest.fixture
@@ -144,9 +147,10 @@ def test_upload_then_transcribe_end_to_end(
     assert body["status_url"].endswith("/status")
 
     # Poll status until terminal (should take ~1–2s with FAKE_DELAY_SECONDS=1).
+    # Admin-only post-C23 (2026-05-03): /status.json is admin role.
     terminal = {"done", "error"}
     for _ in range(50):
-        r = client.get(f"/session/{sid}/status.json", auth=AUTH)
+        r = client.get(f"/session/{sid}/status.json", auth=ADMIN_AUTH)
         st = r.json()
         if st.get("state") in terminal:
             break

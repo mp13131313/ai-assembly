@@ -905,6 +905,201 @@ External reviewer flagged three voice-side moves that recurred across Test 1 nig
 
 ---
 
+### C23. Read-only progress dashboard + producer/admin auth split 🟡 (filed 2026-05-03)
+
+**State:** filed 2026-05-03. Pre-Athens-eligible. Phased landing target T-3 (May 4) for MVP, T-2 (May 5) for high-leverage drilldowns, post-Athens for full granularity.
+
+**Origin:** operator request 2026-05-03 — extend the ingest console's per-session granularity (currently transcription-only) across the whole pipeline, with two roles:
+- **Producer** (HoBB A/V): existing login, see only "Received: `<filename>` at `<timestamp>`" — no `normalizing` / `transcribing` / `done` / `error` states; if something fails, operator handles out-of-band
+- **Admin** (operator): see whole pipeline state across all 8 stages; **read-only** — no buttons for start/restart/retry/edit; all changes via Claude Code on VM (mosh + tmux)
+
+The architectural payoff: zero write semantics in the UI. Glance surface only. Claude on VM is the actual control plane. No auth-scoping nightmares, no retry semantics, no concurrency issues.
+
+#### Design — two tiers
+
+**Tier 1 — orchestrator meta view** (`/admin/tonight` or `/admin/night/<N>`):
+
+Single-page summary of all 8 stages, auto-refresh meta-tag every 30s. Reads `<run_dir>/_orchestrator_logs/status.json` + per-stage `manifest.json` + sentinel files. Plain HTML + Jinja, no JS framework.
+
+```
+ATHENS NIGHT 1 — 2026-05-07 — Day One
+
+Current: voice (Step 1, batch 6/9)         elapsed 03:42 / est 6-7 hr
+Halt risk: none
+
+Transcription   ✓ 15/15 done           23:14 (last)
+Researcher      ✓ done · 187 ext · 36 clusters · 8 themes   00:42
+Provocateur     ✓ done · 6 themes selected · 38 pairs · 0 forced-fits · 1 stretch-swap   01:18
+Voice Step 1    ⏳ 24/38 pairs done · batch 6/9 · 0 failed
+Voice valid     ⏳ 18/38 done · 0 flagged so far
+Voice Step 2    — pending
+Voice continui  — pending
+Editor          — pending
+Publish         — pending
+
+[transcription] [researcher] [provocateur] [voice] [editor] [publish]
+```
+
+**Tier 2 — per-stage drilldown views** (one route per stage):
+
+Mirroring transcription's per-session granularity. Each stage has its own natural unit:
+
+| Stage | Natural unit | Cell count Athens N1 |
+|---|---|---|
+| Transcription | per-session | 15 |
+| Researcher | per-session extraction + clustering + theming meta | 15 + 2 |
+| Provocateur | per-voice triage matrix + per-pair formulation grid | 10 + 30-60 |
+| Voice Step 1 | per-pair (voice × theme) **grid** | 30-60 |
+| Voice validation | per-pair × 2 checks | 60-120 |
+| Voice Step 2 | per-voice | 10 |
+| Voice continuity | per-voice | 10 |
+| Editor | per-dossier | 7-14 |
+| Publish | per-voice | 10 |
+
+#### Dimensionality envelope (revised 2026-05-03 from on-disk dev_msc_test)
+
+Settled empirically by reading `projects/current-tests/dev_msc_test/02_researcher/grouping.json` (canonical v2.4): 102 in-cluster + 4 isolates = 106 extractions, 25 clusters, **6 themes**, 17 ext/theme.
+
+Linear extrapolation at v2.4 ratios (200-400 Athens extractions across 13hr / 15 sessions):
+
+| Athens scale | Clusters (4.08 ext/cluster) | Themes (17 ext/theme) |
+|---|---|---|
+| 200 ext | ~49 | ~12 |
+| 300 ext | ~74 | ~18 |
+| 400 ext | ~98 | ~24 |
+
+**Working design envelope: 10-18 themes, 30-60 formulation pairs, 7-14 dossiers.** Upper bound: 24 themes if material is genuinely heterogeneous. Design tables to handle the upper bound; use compact cells for grids ≥ 100 cells.
+
+#### Per-stage drilldown specs
+
+**`/admin/tonight/transcription`** — existing per-session table, just admin-gated (already correct granularity). Producer view truncated to "Received" only (Change 2 below).
+
+**`/admin/tonight/researcher`**:
+- Per-session extraction sub-table: 15 rows × {session_id, count, state}
+- Round 1 clustering: 1 call status + input/output counts when done
+- Round 2 theming: 1 call status + input/output counts when done
+- Themes list: 8-18 rows · click → cluster list → click → extraction list
+
+**`/admin/tonight/provocateur`**:
+- **Triage matrix** (10 voices × 10-18 themes = 100-180 cells): single-letter activation `S`/`M`/`–` + stretch flag, hover for reason text
+- Triage flags sub-table: per-theme {worth_surfacing, audience_friction, fault_line_present}
+- Selection diagnostic block: dropped_themes, forced_fits, stretch_swaps, prior_exclusions (Nights 2/3)
+- **Formulation grid** (theme × voice, 30-60 cells): state per cell + click into formulation file
+
+**`/admin/tonight/voice`**:
+- **Step 1 grid** (theme × voice, 30-60 cells): state, time-since-start, token counts when done
+- **Validation grid** (pair × {anachronism, constitution}, 60-120 cells): PASS/FLAGGED + click-through to flagged JSON
+- Step 2 list: 10 voices × {focus_decision, stance, selected_form}
+- Continuity list: 10 voices × continuity_night_<N+1>.json status
+
+**`/admin/tonight/editor`**:
+- Routing manifest preview (which voices → which dossier)
+- Dossier list: 7-14 rows · click → full dossier preview (front + article + theme + headnotes)
+
+**`/admin/tonight/publish`**:
+- Per-voice published file count + size
+- Night index status
+- Cross-night per-voice rollup status
+- Lineage graph + traces summary
+
+#### Architecture (so we can iterate)
+
+Each Tier 2 view independent + stateless:
+1. Take `night` param (or derive from path)
+2. Read `<run_dir>/<stage>/manifest.json` + checkpoint files (no DB, no API, no cache)
+3. Render Jinja template
+
+Reuses pattern from existing `runtime/ingest/app.py`. No flow control, no buttons, no streaming. Filesystem-as-state, same surface as orchestrator. Auto-refresh meta-tag handles "live" feel.
+
+**File layout (proposed):**
+```
+runtime/ingest/
+├── app.py                    # add role-split auth + route registration
+├── routes/
+│   ├── orchestrator.py       # /admin/tonight meta view
+│   ├── researcher.py         # /admin/tonight/researcher
+│   ├── provocateur.py        # /admin/tonight/provocateur
+│   ├── voice.py              # /admin/tonight/voice
+│   ├── editor.py             # /admin/tonight/editor
+│   └── publish.py            # /admin/tonight/publish
+└── templates/
+    ├── tonight_meta.html
+    ├── researcher_detail.html
+    ├── provocateur_grids.html
+    ├── voice_grids.html
+    ├── editor_dossiers.html
+    ├── publish_summary.html
+    └── producer_session.html  # stripped per-session for producer role
+```
+
+#### Auth split
+
+Add `ADMIN_APP_PASSWORD` to `.env`. `runtime/ingest/app.py`'s Basic Auth dependency identifies role by which credential matched (existing `UPLOAD_APP_PASSWORD` → producer; new `ADMIN_APP_PASSWORD` → admin). Routes check role.
+
+Producer role:
+- Can `/upload/<id>` (existing flow)
+- Sees `/` index with session list (state column hidden or collapsed to "✓ uploaded" / "— pending")
+- Sees `/sessions/<id>` truncated to "Received: `<filename>` at `<timestamp>`" only
+
+Admin role:
+- All producer surfaces (full state machine on per-session)
+- Plus all `/admin/*` routes
+
+#### What's NOT in scope (deliberate)
+
+- ❌ Buttons for retry/restart/skip/edit
+- ❌ Live log streaming (WebSocket / SSE) — meta-refresh is enough
+- ❌ Per-stage launch UI — `systemctl start orchestrator@<N>.service` from terminal
+- ❌ Validation_failures editing — JSON file inspection via Claude on VM
+- ❌ Council_config edit UI — git workflow on athens-2026 repo
+- ❌ Dossier preview-and-edit forms — read-only previews only
+
+All control-surface work stays in B8 proper, post-Athens.
+
+#### Phased landing
+
+**Phase A** (MVP, target T-3 May 4, ~6-10 hr):
+- Auth role split (producer / admin) + producer per-session truncation
+- `/admin/tonight` Tier 1 meta view
+- Transcription role-gate (existing view, just admin-only access)
+
+**Phase B** (high-leverage drilldowns, target T-2 May 5, ~13-18 hr):
+- Voice Step 1 grid + validation grid (where 60-80% of overnight wall lives)
+- Editor dossier list + preview (gated on B1 editor implementation)
+
+**Phase C** (full granularity, T-1 May 6 if budget permits, ~12-17 hr):
+- Researcher drill-down (extractions per session, clusters, themes tree)
+- Provocateur triage matrix + formulation grid
+- Publish per-voice summary
+
+**Phase D** (post-Athens polish): UX iteration based on what operator actually used during Athens nights.
+
+**Total full granularity: ~31-45 hr engineering.** Phase A+B alone (MVP + high-leverage) ≈ 19-28 hr — fits 2-3 days.
+
+#### Trade-flag with B1
+
+C23 Phase A+B competes with B1 editor implementation for engineering time. Two options:
+
+- **C23 first, B1 second:** dashboard ships pre-Athens; editor lands T-1 or T+0 evening; orchestrator skip-if-not-built means dossiers don't exist Night 1 but pipeline runs (Voice → Publish skipping Editor). Microsite renders voice artifacts only Night 1, dossiers from Night 2.
+- **B1 first, C23 progressive:** dossiers ship Night 1; dashboard ships only Tier 1 + Voice grid pre-Athens; rest lands during/post-Athens.
+
+Operator decision: lean **C23 first** (operator visibility during overnight wall is high-leverage; missing-dossier-Night-1 is aesthetic regression but not Layer-3 regression; editor is post-Athens-recoverable, dashboard during-Athens isn't).
+
+#### Files implicated
+
+- `runtime/ingest/app.py` — auth role logic + new route registration
+- `runtime/ingest/routes/*.py` — new (one per stage drilldown)
+- `runtime/ingest/templates/*.html` — new templates + producer-truncated detail
+- `runtime/ingest/.env` — `ADMIN_APP_PASSWORD` added
+- `runtime/ingest/deploy/README.md` — auth section update (two credentials)
+- `_workspace/planning/runtime/HANDOFF_<DATE>.md` — session log
+
+#### Athens fallback
+
+Falls back gracefully — if not landed, operator uses CLI surface (`status.json` + `journalctl` + Prefect dashboard + ssh+claude on VM) per existing infra spec. C23 is operator quality-of-life, not Athens-blocking. Confidence in fallback: high (this surface has been the working assumption since the infra spec landed 2026-05-02).
+
+---
+
 ## Section D — Existing FU#s, runtime-relevant
 
 These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain to runtime. Cross-referenced; full text in FOLLOW_UPS.md. (Persona-internal FUs not listed here.)
@@ -1051,6 +1246,7 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 - C10 council_config.json populated from real Profiles — gated on all 12 cards shipped (per operator decision earlier this session)
 
 **Still open runtime-side (high-value, not strictly blocking):**
+- **C23 — Read-only progress dashboard + producer/admin auth split** 🟡 (filed 2026-05-03; pre-Athens-eligible; Phase A target T-3 May 4, Phase B T-2 May 5; falls back to CLI surface if not landed)
 - C18 — Test 3 ✅ same-shape-as-Test-2-v2 RUN 2026-05-02 PM (synthesis-bias structurally fixed); the truly-divergent-formulations variant (different conceptual territories per reviewer recommendation) still optional ~$5-15 API
 - C22 — automation orchestrator scope decision (manual-fire / full / defer)
 - ~~Path A from external review — Step 2 prompt tighten~~ ✅ SUPERSEDED 2026-05-02 PM by routing refactor + Step 2 prompt rewrite (commits `d9ca3f9` + `dfb46f7`)
