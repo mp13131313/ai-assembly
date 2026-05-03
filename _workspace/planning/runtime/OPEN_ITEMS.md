@@ -1161,6 +1161,91 @@ Falls back gracefully — if not landed, operator uses CLI surface (`status.json
 
 ---
 
+### C24. Vendor-supplied sessions (5 mobile/nightwalk sessions, athens-2026) ✅ LANDED 2026-05-03 PM
+
+Five athens-2026 AI Democracy Marathon mobile sessions are recorded by an external production vendor and delivered as **JSON in our session_package schema**, not as audio. They skip Stage 0 (audio normalization) and Stage 1 (ASR + speaker ID + cleaning) entirely and land at the canonical Stage 1 output boundary `<run_dir>/01_transcription/<sid>/session_package.json`.
+
+**Sessions affected** (3 Day One, 1 Day Two, 1 Day Three; all `ai_assembly: true`, all `audio_source: "vendor"`):
+
+| Night | Time | Title | Speakers |
+|---|---|---|---|
+| 1 | 10:00 | Birthplace of Democracy Tour | Christoph Quarch |
+| 1 | 13:30 | Human Democracy Is Dead | Dave + Helen Edwards |
+| 1 | 22:30 | The Dark Side of Democracy: A Nightwalk | Monique van Dusseldorp |
+| 2 | 22:30 | Dance and Dissent: A Nightwalk | Brett Perry, John Michael Schert, Monique van Dusseldorp, Vasia Koutsilianou, Mark Aanderud |
+| 3 | 16:00 | Make Politics Great Again | Jon Alexander, Claudia Chwalisz, Christos Floros, Lisa Witter, Otti Vogt |
+
+**Architecture decision: filesystem boundary, not pipeline change.** The orchestrator's transcription gate (`overnight_orchestrator.transcription_state`) reads per-session `status.json` with `state="done"` and Researcher reads `session_package.json` via glob. Anything that lands those two files at the right path is indistinguishable downstream — vendor sessions count toward Researcher gate-open with zero orchestrator changes. There is precedent: walking-session reflections also skip Stage 0 (vendor JSON, not audio) per the same file-contract pattern.
+
+**Done:**
+
+`runtime/flows/vendor_intake.py` — validator + lander CLI. Two-tier validation per `docs/AI_Assembly_Transcription_Pipeline.md` §"Step 5 Output":
+
+- **Hard fails** (`vendor.error` + `status.json state=error`, exit 2): bad JSON, missing `metadata`/`transcript`, `metadata.session_id` mismatch with `--session-id`, empty `transcript.turns[]`, any turn missing `speaker`/`role`/`text`, `confidence` value outside `{high, medium, low}` (after lowercase-normalize).
+- **Warn-and-accept** (`vendor.warnings` written, `status.json state=done`, exit 0; vendor reality wins on roster drift per operator default): missing `review_queue` → empty stub injected (no warning — clean output is normal); missing `turn_index` → injected via `load_session_package` normalizer; `metadata.roster` differs from `sessions.json` → vendor wins, warning logged; `transcript.speakers_present` mismatched → recomputed; role outside `{moderator, panelist, audience}` → defaulted to `panelist`; whitespace-strip on text (silent).
+
+CLI has two modes:
+
+```bash
+# single-file
+python -m flows.vendor_intake <vendor_file> --run-dir runs/athens_night_1 --session-id <sid>
+
+# sweep — read sessions.json, find every audio_source=='vendor' for --night,
+# look for <session_id>.json files in --inbox, land each one
+python -m flows.vendor_intake --night 1 --sweep [--inbox <dir>]
+# default inbox: <PROJECT_ROOT>/vendor_inbox/
+```
+
+Sweep is idempotent — re-run as files trickle in; missing files are reported but don't fail (exit 0 unless an actual validation error). Misses are normal (vendor hasn't delivered yet).
+
+`reference/sessions.json` (athens-2026 repo) — 5 vendor rows tagged `audio_source: "vendor"`, plus 3 session_format corrections (panel/keynote → walking with `confidence: "manual"`) and 3 capacity drift fixes (38/37/60 → 30 with `capacity_confidence: "manual"`) caught while verifying. `audio_source: "audio"` defaulted on the other 141 rows so the field is universal.
+
+`runtime/scripts/generate_sessions_json.py` — preservation list extended from `ai_assembly` only to also preserve `audio_source` (when ≠ "audio"), `session_format` (when `confidence: "manual"`), and `capacity` (when `capacity_confidence: "manual"`) across regeneration from `program_index.html`. Operator hand-corrections survive re-runs.
+
+**Ingest UI touchpoints:**
+
+- `Session` dataclass: new `audio_source: str = "audio"` field + `is_vendor` property
+- Producer `/` index filtered to `audio_source == "audio"` (vendor sessions hidden — not the producer's job)
+- Admin `/` index includes vendor (situational awareness)
+- Producer GET `/session/{vendor}` → 403 with explanatory message
+- POST `/session/{vendor}/upload` → 409 (any role) — orphan audio bytes would never trigger Stage 0
+- POST `/session/{vendor}/retry` → 409 — re-validate via `vendor_intake` from tmux
+- `/admin/tonight` Pipeline overview Transcription summary label appends `(X audio · Y vendor)` when vendor sessions present
+- `/admin/tonight/transcription` drilldown header shows "N vendor-supplied sessions" note; per-row "vendor" pill (`state-pill-vendor` CSS class); per-row file links: `vendor.flag` / `vendor.warnings` / `vendor.error` linked via `/admin/file?path=` instead of `pipeline.log`
+- STATIC_VERSION 16 → 17
+
+**Operator workflow on the VM during Athens** (per email-delivery decision 2026-05-03):
+
+```bash
+ssh athens-vm
+mkdir -p /opt/ai-assembly-athens2026/vendor_inbox  # one-time
+
+# vendor emails files; operator saves with <session_id>.json names + scp's:
+scp ~/Downloads/*.json athens-vm:/opt/ai-assembly-athens2026/vendor_inbox/
+
+# in tmux on VM:
+cd /opt/ai-assembly-athens2026/runtime
+venv/bin/python -m flows.vendor_intake --night 1 --sweep
+# → "expected: 3 · landed: 3 · missing: 0"
+```
+
+Re-run sweep as many times as needed across the night as files trickle in. No new credentials, no new HTTP routes, no Google Drive setup — operator-in-loop is acceptable for 5 files across 3 nights.
+
+**Tests:** 24 in `runtime/tests/test_vendor_intake.py` (3 happy path, 7 hard-fail, 6 warn-and-accept, 2 re-run idempotence, 6 sweep) + 6 vendor-aware route tests in `runtime/ingest/tests/test_app.py`. 152/152 runtime tests passing against athens-2026 PROJECT_ROOT.
+
+**Live verification 2026-05-03 PM** (demo PROJECT_ROOT at `/tmp/vendor_demo_*`): single-file landed Birthplace tour cleanly; sweep night=1 with 3 inbox files landed all 3; sweep night=2 with empty inbox reported 1 missing without crashing. `/admin/tonight.json` showed `{"audio": 0, "vendor": 1}` in `by_source`; transcription drilldown rendered vendor pill on each row.
+
+**Commits** (across two repos, all on `main`):
+
+- `code/` `edb877a` — runtime(scripts): preserve audio_source + manual session_format/capacity overrides in generator
+- `code/` `9756677` — runtime(ingest+flows): vendor-supplied sessions land at the 01_transcription boundary
+- `code/` `51234cf` — runtime(flows): vendor_intake sweep mode
+- `athens-2026/` `f652949` — reference/sessions.json: tag 5 vendor-supplied sessions + format/capacity fixes
+
+**Open:** none directly. Operator pre-Athens TODO: `mkdir /opt/ai-assembly-athens2026/vendor_inbox` on the VM at provisioning time (will fold into B10).
+
+---
+
 ## Section D — Existing FU#s, runtime-relevant
 
 These are open FU# entries from `_workspace/planning/FOLLOW_UPS.md` that pertain to runtime. Cross-referenced; full text in FOLLOW_UPS.md. (Persona-internal FUs not listed here.)

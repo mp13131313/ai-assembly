@@ -148,6 +148,59 @@ Plus `/admin/tonight/editor` once `runtime/flows/editor_flow.py` (B1) ships.
 If Phase C doesn't land before Athens, the operator falls back to the
 existing CLI surface (`status.json` + `journalctl` + Prefect dashboard).
 
+### Vendor-supplied sessions (audio_source: "vendor")
+
+Five athens-2026 sessions are recorded by an external vendor and delivered
+as session_package-shaped JSON, not audio. They skip Stage 0 + Stage 1 and
+land at the canonical Stage 1 output boundary directly via
+`flows/vendor_intake.py`. Tagged with `audio_source: "vendor"` in
+`reference/sessions.json`. The producer UI hides them; the admin dashboard
+renders them with a "vendor" pill and per-row file links to vendor.flag /
+vendor.warnings / vendor.error.
+
+Pre-Athens setup (one-time):
+
+```bash
+sudo mkdir -p /opt/ai-assembly-athens2026/vendor_inbox
+sudo chown ingest:ingest /opt/ai-assembly-athens2026/vendor_inbox
+```
+
+Operator workflow during the event:
+
+```bash
+# vendor emails files; operator saves them locally with the convention
+#   <session_id>.json  (matches reference/sessions.json session_id)
+# and scp's the batch to the VM:
+scp ~/Downloads/*.json athens-vm:/opt/ai-assembly-athens2026/vendor_inbox/
+
+# in tmux on VM, after each delivery batch:
+ssh athens-vm
+cd /opt/ai-assembly-athens2026/runtime
+venv/bin/python -m flows.vendor_intake --night 1 --sweep
+# → "expected: 3 · landed: 3 · missing: 0"
+```
+
+Sweep is idempotent — re-run as files trickle in. Missing files are
+reported but don't fail the sweep (exit 0 unless an actual validation
+error occurred). The orchestrator's transcription gate sees vendor
+sessions as `state=done` exactly the same as audio sessions.
+
+Single-file form for one-offs:
+
+```bash
+venv/bin/python -m flows.vendor_intake \
+    /opt/ai-assembly-athens2026/vendor_inbox/<session_id>.json \
+    --run-dir runs/athens_night_1 \
+    --session-id <session_id>
+```
+
+Validation is two-tier: hard fails (bad JSON, session_id mismatch, empty
+turns, missing required fields, bad confidence values) write `vendor.error`
++ `status.json state=error`; warn-and-accept paths (missing review_queue,
+roster drift vs sessions.json, missing turn_index, etc.) write
+`vendor.warnings` and proceed. See `flows/vendor_intake.py` docstring for
+the full matrix.
+
 ```bash
 sudo chmod 600 /opt/ai-assembly/.env
 sudo chown ingest:ingest /opt/ai-assembly/.env
@@ -340,6 +393,16 @@ sudo journalctl -u orchestrator@1 -f
 sudo systemctl start orchestrator@2.service
 sudo systemctl start orchestrator@3.service
 ```
+
+If the night includes vendor-supplied sessions (currently 3 on Night 1, 1
+on Night 2, 1 on Night 3), land them via `flows/vendor_intake.py` BEFORE
+or DURING the orchestrator run — the orchestrator's transcription gate
+requires every flagged session to have `status.json state=done` before
+firing the Researcher. Audio sessions land via the producer upload UI
++ Stage 0 normalization; vendor sessions land via `vendor_intake --sweep`
+(see "Vendor-supplied sessions" section above for the workflow). The two
+paths are independent — vendor sessions can be landed at any point in the
+night, before or after audio sessions finish transcribing.
 
 If a stage fails, the orchestrator halts and exits non-zero. systemd's
 `Restart=on-failure` won't restart on clean failure exits — investigate the
