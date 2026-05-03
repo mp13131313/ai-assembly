@@ -94,20 +94,59 @@ AI_ASSEMBLY_PROJECT_ROOT=/opt/ai-assembly-athens2026
 **Two roles, two credentials** (per C23, 2026-05-03):
 
 - `UPLOAD_APP_PASSWORD` → role `producer`. HoBB A/V producers' login. They see
-  the session list + their per-session upload page + a truncated post-upload
+  a flat session list + their per-session upload page + a truncated post-upload
   view ("Received: `<filename>` at `<timestamp>`"). They do NOT see pipeline
   state, downstream stages, or other sessions' progress.
 - `ADMIN_APP_PASSWORD` → role `admin`. Operator login. Sees everything:
-  per-session pipeline state machine, the cross-session `/status` overview,
-  the `/admin/tonight` meta dashboard, and admin-only routes (`/retry`,
-  `/status.json`, `/admin/tonight.json`).
+  per-session pipeline state machine, the `/admin/tonight` Pipeline overview,
+  per-stage drilldowns, and admin-only routes.
 
 Optional: if `ADMIN_APP_PASSWORD` is unset, admin role is unavailable and
 the app behaves exactly as the pre-2026-05-03 single-password setup. The
 `/admin/*` routes 401 for any caller. Producers continue to work normally.
 
-The dashboard at `https://<vm-hostname>/admin/tonight` is read-only —
-all change/intervention happens via Claude Code on the VM (mosh + tmux).
+### Routes (post-2026-05-03 IA)
+
+```
+unauthenticated:  /health
+both roles:       /  /session/{id}  /session/{id}/upload (POST)
+                  /session/{id}/status   ← producer truncated, admin full
+                  /logout                ← 401 with fresh realm string;
+                                           best-effort cred clear
+admin only:       /status  /status.json  ← legacy cross-night view
+                  /session/{id}/status.json  /session/{id}/retry (POST)
+                  /admin/tonight  /admin/tonight.json     ← Pipeline overview
+                  /admin/tonight/transcription[?night=N]  ← stage drilldown
+                  /admin/tonight/voice[?night=N]  + .json ← stage drilldown
+                  /admin/file?path=<rel>          ← read-only file viewer
+```
+
+The `/admin/tonight` dashboard is **read-only** — all change/intervention
+happens via Claude Code on the VM (mosh + tmux). `/admin/file?path=<rel>`
+serves files from PROJECT_ROOT inline in the browser (suffix-whitelist:
+`.json/.log/.md/.txt/.flag`; max 10 MiB; path-traversal-protected); used
+by the dashboard to make every mentioned file path clickable.
+
+### Logout
+
+HTTP Basic Auth has no real logout. `/logout` returns 401 with a
+differentiated realm string (`Basic realm="AI Assembly Ingest (logged
+out)"`) — most modern browsers (Chrome, Firefox, Safari, Edge) treat
+the realm change as a fresh challenge and drop the cached creds. If a
+browser hangs onto cached creds, the reliable fallback is to close the
+tab/window. Logout link in the top nav, role-aware label.
+
+### Phase C still open
+
+Three more stage drilldowns pending:
+- `/admin/tonight/researcher`
+- `/admin/tonight/provocateur`
+- `/admin/tonight/publish`
+
+Plus `/admin/tonight/editor` once `runtime/flows/editor_flow.py` (B1) ships.
+
+If Phase C doesn't land before Athens, the operator falls back to the
+existing CLI surface (`status.json` + `journalctl` + Prefect dashboard).
 
 ```bash
 sudo chmod 600 /opt/ai-assembly/.env

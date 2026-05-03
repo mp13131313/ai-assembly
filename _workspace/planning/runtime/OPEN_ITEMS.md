@@ -905,9 +905,70 @@ External reviewer flagged three voice-side moves that recurred across Test 1 nig
 
 ---
 
-### C23. Read-only progress dashboard + producer/admin auth split 🟡 (filed 2026-05-03)
+### C23. Read-only progress dashboard + producer/admin auth split 🟢 PHASE A+B DONE, UX iterated, Phase C open (filed 2026-05-03)
 
-**State:** filed 2026-05-03. Pre-Athens-eligible. Phased landing target T-3 (May 4) for MVP, T-2 (May 5) for high-leverage drilldowns, post-Athens for full granularity.
+**State:** filed 2026-05-03; **Phase A + Phase B + UX iteration shipped same day** (commits `cbaf3aa`, `83102a6`, `02a406d`). Phase C drilldowns (Researcher / Provocateur / Publish) still open per spec. Pre-Athens-eligible.
+
+#### Done (2026-05-03, three commits on main)
+
+**Phase A** (`cbaf3aa`) — auth role split + `/admin/tonight` Tier 1 meta + producer view truncation:
+- Two-credential auth (`UPLOAD_APP_PASSWORD` → producer; `ADMIN_APP_PASSWORD` → admin, optional)
+- Producer `/session/{id}/status` truncated to "Received: …" only; pipeline state stays admin-side
+- `/admin/tonight` orchestrator + 6-stage table with 30s meta-refresh
+- `/status` admin-gated (was role-blind)
+- `runtime/ingest/dashboard.py` reads filesystem state per stage
+
+**Phase B** (`83102a6`) — Voice Pipeline drilldown:
+- `/admin/tonight/voice` + `.json` twin
+- Step 1 grid (voice × theme matrix), Validation grid (pair × {anachronism, constitution}), Step 2 list, Continuity list
+- Smoke-validated against Test 3 (4 voices × 3 themes = 12 Step 1 cells)
+- `admin_tonight.html` stage rows link to drilldowns (Transcription + Voice)
+
+**UX iteration** (`02a406d`) — operator feedback after first demo:
+- Sessions index: grid → flat list (`session-list` / `session-row`)
+- Top nav: "Tonight" → "Pipeline"; drop "All statuses" (now reached as Transcription drilldown)
+- Pipeline overview table transposed (stages as column headers, attributes as rows)
+- New `/admin/tonight/transcription` per-session detail scoped to one night
+- `/admin/file?path=…` read-only file viewer (admin-gated, traversal-protected, suffix-whitelist, 10 MiB cap, symlink-tolerant) — every file path mentioned in templates is now clickable
+- `/logout` returns 401 with a differentiated realm string ("AI Assembly Ingest (logged out)") so browsers drop cached creds; styled HTML body with "Sign in again" link; nav adds role-aware "Log out (admin/producer)" link
+- `app.js` filter selector regression fixed (`.session-card` → `.session-card, .session-row`)
+
+**Test coverage**: 122/122 passing in full runtime suite. New test files:
+- `test_admin_file.py` (13 tests) — file viewer auth + traversal + suffix + drilldown auth
+- `test_app_role_split.py` (+4 tests) — /logout 401 + differentiated realm + role-aware nav labels
+
+#### Routes live (post-iteration)
+
+```
+unauthenticated:  /health
+both roles:       /  /session/{id}  /session/{id}/upload (POST)
+                  /session/{id}/status   ← producer truncated, admin full
+                  /logout                ← always 401, fresh realm
+admin only:       /status  /status.json  ← legacy cross-night view
+                  /session/{id}/status.json  /session/{id}/retry (POST)
+                  /admin/tonight  /admin/tonight.json     ← Tier 1 meta
+                  /admin/tonight/transcription[?night=N]  ← stage drilldown
+                  /admin/tonight/voice[?night=N]  + .json ← stage drilldown
+                  /admin/file?path=<rel>          ← read-only viewer
+```
+
+#### Still open: Phase C drilldowns
+
+- **`/admin/tonight/researcher`** — per-session extraction table + clusters/themes drilldown tree (~4-6 hr)
+- **`/admin/tonight/provocateur`** — triage matrix (10 voices × N themes) + formulation grid (~6-8 hr)
+- **`/admin/tonight/publish`** — per-voice publish status + per-night index status (~2-3 hr)
+- **`/admin/tonight/editor`** — gated on B1 editor implementation; trivial once that ships (~2 hr)
+
+Phase C target T-2 (May 5) if budget; otherwise post-Athens. Athens is operable on Phase A+B alone — operator can `cat grouping.json | jq` for Researcher state during overnight wall.
+
+#### Decisions made during iteration (worth preserving)
+
+- **HTTP Basic realm string must be ASCII** (RFC 7230); first /logout pass used `·`, tests caught via UnicodeDecodeError, replaced with parens.
+- **File-open resolver does NOT call `.resolve()`** on candidate paths — keeps symlink-staged demos working. Traversal protection via `os.path.normpath()` rejection of `..` segments is sufficient (operator controls PROJECT_ROOT contents).
+- **/status preserved** as legacy cross-night view but removed from top nav. Operator can still bookmark it; it's just not the canonical operator entry point anymore (that's `/admin/tonight`).
+- **Producer state visibility = binary "uploaded vs not"**, mapped to existing `dot-done` CSS class for consistency. No leak of pipeline state to producers.
+
+
 
 **Origin:** operator request 2026-05-03 — extend the ingest console's per-session granularity (currently transcription-only) across the whole pipeline, with two roles:
 - **Producer** (HoBB A/V): existing login, see only "Received: `<filename>` at `<timestamp>`" — no `normalizing` / `transcribing` / `done` / `error` states; if something fails, operator handles out-of-band
