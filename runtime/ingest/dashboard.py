@@ -245,12 +245,20 @@ def _editor_summary(run_dir: Path) -> dict[str, Any]:
             )
         return _stage_summary("pending")
     manifest = _read_json_or_none(manifest_path) or {}
-    n_dossiers = len(manifest.get("dossiers", []))
-    label = f"{n_dossiers} dossier(s)"
+    counts = manifest.get("counts", {})
+    n_succeeded = counts.get("dossiers_succeeded", 0)
+    n_failed = counts.get("dossiers_failed", 0)
+    n_themes = counts.get("themes_routed", 0)
+    label = f"{n_succeeded}/{n_themes} dossier(s)"
+    if n_failed:
+        label += f" · ⚠ {n_failed} failed"
     return _stage_summary(
-        "done", label,
+        "done" if n_failed == 0 else "error",
+        label,
         mtime=_file_mtime_iso(manifest_path),
-        dossiers=n_dossiers,
+        dossiers_succeeded=n_succeeded,
+        dossiers_failed=n_failed,
+        themes_routed=n_themes,
     )
 
 
@@ -879,6 +887,88 @@ def collect_publish_detail(night: int) -> dict[str, Any]:
         "voices": voices,
         "totals": {"n_voices": len(voices)},
     }
+
+
+# --- Editor Pipeline detail view (post-B1, 2026-05-03 PM) ------------------
+#
+# Reads <run_dir>/05_editor/{theme_routing.json, dossiers/dossier_*.json,
+# manifest.json}. Each dossier JSON is in the v2 schema (kicker, headline,
+# subline, body_paragraphs[], headnotes[], front_abstract, colophon, metadata).
+
+
+def collect_editor_detail(night: int) -> dict[str, Any]:
+    """Top-level payload for /admin/tonight/editor.
+
+    Renders:
+      - top-line counts from manifest
+      - theme_routing.json summary (voices_routing + refusals)
+      - per-dossier rows (dossier_no, theme_id, kicker, headline, body word
+        count, headnote count, file path)
+    """
+    run_dir = run_dir_for_night(night)
+    base = {
+        "night": night,
+        "run_id": run_dir.name,
+        "run_dir": str(run_dir),
+        "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    if not run_dir.exists():
+        return {**base, "run_exists": False}
+
+    editor_dir = run_dir / "05_editor"
+    if not editor_dir.exists():
+        return {**base, "run_exists": True, "editor_dir_present": False}
+
+    manifest = _read_json_or_none(editor_dir / "manifest.json") or {}
+    routing = _read_json_or_none(editor_dir / "theme_routing.json") or {}
+
+    dossier_files = sorted((editor_dir / "dossiers").glob("dossier_*.json")) \
+        if (editor_dir / "dossiers").exists() else []
+
+    dossiers = []
+    for path in dossier_files:
+        d = _read_json_or_none(path) or {}
+        meta = d.get("metadata", {})
+        body_paragraphs = d.get("body_paragraphs", []) or []
+        word_count = sum(len((p or "").split()) for p in body_paragraphs if p != "* * *")
+        dossiers.append({
+            "dossier_no":         _extract_dossier_no(path),
+            "theme_id":           meta.get("theme_id"),
+            "theme_display_title": meta.get("theme_display_title"),
+            "kicker":             d.get("kicker", ""),
+            "headline":           d.get("headline", ""),
+            "n_body_paragraphs":  len(body_paragraphs),
+            "n_words":            word_count,
+            "n_headnotes":        len(d.get("headnotes", []) or []),
+            "filename":           path.name,
+            "mtime":              _file_mtime_iso(path),
+            "input_tokens":       meta.get("input_tokens"),
+            "output_tokens":      meta.get("output_tokens"),
+            "wall_clock_s":       meta.get("wall_clock_s"),
+        })
+    dossiers.sort(key=lambda x: (x["dossier_no"] or 0))
+
+    return {
+        **base,
+        "run_exists": True,
+        "editor_dir_present": True,
+        "manifest_present": bool(manifest),
+        "manifest_mtime": _file_mtime_iso(editor_dir / "manifest.json"),
+        "routing_present": bool(routing),
+        "counts": manifest.get("counts", {}),
+        "dossier_failures": manifest.get("dossier_failures", []),
+        "voices_routing": routing.get("voices_routing", []),
+        "refusals": routing.get("refusals", []),
+        "themes_to_dossiers": routing.get("themes_to_dossiers", []),
+        "dossiers": dossiers,
+    }
+
+
+def _extract_dossier_no(path: Path) -> int | None:
+    """Pull the integer N out of dossier_NNN.json filenames."""
+    import re
+    m = re.search(r"dossier_(\d+)", path.stem)
+    return int(m.group(1)) if m else None
 
 
 def latest_active_night() -> int:

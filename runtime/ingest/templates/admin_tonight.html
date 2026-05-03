@@ -57,7 +57,7 @@
     ('researcher',    'Researcher',    '/admin/tonight/researcher?night=' ~ night),
     ('provocateur',   'Provocateur',   '/admin/tonight/provocateur?night=' ~ night),
     ('voice',         'Voice',         '/admin/tonight/voice?night=' ~ night),
-    ('editor',        'Editor',        none),
+    ('editor',        'Editor',        '/admin/tonight/editor?night=' ~ night),
     ('publish',       'Publish',       '/admin/tonight/publish?night=' ~ night),
   ] %}
   {# Transposed table: stages as columns, attributes as rows.
@@ -107,7 +107,6 @@
   </div>
   <p class="muted hint">
     Stages flow left → right. Click any stage header to drill into per-stage detail.
-    <em>Editor</em> drilldown lands once <code>editor_flow.py</code> ships (B1).
   </p>
 </section>
 

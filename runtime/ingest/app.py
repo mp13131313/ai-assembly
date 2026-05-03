@@ -802,6 +802,36 @@ def admin_tonight_publish_json(
     return JSONResponse(dashboard.collect_publish_detail(n))
 
 
+@app.get("/admin/tonight/editor", response_class=HTMLResponse)
+def admin_tonight_editor(
+    request: Request,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Editor Pipeline drilldown: per-dossier kicker/headline/word count +
+    routing decisions + refusals. Post-B1 (2026-05-03 PM)."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    payload = dashboard.collect_editor_detail(n)
+    return templates.TemplateResponse(
+        request, "admin_editor.html",
+        {
+            "payload": payload,
+            "night": n,
+            "all_nights": dashboard.ATHENS_NIGHTS,
+            "role": "admin",
+        },
+    )
+
+
+@app.get("/admin/tonight/editor.json")
+def admin_tonight_editor_json(
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    return JSONResponse(dashboard.collect_editor_detail(n))
+
+
 # --- /admin/file: read-only file viewer (C23 UX feedback, 2026-05-03) -------
 
 

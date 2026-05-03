@@ -80,8 +80,12 @@ def _is_refusal(focus_decision: str, themes_covered: list[str]) -> bool:
     return any(marker in fd for marker in REFUSAL_MARKERS)
 
 
+# v2 regex: matches "Response N" ANYWHERE in focus_decision text. Catches
+# "Focus on Response 3", "Focus on response 2 (algorithmic governance)",
+# AND "synthesise around Response 2's threshold-scene" (synthesis-anchored
+# hybrid). Per spec v2 §"Stage 1 — Theme Routing".
 _RESPONSE_N_RE = re.compile(
-    r"focus\s+on\s+response\s*(\d+)",
+    r"response\s*(\d+)",
     re.IGNORECASE,
 )
 
@@ -110,7 +114,7 @@ def _parse_focus_to_primary_theme(
         if 1 <= n <= len(briefings):
             theme_id = briefings[n - 1].get("theme_id")
             if theme_id:
-                return theme_id, "Case 1 — explicit Response N"
+                return theme_id, "Case A — Response N anchor"
 
     if any(marker in fd_lower for marker in SYNTHESIS_MARKERS):
         if themes_covered:

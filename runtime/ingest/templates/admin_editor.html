@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Editor · Night {{ night }}{% endblock %}
+{% block head_extra %}
+  <meta http-equiv="refresh" content="30">
+{% endblock %}
+{% block content %}
+
+<p class="breadcrumb">
+  <a href="/admin/tonight?night={{ night }}">← Pipeline · Night {{ night }}</a>
+</p>
+
+<h1>Editor — Night {{ night }}</h1>
+
+<nav class="night-picker">
+  {% for n in all_nights %}
+    {% if n == night %}
+      <span class="chip active">Night {{ n }}</span>
+    {% else %}
+      <a class="chip" href="/admin/tonight/editor?night={{ n }}">Night {{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  <span class="muted">·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/05_editor/manifest.json">
+      <code>{{ payload.run_id }}/05_editor/manifest.json</code>
+    </a>
+    {% if payload.routing_present %}
+    ·
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/05_editor/theme_routing.json">
+      <code>theme_routing.json</code>
+    </a>
+    {% endif %}
+  </span>
+  <span class="muted">· polled {{ payload.polled_at }}</span>
+</nav>
+
+{% if not payload.run_exists %}
+  <div class="empty">
+    <p>No run directory for Night {{ night }} yet.</p>
+  </div>
+{% elif not payload.editor_dir_present %}
+  <div class="empty">
+    <p>Editor pipeline hasn't run yet for Night {{ night }}.</p>
+    <p class="muted">
+      Will appear here once Voice Pipeline finishes and the orchestrator fires editor_flow.
+    </p>
+  </div>
+{% else %}
+
+{% set c = payload.counts %}
+<section class="voice-summary">
+  <p class="muted">
+    {{ c.get('dossiers_succeeded', 0) }}/{{ c.get('themes_routed', 0) }} dossier(s) succeeded
+    {% if c.get('dossiers_failed', 0) %}
+      · ⚠ {{ c.dossiers_failed }} failed
+    {% endif %}
+    {% if c.get('refusals', 0) %}
+      · {{ c.refusals }} refusal(s)
+    {% endif %}
+  </p>
+</section>
+
+{# --- Dossier failures (if any) ----------------------------------- #}
+{% if payload.dossier_failures %}
+<section class="grid-block">
+  <h2>⚠ Dossier failures</h2>
+  <ul>
+    {% for f in payload.dossier_failures %}
+      <li>
+        <code>{{ f.theme_id }}</code> — <span class="muted">{{ f.error }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# --- Voice routing (Stage 1 output) ------------------------------ #}
+{% if payload.voices_routing %}
+<section class="grid-block">
+  <h2>Voice routing</h2>
+  <p class="muted">Stage 1 deterministic routing of voices to dossiers via <code>focus_decision</code> parser.</p>
+  <table class="overview">
+    <thead>
+      <tr><th>Voice</th><th>Primary theme</th><th>Dossier</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      {% for v in payload.voices_routing %}
+        <tr>
+          <td><strong>{{ v.voice_slug }}</strong>{% if v.voice_name and v.voice_name != v.voice_slug %} <span class="muted">{{ v.voice_name }}</span>{% endif %}</td>
+          <td><code>{{ v.primary_theme }}</code></td>
+          <td>{{ v.primary_dossier }}</td>
+          <td class="muted">{{ v.primary_theme_source }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if payload.refusals %}
+<section class="grid-block">
+  <h2>Refusals ({{ payload.refusals|length }})</h2>
+  <p class="muted">Voices with empty <code>themes_covered</code> or refusal markers in <code>focus_decision</code>. Not routed to a dossier.</p>
+  <ul>
+    {% for r in payload.refusals %}
+      <li>
+        <strong>{{ r.voice_slug }}</strong>
+        {% if r.voice_name and r.voice_name != r.voice_slug %} — {{ r.voice_name }}{% endif %}
+        <br><span class="muted">form: <code>{{ r.form }}</code> · {{ r.focus_decision[:120] }}{% if r.focus_decision|length > 120 %}…{% endif %}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# --- Per-dossier rows -------------------------------------------- #}
+<section class="grid-block">
+  <h2>Dossiers</h2>
+  {% if not payload.dossiers %}
+    <p class="muted">No dossiers written yet.</p>
+  {% else %}
+    <table class="overview">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Theme</th>
+          <th>Kicker</th>
+          <th>Headline</th>
+          <th>Body</th>
+          <th>Headnotes</th>
+          <th>Wall</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in payload.dossiers %}
+          <tr>
+            <td><strong>{{ d.dossier_no or '—' }}</strong></td>
+            <td>
+              <code>{{ d.theme_id }}</code>
+              {% if d.theme_display_title %}
+                <br><span class="muted">{{ d.theme_display_title }}</span>
+              {% endif %}
+            </td>
+            <td>{{ d.kicker or '—' }}</td>
+            <td>{{ d.headline or '—' }}</td>
+            <td class="muted">
+              {{ d.n_body_paragraphs }} para · {{ d.n_words }} words
+            </td>
+            <td class="muted">{{ d.n_headnotes }}</td>
+            <td class="muted">
+              {% if d.wall_clock_s %}{{ d.wall_clock_s }}s{% else %}—{% endif %}
+              {% if d.input_tokens %}<br>{{ d.input_tokens }}/{{ d.output_tokens }} tok{% endif %}
+            </td>
+            <td class="muted file-links">
+              <a href="/admin/file?path=runs/{{ payload.run_id }}/05_editor/dossiers/{{ d.filename }}">{{ d.filename }}</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
+{% endblock %}
