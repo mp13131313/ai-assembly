@@ -175,16 +175,25 @@ def build_user_prompt(dossier_briefing: dict[str, Any]) -> str:
 # --- Output parsing -------------------------------------------------------
 
 
-# v2 output schema: kicker, headline, subline, body_paragraphs[], headnotes[],
-# front_abstract. Parser uses the same `**Label:** value` pattern as voice
-# pipeline; multi-line fields (body_paragraphs) parse as one block then split
-# on a separator.
+# v2 output schema: kicker, headline, subline, front_abstract,
+# theme_title, theme_abstract, body_paragraphs[], headnotes[]. Parser uses
+# the same `**Label:** value` pattern as voice pipeline; multi-line fields
+# (body_paragraphs) parse as one block then split on a separator.
+#
+# theme_title + theme_abstract added 2026-05-04 PM (B1 closing-prompt v2
+# rewrite): Claudia reads the Researcher's theme record and writes a
+# publishing-register short title + abstract for the dossier's Page 3.
+# Microsite still has the option to render directly from the upstream
+# theme record at published_artifacts/themes/night_<N>/<theme_id>.json,
+# but the dossier now carries Claudia's paper-voice version inline.
 
 _FIELD_LABEL_RE = {
     "kicker":         re.compile(r"^\s*[*_#\-]*\s*kicker\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "headline":       re.compile(r"^\s*[*_#\-]*\s*headline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "subline":        re.compile(r"^\s*[*_#\-]*\s*subline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "front_abstract": re.compile(r"^\s*[*_#\-]*\s*front[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "theme_title":    re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*title\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "theme_abstract": re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
 }
 
 
@@ -271,17 +280,19 @@ def _parse_headnotes(raw_text: str) -> list[dict[str, str]]:
 def parse_dossier_output(raw_text: str) -> dict[str, Any]:
     """Parse Claudia's prose-and-parse output into the v2 dossier schema.
 
-    Returns a dict with: kicker, headline, subline, body_paragraphs[],
-    headnotes[], front_abstract. Missing fields default to empty strings
-    or empty lists rather than crashing.
+    Returns a dict with: kicker, headline, subline, front_abstract,
+    theme_title, theme_abstract, body_paragraphs[], headnotes[]. Missing
+    fields default to empty strings or empty lists rather than crashing.
     """
     out: dict[str, Any] = {
         "kicker": "",
         "headline": "",
         "subline": "",
+        "front_abstract": "",
+        "theme_title": "",
+        "theme_abstract": "",
         "body_paragraphs": [],
         "headnotes": [],
-        "front_abstract": "",
     }
     for field, rx in _FIELD_LABEL_RE.items():
         m = rx.search(raw_text)
@@ -381,9 +392,11 @@ def stamp_runtime_fields(
         "kicker":          parsed.get("kicker", ""),
         "headline":        parsed.get("headline", ""),
         "subline":         parsed.get("subline", ""),
+        "front_abstract":  parsed.get("front_abstract", ""),
+        "theme_title":     parsed.get("theme_title", ""),
+        "theme_abstract":  parsed.get("theme_abstract", ""),
         "body_paragraphs": parsed.get("body_paragraphs", []),
         "headnotes":       enriched_headnotes,
-        "front_abstract":  parsed.get("front_abstract", ""),
         "colophon":        _colophon_for_night(night),
         "metadata":        metadata,
     }

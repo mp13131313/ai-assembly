@@ -198,12 +198,12 @@ Trigger: A2 (editor layer approval) decided. Doc revision follows.
 
 ## Section B — Athens-blocking items not yet built
 
-### B1. Editor / Frame layer 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (closing-prompt rewrite + Claudia card still pending)
+### B1. Editor / Frame layer 🟢 IMPLEMENTATION + CLOSING PROMPT SHIPPED 2026-05-04 PM (Claudia card still on voices thread)
 
-**State:** spec at `docs/AI_Assembly_Editor_Pipeline.md` at **v2** (canonical; refinements landed 2026-05-03 PM). Predecessor memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` archived to `_workspace/archive/`. Implementation **shipped** 2026-05-03 PM in commit `1437dfc`. Two items remain:
+**State:** spec at `docs/AI_Assembly_Editor_Pipeline.md` at **v2** (canonical; refinements landed 2026-05-03 PM). Predecessor memo `_workspace/planning/runtime/MEMO_2026_05_03_editor_flow_input_output_contract.md` archived to `_workspace/archive/`. Implementation **shipped** 2026-05-03 PM in commit `1437dfc`; closing prompt **rewritten to v2** 2026-05-04 PM (this entry's commit). One item remains:
 
 1. **Claudia Pinchbeck's persona card** (35 fields per Persona Card v2 schema). Sketched in spec §7; voices thread is constructing per `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. *Operator-side.* Until shipped, runtime uses the schema-valid stub at `runtime/tests/fixtures/claudia_pinchbeck_stub.json` for smoke tests.
-2. **`editor_dossier.md` closing prompt rewrite to v2 contract.** A v1 version exists at `runtime/flows/shared/prompts/editor_dossier.md` (136 lines, 2026-05-02) but is written against v1 input/output fields (in_brief_voices, primary_contributors, refusals as input, marathon_panel_source, lead_headline + lead_subdeck + lead_teaser, single article body string, etc.) — all of which v2 dropped or replaced. **The current closing prompt MUST NOT be used for production v2 calls;** rewrite needed (~30-60 min, mechanical against §"Output Schema (v2)" + §"Stage 2 — Per-call inputs (v2 contract)").
+2. ~~**`editor_dossier.md` closing prompt rewrite to v2 contract.**~~ ✅ SHIPPED 2026-05-04 PM. Per operator direction the rewrite stripped all editorial discipline (weighing, bastard-form, banned-modes, quality-criteria, programme-supply prohibition) — those live on Claudia's persona card and shouldn't be duplicated in the runtime prompt. New prompt is pure mechanics: `<input>` (4 user-message fields) + `<output>` (8 labelled fields with parser-readable format + length envelopes). Plus operator added two new fields (`theme_title`, `theme_abstract`) so Claudia writes the theme-page content (Page 3) in publishing register from the Researcher's theme record, instead of the microsite rendering Page 3 directly from upstream. Parser + schema + 3 new tests; 299/299 runtime tests pass.
 
 **Wiring proof — single-dossier live test 2026-05-04** (~$1.50 spent against real Anthropic):
 

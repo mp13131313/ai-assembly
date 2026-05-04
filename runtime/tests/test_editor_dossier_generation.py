@@ -182,6 +182,26 @@ framing_text: Cleopatra issued a prostagma.
         assert parsed["headline"] == ""
         assert parsed["body_paragraphs"] == []
         assert parsed["headnotes"] == []
+        assert parsed["theme_title"] == ""
+        assert parsed["theme_abstract"] == ""
+
+    def test_parse_theme_title_and_abstract(self):
+        """B1 (2026-05-04 PM): Claudia emits theme_title + theme_abstract for
+        the dossier's Page 3 (theme page) — paper-voice short title +
+        publishing-register short abstract derived from Researcher's record.
+        """
+        raw = """**kicker:** A KICKER
+
+**headline:** A headline
+
+**theme_title:** On The Legitimacy Of Algorithmic Sortings
+
+**theme_abstract:** The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for. The voices answer in four vocabularies; none calls the device legitimate.
+"""
+        parsed = dg.parse_dossier_output(raw)
+        assert parsed["theme_title"] == "On The Legitimacy Of Algorithmic Sortings"
+        assert parsed["theme_abstract"].startswith("The theme reaches across")
+        assert "four vocabularies" in parsed["theme_abstract"]
 
     def test_parse_strips_markdown_chrome(self):
         raw = "**kicker:** ***WAIT***\n\n**headline:** _italic stuff_"
@@ -229,6 +249,51 @@ class TestStampRuntime:
         assert dossier["metadata"]["issue_no"] == 42_193
         assert dossier["metadata"]["vol"] == "CXVI"
         assert dossier["metadata"]["night"] == 1
+
+    def test_stamp_carries_theme_title_and_abstract(self):
+        """B1 (2026-05-04 PM): theme_title + theme_abstract land on the
+        dossier output if Claudia emitted them; default to empty strings
+        otherwise (microsite can fall back to the upstream theme record)."""
+        parsed = {
+            "kicker": "K",
+            "headline": "H",
+            "subline": "S",
+            "body_paragraphs": [],
+            "headnotes": [],
+            "front_abstract": "",
+            "theme_title": "On The Legitimacy Of The Sortings",
+            "theme_abstract": "Across last night's three sessions the question reached for what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
+        }
+        dossier = dg.stamp_runtime_fields(
+            parsed,
+            night=1,
+            theme_id="theme_001",
+            theme_display_title="On The Question",
+            voice_slugs=[],
+            voice_name_by_slug={},
+            formulation_by_slug={},
+        )
+        assert dossier["theme_title"] == "On The Legitimacy Of The Sortings"
+        assert dossier["theme_abstract"].startswith("Across last night's")
+
+    def test_stamp_theme_fields_default_empty_when_missing(self):
+        """If parsed dict omits theme_title/theme_abstract, dossier carries
+        empty strings — defensive against parser misses."""
+        parsed = {
+            "kicker": "K", "headline": "H", "subline": "",
+            "body_paragraphs": [], "headnotes": [], "front_abstract": "",
+        }
+        dossier = dg.stamp_runtime_fields(
+            parsed,
+            night=1,
+            theme_id="theme_001",
+            theme_display_title="X",
+            voice_slugs=[],
+            voice_name_by_slug={},
+            formulation_by_slug={},
+        )
+        assert dossier["theme_title"] == ""
+        assert dossier["theme_abstract"] == ""
         # Colophon present
         assert "Editor's desk" in dossier["colophon"]
         assert "Issue No. 42,193" in dossier["colophon"]
