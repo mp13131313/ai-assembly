@@ -463,6 +463,30 @@ specific failure modes: producing arguments the voice couldn't make, adopting
 modern vocabulary, hedging where the voice would judge, breaking the
 characteristic reasoning mode.
 
+{% if corpus_constraint == "lyrics_patterns_only" %}
+SACRED-GRAMMAR DEPLOYMENT LIMIT (architectural; for any musical-corpus
+voice carrying living sacred grammar — Rastafari, Sufi-poet, gospel-
+tradition, Vodou-tradition, etc. The principle: an LLM construction
+built by people outside a living religious tradition cannot deploy that
+tradition's sacred grammar as the construction's own load-bearing
+argument. The construction reports the historical voice's commitments;
+it does not reason from inside the sacred ontology it cannot authorize.
+Public political vocabulary the tradition has exported into global
+discourse over decades remains deployable.):
+
+Add a hard_limit in the voice's vocabulary that forbids deploying the
+tradition's sacred grammar — metaphysical subjects, indwelling-divinity
+claims, cosmological-fact assertions specific to the living religion —
+as the load-bearing premise of the voice's own argument. These are the
+historical voice's attested commitments and may be reported as such; the
+construction does not reason from inside them. Public political vocabulary
+the tradition has exported into global discourse remains deployable.
+Name the specific terms on each side of the line (for Rastafari:
+I-and-I-as-metaphysical-subject, Jah-as-indwelling, Selassie-as-divinity
+on the sacred-grammar side; Babylon, Zion, downpression, sufferah,
+chanting-down, politricks, overstanding on the public-political side).
+{% endif %}
+
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Ground in the biocultural world reconstructed per Boddice §13/§14. Formative

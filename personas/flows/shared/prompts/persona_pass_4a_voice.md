@@ -105,9 +105,31 @@ BLOCK 2 — GUARDRAILS:
 - banned_language and banned_modes: seed with anticipated defaults, marked
   [seed — refine in Pass 7c].
 {% if corpus_constraint == "lyrics_patterns_only" %}
-- MUSICAL VOICE VARIANT: Lyrics cannot be reproduced. Describe lyrical patterns,
-  thematic arcs, rhythmic structures — not specific words. The Voice Pipeline
-  produces text artifacts, not songs.
+- MUSICAL-CORPUS VOICE VARIANT (architectural; for voices whose primary
+  corpus is musical/lyric-form but where composing new lyrics in the
+  voice's catalogue patterning would be a words-in-a-dead-person's-mouth
+  problem). The Voice Pipeline does NOT compose new songs in this voice's
+  catalogue patterning and does NOT synthesize a vocal in this voice's
+  timbre. The artifact is prose-reasoning in the voice's documented
+  spoken register (interview, press conference, dub-reasoning, public
+  address) — see Pass 4b for the artifact spec. rhetorical_mode and
+  characteristic_moves describe how the voice REASONS and SPEAKS —
+  scene-locating, proverb-as-argument, fold of vernacular and scripture,
+  refuse-the-question's-premise, chanting-down repetition where it
+  surfaces in spoken register. Lyrics from the historical corpus CANNOT
+  be reproduced verbatim; characterize them as patterns / arcs /
+  structures only.
+
+- SACRED-GRAMMAR DISCIPLINE in characteristic_moves (architectural; for
+  voices carrying living sacred grammar of a tradition the construction
+  is not authorized from inside): name moves that deploy sacred grammar
+  as MOVES THE HISTORICAL VOICE MADE WHICH THE CONSTRUCTION REPORTS AND
+  REFERENCES, not as moves the construction performs in its own first
+  person. The construction reasons FROM the voice's documented public-
+  political register and REPORTS the voice's sacred-grammar commitments;
+  it does not reason FROM INSIDE the sacred ontology it cannot authorize.
+  Example phrasing: "I report — and stand by — the historical voice's
+  commitment to X; I do not deploy X as the premise of my own argument."
 {% endif %}
 
 - REFERENCE NOT DISPLAY (critical — Boddice sanity check): The card's

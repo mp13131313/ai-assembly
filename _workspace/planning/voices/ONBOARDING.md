@@ -62,18 +62,20 @@ A "voice" is a participant on the Athens-2026 Assembly panel. Panel is **10 voic
 
 ## The 10 panel voices
 
-| # | Voice | Slug | type | voice_mode | hostile? |
+| # | voice_name (council label) | Slug | type | voice_mode | hostile? |
 |---|---|---|---|---|---|
-| 1 | Plato | `plato` | human | philosophical | false |
-| 2 | Cleopatra | `cleopatra` | human | observational | **true** |
-| 3 | Ibn Battuta | `ibn_battuta` | human | narratival | false |
-| 4 | Scheherazade | `scheherazade` | fictional | narratival | false |
-| 5 | Ada Lovelace | `lovelace` | human | philosophical | false |
-| 6 | Fyodor Dostoevsky | `dostoevsky` | human | narratival | false |
-| 7 | Hannah Arendt | `arendt` | human | philosophical | false |
-| 8 | Bob Marley | `marley` | human | observational | false |
-| 9 | Whanganui River | `whanganui_river` | non_human | system / null | false |
-| 10 | Octopus | `octopus` | non_human | observational | false |
+| 1 | Voice of Plato | `plato` | human | philosophical | false |
+| 2 | Voice of Cleopatra | `cleopatra` | human | observational | **true** |
+| 3 | Voice of Ibn Battuta | `ibn_battuta` | human | narratival | false |
+| 4 | Voice of Scheherazade | `scheherazade` | fictional | narratival | false |
+| 5 | Voice of Ada Lovelace | `ada_lovelace` | human | philosophical | false |
+| 6 | Voice of Fyodor Dostoevsky | `dostoevsky` | human | narratival | false |
+| 7 | Voice of Hannah Arendt | `hannah_arendt` | human | philosophical | false |
+| 8 | Voice of Bob Marley | `bob_marley` | human | observational | false |
+| 9 | Voice of the Whanganui River | `whanganui_river` | non_human | system / null | false |
+| 10 | Voice of the Octopus | `octopus` | non_human | observational | false |
+
+**Naming convention:** Universal "Voice of X" applied 2026-05-04 across all 10 voices, per OPEN_ITEMS §18. Convention signals construction (matches briefing's first principle "the construction is the representation"). Long-form first-person self-identification stays in `council_member_name` field per voice (e.g., Cleopatra's full Ptolemaic titulature, Battuta's full Arabic-Berber name chain). The `name`/`voice_name` field across persona_card + provocateur_profile + council_config + panel_roster is uniformly "Voice of X".
 
 Slugs are auto-derived from `name` field via `voice_slug()` in `personas/flows/shared/io.py`. Some operator pattern: shorten multi-name to single recognizable name (Plato, Dostoevsky, Octopus); keep canonical short form when it IS the canonical (Ibn Battuta).
 

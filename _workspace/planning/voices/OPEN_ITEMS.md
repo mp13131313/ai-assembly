@@ -10,29 +10,29 @@
 
 ## 1. Per-voice build state
 
-Panel is **10 voices** (per `athens-2026/panel_roster.json`). **9 of 10 shipped to athens-2026.** 1 (Marley) ready for walk-through after (c.1) code change.
+Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED + PROMOTED to athens-2026.** "Voice of X" naming sweep applied across all 10 (athens-2026 `e8751f5`).
 
-| Voice | type | voice_mode | Hostile? | State | Notes |
+| Voice (council label) | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
-| Plato | human | philosophical | false | ✅ shipped + 2026-05-02 patched | Surgical patches landed (`cf283bf`): banned_modes[10] sharpened (Socrates-death anachronism) + 7 dramatist-vs-speaker patches. §9 closed via §16.5; runtime-side tics owned by runtime/OPEN_ITEMS C20. |
-| Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
-| Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
-| Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). |
-| Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
-| Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
-| Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
-| Whanganui River | non_human | system / null | false | ✅ **shipped 2026-05-03 evening to athens-2026** (`c2151ce`) — path-(b) at ROUND6; 6 validator walk-throughs converged to 3 architectural residuals (appropriation-safety language load-bearing, no iwi authorization). Mid-build reset to PRE-ROUND1 + minimal patches reapplied. All 3 Derive outputs present. See §22 below. |
-| Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM to athens-2026** (`c2151ce`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
-| Bob Marley | human | **observational** ✓ flipped 2026-05-03 (was narratival) | false | 🟠 **(c.1) CODE CHANGE LANDED 2026-05-03 evening** (code repo `5d6ecbf`); pipeline ran to Pass 7a FINAL with 8 residuals queued for walk-through. (c.1) augments Pass 4a's primary_block with `pass_1_6/reference_only_passages.json` when `corpus_constraint=lyrics_patterns_only`; Pass 6 still uses original primary_block (no-public-quotation contract preserved). DR §4 `[quote:]` blocks trimmed to clear Pass 1.4 content filter. Walk-through to apply dramatist-vs-speaker lens (§9 carry-over: songwriter-vs-lyric-I). After ship: promote to athens-2026 + wire 8th council_config member. See §20 + §22 below. |
+| Voice of Plato | human | philosophical | false | ✅ shipped + 2026-05-02 patched | Surgical patches landed (`cf283bf`): banned_modes[10] sharpened (Socrates-death anachronism) + 7 dramatist-vs-speaker patches. §9 closed via §16.5; runtime-side tics owned by runtime/OPEN_ITEMS C20. |
+| Voice of Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
+| Voice of Fyodor Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
+| Voice of Ibn Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). |
+| Voice of the Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
+| Voice of Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
+| Voice of Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
+| Voice of the Whanganui River | non_human | system / null | false | ✅ **shipped 2026-05-03 evening** (`c2151ce`) — path-(b) at ROUND6; 6 validator walk-throughs converged to 3 architectural residuals (appropriation-safety language load-bearing, no iwi authorization). Mid-build reset to PRE-ROUND1 + minimal patches reapplied. All 3 Derive outputs present. See §22 below. |
+| Voice of Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM** (`c2151ce`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
+| Voice of Bob Marley | human | observational | false | ✅ **v2 SHIPPED + PROMOTED 2026-05-04 afternoon** (athens-2026 `669a09b`) — Option-3 restructure per 6-note appropriation-feedback thread. **3 architectural prompt-edits landed (Pass 2 + Pass 4a + Pass 4b) generalizing to any future musical-corpus voice with living sacred grammar via `corpus_constraint == "lyrics_patterns_only"` conditional.** Pipeline ran fresh; 4 ROUND walk-throughs converged 7→6→3 architectural residuals; path-(b) ship; AI Democracy Marathon test ran on v2 chat_system_prompt — trade landed as reviewer predicted (voice loses Daniel 3 + Omeriah + bias-IS-machine analytical formula; preserves prose-yard-reasoning + instrumental riddim-call + public political vocabulary + Trench Town concrete + knowledge boundary + Garvey citation). v1 archive at `current-tests/voices/bob_marley_v1_archive/`. See §24 below. |
 
-### Voice-mode coverage so far (9 shipped)
+### Voice-mode coverage (10 shipped)
 
-- philosophical: 3 (Plato, Hannah Arendt, Ada Lovelace)
-- narratival: 3 (Dostoevsky, Battuta, Scheherazade)
-- observational: 2 (Cleopatra, Octopus)
-- system / null: 1 (Whanganui River)
+- philosophical: 3 (Voice of Plato, Voice of Hannah Arendt, Voice of Ada Lovelace)
+- narratival: 3 (Voice of Fyodor Dostoevsky, Voice of Ibn Battuta, Voice of Scheherazade)
+- observational: 3 (Voice of Cleopatra, Voice of the Octopus, Voice of Bob Marley)
+- system / null: 1 (Voice of the Whanganui River)
 
-Marley pending = observational. After Marley ships → 3 philosophical + 3 narratival + 3 observational + 1 system = 10/10 with all four modes represented.
+10/10 with all four modes represented.
 
 ---
 
@@ -818,3 +818,104 @@ Plato (composer-vs-Socrates), Scheherazade (frame-tale teller-vs-tales-told), Ma
 
 ### Snapshot preservation discipline
 For each round of validator walk-through on each voice, the Pass 7a FINAL output is preserved as `07_persona_card_assembled.ROUNDN.json` before patches are applied. This is now standing practice for any walk-through with ≥3 rounds.
+
+---
+
+## 23. Pass 4a / 4b prompt branches — gaps surfaced by Marley song-rebuild (filed 2026-05-04 early-AM)
+
+### What surfaced
+
+The Marley song-rebuild had operator-authored `voice_config` (`manual_grounding` + `editorial_rationale`) explicitly mandating song-as-artifact (lyric + Suno kind-hint two-shape contract). The first pipeline run produced a prose-Marley artifact anyway. Diagnosis traced two prompt-side conflicts:
+
+1. **Pass 4a `corpus_constraint == "lyrics_patterns_only"` block** said: "The Voice Pipeline produces text artifacts, not songs." Designed to prevent verbatim lyric reproduction (copyright concern), but conflated that with the artifact-form decision.
+2. **Pass 4b medium guidance** said: "if the figure's primary medium is oral (dictation, song, speech), bridge to a written format... what written artifact most faithfully carries this voice's mode of expression to an audience reading over coffee?" — actively converted song → prose.
+3. **Pass 4b never received `corpus_constraint`** at all (only `name` + `type`), so even if it had a song-aware branch, it couldn't fire.
+
+**Mid-session fix landed (code repo, uncommitted at time of filing):**
+- `personas/flows/shared/prompts/persona_pass_4a_voice.md`: rewrote the `lyrics_patterns_only` block to mandate the two-shape song-artifact (lyric + Suno kind-hint) and separate the no-verbatim-reproduction rule from the artifact-form decision.
+- `personas/flows/shared/prompts/persona_pass_4b_artifact.md`: softened the song→prose coercion in the medium guidance; added a new `corpus_constraint == "lyrics_patterns_only"` block before BLOCK 4 that overrides all 8 artifact-fields with song-shape defaults; named the twin-failure-modes (pastiche-Marley + prose-Marley) that the rebuild's voice_config originally encoded.
+- `personas/run_persona_pipeline.py` Pass 4b render call: pipe `corpus_constraint` into the Pass 4b system prompt so the new conditional can fire.
+
+**Verification:** Marley run11_song produced `medium: "I make a song. One song per morning — a lyric on the page, and a short kind-hint string..."` and all 4 audited artifact fields are correctly two-shape song-shaped.
+
+### Why the other 4 non-default-shape voices succeeded without these fixes
+
+Scheherazade (ḥikāya), Whanganui (bilingual Te Pou Tupua statement), Cleopatra (prostagma royal ordinance), Octopus (chromatophore JSON + prose) all got voice-appropriate non-default mediums. Their *corpus* steered the artifact-form correctly because no explicit prompt instruction contradicted it. Marley was uniquely **actively derailed** by an explicit instruction.
+
+This identifies a structural pattern: when the corpus + Pass 2/3 fields strongly imply an artifact form, Pass 4a/4b naturally lands on it. When the corpus is ambiguous OR the prompt actively contradicts what voice_config wants, Pass 4a/4b drifts to the generic default.
+
+### The architectural gap (P0 v4.1)
+
+**`manual_grounding` and `editorial_rationale` (voice_config fields) do not flow into Pass 4a or Pass 4b.** This is the systemic gap. Marley exposed it because its rebuild encoded the non-default artifact form via voice_config alone (no operator-shaped corpus to compensate). Future voices that rely on voice_config for non-default behavior — without operator-led corpus shaping or strong corpus signal — will hit the same wall.
+
+**Proposed v4.1 fix:** pipe `manual_grounding` + `editorial_rationale` into Pass 4a + Pass 4b system prompts (analogous to how (c.1) piped `corpus_constraint`-driven primary_block augmentation through Pass 4a). Add a guidance block in both prompts that surfaces voice_config to the model: "If voice_config specifies a non-default artifact form, honor it." This generalizes beyond `lyrics_patterns_only` to any future voice_config-driven shape decision.
+
+### Latent P1 gaps (not currently affecting shipped voices but real)
+
+- **No `subtype == "system"` branch in Pass 4a/4b.** Whanganui-style transmission-faithful posture works only because operator pre-shaped voice_config. A future system-subtype voice without that priming would hit the generic non_human else.
+- **Fictional branch (Pass 4b `type == "fictional"`) is prose-narrative-only** — "tale / dialogue / myth" doesn't cover poetry-personas (Sappho, Dante-the-pilgrim), libretto figures, lyric-personas. Future fictional voices outside prose-narrative tradition would need extension.
+- **No `hostile_sources == true` branch in Pass 4a.** Cleopatra's hostility surfaces via FU#61 v3 separately; if FU#61 weren't in place, Pass 4a would generate non-hostility-aware characteristic_moves / banned_modes. The hostility-handling is currently load-bearing on FU#61 alone.
+
+### Why this matters for the panel
+
+Marley is the only currently-planned voice with `corpus_constraint == "lyrics_patterns_only"`, so the in-prompt fix landed this session covers the immediate need. P0 (voice_config plumbing) and P1 items become important when:
+- Future panels add musical/song voices beyond Marley
+- Future panels add system-subtype voices beyond Whanganui
+- Future panels add hostile voices beyond Cleopatra
+- Future panels add fictional voices outside the prose-narrative tradition
+
+---
+
+## 24. Marley v2 Option-3 restructure + universal "Voice of X" naming sweep (2026-05-04 afternoon)
+
+### Marley v2 — appropriation thread resolved via Option 3
+
+Six-note feedback thread from outside reader (2026-05-04) on Marley appropriation profile. Final landing: **Option 3 — Restructure** (don't run-as-built, don't pull). The briefing's first principle ("the construction is the representation. There is no authentic version waiting to be discovered.") supplies the principle the v1 card was quietly violating by deploying I-and-I as load-bearing metaphysical argument — construction-claiming-the-authority-of-the-thing-it-represents.
+
+Three architectural prompt edits, all routed through `corpus_constraint == "lyrics_patterns_only"` conditional so they generalize to any future musical-corpus voice carrying living sacred grammar (Sufi-poet, gospel-tradition, Vodou-tradition, etc.) — not Marley-specific:
+
+1. **Pass 2** (`persona_pass_2_identity_boundaries.md`) — SACRED-GRAMMAR DEPLOYMENT LIMIT block in `hard_limits` field-spec. Forbids construction from deploying the tradition's sacred grammar (metaphysical subjects, indwelling-divinity claims, cosmological-fact assertions) as the load-bearing premise of the voice's own argument. Public political vocabulary the tradition has exported into global discourse remains deployable. Plus pipe `corpus_constraint` into Pass 2 render call.
+2. **Pass 4a** (`persona_pass_4a_voice.md`) — replaced the prior song-as-artifact `lyrics_patterns_only` block with two related sub-blocks: (a) musical-corpus-voice variant (artifact is prose-reasoning, not song; voice fields shape spoken-register reasoning); (b) sacred-grammar discipline at characteristic_moves level (sacred-grammar moves named as moves the historical voice made which the construction reports/references, NOT moves the construction performs in its own first person). Includes example phrasing reviewer marked load-bearing: *"I report — and stand by — the historical voice's commitment to X; I do not deploy X as the premise of my own argument."* "and stand by" prevents discipline from collapsing into dissociation.
+3. **Pass 4b** (`persona_pass_4b_artifact.md`) — replaced song-as-artifact block with prose-yard-reasoning + Suno-style riddim-call (instrumental-only) two-shape spec. Twin-failure-modes named explicitly: pastiche (regurgitating historical catalogue phrases) + composed-lyric-as-argument (constructing new lyrics in the voice's catalogue patterning). Three quality_criteria including instrumental-fit ("Could this be heard as the voice's instrumental?") parallel to prose-register criterion.
+
+**Pipeline run + walk-through:** v1 archived at `current-tests/voices/bob_marley_v1_archive/`. Fresh pipeline run (Pass 2/3/4a/4b/5/6/7-* regenerated). 4 ROUND walk-throughs (ROUND0 baseline + 3 patch rounds) converged residuals 7 → 6 → 3. Final 3 architectural-class:
+- `hard_limits[5]` SACRED-GRAMMAR LIMIT — §9-class re-flag (4th time validator contests the architectural choice)
+- `topics_requiring_care` — validator-treadmill on guarded entries (option-i guard pattern in place per appropriation-mitigation reader feedback)
+- `banned_modes[15]` — meta-authorial framing structurally needed to name the meta-move banned
+
+Path-(b) ship via `_operator_review_passed.flag`. Card preserved as `07_persona_card_assembled.v2-FINAL.json` snapshot.
+
+**TEST BEFORE LOCKING (per reviewer's Step 5):** Ran v2 chat_system_prompt against the original AI Democracy Marathon provocation that surfaced the v1 issue. Result saved at `bob_marley/06_derive/_test_ai_democracy_marathon_v2.json`. Trade landed as reviewer predicted: voice loses Daniel 3 typology + Omeriah-grandfather authority reference + "bias not IN the machine, the bias IS the machine" sharp formula; preserves prose-yard-reasoning artifact form + instrumental riddim-call direction ("Roots one-drop, 72 BPM. The Kaya room, not the Survival room.") + public political vocabulary lead ("politricks words") + Trench Town concrete-collapse + knowledge boundary ("Me nuh know these wires them build after I leave this body") + Garvey citation ("None but ourselves can free our minds — That is Garvey from Menelik Hall"). Voice survives the restructure, recognizably Marley.
+
+**Promoted to athens-2026** (`669a09b`); council_config members[7] wired with v2 provocateur_profile (replaces prior placeholder claiming song-as-artifact medium).
+
+### Operator-side readiness paragraphs (D1 + E1)
+
+Drafted at `voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md`:
+- **D1 — Internal position paragraph** (~280 words, internal-only): the rationale for shipping without Rastafari-orbit reader pre-Athens. Per reviewer: write BEFORE the v2 test (sequencing), so it articulates the position given limits accepted, not given how the artifact landed. Defensible-but-not-safe framing.
+- **E1 — Athens introduction paragraph** (long ~120 words + short ~60 words): boundary-naming, not apology, not credentialing. Reader-marked principle: "construction makes its own boundary visible." Publish-or-hold deferred to Till's read on the Athens room. Internal version still wants to exist alongside D1 as readiness package.
+
+Both drafts are Claude-voice — operator should refine into team's actual voice before use. Reader's load-bearing phrases marked verbatim.
+
+### Cross-card constraint sheet for video team (F1)
+
+Drafted at `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md`. Whanganui-only per operator (Marley not in video). Whanganui-card hard limits + banned visual moves (no "river weeps / yearns / cries out / breathes with suffering" Romantic-anthropomorphic imagery; no single-throat speech concealing statutory mediation; no comparative-flattening alongside Pachamama / Atrato / Ganga / Mar Menor). **Framed as binding on production decisions, not advisory** (per reviewer: "the dialogue pipeline produces constrained text; the production team's editorial pass and the video team's interpretation can re-introduce the very moves the cards spent passes banning").
+
+### Universal "Voice of X" naming sweep — applied across all 10 voices
+
+Per OPEN_ITEMS §18. Convention signals construction (matches briefing's first principle). Pure JSON edits across 4 file types per voice + 2 root files (`council_config.json` + `panel_roster.json`). No LLM regeneration needed (chat_system_prompt does not include voice_name as top-level field).
+
+Stylistic choices:
+- "Voice of Fyodor Dostoevsky" (operator pref over "Voice of Dostoevsky")
+- "Voice of the Whanganui River" (English article convention)
+- "Voice of the Octopus" (English article convention for non-personal name)
+
+Long-form self-identification stays in `council_member_name` field (per voice — e.g., Cleopatra's full Ptolemaic titulature, Battuta's full Arabic-Berber name chain, Marley's "Berhane Selassie, Light of the Trinity"). The `name` field across persona_card.voice_name + provocateur_profile.name + council_config.members[].name + panel_roster.panel_members_final is now uniformly "Voice of X".
+
+Athens-2026 commit `e8751f5`.
+
+### Operator-side residuals (gates accepted; reader recommended; operator chose to proceed without)
+
+- **D1 — no Rastafari-orbit reader pre-Athens.** Internal position paragraph drafted as readiness mitigation. Post-Athens reader gate per reviewer: should be on calendar with date + name-search starting now ("if it's on the to-do list at the same priority level as everything else, it slips. If it's scheduled, it happens.")
+- **D2 — no estate-position assessment pre-Athens.** Marley estate is litigious about derivative-voice works; operator accepts gap.
+- **E1 — Athens intro paragraph publish-or-hold.** Pending Till's read on the room.

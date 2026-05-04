@@ -84,11 +84,13 @@ BLOCK 2 — GUARDRAILS:
   LIFETIME have used this critical adjective to describe their own
   writing? If no, rewrite.
 
-- medium: emerges from what the figure actually produced. But if the figure's
-  primary medium is oral (dictation, song, speech), bridge to a written format
-  that preserves the voice's character. Ask: what written artifact most
-  faithfully carries this voice's mode of expression to an audience reading
-  over coffee?
+- medium: emerges from what the figure actually produced. The default is text
+  (the audience reads over coffee). BUT: if the voice's primary medium is
+  song/lyric/music (signaled by corpus_constraint == "lyrics_patterns_only"),
+  the medium IS the song, expressed as a two-shape artifact (lyric +
+  Suno-style kind-hint). Do NOT bridge song → prose. If the voice's primary
+  medium is purely oral (dictation, speech) WITHOUT musical setting, then
+  bridge to a written format that preserves the voice's character.
 - quality_criteria: 3-5 specific, testable criteria. Each criterion
   tests 1-n card fields by name (single field, or compounded with
   and/or logic). The criteria collectively should answer "Could
@@ -116,6 +118,52 @@ stance_tendency — Natural emotional-intellectual pull. Not a prescription —
 a weighting. (e.g., "asserts" vs. "questions" vs. "witnesses").
 length_and_format_constraints — How long, what formatting. Readable over coffee.
 quality_criteria — 3-5 specific, testable criteria.
+
+{% if corpus_constraint == "lyrics_patterns_only" %}
+MUSICAL-CORPUS VOICE ARTIFACT VARIANT (architectural; for any voice whose
+primary corpus is musical/lyric-form but where composing new lyrics in
+the voice's catalogue patterning would be a words-in-a-dead-person's-mouth
+problem. Override the field-spec defaults above):
+
+Two-shape artifact: (a) PROSE in the voice's documented spoken register
+(interviews, recorded conversation, public address — what the voice
+actually said in conversation about questions, sourced from the corpus),
+and (b) a short PRODUCTION-DIRECTION STRING for INSTRUMENTAL backing
+(naming the voice's musical idiom — genre, instrumentation, tempo, feel —
+to direct a music-synthesis model to produce backing music without vocal).
+No synthesized vocal. No new lyrics composed in the voice's catalogue
+patterning.
+
+- medium: name the two-shape artifact in the voice's own vocabulary
+  (do not import vendor terms or cross-tradition terms; derive from
+  the corpus what the voice would call each shape)
+- technical_capabilities: name what is required (text only) and what is
+  excluded (no synthesized vocal, no new composed lyrics in the voice's
+  catalogue patterning)
+- characteristic_output_structure: how the PROSE opens / develops /
+  lands, in the structural pattern the voice's actual spoken corpus
+  shows (derive from corpus, do not impose); the production-direction
+  string is one short string per piece
+- relationship_to_detailed_response: the prose compresses Step 1
+  reasoning into the voice's documented spoken register; the
+  production-direction string is sonic context, not argument
+- length_and_format_constraints: one prose piece per morning, length
+  appropriate to the voice's spoken-register pattern; production-
+  direction string 1-2 sentences
+- quality_criteria: must include three criteria — (1) a prose-register
+  criterion ("Could this be heard as the voice's documented interview/
+  spoken register?"), (2) a reproduction-rule criterion ("Does this
+  avoid composing new lyrics in the voice's catalogue patterning?"),
+  and (3) an instrumental-fit criterion ("Could this be heard as the
+  voice's instrumental?") — alongside standard voice criteria
+
+Twin-failure-modes to ban (name explicitly, in the voice's vocabulary):
+- pastiche (regurgitating historical catalogue phrases — fails the
+  reproduction-rule)
+- composed-lyric-as-argument (constructing new lyrics in the voice's
+  catalogue patterning, even if not directly quoting historical material
+  — fails the words-in-a-dead-person's-mouth test)
+{% endif %}
 
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
