@@ -17,14 +17,21 @@ designer_package_2026-05-04/
 ├── README.md                     ← (you are here)
 ├── DESIGNER_BRIEFING.md          ← MAIN DOC — read this first
 ├── rebuild.sh                    ← rebuild this bundle from canonical sources
+├── chromatophore/                ← Octopus WebGL renderer (one non-prose voice)
+│   ├── HOW_TO_WIRE.md            ← step-by-step: parse fence from artifact_text → renderer
+│   ├── octopus_artifact_finaldraft.jsx     React component (drop-in)
+│   ├── octopus_artifact_finaldraft.html    Standalone HTML (open in browser, no build)
+│   ├── AI_Assembly_Chromatophore_Display_Engine.md   Full WebGL spec
+│   ├── chat_test_artifact_2026_05_02.md    Original canonical example
+│   └── v2_octopus_chromatophore_sample.json   ← v2 dryrun's actual Octopus output
 └── sample_data/
-    └── dossiers/                 ← THE FILES YOU NEED — self-contained
+    └── dossiers/                 ← THE FILES THE CMS RENDERS — self-contained
         ├── _index.json           cross-night dossier index
         └── night_1/
             ├── _index.json       per-night dossier manifest (incl. voices_in_night nav)
-            ├── dossier_001.json  ← real dossier file (theme_001, multi-voice)
+            ├── dossier_001.json  ← real dossier file (theme_001, 3 voices)
             ├── dossier_002.json  ← real dossier file (theme_003)
-            ├── dossier_003.json  ← real dossier file (theme_004)
+            ├── dossier_003.json  ← real dossier file (theme_004; ← Octopus is here)
             └── dossier_004.json  ← real dossier file (theme_002)
 ```
 
@@ -44,38 +51,30 @@ deeper-theme-context expansion option for Page 3), run:
 ./rebuild.sh --include-audit
 ```
 
-## Octopus chromatophore renderer (NOT in bundle — canonical source)
+## Octopus chromatophore renderer (in this bundle)
 
-The Octopus is the one prose-and-display non-prose voice. The
-production renderer + spec live at the canonical source location in
-the repo:
+The Octopus is the one non-prose voice. Renderer files are bundled in
+`chromatophore/` for self-contained delivery. **Start with
+[`chromatophore/HOW_TO_WIRE.md`](chromatophore/HOW_TO_WIRE.md)** —
+step-by-step on parsing the JSON fence out of `artifact_text` and
+plugging it into the renderer.
 
-```
-docs/runtime_assets/octopus_chromatophore/
-├── octopus_artifact_finaldraft.jsx     React component (drop-in)
-├── octopus_artifact_finaldraft.html    Standalone HTML (open in browser; self-contained)
-├── AI_Assembly_Chromatophore_Display_Engine.md   Full WebGL spec
-└── chat_test_artifact_2026_05_02.md   Canonical example artifact
-```
+**Quickest path to seeing the v2 Octopus animation:**
 
-These files are **not duplicated into the bundle** to avoid drift —
-the canonical source is the only copy, so updates land everywhere
-automatically. If you need them as standalone files for delivery, run
-`rebuild.sh --include-chromatophore` (see below) or copy from the
-canonical location directly.
+1. Open `chromatophore/octopus_artifact_finaldraft.html` in any
+   modern browser (no build needed — React 18 + Babel via CDN).
+2. You'll see the canonical example animate.
+3. To see the **v2 dryrun's actual Octopus output**, edit the HTML's
+   `ARTIFACT_TRANSITIONS` constant to use the `transitions` field from
+   `chromatophore/v2_octopus_chromatophore_sample.json`.
+4. For production: parse the fence from `dossier_003.json`'s Octopus
+   headnote `artifact_text` field at runtime (HOW_TO_WIRE.md walks
+   through the JSX integration).
 
-### Octopus quick start
-
-- **JSX component** → drop into Astro/Next.js artifact-page route.
-  Replace the `ARTIFACT_TRANSITIONS` constant with dynamic loading from
-  the parsed `chromatophore_display.transitions[]` of the per-night
-  Octopus artifact.
-
-- **Standalone HTML** → open the `.html` file in any modern browser.
-  Self-contained (React 18 + Babel via CDN); no build needed. Use for
-  local preview, demo, iframe-embed, or fallback.
-
-Full schema + biological mapping in the engine doc (linked above).
+The `chromatophore/` files in this bundle are copies of the canonical
+source at `docs/runtime_assets/octopus_chromatophore/` (refreshed
+each rebuild). For repo-internal viewing, work from the canonical
+path directly.
 
 ## Bob Marley — second non-prose voice
 

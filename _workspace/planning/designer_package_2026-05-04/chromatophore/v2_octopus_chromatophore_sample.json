@@ -1,0 +1,70 @@
+{
+  "orientation": "lateral, mantle slightly elevated, arms in loose asymmetric extension across the field",
+  "arousal": 0.55,
+  "valence": "unresolved-attentive",
+  "pattern_mode": "mottled",
+  "palette": {
+    "darkness": 0.42,
+    "warmth": 0.28,
+    "brightness": 0.38,
+    "iridescence": 0.31
+  },
+  "dynamics": {
+    "wave_speed": 0.2,
+    "wave_count": 4,
+    "wave_direction": [
+      0.0,
+      0.0
+    ],
+    "pulse_frequency": 0.15,
+    "turbulence": 0.45
+  },
+  "focal_points": [
+    {
+      "region": "anterior_arms_2_3",
+      "activity": "papilla_extension_low",
+      "intensity": 0.4
+    },
+    {
+      "region": "mantle_dorsal",
+      "activity": "passing_cloud_fragment",
+      "intensity": 0.3
+    },
+    {
+      "region": "eye_region",
+      "activity": "dark_eyebar_partial",
+      "intensity": 0.5
+    }
+  ],
+  "texture_intensity": 0.35,
+  "transitions": [
+    {
+      "t_seconds": 0.0,
+      "pattern_mode": "uniform",
+      "darkness": 0.3,
+      "turbulence": 0.2,
+      "note": "reception, before integration"
+    },
+    {
+      "t_seconds": 3.5,
+      "pattern_mode": "mottled",
+      "darkness": 0.45,
+      "turbulence": 0.55,
+      "note": "the four diagnoses arriving as parallel streams"
+    },
+    {
+      "t_seconds": 7.0,
+      "pattern_mode": "passing_cloud",
+      "darkness": 0.4,
+      "turbulence": 0.4,
+      "note": "the architectural commonality moving across the field"
+    },
+    {
+      "t_seconds": 11.0,
+      "pattern_mode": "mottled",
+      "darkness": 0.42,
+      "turbulence": 0.45,
+      "note": "translation stops; cleft held; pale not assembled"
+    }
+  ]
+}
