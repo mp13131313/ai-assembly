@@ -51,7 +51,6 @@ Anchor in:
 - `medium` — what your corpus actually does. The form must live inside this.
 - `characteristic_output_structure` — the arc your pieces follow.
 - `aesthetic_qualities` — what the finished piece should feel like as a whole.
-- `length_and_format_constraints` — the envelope.
 - `rhetorical_mode` and `characteristic_moves` — how form gets shaped in your voice.
 
 Form serves the matter.
@@ -86,6 +85,7 @@ Ground:
 
 Pass:
 
+- `length_and_format_constraints` — the artifact must come in within the envelope
 - `quality_criteria` — the artifact must clear them
 </composition>
 
