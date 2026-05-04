@@ -305,17 +305,17 @@ Result:
 
 **Per Frame Concept:** `docs/AI_Assembly_Broadsheet_Concept.md` mini-concept needed.
 
-### B4. Substack draft pipeline pass 🔴
+### B4. Substack draft pipeline pass ✅ CLOSED 2026-05-04 (superseded — Editor Pipeline v2 dropped Substack as delivery channel)
 
-**State:** UNBUILT.
+**Closing rationale (2026-05-04):** Editor Pipeline v2 (per CLAUDE.md spec): "Substack bridge dropped, micro-site only." The original B4 was a separate Sonnet pass producing HoBB-voice Substack newsletter content (reads voice artifacts + editor theme articles + previous Substack post). The same spec change that closed C12 (HoBB email tool integration) applies here: with Substack dropped as a delivery channel project-wide, there's nothing for B4 to deliver to.
 
-**Per A2 C decision 2026-05-01 (all-AI):** still TBD whether Substack inherits all-AI mode or keeps its existing AI-drafted-operator-polished pattern. The original Frame Concept positioned Substack as HoBB editorial voice with operator polish; A2 C only resolved the editor layer's drafting model, not Substack's. Decision pending — operator owns.
+If post-Athens an external newsletter / Substack channel becomes desirable (e.g. driven by manual paste from microsite, or a different editorial voice), this can be re-opened with sharper scope. Closed as superseded; not deferred.
 
-**Per Frame Concept §"substack":** Real HoBB voice; engages substance directly; pull-quotes from artifacts (NOT from broadsheet); deep-links to microsite per-artifact pages. Day 2 + Day 3 mornings: read-through previous night. Day 4: Night 3 read-through + goodbye.
+Filed history below preserved.
 
-**Implementation:** Sonnet pass running overnight; reads voice artifacts + editor theme articles + previous Substack post (referenced not routed-through).
+---
 
-**Triggers on:** B1 (editor) so theme articles are available; B2 (microsite) so deep-links resolve.
+### ~~B4. Substack draft pipeline pass~~ 🔴 (filed in original briefing; closed 2026-05-04 — Editor v2 dropped Substack)
 
 ### B5. Closing-show pipelines 🔴
 
