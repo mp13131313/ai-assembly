@@ -567,7 +567,8 @@ table.overview {
 table.overview th,
 table.overview td {
   padding: 10px 14px;
-  text-align: left;
+  text-align: center;
+  vertical-align: middle;
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -654,7 +655,8 @@ table.stages-table {
 }
 table.stages-table th,
 table.stages-table td {
-  text-align: left;
+  text-align: center;
+  vertical-align: middle;
   padding: 8px 12px;
   border-bottom: 1px solid var(--hairline);
 }
@@ -735,22 +737,36 @@ table.stages-table th {
 }
 
 table.cell-grid {
-  border-collapse: collapse;
+  /* `separate` lets us use border-spacing as a hair gap between
+     state-colored cells, so colored blocks read as distinct without
+     needing per-cell borders that fight the state backgrounds. */
+  border-collapse: separate;
+  border-spacing: 2px;
   margin-top: 8px;
   font-size: 11px;
 }
 table.cell-grid th,
 table.cell-grid td {
-  border: 1px solid var(--hairline);
+  /* Remove per-cell borders entirely — state-colored backgrounds + the
+     2px gap from border-spacing carry the cell separation visually. */
+  border: 0;
   padding: 0;
   text-align: center;
+  vertical-align: middle;
 }
 table.cell-grid .row-header {
-  text-align: right;
+  /* Row labels (voice names) left-aligned for readability; voice names
+     are first-class category labels, not data values. */
+  text-align: left;
   padding: 4px 10px;
   font-size: 12px;
   background: var(--cream-2);
+  color: var(--warm-mid);
   white-space: nowrap;
+  border-radius: 2px;
+  /* Cap the first column's width so a long voice name + the corner
+     header ("Voice ↓ Theme →") don't push the data cells off-screen. */
+  width: 1%;
 }
 table.cell-grid .col-header {
   padding: 6px 8px;
@@ -761,6 +777,7 @@ table.cell-grid .col-header {
   color: var(--warm-mid);
   text-align: center;
   vertical-align: middle;
+  border-radius: 2px;
 }
 table.cell-grid .col-header-sub {
   padding: 2px 4px;
@@ -771,6 +788,7 @@ table.cell-grid .col-header-sub {
   color: var(--warm-light);
   text-align: center;
   width: 18px;
+  border-radius: 2px;
 }
 table.cell-grid .sub-header th {
   border-top: 0;
@@ -781,6 +799,7 @@ table.cell-grid .cell {
   font-size: 12px;
   font-weight: 600;
   cursor: default;
+  border-radius: 2px;
 }
 table.cell-grid .cell.state-done {
   background: var(--state-done);
@@ -1053,6 +1072,30 @@ details > div {
 .voice-rationale {
   border-bottom: 1px solid var(--warm-light);
   padding: 0.5em 0;
+}
+.voice-rationale > h4 {
+  margin: 0.6em 0 0.3em 0;
+  font-size: 0.95em;
+}
+.voice-rationale .theme-rationale-list {
+  margin: 0.2em 0 0.6em 1.2em;
+  padding-left: 0.6em;
+}
+.voice-rationale .theme-rationale-list > li {
+  margin-bottom: 0.7em;
+}
+.voice-rationale .theme-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  margin-bottom: 0.15em;
+}
+.voice-rationale .theme-reason {
+  margin: 0 0 0 0.2em;
+  padding-left: 0.6em;
+  border-left: 2px solid var(--warm-light);
+  font-size: 0.9em;
+  line-height: 1.45;
 }
 
 /* --- Render modal overlay (admin/render artifact previews) ------------- */

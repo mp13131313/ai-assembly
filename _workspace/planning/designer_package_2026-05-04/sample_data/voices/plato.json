@@ -1,0 +1,27 @@
+{
+  "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+  "voice_slug": "plato",
+  "nights_present": [
+    1
+  ],
+  "url_paths": {
+    "1": "/night-1/plato"
+  },
+  "artifact_summaries": {
+    "1": {
+      "title": "",
+      "subtitle": "",
+      "selected_form": "Short Socratic dialogue with first-person Socratic narration (the *Republic* / *Charmides* frame).",
+      "stance": "Patient, sober, ironic-warm; refusing the pre-set either/or the speakers brought.",
+      "themes_addressed": [
+        "theme_003",
+        "theme_004",
+        "theme_002",
+        "theme_001"
+      ],
+      "decision": "first_draft",
+      "word_count": 542
+    }
+  },
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

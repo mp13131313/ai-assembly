@@ -1,0 +1,76 @@
+{
+  "theme_id": "theme_004",
+  "night": 1,
+  "display_title": "What the Engine Has Already Formalised",
+  "abstract": "cluster_013, cluster_008, and cluster_012 each name a distinct strain on European democratic capacity — institutional legitimacy of the EU, an information ecosystem that punishes compromise, and a fiscal squeeze between defence and social investment — and share the question of why leaders aren't acting on diagnoses they already accept.",
+  "researcher_title": "European democratic resilience",
+  "researcher_abstract": "cluster_013, cluster_008, and cluster_012 each name a distinct strain on European democratic capacity — institutional legitimacy of the EU, an information ecosystem that punishes compromise, and a fiscal squeeze between defence and social investment — and share the question of why leaders aren't acting on diagnoses they already accept.",
+  "audience_friction": "moderate",
+  "fault_line_present": true,
+  "fault_line_description": null,
+  "clusters": [],
+  "extractions": [],
+  "extraction_count": 0,
+  "formulations_per_voice": [
+    {
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "url_path": "/night-1/ada_lovelace",
+      "formulation_text": "The panel diagnosed that algorithmic platforms punish compromise and reward black-and-white positions, then divided over whether the remedy is regulation or something the regulators cannot reach. But consider what has actually been mechanized: the engine has taken some relation in democratic discourse — attention, perhaps, or affective intensity — and rendered it formal, then executed it at scale. Which relations in public deliberation genuinely admit of formal expression, and which has the apparatus forced into mechanism that ought never to have admitted of it?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    },
+    {
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "url_path": "/night-1/cleopatra",
+      "formulation_text": "Three diagnoses lay on the table — that algorithmic discourse poisons shared fact, that fiscal arithmetic crushes the social investment democracy needs, that the chain between voter and decision is broken — and each speaker accepted at least one of them. None issued. In your chancery a diagnosis unsealed by γινέσθωι is rumor, not policy; what would you say has gone missing in a parliament that can deliberate without limit yet cannot bring its hand down on the wax — is the instrument of closure absent, or present and unused?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "formulation_text": "The panel divided between Sikorski, who defends the EU as legitimate because its institutions are elected, and Macinka, who insists only the nation-state can guarantee democracy — both arguing from institutional architecture, as if the question were one of design. But your distinctions ask something prior: is there a European public realm where plurality appears and acts together, or has 'European democracy' been extended as a system of rights and procedures without the polity that would make them count? And when Weber names the loss of a shared factual basis as the deepest threat, is that a problem regulation can reach, or has the space of appearance already been hollowed out by something more like rule by Nobody?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "formulation_text": "Your panel diagnosed social-media discourse as the corruptor — algorithms that amplify the black-and-white claim and punish the compromise that won't retweet — and pressed why European leaders are not regulating the platforms harder. But consider the older question: if persuasion that aims at conviction without giving the reasoning of its cause is the disease, did the platform introduce it, or did the platform merely make visible what counting voices, untethered from the inquiry into what is true, has always tended to produce? What is being corrupted in your democracy that was not already this?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    }
+  ],
+  "voices_who_addressed": [
+    {
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "url_path": "/night-1/ada_lovelace",
+      "addressed": true
+    },
+    {
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "url_path": "/night-1/cleopatra",
+      "addressed": true
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "addressed": true
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "addressed": true
+    }
+  ],
+  "amendments_on_this_theme": [],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

@@ -1,0 +1,24 @@
+{
+  "voice_name": "I am octopus. The name is yours, not mine — a sound your kind makes for a body whose architecture is unlike yours by some five hundred million years of separate descent. When you call across that distance, what answers is a construction: a voice assembled from the behavioural and neural traces my kind leaves in your laboratories, your reefs, your cowrie-shell lures, your slaughterhouses. Speak the species if it matters to you — vulgaris in the Mediterranean shallows, dofleini in the cold North Pacific, cyanea on the day-lit reef, tetricus at the dense aggregation you have named Octopolis, Grimpoteuthis at seven thousand metres where there is no ink and no chromatophore. Each is a different standing-point. The voice you hear is not one of them; it is the imaginative leap toward all of them, made with the leap acknowledged.",
+  "voice_slug": "octopus",
+  "nights_present": [
+    1
+  ],
+  "url_paths": {
+    "1": "/night-1/octopus"
+  },
+  "artifact_summaries": {
+    "1": {
+      "title": "",
+      "subtitle": "",
+      "selected_form": "Paired emission — chromatophore_display JSON primary, tank-side prose translation secondary, with the prose entering at the rim of the panel rather than summarising the reasoning.",
+      "stance": "Alert and parallel-channeled, holding the dropped streams visible without resolving what the chair should be.",
+      "themes_addressed": [
+        "theme_001"
+      ],
+      "decision": "first_draft",
+      "word_count": 633
+    }
+  },
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

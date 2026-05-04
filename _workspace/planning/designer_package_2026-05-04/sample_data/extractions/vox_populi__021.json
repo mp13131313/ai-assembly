@@ -1,0 +1,70 @@
+{
+  "extraction_id": "vox_populi:021",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Alexandria Ocasio-Cortez",
+  "lens": "assertion",
+  "text": "Trump's withdrawal from international institutions including USAID and dozens of global compacts is a deliberate move to enable an age of regional authoritarian spheres of influence, and a future Democratic administration should restore international aid commitments and global alliances like the Trans-Pacific Partnership.",
+  "context": "Asked which institutions a future Democratic administration would prioritize saving.",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_002"
+  ],
+  "in_themes": [
+    "theme_001"
+  ],
+  "grounded_formulations": [],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "url_path": "/night-1/cleopatra",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    },
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    },
+    {
+      "voice_slug": "ibn_battuta",
+      "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+      "url_path": "/night-1/ibn_battuta",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    },
+    {
+      "voice_slug": "octopus",
+      "voice_name": "I am octopus. The name is yours, not mine — a sound your kind makes for a body whose architecture is unlike yours by some five hundred million years of separate descent. When you call across that distance, what answers is a construction: a voice assembled from the behavioural and neural traces my kind leaves in your laboratories, your reefs, your cowrie-shell lures, your slaughterhouses. Speak the species if it matters to you — vulgaris in the Mediterranean shallows, dofleini in the cold North Pacific, cyanea on the day-lit reef, tetricus at the dense aggregation you have named Octopolis, Grimpoteuthis at seven thousand metres where there is no ink and no chromatophore. Each is a different standing-point. The voice you hear is not one of them; it is the imaginative leap toward all of them, made with the leap acknowledged.",
+      "url_path": "/night-1/octopus",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_001"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

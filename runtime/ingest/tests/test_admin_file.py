@@ -149,8 +149,9 @@ def test_transcription_drilldown_renders(client: TestClient):
     # Title + breadcrumb back to Pipeline:
     assert "Transcription — Night 1" in body
     assert "← Pipeline · Night 1" in body
-    # Night picker present:
-    assert 'href="/admin/tonight/transcription?night=2"' in body
+    # Night picker chips removed 2026-05-04 PM (operator UX: nights only
+    # reachable via pipeline-level view); breadcrumb is the way back.
+    assert 'href="/admin/tonight/transcription?night=2"' not in body
 
 
 def test_transcription_drilldown_invalid_night_falls_back(client: TestClient):

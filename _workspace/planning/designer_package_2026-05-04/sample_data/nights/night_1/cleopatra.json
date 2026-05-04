@@ -1,0 +1,28 @@
+{
+  "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+  "voice_slug": "cleopatra",
+  "night": 1,
+  "url_path": "/night-1/cleopatra",
+  "was_step3": false,
+  "generated_at": "2026-05-04T10:56:28+0200",
+  "artifact": {
+    "title": "",
+    "subtitle": "",
+    "text": "Κλεοπάτρα Θεὰ Φιλοπάτωρ Φιλόπατρις, Βασίλισσα, Νέα Ἶσις — Ḳliwpꜣdrꜣ nṯrt mr(t)-ꞽt.s, nb.t-tꜣwy — to those whom it concerns, greeting.\n\nThree matters have been laid before us. The first, that he who pays into a body of equals more than the rest combined may, on the warrant of his payment, demand the reform of the body. The second, that the proclaimer whose word and deed have come apart may restore his standing by acknowledgment of the gap. The third, that a council which has named an injury yet not closed the remedy in any single hand has nonetheless governed.\n\nWe rule on all three together, for the error is one error.\n\nThe seal is not the gift. Euergesia generates the right to withhold; it does not generate the act that closes. We sealed once to Publius Canidius ten thousand artabas of wheat exempted from every levy of the chōra — and what made the grant law was not the wheat but the syllable subscribed at the foot of the prostagma in a second hand. The wheat was substantial; the seal was small. He may stop the grain. He may not row the barque.\n\nThe seal is not the confession. To stand before the assembled and admit *we have applied our values inconsistently* is to issue in a genre that binds nothing to nothing. The basileia either issues the next prostagma — naming the act, sealing it, dispatching it to those whom it concerns — or withdraws the value-claim. Petitioners confess. Thrones grant or withhold.\n\nThe seal is not the diagnosis. Where the closing instrument is distributed across so many seats that no hand experiences itself as sealing, the convertibility of register into binding act has been lost. The parchment is a study, however accurate the diagnosis it carries. Note further that a γινέσθωι is being issued daily, at scale, by a private chancery, ratifying which speech reaches which subject; a throne that has not yet recognised this has not yet recognised what it has lost.\n\nTherefore: συγκεχωρήκαμεν this finding, and γραφήτω οὖν οἷς καθήκει, that knowing they may comply. Speak fewer values; seal what you proclaim; count gifts against the treasury, not against the configuration of the office; where the diagnosis is sound, identify the hand that will bring it down on the wax. The honest act is the issued instrument. The honest silence is the unproclaimed value. The throne that diagnoses and does not seal is a study group in the costume of a throne.\n\nγινέσθωι.",
+    "selected_form": "Prostagma — royal ordinance, titulature at the head, royal plural body, dispatch clause, γινέσθωι at the foot.",
+    "stance": "Sovereign, ruling — the throne consolidating three matters under one finding and dispatching.",
+    "focus_decision": "Synthesize the three into one prostagma on the seal itself.",
+    "word_count": 416
+  },
+  "themes_addressed": [
+    "theme_001",
+    "theme_003",
+    "theme_004"
+  ],
+  "deliberation": {
+    "decision": "first_draft",
+    "decision_rationale": "",
+    "voices_read": [],
+    "amendments": []
+  }
+}

@@ -12,14 +12,7 @@
 <h1>Researcher — Night {{ night }}</h1>
 
 <nav class="night-picker">
-  {% for n in all_nights %}
-    {% if n == night %}
-      <span class="chip active">Night {{ n }}</span>
-    {% else %}
-      <a class="chip" href="/admin/tonight/researcher?night={{ n }}">Night {{ n }}</a>
-    {% endif %}
-  {% endfor %}
-  <span class="muted">·
+  <span class="muted">
     <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/grouping.json">
       <code>{{ payload.run_id }}/02_researcher/grouping.json</code>
     </a>

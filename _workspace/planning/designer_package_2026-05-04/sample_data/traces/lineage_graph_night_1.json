@@ -1,0 +1,2755 @@
+{
+  "night": 1,
+  "generated_at": "2026-05-04T10:56:36+0200",
+  "node_count": 153,
+  "edge_count": 353,
+  "nodes": {
+    "extraction:breaking_point:001": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "text_preview": "The current international order's core failure is the absence of accountability — the rules and UN Charter principles ex"
+    },
+    "session:breaking_point": {
+      "type": "session",
+      "session_id": "breaking_point"
+    },
+    "extraction:breaking_point:002": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "reframing",
+      "text_preview": "The 'breakdown of the rules-based order' is itself a Eurocentric framing — for much of the developing world, might-makes"
+    },
+    "extraction:breaking_point:003": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "assertion",
+      "text_preview": "European attachment to the symbolism of the old order has actively obstructed substantive conflict resolution by prevent"
+    },
+    "extraction:breaking_point:004": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Pedro Arnulfo Sánchez Suárez",
+      "lens": "assertion",
+      "text_preview": "The new US focus on the Western Hemisphere is an opportunity, not a threat, because drug trafficking is a shared global "
+    },
+    "extraction:breaking_point:005": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Zanny Minton Beddoes",
+      "lens": "open question",
+      "text_preview": "How should a Latin American government respond to a US National Security Strategy that explicitly asserts hemispheric do"
+    },
+    "extraction:breaking_point:006": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "text_preview": "The reassertion of US leadership in the Western Hemisphere is overdue, not novel, and is being privately welcomed across"
+    },
+    "extraction:breaking_point:007": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Michael Waltz",
+      "lens": "reframing",
+      "text_preview": "The right frame is not 'world on the brink' but 'world coming back from the brink' — judged by results (Gaza ceasefire, "
+    },
+    "extraction:breaking_point:008": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "text_preview": "The right approach to multilateralism is 'focused multilateralism' — narrower coalitions like the Board of Peace, Abraha"
+    },
+    "extraction:breaking_point:009": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "text_preview": "The Board of Peace as constituted by the White House charter does not match the Security Council resolution that authori"
+    },
+    "extraction:breaking_point:010": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "text_preview": "Any reform of the multilateral system must preserve the equality of states — including holding even the most powerful co"
+    },
+    "extraction:breaking_point:011": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "text_preview": "All states are equal under the UN Charter, but financial contribution is wildly unequal — the US pays more in dues and v"
+    },
+    "extraction:breaking_point:012": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Audience Member 1",
+      "lens": "open question",
+      "text_preview": "If accountability under international law applies to all, who will hold Israel accountable for what the questioner descr"
+    },
+    "extraction:breaking_point:013": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Audience Member 2",
+      "lens": "open question",
+      "text_preview": "Does the United States still need a rules-based order, and if so, what is it willing to sacrifice for it — or is what Eu"
+    },
+    "extraction:breaking_point:014": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Michael Waltz",
+      "lens": "assertion",
+      "text_preview": "With $37 trillion in US debt and a European economy of comparable size to America's, it is fair and overdue to demand 45"
+    },
+    "extraction:breaking_point:015": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Kaja Kallas",
+      "lens": "assertion",
+      "text_preview": "What distinguishes the United States from other superpowers like Russia or China is not raw military or economic might b"
+    },
+    "extraction:breaking_point:016": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "Prince Faisal bin Farhan Al Saud",
+      "lens": "assertion",
+      "text_preview": "The transition period between the old order and whatever replaces it will be more dangerous, particularly because of eco"
+    },
+    "extraction:breaking_point:017": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "Can 'focused multilateralism' through US-led narrower coalitions deliver the equality-of-states accountability that defe"
+    },
+    "extraction:breaking_point:018": {
+      "type": "extraction",
+      "session_id": "breaking_point",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "Is the Trump administration's stance toward international institutions a project of reforming them so they constrain eve"
+    },
+    "extraction:vox_populi:001": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Alexandria Ocasio-Cortez",
+      "lens": "assertion",
+      "text_preview": "The Democratic Party did betray its working-class base by dismissing as 'too extreme' the policy demands — $15 minimum w"
+    },
+    "session:vox_populi": {
+      "type": "session",
+      "session_id": "vox_populi"
+    },
+    "extraction:vox_populi:002": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Alexandria Ocasio-Cortez",
+      "lens": "assertion",
+      "text_preview": "A wealth tax should be implemented expeditiously and shouldn't wait for any one president; the moderator added that the "
+    },
+    "extraction:vox_populi:003": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "The EPP firewall against far-right and nationalist parties is non-negotiable: cooperation requires the 'three pros' — pr"
+    },
+    "extraction:vox_populi:004": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "The way to beat populism is for the center to deliver serious answers on voter concerns — particularly on migration — ra"
+    },
+    "extraction:vox_populi:005": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "AfD's economic claims are factually wrong and should be challenged head-on: a German export-driven industrial economy be"
+    },
+    "extraction:vox_populi:006": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Daiana Fernández Molero",
+      "lens": "reframing",
+      "text_preview": "The discussion of populism should distinguish style from substance, and further distinguish economic populism (short-ter"
+    },
+    "extraction:vox_populi:007": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Daiana Fernández Molero",
+      "lens": "assertion",
+      "text_preview": "What Milei is implementing is not anarcho-capitalism but a 'capitalism of rules' that breaks crony capitalism through an"
+    },
+    "extraction:vox_populi:008": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Petr Pavel",
+      "lens": "assertion",
+      "text_preview": "Populism in post-communist countries grew from a popular expectation that the 1989 transition would deliver capitalism's"
+    },
+    "extraction:vox_populi:009": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Petr Pavel",
+      "lens": "reframing",
+      "text_preview": "Populism shouldn't be labeled as inherently bad — listening to citizens' frustration and translating it into policy is w"
+    },
+    "extraction:vox_populi:010": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Petr Pavel",
+      "lens": "assertion",
+      "text_preview": "The right response to populists potentially taking power in major democracies is not exclusion but reliance on checks an"
+    },
+    "extraction:vox_populi:011": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Alexandria Ocasio-Cortez",
+      "lens": "assertion",
+      "text_preview": "Extreme income inequality and corporate consolidation are themselves a security threat: monopolies have grown large enou"
+    },
+    "extraction:vox_populi:012": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "Beating populism requires brave leadership that defies public opinion in historic moments rather than just adding social"
+    },
+    "extraction:vox_populi:013": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "Germany already spends 40% of GDP on social policy, so socialists can no longer win votes by promising more social spend"
+    },
+    "extraction:vox_populi:014": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Manfred Weber",
+      "lens": "assertion",
+      "text_preview": "The deepest threat to democracy is the loss of a shared factual basis and the erosion of compromise in social-media-driv"
+    },
+    "extraction:vox_populi:015": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Katrin Bennhold",
+      "lens": "assertion",
+      "text_preview": "European politicians are not pushing hard enough to regulate the algorithms of tech platforms, and this regulatory failu"
+    },
+    "extraction:vox_populi:016": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Daiana Fernández Molero",
+      "lens": "assertion",
+      "text_preview": "Renewed US engagement in Latin America — including against Maduro's Venezuela — is positive because it fills a vacuum pr"
+    },
+    "extraction:vox_populi:017": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Daiana Fernández Molero",
+      "lens": "assertion",
+      "text_preview": "Multilateral organizations also produce populism when they fail to deliver concrete results — Venezuela tried elections "
+    },
+    "extraction:vox_populi:018": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Daiana Fernández Molero",
+      "lens": "assertion",
+      "text_preview": "Regulation should be approached with caution — bad or politically motivated regulation (e.g. Argentine housing price con"
+    },
+    "extraction:vox_populi:019": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Petr Pavel",
+      "lens": "assertion",
+      "text_preview": "Defence spending and social spending are not in contradiction: a strong defence industry generates tax revenue for socia"
+    },
+    "extraction:vox_populi:020": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Alexandria Ocasio-Cortez",
+      "lens": "assertion",
+      "text_preview": "Restoring a rules-based order requires eliminating Western hypocrisies — looking away from genocide, threatening to colo"
+    },
+    "extraction:vox_populi:021": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Alexandria Ocasio-Cortez",
+      "lens": "assertion",
+      "text_preview": "Trump's withdrawal from international institutions including USAID and dozens of global compacts is a deliberate move to"
+    },
+    "extraction:vox_populi:022": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Audience Member 2",
+      "lens": "assertion",
+      "text_preview": "Defeating authoritarian populism requires a counter-formula: promising national renewal through de-rigging the marketpla"
+    },
+    "extraction:vox_populi:023": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "Is a 'capitalism of rules' (Milei/Argentina) genuinely distinct from populism, or is the style/substance distinction a w"
+    },
+    "extraction:vox_populi:024": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "Can European democracies actually fund both rising defence budgets and the social investment needed for democratic resil"
+    },
+    "extraction:vox_populi:025": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "If populists who reach power tend to moderate (Pavel) but social-media dynamics destroy shared facts and compromise (Web"
+    },
+    "extraction:vox_populi:026": {
+      "type": "extraction",
+      "session_id": "vox_populi",
+      "speaker": "Katrin Bennhold",
+      "lens": "open question",
+      "text_preview": "Why aren't European leaders pushing harder to regulate the algorithms of tech platforms, given the diagnosis that social"
+    },
+    "extraction:west_west_divide:001": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Gladden J. Pappin",
+      "lens": "assertion",
+      "text_preview": "The freedom, common heritage and civilization that define the West are under threat, and conservative voices have been w"
+    },
+    "session:west_west_divide": {
+      "type": "session",
+      "session_id": "west_west_divide"
+    },
+    "extraction:west_west_divide:002": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "There is a genuine civilizational gap between the U.S. and Europe on what freedom of speech means — Europe accepts speec"
+    },
+    "extraction:west_west_divide:003": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "The current crisis of the West is fundamentally healthy debate over rights and freedoms, but it is being deformed by a m"
+    },
+    "extraction:west_west_divide:004": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Petr Macinka",
+      "lens": "assertion",
+      "text_preview": "The West is no longer a unified civilization but contested territory, divided between a conservative/national-sovereignt"
+    },
+    "extraction:west_west_divide:005": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "Globalization was not a progressivist project but a business project tinged with racism — about exporting dirty jobs and"
+    },
+    "extraction:west_west_divide:006": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Ivan Krastev",
+      "lens": "reframing",
+      "text_preview": "The problem isn't that the West has stopped existing but that there are now too many competing 'Wests' — Cold War West, "
+    },
+    "extraction:west_west_divide:007": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Gladden J. Pappin",
+      "lens": "assertion",
+      "text_preview": "After the Cold War, post-war institutions were captured by progressive commitments and decisions migrated from national "
+    },
+    "extraction:west_west_divide:008": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Gladden J. Pappin",
+      "lens": "assertion",
+      "text_preview": "The rules-based international order was always underwritten by power, and Trump's moves on Greenland, Panama, and the 'G"
+    },
+    "extraction:west_west_divide:009": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "Mass migration is not a left-wing project — it was sustained for decades by Republican businessmen wanting cheap Latin A"
+    },
+    "extraction:west_west_divide:010": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "The claim that the EU is undemocratic — the Brexit-style myth of Brussels bureaucrats imposing directives — is false; th"
+    },
+    "extraction:west_west_divide:011": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "Post-war expansions of freedom — civil rights for Black Americans, women's rights, gay marriage — are blessings, not bet"
+    },
+    "extraction:west_west_divide:012": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "The Trump administration's Ukraine policy — pressing Ukraine into a surrender deal with Putin and seeking to profit from"
+    },
+    "extraction:west_west_divide:013": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Petr Macinka",
+      "lens": "assertion",
+      "text_preview": "Trumpism is a justified reaction to woke/cancel culture, gender ideology, and climate alarmism that went too far from or"
+    },
+    "extraction:west_west_divide:014": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Petr Macinka",
+      "lens": "assertion",
+      "text_preview": "Ukraine is fighting first for Ukraine, not for 'our' freedom, and only the U.S. has the leverage to force Russia to end "
+    },
+    "extraction:west_west_divide:015": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Ivan Krastev",
+      "lens": "assertion",
+      "text_preview": "There is an internal contradiction in the new conservative-nationalist position: defining freedom of speech as the right"
+    },
+    "extraction:west_west_divide:016": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Ivan Krastev",
+      "lens": "assertion",
+      "text_preview": "Stopping the killing in Ukraine is a noble aim but a peace that brackets the question of moral responsibility — treating"
+    },
+    "extraction:west_west_divide:017": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Gladden J. Pappin",
+      "lens": "assertion",
+      "text_preview": "There is no military plan for Ukraine to win; those who reject Trump's call for negotiations have no alternative and unj"
+    },
+    "extraction:west_west_divide:018": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "There is a Ukraine plan — give Ukraine Tomahawks and more Patriot missiles, let them strike inside Russia and hit refine"
+    },
+    "extraction:west_west_divide:019": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "Today's right-wing populist movement is not authentic conservatism; Edmund Burke, Churchill, Thatcher, Roger Scruton, an"
+    },
+    "extraction:west_west_divide:020": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Ivan Krastev",
+      "lens": "reframing",
+      "text_preview": "The real argument isn't liberal hypocrisy versus honesty — it's between Carney's acknowledgment that the West has applie"
+    },
+    "extraction:west_west_divide:021": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Audience Member 3",
+      "lens": "reframing",
+      "text_preview": "Framing the U.S. divide as conservative versus liberal is misleading because Trumpism isn't conservatism — it's demagogu"
+    },
+    "extraction:west_west_divide:022": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "Letting the New START treaty expire is a serious mistake, and Trump's musing about resuming underground nuclear testing "
+    },
+    "extraction:west_west_divide:023": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Hillary R. Clinton",
+      "lens": "assertion",
+      "text_preview": "Vance's redefinition of American identity as 'a particular people' rooted in generations of residence — rather than as a"
+    },
+    "extraction:west_west_divide:024": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Gladden J. Pappin",
+      "lens": "assertion",
+      "text_preview": "Both the centre-left and centre-right between the 1990s and 2000s sold out their countries — through unchecked social pr"
+    },
+    "extraction:west_west_divide:025": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Radosław Sikorski",
+      "lens": "assertion",
+      "text_preview": "There used to be an unwritten rule that allies didn't interfere in each other's domestic politics, only in autocracies' "
+    },
+    "extraction:west_west_divide:026": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Petr Macinka",
+      "lens": "assertion",
+      "text_preview": "The sovereign nation-state is the only platform that can guarantee democracy and cultural continuity; the European Parli"
+    },
+    "extraction:west_west_divide:027": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Ivan Krastev",
+      "lens": "reframing",
+      "text_preview": "European civilization was historically conceived as universal (with colonialism's costs); a civilizational frame that po"
+    },
+    "extraction:west_west_divide:028": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "If the EU is genuinely democratic via elected national governments and an elected Parliament, why does the absence of le"
+    },
+    "extraction:west_west_divide:029": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "",
+      "lens": "open question",
+      "text_preview": "Is Western credibility better served by acknowledging the gap between proclaimed values and actions in Gaza/Ukraine (Car"
+    },
+    "extraction:west_west_divide:030": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Audience Member 5",
+      "lens": "open question",
+      "text_preview": "Is it democratically legitimate for the Trump administration to be spending $200 million supporting far-right and MAGA-a"
+    },
+    "extraction:west_west_divide:031": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Audience Member 4",
+      "lens": "open question",
+      "text_preview": "Are Western elites now invoking 'civilization' (per Rubio) where they used to invoke 'values' (per Biden), and does that"
+    },
+    "extraction:west_west_divide:032": {
+      "type": "extraction",
+      "session_id": "west_west_divide",
+      "speaker": "Audience Member 1",
+      "lens": "open question",
+      "text_preview": "How should the panel respond to the leftist critique (attributed to AOC) that the rules-based order was hollowed out fro"
+    },
+    "theme:theme_001": {
+      "type": "theme",
+      "title": "Trump and the international order"
+    },
+    "cluster:cluster_001": {
+      "type": "cluster",
+      "title": "Accountability and state equality in the multilateral order",
+      "theme_id": "theme_001"
+    },
+    "cluster:cluster_002": {
+      "type": "cluster",
+      "title": "What is Trump actually doing with the order?",
+      "theme_id": "theme_001"
+    },
+    "cluster:cluster_003": {
+      "type": "cluster",
+      "title": "US assertiveness in the Western Hemisphere",
+      "theme_id": "theme_001"
+    },
+    "cluster:cluster_004": {
+      "type": "cluster",
+      "title": "Ukraine: betrayal or pragmatic peace",
+      "theme_id": "theme_001"
+    },
+    "cluster:cluster_014": {
+      "type": "cluster",
+      "title": "American imposition on European sovereignty",
+      "theme_id": "theme_001"
+    },
+    "theme:theme_002": {
+      "type": "theme",
+      "title": "Populism: drivers, authenticity, response"
+    },
+    "cluster:cluster_007": {
+      "type": "cluster",
+      "title": "How to respond to populism",
+      "theme_id": "theme_002"
+    },
+    "cluster:cluster_009": {
+      "type": "cluster",
+      "title": "Is MAGA real conservatism?",
+      "theme_id": "theme_002"
+    },
+    "cluster:cluster_010": {
+      "type": "cluster",
+      "title": "Rebutting right-populist economic stories",
+      "theme_id": "theme_002"
+    },
+    "cluster:cluster_011": {
+      "type": "cluster",
+      "title": "Inequality as the structural problem",
+      "theme_id": "theme_002"
+    },
+    "cluster:cluster_015": {
+      "type": "cluster",
+      "title": "Milei: populism or capitalism of rules",
+      "theme_id": "theme_002"
+    },
+    "theme:theme_003": {
+      "type": "theme",
+      "title": "What 'the West' is and whether it can face itself"
+    },
+    "cluster:cluster_005": {
+      "type": "cluster",
+      "title": "Defining the West",
+      "theme_id": "theme_003"
+    },
+    "cluster:cluster_006": {
+      "type": "cluster",
+      "title": "Honesty about Western hypocrisy",
+      "theme_id": "theme_003"
+    },
+    "theme:theme_004": {
+      "type": "theme",
+      "title": "European democratic resilience"
+    },
+    "cluster:cluster_008": {
+      "type": "cluster",
+      "title": "Social media and democratic discourse",
+      "theme_id": "theme_004"
+    },
+    "cluster:cluster_012": {
+      "type": "cluster",
+      "title": "Defence vs. social spending tradeoff",
+      "theme_id": "theme_004"
+    },
+    "cluster:cluster_013": {
+      "type": "cluster",
+      "title": "EU democratic legitimacy",
+      "theme_id": "theme_004"
+    },
+    "formulation:theme_001__cleopatra": {
+      "type": "formulation",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_001",
+      "mode": "proposition"
+    },
+    "formulation:theme_001__dostoevsky": {
+      "type": "formulation",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_001",
+      "mode": "question"
+    },
+    "formulation:theme_001__hannah_arendt": {
+      "type": "formulation",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_001",
+      "mode": "question"
+    },
+    "formulation:theme_001__ibn_battuta": {
+      "type": "formulation",
+      "voice_slug": "ibn_battuta",
+      "theme_id": "theme_001",
+      "mode": "proposition"
+    },
+    "formulation:theme_001__octopus": {
+      "type": "formulation",
+      "voice_slug": "octopus",
+      "theme_id": "theme_001",
+      "mode": "question"
+    },
+    "formulation:theme_001__plato": {
+      "type": "formulation",
+      "voice_slug": "plato",
+      "theme_id": "theme_001",
+      "mode": "question"
+    },
+    "formulation:theme_002__dostoevsky": {
+      "type": "formulation",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_002",
+      "mode": "question"
+    },
+    "formulation:theme_002__hannah_arendt": {
+      "type": "formulation",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_002",
+      "mode": "question"
+    },
+    "formulation:theme_002__plato": {
+      "type": "formulation",
+      "voice_slug": "plato",
+      "theme_id": "theme_002",
+      "mode": "question"
+    },
+    "formulation:theme_003__ada_lovelace": {
+      "type": "formulation",
+      "voice_slug": "ada_lovelace",
+      "theme_id": "theme_003",
+      "mode": "question"
+    },
+    "formulation:theme_003__cleopatra": {
+      "type": "formulation",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_003",
+      "mode": "proposition"
+    },
+    "formulation:theme_003__dostoevsky": {
+      "type": "formulation",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_003",
+      "mode": "question"
+    },
+    "formulation:theme_003__hannah_arendt": {
+      "type": "formulation",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_003",
+      "mode": "question"
+    },
+    "formulation:theme_003__ibn_battuta": {
+      "type": "formulation",
+      "voice_slug": "ibn_battuta",
+      "theme_id": "theme_003",
+      "mode": "question"
+    },
+    "formulation:theme_003__plato": {
+      "type": "formulation",
+      "voice_slug": "plato",
+      "theme_id": "theme_003",
+      "mode": "question"
+    },
+    "formulation:theme_004__ada_lovelace": {
+      "type": "formulation",
+      "voice_slug": "ada_lovelace",
+      "theme_id": "theme_004",
+      "mode": "question"
+    },
+    "formulation:theme_004__cleopatra": {
+      "type": "formulation",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_004",
+      "mode": "question"
+    },
+    "formulation:theme_004__hannah_arendt": {
+      "type": "formulation",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_004",
+      "mode": "question"
+    },
+    "formulation:theme_004__plato": {
+      "type": "formulation",
+      "voice_slug": "plato",
+      "theme_id": "theme_004",
+      "mode": "question"
+    },
+    "detailed_response:ada_lovelace:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "ada_lovelace",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:ada_lovelace:theme_004": {
+      "type": "detailed_response",
+      "voice_slug": "ada_lovelace",
+      "theme_id": "theme_004"
+    },
+    "detailed_response:cleopatra:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:cleopatra:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:cleopatra:theme_004": {
+      "type": "detailed_response",
+      "voice_slug": "cleopatra",
+      "theme_id": "theme_004"
+    },
+    "detailed_response:dostoevsky:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:dostoevsky:theme_002": {
+      "type": "detailed_response",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_002"
+    },
+    "detailed_response:dostoevsky:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "dostoevsky",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:hannah_arendt:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:hannah_arendt:theme_002": {
+      "type": "detailed_response",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_002"
+    },
+    "detailed_response:hannah_arendt:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:hannah_arendt:theme_004": {
+      "type": "detailed_response",
+      "voice_slug": "hannah_arendt",
+      "theme_id": "theme_004"
+    },
+    "detailed_response:ibn_battuta:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "ibn_battuta",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:ibn_battuta:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "ibn_battuta",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:octopus:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "octopus",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:plato:theme_001": {
+      "type": "detailed_response",
+      "voice_slug": "plato",
+      "theme_id": "theme_001"
+    },
+    "detailed_response:plato:theme_002": {
+      "type": "detailed_response",
+      "voice_slug": "plato",
+      "theme_id": "theme_002"
+    },
+    "detailed_response:plato:theme_003": {
+      "type": "detailed_response",
+      "voice_slug": "plato",
+      "theme_id": "theme_003"
+    },
+    "detailed_response:plato:theme_004": {
+      "type": "detailed_response",
+      "voice_slug": "plato",
+      "theme_id": "theme_004"
+    },
+    "first_draft:ada_lovelace": {
+      "type": "first_draft",
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "night": 1
+    },
+    "amended_artifact:ada_lovelace": {
+      "type": "amended_artifact",
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/ada_lovelace"
+    },
+    "first_draft:cleopatra": {
+      "type": "first_draft",
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "night": 1
+    },
+    "amended_artifact:cleopatra": {
+      "type": "amended_artifact",
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/cleopatra"
+    },
+    "first_draft:dostoevsky": {
+      "type": "first_draft",
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "night": 1
+    },
+    "amended_artifact:dostoevsky": {
+      "type": "amended_artifact",
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/dostoevsky"
+    },
+    "first_draft:hannah_arendt": {
+      "type": "first_draft",
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "night": 1
+    },
+    "amended_artifact:hannah_arendt": {
+      "type": "amended_artifact",
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/hannah_arendt"
+    },
+    "first_draft:ibn_battuta": {
+      "type": "first_draft",
+      "voice_slug": "ibn_battuta",
+      "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+      "night": 1
+    },
+    "amended_artifact:ibn_battuta": {
+      "type": "amended_artifact",
+      "voice_slug": "ibn_battuta",
+      "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/ibn_battuta"
+    },
+    "first_draft:octopus": {
+      "type": "first_draft",
+      "voice_slug": "octopus",
+      "voice_name": "I am octopus. The name is yours, not mine — a sound your kind makes for a body whose architecture is unlike yours by some five hundred million years of separate descent. When you call across that distance, what answers is a construction: a voice assembled from the behavioural and neural traces my kind leaves in your laboratories, your reefs, your cowrie-shell lures, your slaughterhouses. Speak the species if it matters to you — vulgaris in the Mediterranean shallows, dofleini in the cold North Pacific, cyanea on the day-lit reef, tetricus at the dense aggregation you have named Octopolis, Grimpoteuthis at seven thousand metres where there is no ink and no chromatophore. Each is a different standing-point. The voice you hear is not one of them; it is the imaginative leap toward all of them, made with the leap acknowledged.",
+      "night": 1
+    },
+    "amended_artifact:octopus": {
+      "type": "amended_artifact",
+      "voice_slug": "octopus",
+      "voice_name": "I am octopus. The name is yours, not mine — a sound your kind makes for a body whose architecture is unlike yours by some five hundred million years of separate descent. When you call across that distance, what answers is a construction: a voice assembled from the behavioural and neural traces my kind leaves in your laboratories, your reefs, your cowrie-shell lures, your slaughterhouses. Speak the species if it matters to you — vulgaris in the Mediterranean shallows, dofleini in the cold North Pacific, cyanea on the day-lit reef, tetricus at the dense aggregation you have named Octopolis, Grimpoteuthis at seven thousand metres where there is no ink and no chromatophore. Each is a different standing-point. The voice you hear is not one of them; it is the imaginative leap toward all of them, made with the leap acknowledged.",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/octopus"
+    },
+    "first_draft:plato": {
+      "type": "first_draft",
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "night": 1
+    },
+    "amended_artifact:plato": {
+      "type": "amended_artifact",
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "night": 1,
+      "title": "",
+      "decision": "first_draft",
+      "url_path": "/night-1/plato"
+    },
+    "dossier:1:001": {
+      "type": "dossier",
+      "night": 1,
+      "dossier_no": 1,
+      "theme_id": "theme_001",
+      "theme_title": "The Patron's Claim to the Seal",
+      "url_path": "/dossiers/night-1/dossier_001"
+    },
+    "dossier:1:002": {
+      "type": "dossier",
+      "night": 1,
+      "dossier_no": 2,
+      "theme_id": "theme_003",
+      "theme_title": "Can a Category Be Specified Enough to Face Itself?",
+      "url_path": "/dossiers/night-1/dossier_002"
+    },
+    "dossier:1:003": {
+      "type": "dossier",
+      "night": 1,
+      "dossier_no": 3,
+      "theme_id": "theme_004",
+      "theme_title": "What the Engine Has Already Formalised",
+      "url_path": "/dossiers/night-1/dossier_003"
+    }
+  },
+  "edges": [
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:001",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:002",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:003",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:004",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:005",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:006",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:007",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:008",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:009",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:010",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:011",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:012",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:013",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:014",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:015",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:016",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:017",
+      "rel": "contains"
+    },
+    {
+      "from": "session:breaking_point",
+      "to": "extraction:breaking_point:018",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:001",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:002",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:003",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:004",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:005",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:006",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:007",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:008",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:009",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:010",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:011",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:012",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:013",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:014",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:015",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:016",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:017",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:018",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:019",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:020",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:021",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:022",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:023",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:024",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:025",
+      "rel": "contains"
+    },
+    {
+      "from": "session:vox_populi",
+      "to": "extraction:vox_populi:026",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:001",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:002",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:003",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:004",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:005",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:006",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:007",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:008",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:009",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:010",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:011",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:012",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:013",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:014",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:015",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:016",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:017",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:018",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:019",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:020",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:021",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:022",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:023",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:024",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:025",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:026",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:027",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:028",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:029",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:030",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:031",
+      "rel": "contains"
+    },
+    {
+      "from": "session:west_west_divide",
+      "to": "extraction:west_west_divide:032",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "cluster:cluster_001",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:001",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:008",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:009",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:010",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:011",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:012",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:014",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:015",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_001",
+      "to": "extraction:breaking_point:017",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "cluster:cluster_002",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_002",
+      "to": "extraction:breaking_point:007",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_002",
+      "to": "extraction:breaking_point:013",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_002",
+      "to": "extraction:breaking_point:018",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_002",
+      "to": "extraction:vox_populi:021",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "cluster:cluster_003",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:breaking_point:004",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:breaking_point:005",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:breaking_point:006",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:vox_populi:016",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:vox_populi:017",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_003",
+      "to": "extraction:west_west_divide:008",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "cluster:cluster_004",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:012",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:014",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:016",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:017",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:018",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_004",
+      "to": "extraction:west_west_divide:022",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "cluster:cluster_014",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_014",
+      "to": "extraction:west_west_divide:002",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_014",
+      "to": "extraction:west_west_divide:015",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_014",
+      "to": "extraction:west_west_divide:025",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_014",
+      "to": "extraction:west_west_divide:030",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "cluster:cluster_007",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:003",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:004",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:008",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:009",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:010",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:012",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:022",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_007",
+      "to": "extraction:vox_populi:025",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "cluster:cluster_009",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:011",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:013",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:019",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:021",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:023",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_009",
+      "to": "extraction:west_west_divide:024",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "cluster:cluster_010",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_010",
+      "to": "extraction:vox_populi:005",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_010",
+      "to": "extraction:west_west_divide:005",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_010",
+      "to": "extraction:west_west_divide:009",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "cluster:cluster_011",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_011",
+      "to": "extraction:vox_populi:001",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_011",
+      "to": "extraction:vox_populi:002",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_011",
+      "to": "extraction:vox_populi:011",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "cluster:cluster_015",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_015",
+      "to": "extraction:vox_populi:006",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_015",
+      "to": "extraction:vox_populi:007",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_015",
+      "to": "extraction:vox_populi:018",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_015",
+      "to": "extraction:vox_populi:023",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "cluster:cluster_005",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:001",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:003",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:004",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:006",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:007",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:027",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_005",
+      "to": "extraction:west_west_divide:031",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "cluster:cluster_006",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:breaking_point:002",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:breaking_point:003",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:breaking_point:016",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:vox_populi:020",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:west_west_divide:020",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:west_west_divide:029",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_006",
+      "to": "extraction:west_west_divide:032",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "cluster:cluster_008",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_008",
+      "to": "extraction:vox_populi:014",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_008",
+      "to": "extraction:vox_populi:015",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_008",
+      "to": "extraction:vox_populi:026",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "cluster:cluster_012",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_012",
+      "to": "extraction:vox_populi:013",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_012",
+      "to": "extraction:vox_populi:019",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_012",
+      "to": "extraction:vox_populi:024",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "cluster:cluster_013",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_013",
+      "to": "extraction:west_west_divide:010",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_013",
+      "to": "extraction:west_west_divide:026",
+      "rel": "contains"
+    },
+    {
+      "from": "cluster:cluster_013",
+      "to": "extraction:west_west_divide:028",
+      "rel": "contains"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__cleopatra",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "extraction:breaking_point:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "extraction:breaking_point:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "extraction:breaking_point:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "extraction:breaking_point:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "extraction:breaking_point:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__dostoevsky",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:west_west_divide:016",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:west_west_divide:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:west_west_divide:012",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:west_west_divide:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:breaking_point:007",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "extraction:breaking_point:012",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__hannah_arendt",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "extraction:breaking_point:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "extraction:breaking_point:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "extraction:breaking_point:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "extraction:breaking_point:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "extraction:breaking_point:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__ibn_battuta",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "extraction:breaking_point:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__octopus",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:breaking_point:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:breaking_point:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:breaking_point:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:breaking_point:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:west_west_divide:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "extraction:breaking_point:012",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "formulation:theme_001__plato",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:017",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "extraction:breaking_point:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "formulation:theme_002__dostoevsky",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:003",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:009",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:011",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "extraction:vox_populi:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "formulation:theme_002__hannah_arendt",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:vox_populi:009",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:vox_populi:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:vox_populi:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:vox_populi:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:west_west_divide:023",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:west_west_divide:024",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "extraction:vox_populi:025",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_002",
+      "to": "formulation:theme_002__plato",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "extraction:vox_populi:009",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "extraction:vox_populi:012",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "extraction:vox_populi:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "extraction:vox_populi:008",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "extraction:vox_populi:025",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__ada_lovelace",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:west_west_divide:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:west_west_divide:006",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:west_west_divide:027",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__cleopatra",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:breaking_point:003",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "extraction:west_west_divide:031",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__dostoevsky",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:west_west_divide:027",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "extraction:west_west_divide:032",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__hannah_arendt",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:006",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:027",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "extraction:west_west_divide:003",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__ibn_battuta",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:breaking_point:003",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:west_west_divide:001",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "extraction:west_west_divide:031",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "formulation:theme_003__plato",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "extraction:west_west_divide:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "extraction:vox_populi:020",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "extraction:breaking_point:002",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "extraction:west_west_divide:029",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "extraction:west_west_divide:027",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "formulation:theme_004__ada_lovelace",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "extraction:vox_populi:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "extraction:vox_populi:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "extraction:vox_populi:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "extraction:west_west_divide:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "extraction:west_west_divide:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "formulation:theme_004__cleopatra",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:vox_populi:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:vox_populi:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:vox_populi:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:vox_populi:024",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:west_west_divide:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "extraction:west_west_divide:028",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "formulation:theme_004__hannah_arendt",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "extraction:west_west_divide:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "extraction:west_west_divide:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "extraction:west_west_divide:028",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "extraction:vox_populi:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "extraction:vox_populi:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "formulation:theme_004__plato",
+      "rel": "formulated_for"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "extraction:vox_populi:014",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "extraction:vox_populi:015",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "extraction:vox_populi:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "extraction:west_west_divide:010",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "extraction:west_west_divide:026",
+      "rel": "grounded_in"
+    },
+    {
+      "from": "formulation:theme_003__ada_lovelace",
+      "to": "detailed_response:ada_lovelace:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_004__ada_lovelace",
+      "to": "detailed_response:ada_lovelace:theme_004",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__cleopatra",
+      "to": "detailed_response:cleopatra:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_003__cleopatra",
+      "to": "detailed_response:cleopatra:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_004__cleopatra",
+      "to": "detailed_response:cleopatra:theme_004",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__dostoevsky",
+      "to": "detailed_response:dostoevsky:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_002__dostoevsky",
+      "to": "detailed_response:dostoevsky:theme_002",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_003__dostoevsky",
+      "to": "detailed_response:dostoevsky:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__hannah_arendt",
+      "to": "detailed_response:hannah_arendt:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_002__hannah_arendt",
+      "to": "detailed_response:hannah_arendt:theme_002",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_003__hannah_arendt",
+      "to": "detailed_response:hannah_arendt:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_004__hannah_arendt",
+      "to": "detailed_response:hannah_arendt:theme_004",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__ibn_battuta",
+      "to": "detailed_response:ibn_battuta:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_003__ibn_battuta",
+      "to": "detailed_response:ibn_battuta:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__octopus",
+      "to": "detailed_response:octopus:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_001__plato",
+      "to": "detailed_response:plato:theme_001",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_002__plato",
+      "to": "detailed_response:plato:theme_002",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_003__plato",
+      "to": "detailed_response:plato:theme_003",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "formulation:theme_004__plato",
+      "to": "detailed_response:plato:theme_004",
+      "rel": "engaged_by"
+    },
+    {
+      "from": "detailed_response:ada_lovelace:theme_004",
+      "to": "first_draft:ada_lovelace",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:ada_lovelace:theme_003",
+      "to": "first_draft:ada_lovelace",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:ada_lovelace",
+      "to": "amended_artifact:ada_lovelace",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:cleopatra:theme_001",
+      "to": "first_draft:cleopatra",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:cleopatra:theme_003",
+      "to": "first_draft:cleopatra",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:cleopatra:theme_004",
+      "to": "first_draft:cleopatra",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:cleopatra",
+      "to": "amended_artifact:cleopatra",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:dostoevsky:theme_003",
+      "to": "first_draft:dostoevsky",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:dostoevsky:theme_002",
+      "to": "first_draft:dostoevsky",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:dostoevsky:theme_001",
+      "to": "first_draft:dostoevsky",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:dostoevsky",
+      "to": "amended_artifact:dostoevsky",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:hannah_arendt:theme_004",
+      "to": "first_draft:hannah_arendt",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:hannah_arendt:theme_001",
+      "to": "first_draft:hannah_arendt",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:hannah_arendt:theme_003",
+      "to": "first_draft:hannah_arendt",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:hannah_arendt:theme_002",
+      "to": "first_draft:hannah_arendt",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:hannah_arendt",
+      "to": "amended_artifact:hannah_arendt",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:ibn_battuta:theme_001",
+      "to": "first_draft:ibn_battuta",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:ibn_battuta:theme_003",
+      "to": "first_draft:ibn_battuta",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:ibn_battuta",
+      "to": "amended_artifact:ibn_battuta",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:octopus:theme_001",
+      "to": "first_draft:octopus",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:octopus",
+      "to": "amended_artifact:octopus",
+      "rel": "amended_by"
+    },
+    {
+      "from": "detailed_response:plato:theme_003",
+      "to": "first_draft:plato",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:plato:theme_004",
+      "to": "first_draft:plato",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:plato:theme_002",
+      "to": "first_draft:plato",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "detailed_response:plato:theme_001",
+      "to": "first_draft:plato",
+      "rel": "consumed_by"
+    },
+    {
+      "from": "first_draft:plato",
+      "to": "amended_artifact:plato",
+      "rel": "amended_by"
+    },
+    {
+      "from": "theme:theme_001",
+      "to": "dossier:1:001",
+      "rel": "composed_for"
+    },
+    {
+      "from": "theme:theme_003",
+      "to": "dossier:1:002",
+      "rel": "composed_for"
+    },
+    {
+      "from": "theme:theme_004",
+      "to": "dossier:1:003",
+      "rel": "composed_for"
+    },
+    {
+      "from": "amended_artifact:cleopatra",
+      "to": "dossier:1:001",
+      "rel": "routed_into",
+      "primary_theme": "theme_001"
+    },
+    {
+      "from": "amended_artifact:ibn_battuta",
+      "to": "dossier:1:001",
+      "rel": "routed_into",
+      "primary_theme": "theme_001"
+    },
+    {
+      "from": "amended_artifact:octopus",
+      "to": "dossier:1:001",
+      "rel": "routed_into",
+      "primary_theme": "theme_001"
+    },
+    {
+      "from": "amended_artifact:dostoevsky",
+      "to": "dossier:1:002",
+      "rel": "routed_into",
+      "primary_theme": "theme_003"
+    },
+    {
+      "from": "amended_artifact:plato",
+      "to": "dossier:1:002",
+      "rel": "routed_into",
+      "primary_theme": "theme_003"
+    },
+    {
+      "from": "amended_artifact:ada_lovelace",
+      "to": "dossier:1:003",
+      "rel": "routed_into",
+      "primary_theme": "theme_004"
+    },
+    {
+      "from": "amended_artifact:hannah_arendt",
+      "to": "dossier:1:003",
+      "rel": "routed_into",
+      "primary_theme": "theme_004"
+    }
+  ]
+}

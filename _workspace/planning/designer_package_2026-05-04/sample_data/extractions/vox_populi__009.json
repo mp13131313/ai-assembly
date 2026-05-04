@@ -1,0 +1,68 @@
+{
+  "extraction_id": "vox_populi:009",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Petr Pavel",
+  "lens": "reframing",
+  "text": "Populism shouldn't be labeled as inherently bad — listening to citizens' frustration and translating it into policy is what politics is for; the line is crossed only when populism turns against the institutions that protect democracy.",
+  "context": "Noted that some politicians proudly accept the populist label.",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_007"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__dostoevsky"
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__hannah_arendt"
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__plato"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

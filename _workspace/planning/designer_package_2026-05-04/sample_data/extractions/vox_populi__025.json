@@ -1,0 +1,61 @@
+{
+  "extraction_id": "vox_populi:025",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "",
+  "lens": "open question",
+  "text": "If populists who reach power tend to moderate (Pavel) but social-media dynamics destroy shared facts and compromise (Weber), is institutional containment-via-governing-responsibility still a viable theory of democratic resilience?",
+  "context": "Tension between Pavel's reassurance about populists in power and Weber's diagnosis of an information environment that punishes compromise; never directly engaged.",
+  "engagement": null,
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_007"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__hannah_arendt"
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__plato"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

@@ -1,0 +1,46 @@
+{
+  "extraction_id": "vox_populi:022",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Audience Member 2",
+  "lens": "assertion",
+  "text": "Defeating authoritarian populism requires a counter-formula: promising national renewal through de-rigging the marketplace, optimism about an opportunity economy, and rebuilding social capital — rather than ceding the language of renewal and emergency to strongman politics.",
+  "context": "Liam Byrne, UK Labour MP, citing his forthcoming book; described populist formula as 'appeasement abroad, autocracy at home, avarice everywhere.' [word uncertain in source]",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_007"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

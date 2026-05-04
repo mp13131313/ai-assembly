@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-05-04T10:56:36+0200",
+  "nights_present": [
+    1
+  ],
+  "dossier_count": 1,
+  "dossiers": [
+    {
+      "night": 1,
+      "dossier_no": 1,
+      "filename": "dossier_001.json",
+      "url_path": "/dossiers/night-1/dossier_001",
+      "kicker": "",
+      "headline": "",
+      "theme_id": "theme_001",
+      "theme_display_title": "The Patron's Claim to the Seal",
+      "issue_no": 42193,
+      "vol": "CXVI",
+      "publication_date": "2026-05-08"
+    }
+  ]
+}

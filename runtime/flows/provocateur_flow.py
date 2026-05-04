@@ -1512,7 +1512,10 @@ def run_provocateur(
     # call produces ~3K output, so 4 concurrent calls per minute is the
     # sustainable steady-state. Configurable via env vars for tuning.
     batch_size = int(os.environ.get("PROVOCATEUR_FORMULATION_BATCH", "4"))
-    batch_wait_s = int(os.environ.get("PROVOCATEUR_BATCH_WAIT_S", "20"))
+    # 5s default mirrors the C30 fix on voice/step1 (was 20s — too
+    # conservative for Anthropic Tier 4 limits at 4 concurrent Opus 4.7
+    # calls). Override via env var if rate-limit pressure surfaces.
+    batch_wait_s = int(os.environ.get("PROVOCATEUR_BATCH_WAIT_S", "5"))
     n_batches = (total_pairs + batch_size - 1) // batch_size if total_pairs else 0
     if already_done_formulations:
         logger.info(

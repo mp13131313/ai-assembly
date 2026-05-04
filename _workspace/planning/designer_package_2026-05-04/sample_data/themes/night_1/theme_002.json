@@ -1,0 +1,62 @@
+{
+  "theme_id": "theme_002",
+  "night": 1,
+  "display_title": "The Cordon and What It Names",
+  "abstract": "These clusters form a layered argument about right-populism: cluster_011 and cluster_010 locate its real drivers in inequality and business-driven globalization rather than the stories populists tell; cluster_009 and cluster_015 contest whether specific movements (MAGA, Milei) are authentic conservatism or its corruption; and cluster_007 sets out the rival prescriptions — firewall, accommodation, governing responsibility — that follow from how one answers the prior questions.",
+  "researcher_title": "Populism: drivers, authenticity, response",
+  "researcher_abstract": "These clusters form a layered argument about right-populism: cluster_011 and cluster_010 locate its real drivers in inequality and business-driven globalization rather than the stories populists tell; cluster_009 and cluster_015 contest whether specific movements (MAGA, Milei) are authentic conservatism or its corruption; and cluster_007 sets out the rival prescriptions — firewall, accommodation, governing responsibility — that follow from how one answers the prior questions.",
+  "audience_friction": "high",
+  "fault_line_present": true,
+  "fault_line_description": null,
+  "clusters": [],
+  "extractions": [],
+  "extraction_count": 0,
+  "formulations_per_voice": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "formulation_text": "The panel handled populism in two ways: as something to firewall out (Weber's 'three pros' — pro-Europe, pro-Ukraine, pro-rule of law) and as something to diagnose and manage (Pavel: post-communist voters wanted capitalism's goods while preserving socialism's freedom from responsibility). To draw a cordon around tens of millions and call them the unredeemed, or to explain their politics as a flight from adult responsibility — both gestures seat the enlightened observer above the dark mass and name its sickness. What does the firewall reveal about the soul of the one who draws it, and is there a way the populist voter could be met as a person rather than as a symptom?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "formulation_text": "Across the day's panels, 'the people' kept appearing as a single subject already given — citizens' frustration to be translated into policy (Pavel), a working-class base whose demands were dismissed (Ocasio-Cortez), a 'particular people rooted in generations of residence' (Vance, via Clinton's rebuke). Each diagnosis competes over how to listen to or speak for this singular voice; none questions that there is one. What populist moment is your apparatus actually equipped to name here — the demagogue's seizure of an existing demos, or a prior collapse in which plurality has already been replaced by 'a people' whose mood the political class competes to channel, leaving firewall, accommodation, and governing-responsibility as three managers of the same conceptual error?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "formulation_text": "The panel divided between those who said populism is a legitimate reading of citizen frustration that politicians must translate into policy, and those who said leadership at historic moments requires defying public opinion. Both sides took for granted that the only question is how to weigh the demos's pain — never whether the pain itself, however authentic, tracks the good. When the cobbler is angry about his shoes we ask the cobbler; when the city is angry about its course, whom do we ask, and by what art?",
+      "mode": "question",
+      "addressed_in_artifact": true
+    }
+  ],
+  "voices_who_addressed": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "addressed": true
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "addressed": true
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "addressed": true
+    }
+  ],
+  "amendments_on_this_theme": [],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

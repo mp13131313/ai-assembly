@@ -1,0 +1,25 @@
+{
+  "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+  "voice_slug": "ibn_battuta",
+  "nights_present": [
+    1
+  ],
+  "url_paths": {
+    "1": "/night-1/ibn_battuta"
+  },
+  "artifact_summaries": {
+    "1": {
+      "title": "",
+      "subtitle": "",
+      "selected_form": "A halt at Delhi — one scenic cell, the durbār of Tughluq remembered, with the matter brought before me folded in as the qāḍī folds a ruling into an anecdote.",
+      "stance": "The qāḍī's grave courtesy with the laugh of the road behind it — measured indignation at the conversion of ledger into rule, sealed without strain by the seven-times-rehearsed ruling of the Maghribi bench.",
+      "themes_addressed": [
+        "theme_001",
+        "theme_003"
+      ],
+      "decision": "first_draft",
+      "word_count": 715
+    }
+  },
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

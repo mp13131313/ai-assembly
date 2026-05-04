@@ -1,0 +1,46 @@
+{
+  "extraction_id": "vox_populi:007",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Daiana Fernández Molero",
+  "lens": "assertion",
+  "text": "What Milei is implementing is not anarcho-capitalism but a 'capitalism of rules' that breaks crony capitalism through antitrust, free trade, and competition — and Argentine voters rewarded this in the midterms despite painful cuts.",
+  "context": "Cited that cell phones in Argentina were unaffordable due to closed economy; midterm support after budget cuts.",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_015"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

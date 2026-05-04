@@ -1,0 +1,29 @@
+{
+  "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+  "voice_slug": "plato",
+  "night": 1,
+  "url_path": "/night-1/plato",
+  "was_step3": false,
+  "generated_at": "2026-05-04T10:56:28+0200",
+  "artifact": {
+    "title": "",
+    "subtitle": "",
+    "text": "Glaucon had come up from the agora as the lamps were being lit, and we walked together through the Cerameicus toward the gate.\n\n\"They were arguing today, Socrates, whether a city does better to keep speaking of justice while it acts otherwise, or to drop the speech and admit that the strong do as they will.\"\n\n\"And which side carried it?\"\n\n\"Neither. The one said the speech is what little restraint the world still has, and without it nothing answers to anything. The other said the speech itself is the disease — that to name what one will not do teaches the citizens that words are noises, and once they have learned this, no further teaching can reach them.\"\n\n\"Tell me, Glaucon. Is what they were calling 'the speech' one thing, or two?\"\n\n\"How do you mean?\"\n\n\"Consider the archer who is poor at his craft. His arrows fall wide, but his eye is on the target. Would you call his keeping the target in view a falsehood, since his arrows do not strike it?\"\n\n\"Of course not. The target is what corrects him.\"\n\n\"Now consider the man your brother once set before me — the perfectly unjust who has secured for himself the reputation of a just one. He too speaks of justice. What does the speaking do for him?\"\n\n\"It keeps anyone from looking at what he is doing.\"\n\n\"Including, perhaps, himself?\"\n\n\"Including himself.\"\n\n\"Then we have two speeches under one name. The first is the form held before the deed, that the deed may be measured and corrected. The second is the cover by which the soul keeps its own injustice out of its own sight. And when we found that second man, your brother and I — did we find him well?\"\n\n\"The most wretched of men, however the world treated him; for he had lost the part of his soul that could have known he was sick.\"\n\n\"Then a city in his condition is in his condition. It is not protected by its lie. It is being completed by it.\"\n\n\"So those who said drop the speech were right?\"\n\n\"Not yet. Ask of the city, as we asked of the man: when the gap between what is said and what is done is shown to it, does it turn toward what it named, or does it bend the name to fit what it did? The first is a city in which aidōs still lives — that reverent shame the gods left last among men, the affection of a soul still capable of correction. The second is your brother's figure scaled up. And aidōs, Glaucon, is not preserved by suppressing the gap. It is preserved only by being willing to look at it. Whoever counsels otherwise is asking the city to do for itself what the unjust soul does for itself.\"\n\nHe was silent for a while as we walked.\n\n\"Then the question I should have put — \"\n\n\"Was not whether to keep the speech or drop it. It was what dikaiosynē is, by which a city might be measured at all. They argued past it, and so neither answer they gave could land. — Come. It grows dark. Tomorrow let us begin where they did not.\"",
+    "selected_form": "Short Socratic dialogue with first-person Socratic narration (the *Republic* / *Charmides* frame).",
+    "stance": "Patient, sober, ironic-warm; refusing the pre-set either/or the speakers brought.",
+    "focus_decision": "Focus on Response 1.",
+    "word_count": 542
+  },
+  "themes_addressed": [
+    "theme_003",
+    "theme_004",
+    "theme_002",
+    "theme_001"
+  ],
+  "deliberation": {
+    "decision": "first_draft",
+    "decision_rationale": "",
+    "voices_read": [],
+    "amendments": []
+  }
+}

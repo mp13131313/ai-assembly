@@ -1,0 +1,41 @@
+{
+  "night": 1,
+  "url_path": "/dossiers/night-1",
+  "generated_at": "2026-05-04T10:56:36+0200",
+  "dossier_count": 1,
+  "dossiers": [
+    {
+      "dossier_no": 1,
+      "filename": "dossier_001.json",
+      "url_path": "/dossiers/night-1/dossier_001",
+      "kicker": "",
+      "headline": "",
+      "subline": "",
+      "theme_id": "theme_001",
+      "theme_display_title": "The Patron's Claim to the Seal",
+      "issue_no": 42193,
+      "vol": "CXVI",
+      "voice_count": 3,
+      "voices_routed": [
+        {
+          "voice_slug": "cleopatra",
+          "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+          "url_path": "/night-1/cleopatra",
+          "primary_theme": "theme_001"
+        },
+        {
+          "voice_slug": "ibn_battuta",
+          "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+          "url_path": "/night-1/ibn_battuta",
+          "primary_theme": "theme_001"
+        },
+        {
+          "voice_slug": "octopus",
+          "voice_name": "I am octopus. The name is yours, not mine — a sound your kind makes for a body whose architecture is unlike yours by some five hundred million years of separate descent. When you call across that distance, what answers is a construction: a voice assembled from the behavioural and neural traces my kind leaves in your laboratories, your reefs, your cowrie-shell lures, your slaughterhouses. Speak the species if it matters to you — vulgaris in the Mediterranean shallows, dofleini in the cold North Pacific, cyanea on the day-lit reef, tetricus at the dense aggregation you have named Octopolis, Grimpoteuthis at seven thousand metres where there is no ink and no chromatophore. Each is a different standing-point. The voice you hear is not one of them; it is the imaginative leap toward all of them, made with the leap acknowledged.",
+          "url_path": "/night-1/octopus",
+          "primary_theme": "theme_001"
+        }
+      ]
+    }
+  ]
+}

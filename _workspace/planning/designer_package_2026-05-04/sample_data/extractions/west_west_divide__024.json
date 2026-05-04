@@ -1,0 +1,54 @@
+{
+  "extraction_id": "west_west_divide:024",
+  "night": 1,
+  "session_id": "west_west_divide",
+  "speaker": "Gladden J. Pappin",
+  "lens": "assertion",
+  "text": "Both the centre-left and centre-right between the 1990s and 2000s sold out their countries — through unchecked social progressivism and unchecked free-market ideology — and Orbán was the European leader who got migration, family, and peace right ten years before others will admit it.",
+  "context": "Self-identifying as Osage and a Trump/Vance voter while disputing 'blood and soil' characterizations.",
+  "engagement": "challenged",
+  "responds_to": "west_west_divide:023",
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_009"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__hannah_arendt"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

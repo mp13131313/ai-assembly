@@ -1,0 +1,54 @@
+{
+  "extraction_id": "west_west_divide:023",
+  "night": 1,
+  "session_id": "west_west_divide",
+  "speaker": "Hillary R. Clinton",
+  "lens": "assertion",
+  "text": "Vance's redefinition of American identity as 'a particular people' rooted in generations of residence — rather than as a creed — contradicts the founders' philosophy and is a politically dangerous device that should be rejected wholesale.",
+  "context": "Responding to the Polish MFA's question quoting Vance. [word uncertain in source]",
+  "engagement": "challenged",
+  "responds_to": null,
+  "energy": "high",
+  "in_clusters": [
+    "cluster_009"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__hannah_arendt"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

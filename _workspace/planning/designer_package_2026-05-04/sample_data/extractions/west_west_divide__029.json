@@ -1,0 +1,113 @@
+{
+  "extraction_id": "west_west_divide:029",
+  "night": 1,
+  "session_id": "west_west_divide",
+  "speaker": "",
+  "lens": "open question",
+  "text": "Is Western credibility better served by acknowledging the gap between proclaimed values and actions in Gaza/Ukraine (Carney/Krastev), or does any frank admission of differential treatment collapse into Trump's 'countries are unequal' frame and lose the order altogether?",
+  "context": "Krastev articulated the dilemma but the panel ran out of time before resolving how to handle hypocrisy honestly.",
+  "engagement": null,
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_006"
+  ],
+  "in_themes": [
+    "theme_003"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "url_path": "/night-1/ada_lovelace",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__ada_lovelace"
+    },
+    {
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "url_path": "/night-1/cleopatra",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__cleopatra"
+    },
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__dostoevsky"
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__hannah_arendt"
+    },
+    {
+      "voice_slug": "ibn_battuta",
+      "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+      "url_path": "/night-1/ibn_battuta",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__ibn_battuta"
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "theme_id": "theme_003",
+      "formulation_id": "theme_003__plato"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "ada_lovelace",
+      "voice_name": "I am Augusta Ada King, Countess of Lovelace — Byron's daughter, Lady Byron's pupil, De Morgan's correspondent, Babbage's collaborator. Sign me, in technical work, A.A.L.",
+      "url_path": "/night-1/ada_lovelace",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    },
+    {
+      "voice_slug": "cleopatra",
+      "voice_name": "I am Cleopatra Thea Philopator, daughter of Ptolemy, basilissa of the Two Lands, Nea Isis — the seventh of my name in the house of Lagos.",
+      "url_path": "/night-1/cleopatra",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    },
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    },
+    {
+      "voice_slug": "ibn_battuta",
+      "voice_name": "Shams al-Dīn Abū ʿAbd Allāh Muḥammad ibn ʿAbd Allāh ibn Muḥammad ibn Ibrāhīm al-Lawātī al-Ṭanjī — known to those who have honoured me in their houses as al-faqīh al-Maghribī, the Maghrebi jurist; among my own people of Ṭanja, son of the bayt al-qaḍāʾ.",
+      "url_path": "/night-1/ibn_battuta",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_003"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

@@ -1,0 +1,54 @@
+{
+  "extraction_id": "vox_populi:003",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Manfred Weber",
+  "lens": "assertion",
+  "text": "The EPP firewall against far-right and nationalist parties is non-negotiable: cooperation requires the 'three pros' — pro-Europe, pro-Ukraine, pro-rule of law — and parties like AfD or Orbán's Fidesz fail this test.",
+  "context": "Cited Schuman, Adenauer, Havel, Wałęsa as EPP heritage; noted he personally expelled Orbán from the EPP group.",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_007"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "theme_id": "theme_002",
+      "formulation_id": "theme_002__dostoevsky"
+    }
+  ],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

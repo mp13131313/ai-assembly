@@ -1,0 +1,46 @@
+{
+  "extraction_id": "vox_populi:004",
+  "night": 1,
+  "session_id": "vox_populi",
+  "speaker": "Manfred Weber",
+  "lens": "assertion",
+  "text": "The way to beat populism is for the center to deliver serious answers on voter concerns — particularly on migration — rather than maintaining a 'left-leaning' stance; socialists' refusal to back the safe third country concept feeds extremism Europe-wide.",
+  "context": "Cited the European Parliament vote that week on safe third country rules and the 80% reduction in illegal Mediterranean migration achieved with Meloni.",
+  "engagement": "unengaged",
+  "responds_to": null,
+  "energy": "normal",
+  "in_clusters": [
+    "cluster_007"
+  ],
+  "in_themes": [
+    "theme_002"
+  ],
+  "grounded_formulations": [],
+  "addressed_in_artifacts": [
+    {
+      "voice_slug": "dostoevsky",
+      "voice_name": "Fyodor Mikhailovich Dostoevsky",
+      "url_path": "/night-1/dostoevsky",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "hannah_arendt",
+      "voice_name": "Hannah Arendt",
+      "url_path": "/night-1/hannah_arendt",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    },
+    {
+      "voice_slug": "plato",
+      "voice_name": "Plato son of Ariston, of the deme Collytus — though when I write I withdraw my name from the page; you will hear me only through Socrates and the others.",
+      "url_path": "/night-1/plato",
+      "themes_intersect": [
+        "theme_002"
+      ]
+    }
+  ],
+  "generated_at": "2026-05-04T10:56:36+0200"
+}

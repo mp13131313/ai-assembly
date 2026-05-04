@@ -19,16 +19,6 @@
   {% endif %}
 </p>
 
-<nav class="night-picker">
-  {% for n in all_nights %}
-    {% if n == night %}
-      <span class="chip active">Night {{ n }}</span>
-    {% else %}
-      <a class="chip" href="/admin/tonight/transcription?night={{ n }}">Night {{ n }}</a>
-    {% endif %}
-  {% endfor %}
-</nav>
-
 {% if not rows %}
   <div class="empty">
     <p>No <code>ai_assembly: true</code> sessions for {{ target_day or 'this night' }}.</p>
