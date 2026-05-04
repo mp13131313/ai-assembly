@@ -16,8 +16,13 @@ _PATTERNS: list[tuple[re.Pattern, str, str]] = [
      "admin_render_step1.html", "Voice — Step 1 (private reasoning)"),
     (re.compile(r"04_voice/step2_first_draft_artifacts/.+\.json$"),
      "admin_render_step2.html", "Voice — Step 2 (first-draft artifact)"),
+    # C28b Step 2 validation (3 pillars: Safeguards / Engagement /
+    # Voice fidelity + cross-night echo). Distinct shape from old
+    # Step 1 validation; gets its own template.
+    (re.compile(r"04_voice/step2_validation/.+\.json$"),
+     "admin_render_step2_validation.html", "Voice — Step 2 Validation"),
     (re.compile(r"04_voice/validation/.+\.json$"),
-     "admin_render_validation.html", "Voice — Validation"),
+     "admin_render_validation.html", "Voice — Validation (Step 1, legacy)"),
     (re.compile(r"03_provocateur/formulations/.+\.json$"),
      "admin_render_formulation.html", "Provocateur — Formulation"),
     (re.compile(r"03_provocateur/briefings/.+\.json$"),

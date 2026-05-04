@@ -1665,6 +1665,105 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
+### C36. Voice pipeline streaming — per-voice Step 2 starts when that voice's Step 1 done 🟡 (filed 2026-05-04 PM)
+
+**Surfaced 2026-05-04 PM during v2 dryrun re-run:** operator asked "now that ada is done with private thinking — will she start step 2?" Answer: no. Voice pipeline currently has a sync barrier between Step 1 and Step 2 — Step 2 fires for ALL voices in parallel only after EVERY voice's Step 1 completes.
+
+**Current architecture** (`voice_flow.run_voice()`):
+1. Step 1: parallel batches across (voice, theme) pairs (`VOICE_STEP1_BATCH=4`)
+2. Sync barrier — wait for all Step 1 done
+3. Step 2: parallel across all voices (`VOICE_STEP2_BATCH=4`)
+4. Sync barrier
+5. Step 2 validation → operator gate
+
+**Streaming alternative:** as soon as voice X's Step 1 outputs (all of X's themes) complete, fire X's Step 2 immediately. Doesn't wait for other voices. Step 2 + validation pipelines per voice; orchestrator gate still halts on any flag.
+
+**Why it matters:** at Athens scale (10 voices × 3-5 themes = 30-50 pairs), Step 1 is the wall-time floor (60-160s per pair, batches of 4 → ~7-12 batches × ~2-3 min ≈ 14-36 min). Step 2 can't start until the slowest pair in the LAST batch completes. Streaming would let fast voices' Step 2 begin while slow voices' Step 1 still finishes — savings depend on how skewed batch completion times are. Estimated 5-15 min wall savings per night at Athens scale; less at dryrun scale.
+
+**Cost:** zero (same number of LLM calls); just earlier scheduling.
+
+**Risk:** more concurrent Anthropic load (Step 1 + Step 2 calls in flight simultaneously). Tier 4 limits comfortably accommodate; cache write/read concurrency may interfere on first batch.
+
+**Effort:** ~2-3 hr — refactor voice_flow's barrier-based loop to per-voice futures (`voice_pipeline_for_voice(slug)` runs Step 1 batches → Step 2 → sub-Step 2 validation as one chain; outer ThreadPool fires N voices concurrently).
+
+**Status:** filed; not Athens-blocking (current architecture works correctly, just sequential by batch). Defer until post-Athens unless ~10-min wall savings matter.
+
+---
+
+### C35. Bump default batch sizes for parallel Anthropic calls 🟡 (filed 2026-05-04 PM)
+
+**Surfaced 2026-05-04 PM during v2 dryrun re-run:** operator asked if higher concurrency is an option. Current defaults across stages:
+
+| Stage | Env var | Default | Athens N |
+|---|---|---|---|
+| Researcher Node 1 | `RESEARCHER_NODE1_BATCH` | 4 | ~15-25 sessions |
+| Provocateur formulation | `PROVOCATEUR_FORMULATION_BATCH` | 4 | ~26-40 (theme × voice) pairs |
+| Voice Step 1 | `VOICE_STEP1_BATCH` | 4 | ~26-40 pairs |
+| Voice Step 2 | `VOICE_STEP2_BATCH` | 4 | 10 voices |
+| Voice Step 3 | `VOICE_STEP3_BATCH` | 4 | 10 voices (dormant for Athens per A1) |
+| Voice continuity | `VOICE_CONTINUITY_BATCH` | 4 | 10 voices |
+| Step 2 validation pillar | `STEP2_VALIDATION_PILLAR_BATCH` | 4 | 30-40 (3 pillars × 10 voices) |
+| Editor dossier | `EDITOR_BATCH` | 4 | 3-5 dossiers |
+
+**Recommendation:** raise defaults to 6 across the board.
+
+**Rationale:**
+- Anthropic Tier 4 limits (Opus 4.7) comfortably accommodate 6-8 concurrent thinking-enabled calls (~30-50K input/min at Athens-typical token sizes; well under TPM ceilings)
+- ~33% wall savings per affected stage with low risk
+- Higher (8+) risks 429 retries on cache-write collisions when multiple voices' prefix caches all write simultaneously on first batch
+- 6 is the sweet spot between throughput gain and rate-limit headroom
+
+**Per-stage projected savings (Athens 3-night total):**
+- Researcher Node 1 (~25 sessions @ 2 min ÷ 6 vs ÷ 4): ~6-10 min/night × 3 = ~20-30 min
+- Provocateur formulation: ~5-8 min/night × 3 = ~15-25 min
+- Voice Step 1 (~30 pairs @ ~2 min): ~10-15 min/night × 3 = ~30-45 min
+- Voice Step 2 (10 voices @ ~3 min): ~3-5 min/night × 3 = ~10-15 min
+- Step 2 validation: ~2-3 min/night × 3 = ~6-10 min
+- **Total: ~80-125 min wall savings across Athens 3 nights**
+
+**Effort:** ~10 min — change defaults in 6 source files. No tests need changing (env-overridable; behavior identical at higher cap).
+
+**Risk mitigation:** keep env-overridable. If 429s surface during early run, drop back to 4 via env without code change.
+
+**Status:** filed; ship pre-Athens for the wall savings. Trivial change. Bundles with C30 (already shipped — voice batch sleep) + the 2026-05-04 PM Provocateur batch sleep mirror.
+
+---
+
+### C34. Runtime member_slug doesn't handle "Voice of X" naming convention 🟡 (filed 2026-05-04 PM)
+
+**Surfaced 2026-05-04 PM during C10 council_config sync:** athens-2026 has rolled out the "Voice of X" naming convention across persona cards' `voice_name` + provocateur_profile's `name` + council_config's `members[].name` + panel_roster's `panel_members_final` (athens-2026 commit `e8751f5`). The runtime's `member_slug` function (`flows/shared/io.py`) slugifies "Voice of Plato" → `voice_of_plato`, which doesn't match the folder name `plato/`.
+
+**Why the dryrun still works:** I built the dryrun's separate `council_config.json` with SHORT names ("Plato", "Cleopatra") so `member_slug` derives correctly. Runtime is happy. But this means there are now TWO naming conventions in active use:
+- Athens-2026 production: "Voice of X" everywhere
+- Dryrun PROJECT_ROOT council_config: short names (legacy convention)
+
+**The gap:** if a future PROJECT_ROOT (e.g., post-Athens deployment, new conference) uses athens-2026's "Voice of X" naming throughout — including its council_config — the runtime will break: it'll try to load voice cards from `voices/voice_of_plato/07_persona_card_assembled.json` which doesn't exist.
+
+**Two paths to close:**
+
+**Path A — extend `member_slug` to strip "Voice of " / "Voice of the " prefix** (~30 min):
+```python
+def member_slug(name: str) -> str:
+    # Strip "Voice of [the] " prefix introduced by athens-2026 naming
+    # convention so council_config + folder-slug stay in sync.
+    name = re.sub(r"^Voice\s+of\s+(?:the\s+)?", "", name, flags=re.I)
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+```
+Test: `"Voice of Plato"` → `"plato"`, `"Voice of the Octopus"` → `"octopus"`, `"Voice of the Whanganui River"` → `"whanganui_river"`. Folder lookups work. Backward-compatible (short names still work).
+
+**Path B — rename voice folders to `voice_of_<x>/`** (~1-2 hr):
+- Athens-2026: `voices/plato/` → `voices/voice_of_plato/` (etc.)
+- Update all references in personas/runtime/dashboard
+- More invasive; affects more code
+
+Path A is the cheaper fix and matches the convention pattern (other naming-prefix-strips exist in similar pipelines).
+
+**Cross-references:** voices/OPEN_ITEMS.md §18 ("Voice of X" naming convention rollout — this is its runtime-side counterpart).
+
+**Status:** filed; not Athens-blocking (current dryrun + Athens production both use short names in council_config). Pre-Athens-eligible if athens-2026 council convention is to be runtime-source-of-truth for any deployment.
+
+---
+
 ### C33. publish_flow.py needs dossier + edition coverage 🟢 SHIPPED 2026-05-04 PM (items 1-3); item 4 deferred until B3
 
 **Shipped 2026-05-04 PM** in same bundle as C32. publish_flow.py extended:

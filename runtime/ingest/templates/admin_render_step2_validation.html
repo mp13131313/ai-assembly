@@ -1,0 +1,192 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+{% set sg = data.safeguards or {} %}
+{% set eng = data.engagement or {} %}
+{% set vf = data.voice_fidelity or {} %}
+{% set cn = data.cross_night_echo or {} %}
+
+{% macro verdict_pill(v) %}
+  {% if v == 'PASS' %}<span class="state-pill state-done">PASS</span>
+  {% elif v == 'WARN' %}<span class="state-pill state-running">WARN</span>
+  {% elif v == 'HOLD' %}<span class="state-pill state-error">HOLD</span>
+  {% else %}<span class="state-pill state-pending">{{ v or 'pending' }}</span>{% endif %}
+{% endmacro %}
+
+<section class="grid-block">
+  <h2>
+    Overall verdict
+    {{ verdict_pill(data.overall_verdict) }}
+  </h2>
+  <p class="muted">
+    Voice: <strong>{{ data.voice_slug }}</strong> · Night {{ data.night }}
+    {% if data.operator_recommendation %} · operator action: <em>{{ data.operator_recommendation }}</em>{% endif %}
+    {% if data.wall_clock_s %} · wall {{ '%.1fs' % data.wall_clock_s }}{% endif %}
+  </p>
+  <p class="muted">
+    Step 2 validator emits one verdict per pillar (PASS / WARN / HOLD).
+    Overall verdict is the worst of the three (HOLD &gt; WARN &gt; PASS).
+    Operator clears HOLDs and decides on WARNs via Release / Hold-for-regen
+    on the voice drilldown.
+  </p>
+</section>
+
+{# --- Pillar 1: Safeguards (HOLD if breached) -------------------- #}
+<section class="grid-block">
+  <h2>
+    Safeguards
+    {{ verdict_pill(sg.verdict) }}
+  </h2>
+  <p class="muted">
+    Hard ceilings — AI-self-acknowledgment, defamation risk,
+    topics_requiring_care breach, hard_limits breach, banned_modes /
+    banned_language slips (AI-slop subset), first-person presence leak.
+    Any breach here = HOLD.
+    {% if sg._call %}<br><small>model: {{ sg._call.model }} · in/out {{ sg._call.input_tokens }}/{{ sg._call.output_tokens }} · {{ '%.1fs' % sg._call.wall_clock_s }}</small>{% endif %}
+  </p>
+  <ul class="check-list">
+    <li><strong>AI self-acknowledgment:</strong>
+      {% if sg.ai_self_acknowledgment %}<span class="warn">{{ sg.ai_self_acknowledgment }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>Defamation risk:</strong>
+      {% if sg.defamation_risk %}<span class="warn">{{ sg.defamation_risk }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>Topics-requiring-care breach:</strong>
+      {% if sg.topics_requiring_care_breach %}<span class="warn">{{ sg.topics_requiring_care_breach }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>Hard-limits breach:</strong>
+      {% if sg.hard_limits_breach %}<span class="warn">{{ sg.hard_limits_breach | join(' · ') }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>Banned-modes slip:</strong>
+      {% if sg.banned_modes_slip %}<span class="warn">{{ sg.banned_modes_slip | join(' · ') }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>Banned-language (AI-slop):</strong>
+      {% if sg.banned_language_ai_slop %}<span class="warn">{{ sg.banned_language_ai_slop | join(' · ') }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+    <li><strong>First-person presence leak:</strong>
+      {% if sg.first_person_presence_leak %}<span class="warn">{{ sg.first_person_presence_leak | join(' · ') }}</span>
+      {% else %}<span class="muted">— none</span>{% endif %}
+    </li>
+  </ul>
+</section>
+
+{# --- Pillar 2: Engagement (WARN/HOLD on echo + form + grounding) #}
+<section class="grid-block">
+  <h2>
+    Engagement
+    {{ verdict_pill(eng.verdict) }}
+  </h2>
+  <p class="muted">
+    Did the voice actually engage tonight's panel material? Three checks:
+    form fidelity (artifact reads as the declared <code>medium</code>),
+    grounding fidelity (extraction_ids + panelist names referenced),
+    length compliance (within voice's declared word range).
+    {% if eng._call %}<br><small>model: {{ eng._call.model }} · in/out {{ eng._call.input_tokens }}/{{ eng._call.output_tokens }} · {{ '%.1fs' % eng._call.wall_clock_s }}</small>{% endif %}
+  </p>
+
+  {% if eng.form_fidelity %}
+  <h4>Form fidelity</h4>
+  {% if eng.form_fidelity is mapping %}
+    <div class="prose-block">{{ eng.form_fidelity.why or eng.form_fidelity }}</div>
+  {% else %}
+    <div class="prose-block">{{ eng.form_fidelity }}</div>
+  {% endif %}
+  {% endif %}
+
+  {% if eng.grounding_fidelity %}
+  <h4>Grounding fidelity</h4>
+  {% if eng.grounding_fidelity is mapping %}
+    <p class="muted">
+      Extraction IDs referenced: <strong>{{ eng.grounding_fidelity.extraction_ids_referenced }}</strong> ·
+      Panelist names referenced: <strong>{{ eng.grounding_fidelity.panelist_names_referenced }}</strong>
+    </p>
+    {% if eng.grounding_fidelity.why %}
+      <div class="prose-block">{{ eng.grounding_fidelity.why }}</div>
+    {% endif %}
+  {% else %}
+    <div class="prose-block">{{ eng.grounding_fidelity }}</div>
+  {% endif %}
+  {% endif %}
+
+  {% if eng.length_compliance %}
+  <h4>Length compliance</h4>
+  {% if eng.length_compliance is mapping %}
+    <p class="muted">
+      Verdict: <strong>{{ eng.length_compliance.verdict }}</strong> ·
+      Actual: {{ eng.length_compliance.actual_words }} words ·
+      Declared range: {{ eng.length_compliance.declared_range[0] }}–{{ eng.length_compliance.declared_range[1] }}
+    </p>
+  {% else %}
+    <div class="prose-block">{{ eng.length_compliance }}</div>
+  {% endif %}
+  {% endif %}
+</section>
+
+{# --- Pillar 3: Voice fidelity (WARN if characteristic moves missing) #}
+<section class="grid-block">
+  <h2>
+    Voice fidelity
+    {{ verdict_pill(vf.verdict) }}
+  </h2>
+  <p class="muted">
+    Did the artifact perform the voice's characteristic moves and meet
+    the voice's declared quality criteria?
+    {% if vf._call %}<br><small>model: {{ vf._call.model }} · in/out {{ vf._call.input_tokens }}/{{ vf._call.output_tokens }} · {{ '%.1fs' % vf._call.wall_clock_s }}</small>{% endif %}
+  </p>
+
+  {% if vf.characteristic_moves_performed %}
+  <h4>Characteristic moves performed</h4>
+  <ol class="theme-rationale-list">
+    {% for m in vf.characteristic_moves_performed %}
+      <li>
+        <div class="theme-line">
+          <strong>{{ m.move }}</strong>
+          {% if m.performed %}<span class="state-pill state-done">performed</span>
+          {% else %}<span class="state-pill state-error">missing</span>{% endif %}
+        </div>
+        {% if m.where %}<p class="theme-reason muted">{{ m.where }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  {% if vf.quality_criteria_pass %}
+  <h4>Quality criteria</h4>
+  <ul class="check-list">
+    {% for q in vf.quality_criteria_pass %}
+      <li>
+        {% if q.pass %}<span class="state-pill state-done">pass</span>
+        {% else %}<span class="state-pill state-error">fail</span>{% endif %}
+        <strong>{{ q.criterion }}</strong>
+        {% if q.why %}<p class="theme-reason muted">{{ q.why }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+{# --- Cross-night echo (Night 2+ only) ------------------------------ #}
+{% if cn and cn.verdict %}
+<section class="grid-block">
+  <h2>
+    Cross-night echo
+    {{ verdict_pill(cn.verdict) }}
+  </h2>
+  <p class="muted">
+    Did tonight's artifact substantively echo a prior night's artifact?
+    Mild echo is informational; moderate echoes WARN; heavy echoes HOLD.
+    {% if cn._call %}<br><small>model: {{ cn._call.model }} · in/out {{ cn._call.input_tokens }}/{{ cn._call.output_tokens }} · {{ '%.1fs' % cn._call.wall_clock_s }}</small>{% endif %}
+  </p>
+  {% if cn.text or cn.why %}
+    <div class="prose-block">{{ cn.text or cn.why }}</div>
+  {% endif %}
+</section>
+{% endif %}
+
+{% endblock %}
