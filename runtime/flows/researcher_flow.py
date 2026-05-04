@@ -32,6 +32,7 @@ import random
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # Make `flows.shared.io` importable when this script is run directly
@@ -99,6 +100,13 @@ CLUSTERING_MAX_TOKENS = 40000  # was 16000 pre-thinking
 # repetition. ~20 themes × ~250 tokens each = 5K. With 15K thinking
 # budget we need 24K ceiling.
 THEMING_MAX_TOKENS = 24000  # was 8000 pre-thinking
+
+# C25 (2026-05-04): Node 1 (extraction) per-session concurrency cap.
+# Was sequential `for pkg in packages: extract_session(pkg)` — Athens
+# with 15 sessions × ~2-3 min each = 30-45 min serial. Parallel at
+# max_workers=4 ≈ 8-12 min. Anthropic Tier 4 limits accommodate
+# (4 parallel Opus 4.7 extraction calls ~80K input + 12K output/min).
+RESEARCHER_NODE1_BATCH = int(os.environ.get("RESEARCHER_NODE1_BATCH", "4"))
 
 
 def _thinking_kwargs(budget_tokens: int) -> dict:
@@ -757,15 +765,34 @@ def run_researcher(run_root: str) -> dict:
     output_dir = run_path / "02_researcher"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Node 1: extraction per session. Write each per-session output to
-    # disk as we go so partial progress survives a crash or timeout.
+    # Node 1: extraction per session. Parallel across sessions (cap at
+    # RESEARCHER_NODE1_BATCH = 4 concurrent Anthropic calls per C25). Each
+    # session's extraction is independent + atomic; results written to disk
+    # as they land so partial progress survives crash/timeout. Order-agnostic
+    # for downstream — validate_and_concat operates on the full list.
     per_session_results = []
-    for pkg_path in packages:
-        result = extract_session(str(pkg_path))
-        per_session_results.append(result)
-        out_path = output_dir / f"{result['session_id']}_extractions.json"
-        write_json_atomic(out_path, result)
-        logger.info(f"  wrote {out_path}")
+    logger.info(
+        f"Node 1 extraction: {len(packages)} sessions "
+        f"(parallel, max_workers={RESEARCHER_NODE1_BATCH})"
+    )
+    with ThreadPoolExecutor(max_workers=RESEARCHER_NODE1_BATCH) as ex:
+        futures = {
+            ex.submit(extract_session, str(pkg_path)): pkg_path
+            for pkg_path in packages
+        }
+        for fut in as_completed(futures):
+            pkg_path = futures[fut]
+            try:
+                result = fut.result()
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    f"  Node 1 extraction failed for {pkg_path.parent.name}: {e}"
+                )
+                raise
+            per_session_results.append(result)
+            out_path = output_dir / f"{result['session_id']}_extractions.json"
+            write_json_atomic(out_path, result)
+            logger.info(f"  wrote {out_path}")
 
     # Concat with namespaced id validation
     all_extractions = validate_and_concat(per_session_results, logger)
