@@ -23,7 +23,7 @@ Stage 3  Publish             publish_flow.py
 
 ```
 Editor / Frame layer        editor_flow.py (NOT BUILT)
-Edition Pipeline             edition_flow.py / broadsheet (NOT BUILT)
+Edition Pipeline             edition_flow.py — lead-theme picker per night (NOT BUILT; placeholder fields shipped 2026-05-04 PM)
 Microsite                    static site consumer (NOT BUILT)
 Substack draft pass          substack_flow.py (NOT BUILT)
 Closing show                 theme ID + Matrix mapping + video (UNSPECIFIED)
@@ -293,17 +293,32 @@ Result:
 
 **Per Frame Concept §"production implications":** `docs/AI_Assembly_Microsite_Concept.md` mini-concept landing as part of operator's design work.
 
-### B3. Broadsheet / Edition Pipeline 🔴
+### B3. Edition Pipeline (lead-theme picker) 🟡 SCOPE NARROWED 2026-05-04 PM
 
-**State:** UNBUILT. Front-page broadsheet per night.
+**Operator decision 2026-05-04 PM:** "Broadsheet" pipeline as a separate cross-dossier publication is OFF the roadmap entirely (not even post-Athens). The "edition" concept is per-night and currently does **one thing**: pick which dossier is tonight's lead.
 
-**Per Frame Concept §"newspaper":** one of N artifacts per night (NOT the wrapper); Caslon-style typography; ten voice headlines + short reportage paragraphs; wire-service unavailability paragraph (≤1 per edition); strikethrough as signature visual move (≤1 per edition); masthead with incrementing issue number.
+**State:** UNBUILT. Placeholder fields provisioned in the publish surface (commit `14a74be`):
+- `published_artifacts/dossiers/night_<N>/_index.json` carries `edition_lead: null`
+- `published_artifacts/dossiers/_index.json` carries `editions_by_night: {}`
 
-**Implementation:** likely deterministic Python pass + visual production (HTML/CSS template + per-night content fill, possibly screenshot for share). **NOT an LLM pass** if editor layer (B1) produces enough material — under per-theme editor, broadsheet consumes theme articles + voice artifacts directly; headline grammar still needs solving (per-voice headline poetics may matter for broadsheet voice-name display).
+**Shape when populated:**
+```jsonc
+"edition_lead": { "lead_dossier_no": 2 }
+"editions_by_night": { "1": { "lead_dossier_no": 2 }, ... }
+```
 
-**Triggers on:** A2 (editor layer) decisions settled ✅; microsite output schema (B2) → editor build (B1) → broadsheet consumes editor + voice outputs.
+**Microsite use:**
+- Page 1 lead-vs-grid layout — read `edition_lead.lead_dossier_no` to know which dossier renders in the lead position. Fall back to algorithmic / operator override when null.
+- "Past Editions" archive — read `editions_by_night` to show one lead per night without re-fetching every per-night `_index.json`.
 
-**Per Frame Concept:** `docs/AI_Assembly_Broadsheet_Concept.md` mini-concept needed.
+**Implementation options when ready (not yet decided):**
+1. **Operator picks by hand** (manual override file; no LLM)
+2. **Algorithmic** (deterministic — e.g., dossier with most engaged voices, or theme flagged `audience_friction: high`)
+3. **Small LLM pass** (Sonnet 4.6 reads the night's dossiers, picks lead + emits a one-line rationale)
+
+Estimated effort once decided: 1-2 hr for option 1 or 2; 2-3 hr for option 3. Pre-Athens-eligible if the microsite needs the lead-vs-grid distinction by the conference.
+
+**Cross-references:** Designer briefing at `_workspace/planning/DESIGNER_BRIEFING_2026-05-04.md` documents the placeholder shape for downstream consumers.
 
 ### B4. Substack draft pipeline pass ✅ CLOSED 2026-05-04 (superseded — Editor Pipeline v2 dropped Substack as delivery channel)
 
@@ -376,7 +391,7 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 **State:** architectural placement settled. Per-voice headline torques live in **two surfaces**:
 
 1. **Per-dossier headnote `artifact_title`** (4-12 words, paper-voice) — Claudia emits one per voice in each dossier she writes. Restored to v2 dossier output schema 2026-05-03 PM after the initial v2 simplification over-aggressively dropped it. Implementation lands at `runtime/flows/editor/dossier_generation.py` parser + stamp.
-2. **Per-voice broadsheet headline** (B3 territory; one headline per voice per night, cross-theme) — when B3 broadsheet ships, it consumes voice + editor outputs and lays out a per-night front page with ten voice headlines + reportage paragraphs. Currently unbuilt.
+2. ~~**Per-voice broadsheet headline**~~ DROPPED 2026-05-04 PM. Operator decision: there is no separate broadsheet pipeline at any horizon. The per-night front page is rendered by the microsite from per-dossier `kicker` + `headline` (Claudia's, per dossier — one paper-voice headline per dossier, NOT one per voice per night). The "edition" step (B3, narrowed scope) only picks which dossier sits in the lead position; it does not author a separate per-voice headline track.
 
 **Where the torque CONTENT lives:** Claudia's `translation_protocol` field on her persona card (per memo §4 — "the 10 voices' torque descriptions live in Claudia's translation_protocol"). One spine, ten bends.
 
@@ -547,7 +562,7 @@ This was Athens-eligible: although `voice_flow.py` auto-publishes per-night per-
 
 1. **All 10 voices** wired in council_config — Marley, Whanganui, Scheherazade not yet built (voices thread; Marley in flight, others gated on operator DR sessions). Ada Lovelace council_config entry stale (C10).
 2. **Editor pipeline (B1)** running with **v2 closing prompt** (current closing prompt is v1; produces malformed output per the wiring proof 2026-05-04). B1 sub-task: rewrite closing prompt to v2 contract.
-3. **Edition Pipeline (B3)** — broadsheet / microsite renderer consuming editor dossiers. Not yet built.
+3. **Edition Pipeline (B3 — narrowed scope per 2026-05-04 PM)** — lead-theme picker per night (`edition_lead.lead_dossier_no`). Not yet built; placeholder fields provisioned in publish surface. Broadsheet-as-separate-publication scope dropped.
 4. **Publish pipeline (publish_flow.py)** end-to-end against the dryrun outputs (C3 — never run end-to-end against real Researcher/Provocateur/Voice/Editor outputs).
 5. **Cross-night state** — Convention A run_dirs across 3 nights with continuity overlay actually exercised (C4 — Multi-night sequence dry-run).
 
@@ -1639,7 +1654,7 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 - Cross-night index: 1 dossier across 1 night
 - Lineage graph: 3 dossier nodes + 7 routed_into + 3 composed_for edges (more dossier nodes than dossier files because theme_routing declared 3 themes_to_dossiers entries — lineage represents intent, index represents published)
 
-**Item 4 (Edition pipeline outputs):** still deferred until B3 (Edition/broadsheet renderer) ships.
+**Item 4 (Edition pipeline outputs):** placeholder fields shipped same day (`edition_lead: null` per night, `editions_by_night: {}` cross-night). The actual edition step (lead-theme picker, scope narrowed per 2026-05-04 PM operator decision) remains in B3 — when shipped, populates those fields. Broadsheet-as-separate-publication scope dropped entirely.
 
 ---
 
@@ -1651,9 +1666,9 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 1. **Per-night dossier index** — `published_artifacts/dossiers/night_<N>/_index.json` listing all dossiers published that night (kicker, headline, theme_id, voice_count, lineage). Editor writes individual `dossier_<NNN>.json` files but no per-night index.
 2. **Cross-night dossier multi-night index** — `published_artifacts/dossiers/_index.json` walking all nights. Microsite needs this to render the conference's full dossier list.
 3. **Lineage graph extension** — currently stops at `voice → step2_artifact`. Needs `voice → editor → dossier` arcs so audit trails reach published unit-of-publication.
-4. **Edition pipeline outputs** — once B3 (Edition / broadsheet renderer) ships, publish_flow should also walk its outputs and add to the manifest. Pending B3.
+4. **Edition pipeline outputs** — `edition_lead` per-night + `editions_by_night` cross-night placeholder fields. Filled by the edition step (B3, scope narrowed to lead-theme picker per 2026-05-04 PM operator decision; broadsheet-as-separate-publication dropped).
 
-**Implementation scope (~1-2 hr for items 1-3; item 4 gated on B3):**
+**Implementation scope (~1-2 hr for items 1-3; item 4 placeholder fields shipped, populated by B3 when built):**
 - New `_build_dossier_indexes(project_root, night)` function in publish_flow.py
 - Extend `_build_lineage_graph` to walk `published_artifacts/dossiers/night_<N>/*.json` + add editor → dossier nodes/edges
 - New CLI flags `--skip-dossiers` (mirror existing skip flags) for opt-out
@@ -2299,7 +2314,7 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 **Still gating Athens (operator-side):**
 - B1 editor implementation — gated on microsite design (operator-side; persona thread + operator)
 - B2 microsite — operator designing; specifies editor output schema
-- B3 broadsheet — gated on B1 + microsite
+- B3 edition (lead-theme picker; scope narrowed 2026-05-04 PM, broadsheet dropped) — placeholder fields shipped; impl approach (operator pick / algorithmic / small LLM) not yet decided
 - B4 Substack draft pass — gated on B1
 - All 12 persona cards finalized (4 of 12 shipped; 5 unbuilt; Octopus FU#53 review)
 - Persona-thread voice card patches per C20 memo (Plato Socrates-death anachronism + recurrence patterns)
