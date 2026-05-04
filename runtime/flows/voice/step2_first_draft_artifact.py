@@ -195,6 +195,50 @@ def _derive_themes_covered(
     return voice_theme_ids
 
 
+def _build_response_n_to_theme_id(
+    step1_outputs: list[dict[str, Any]],
+) -> dict[int, str]:
+    """Authoritative "Response N → theme_id" mapping.
+
+    Step 2 prompts the voice with `Detailed response 1 of N`, `2 of N`,
+    etc. in the order it received `step1_outputs`. So when the voice
+    writes `Focus on Response 2.` it means `step1_outputs[1].theme_id`.
+
+    The order of `step1_outputs` is set at the orchestrator level — for
+    parallel completion (ThreadPool's as_completed) it's non-deterministic
+    across runs. Recording the mapping at write-time makes the editor
+    independent of any later re-ordering.
+    """
+    return {
+        i: o["lineage"]["theme_id"]
+        for i, o in enumerate(step1_outputs, 1)
+    }
+
+
+_RESPONSE_N_RE = re.compile(r"response\s*(\d+)", re.IGNORECASE)
+
+
+def _resolve_primary_theme_id(
+    focus_decision: str,
+    response_n_map: dict[int, str],
+) -> str | None:
+    """Resolve `focus_decision` to a primary theme_id at write time.
+
+    Authoritative resolution — the voice saw N labelled responses in this
+    exact order; mapping is unambiguous if focus_decision names a number.
+
+    Returns None for synthesis-style focus_decisions ("woven across all
+    three", "synthesise", etc.) — those are intentionally multi-theme.
+    """
+    if not focus_decision:
+        return None
+    m = _RESPONSE_N_RE.search(focus_decision.lower())
+    if not m:
+        return None
+    n = int(m.group(1))
+    return response_n_map.get(n)
+
+
 def run_step2_for_voice(
     voice_slug: str,
     step1_outputs: list[dict[str, Any]],
@@ -254,6 +298,15 @@ def run_step2_for_voice(
         parsed["focus_decision"], step1_outputs
     )
 
+    # Authoritative "Response N → theme_id" map + resolved primary theme.
+    # Eliminates the editor's order-inference fragility — voice's "Focus
+    # on Response N" is resolved at write time using the exact ordering
+    # the voice saw, recorded in lineage for the editor to use directly.
+    response_n_map = _build_response_n_to_theme_id(step1_outputs)
+    primary_theme_id = _resolve_primary_theme_id(
+        parsed["focus_decision"], response_n_map
+    )
+
     # Build lineage block (consumed Step 1 paths + union of grounding ids).
     consumed = []
     all_grounding: set[str] = set()
@@ -281,6 +334,12 @@ def run_step2_for_voice(
             "consumed_detailed_responses": consumed,
             "themes_covered": themes_covered,
             "formulation_ids_engaged": formulation_ids,
+            # Authoritative "Response N → theme_id" mapping (Step 2 saw
+            # step1_outputs in this exact order and labelled them "Detailed
+            # response N of M" to the voice). Editor uses primary_theme_id
+            # directly — no order inference needed.
+            "response_n_to_theme_id": {str(n): tid for n, tid in response_n_map.items()},
+            "primary_theme_id": primary_theme_id,  # null for synthesis-style focus
             "all_grounding_extraction_ids": sorted(all_grounding),
             "all_session_ids": sorted(all_sessions),
         },

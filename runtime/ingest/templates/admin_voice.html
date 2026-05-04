@@ -43,10 +43,107 @@
       · Step 3: {{ counts.step3_voices_succeeded }} voices
     {% endif %}
     {% if payload.manifest.validation_failures_count %}
-      · <span class="warn">⚠ {{ payload.manifest.validation_failures_count }} validation flag(s)</span>
+      · <span class="warn">⚠ {{ payload.manifest.validation_failures_count }} Step 1 validation flag(s)</span>
     {% endif %}
   </p>
 </section>
+
+{# --- C28b Step 2 validation gate banner + per-voice pills ----------- #}
+{% if payload.validation_gate.step2_validation_present %}
+{% set vg = payload.validation_gate %}
+<section class="grid-block">
+  <h2>
+    Step 2 validation
+    {% if vg.awaiting_operator %}
+      <span class="state-pill state-error">AWAITING OPERATOR — {{ vg.undecided | length }} voice(s)</span>
+    {% elif vg.n_flagged %}
+      <span class="state-pill state-done">all {{ vg.n_flagged }} flagged voice(s) cleared</span>
+    {% else %}
+      <span class="state-pill state-done">all {{ vg.n_total }} voices PASS</span>
+    {% endif %}
+  </h2>
+  <p class="muted">
+    Three pillars per voice (Safeguards · Engagement · Voice fidelity) plus cross-night echo on Nights 2+3.
+    Operator gate per <strong>C28b Option C</strong>: orchestrator halts at this stage; operator clears each flagged voice (release or hold for regen) before pipeline proceeds to editor.
+  </p>
+
+  <table class="overview">
+    <thead>
+      <tr>
+        <th>Voice</th>
+        <th>Safeguards</th>
+        <th>Engagement</th>
+        <th>Voice fidelity</th>
+        {% set has_echo = false %}
+        {% for v in payload.voices %}
+          {% set vd = payload.step2_validation_by_slug.get(v.voice_slug) %}
+          {% if vd and vd.cross_night_echo %}{% set has_echo = true %}{% endif %}
+        {% endfor %}
+        {% if has_echo %}<th>Cross-night</th>{% endif %}
+        <th>Overall</th>
+        <th>Operator decision</th>
+        <th>Files</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in payload.voices %}
+        {% set vd = payload.step2_validation_by_slug.get(v.voice_slug) %}
+        {% set decision = payload.operator_decisions_by_slug.get(v.voice_slug) %}
+        <tr>
+          <td><strong>{{ v.council_member }}</strong></td>
+          {% if vd %}
+            {% for pillar in ['safeguards', 'engagement', 'voice_fidelity'] %}
+              {% set pv = (vd[pillar] or {}).verdict %}
+              <td>
+                {% if pv == 'PASS' %}<span class="state-pill state-done">PASS</span>
+                {% elif pv == 'WARN' %}<span class="state-pill state-running">WARN</span>
+                {% elif pv == 'HOLD' %}<span class="state-pill state-error">HOLD</span>
+                {% else %}<span class="state-pill state-pending">{{ pv or '—' }}</span>{% endif %}
+              </td>
+            {% endfor %}
+            {% if has_echo %}
+              {% set echo = vd.cross_night_echo %}
+              <td>
+                {% if echo is none %}<span class="muted">—</span>
+                {% elif echo.verdict == 'PASS' %}<span class="state-pill state-done">PASS{% if echo.echo_level == 'mild' %} (mild){% endif %}</span>
+                {% elif echo.verdict == 'WARN' %}<span class="state-pill state-running">WARN ({{ echo.echo_level }})</span>
+                {% elif echo.verdict == 'HOLD' %}<span class="state-pill state-error">HOLD ({{ echo.echo_level }})</span>
+                {% else %}<span class="state-pill state-pending">{{ echo.verdict }}</span>{% endif %}
+              </td>
+            {% endif %}
+            <td>
+              {% set ov = vd.overall_verdict %}
+              {% if ov == 'PASS' %}<span class="state-pill state-done">PASS</span>
+              {% elif ov == 'WARN' %}<span class="state-pill state-running">WARN</span>
+              {% elif ov == 'HOLD' %}<span class="state-pill state-error">HOLD</span>{% endif %}
+            </td>
+            <td>
+              {% if decision %}
+                {% if decision.decision == 'release' %}<span class="state-pill state-done">released</span>
+                {% elif decision.decision == 'hold_for_regen' %}<span class="state-pill state-error">held for regen</span>
+                {% else %}<span class="muted">{{ decision.decision }}</span>{% endif %}
+              {% elif ov in ('WARN', 'HOLD') %}
+                <form method="post" action="/admin/voice/{{ v.voice_slug }}/release" style="display:inline;margin-right:6px;">
+                  <button type="submit" class="state-pill state-done" style="cursor:pointer;border:none;">Release</button>
+                </form>
+                <form method="post" action="/admin/voice/{{ v.voice_slug }}/hold" style="display:inline;">
+                  <button type="submit" class="state-pill state-error" style="cursor:pointer;border:none;">Hold for regen</button>
+                </form>
+              {% else %}<span class="muted">—</span>{% endif %}
+            </td>
+            <td class="muted file-links">
+              <a href="/admin/render?path=runs/{{ payload.run_id }}/04_voice/step2_validation/{{ v.voice_slug }}.json">validation</a>
+              · <a href="/admin/render?path=runs/{{ payload.run_id }}/04_voice/step2_first_draft_artifacts/{{ v.voice_slug }}.json">artifact</a>
+            </td>
+          {% else %}
+            <td colspan="{{ '7' if has_echo else '6' }}" class="muted">no validation file</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
 
 {# --- Step 1 grid: voice × theme matrix ----------------------------- #}
 <section class="grid-block">

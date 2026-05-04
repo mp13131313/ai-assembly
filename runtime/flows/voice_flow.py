@@ -61,6 +61,7 @@ try:
     from flows.voice.step1_private_reasoning import run_step1_for_pair
     from flows.voice.step1_validation import run_validation_for_step1_output
     from flows.voice.step2_first_draft_artifact import run_step2_for_voice
+    from flows.voice.step2_validation import run_step2_validation
     from flows.voice.step3_amended_artifact import run_step3_for_voice
     from flows.voice.continuity import generate_continuity
     from flows.voice.publish import publish_voice_artifacts_for_night
@@ -304,6 +305,7 @@ def run_voice(
     skip_continuity: bool = False,
     project_root: Path | None = None,
     voices_filter: list[str] | None = None,
+    step2_validate: bool = True,  # C28b (2026-05-04): default-ON — Step 2 validator runs after Step 2; orchestrator gates on operator clearance
 ) -> dict[str, Any]:
     """Run the Voice Pipeline end-to-end for one night."""
     logger = get_logger("voice_flow")
@@ -396,6 +398,47 @@ def run_voice(
                 step2_results[slug] = fut.result()
             except Exception as e:  # noqa: BLE001
                 logger.error(f"Step 2 failed for {slug}: {e}")
+
+    # ---- Step 2 Validation (operator gate per C28b, parallel across voices) ----
+    # Three pillars per voice (Safeguards + Engagement + Voice fidelity)
+    # plus Cross-night echo on Nights 2+3. Each pillar one Sonnet 4.6 call.
+    # Per-voice JSON written to 04_voice/step2_validation/<voice>.json.
+    # Halt-on-any-flag is the orchestrator's job — this stage just produces
+    # the validation files; orchestrator reads + halts.
+    step2_validation_results: dict[str, dict[str, Any]] = {}
+    if step2_validate and step2_results:
+        logger.info(
+            f"  Step 2 Validation: running 3 pillars × {len(step2_results)} voices"
+            + (" + cross-night echo" if night > 1 else "")
+        )
+        with ThreadPoolExecutor(max_workers=VOICE_STEP2_BATCH) as ex:
+            futures = {
+                ex.submit(
+                    run_step2_validation,
+                    step2_artifact=artifact,
+                    card=load_persona_card(slug, night=night, project_root=project_root),
+                    run_dir=run_dir,
+                    night=night,
+                    project_root=project_root,
+                ): slug
+                for slug, artifact in step2_results.items()
+            }
+            for fut in as_completed(futures):
+                slug = futures[fut]
+                try:
+                    step2_validation_results[slug] = fut.result()
+                except Exception as e:  # noqa: BLE001
+                    logger.error(f"Step 2 validation failed for {slug}: {e}")
+        # Summary line
+        verdicts = [r.get("overall_verdict", "?") for r in step2_validation_results.values()]
+        n_pass = sum(1 for v in verdicts if v == "PASS")
+        n_warn = sum(1 for v in verdicts if v == "WARN")
+        n_hold = sum(1 for v in verdicts if v == "HOLD")
+        logger.info(
+            f"  Step 2 Validation summary: {n_pass} PASS · {n_warn} WARN · {n_hold} HOLD"
+        )
+    elif not step2_validate:
+        logger.info("  Step 2 Validation: SKIPPED (--skip-step2-validation)")
 
     # ---- Step 3 (parallel across voices, requires ALL voices' Step 2) ----
     step3_results: dict[str, dict[str, Any]] = {}
@@ -565,6 +608,12 @@ def _parse_args() -> argparse.Namespace:
                    help="(deprecated, no-op — Step 1 validation now off by default per C28)")
     p.add_argument("--enable-step1-validation", action="store_true",
                    help="Re-enable Step 1 validation (default OFF per C28). For diagnostic dryruns only.")
+    # C28b (2026-05-04): Step 2 validation runs by default after Step 2 completes.
+    # Three pillars (Safeguards + Engagement + Voice fidelity) plus cross-night
+    # echo on Nights 2+3. Sonnet 4.6; ~$5.50 across Athens; orchestrator halts
+    # on any flag for operator clearance via dashboard.
+    p.add_argument("--skip-step2-validation", action="store_true",
+                   help="Skip Step 2 validation (default ON per C28b). Use when running unattended dryrun without operator gate.")
     p.add_argument(
         "--skip-step3",
         action="store_true",
@@ -590,6 +639,10 @@ if __name__ == "__main__":
     # for back-compat; --enable-step1-validation flips it back on for
     # diagnostic use.
     skip_validation = not args.enable_step1_validation
+    # C28b: Step 2 validation default ON; --skip-step2-validation flips off
+    # for unattended dryruns where no operator is on the dashboard to clear
+    # flags.
+    step2_validate = not args.skip_step2_validation
     run_voice(
         run_dir=args.run_dir,
         night=args.night,
@@ -598,4 +651,5 @@ if __name__ == "__main__":
         skip_continuity=args.skip_continuity,
         project_root=project_root,
         voices_filter=voices_filter,
+        step2_validate=step2_validate,
     )

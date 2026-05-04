@@ -173,6 +173,24 @@ def _load_step2(run_dir: Path, voice_slug: str) -> dict[str, Any] | None:
         return json.load(f)
 
 
+def _load_held_voices(run_dir: Path) -> set[str]:
+    """C28b: voices the operator marked hold_for_regen at the validation
+    gate. Excluded from per-voice publish."""
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    if not dec_dir.exists():
+        return set()
+    held: set[str] = set()
+    for p in sorted(dec_dir.glob("*.json")):
+        try:
+            with p.open(encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("decision") == "hold_for_regen":
+            held.add(data.get("voice_slug") or p.stem)
+    return held
+
+
 def publish_voice_artifacts_for_night(
     run_dir: Path,
     night: int,
@@ -188,6 +206,9 @@ def publish_voice_artifacts_for_night(
 
     Per-night `_index.json` lists every voice that published a file
     that night, with summary metadata for index-page rendering.
+
+    Voices marked hold_for_regen via `04_voice/operator_decisions/<voice>.json`
+    are EXCLUDED (C28b operator gate).
     """
     logger = get_logger("voice_publish")
     if project_root is None:
@@ -207,6 +228,16 @@ def publish_voice_artifacts_for_night(
             )
             return {"voices_published": [], "index_path": None, "output_dir": str(publish_dir)}
         voice_slugs = sorted(p.stem for p in step3_dir.glob("*.json"))
+
+    # C28b: filter out voices the operator held for regen.
+    held = _load_held_voices(run_dir)
+    if held:
+        before = len(voice_slugs)
+        voice_slugs = [s for s in voice_slugs if s not in held]
+        logger.info(
+            f"  Publish: held {sorted(held)} per operator decisions "
+            f"({before - len(voice_slugs)} excluded; {len(voice_slugs)} remain)"
+        )
 
     voices_published: list[dict[str, Any]] = []
 

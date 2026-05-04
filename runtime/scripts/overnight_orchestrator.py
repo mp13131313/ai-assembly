@@ -143,6 +143,50 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
     }
 
 
+def validation_gate_state(run_dir: Path) -> dict:
+    """Read Step 2 validation files + operator decisions. Returns dict:
+
+      - state: "awaiting_operator" | "all_clear"
+      - n_total: number of step2_validation files found
+      - n_flagged: voices with overall_verdict ∈ {WARN, HOLD}
+      - n_decided: flagged voices with operator decision file
+      - undecided: list of voice slugs flagged but not yet decided
+
+    Used by orchestrator Stage 3.5 gate (C28b Option C halt-on-any-flag).
+    """
+    val_dir = run_dir / "04_voice" / "step2_validation"
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    if not val_dir.exists():
+        # Validation didn't run (e.g. --skip-step2-validation) — open gate.
+        return {
+            "state": "all_clear",
+            "n_total": 0, "n_flagged": 0, "n_decided": 0, "undecided": [],
+        }
+    n_total = 0
+    flagged: list[str] = []
+    for vf in sorted(val_dir.glob("*.json")):
+        n_total += 1
+        try:
+            data = json.loads(vf.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("overall_verdict") in ("WARN", "HOLD"):
+            flagged.append(data.get("voice_slug") or vf.stem)
+    decided = []
+    if dec_dir.exists():
+        for slug in flagged:
+            if (dec_dir / f"{slug}.json").exists():
+                decided.append(slug)
+    undecided = [s for s in flagged if s not in decided]
+    return {
+        "state": "awaiting_operator" if undecided else "all_clear",
+        "n_total": n_total,
+        "n_flagged": len(flagged),
+        "n_decided": len(decided),
+        "undecided": undecided,
+    }
+
+
 def fire_stage(cmd: list[str], stage_name: str, log_dir: Path) -> tuple[bool, Path]:
     """Run a stage subprocess. Returns (success, log_path)."""
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -299,6 +343,26 @@ def poll_once(
             "detail": f"log at {log_path}",
             "ts": _now_iso(),
         }
+
+    # Stage 3.5: Operator validation gate (C28b — Option C halt-on-any-flag).
+    # After Voice completes, check Step 2 validation results. If any voice
+    # has overall_verdict ∈ {WARN, HOLD} without a corresponding operator
+    # decision file, halt the pipeline and wait for operator clearance via
+    # dashboard. Once all flagged voices have decisions (release or
+    # hold_for_regen), proceed to Editor.
+    if voice_done:
+        gate = validation_gate_state(run_dir)
+        if gate["state"] == "awaiting_operator":
+            return {
+                "state": "awaiting_validation_clearance",
+                "detail": (
+                    f"{gate['n_flagged']} voice(s) flagged "
+                    f"({gate['n_decided']}/{gate['n_flagged']} decided): "
+                    f"awaiting clearance for {gate['undecided']}"
+                ),
+                "validation": gate,
+                "ts": _now_iso(),
+            }
 
     # Stage 4: Editor — skip if editor_flow.py not yet built (B1 in flight).
     if editor_flow_exists() and not editor_done:

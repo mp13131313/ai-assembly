@@ -103,18 +103,36 @@ def _parse_focus_to_primary_theme(
     focus_decision: str,
     briefings: list[dict[str, Any]] | None,
     themes_covered: list[str],
+    *,
+    artifact_lineage: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
-    """Returns (primary_theme_id, source_label)."""
+    """Returns (primary_theme_id, source_label).
+
+    Authoritative path (post-2026-05-04): if Step 2 wrote `lineage.
+    primary_theme_id` (resolved at write time using the actual order the
+    voice saw step1_outputs), use that directly. Falls back to the
+    Response-N parser against briefings[] for older artifacts that
+    pre-date the resolved field.
+    """
     fd = (focus_decision or "").strip()
     fd_lower = fd.lower()
 
+    # Authoritative resolution from Step 2's write-time mapping.
+    if artifact_lineage:
+        ptid = artifact_lineage.get("primary_theme_id")
+        if ptid:
+            return ptid, "Case A — Step 2 resolved primary_theme_id (authoritative)"
+
+    # Legacy fallback: parse "Response N" against briefings[N-1] order.
+    # Fragile because briefings[] order may not match the order the voice
+    # saw — kept only for back-compat with pre-resolved-field artifacts.
     m = _RESPONSE_N_RE.search(fd_lower)
     if m and briefings:
         n = int(m.group(1))
         if 1 <= n <= len(briefings):
             theme_id = briefings[n - 1].get("theme_id")
             if theme_id:
-                return theme_id, "Case A — Response N anchor"
+                return theme_id, "Case A (legacy) — Response N parsed against briefings order"
 
     if any(marker in fd_lower for marker in SYNTHESIS_MARKERS):
         if themes_covered:
@@ -132,14 +150,37 @@ def _parse_focus_to_primary_theme(
     return ("", "Case 3 — no themes_covered; refusal handling expected")
 
 
+def _load_held_voices(run_dir: Path) -> set[str]:
+    """Voices the operator marked `hold_for_regen` per C28b. Excluded
+    from dossier composition + publish."""
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    if not dec_dir.exists():
+        return set()
+    held: set[str] = set()
+    for p in sorted(dec_dir.glob("*.json")):
+        try:
+            with p.open(encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("decision") == "hold_for_regen":
+            held.add(data.get("voice_slug") or p.stem)
+    return held
+
+
 def _load_step2_artifacts(run_dir: Path) -> list[dict[str, Any]]:
     s2_dir = run_dir / "04_voice" / "step2_first_draft_artifacts"
     if not s2_dir.exists():
         return []
+    held = _load_held_voices(run_dir)
     out = []
     for p in sorted(s2_dir.glob("*.json")):
         with p.open(encoding="utf-8") as f:
-            out.append(json.load(f))
+            artifact = json.load(f)
+        slug = artifact.get("lineage", {}).get("voice_slug") or p.stem
+        if slug in held:
+            continue  # C28b: operator held this voice for regen — skip
+        out.append(artifact)
     return out
 
 
@@ -232,6 +273,7 @@ def route_themes(
             focus_decision,
             briefings_by_voice.get(slug),
             themes_covered,
+            artifact_lineage=lineage,
         )
         if not primary_theme:
             log.warning(

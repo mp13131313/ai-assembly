@@ -327,19 +327,53 @@ def _voice_summary(run_dir: Path) -> dict[str, Any]:
     n_step2 = counts.get("step2_voices_succeeded", 0)
     n_step3 = counts.get("step3_voices_succeeded", 0)
     n_continuity = counts.get("continuity_voices_succeeded", 0)
-    n_flagged = counts.get("validation_flagged", 0)
+    n_flagged_step1 = counts.get("validation_flagged", 0)
     label = (
         f"Step 1: {n_pairs}/{n_attempts} · Step 2: {n_step2} voices · "
         f"continuity: {n_continuity}"
     )
     if n_step3:
         label += f" · Step 3: {n_step3}"
-    if n_flagged:
-        label += f" · ⚠ {n_flagged} validation flags"
+    if n_flagged_step1:
+        label += f" · {n_flagged_step1} Step 1 flag(s)"
+
+    # C28b: surface awaiting-operator state if Step 2 validation has
+    # undecided flagged voices.
+    val_dir = run_dir / "04_voice" / "step2_validation"
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    flagged: list[str] = []
+    if val_dir.exists():
+        for vf in sorted(val_dir.glob("*.json")):
+            try:
+                data = json.loads(vf.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if data.get("overall_verdict") in ("WARN", "HOLD"):
+                flagged.append(data.get("voice_slug") or vf.stem)
+    decided = set()
+    if dec_dir.exists():
+        for s in flagged:
+            if (dec_dir / f"{s}.json").exists():
+                decided.add(s)
+    undecided = [s for s in flagged if s not in decided]
+    if undecided:
+        return _stage_summary(
+            "running",
+            f"⚠ AWAITING OPERATOR — {len(undecided)} voice(s) flagged: {', '.join(sorted(undecided))}",
+            mtime=_file_mtime_iso(run_dir / "04_voice" / "manifest.json"),
+            validation_flagged=n_flagged_step1,
+            step2_validation_flagged=len(flagged),
+            step2_validation_undecided=len(undecided),
+            step2_validation_undecided_voices=undecided,
+        )
+    if flagged:
+        label += f" · {len(flagged)} Step 2 flag(s) cleared"
     return _stage_summary(
         "done", label,
         mtime=_file_mtime_iso(run_dir / "04_voice" / "manifest.json"),
-        validation_flagged=n_flagged,
+        validation_flagged=n_flagged_step1,
+        step2_validation_flagged=len(flagged),
+        step2_validation_undecided=0,
     )
 
 
@@ -687,6 +721,25 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         PROJECT_ROOT, night, [v["voice_slug"] for v in voices],
     )
 
+    # C28b: per-voice Step 2 validation results + operator decisions.
+    step2_validation_by_slug = _load_step2_validation(run_dir)
+    operator_decisions_by_slug = _load_operator_decisions(run_dir)
+    # Compute the gate state inline so the dashboard banner doesn't need
+    # to import from overnight_orchestrator.
+    flagged_slugs = [
+        s for s, v in step2_validation_by_slug.items()
+        if v.get("overall_verdict") in ("WARN", "HOLD")
+    ]
+    undecided = [s for s in flagged_slugs if s not in operator_decisions_by_slug]
+    validation_gate = {
+        "step2_validation_present": len(step2_validation_by_slug) > 0,
+        "n_total": len(step2_validation_by_slug),
+        "n_flagged": len(flagged_slugs),
+        "n_decided": len(flagged_slugs) - len(undecided),
+        "undecided": undecided,
+        "awaiting_operator": len(undecided) > 0,
+    }
+
     # Manifest for top-line counts (validation_failures, etc.).
     manifest = _read_json_or_none(run_dir / "04_voice" / "manifest.json") or {}
 
@@ -706,6 +759,9 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         "validation_cells": val_cells,
         "step2_voices": s2_voices,
         "continuity_voices": cont_list,
+        "step2_validation_by_slug": step2_validation_by_slug,  # C28b
+        "operator_decisions_by_slug": operator_decisions_by_slug,  # C28b
+        "validation_gate": validation_gate,  # C28b
         "manifest": {
             "counts": manifest.get("counts", {}),
             "validation_failures_count": len(
@@ -715,6 +771,38 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         },
         "polled_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
+
+
+# C28b helpers — Step 2 validation files + operator decisions.
+
+def _load_step2_validation(run_dir: Path) -> dict[str, dict[str, Any]]:
+    """Load all per-voice Step 2 validation files. Returns {slug: payload}."""
+    val_dir = run_dir / "04_voice" / "step2_validation"
+    if not val_dir.exists():
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    for p in sorted(val_dir.glob("*.json")):
+        data = _read_json_or_none(p)
+        if data is None:
+            continue
+        slug = data.get("voice_slug") or p.stem
+        out[slug] = data
+    return out
+
+
+def _load_operator_decisions(run_dir: Path) -> dict[str, dict[str, Any]]:
+    """Load all per-voice operator decision files. Returns {slug: payload}."""
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    if not dec_dir.exists():
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    for p in sorted(dec_dir.glob("*.json")):
+        data = _read_json_or_none(p)
+        if data is None:
+            continue
+        slug = data.get("voice_slug") or p.stem
+        out[slug] = data
+    return out
 
 
 # --- Researcher Pipeline detail view (C23 Phase C, 2026-05-03) -------------

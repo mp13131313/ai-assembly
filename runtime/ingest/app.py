@@ -698,6 +698,61 @@ def admin_tonight_voice_json(
     return JSONResponse(dashboard.collect_voice_detail(n))
 
 
+# --- C28b: Step 2 validation — operator decisions (release / hold for regen)
+
+def _write_operator_decision(
+    voice_slug: str, decision: str, night: int,
+) -> Path:
+    """Write per-voice operator decision file at
+    `<run_dir>/04_voice/operator_decisions/<voice>.json`. Idempotent —
+    overwrites prior decision if operator changed mind."""
+    run_dir = dashboard.run_dir_for_night(night)
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    dec_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "voice_slug": voice_slug,
+        "night": night,
+        "decision": decision,  # "release" | "hold_for_regen"
+        "decided_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "decided_by": "operator",
+    }
+    out_path = dec_dir / f"{voice_slug}.json"
+    out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    return out_path
+
+
+@app.post("/admin/voice/{voice_slug}/release")
+def admin_voice_release(
+    voice_slug: str,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Operator decision: release this voice's artifact as-is despite
+    validation flags. Writes operator_decisions/<voice>.json."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    _write_operator_decision(voice_slug, "release", n)
+    return RedirectResponse(
+        url=f"/admin/tonight/voice?night={n}",
+        status_code=303,
+    )
+
+
+@app.post("/admin/voice/{voice_slug}/hold")
+def admin_voice_hold(
+    voice_slug: str,
+    night: int | None = None,
+    _: str = Depends(require_admin),
+):
+    """Operator decision: hold this voice's artifact for regen. Excluded
+    from dossier composition + per-night publish per C28b."""
+    n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
+    _write_operator_decision(voice_slug, "hold_for_regen", n)
+    return RedirectResponse(
+        url=f"/admin/tonight/voice?night={n}",
+        status_code=303,
+    )
+
+
 # --- C23 Phase C drilldowns: Researcher / Provocateur / Publish ------------
 
 
