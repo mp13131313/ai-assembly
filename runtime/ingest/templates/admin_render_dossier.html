@@ -1,0 +1,97 @@
+{% extends "admin_render_base.html" %}
+{% block render_body %}
+
+{% set md = data.metadata or {} %}
+
+{# === Masthead chrome (per-dossier metadata; site renders this in production) === #}
+<section class="grid-block dossier-masthead muted">
+  <p>
+    <strong>{{ md.theme_display_title or md.theme_id or 'Theme' }}</strong>
+    · Night {{ md.night }}
+    · Vol. {{ md.vol }} · Issue No. {{ '{:,}'.format(md.issue_no) if md.issue_no else '?' }}
+    · {{ md.publication_date_long or md.publication_date or '' }}
+    · {{ md.edition_label or '' }}
+  </p>
+  <p>
+    <small>schema {{ data.schema_version or '?' }} · {{ md.model or '' }}
+    {% if md.input_tokens %} · in {{ '{:,}'.format(md.input_tokens) }} / out {{ '{:,}'.format(md.output_tokens) }} tokens
+    · cache w {{ '{:,}'.format(md.cache_creation_input_tokens or 0) }} / r {{ '{:,}'.format(md.cache_read_input_tokens or 0) }}
+    · wall {{ '%.1fs' % (md.wall_clock_s or 0) }}{% endif %}</small>
+  </p>
+</section>
+
+{# === Page 1 (front teaser) + Page 2 (article header) — kicker + headline === #}
+<section class="grid-block dossier-article">
+  <p class="dossier-kicker">{{ data.kicker }}</p>
+  <h2 class="dossier-headline">{{ data.headline }}</h2>
+  {% if data.subline %}
+    <p class="dossier-subline"><em>{{ data.subline }}</em></p>
+  {% endif %}
+
+  {% if data.front_abstract %}
+    <details class="dossier-front-abstract">
+      <summary class="muted"><small>front-page teaser ({{ data.front_abstract.split() | length }} words)</small></summary>
+      <p>{{ data.front_abstract }}</p>
+    </details>
+  {% endif %}
+
+  {# Article body — body_paragraphs[]; * * * is asterism break #}
+  <div class="dossier-body">
+    {% for p in data.body_paragraphs or [] %}
+      {% if p == '* * *' %}
+        <p class="dossier-asterism">* * *</p>
+      {% else %}
+        <p>{{ p }}</p>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <p class="muted dossier-byline-foot"><small>By Claudia Pinchbeck · — C.P.</small></p>
+</section>
+
+{# === Page 3 — Theme page (Claudia's paper-voice theme intro) === #}
+{% if data.theme_title_for_dossier or data.theme_abstract_for_dossier %}
+<section class="grid-block dossier-theme-page">
+  <h3>{{ data.theme_title_for_dossier or md.theme_display_title }}</h3>
+  {% if data.theme_abstract_for_dossier %}
+    <p>{{ data.theme_abstract_for_dossier }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{# === Pages 4-N — per-artifact pages (one per engaged voice) === #}
+{% for h in data.headnotes or [] %}
+<section class="grid-block dossier-artifact">
+  <p class="muted dossier-page-label"><small>PAGE {{ loop.index + 3 }} — {{ (h.voice_name or h.voice_slug) | upper }}</small></p>
+  <h3 class="dossier-artifact-title">{{ h.artifact_title or '(untitled)' }}</h3>
+
+  {% if h.framing_text %}
+    <p class="dossier-framing"><em>{{ h.framing_text }}</em></p>
+  {% endif %}
+
+  {% if h.formulation_text %}
+    <details class="dossier-formulation">
+      <summary class="muted"><small>formulation the voice received (raw)</small></summary>
+      <pre class="prose-block dossier-formulation-text">{{ h.formulation_text }}</pre>
+    </details>
+  {% endif %}
+
+  <p class="muted dossier-form-marker">
+    <small>form: <code>{{ h.artifact_form or '?' }}</code> · voice slug: <code>{{ h.voice_slug }}</code></small>
+  </p>
+
+  {# Artifact body — render verbatim, voice's own form. Pre-wrap for
+     prostagma / dialogue / diary etc. that may carry whitespace
+     significance. #}
+  <pre class="prose-block dossier-artifact-body">{{ h.artifact_text }}</pre>
+</section>
+{% endfor %}
+
+{# === Colophon === #}
+{% if data.colophon %}
+<section class="grid-block dossier-colophon muted">
+  <p><small>{{ data.colophon }}</small></p>
+</section>
+{% endif %}
+
+{% endblock %}

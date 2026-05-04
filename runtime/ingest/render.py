@@ -29,6 +29,11 @@ _PATTERNS: list[tuple[re.Pattern, str, str]] = [
      "admin_render_briefing.html", "Provocateur — Briefing (per voice)"),
     (re.compile(r"03_provocateur/triage_voices/.+\.json$"),
      "admin_render_triage.html", "Provocateur — Per-voice triage"),
+    # Editor dossier output — the publishing unit. Renders kicker/
+    # headline/subline/body/theme page/headnotes nicely instead of raw
+    # JSON. Matches the published copy AND the run_dir copy.
+    (re.compile(r"(published_artifacts/dossiers/night_\d+|05_editor/dossiers)/dossier_\d+\.json$"),
+     "admin_render_dossier.html", "Editor — Dossier"),
 ]
 
 

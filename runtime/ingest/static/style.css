@@ -1068,6 +1068,116 @@ details > div {
   margin-left: 1em;
 }
 
+/* --- Dossier render (admin_render_dossier.html) -------------------- */
+.dossier-masthead { font-size: 11px; }
+.dossier-masthead p { margin: 2px 0; }
+
+.dossier-article { padding: 1em 0; }
+.dossier-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  color: var(--warm-mid);
+  margin-bottom: 0.5em;
+}
+.dossier-headline {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1.6em;
+  line-height: 1.25;
+  margin: 0.2em 0;
+  color: var(--ink);
+}
+.dossier-subline {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.95em;
+  color: var(--warm-mid);
+  line-height: 1.45;
+  margin: 0.4em 0 1.2em;
+}
+.dossier-front-abstract { margin: 0.6em 0; font-size: 0.92em; }
+.dossier-front-abstract summary { cursor: pointer; }
+.dossier-front-abstract p { margin: 0.4em 0; padding-left: 0.8em; border-left: 2px solid var(--cream); font-style: italic; color: var(--warm-mid); }
+
+.dossier-body {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1.02em;
+  line-height: 1.65;
+  max-width: 38em;
+}
+.dossier-body p { margin: 0 0 1em; }
+.dossier-asterism {
+  text-align: center;
+  letter-spacing: 0.5em;
+  color: var(--warm-light);
+  margin: 1.5em 0 !important;
+}
+.dossier-byline-foot { margin-top: 1.5em; }
+
+.dossier-theme-page {
+  border-top: 1px solid var(--hairline);
+  padding-top: 1em;
+}
+.dossier-theme-page h3 {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1.25em;
+  margin-bottom: 0.4em;
+}
+.dossier-theme-page p {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.98em;
+  line-height: 1.55;
+  max-width: 40em;
+}
+
+.dossier-artifact {
+  border-top: 2px solid var(--hairline);
+  padding-top: 1em;
+  margin-top: 1.5em;
+}
+.dossier-page-label {
+  letter-spacing: 0.2em;
+  margin-bottom: 0.3em;
+}
+.dossier-artifact-title {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1.3em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin: 0.3em 0;
+}
+.dossier-framing {
+  color: var(--warm-mid);
+  font-style: italic;
+  margin: 0.4em 0 0.8em;
+}
+.dossier-form-marker { margin: 0.4em 0; }
+.dossier-formulation { margin: 0.5em 0; font-size: 0.9em; }
+.dossier-formulation summary { cursor: pointer; }
+.dossier-formulation-text {
+  margin: 0.4em 0;
+  padding: 0.6em 0.8em;
+  background: var(--cream-2);
+  font-size: 0.85em;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  white-space: pre-wrap;
+  max-width: none;
+}
+.dossier-artifact-body {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 1em;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  background: var(--paper);
+  padding: 0.8em 1em;
+  border-left: 3px solid var(--cream);
+  margin: 0.6em 0;
+  max-width: 42em;
+}
+
+.dossier-colophon { font-size: 11px; border-top: 1px solid var(--hairline); padding-top: 0.6em; }
+.dossier-colophon p { margin: 0; }
+
 /* Per-voice triage rationale section in Provocateur drilldown. */
 .voice-rationale {
   border-bottom: 1px solid var(--warm-light);
