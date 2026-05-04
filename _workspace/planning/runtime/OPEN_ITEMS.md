@@ -1690,6 +1690,55 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
+### C38. Bob Marley × theme_001 Step 1 silent drop in v2 dryrun 🟡 (filed 2026-05-04 PM)
+
+**Surfaced 2026-05-04 PM during v2 dryrun:** Step 1 produced 25/26 detailed_response files. The missing pair was `bob_marley × theme_001`. Provocateur briefing exists for that pair; voice manifest reports `step1_failures: 0` (the failure handler didn't catch it).
+
+**Symptoms:**
+- `briefings/bob_marley.json` includes `theme_001` in its formulations
+- `step1_detailed_responses/bob_marley__theme_001.json` is absent on disk
+- `manifest.json::step1_failures = []` (no error logged)
+- All other 25 expected pairs landed cleanly
+
+**Hypotheses to investigate:**
+1. Race condition / dropped pair in the parallel ThreadPoolExecutor batch logic
+2. Silent exception in `run_step1_for_pair` that was swallowed before reaching the failure-handler hook (e.g. inside the streaming call's retry path)
+3. Anthropic call returned an empty response or timed out without raising
+4. Something specific to the Marley card's content triggered a non-error skip path
+
+**Investigation steps (~30-60 min):**
+1. Re-run JUST the missing pair via voice_flow CLI in single-pair mode + capture full subprocess logs
+2. Inspect voice_flow's exception handling around `run_step1_for_pair` to see if any path silently no-ops
+3. Check if Marley's card content has anything that would cause the model to refuse to engage (e.g. theme content explicitly violating Marley's hard_limits)
+
+**Risk:** silent drops at Athens scale = missing artifact at publish time, no operator alert. Worth fixing before Athens even if root-cause is rare.
+
+**Status:** filed; pre-Athens-eligible — silent drops are exactly the bug class that bites worse at production scale.
+
+---
+
+### C37. Provocateur output JSONs don't persist per-call tokens 🟡 (filed 2026-05-04 PM)
+
+**Surfaced 2026-05-04 PM during v2 dryrun cost calculation:** `triage_voices/<slug>.json` and `formulations/<theme>__<voice>.json` files only persist content (ranked_themes, formulation prose, selected_quotes, etc.) — NOT per-call `input_tokens` / `output_tokens` / `cache_creation_input_tokens` / `cache_read_input_tokens` / `model` / `wall_clock_s`.
+
+Voice Step 1/2/3 + Editor + Continuity all DO persist these fields on their output JSONs. Provocateur is the gap.
+
+**Why it matters:** post-run cost calcs (per-stage token totals, cache-hit-rate analysis, per-call wall-clock distribution) can't roll up Provocateur. Roughly 37 calls per Athens night currently invisible to cost monitoring.
+
+**Fix (~10 min):** in `provocateur_flow.py::_stream_and_parse`, merge the `usage` block into the `result` dict before returning. Both `triage_voice` and `formulate_for_member` callers persist that result via `write_json_atomic`. Add fields:
+```python
+result["model"] = CLAUDE_MODEL
+result["input_tokens"] = usage.input_tokens
+result["output_tokens"] = usage.output_tokens
+result["cache_creation_input_tokens"] = getattr(usage, "cache_creation_input_tokens", 0) or 0
+result["cache_read_input_tokens"] = getattr(usage, "cache_read_input_tokens", 0) or 0
+result["wall_clock_s"] = wall
+```
+
+**Status:** filed; pre-Athens-eligible (small but enables exact cost monitoring during the 3-night run). Trivial change, no behavior impact.
+
+---
+
 ### C35. Bump default batch sizes for parallel Anthropic calls 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun re-run:** operator asked if higher concurrency is an option. Current defaults across stages:
