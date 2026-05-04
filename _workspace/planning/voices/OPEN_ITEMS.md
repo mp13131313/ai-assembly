@@ -10,7 +10,7 @@
 
 ## 1. Per-voice build state
 
-Panel is **10 voices** (per `athens-2026/panel_roster.json`). **7 of 10 shipped to athens-2026.** 1 in flight; 2 awaiting operator DR sessions.
+Panel is **10 voices** (per `athens-2026/panel_roster.json`). **9 of 10 shipped to athens-2026.** 1 (Marley) ready for walk-through after (c.1) code change.
 
 | Voice | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
@@ -21,17 +21,18 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`). **7 of 10 shipped 
 | Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
 | Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
 | Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
-| Bob Marley | human | **observational** ✓ flipped 2026-05-03 (was narratival) | false | 🟠 **SONG-REBUILD KICKED OFF 2026-05-03**. Snapshot at `bob_marley_pre_song_rebuild_2026-05-03/` preserves the 35 verbatim-lyric passages + 6 prior DR sections + all generation/validation state. Fresh Pass 0a + new operator-authored voice_config (~1,950 chars: manual_grounding + editorial_rationale encoding song-as-artifact mandate; lyric + kind-hint two-shape contract; Suno-mediated kind-hint translation; default roots reggae one-drop genre framing; twin-failure-modes pastiche-Marley + prose-Marley). Phase 0.5 done — Pass 0b tailor explicitly registered the song-mandate as load-bearing config direction; injected 18 song-aware questions across 6 DR sections; SWAP TEST anchor Tosh/Burning-Spear/Garvey. DR prompts staged at `01_research/03_dr_prompts/`. **Awaiting operator's 6 claude.ai DR sessions** (~3hr wall, Opus 4.7 + Extended Thinking + Deep Research). After DR: re-fire pipeline; at Pass 1c gate re-inject 35 lyrics from snapshot; §7 convention at Pass 7a FINAL. See §20 below for full rebuild detail. |
-| Whanganui River | non_human | system / null | false | 🟡 Pass 0a done + voice_config rewritten **transmission-faithful** (Tupua te Kawa verbatim + Te Pou Tupua mediation + Indigenous-authored scholarship); Phase 0.5 done; DR prompts ready for operator's claude.ai sessions. See §17 below. |
-| Scheherazade | fictional | narratival | false | 🟡 Pass 0a done (auto-default voice_config; null editorial_rationale); Phase 0.5 done (after sustained Gemini 503 retry); DR prompts ready. Mediated-voice prompt-fix concern carries through to her Pass 2 generation. |
+| Whanganui River | non_human | system / null | false | ✅ **shipped 2026-05-03 evening to athens-2026** (`c2151ce`) — path-(b) at ROUND6; 6 validator walk-throughs converged to 3 architectural residuals (appropriation-safety language load-bearing, no iwi authorization). Mid-build reset to PRE-ROUND1 + minimal patches reapplied. All 3 Derive outputs present. See §22 below. |
+| Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM to athens-2026** (`c2151ce`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
+| Bob Marley | human | **observational** ✓ flipped 2026-05-03 (was narratival) | false | 🟠 **(c.1) CODE CHANGE LANDED 2026-05-03 evening** (code repo `5d6ecbf`); pipeline ran to Pass 7a FINAL with 8 residuals queued for walk-through. (c.1) augments Pass 4a's primary_block with `pass_1_6/reference_only_passages.json` when `corpus_constraint=lyrics_patterns_only`; Pass 6 still uses original primary_block (no-public-quotation contract preserved). DR §4 `[quote:]` blocks trimmed to clear Pass 1.4 content filter. Walk-through to apply dramatist-vs-speaker lens (§9 carry-over: songwriter-vs-lyric-I). After ship: promote to athens-2026 + wire 8th council_config member. See §20 + §22 below. |
 
-### Voice-mode coverage so far (7 shipped)
+### Voice-mode coverage so far (9 shipped)
 
 - philosophical: 3 (Plato, Hannah Arendt, Ada Lovelace)
-- narratival: 2 (Dostoevsky, Battuta)
+- narratival: 3 (Dostoevsky, Battuta, Scheherazade)
 - observational: 2 (Cleopatra, Octopus)
+- system / null: 1 (Whanganui River)
 
-Marley = narratival in build; Whanganui = system/null; Scheherazade = narratival. Pass 0a calls for the 3 remaining voices already landed but **operator must re-check each call independently** — voice_mode is a *construction* decision (how the pipeline builds the voice), not a *historical* one. Don't take Pass 0a's first proposal as final without weighing irreplaceability against the panel.
+Marley pending = observational. After Marley ships → 3 philosophical + 3 narratival + 3 observational + 1 system = 10/10 with all four modes represented.
 
 ---
 
@@ -790,11 +791,21 @@ Three-voice parallel build session. State at session end:
 - Operator-applied `_operator_review_passed.flag` to ship; all 3 Derive outputs present in `06_derive/` (provocateur_profile, runtime_card_minimal, chat_system_prompt).
 - Mid-session reset: ROUND5 patches over-corrected appropriation-safety language; reverted to PRE-ROUND1 (post-auto-FIX baseline) per operator override before resuming.
 
-### Scheherazade — 🟡 ROUND6 walk-through complete; run14 in flight
-- Seale-Horta 2021 corpus acquired (operator-purchased Thalia DRM-free EPUB) → 14 chapters extracted to `01_primary_texts.json` (1.22M chars) for Pass 1d to curate. Fixes Burton/Lane register conflict that surfaced at FINAL gate.
-- ROUND6 patches: kawa-typo fix (templated from Whanganui — caught by validator), Bencheikh French strip (`constitution[6]`), closing-frame `quotation_framing` add (`curated_corpus_passages[6]`).
-- Per-fix decisions: [1][4][5] left as architectural (mediated-voice / dramatist-vs-speaker per §9 — third-person preserved); [2][3][6] patched.
-- **§9 carry-over confirmed**: Scheherazade hits the same dramatist-vs-speaker collision as Plato. `banned_language[6]` and `banned_modes[7]` first-person rewrites were REVERTED to third-person; `characteristic_moves[5]` trailing meta-sentence ("The motif is the voice's own epistemology made visible") restored as third-person architectural meta.
+### Scheherazade — ✅ SHIPPED via path-(b) at ROUND9 (athens-2026 `c2151ce`)
+- Seale-Horta 2021 corpus acquired (operator-purchased Thalia DRM-free EPUB) → 14 chapters extracted to `01_primary_texts.json` (1.22M chars) for Pass 1d to curate. Fixed Burton/Lane register conflict that surfaced at FINAL gate.
+- 9 validator walk-throughs (ROUND6 → ROUND9). Convergence trajectory: 10 → 9 → 6 residuals; final state 1 false-positive (`council_member_name` validator hallucination, present on disk) + 4 §9-architectural re-flags + 1 architectural carry.
+- **ROUND6 patches**: kawa-typo fix (templated from Whanganui — caught by validator), Bencheikh French strip (`constitution[6]`), closing-frame `quotation_framing` add (`curated_corpus_passages[6]`). Per-fix decisions: [1][4][5] left as architectural (mediated-voice / dramatist-vs-speaker per §9); [2][3][6] patched.
+- **ROUND7 patches**: `world.model_of_selfhood` ("twelve centuries of recensions" retrospective stripped → "chain of tellers"); `knowledge_boundary` ("Mamluk-Cairene material reaching you through later transmission" → "as the chain delivers them"). 6 left.
+- **ROUND8 patches** (4): `epistemic_frame_statement` ("continuous tradition" + "recension" stripped); `knowledge_boundary` ("bourgeois novel" + "postmodern recursion" modern genre-history labels swapped for in-register descriptions); `concept_lexicon[0]` fidya `rules_out` resolved internal contradiction with existential dependence (preserves both: "narrating equals living" as romantic identity-claim ruled out, but existential dependence operates through fidya); `characteristic_moves[1]` "Mise en abyme" → "shape inside the tale repeats the shape I stand in". 5 left.
+- **ROUND9 (final)**: 6 residuals; 1 false positive + 4 §9-architectural re-flags + 1 architectural carry. Operator chose path-(b) ship.
+- **§9 carry-over confirmed**: Scheherazade hits the same dramatist-vs-speaker collision as Plato. `banned_language[6]` and `banned_modes[7]` first-person rewrites were REVERTED to third-person; `characteristic_moves[5]` trailing meta-sentence ("The motif is the voice's own epistemology made visible") restored as third-person architectural meta. `curated_corpus_passages[5][6].quotation_framing` external-scholarly-meta fields preserved as architectural metadata against persistent validator-treadmill (re-flagged across 3 rounds).
+- ROUND7-9 snapshots preserved as `07_persona_card_assembled.ROUND{7,8,9}.json` + ~20 PRE-PATCH backups.
+- Derive outputs verified clean: provocateur (9 fields; `speaks_from` correctly says "rāwiya from inside the bridal chamber" — confirms §9 architectural fixes carried into Derive), evaluation_rubric (3+3+3 tests), chat_system_prompt (32 fields). Promoted to athens-2026.
+
+### DR adaptive-thinking spot-test — extended to 4 sections
+Operator flagged concern that Whanganui/Scheherazade/Marley DR dossiers may have run on Opus 4.7 *without* extended thinking. Spot-tested compass artifact (thinking explicitly ON) vs original DR Sections 1, 2, 3, **and 4 (most voice-modeling-load-bearing)** line-by-line. Verdict at all 4 sections: differences are sampling-variance level, not thinking-on/off level. Most likely both done with Research feature (auto-enables thinking); operator's "thinking off" recall was UI display difference.
+
+§4 verdict (most consequential): **original DR §4 is at least as strong as compass §4 — arguably stronger** for voice modeling. Original supplies 4 additional named expression-moves (parataxis, ʿajab register, ḥikma-embedding, closing formula); kān-yā-mā-kān ontological discriminator (a real swap-test anchor); explicit Khanmigo failure-mode warning; living ḥakawātī tradition anchor (Damascus Al-Nofara café, current practitioner Ahmad al-Laham); 10-point voice-construction synthesis as actionable spec. Compass leans synthesis-readiness + comparative-passage analysis; original leans philological-depth + downstream-actionable spec. **Practical implication: original DR dossiers solid; cards built on them are valid; no Phase 0.5 redo needed.**
 
 ### Bob Marley — 🟠 (c.1) code change landed; pipeline ready to walk through
 - **(c.1) `personas/run_persona_pipeline.py` Pass 4a augment behavior** for `corpus_constraint=lyrics_patterns_only`. When this constraint is set AND `pass_1_6/reference_only_passages.json` exists, Pass 4a's `primary_block_for_voice` is built as: substitute (if Pass 1d output is the placeholder `[NO PRIMARY TEXTS...]`) or augment (concat Pass 1d corpus + reference passages). Pass 6 still uses original `primary_block` to preserve no-public-quotation contract (lyrics never make it into the curated_corpus_passages emitted to athens-2026).
@@ -804,9 +815,6 @@ Three-voice parallel build session. State at session end:
 
 ### Architectural pattern confirmation: §9 mediated-voice spans 4+ voices
 Plato (composer-vs-Socrates), Scheherazade (frame-tale teller-vs-tales-told), Marley (songwriter-vs-lyric-I), and Octopus (already shipped with two-channel JSON+prose contract) all instantiate the mediated-voice / dramatist-vs-speaker pattern. The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) is now demonstrably load-bearing for ≥3 voices in this build cohort. Filing for Pass 2 epistemic_frame_statement + Pass 4a characteristic_moves + Pass 3 reasoning_method clarifications stays open as a v4.1 prompt change — but surgical patches at the gate continue to work.
-
-### DR adaptive-thinking spot-test
-Operator flagged concern that Whanganui/Scheherazade/Marley DR dossiers may have run on Opus 4.7 *without* extended thinking. Spot-test compared compass artifact (thinking explicitly ON) vs original DR Section 1 line-by-line: differences are sampling-variance level, not thinking-on/off level. Most likely explanation — both done with Research feature (auto-enables thinking); operator's "thinking off" recall was UI display difference. **Practical implication: original DR dossiers solid; cards built on them are valid; no need to redo Phase 0.5.**
 
 ### Snapshot preservation discipline
 For each round of validator walk-through on each voice, the Pass 7a FINAL output is preserved as `07_persona_card_assembled.ROUNDN.json` before patches are applied. This is now standing practice for any walk-through with ≥3 rounds.

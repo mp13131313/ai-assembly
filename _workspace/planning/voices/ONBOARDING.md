@@ -67,12 +67,12 @@ A "voice" is a participant on the Athens-2026 Assembly panel. Panel is **10 voic
 | 1 | Plato | `plato` | human | philosophical | false |
 | 2 | Cleopatra | `cleopatra` | human | observational | **true** |
 | 3 | Ibn Battuta | `ibn_battuta` | human | narratival | false |
-| 4 | Scheherazade | `scheherazade` | fictional | (likely narratival) | false |
-| 5 | Ada Lovelace | `lovelace` | human | (TBD) | false |
+| 4 | Scheherazade | `scheherazade` | fictional | narratival | false |
+| 5 | Ada Lovelace | `lovelace` | human | philosophical | false |
 | 6 | Fyodor Dostoevsky | `dostoevsky` | human | narratival | false |
-| 7 | Hannah Arendt | `arendt` | human | (likely philosophical) | false |
-| 8 | Bob Marley | `marley` | human | (likely narratival) | false |
-| 9 | Whanganui River | `whanganui_river` | non_human | (likely observational) | (TBD) |
+| 7 | Hannah Arendt | `arendt` | human | philosophical | false |
+| 8 | Bob Marley | `marley` | human | observational | false |
+| 9 | Whanganui River | `whanganui_river` | non_human | system / null | false |
 | 10 | Octopus | `octopus` | non_human | observational | false |
 
 Slugs are auto-derived from `name` field via `voice_slug()` in `personas/flows/shared/io.py`. Some operator pattern: shorten multi-name to single recognizable name (Plato, Dostoevsky, Octopus); keep canonical short form when it IS the canonical (Ibn Battuta).
