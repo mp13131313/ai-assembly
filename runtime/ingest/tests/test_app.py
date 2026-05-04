@@ -151,8 +151,43 @@ def test_upload_then_transcribe_end_to_end(
     assert body["ok"] is True
     assert body["status_url"].endswith("/status")
 
-    # Poll status until terminal (should take ~1–2s with FAKE_DELAY_SECONDS=1).
-    # Admin-only post-C23 (2026-05-03): /status.json is admin role.
+    # C26 (2026-05-04): upload now stops at `normalized` (ffmpeg complete);
+    # the overnight orchestrator handles transcription dispatch in its own
+    # poll loop, not at upload time. Test asserts upload-side terminal.
+    upload_terminal = {"normalized", "error"}
+    for _ in range(50):
+        r = client.get(f"/session/{sid}/status.json", auth=ADMIN_AUTH)
+        st = r.json()
+        if st.get("state") in upload_terminal:
+            break
+        time.sleep(0.2)
+
+    assert st["state"] == "normalized", st
+
+    # Filesystem check: the normalized m4a + session.json should exist; the
+    # full transcription outputs (session_package.json) are NOT produced
+    # here — orchestrator fires the subprocess separately.
+    sdir = pipeline.RUNS_DIR / "athens_night_1" / "01_transcription" / sid
+    assert (sdir / "audio.m4a").exists()
+    assert (sdir / "session.json").exists()
+    assert (sdir / "pipeline.log").exists()
+    assert not (sdir / "session_package.json").exists()
+
+    # session.json shape: title got translated to session_title.
+    s_json = json.loads((sdir / "session.json").read_text())
+    assert s_json["session_title"]
+    assert "roster" in s_json
+
+    # C26: invoking pipeline.fire_transcription against the normalized
+    # session is exactly what the orchestrator's Stage 0 dispatch does.
+    # Verifies the orchestrator-facing entrypoint works end-to-end against
+    # a real upload's filesystem state.
+    session_json_path = sdir / "session.json"
+    fired = pipeline.fire_transcription(sdir, session_json_path)
+    assert fired["state"] == "transcribing", fired
+    assert fired.get("pid"), fired
+
+    # Now wait for transcription to complete (FAKE_DELAY_SECONDS=1; ~1-2s).
     terminal = {"done", "error"}
     for _ in range(50):
         r = client.get(f"/session/{sid}/status.json", auth=ADMIN_AUTH)
@@ -160,20 +195,8 @@ def test_upload_then_transcribe_end_to_end(
         if st.get("state") in terminal:
             break
         time.sleep(0.2)
-
     assert st["state"] == "done", st
-
-    # Filesystem check: the normalized m4a + fake outputs should exist.
-    sdir = pipeline.RUNS_DIR / "athens_night_1" / "01_transcription" / sid
-    assert (sdir / "audio.m4a").exists()
     assert (sdir / "session_package.json").exists()
-    assert (sdir / "session.json").exists()
-    assert (sdir / "pipeline.log").exists()
-
-    # session.json shape: title got translated to session_title.
-    s_json = json.loads((sdir / "session.json").read_text())
-    assert s_json["session_title"]
-    assert "roster" in s_json
 
 
 # --- Validation -------------------------------------------------------------

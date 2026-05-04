@@ -67,6 +67,7 @@ templates.env.globals["static_version"] = STATIC_VERSION
 _STATE_DISPLAY = {
     "received":               "received",
     "normalizing":            "normalizing",
+    "normalized":             "normalized · awaiting orchestrator",
     "transcribing":           "transcribing",
     "transcribing_asr":       "transcribing · ASR",
     "transcribing_speaker_id":"transcribing · speaker ID",
@@ -294,7 +295,16 @@ def overview(request: Request, role: str = Depends(require_admin)):
         st = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
         rows.append({"session": s, "status": st})
     # Sort: errors first, then active, then done, then not-started.
-    order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
+    # C26: `normalized` slots between transcribing and received — ffmpeg done,
+    # awaiting orchestrator dispatch (next poll, ≤60s).
+    order = {
+        "error": 0,
+        "normalizing": 1, "transcribing": 1,
+        "normalized": 2,
+        "received": 3,
+        "done": 4,
+        None: 9,
+    }
     # Sort by state priority, then day, then time. Use date_time_start (ISO 8601)
     # for time ordering — it sorts lexicographically correctly and is always
     # zero-padded. Fall back to start_time only if date_time_start is absent.
@@ -645,7 +655,16 @@ def admin_tonight_transcription(
             "has_vendor_warnings": has_vendor_warnings,
             "has_vendor_error": has_vendor_error,
         })
-    order = {"error": 0, "normalizing": 1, "transcribing": 1, "received": 2, "done": 3, None: 4}
+    # C26: `normalized` slots between transcribing and received — ffmpeg done,
+    # awaiting orchestrator dispatch (next poll, ≤60s).
+    order = {
+        "error": 0,
+        "normalizing": 1, "transcribing": 1,
+        "normalized": 2,
+        "received": 3,
+        "done": 4,
+        None: 9,
+    }
     rows.sort(key=lambda r: (
         order.get(r["status"].get("state"), 9),
         r["session"].day_index,

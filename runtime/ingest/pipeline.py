@@ -1,9 +1,22 @@
-"""Pipeline worker: ffmpeg normalize, Stage 0 subprocess, status tracking.
+"""Pipeline worker: ffmpeg normalize, Stage 0 spawning, status tracking.
 
 Design principle: the filesystem is authoritative. status.json files under
-each session dir are the source of truth. The FastAPI BackgroundTask is
-just the thing that updates them; transcription subprocesses are detached
-so they survive uvicorn restarts.
+each session dir are the source of truth.
+
+C26 (2026-05-04) split the upload-time path from the transcription-firing
+path. Upload now does normalize only (state: received → normalizing →
+normalized) and STOPS. The overnight orchestrator scans for `normalized`
+sessions and fires transcription in its own concurrency-bounded queue,
+which gives us:
+  - Single state machine (orchestrator) drives all 6 stages
+  - Concurrency control on AssemblyAI calls
+  - Centralised retry visibility in dashboard
+  - CLI use of transcription_flow.py (dryruns) doesn't need the
+    upload-side status.json plumbing
+
+`spawn_transcription` is the public function the orchestrator calls.
+The legacy `run_normalize_and_transcribe` wrapper is preserved as a
+back-compat alias (now equivalent to `run_normalize` — no spawn).
 
 All status writes go through `write_json_atomic` from flows.shared.io —
 reconciliation reads these files from another process/worker, so torn
@@ -40,11 +53,19 @@ from .config import (
 
 STATE_RECEIVED = "received"
 STATE_NORMALIZING = "normalizing"
+STATE_NORMALIZED = "normalized"  # C26: ffmpeg done, awaiting orchestrator dispatch
 STATE_TRANSCRIBING = "transcribing"
 STATE_DONE = "done"
 STATE_ERROR = "error"
 
 TERMINAL_STATES = {STATE_DONE, STATE_ERROR}
+
+# C26: states the orchestrator's pending-transcription scanner picks up.
+# `normalized` is the post-C26 happy path; `received` is included for
+# legacy / mid-flight uploads where ffmpeg was interrupted before normalize
+# completed (the orchestrator skips them — they need operator attention or
+# a fresh re-upload).
+DISPATCHABLE_STATES = {STATE_NORMALIZED}
 
 # Sub-states derived from pipeline.log (returned by infer_state, never written
 # to status.json — they'd be stale within seconds anyway).
@@ -392,13 +413,19 @@ def spawn_transcription(
 # --- Worker orchestration ----------------------------------------------------
 
 
-async def run_normalize_and_transcribe(
+async def run_normalize(
     session_dir: Path, raw_path: Path, session_json_path: Path
 ) -> None:
-    """Background worker body: normalize → spawn transcription → return.
+    """Background worker body: normalize and STOP.
 
-    We do NOT wait for transcription here. The subprocess is detached; its
-    status is inferred from session_package.json presence + PID liveness.
+    C26 (2026-05-04): the FastAPI BackgroundTask no longer fires
+    transcription. After ffmpeg completes, status moves to `normalized`
+    and the overnight orchestrator picks it up in its own concurrency-
+    bounded queue (see overnight_orchestrator.py:fire_pending_transcriptions).
+
+    `session_json_path` is unused here but kept in the signature so that
+    `run_normalize_and_transcribe` (legacy alias) can be replaced byte-
+    identically by callers without parameter shuffling.
     """
     async with _gate:
         # --- Normalize
@@ -412,16 +439,45 @@ async def run_normalize_and_transcribe(
             update_status(session_dir, state=STATE_ERROR, error=f"normalize crashed: {e}")
             return
 
-        update_status(session_dir, audio_size_bytes=normalized.stat().st_size)
+        update_status(
+            session_dir,
+            state=STATE_NORMALIZED,
+            audio_size_bytes=normalized.stat().st_size,
+        )
 
-        # --- Spawn transcription. Don't hold the gate while the subprocess runs;
-        # it's detached, and infer_state() is what reports its status afterwards.
+
+# C26 back-compat alias. New callers should use `run_normalize`.
+run_normalize_and_transcribe = run_normalize
+
+
+def fire_transcription(session_dir: Path, session_json_path: Path) -> dict[str, Any]:
+    """Public spawn entrypoint for the orchestrator.
+
+    Spawns the transcription subprocess against the already-normalized
+    audio at `<session_dir>/audio.m4a` and flips status to `transcribing`
+    with the new PID. Returns the merged status dict.
+
+    Errors during spawn are surfaced as state=error with an explanatory
+    message so the orchestrator's next poll classifies the session as
+    failed rather than retrying indefinitely. The orchestrator is
+    expected to call this only on sessions in `STATE_NORMALIZED`.
+    """
+    audio = session_dir / NORMALIZED_FILENAME
+    if not audio.exists():
+        return update_status(
+            session_dir,
+            state=STATE_ERROR,
+            error=f"cannot transcribe: {NORMALIZED_FILENAME} missing under {session_dir}",
+        )
     try:
-        pid = spawn_transcription(session_dir, normalized, session_json_path)
-    except Exception as e:
-        update_status(session_dir, state=STATE_ERROR, error=f"spawn failed: {e}")
-        return
-    update_status(session_dir, state=STATE_TRANSCRIBING, pid=pid)
+        pid = spawn_transcription(session_dir, audio, session_json_path)
+    except Exception as e:  # defensive — subprocess machinery rarely fails this way
+        return update_status(
+            session_dir,
+            state=STATE_ERROR,
+            error=f"spawn failed: {e}",
+        )
+    return update_status(session_dir, state=STATE_TRANSCRIBING, pid=pid, error=None)
 
 
 def spawn_retry(session_dir: Path, session_json_path: Path) -> dict[str, Any]:

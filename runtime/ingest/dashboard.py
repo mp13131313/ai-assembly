@@ -64,15 +64,21 @@ def _stage_summary(state: str, label: str = "", **extras: Any) -> dict[str, Any]
 def _transcription_summary(run_dir: Path) -> dict[str, Any]:
     """Aggregate per-session transcription state into a stage row.
 
-    States across the per-session status.json files:
-        received | normalizing | transcribing* | done | error
+    States across the per-session status.json files (post-C26 2026-05-04):
+        received | normalizing | normalized | transcribing* | done | error
     Aggregate logic:
         * any in error           → state="error"
         * all in done            → state="done"
         * any in transcribing*   → state="running" (transcription substate)
         * any in normalizing     → state="running"
+        * any in normalized      → state="awaiting_dispatch"  (orchestrator hasn't picked up yet)
         * any in received        → state="running"
         * none                   → state="pending"
+
+    `normalized` is the post-C26 happy-path state where ffmpeg has
+    completed but the orchestrator hasn't yet spawned transcription.
+    Surfaced distinctly so operators can tell whether the bottleneck is
+    on ffmpeg, the orchestrator dispatcher, or AssemblyAI itself.
     """
     tdir = run_dir / "01_transcription"
     if not tdir.exists():
@@ -83,7 +89,7 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
         return _stage_summary("pending", "no sessions uploaded yet")
 
     counts = {"done": 0, "error": 0, "transcribing": 0, "normalizing": 0,
-              "received": 0, "unknown": 0}
+              "normalized": 0, "received": 0, "unknown": 0}
     # Per-source totals so the admin dashboard can show "X audio · Y vendor"
     # at a glance. Vendor sessions land via flows/vendor_intake.py with
     # status.json source: "vendor"; everything else (including pre-vendor
@@ -118,6 +124,11 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
         state = "done"
     elif counts["transcribing"] or counts["normalizing"] or counts["received"]:
         state = "running"
+    elif counts["normalized"]:
+        # C26: ffmpeg finished but orchestrator hasn't spawned transcription
+        # yet. Up to ~60s lag (default poll interval); operator may want to
+        # check the orchestrator is alive.
+        state = "awaiting_dispatch"
     else:
         state = "pending"
 
@@ -133,6 +144,8 @@ def _transcription_summary(run_dir: Path) -> dict[str, Any]:
         label += f" · {counts['error']} error"
     if counts["transcribing"]:
         label += f" · {counts['transcribing']} transcribing"
+    if counts["normalized"]:
+        label += f" · {counts['normalized']} awaiting dispatch"
     if counts["normalizing"]:
         label += f" · {counts['normalizing']} normalizing"
     if counts["received"]:

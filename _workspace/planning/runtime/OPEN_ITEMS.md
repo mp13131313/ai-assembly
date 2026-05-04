@@ -1543,7 +1543,42 @@ Filed history below preserved.
 
 ---
 
-### C26. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: post-Athens architecture suggestion)
+### C26. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟢 SHIPPED 2026-05-04 PM (with dashboard adaptation per operator request)
+
+**Shipped 2026-05-04 PM** — operator-driven split ships per spec, plus the dashboard adaptation operator asked for in same turn.
+
+**Architecture change:**
+- New per-session state `STATE_NORMALIZED` between `normalizing` and `transcribing` (filesystem source of truth in `01_transcription/<sid>/status.json`)
+- `pipeline.run_normalize_and_transcribe` (FastAPI BackgroundTask) renamed to `pipeline.run_normalize` — does ffmpeg only, then sets state=`normalized` and STOPS. Legacy alias preserved so `app.py` still calls the same name.
+- New `pipeline.fire_transcription(session_dir, session_json_path)` is the orchestrator-facing spawn entrypoint — guards against missing audio.m4a, surfaces spawn errors as state=error.
+- `overnight_orchestrator.py::fire_pending_transcriptions(run_dir, session_ids, max_concurrent)` scans the per-session status.jsons, counts in-flight transcriptions, fires `fire_transcription` for `normalized` sessions up to the cap. Concurrency: `ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY=4` default (env-overridable).
+- New Stage 0 in `poll_once` runs the dispatcher before the existing transcription_state check; idle returns now report `dispatch` and `awaiting dispatch` count.
+
+**`transcription_state` extended** with new `normalized_sessions` and `transcribing_sessions` lists so callers can see exactly which sessions are awaiting dispatch vs. in flight.
+
+**Dashboard adaptation (per operator turn-request):**
+- `_transcription_summary` adds `normalized` to its counts dict
+- New top-level state `awaiting_dispatch` when ALL pending sessions are `normalized` (no normalizing/received/transcribing in flight) — surfaces orchestrator bottleneck distinctly from ffmpeg or AssemblyAI bottlenecks
+- Per-session label gains "N awaiting dispatch" when normalized > 0
+- `_STATE_DISPLAY` adds `"normalized": "normalized · awaiting orchestrator"` for per-row state pill on transcription drilldown
+- Sort order on `/admin/tonight/transcription` slots `normalized` between `transcribing` and `received` (active dispatch ahead of waiting-on-ffmpeg)
+
+**Tests:** 17 new across two test files (12 in `test_orchestrator_dispatch.py`: state buckets + dispatch logic + concurrency cap + inflight count + substate handling + received-state-not-dispatched + spawn-error + missing-status; 5 in `test_dashboard_normalized.py`: counts surface normalized / awaiting_dispatch state / label / mixed-state / done unaffected). Plus updated `test_app.py::test_upload_then_transcribe_end_to_end` to reflect that upload now stops at `normalized` and the test then explicitly calls `fire_transcription` to drive the second half. Full runtime + ingest suite: 296/296 pass (was 279).
+
+**Operator UX impact:**
+- Producer upload still gets fast confirmation (state=normalized; ffmpeg done in seconds)
+- Orchestrator picks up within ≤60s (default poll interval)
+- Dashboard shows the new state distinctly so operator can tell at a glance whether the bottleneck is upload-side, dispatcher-side, or transcription-side
+- Concurrency-bounded firing prevents AssemblyAI rate-limit surprises at 25-session Athens scale
+- CLI use of `transcription_flow.py` (dryruns) no longer touches status.json plumbing — fully decoupled
+
+**Smoke test:** orchestrator one-shot poll against fresh project_root returns clean `idle` status with no errors; imports + state machine work.
+
+Filed history below preserved.
+
+---
+
+### ~~C26 (pre-shipped, post-promotion)~~. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: post-Athens architecture suggestion)
 
 **Promotion rationale (2026-05-04):** Operator's dryrun pattern — running transcription_flow.py via CLI, hand-patching status.json so the dashboard reflects state — is exactly the friction this item resolves. During Athens itself, the operator will be observing via dashboard while transcription runs; having the orchestrator drive transcription (instead of fire-and-forget from ingest) gives:
 - Concurrency control on AssemblyAI calls (stagger 25 sessions across the night without overrunning rate limits)

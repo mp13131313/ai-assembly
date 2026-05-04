@@ -10,13 +10,18 @@ sys.executable; PROJECT_ROOT comes from --project arg or env var.
 
 Stage chain (coarse-grained — each stage fires once at upstream completion):
 
-    transcription (auto-fired by ingest)
+    Stage 0 (transcription dispatch)        ← C26 (2026-05-04)
+        │  (scan for state=normalized; spawn up to ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY)
+        ▼
+    transcription                           ← per-session subprocesses run
         │  (all sessions state=done; halt if any state=error)
         ▼
     researcher  ─►  provocateur  ─►  voice  ─►  editor (skip if not built)  ─►  publish
 
-Per-session transcription is auto-fired by ingest's pipeline.py — orchestrator
-does NOT fire it, only polls for completion.
+C26 (2026-05-04): orchestrator now fires transcription itself rather than
+ingest spawning fire-and-forget at upload time. Producer upload → ffmpeg
+normalize → state=`normalized` → orchestrator picks up. Concurrency
+bound via ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY (default 4).
 
 Usage:
 
@@ -68,9 +73,19 @@ NIGHT_TO_DAY = {1: "Day One", 2: "Day Two", 3: "Day Three"}
 DEFAULT_POLL_INTERVAL_S = 60
 DEFAULT_DEADLINE_HOURS = 14
 
-# Per-session transcription states (from runtime/ingest/pipeline.py:41-45).
+# Per-session transcription states (from runtime/ingest/pipeline.py:41-46).
 TRANSCRIPTION_STATE_DONE = "done"
 TRANSCRIPTION_STATE_ERROR = "error"
+TRANSCRIPTION_STATE_NORMALIZED = "normalized"  # C26: dispatchable
+TRANSCRIPTION_STATE_TRANSCRIBING = "transcribing"
+
+# C26: cap on concurrent transcription subprocesses the orchestrator will
+# spawn per poll. AssemblyAI's tier limits comfortably accommodate 4 at
+# Athens scale (3 panels × 8 hours per night across 25 sessions); raise
+# via env var if a future deployment runs hotter.
+ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY = int(
+    os.environ.get("ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY", "4")
+)
 
 # --- Helpers ----------------------------------------------------------------
 
@@ -102,6 +117,77 @@ def sessions_for_tonight(project_root: Path, night: int) -> list[str]:
     )
 
 
+def fire_pending_transcriptions(
+    run_dir: Path,
+    session_ids: list[str],
+    *,
+    max_concurrent: int = ORCHESTRATOR_TRANSCRIPTION_CONCURRENCY,
+) -> dict:
+    """C26: scan for `normalized` sessions and spawn transcription up to cap.
+
+    Reads each required session's status.json. Counts in-flight
+    transcriptions (any status startswith 'transcribing'); fires
+    spawn_transcription against the next `normalized` sessions until the
+    in-flight count reaches `max_concurrent`.
+
+    `spawn_transcription` is the orchestrator-facing entrypoint added in
+    pipeline.py (C26): it spawns the subprocess against the already-
+    normalized audio at <session_dir>/audio.m4a and flips status to
+    `transcribing` with the new PID.
+
+    Returns dict with:
+      - fired: list[str]    — session_ids the orchestrator just spawned
+      - skipped_capacity: list[str]  — normalized sessions that didn't fit under the cap
+      - inflight_before: int — count of transcriptions already running
+      - inflight_after: int  — count after this dispatch
+      - normalized_pending: int — total normalized sessions (incl. fired + skipped)
+    """
+    # Local import to avoid top-of-file ingest dep on path setup; the
+    # orchestrator already added _RUNTIME_DIR to sys.path.
+    from ingest.pipeline import fire_transcription
+
+    fired: list[str] = []
+    skipped: list[str] = []
+    inflight = 0
+    normalized: list[tuple[str, Path]] = []
+
+    for sid in session_ids:
+        sdir = run_dir / "01_transcription" / sid
+        sp = sdir / "status.json"
+        if not sp.exists():
+            continue
+        try:
+            status = json.loads(sp.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        state = (status or {}).get("state", "")
+        if isinstance(state, str) and state.startswith("transcribing"):
+            inflight += 1
+        elif state == TRANSCRIPTION_STATE_NORMALIZED:
+            normalized.append((sid, sdir))
+
+    inflight_before = inflight
+    for sid, sdir in normalized:
+        if inflight >= max_concurrent:
+            skipped.append(sid)
+            continue
+        session_json_path = sdir / "session.json"
+        result = fire_transcription(sdir, session_json_path)
+        if result.get("state") == TRANSCRIPTION_STATE_TRANSCRIBING:
+            fired.append(sid)
+            inflight += 1
+        # state=error gets surfaced via the next transcription_state poll;
+        # don't count it against the cap.
+
+    return {
+        "fired": fired,
+        "skipped_capacity": skipped,
+        "inflight_before": inflight_before,
+        "inflight_after": inflight,
+        "normalized_pending": len(normalized),
+    }
+
+
 def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
     """Classify transcription state across required sessions.
 
@@ -109,12 +195,16 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
       - all_done: bool — every session state=done
       - any_error: bool — at least one state=error
       - error_sessions: list[str]
-      - pending_sessions: list[str]  (received | normalizing | transcribing | absent)
+      - pending_sessions: list[str]  (received | normalizing | normalized | transcribing | absent)
+      - normalized_sessions: list[str]  (C26: subset of pending awaiting orchestrator dispatch)
+      - transcribing_sessions: list[str]  (C26: subset of pending currently in-flight)
       - done_count: int
       - total_count: int
     """
     error_sessions: list[str] = []
     pending_sessions: list[str] = []
+    normalized_sessions: list[str] = []
+    transcribing_sessions: list[str] = []
     done_count = 0
     for sid in session_ids:
         status_path = run_dir / "01_transcription" / sid / "status.json"
@@ -133,11 +223,17 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
             error_sessions.append(sid)
         else:
             pending_sessions.append(sid)
+            if state == TRANSCRIPTION_STATE_NORMALIZED:
+                normalized_sessions.append(sid)
+            elif isinstance(state, str) and state.startswith(TRANSCRIPTION_STATE_TRANSCRIBING):
+                transcribing_sessions.append(sid)
     return {
         "all_done": done_count == len(session_ids) and len(session_ids) > 0,
         "any_error": bool(error_sessions),
         "error_sessions": error_sessions,
         "pending_sessions": pending_sessions,
+        "normalized_sessions": normalized_sessions,
+        "transcribing_sessions": transcribing_sessions,
         "done_count": done_count,
         "total_count": len(session_ids),
     }
@@ -275,6 +371,14 @@ def poll_once(
     if publish_done or (skip_publish and (editor_done or (voice_done and not editor_flow_exists()))):
         return {"state": "complete", "detail": "pipeline complete", "ts": _now_iso()}
 
+    # Stage 0 (C26): dispatch transcription for any normalized sessions
+    # under the concurrency cap. Runs every poll while researcher hasn't
+    # fired — once researcher_done is true the dispatcher would never fire
+    # anyway because all sessions are already in `done` state.
+    dispatch: dict | None = None
+    if not researcher_done:
+        dispatch = fire_pending_transcriptions(run_dir, session_ids)
+
     # Stage 1: Researcher — needs all transcriptions in done state.
     if not researcher_done:
         ts = transcription_state(run_dir, session_ids)
@@ -283,13 +387,20 @@ def poll_once(
                 "state": "failed:transcription",
                 "detail": f"sessions in error state: {ts['error_sessions']}",
                 "transcription": ts,
+                "dispatch": dispatch,
                 "ts": _now_iso(),
             }
         if not ts["all_done"]:
+            detail = f"transcription {ts['done_count']}/{ts['total_count']} done"
+            if dispatch and dispatch["fired"]:
+                detail += f" · just fired {len(dispatch['fired'])}"
+            if ts.get("normalized_sessions"):
+                detail += f" · {len(ts['normalized_sessions'])} awaiting dispatch"
             return {
                 "state": "idle",
-                "detail": f"transcription {ts['done_count']}/{ts['total_count']} done",
+                "detail": detail,
                 "transcription": ts,
+                "dispatch": dispatch,
                 "ts": _now_iso(),
             }
         ok, log_path = fire_stage(
