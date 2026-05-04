@@ -503,14 +503,20 @@ def run_voice(
     # ID — full theme metadata produced by separate publish_flow.py
     # (which reads across upstream pipelines: Researcher + Provocateur +
     # Voice).
+    # C32 (2026-05-04): publish fires whenever Step 2 (or Step 3) ran.
+    # Athens runs --skip-step3 per A1, so the prior `if step3_results and not
+    # skip_step3` condition meant the per-voice publish never fired in
+    # production. publish_voice_artifacts_for_night now prefers Step 3 and
+    # falls back to Step 2 per voice, marking each published file with
+    # `was_step3` true/false.
     publish_summary: dict[str, Any] = {}
-    if step3_results and not skip_step3:
+    if completed_voices:
         try:
             publish_summary = publish_voice_artifacts_for_night(
                 run_dir=run_dir,
                 night=night,
                 project_root=project_root,
-                voice_slugs=sorted(step3_results),
+                voice_slugs=sorted(completed_voices),
             )
         except Exception as e:  # noqa: BLE001
             logger.error(f"Publish step failed: {e}")

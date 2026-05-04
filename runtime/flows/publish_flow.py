@@ -1,12 +1,15 @@
 """Publish Pipeline — cross-pipeline aggregation for the publish layer.
 
-Runs once per night AFTER voice_flow has produced:
-  - <run_dir>/04_voice/step3_amended_artifacts/<slug>.json
+Runs once per night AFTER voice_flow + editor_flow have produced:
+  - <run_dir>/04_voice/step3_amended_artifacts/<slug>.json (or step2 fallback)
+  - <run_dir>/05_editor/dossiers/dossier_<NNN>.json
+  - <run_dir>/05_editor/theme_routing.json
   - <PROJECT_ROOT>/published_artifacts/nights/night_<N>/<slug>.json
   - <PROJECT_ROOT>/published_artifacts/nights/night_<N>/_index.json
+  - <PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/dossier_<NNN>.json
 
-Reads from upstream pipelines (Researcher + Provocateur + Voice) and
-produces:
+Reads from upstream pipelines (Researcher + Provocateur + Voice + Editor)
+and produces:
 
   <PROJECT_ROOT>/published_artifacts/themes/night_<N>/<theme_id>.json
        Per-theme files: theme metadata + clusters + extractions +
@@ -31,19 +34,30 @@ produces:
        publish_flow run (additive across nights). Lets the micro-site
        render per-voice timeline pages.
 
+  <PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/_index.json
+       Per-night dossier index — kicker, headline, theme_id, voice_count,
+       and routing lineage for each dossier published that night.
+       Microsite "Tonight's Edition" / per-night listing surface.
+
+  <PROJECT_ROOT>/published_artifacts/dossiers/_index.json
+       Cross-night dossier index — every dossier across every night
+       published so far, in chronological order. Microsite "Past Editions"
+       / full conference archive surface. Re-built each publish_flow run.
+
 Run:
 
     python flows/publish_flow.py <run_dir> --night N --project PATH
 
 CLI flags:
     <run_dir>       Run directory containing 02_researcher/ +
-                    03_provocateur/ + 04_voice/.
+                    03_provocateur/ + 04_voice/ + (optional) 05_editor/.
     --night N       Night number (1, 2, or 3).
     --project PATH  PROJECT_ROOT override (or set $AI_ASSEMBLY_PROJECT_ROOT).
     --skip-themes   Skip per-theme file generation.
     --skip-extractions  Skip per-extraction file generation.
     --skip-graph    Skip lineage-graph generation.
     --skip-voices   Skip cross-night per-voice index regeneration.
+    --skip-dossiers Skip dossier index generation (per-night + cross-night).
 """
 
 from __future__ import annotations
@@ -498,6 +512,8 @@ def _build_lineage_graph(
       consumed_by   detailed_response → first_draft
       amended_by    first_draft → amended_artifact (1:1 per voice)
       cites         amended_artifact → amended_artifact (with amendment_type)
+      routed_into   amended_artifact → dossier (per editor theme_routing)
+      composed_for  theme → dossier (theme dossier_no anchor)
     """
     logger = get_logger("publish_flow")
     out_dir = project_root / "published_artifacts" / "traces"
@@ -649,6 +665,55 @@ def _build_lineage_graph(
                     "cited_theme_id": a.get("cited_theme_id", ""),
                 })
 
+    # Editor dossier nodes + edges (C33 item 3) — added when editor's
+    # theme_routing.json is present. Each dossier becomes a node; each
+    # routed voice gets an `amended_artifact → dossier` edge; each theme
+    # composed into a dossier gets a `theme → dossier` edge.
+    routing = _load_theme_routing(run_dir)
+    if routing:
+        for td in routing.get("themes_to_dossiers", []) or []:
+            d_no = td.get("dossier_no")
+            tid = td.get("theme_id")
+            if d_no is None:
+                continue
+            d_node = f"dossier:{night}:{d_no:03d}"
+            if d_node not in nodes:
+                nodes[d_node] = {
+                    "type": "dossier",
+                    "night": night,
+                    "dossier_no": d_no,
+                    "theme_id": tid,
+                    "theme_title": td.get("theme_title", ""),
+                    "url_path": f"/dossiers/night-{night}/dossier_{d_no:03d}",
+                }
+            if tid:
+                edges.append({
+                    "from": f"theme:{tid}",
+                    "to": d_node,
+                    "rel": "composed_for",
+                })
+        for vr in routing.get("voices_routing", []) or []:
+            slug = vr.get("voice_slug")
+            d_no = vr.get("primary_dossier")
+            if not slug or d_no is None:
+                continue
+            d_node = f"dossier:{night}:{d_no:03d}"
+            if d_node not in nodes:
+                # Defensive: routing referenced a dossier_no with no themes_to_dossiers
+                # entry — record a stub so the edge target resolves.
+                nodes[d_node] = {
+                    "type": "dossier",
+                    "night": night,
+                    "dossier_no": d_no,
+                    "url_path": f"/dossiers/night-{night}/dossier_{d_no:03d}",
+                }
+            edges.append({
+                "from": f"amended_artifact:{slug}",
+                "to": d_node,
+                "rel": "routed_into",
+                "primary_theme": vr.get("primary_theme", ""),
+            })
+
     graph = {
         "night": night,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -742,6 +807,179 @@ def _build_per_voice_multi_night_index(
     return voices_written
 
 
+# --- Dossier index builders (C33) --------------------------------------
+
+def _load_theme_routing(run_dir: Path) -> dict[str, Any] | None:
+    """Load editor's theme_routing.json if present (Stage 1 output).
+
+    Returns None when editor hasn't run for this night (e.g. in dryruns
+    that only exercised voice_flow). Callers use it for lineage edges
+    between voices and dossiers.
+    """
+    p = run_dir / "05_editor" / "theme_routing.json"
+    if not p.exists():
+        return None
+    try:
+        with open(p, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _build_per_night_dossier_index(
+    run_dir: Path,
+    night: int,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Per-night dossier index — kicker / headline / theme_id / voice_count
+    / lineage for every dossier_<NNN>.json published this night.
+
+    Idempotent (re-built each publish_flow run); zero work if no dossiers
+    were published. `voices_routed` (slug + name + url_path + primary_theme)
+    sourced from theme_routing.voices_routing[]; falls back to dossier
+    headnotes-derived count when theme_routing is absent.
+    """
+    logger = get_logger("publish_flow")
+    out_dir = project_root / "published_artifacts" / "dossiers" / f"night_{night}"
+    if not out_dir.exists():
+        logger.info(
+            f"  Dossier index (night {night}): no dossiers/ dir at "
+            f"{out_dir.relative_to(project_root)}; skipping."
+        )
+        return {"dossier_count": 0, "index_path": None}
+
+    routing = _load_theme_routing(run_dir)
+    voices_by_dossier: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    if routing:
+        for vr in routing.get("voices_routing", []):
+            d_no = vr.get("primary_dossier")
+            if d_no is None:
+                continue
+            slug = vr.get("voice_slug", "")
+            voices_by_dossier[d_no].append({
+                "voice_slug": slug,
+                "voice_name": vr.get("voice_name", slug),
+                "url_path": f"/night-{night}/{slug}",
+                "primary_theme": vr.get("primary_theme", ""),
+            })
+
+    dossiers_summary: list[dict[str, Any]] = []
+    for path in sorted(out_dir.glob("dossier_*.json")):
+        try:
+            with path.open(encoding="utf-8") as f:
+                dossier = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        meta = dossier.get("metadata", {}) or {}
+        # dossier_no comes from filename (`dossier_001.json` → 1) so the
+        # index works even if metadata didn't carry it explicitly.
+        m = re.match(r"dossier_(\d+)\.json$", path.name)
+        dossier_no = int(m.group(1)) if m else None
+        voices_routed = voices_by_dossier.get(dossier_no, []) if dossier_no else []
+        # Headnotes are the runtime-stamped voice slots Editor allocates;
+        # their length is a reliable voice_count fallback when theme_routing
+        # is absent.
+        headnotes = dossier.get("headnotes", []) or []
+        dossiers_summary.append({
+            "dossier_no": dossier_no,
+            "filename": path.name,
+            "url_path": f"/dossiers/night-{night}/{path.stem}",
+            "kicker": dossier.get("kicker", ""),
+            "headline": dossier.get("headline", ""),
+            "subline": dossier.get("subline", ""),
+            "theme_id": meta.get("theme_id", ""),
+            "theme_display_title": meta.get("theme_display_title", ""),
+            "issue_no": meta.get("issue_no"),
+            "vol": meta.get("vol"),
+            "voice_count": len(voices_routed) if voices_routed else len(headnotes),
+            "voices_routed": voices_routed,
+        })
+
+    index = {
+        "night": night,
+        "url_path": f"/dossiers/night-{night}",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "dossier_count": len(dossiers_summary),
+        "dossiers": dossiers_summary,
+    }
+    index_path = out_dir / "_index.json"
+    write_json_atomic(index_path, index)
+    logger.info(
+        f"  Dossier index (night {night}): {len(dossiers_summary)} dossiers → "
+        f"{index_path.relative_to(project_root)}"
+    )
+    return {"dossier_count": len(dossiers_summary), "index_path": str(index_path)}
+
+
+def _build_cross_night_dossier_index(
+    project_root: Path,
+) -> dict[str, Any]:
+    """Cross-night dossier index — walk every published_artifacts/dossiers/
+    night_*/dossier_*.json and emit a flat chronological list.
+
+    Re-built each publish_flow run (additive: as more nights publish, the
+    index grows). Microsite "Past Editions" / full archive surface.
+    """
+    logger = get_logger("publish_flow")
+    dossiers_root = project_root / "published_artifacts" / "dossiers"
+    if not dossiers_root.exists():
+        logger.info(
+            "  Cross-night dossier index: no dossiers/ dir at "
+            f"{dossiers_root}; skipping."
+        )
+        return {"dossier_count": 0, "index_path": None, "nights_present": []}
+
+    night_dirs = sorted(dossiers_root.glob("night_*"))
+    all_dossiers: list[dict[str, Any]] = []
+    nights_present: list[int] = []
+    for nd in night_dirs:
+        m = re.match(r"night_(\d+)$", nd.name)
+        if not m:
+            continue
+        night = int(m.group(1))
+        nights_present.append(night)
+        for path in sorted(nd.glob("dossier_*.json")):
+            try:
+                with path.open(encoding="utf-8") as f:
+                    dossier = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                continue
+            meta = dossier.get("metadata", {}) or {}
+            mfn = re.match(r"dossier_(\d+)\.json$", path.name)
+            dossier_no = int(mfn.group(1)) if mfn else None
+            all_dossiers.append({
+                "night": night,
+                "dossier_no": dossier_no,
+                "filename": path.name,
+                "url_path": f"/dossiers/night-{night}/{path.stem}",
+                "kicker": dossier.get("kicker", ""),
+                "headline": dossier.get("headline", ""),
+                "theme_id": meta.get("theme_id", ""),
+                "theme_display_title": meta.get("theme_display_title", ""),
+                "issue_no": meta.get("issue_no"),
+                "vol": meta.get("vol"),
+                "publication_date": meta.get("publication_date", ""),
+            })
+
+    index = {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "nights_present": sorted(set(nights_present)),
+        "dossier_count": len(all_dossiers),
+        "dossiers": all_dossiers,
+    }
+    index_path = dossiers_root / "_index.json"
+    write_json_atomic(index_path, index)
+    logger.info(
+        f"  Cross-night dossier index: {len(all_dossiers)} dossiers across "
+        f"{len(nights_present)} night(s) → {index_path.relative_to(project_root)}"
+    )
+    return {
+        "dossier_count": len(all_dossiers),
+        "index_path": str(index_path),
+        "nights_present": sorted(set(nights_present)),
+    }
+
+
 # --- Main flow --------------------------------------------------------
 
 def run_publish(
@@ -752,6 +990,7 @@ def run_publish(
     skip_extractions: bool = False,
     skip_graph: bool = False,
     skip_voices: bool = False,
+    skip_dossiers: bool = False,
 ) -> dict[str, Any]:
     """Run the publish pipeline for one night."""
     logger = get_logger("publish_flow")
@@ -808,6 +1047,13 @@ def run_publish(
         summary["per_voice_multi_night_index"] = _build_per_voice_multi_night_index(
             project_root
         )
+    if not skip_dossiers:
+        summary["per_night_dossier_index"] = _build_per_night_dossier_index(
+            run_dir, night, project_root
+        )
+        summary["cross_night_dossier_index"] = _build_cross_night_dossier_index(
+            project_root
+        )
 
     summary["wall_clock_s"] = round(time.time() - t_start, 2)
 
@@ -836,6 +1082,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--skip-extractions", action="store_true")
     p.add_argument("--skip-graph", action="store_true")
     p.add_argument("--skip-voices", action="store_true")
+    p.add_argument("--skip-dossiers", action="store_true")
     add_project_arg(p)
     return p.parse_args()
 
@@ -851,4 +1098,5 @@ if __name__ == "__main__":
         skip_extractions=args.skip_extractions,
         skip_graph=args.skip_graph,
         skip_voices=args.skip_voices,
+        skip_dossiers=args.skip_dossiers,
     )

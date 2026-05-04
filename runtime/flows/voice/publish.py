@@ -1,9 +1,9 @@
 """Voice Pipeline — publish-ready artifact handoff.
 
-After Step 3 + continuity for a night settle, write per-voice publish-
-ready files to <PROJECT_ROOT>/published_artifacts/nights/night_<N>/
-that downstream consumers (micro-site, Edition Pipeline, Substack
-curation, closing-show pipelines) read from.
+After Step 3 (or, under Athens `--skip-step3`, after Step 2) + continuity
+for a night settle, write per-voice publish-ready files to
+<PROJECT_ROOT>/published_artifacts/nights/night_<N>/ that downstream
+consumers (micro-site, Edition Pipeline, closing-show pipelines) read from.
 
 Per-voice file shape (one per voice per night) — themes referenced by
 ID, not inlined. Per-theme files are produced by the separate
@@ -11,10 +11,17 @@ publish_flow.py (which can read across multiple upstream pipelines).
 
 This module's contract:
   - Reads:   <run_dir>/04_voice/step3_amended_artifacts/<slug>.json
+             (preferred — when Step 3 ran)
+             <run_dir>/04_voice/step2_first_draft_artifacts/<slug>.json
+             (fallback — when Step 3 was skipped per A1)
   - Writes:  <PROJECT_ROOT>/published_artifacts/nights/night_<N>/<slug>.json
              <PROJECT_ROOT>/published_artifacts/nights/night_<N>/_index.json
 
-The published file is the SAME artifact as the run-dir Step 3 file but:
+The published file carries `was_step3` (true/false) so consumers can
+distinguish amended artifacts (deliberation block populated) from
+first-draft artifacts (deliberation.voices_read + amendments empty).
+
+The published file is the SAME artifact as the source run-dir file but:
   - Stripped of telemetry, lineage paths, and thinking_trace
   - Re-shaped for downstream consumers (artifact / themes_addressed /
     deliberation grouped logically)
@@ -22,7 +29,7 @@ The published file is the SAME artifact as the run-dir Step 3 file but:
   - Themes referenced by theme_id (joins to per-theme files in
     <PROJECT_ROOT>/published_artifacts/themes/night_<N>/<theme_id>.json)
 
-The run-dir Step 3 files remain on disk as the audit / debug surface
+The run-dir source files remain on disk as the audit / debug surface
 (full lineage, thinking_trace, telemetry). The published files are
 the read surface.
 """
@@ -120,6 +127,7 @@ def _to_publish_per_voice(
         "voice_slug": voice_slug,
         "night": night,
         "url_path": url_path,
+        "was_step3": True,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "artifact": {
             "title": step3_output.get("amended_artifact_title", ""),
@@ -132,6 +140,57 @@ def _to_publish_per_voice(
         },
         "themes_addressed": themes_addressed,
         "deliberation": deliberation,
+    }
+
+
+def _to_publish_per_voice_from_step2(
+    step2_output: dict[str, Any],
+    night: int,
+) -> dict[str, Any]:
+    """Re-shape one Step 2 output into a publish-ready file (Step 3 absent).
+
+    Used under Athens `--skip-step3` (per A1, Step 3 dormant for Athens).
+    Same published shape as the Step 3 path, with:
+      - `was_step3` = False so consumers can distinguish first-draft vs.
+        amended artifacts
+      - `deliberation.decision` = "first_draft" (no amend/no-change choice
+        was made — Step 3 didn't run)
+      - `deliberation.voices_read` = []  (Step 3 reads other voices; Step 2
+        reads only its own Step 1 outputs)
+      - `deliberation.amendments` = []   (Step 3 produces these)
+
+    `themes_addressed` comes from Step 2's `lineage.themes_covered`
+    (Step 3 propagates this verbatim; Step 2 derives it deterministically
+    from focus_decision + the voice's Step 1 theme_ids).
+    """
+    voice_slug = step2_output["lineage"]["voice_slug"]
+    voice_name = step2_output.get("council_member") or voice_slug
+    url_path = f"/night-{night}/{voice_slug}"
+    themes_addressed = step2_output["lineage"].get("themes_covered", [])
+
+    return {
+        "voice_name": voice_name,
+        "voice_slug": voice_slug,
+        "night": night,
+        "url_path": url_path,
+        "was_step3": False,
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "artifact": {
+            "title": step2_output.get("artifact_title", ""),
+            "subtitle": step2_output.get("artifact_subtitle", ""),
+            "text": step2_output.get("artifact_text", ""),
+            "selected_form": step2_output.get("selected_form", ""),
+            "stance": step2_output.get("stance", ""),
+            "focus_decision": step2_output.get("focus_decision", ""),
+            "word_count": step2_output.get("word_count", 0),
+        },
+        "themes_addressed": themes_addressed,
+        "deliberation": {
+            "decision": "first_draft",
+            "decision_rationale": "",
+            "voices_read": [],
+            "amendments": [],
+        },
     }
 
 
@@ -219,15 +278,22 @@ def publish_voice_artifacts_for_night(
     )
     publish_dir.mkdir(parents=True, exist_ok=True)
 
-    # If voice_slugs not provided, walk the Step 3 output dir.
+    # If voice_slugs not provided, walk the Step 3 output dir, falling back
+    # to Step 2 when Step 3 wasn't run (Athens --skip-step3 per A1).
     if voice_slugs is None:
         step3_dir = run_dir / "04_voice" / "step3_amended_artifacts"
-        if not step3_dir.exists():
+        step2_dir = run_dir / "04_voice" / "step2_first_draft_artifacts"
+        slug_set: set[str] = set()
+        if step3_dir.exists():
+            slug_set.update(p.stem for p in step3_dir.glob("*.json"))
+        if step2_dir.exists():
+            slug_set.update(p.stem for p in step2_dir.glob("*.json"))
+        if not slug_set:
             logger.warning(
-                f"  Publish: no Step 3 outputs at {step3_dir}; skipping."
+                f"  Publish: no Step 3 or Step 2 outputs under {run_dir / '04_voice'}; skipping."
             )
             return {"voices_published": [], "index_path": None, "output_dir": str(publish_dir)}
-        voice_slugs = sorted(p.stem for p in step3_dir.glob("*.json"))
+        voice_slugs = sorted(slug_set)
 
     # C28b: filter out voices the operator held for regen.
     held = _load_held_voices(run_dir)
@@ -240,15 +306,22 @@ def publish_voice_artifacts_for_night(
         )
 
     voices_published: list[dict[str, Any]] = []
+    step2_only_count = 0
 
     for slug in voice_slugs:
         step3 = _load_step3(run_dir, slug)
-        if step3 is None:
-            logger.warning(f"  Publish: no Step 3 file for {slug}; skipping.")
-            continue
         step2 = _load_step2(run_dir, slug)
-        publish_entry = _to_publish_per_voice(step3, night)
-        publish_entry = _enrich_with_step2_metadata(publish_entry, step2)
+        if step3 is not None:
+            publish_entry = _to_publish_per_voice(step3, night)
+            publish_entry = _enrich_with_step2_metadata(publish_entry, step2)
+        elif step2 is not None:
+            publish_entry = _to_publish_per_voice_from_step2(step2, night)
+            step2_only_count += 1
+        else:
+            logger.warning(
+                f"  Publish: no Step 3 or Step 2 file for {slug}; skipping."
+            )
+            continue
 
         out_path = publish_dir / f"{slug}.json"
         write_json_atomic(out_path, publish_entry)
@@ -264,6 +337,7 @@ def publish_voice_artifacts_for_night(
             "decision": publish_entry["deliberation"]["decision"],
             "amendment_count": len(publish_entry["deliberation"]["amendments"]),
             "word_count": publish_entry["artifact"]["word_count"],
+            "was_step3": publish_entry["was_step3"],
         })
 
     # Per-night _index.json — surface for the micro-site index pages
@@ -277,6 +351,12 @@ def publish_voice_artifacts_for_night(
     }
     index_path = publish_dir / "_index.json"
     write_json_atomic(index_path, index)
+
+    if step2_only_count:
+        logger.info(
+            f"  Publish: night {night} — {step2_only_count}/{len(voices_published)} "
+            f"voice(s) published from Step 2 (Step 3 absent; was_step3=false)"
+        )
 
     logger.info(
         f"  Publish: night {night} — {len(voices_published)} voices to "

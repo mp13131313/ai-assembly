@@ -1533,7 +1533,31 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C33. publish_flow.py needs dossier + edition coverage 🟡 (filed 2026-05-04 — surfaced when running publish_flow + considering Editor B1 ship)
+### C33. publish_flow.py needs dossier + edition coverage 🟢 SHIPPED 2026-05-04 PM (items 1-3); item 4 deferred until B3
+
+**Shipped 2026-05-04 PM** in same bundle as C32. publish_flow.py extended:
+
+- **Item 1** — `_build_per_night_dossier_index(run_dir, night, project_root)` walks `published_artifacts/dossiers/night_<N>/dossier_*.json` and emits `_index.json` per night. Each entry: dossier_no, kicker, headline, subline, theme_id, theme_display_title, issue_no, vol, voice_count, voices_routed (sourced from editor's `theme_routing.json`; falls back to `len(headnotes)` when routing absent).
+- **Item 2** — `_build_cross_night_dossier_index(project_root)` walks every `dossiers/night_*/dossier_*.json` and emits `dossiers/_index.json` (chronological, with night/dossier_no/kicker/headline/theme/issue_no/publication_date). Re-built each publish_flow run; idempotent.
+- **Item 3** — `_build_lineage_graph` extended with two new edge types:
+  - `composed_for`: `theme:<tid> → dossier:<night>:<NNN>` (one per `themes_to_dossiers` entry)
+  - `routed_into`: `amended_artifact:<slug> → dossier:<night>:<NNN>` (one per voice in `voices_routing`)
+  Dossier nodes appear only when editor's `theme_routing.json` is present; otherwise no dossier nodes/edges added (no-op).
+
+**CLI:** new `--skip-dossiers` flag mirrors existing skip flags.
+
+**Tests:** 11 new in `test_publish_flow_dossiers.py` (per-night index empty/built/voices_from_routing/headnote_fallback; cross-night empty/multi-night/idempotent; lineage no-routing/with-routing-adds-nodes-and-edges; theme_routing loader missing/present). Total runtime suite: 262/262 pass.
+
+**Smoke test against dryrun PROJECT_ROOT** (`dev_msc_dryrun_1777840771`):
+- Per-night index: 1 dossier (theme_001, 3 voices routed: cleopatra/ibn_battuta/octopus)
+- Cross-night index: 1 dossier across 1 night
+- Lineage graph: 3 dossier nodes + 7 routed_into + 3 composed_for edges (more dossier nodes than dossier files because theme_routing declared 3 themes_to_dossiers entries — lineage represents intent, index represents published)
+
+**Item 4 (Edition pipeline outputs):** still deferred until B3 (Edition/broadsheet renderer) ships.
+
+---
+
+### ~~C33 (original)~~. publish_flow.py needs dossier + edition coverage 🟡 (filed 2026-05-04 — surfaced when running publish_flow + considering Editor B1 ship)
 
 **Surfaced 2026-05-04** during C3 close. publish_flow.py is currently **voice-centric** (built before Editor B1 shipped): writes themes/extractions/voices/traces/nights. With B1 producing dossiers, the aggregation surface needs to extend.
 
@@ -1553,7 +1577,21 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C32. voice/publish.py requires step3 — never fires under Athens's --skip-step3 🔴 ATHENS-BLOCKING (filed 2026-05-04 dryrun, surfaced from C3 close)
+### C32. voice/publish.py requires step3 — never fires under Athens's --skip-step3 🟢 SHIPPED 2026-05-04 PM (Path A; bundled with C33)
+
+**Shipped 2026-05-04 PM** (operator decision: Path A — defensive both-surfaces). Three changes:
+
+- **`voice/publish.py`** — new `_to_publish_per_voice_from_step2(step2_output, night)` produces a publish-ready file from Step 2 alone (Step 3 absent). `was_step3: False` marker on the published file; `deliberation.decision = "first_draft"`; `voices_read` and `amendments` empty. `publish_voice_artifacts_for_night` now walks both `step3_amended_artifacts/` and `step2_first_draft_artifacts/` to discover voices, prefers Step 3 per voice, falls back to Step 2. Per-night `_index.json` records `was_step3` per voice.
+- **`voice_flow.py`** — publish gate flipped from `if step3_results and not skip_step3` to `if completed_voices`. Athens `--skip-step3` mode now publishes per-voice files from Step 2 every night.
+- **`was_step3` marker** — published files carry `was_step3: true|false` so consumers (microsite, editor downstream reads, publish_flow lineage) can distinguish amended artifacts from first drafts.
+
+**Tests:** 15 new in `test_voice_publish.py` (Step 3 shape; Step 2 shape; orchestrator-level Step 3 path / Step 2 fallback / mixed Step 3+2 / hold filter / empty). Total runtime suite: 262/262 pass.
+
+**Smoke test against dryrun PROJECT_ROOT** (`dev_msc_dryrun_1777840771`): all 7 voices (ada_lovelace, cleopatra, dostoevsky, hannah_arendt, ibn_battuta, octopus, plato) published from Step 2 with `was_step3=false`; `_index.json` written.
+
+---
+
+### ~~C32 (original)~~. voice/publish.py requires step3 — never fires under Athens's --skip-step3 🔴 ATHENS-BLOCKING (filed 2026-05-04 dryrun, surfaced from C3 close)
 
 **Surfaced 2026-05-04 from C3 publish_flow exercise:** `voice_flow.py:507` only calls `publish_voice_artifacts_for_night` if `step3_results and not skip_step3`. Since Athens production CLI per A1 always passes `--skip-step3` (Step 3 dormant for Athens), the per-voice publish step **never fires** for Athens nights.
 
