@@ -182,24 +182,27 @@ def build_user_prompt(dossier_briefing: dict[str, Any]) -> str:
 
 
 # v2 output schema: kicker, headline, subline, front_abstract,
-# theme_title, theme_abstract, body_paragraphs[], headnotes[]. Parser uses
-# the same `**Label:** value` pattern as voice pipeline; multi-line fields
-# (body_paragraphs) parse as one block then split on a separator.
+# theme_title_for_dossier, theme_abstract_for_dossier, body_paragraphs[],
+# headnotes[]. Parser uses the same `**Label:** value` pattern as voice
+# pipeline; multi-line fields (body_paragraphs) parse as one block then
+# split on a separator.
 #
-# theme_title + theme_abstract added 2026-05-04 PM (B1 closing-prompt v2
-# rewrite): Claudia reads the Researcher's theme record and writes a
-# publishing-register short title + abstract for the dossier's Page 3.
-# Microsite still has the option to render directly from the upstream
-# theme record at published_artifacts/themes/night_<N>/<theme_id>.json,
-# but the dossier now carries Claudia's paper-voice version inline.
+# theme_title_for_dossier + theme_abstract_for_dossier added 2026-05-04 PM:
+# Claudia reads the Researcher's theme record and writes a publishing-
+# register short title + abstract specifically for the dossier's Page 3.
+# The `_for_dossier` suffix follows the convention pattern
+# (`theme_title_from_researcher` etc.) — names the field by what it's
+# FOR rather than where it CAME FROM, so a future consumer reading both
+# Researcher's source theme + Editor's dossier-render version side-by-
+# side won't confuse the two.
 
 _FIELD_LABEL_RE = {
-    "kicker":         re.compile(r"^\s*[*_#\-]*\s*kicker\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
-    "headline":       re.compile(r"^\s*[*_#\-]*\s*headline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
-    "subline":        re.compile(r"^\s*[*_#\-]*\s*subline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
-    "front_abstract": re.compile(r"^\s*[*_#\-]*\s*front[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
-    "theme_title":    re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*title\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
-    "theme_abstract": re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "kicker":                     re.compile(r"^\s*[*_#\-]*\s*kicker\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "headline":                   re.compile(r"^\s*[*_#\-]*\s*headline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "subline":                    re.compile(r"^\s*[*_#\-]*\s*subline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "front_abstract":             re.compile(r"^\s*[*_#\-]*\s*front[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "theme_title_for_dossier":    re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*title[_\s]*for[_\s]*dossier\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "theme_abstract_for_dossier": re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*abstract[_\s]*for[_\s]*dossier\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
 }
 
 
@@ -287,16 +290,17 @@ def parse_dossier_output(raw_text: str) -> dict[str, Any]:
     """Parse Claudia's prose-and-parse output into the v2 dossier schema.
 
     Returns a dict with: kicker, headline, subline, front_abstract,
-    theme_title, theme_abstract, body_paragraphs[], headnotes[]. Missing
-    fields default to empty strings or empty lists rather than crashing.
+    theme_title_for_dossier, theme_abstract_for_dossier, body_paragraphs[],
+    headnotes[]. Missing fields default to empty strings or empty lists
+    rather than crashing.
     """
     out: dict[str, Any] = {
         "kicker": "",
         "headline": "",
         "subline": "",
         "front_abstract": "",
-        "theme_title": "",
-        "theme_abstract": "",
+        "theme_title_for_dossier": "",
+        "theme_abstract_for_dossier": "",
         "body_paragraphs": [],
         "headnotes": [],
     }
@@ -425,8 +429,8 @@ def stamp_runtime_fields(
         "subline":         parsed.get("subline", ""),
         "body_paragraphs": parsed.get("body_paragraphs", []),
         # Page 3 (theme)
-        "theme_title":     parsed.get("theme_title", ""),
-        "theme_abstract":  parsed.get("theme_abstract", ""),
+        "theme_title_for_dossier":    parsed.get("theme_title_for_dossier", ""),
+        "theme_abstract_for_dossier": parsed.get("theme_abstract_for_dossier", ""),
         # Pages 4-N (artifacts)
         "headnotes":       enriched_headnotes,
         # Audit / stamp

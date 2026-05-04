@@ -49,8 +49,8 @@ numbers); the CMS does not feed it.
   // she reads the Researcher's source title + abstract + cluster
   // extractions in her own user prompt and reformulates them in
   // publishing register. NOT a copy of the Researcher's text.
-  "theme_title":    "On The Legitimacy Of Algorithmic Sortings",
-  "theme_abstract": "The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
+  "theme_title_for_dossier":    "On The Legitimacy Of Algorithmic Sortings",
+  "theme_abstract_for_dossier": "The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
 
   // === ARTIFACT PAGES ===
   // One headnote per engaged voice. Each is fully self-contained:
@@ -103,7 +103,7 @@ numbers); the CMS does not feed it.
 |---|---|
 | **Frontpage teaser** (one card per dossier on the night's index page) | `kicker`, `headline`, `front_abstract` |
 | **Theme article** (Page 2 — Claudia's editorial piece) | `kicker`, `headline`, `subline`, `body_paragraphs[]` |
-| **Theme page** (Page 3 — orients a reader landing here) | `theme_title`, `theme_abstract` |
+| **Theme page** (Page 3 — orients a reader landing here) | `theme_title_for_dossier`, `theme_abstract_for_dossier` |
 | **Artifact page** (Pages 4-N — one per engaged voice) | `headnotes[i].voice_name`, `.artifact_title`, `.framing_text`, `.artifact_form`, `.artifact_text` (+ optional `.formulation_text` — raw briefing, see note below) |
 
 ### Body paragraph rules
@@ -122,8 +122,8 @@ numbers); the CMS does not feed it.
 | `subline` | 25-60 words |
 | `front_abstract` | 30-50 words |
 | `body_paragraphs` total | 350-500 words single-voice / 500-700 multi-voice |
-| `theme_title` | 5-10 words |
-| `theme_abstract` | 60-100 words |
+| `theme_title_for_dossier` | 5-10 words |
+| `theme_abstract_for_dossier` | 60-100 words |
 | `headnotes[i].artifact_title` | 4-12 words |
 | `headnotes[i].framing_text` | 1-2 sentences |
 | `headnotes[i].artifact_text` | varies by voice (~400-1000 words typical) |

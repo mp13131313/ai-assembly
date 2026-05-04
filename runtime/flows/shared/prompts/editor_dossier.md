@@ -49,7 +49,7 @@ The article does not supply a programme. Close on the question stated more sharp
 <theme_page>
 After the article, produce the theme page.
 
-Read the Researcher's `theme_title_from_researcher` and `theme_abstract_from_researcher` (and `clusters[]` if needed for context); render a paper-voice short `theme_title` and a `theme_abstract` in your publishing register. The theme page sits between your article (Page 2) and the artifacts (Pages 4-N), so the abstract orients a reader who arrives there directly.
+Read the Researcher's `theme_title_from_researcher` and `theme_abstract_from_researcher` (and `clusters[]` if needed for context); render a paper-voice short `theme_title_for_dossier` and a `theme_abstract_for_dossier` in your publishing register. The theme page sits between your article (Page 2) and the artifacts (Pages 4-N), so the abstract orients a reader who arrives there directly.
 </theme_page>
 
 <headnotes>
@@ -88,9 +88,9 @@ Emit the dossier as labelled fields in this exact order. Each label appears EXAC
 
 <paragraph 3>
 
-**theme_title:** <string>
+**theme_title_for_dossier:** <string>
 
-**theme_abstract:** <string>
+**theme_abstract_for_dossier:** <string>
 
 **headnotes:**
 voice_slug: <slug for first engaged voice>
@@ -110,8 +110,8 @@ Length envelopes (hard constraints):
 | `headline` | 8-15 words |
 | `subline` | 25-60 words |
 | `front_abstract` | 30-50 words; drawn from the article's opening |
-| `theme_title` | 5-10 words; paper-voice; lifts and tightens `theme_title_from_researcher` |
-| `theme_abstract` | 60-100 words; paper-voice publishing register; renders the Researcher's `theme_abstract_from_researcher` and `clusters[]` for the theme page |
+| `theme_title_for_dossier` | 5-10 words; paper-voice; lifts and tightens `theme_title_from_researcher` |
+| `theme_abstract_for_dossier` | 60-100 words; paper-voice publishing register; renders the Researcher's `theme_abstract_from_researcher` and `clusters[]` for the theme page |
 | `body_paragraphs` total | 350-500 words single-voice (one engaged voice) / 500-700 multi-voice (≥2 engaged voices) |
 | `headnotes[i].artifact_title` | 4-12 words |
 | `headnotes[i].framing_text` | 1-2 sentences |

@@ -182,32 +182,35 @@ framing_text: Cleopatra issued a prostagma.
         assert parsed["headline"] == ""
         assert parsed["body_paragraphs"] == []
         assert parsed["headnotes"] == []
-        assert parsed["theme_title"] == ""
-        assert parsed["theme_abstract"] == ""
+        assert parsed["theme_title_for_dossier"] == ""
+        assert parsed["theme_abstract_for_dossier"] == ""
 
     def test_parse_theme_title_and_abstract(self):
-        """B1 (2026-05-04 PM): Claudia emits theme_title + theme_abstract for
-        the dossier's Page 3 (theme page) — paper-voice short title +
-        publishing-register short abstract derived from Researcher's record.
+        """B1 (2026-05-04 PM): Claudia emits theme_title_for_dossier +
+        theme_abstract_for_dossier for the dossier's Page 3 (theme page) —
+        paper-voice short title + publishing-register short abstract
+        derived from Researcher's record. Suffix `_for_dossier` matches
+        the convention pattern (`theme_title_from_researcher`).
         """
         raw = """**kicker:** A KICKER
 
 **headline:** A headline
 
-**theme_title:** On The Legitimacy Of Algorithmic Sortings
+**theme_title_for_dossier:** On The Legitimacy Of Algorithmic Sortings
 
-**theme_abstract:** The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for. The voices answer in four vocabularies; none calls the device legitimate.
+**theme_abstract_for_dossier:** The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for. The voices answer in four vocabularies; none calls the device legitimate.
 """
         parsed = dg.parse_dossier_output(raw)
-        assert parsed["theme_title"] == "On The Legitimacy Of Algorithmic Sortings"
-        assert parsed["theme_abstract"].startswith("The theme reaches across")
-        assert "four vocabularies" in parsed["theme_abstract"]
+        assert parsed["theme_title_for_dossier"] == "On The Legitimacy Of Algorithmic Sortings"
+        assert parsed["theme_abstract_for_dossier"].startswith("The theme reaches across")
+        assert "four vocabularies" in parsed["theme_abstract_for_dossier"]
 
     def test_parse_theme_fields_after_body_paragraphs(self):
-        """The closing prompt now emits theme_title + theme_abstract AFTER
-        body_paragraphs (swipe order: Page 2 article body → Page 3 theme).
-        body_paragraphs's regex must terminate at the theme_title label
-        without swallowing the theme content into the body.
+        """The closing prompt emits theme_title_for_dossier +
+        theme_abstract_for_dossier AFTER body_paragraphs (swipe order:
+        Page 2 article body → Page 3 theme). body_paragraphs's regex must
+        terminate at the theme_title_for_dossier label without swallowing
+        the theme content into the body.
         """
         raw = """**kicker:** A KICKER
 
@@ -226,9 +229,9 @@ Second paragraph.
 
 Third paragraph.
 
-**theme_title:** Page Three Title
+**theme_title_for_dossier:** Page Three Title
 
-**theme_abstract:** Page Three abstract that orients a reader who arrives directly here.
+**theme_abstract_for_dossier:** Page Three abstract that orients a reader who arrives directly here.
 
 **headnotes:**
 voice_slug: plato
@@ -236,13 +239,13 @@ artifact_title: DOCTORS OR COOKS?
 framing_text: Plato wrote a dialogue.
 """
         parsed = dg.parse_dossier_output(raw)
-        # body_paragraphs stops at theme_title — doesn't bleed
+        # body_paragraphs stops at theme_title_for_dossier — doesn't bleed
         assert len(parsed["body_paragraphs"]) == 4  # 3 paras + asterism
         assert "Page Three Title" not in " ".join(parsed["body_paragraphs"])
         assert "Page Three abstract" not in " ".join(parsed["body_paragraphs"])
         # theme fields parse cleanly
-        assert parsed["theme_title"] == "Page Three Title"
-        assert parsed["theme_abstract"].startswith("Page Three abstract")
+        assert parsed["theme_title_for_dossier"] == "Page Three Title"
+        assert parsed["theme_abstract_for_dossier"].startswith("Page Three abstract")
         # headnotes still parse
         assert len(parsed["headnotes"]) == 1
         assert parsed["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
@@ -295,9 +298,10 @@ class TestStampRuntime:
         assert dossier["metadata"]["night"] == 1
 
     def test_stamp_carries_theme_title_and_abstract(self):
-        """B1 (2026-05-04 PM): theme_title + theme_abstract land on the
-        dossier output if Claudia emitted them; default to empty strings
-        otherwise (microsite can fall back to the upstream theme record)."""
+        """theme_title_for_dossier + theme_abstract_for_dossier land on
+        the dossier output if Claudia emitted them; default to empty
+        strings otherwise (microsite can fall back to the upstream theme
+        record)."""
         parsed = {
             "kicker": "K",
             "headline": "H",
@@ -305,8 +309,8 @@ class TestStampRuntime:
             "body_paragraphs": [],
             "headnotes": [],
             "front_abstract": "",
-            "theme_title": "On The Legitimacy Of The Sortings",
-            "theme_abstract": "Across last night's three sessions the question reached for what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
+            "theme_title_for_dossier": "On The Legitimacy Of The Sortings",
+            "theme_abstract_for_dossier": "Across last night's three sessions the question reached for what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
         }
         dossier = dg.stamp_runtime_fields(
             parsed,
@@ -317,8 +321,8 @@ class TestStampRuntime:
             voice_name_by_slug={},
             formulation_by_slug={},
         )
-        assert dossier["theme_title"] == "On The Legitimacy Of The Sortings"
-        assert dossier["theme_abstract"].startswith("Across last night's")
+        assert dossier["theme_title_for_dossier"] == "On The Legitimacy Of The Sortings"
+        assert dossier["theme_abstract_for_dossier"].startswith("Across last night's")
 
     def test_stamp_embeds_artifact_text_and_form_in_headnotes(self):
         """Self-contained dossier: each headnote carries the per-voice
@@ -381,8 +385,9 @@ class TestStampRuntime:
         assert h["artifact_form"] == ""
 
     def test_stamp_theme_fields_default_empty_when_missing(self):
-        """If parsed dict omits theme_title/theme_abstract, dossier carries
-        empty strings — defensive against parser misses."""
+        """If parsed dict omits theme_title_for_dossier /
+        theme_abstract_for_dossier, dossier carries empty strings —
+        defensive against parser misses."""
         parsed = {
             "kicker": "K", "headline": "H", "subline": "",
             "body_paragraphs": [], "headnotes": [], "front_abstract": "",
@@ -396,8 +401,8 @@ class TestStampRuntime:
             voice_name_by_slug={},
             formulation_by_slug={},
         )
-        assert dossier["theme_title"] == ""
-        assert dossier["theme_abstract"] == ""
+        assert dossier["theme_title_for_dossier"] == ""
+        assert dossier["theme_abstract_for_dossier"] == ""
         # Colophon present
         assert "Editor's desk" in dossier["colophon"]
         assert "Issue No. 42,193" in dossier["colophon"]
