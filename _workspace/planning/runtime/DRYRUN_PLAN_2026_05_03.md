@@ -1,5 +1,7 @@
 # Dev MSC Dryrun Plan (2026-05-03 PM)
 
+> **✅ EXECUTED 2026-05-03 PM — 2026-05-04 AM (continuation).** Final scope: 7 voices (not 3 — operator chose to expand for Athens-scale calibration), 3 MSC panels, Stages 0/1 → 2 → 3 → 4. Outputs: 3 panels transcribed (~68 turns each); 76 extractions → 15 clusters → 4 themes; 19 (voice, theme) Step 1 pairs + 7 first-draft artifacts (Plato dialogue · Cleopatra prostagma · Dostoevsky Diary entry · Battuta halt-at-Delhi · Ada Note in Menabrea manner · Hannah Arendt essay · Octopus paired emission). Cost ~$65-90; total wall ~80 min (Stage 4 dominated at 32 min). Output dir preserved at `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/` for inspection. Full execution log + findings in `HANDOFF_2026_05_04.md`. Six new open items filed (C25/C26/C27[shipped]/C28/C28b/C29/C30) per the dryrun. Bonus editor wiring proof landed 2026-05-04 PM (~$1.50 single-dossier test confirmed wiring sound; closing-prompt rewrite is the actual blocker).
+
 End-to-end smoke test of the runtime pipeline against fresh inputs (3 MSC panel audios from YouTube). Tests wiring + dashboard observability + cost calibration. Does NOT cover live concurrency at Athens scale, cross-night state, or vendor pipeline.
 
 ## Goal

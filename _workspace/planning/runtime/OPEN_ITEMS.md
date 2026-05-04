@@ -1386,6 +1386,20 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
+### C31. transcription_flow.py CLI OUTPUT_DIR default footgun 🟡 (filed 2026-05-04 dryrun)
+
+**Surfaced during dev MSC dryrun setup (2026-05-04 AM):** `transcription_flow.py` defaults `OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "."))` ([transcription_flow.py:91](runtime/flows/transcription_flow.py:91)). When operator runs the flow as a CLI without setting `OUTPUT_DIR` env var, outputs land in the current working directory.
+
+**Bit during dryrun:** ran 3 panels in parallel without `OUTPUT_DIR` set; all 3 wrote `out_*.json` + `session_package.json` + `review.md` to `code/runtime/` (the CWD), overwriting each other. Lost ~$1-2 of AssemblyAI work; recovered by re-running with `OUTPUT_DIR` set per panel.
+
+**Production paths unaffected:** ingest layer (`ingest/pipeline.py:370`) sets `OUTPUT_DIR = str(session_dir)` when spawning. Orchestrator inherits env via subprocess. Only standalone CLI use hits the footgun.
+
+**Fix (~5 min):** in `transcription_flow.py:91`, default `OUTPUT_DIR` to `audio_path.parent` if env var unset, since that's the natural location for transcription artifacts (alongside the audio they were derived from). Compute inside `process_session` rather than at module load time so audio_path is available.
+
+**Status:** filed; quick win pre-Athens. Defensive fix protects future operator dryrun setups + matches the path-derived defaulting pattern used elsewhere in the runtime.
+
+---
+
 ### C30. Voice Step 1 inter-batch sleep is over-conservative 🟡 (filed 2026-05-03 dryrun)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** Voice Step 1 runner sleeps `VOICE_BATCH_WAIT_S=20s` between each batch of 4 Anthropic calls ([voice_flow.py:165](runtime/flows/voice_flow.py:165)) "to respect Anthropic rate limits". Empirical reality at Athens scale:
