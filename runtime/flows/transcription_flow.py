@@ -87,8 +87,28 @@ SPEAKER_ID_MODEL = os.environ.get(
     "TRANSCRIPTION_SPEAKER_ID_MODEL", CLAUDE_MODEL
 )
 
-# Output directory — overridable so Level 3 can point at /mnt/drive/transcripts/dayN/
+# Output directory — overridable so Level 3 can point at /mnt/drive/transcripts/dayN/.
+# When unset (CLI standalone use), defaults to the audio file's parent dir
+# inside process_session() — see _resolve_output_dir(). The module-level value
+# below is kept only for callers that import OUTPUT_DIR directly, but that
+# path is no longer used inside this module (C31 fix 2026-05-04).
 OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "."))
+
+
+def _resolve_output_dir(audio_path: Path) -> Path:
+    """Resolve the per-session output directory.
+
+    Precedence:
+      1. OUTPUT_DIR env var (set by ingest layer, orchestrator, Prefect runner)
+      2. audio_path.parent (CLI standalone use — outputs land alongside audio)
+
+    Defaulting to audio.parent fixes the C31 footgun where parallel CLI runs
+    without OUTPUT_DIR set would all write to CWD and overwrite each other.
+    """
+    env = os.environ.get("OUTPUT_DIR")
+    if env:
+        return Path(env)
+    return audio_path.parent
 
 
 # --- Logger shim ----------------------------------------------------------
@@ -578,8 +598,9 @@ def process_session(audio_path, session_path):
     session = load_session(session_json)
     logger.info(f"Processing session: {session['session_title']}")
 
-    out = OUTPUT_DIR  # shorthand
+    out = _resolve_output_dir(audio)
     out.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Output directory: {out}")
 
     # Step 2: AssemblyAI — skip if output already on disk (e.g. retry after later failure)
     p1 = out / "out_01_diarized.json"
@@ -628,7 +649,7 @@ def process_session(audio_path, session_path):
     # are always consistent with whatever turns/id_output/cleaned_turns we
     # have in memory (which may be loaded from older on-disk versions).
     package = assemble_session_package(session, id_output, cleaned_turns)
-    write_outputs(OUTPUT_DIR, turns, id_output, cleaned_turns, package, session)
+    write_outputs(out, turns, id_output, cleaned_turns, package, session)
 
     logger.info("Done. Start with review.md, then session_package.json if it looks right.")
     return package

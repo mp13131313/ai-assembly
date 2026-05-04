@@ -238,9 +238,17 @@ class TestPollOnce:
         cmd = stub_fire[-1]["cmd"]
         assert "--night" in cmd and "1" in cmd
         assert "--skip-step3" in cmd
-        assert "--skip-validation" not in cmd  # validation ON for Night 1
+        # C28 (2026-05-04): Step 1 validation is OFF by default in voice_flow
+        # now; orchestrator no longer needs to pass --skip-validation. Voice
+        # flow's CLI default does not run Step 1 validation unless
+        # --enable-step1-validation is explicitly passed.
+        assert "--skip-validation" not in cmd
+        assert "--enable-step1-validation" not in cmd
 
-    def test_voice_for_night_2_includes_skip_validation(self, project_root, stub_fire):
+    def test_voice_for_night_2_omits_skip_validation_flag(self, project_root, stub_fire):
+        # C28 (2026-05-04): orchestrator no longer adds --skip-validation
+        # for Night 2/3 because Step 1 validation is now off by default in
+        # voice_flow itself. Test renamed + assertion flipped.
         run_dir2 = project_root / "runs" / "athens_night_2"
         run_dir2.mkdir()
         _set_state(run_dir2, "s3", "done")
@@ -249,7 +257,8 @@ class TestPollOnce:
         status = orch.poll_once(project_root, 2)
         assert status["state"] == "fired:voice"
         cmd = stub_fire[-1]["cmd"]
-        assert "--skip-validation" in cmd
+        assert "--skip-validation" not in cmd
+        assert "--enable-step1-validation" not in cmd
 
     def test_voice_done_skips_editor_when_not_built(
         self, project_root, stub_fire, monkeypatch

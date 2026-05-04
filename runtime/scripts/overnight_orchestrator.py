@@ -284,8 +284,11 @@ def poll_once(
     # Stage 3: Voice — needs Provocateur manifest.
     if not voice_done:
         cmd_args = [str(run_dir), "--night", str(night), "--skip-step3"]
-        if night > 1:
-            cmd_args.append("--skip-validation")  # FU#62 path B: validation N1 only
+        # C28 (2026-05-04): Step 1 validation now OFF by default in voice_flow
+        # (no actionable consumer; replaced by C28b Step 2 validator). The
+        # prior `if night > 1: --skip-validation` (FU#62 path B) is now
+        # redundant — validation is always skipped unless --enable-step1-
+        # validation is explicitly passed for diagnostic dryruns.
         ok, log_path = fire_stage(
             _flow_cmd("voice_flow.py", *cmd_args),
             "voice",

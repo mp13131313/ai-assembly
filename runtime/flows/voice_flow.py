@@ -76,7 +76,11 @@ VOICE_STEP1_BATCH = int(os.environ.get("VOICE_STEP1_BATCH", "4"))
 VOICE_STEP2_BATCH = int(os.environ.get("VOICE_STEP2_BATCH", "4"))
 VOICE_STEP3_BATCH = int(os.environ.get("VOICE_STEP3_BATCH", "4"))
 VOICE_CONTINUITY_BATCH = int(os.environ.get("VOICE_CONTINUITY_BATCH", "4"))
-VOICE_BATCH_WAIT_S = int(os.environ.get("VOICE_BATCH_WAIT_S", "20"))
+# C30 (2026-05-04): lowered from 20s → 5s. Anthropic Tier 4 limits comfortably
+# accommodate 4 parallel Opus 4.7 calls (~100K input + ~8K output tokens/min)
+# without inter-batch backoff. 20s default was over-conservative; ~2-3 min/night
+# Athens wall savings. Override via env var if rate-limit issues surface.
+VOICE_BATCH_WAIT_S = int(os.environ.get("VOICE_BATCH_WAIT_S", "5"))
 
 
 def _load_briefings(run_dir: Path) -> dict[str, list[dict[str, Any]]]:
@@ -295,7 +299,7 @@ def _build_responded_to_graph(
 def run_voice(
     run_dir: str | Path,
     night: int,
-    skip_validation: bool = False,
+    skip_validation: bool = True,  # C28 (2026-05-04): default-OFF — Step 1 validation has no actionable consumer; replaced by C28b Step 2 validator (opt-in via --enable-step1-validation if needed for diagnostics)
     skip_step3: bool = False,
     skip_continuity: bool = False,
     project_root: Path | None = None,
@@ -552,7 +556,15 @@ def _parse_args() -> argparse.Namespace:
     )
     p.add_argument("run_dir", help="Run directory containing 03_provocateur/briefings/")
     p.add_argument("--night", type=int, required=True, choices=[1, 2, 3])
-    p.add_argument("--skip-validation", action="store_true")
+    # C28 (2026-05-04): Step 1 validation is OFF by default — no actionable
+    # consumer (editor reads Step 2 only; validation is diagnostic-only per
+    # FU#62 path B). C28b's Step 2 validator replaces it. --skip-validation
+    # kept for back-compat (no-op now). --enable-step1-validation re-enables
+    # for diagnostic dryruns.
+    p.add_argument("--skip-validation", action="store_true",
+                   help="(deprecated, no-op — Step 1 validation now off by default per C28)")
+    p.add_argument("--enable-step1-validation", action="store_true",
+                   help="Re-enable Step 1 validation (default OFF per C28). For diagnostic dryruns only.")
     p.add_argument(
         "--skip-step3",
         action="store_true",
@@ -574,10 +586,14 @@ if __name__ == "__main__":
     voices_filter = (
         [s.strip() for s in args.voices.split(",") if s.strip()] if args.voices else None
     )
+    # C28: Step 1 validation default OFF; --skip-validation kept as no-op
+    # for back-compat; --enable-step1-validation flips it back on for
+    # diagnostic use.
+    skip_validation = not args.enable_step1_validation
     run_voice(
         run_dir=args.run_dir,
         night=args.night,
-        skip_validation=args.skip_validation,
+        skip_validation=skip_validation,
         skip_step3=args.skip_step3,
         skip_continuity=args.skip_continuity,
         project_root=project_root,
