@@ -1425,9 +1425,11 @@ Only parallelism: outer ThreadPoolExecutor(max_workers=VOICE_STEP1_BATCH=4) runn
 
 **Status:** filed; not blocking dryrun. Same pattern as C25 (Researcher Node 1). Should ship before Athens — saves ~10 min Night 1 wall.
 
+**⚠ Possibly moot:** C28's revised audit (2026-05-04) recommends dropping Step 1 validation entirely for Athens (zero downstream consumers + wrong target — Step 1 is private reasoning, not published). If C28 ships, C29 becomes irrelevant (no validation to parallelise). Hold C29 pending C28 triage decision.
+
 ---
 
-### C28. High volume of voice validation flags on MSC dryrun — audit 🟡 (filed 2026-05-03; thorough audit 2026-05-04)
+### C28. Voice validation: drop Step 1 validation pre-Athens 🟡 (filed 2026-05-03; thorough audit 2026-05-04; **recommendation: drop or move to Step 2**)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** All 19 (voice, theme) Step 1 outputs flagged by validation. Audit conducted 2026-05-04 against the 19 validation files in the dryrun output.
 
@@ -1483,9 +1485,71 @@ Recommended: **(a)** — severity tiers — because the editor needs to know whe
 
 **Athens implication:** WBBF content is more on-domain than MSC, so flag volume will be lower. But binary anachronism PASS/ISSUES will still be ~100% ISSUES for any non-trivial modern panel content. **The output-schema change is necessary even for Athens.** Without it the editor sees 100% flagged dossiers and can't act on the signal.
 
-**Status:** thorough audit complete; awaiting operator triage on the recommendations. Severity-tier change is the highest-leverage pre-Athens fix (~1-2 hr).
+**Status (initial recommendation):** thorough audit complete; awaiting operator triage on the recommendations. Severity-tier change is the highest-leverage pre-Athens fix (~1-2 hr).
 
-**See also:** `04_voice/validation/*.json` written during 2026-05-03 dryrun — under `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/04_voice/validation/`. Validator prompts at `runtime/flows/shared/prompts/voice_step1_validation_anachronism.md` + `voice_step1_validation_constitution.md`.
+---
+
+### Revised audit pass (2026-05-04 PM) — operator pushback: are we validating the right thing at all?
+
+Two sharper findings from rerunning the audit:
+
+**(A) Validators check ~3 of ~26 fields the voice was loaded with.** Per `runtime/flows/voice/card_assembly.py:82-152`, Step 1 system prompt loads:
+
+| Group | Fields |
+|---|---|
+| FOUNDATIONAL (13) | council_member_name, epistemic_frame_statement, world, formative_experience, character, **constitution**, concept_lexicon, curated_corpus_passages, **knowledge_boundary**, **translation_protocol**, topics_requiring_care, hard_limits, **voice_temporal_stance** |
+| REASONING METHOD (3) | reasoning_method, finds_compelling, resists |
+| ENGAGEMENT (3) | default_questions, disagreement_protocol, unique_contribution |
+| VOICE (7) | rhetorical_mode, characteristic_moves, register_and_tone, metaphorical_repertoire, preferred_vocabulary, **banned_language**, **banned_modes** |
+
+Anachronism validator gets 2: `knowledge_boundary` + `voice_temporal_stance`. Constitution validator gets 1: `constitution`. The validator-relevant fields the voice was actually given (`banned_language`, `banned_modes`, `translation_protocol`, `hard_limits`, `topics_requiring_care`, `characteristic_moves`, `register_and_tone`, `quality_criteria`) are NOT visible to the validators. So the validators invent their own anachronism / framework-fidelity criteria from a tiny subset rather than judging by what the voice was specifically instructed to follow.
+
+This explains why every flag is "real per the validator's letter" yet the voice often wasn't breaking its own contract — the validator is judging by general off-domain heuristics, not by the literal `banned_language` rules the voice was held to.
+
+**(B) Step 1 validation has zero downstream consumers.** Per A3 (FU#62 path B), validation is **diagnostic-only** — orchestrator doesn't act on flags; editor doesn't read them; only the dashboard shows them. And Step 1 outputs are **private reasoning, not published**:
+
+| Consumer of Step 1 flag | What flag tells them | What they do |
+|---|---|---|
+| Step 2 (same voice's artifact) | "your reasoning slipped" | Step 2 is its own LLM call — doesn't see the flag |
+| Editor pipeline | (per spec, editor reads Step 2 only — `voice artifacts inviolate`) | Doesn't see Step 1 or its validation |
+| Operator (mid-night) | "this pair has issues" | Could pull artifact for review — but the published artifact is Step 2's, not Step 1's |
+| Future regen-on-flag | "regen this Step 1" | Path B explicitly chose NOT to regen for Athens |
+
+So validation of Step 1 is **expensive logging that doesn't gate anything**. Athens cost: ~30 pairs × 2 checks = 60 calls × ~$0.05 = ~$3/night. Wall: ~10 min/night. For ~$0 actionable value.
+
+---
+
+**Three coherent reasons validation could exist (none satisfied by current Step 1 setup):**
+
+1. **Pre-publication safety gate** — does the artifact have something we'd be embarrassed to publish? Belongs on **Step 2 `artifact_text`**, not Step 1 reasoning. Cheaper (~10 calls/night, not 60). Actionable: editor or operator can hold the artifact.
+2. **Voice-card gap surfacing** — does this voice consistently break its framework on certain topics? Belongs **offline** (post-run sample-read), not as a per-night LLM cost. Reading 5 Step 1 outputs by hand teaches the same thing.
+3. **Regen-on-flag** (revived FU#62) — would justify Step 1 validation (regen reasoning before Step 2 builds on it). But path B chose against this for Athens.
+
+**Current Step 1 validation is the worst of all three:** validates the wrong artifact (Step 1, not the published one), at the most expensive scale (per-pair × 2 checks), with no consumer to act on the flag.
+
+---
+
+**Final recommendation: drop Step 1 validation entirely for Athens.**
+
+- **Cost saved:** ~$9-15 across 3 nights
+- **Wall saved:** ~30 min across 3 nights (validation phase eliminated)
+- **Downstream impact:** zero — no consumer currently acts on the flags
+- **Voice-card gap diagnosis** can be a manual sample-read after the run (operator opens 3-5 Step 1 outputs from the dryrun, sees the patterns, decides which voices need card patches)
+
+**If validation is wanted at all for Athens (operator-side decision):** move it to Step 2's `artifact_text`, with these changes:
+1. **Field-aligned inputs:** anachronism validator should also see `banned_language`, `translation_protocol`, `topics_requiring_care`. Constitution validator should also see `hard_limits`, `disagreement_protocol`, `quality_criteria`, `characteristic_moves`. New "voice fidelity" validator could check `register_and_tone` + `rhetorical_mode` (did the voice sound like itself?).
+2. **Severity tiers:** `lexical_slip` (smoothable in editing) vs `frame_violation` (needs voice regen). Editor consumes the tier; operator threshold-gates by tier.
+3. **Actionable downstream:** editor colors the dossier with a "voice flagged" pill; operator gets a "hold for review" button; future FU#62 regen has a richer signal to act on.
+
+**Pre-Athens fix sizes:**
+- **Drop Step 1 validation:** ~10 min (remove the call from `voice_flow.py` + drop `--skip-validation` flag handling, or just default to `True` skip). Saves $9-15 + 30 min wall + 60 LLM calls.
+- **Move to Step 2 with proper inputs + severity tiers + editor consumption:** ~3-5 hr, but only worth doing if validation is going to mean something.
+
+**Decision needed from operator:** drop entirely, or invest in proper Step 2 validation with downstream consumer? **C29 (parallelize Step 1 validation) becomes moot if dropped.**
+
+**Status:** revised audit complete; awaiting operator triage. Default preferred path: **drop entirely; can revisit post-Athens with sharper requirements.**
+
+**See also:** `04_voice/validation/*.json` written during 2026-05-03 dryrun — under `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/04_voice/validation/`. Validator prompts at `runtime/flows/shared/prompts/voice_step1_validation_anachronism.md` + `voice_step1_validation_constitution.md`. Field-routing source of truth: `runtime/flows/voice/card_assembly.py:82-152`.
 
 ---
 
