@@ -78,14 +78,27 @@ def _theme_routing(night: int = 1) -> dict:
     }
 
 
-def _dossier(no: int, theme_id: str, title: str, *, headnote_count: int = 2, night: int = 1) -> dict:
+def _dossier(
+    no: int,
+    theme_id: str,
+    title: str,
+    *,
+    headnote_count: int = 2,
+    night: int = 1,
+    headnotes: list[dict] | None = None,
+) -> dict:
+    """Build a fixture dossier. If `headnotes` is passed, use those
+    verbatim (lets tests inject voice_slug + formulation_text + etc.);
+    otherwise build minimal placeholders by `headnote_count`."""
+    if headnotes is None:
+        headnotes = [{"voice_slug": f"v{i}"} for i in range(headnote_count)]
     return {
         "schema_version": "2.0",
         "kicker": f"Kicker for {theme_id}",
         "headline": title,
         "subline": "subline goes here",
         "body_paragraphs": ["body paragraph one", "body paragraph two"],
-        "headnotes": [{"voice_slug": f"v{i}"} for i in range(headnote_count)],
+        "headnotes": headnotes,
         "front_abstract": "front abstract",
         "colophon": {"editor": "Claudia Pinchbeck"},
         "metadata": {
@@ -157,6 +170,82 @@ class TestPerNightDossierIndex:
         # B3-placeholder field provisioned (filled by edition_flow when shipped).
         assert "edition_lead" in index
         assert index["edition_lead"] is None
+
+    def test_voices_in_night_block(self, tmp_path):
+        """Per-night index carries a voices_in_night dict keyed by voice_slug,
+        so the microsite can render per-voice navigation from one file (no
+        themes/ walk needed). Each entry points back at the dossier the
+        voice's artifact lives in.
+        """
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        out_dir = project_root / "published_artifacts" / "dossiers" / "night_1"
+        out_dir.mkdir(parents=True)
+        # Two dossiers; each has voice headnotes with the runtime-stamped
+        # fields the voices_in_night block reads from.
+        write_json_atomic(
+            out_dir / "dossier_001.json",
+            _dossier(1, "theme_001", "First", headnotes=[
+                {"voice_slug": "cleopatra",
+                 "voice_name": "the voice of Cleopatra",
+                 "artifact_title": "A PROSTAGMA",
+                 "framing_text": "Cleopatra issues an ordinance.",
+                 "artifact_form": "prostagma",
+                 "artifact_text": "[full body — γινέσθωι]",
+                 "formulation_text": "Cleopatra's briefing for theme_001"},
+                {"voice_slug": "ibn_battuta",
+                 "voice_name": "the voice of Ibn Battuta",
+                 "artifact_title": "A HALT",
+                 "framing_text": "Battuta dictates a halt.",
+                 "artifact_form": "rihla",
+                 "artifact_text": "[full body]",
+                 "formulation_text": "Battuta's briefing for theme_001"},
+            ]),
+        )
+        write_json_atomic(
+            out_dir / "dossier_002.json",
+            _dossier(2, "theme_002", "Second", headnotes=[
+                {"voice_slug": "dostoevsky",
+                 "voice_name": "the voice of Dostoevsky",
+                 "artifact_title": "A LETTER",
+                 "framing_text": "Dostoevsky writes a Diary entry.",
+                 "artifact_form": "diary_entry",
+                 "artifact_text": "[full body]",
+                 "formulation_text": "Dostoevsky's briefing for theme_002"},
+            ]),
+        )
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert "voices_in_night" in index
+        v = index["voices_in_night"]
+        assert set(v.keys()) == {"cleopatra", "ibn_battuta", "dostoevsky"}
+        # Cleopatra → dossier_001, theme_001
+        assert v["cleopatra"]["primary_dossier_no"] == 1
+        assert v["cleopatra"]["primary_theme_id"] == "theme_001"
+        assert v["cleopatra"]["url_path"] == "/dossiers/night-1/dossier_001"
+        assert v["cleopatra"]["primary_formulation"] == "Cleopatra's briefing for theme_001"
+        assert v["cleopatra"]["artifact_form"] == "prostagma"
+        # Dostoevsky → dossier_002, theme_002
+        assert v["dostoevsky"]["primary_dossier_no"] == 2
+        assert v["dostoevsky"]["primary_theme_id"] == "theme_002"
+        assert v["dostoevsky"]["url_path"] == "/dossiers/night-1/dossier_002"
+
+    def test_voices_in_night_empty_when_no_headnote_voice_slugs(self, tmp_path):
+        """If the dossier headnotes have no voice_slug fields, the
+        voices_in_night dict is empty (no crash)."""
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        out_dir = project_root / "published_artifacts" / "dossiers" / "night_1"
+        out_dir.mkdir(parents=True)
+        write_json_atomic(
+            out_dir / "dossier_001.json",
+            _dossier(1, "theme_001", "First", headnotes=[
+                {"artifact_title": "no slug here"},  # missing voice_slug
+            ]),
+        )
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert index["voices_in_night"] == {}
 
     def test_cross_night_index_has_editions_by_night_placeholder(self, tmp_path):
         project_root = tmp_path / "project"

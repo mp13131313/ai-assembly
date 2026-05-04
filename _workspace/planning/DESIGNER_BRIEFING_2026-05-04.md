@@ -45,6 +45,10 @@ numbers); the CMS does not feed it.
   ],
 
   // === THEME PAGE ===
+  // Paper-voice short title + abstract Claudia writes for this surface;
+  // she reads the Researcher's source title + abstract + cluster
+  // extractions in her own user prompt and reformulates them in
+  // publishing register. NOT a copy of the Researcher's text.
   "theme_title":    "On The Legitimacy Of Algorithmic Sortings",
   "theme_abstract": "The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
 
@@ -59,10 +63,21 @@ numbers); the CMS does not feed it.
       "voice_slug":       "cleopatra",
       "voice_name":       "the voice of Cleopatra",
       "artifact_title":   "A PROSTAGMA, ISSUED AT NIGHT",
+      // framing_text — Claudia's editorial gloss; she references the
+      // formulation thematically. Use this as the per-artifact headnote.
       "framing_text":     "Cleopatra issues a royal ordinance. Read for the move at the centre.",
+      // artifact_form — CSS-bundle key for per-voice rendering of the body.
       "artifact_form":    "prostagma",
-      "artifact_text":    "[the full artifact body — render verbatim, in voice-faithful typography keyed by artifact_form]",
-      "formulation_text": "[the briefing the voice received — for byline context if you want it]"
+      // artifact_text — the voice's full Step 2 body. Render verbatim,
+      // in voice-faithful typography keyed by artifact_form.
+      "artifact_text":    "[the full artifact body]",
+      // formulation_text — the raw briefing the voice received for this
+      // theme. Delivered separately from framing_text so the designer
+      // can choose: render alongside (e.g. as a small "the question
+      // put to her was…" note), use as byline context, or omit
+      // entirely. framing_text already contains Claudia's editorial
+      // reference to the formulation.
+      "formulation_text": "[the briefing the voice received]"
     }
   ],
 
@@ -89,7 +104,7 @@ numbers); the CMS does not feed it.
 | **Frontpage teaser** (one card per dossier on the night's index page) | `kicker`, `headline`, `front_abstract` |
 | **Theme article** (Page 2 — Claudia's editorial piece) | `kicker`, `headline`, `subline`, `body_paragraphs[]` |
 | **Theme page** (Page 3 — orients a reader landing here) | `theme_title`, `theme_abstract` |
-| **Artifact page** (Pages 4-N — one per engaged voice) | `headnotes[i].voice_name`, `.artifact_title`, `.framing_text`, `.artifact_form`, `.artifact_text` |
+| **Artifact page** (Pages 4-N — one per engaged voice) | `headnotes[i].voice_name`, `.artifact_title`, `.framing_text`, `.artifact_form`, `.artifact_text` (+ optional `.formulation_text` — raw briefing, see note below) |
 
 ### Body paragraph rules
 
@@ -137,7 +152,24 @@ lead position, which in the secondary grid).
       "voice_count":           3
     }
   ],
-  "edition_lead": null   // see "What's TBD" below
+  "edition_lead": null,        // see "What's TBD" below
+
+  // Per-voice navigation aid. Each voice appears once per night (v2:
+  // each voice routes to exactly one primary dossier). Lets you render
+  // a per-night per-voice index — links converge on the dossier
+  // (and headnote) that voice's artifact lives in.
+  "voices_in_night": {
+    "cleopatra": {
+      "voice_slug":          "cleopatra",
+      "voice_name":          "the voice of Cleopatra",
+      "primary_dossier_no":  1,
+      "primary_theme_id":    "theme_001",
+      "url_path":            "/dossiers/night-1/dossier_001",
+      "primary_formulation": "[the briefing the voice received for this theme]",
+      "artifact_title":      "A PROSTAGMA, ISSUED AT NIGHT",
+      "artifact_form":       "prostagma"
+    }
+  }
 }
 ```
 

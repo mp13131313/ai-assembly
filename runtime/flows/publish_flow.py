@@ -864,6 +864,13 @@ def _build_per_night_dossier_index(
             })
 
     dossiers_summary: list[dict[str, Any]] = []
+    # voices_in_night: per-voice navigation aid for the microsite. Keyed
+    # by voice_slug; each entry points back at the dossier the voice's
+    # artifact lives in (Path A — primary formulation only; per v2 each
+    # voice lands in exactly one dossier per night). Lets the designer
+    # render a per-night per-voice index from this single file without
+    # walking themes/.
+    voices_in_night: dict[str, dict[str, Any]] = {}
     for path in sorted(out_dir.glob("dossier_*.json")):
         try:
             with path.open(encoding="utf-8") as f:
@@ -880,10 +887,11 @@ def _build_per_night_dossier_index(
         # their length is a reliable voice_count fallback when theme_routing
         # is absent.
         headnotes = dossier.get("headnotes", []) or []
+        dossier_url = f"/dossiers/night-{night}/{path.stem}"
         dossiers_summary.append({
             "dossier_no": dossier_no,
             "filename": path.name,
-            "url_path": f"/dossiers/night-{night}/{path.stem}",
+            "url_path": dossier_url,
             "kicker": dossier.get("kicker", ""),
             "headline": dossier.get("headline", ""),
             "subline": dossier.get("subline", ""),
@@ -894,6 +902,25 @@ def _build_per_night_dossier_index(
             "voice_count": len(voices_routed) if voices_routed else len(headnotes),
             "voices_routed": voices_routed,
         })
+        # Voices-in-night enrichment: walk this dossier's headnotes, add
+        # each voice's primary entry. Key by voice_slug — per v2 each voice
+        # lands in exactly one dossier per night, so no collision.
+        for h in headnotes:
+            if not isinstance(h, dict):
+                continue
+            slug = h.get("voice_slug", "")
+            if not slug:
+                continue
+            voices_in_night[slug] = {
+                "voice_slug": slug,
+                "voice_name": h.get("voice_name", slug),
+                "primary_dossier_no": dossier_no,
+                "primary_theme_id": meta.get("theme_id", ""),
+                "url_path": dossier_url,
+                "primary_formulation": h.get("formulation_text", ""),
+                "artifact_title": h.get("artifact_title", ""),
+                "artifact_form": h.get("artifact_form", ""),
+            }
 
     # `edition_lead` reserved for a forthcoming per-night LLM edition step
     # (B3 minimal — Claudia or a sibling editor synthesises the night's
@@ -908,6 +935,7 @@ def _build_per_night_dossier_index(
         "dossier_count": len(dossiers_summary),
         "dossiers": dossiers_summary,
         "edition_lead": None,
+        "voices_in_night": voices_in_night,
     }
     index_path = out_dir / "_index.json"
     write_json_atomic(index_path, index)
