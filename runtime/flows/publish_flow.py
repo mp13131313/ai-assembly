@@ -895,12 +895,19 @@ def _build_per_night_dossier_index(
             "voices_routed": voices_routed,
         })
 
+    # `edition_lead` reserved for a forthcoming per-night LLM edition step
+    # (B3 minimal — Claudia or a sibling editor synthesises the night's
+    # dossiers into a single front-page lead: kicker / headline / editor's
+    # note / lead_dossier_no). Until that step ships, the field stays null
+    # and microsites/designers can plan around its presence; populated
+    # later with no schema break for downstream consumers.
     index = {
         "night": night,
         "url_path": f"/dossiers/night-{night}",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "dossier_count": len(dossiers_summary),
         "dossiers": dossiers_summary,
+        "edition_lead": None,
     }
     index_path = out_dir / "_index.json"
     write_json_atomic(index_path, index)
@@ -961,11 +968,16 @@ def _build_cross_night_dossier_index(
                 "publication_date": meta.get("publication_date", ""),
             })
 
+    # `editions_by_night` reserved for the forthcoming per-night LLM
+    # edition step (see _build_per_night_dossier_index). Cross-night
+    # microsites can iterate this dict per night to find the front-page
+    # lead. Empty placeholder dict; fills as edition_flow ships.
     index = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "nights_present": sorted(set(nights_present)),
         "dossier_count": len(all_dossiers),
         "dossiers": all_dossiers,
+        "editions_by_night": {},
     }
     index_path = dossiers_root / "_index.json"
     write_json_atomic(index_path, index)

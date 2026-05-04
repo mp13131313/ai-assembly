@@ -154,6 +154,18 @@ class TestPerNightDossierIndex:
         assert first["filename"] == "dossier_001.json"
         assert first["theme_id"] == "theme_001"
         assert first["url_path"] == "/dossiers/night-1/dossier_001"
+        # B3-placeholder field provisioned (filled by edition_flow when shipped).
+        assert "edition_lead" in index
+        assert index["edition_lead"] is None
+
+    def test_cross_night_index_has_editions_by_night_placeholder(self, tmp_path):
+        project_root = tmp_path / "project"
+        _seed_dossiers_for_night(project_root, 1, [(1, "theme_001", "N1 First")])
+        result = _build_cross_night_dossier_index(project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        # B3-placeholder field provisioned (filled by edition_flow when shipped).
+        assert "editions_by_night" in index
+        assert index["editions_by_night"] == {}
 
     def test_voices_routed_from_theme_routing(self, tmp_path):
         run_dir = _seed_run_dir_with_routing(tmp_path)
