@@ -320,6 +320,66 @@ class TestStampRuntime:
         assert dossier["theme_title"] == "On The Legitimacy Of The Sortings"
         assert dossier["theme_abstract"].startswith("Across last night's")
 
+    def test_stamp_embeds_artifact_text_and_form_in_headnotes(self):
+        """Self-contained dossier: each headnote carries the per-voice
+        artifact_text body + artifact_form (CSS bundle key) so the
+        microsite renders an artifact page from the dossier alone — no
+        per-voice file fetch needed.
+        """
+        parsed = {
+            "kicker": "K", "headline": "H", "subline": "S",
+            "front_abstract": "FA",
+            "body_paragraphs": ["p1"],
+            "headnotes": [
+                {"voice_slug": "cleopatra",
+                 "artifact_title": "A PROSTAGMA, ISSUED AT NIGHT",
+                 "framing_text": "Cleopatra issues an ordinance."},
+                {"voice_slug": "plato",
+                 "artifact_title": "DOCTORS OR COOKS?",
+                 "framing_text": "Plato asks one question."},
+            ],
+        }
+        dossier = dg.stamp_runtime_fields(
+            parsed,
+            night=1,
+            theme_id="theme_001",
+            theme_display_title="On The Question",
+            voice_slugs=["cleopatra", "plato"],
+            voice_name_by_slug={"cleopatra": "the voice of Cleopatra",
+                                "plato": "the voice of Plato"},
+            formulation_by_slug={"cleopatra": "<f-cleo>", "plato": "<f-plato>"},
+            artifact_text_by_slug={"cleopatra": "[full prostagma body — γινέσθωι]",
+                                   "plato": "[full dialogue body]"},
+            artifact_form_by_slug={"cleopatra": "prostagma", "plato": "dialogue"},
+        )
+        h_cleo = dossier["headnotes"][0]
+        h_plato = dossier["headnotes"][1]
+        # Both headnotes carry the body + form for self-contained rendering
+        assert h_cleo["artifact_text"] == "[full prostagma body — γινέσθωι]"
+        assert h_cleo["artifact_form"] == "prostagma"
+        assert h_plato["artifact_text"] == "[full dialogue body]"
+        assert h_plato["artifact_form"] == "dialogue"
+
+    def test_stamp_artifact_fields_default_empty_when_dicts_omitted(self):
+        """Back-compat: if caller doesn't pass the new artifact_*_by_slug
+        dicts, headnotes get empty strings rather than crashing."""
+        parsed = {
+            "kicker": "K", "headline": "H", "subline": "S",
+            "body_paragraphs": [], "headnotes": [], "front_abstract": "",
+        }
+        dossier = dg.stamp_runtime_fields(
+            parsed,
+            night=1,
+            theme_id="theme_001",
+            theme_display_title="X",
+            voice_slugs=["plato"],
+            voice_name_by_slug={"plato": "Plato"},
+            formulation_by_slug={"plato": "x"},
+        )
+        h = dossier["headnotes"][0]
+        assert h["artifact_text"] == ""
+        assert h["artifact_form"] == ""
+
     def test_stamp_theme_fields_default_empty_when_missing(self):
         """If parsed dict omits theme_title/theme_abstract, dossier carries
         empty strings — defensive against parser misses."""

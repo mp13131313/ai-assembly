@@ -146,6 +146,12 @@ def build_dossier_briefing(
             "mode":               briefing.get("mode", "question"),
             "narrative_briefing": briefing.get("narrative_briefing", ""),
             "artifact_text":      artifact.get("artifact_text", ""),
+            # selected_form (the night's chosen form — "prostagma", "rihla",
+            # "dialogue", etc.) → microsite uses this as the CSS-bundle key
+            # for per-voice rendering of the artifact body. Threaded through
+            # to stamp_runtime_fields → dossier headnote so the dossier is
+            # self-contained.
+            "selected_form":      artifact.get("selected_form", ""),
         }
         for slug, briefing, artifact in zip(voice_slugs, briefings, artifacts)
     ]
@@ -325,6 +331,8 @@ def stamp_runtime_fields(
     voice_slugs: list[str],
     voice_name_by_slug: dict[str, str],
     formulation_by_slug: dict[str, str],
+    artifact_text_by_slug: dict[str, str] | None = None,
+    artifact_form_by_slug: dict[str, str] | None = None,
     final_message: Any | None = None,
     wall_clock_s: float = 0.0,
 ) -> dict[str, Any]:
@@ -341,11 +349,18 @@ def stamp_runtime_fields(
     pub_date, pub_date_long = NIGHT_TO_PUB_DATE.get(night, ("", ""))
     issue_no = ATHENS_BASE_ISSUE + night
 
-    # Enrich headnotes with runtime-stamped voice_name + formulation_text.
-    # Slot Claudia's artifact_title + framing_text into the right position
-    # by matching voice_slug. Voices Claudia missed get empty values but
-    # still appear in the headnotes list (so the dossier doesn't silently
-    # drop someone routed here).
+    # Enrich headnotes with all runtime-stamped fields so each headnote is
+    # self-contained for the microsite — no separate per-voice file fetch
+    # needed to render an artifact page. Stamps:
+    #   voice_name        — from per-voice artifact's council_member
+    #   formulation_text  — from briefing's narrative_briefing for this theme
+    #   artifact_text     — from per-voice Step 2 artifact_text (the body)
+    #   artifact_form     — from per-voice selected_form (CSS bundle key)
+    # Claudia's emitted fields (artifact_title + framing_text) slot in by
+    # matching voice_slug. Voices Claudia missed get empty values but still
+    # appear in the list (no silent drops).
+    artifact_text_by_slug = artifact_text_by_slug or {}
+    artifact_form_by_slug = artifact_form_by_slug or {}
     parsed_by_slug = {
         h.get("voice_slug", ""): h
         for h in parsed.get("headnotes", [])
@@ -354,9 +369,11 @@ def stamp_runtime_fields(
         {
             "voice_slug":       slug,
             "voice_name":       voice_name_by_slug.get(slug, slug),
-            "formulation_text": formulation_by_slug.get(slug, ""),
             "artifact_title":   parsed_by_slug.get(slug, {}).get("artifact_title", ""),
             "framing_text":     parsed_by_slug.get(slug, {}).get("framing_text", ""),
+            "artifact_form":    artifact_form_by_slug.get(slug, ""),
+            "artifact_text":    artifact_text_by_slug.get(slug, ""),
+            "formulation_text": formulation_by_slug.get(slug, ""),
         }
         for slug in voice_slugs
     ]
@@ -387,21 +404,25 @@ def stamp_runtime_fields(
                     getattr(usage, "cache_read_input_tokens", 0) or 0,
             })
 
-    # Field order follows the dossier's swipe order so the JSON file
-    # reads top-to-bottom in the same order as the microsite renders the
-    # 5-page surface: Page 1 front (kicker + headline + subline +
-    # front_abstract; kicker + headline + subline are also Page 2's
-    # article header) → Page 2 article body (body_paragraphs) → Page 3
-    # theme (theme_title + theme_abstract) → Pages 4-N artifacts
-    # (headnotes). Audit/stamp fields (colophon, metadata) trail.
+    # Field order follows surface-by-surface render order:
+    #   Page 1 teaser:   kicker + headline + front_abstract
+    #   Page 2 article:  kicker + headline (shared from Page 1) +
+    #                    subline (article-only) + body_paragraphs
+    #   Page 3 theme:    theme_title + theme_abstract
+    #   Pages 4-N:       headnotes (each self-contained — see stamp logic)
+    #   Audit/stamp:     colophon + metadata (not render content)
+    #
+    # kicker + headline are shared between Page 1 and Page 2; we list
+    # them once at the top of the front-teaser group and the renderer
+    # uses them in both places. subline only appears on the article.
     return {
         "schema_version":  "2.0",
-        # Page 1 (front) + Page 2 (article header)
+        # Page 1 (front teaser) + shared with Page 2 article header
         "kicker":          parsed.get("kicker", ""),
         "headline":        parsed.get("headline", ""),
-        "subline":         parsed.get("subline", ""),
         "front_abstract":  parsed.get("front_abstract", ""),
-        # Page 2 (article body)
+        # Page 2 (article only)
+        "subline":         parsed.get("subline", ""),
         "body_paragraphs": parsed.get("body_paragraphs", []),
         # Page 3 (theme)
         "theme_title":     parsed.get("theme_title", ""),
@@ -445,6 +466,8 @@ def generate_dossier(
 
     voice_name_by_slug = {v["voice_slug"]: v["voice_name"] for v in briefing["engaged_voices"]}
     formulation_by_slug = {v["voice_slug"]: v["narrative_briefing"] for v in briefing["engaged_voices"]}
+    artifact_text_by_slug = {v["voice_slug"]: v["artifact_text"] for v in briefing["engaged_voices"]}
+    artifact_form_by_slug = {v["voice_slug"]: v.get("selected_form", "") for v in briefing["engaged_voices"]}
     theme_display_title = briefing["theme"]["theme_display_title"]
 
     log.info(
@@ -471,6 +494,8 @@ def generate_dossier(
         voice_slugs=voice_slugs,
         voice_name_by_slug=voice_name_by_slug,
         formulation_by_slug=formulation_by_slug,
+        artifact_text_by_slug=artifact_text_by_slug,
+        artifact_form_by_slug=artifact_form_by_slug,
         final_message=final_message,
         wall_clock_s=wall,
     )

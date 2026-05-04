@@ -75,9 +75,9 @@ Emit the dossier as labelled fields in this exact order. Each label appears EXAC
 
 **headline:** <string>
 
-**subline:** <string>
-
 **front_abstract:** <string>
+
+**subline:** <string>
 
 **body_paragraphs:**
 <paragraph 1>
