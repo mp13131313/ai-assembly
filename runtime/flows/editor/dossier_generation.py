@@ -387,16 +387,28 @@ def stamp_runtime_fields(
                     getattr(usage, "cache_read_input_tokens", 0) or 0,
             })
 
+    # Field order follows the dossier's swipe order so the JSON file
+    # reads top-to-bottom in the same order as the microsite renders the
+    # 5-page surface: Page 1 front (kicker + headline + subline +
+    # front_abstract; kicker + headline + subline are also Page 2's
+    # article header) → Page 2 article body (body_paragraphs) → Page 3
+    # theme (theme_title + theme_abstract) → Pages 4-N artifacts
+    # (headnotes). Audit/stamp fields (colophon, metadata) trail.
     return {
         "schema_version":  "2.0",
+        # Page 1 (front) + Page 2 (article header)
         "kicker":          parsed.get("kicker", ""),
         "headline":        parsed.get("headline", ""),
         "subline":         parsed.get("subline", ""),
         "front_abstract":  parsed.get("front_abstract", ""),
+        # Page 2 (article body)
+        "body_paragraphs": parsed.get("body_paragraphs", []),
+        # Page 3 (theme)
         "theme_title":     parsed.get("theme_title", ""),
         "theme_abstract":  parsed.get("theme_abstract", ""),
-        "body_paragraphs": parsed.get("body_paragraphs", []),
+        # Pages 4-N (artifacts)
         "headnotes":       enriched_headnotes,
+        # Audit / stamp
         "colophon":        _colophon_for_night(night),
         "metadata":        metadata,
     }

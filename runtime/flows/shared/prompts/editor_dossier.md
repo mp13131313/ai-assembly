@@ -79,10 +79,6 @@ Emit the dossier as labelled fields in this exact order. Each label appears EXAC
 
 **front_abstract:** <string>
 
-**theme_title:** <string>
-
-**theme_abstract:** <string>
-
 **body_paragraphs:**
 <paragraph 1>
 
@@ -91,6 +87,10 @@ Emit the dossier as labelled fields in this exact order. Each label appears EXAC
 * * *
 
 <paragraph 3>
+
+**theme_title:** <string>
+
+**theme_abstract:** <string>
 
 **headnotes:**
 voice_slug: <slug for first engaged voice>

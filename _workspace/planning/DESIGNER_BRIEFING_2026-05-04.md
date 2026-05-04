@@ -81,22 +81,23 @@ if they fit your design; safe to ignore otherwise.
 
 ### Page 1 — THE FRONT (per-night index)
 
-**Read:** `dossiers/night_<N>/_index.json` → list of dossiers
+The website owns the masthead (paper title, date strip, issue chrome).
+The CMS does not feed the masthead — render it site-side.
 
-**Render:**
-- Masthead (date, issue number, vol) — derive from any dossier's
-  `metadata.publication_date_long` + `metadata.issue_no` + `metadata.vol`
-- Lead position + grid of secondary positions — your layout choice.
-  Each grid card shows: `kicker` (ALL-CAPS, 3-7 words), `headline` (8-15
-  words), `front_abstract` (30-50-word teaser)
-- Issue masthead: "Vol. CXVI · Issue No. 42,193 · Friday, 8th of May 2026"
+What the CMS feeds Page 1: **the list of tonight's dossiers** + a hint
+about which one is the lead.
 
-The per-night `_index.json` carries an `edition_lead` field (currently
-`null` — placeholder). Once the per-night LLM edition step ships, this
-will hold a small object with a synthesised front-page kicker / headline
-/ editor's note / `lead_dossier_no` tying the night's dossiers together.
-Render it when present; fall back to picking a lead dossier
-algorithmically (or operator override) when absent.
+**Read:** `dossiers/night_<N>/_index.json` → `dossiers[]` list
+
+**Render per dossier card** (lead position + secondary grid):
+- `kicker` (ALL-CAPS, 3-7 words)
+- `headline` (8-15 words)
+- `front_abstract` (30-50-word teaser)
+
+`edition_lead.lead_dossier_no` (when populated; currently `null`) tells
+you which dossier sits in the lead position vs. the secondary grid.
+Without it, fall back to picking algorithmically or via operator
+override.
 
 ### Page 2 — THE ARTICLE (per-dossier)
 
@@ -154,21 +155,38 @@ and `nights/night_<N>/<voice_slug>.json` for each voice's actual artifact.
 
 ### `dossiers/night_<N>/dossier_<NNN>.json` (the core unit)
 
+The CMS-render fields are `kicker`, `headline`, `subline`,
+`front_abstract`, `theme_title`, `theme_abstract`, `body_paragraphs`,
+and `headnotes`. The `colophon` and `metadata` block exist on the file
+for audit/debugging and join keys (`metadata.theme_id` for the theme
+file lookup); they are not dossier-render content. The masthead chrome
+(date, issue number, volume) lives on the website, not in the CMS feed.
+
 ```json
 {
   "schema_version": "2.0",
+
+  // --- CMS-render fields, grouped in swipe order ---
+  // Page 1 (front) + Page 2 (article) — the kicker / headline / subline
+  // are shared between the Page 1 teaser and the Page 2 article header.
   "kicker": "FOUR NAMINGS OF A DISSOLVED THING",
   "headline": "The voices refused to call it governance",
   "subline": "Four voices, in different vocabularies, decline the term; the editor notes a convergence she will not call agreement",
   "front_abstract": "Four voices, in different vocabularies, declined to call faceless sortings governance; the editor names a convergence she will not call agreement.",
-  "theme_title": "On The Legitimacy Of Algorithmic Sortings",
-  "theme_abstract": "The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
+
+  // Page 2 (article body)
   "body_paragraphs": [
     "We received the night's submissions in the order they arrived...",
     "...",
     "* * *",
     "Last paragraph..."
   ],
+
+  // Page 3 (theme)
+  "theme_title": "On The Legitimacy Of Algorithmic Sortings",
+  "theme_abstract": "The theme reaches across last night's three sessions, asking what an institution owes when its sorting devices have begun to issue verdicts no human will sign for.",
+
+  // Pages 4-N (one per engaged voice)
   "headnotes": [
     {
       "voice_slug": "cleopatra",
@@ -178,15 +196,16 @@ and `nights/night_<N>/<voice_slug>.json` for each voice's actual artifact.
       "framing_text": "Cleopatra issues a royal ordinance. Read for the move at the centre."
     }
   ],
-  "front_abstract": "...",
+
+  // --- Audit / join keys (not dossier-render content) ---
   "colophon": "Filed by the Editor's desk on the morning of Night 1, Friday, 8th of May 2026. Vol. CXVI · Issue No. 42,193.",
   "metadata": {
-    "theme_id": "theme_001",
+    "theme_id": "theme_001",                  // join key: themes/night_<N>/<theme_id>.json
     "theme_display_title": "On the Legitimacy of the Invisible",
-    "night": 1,
-    "issue_no": 42193,
-    "vol": "CXVI",
-    "publication_date": "2026-05-08",
+    "night": 1,                                // also derivable from file path
+    "issue_no": 42193,                         // masthead chrome — render site-side, not from dossier
+    "vol": "CXVI",                             // ditto
+    "publication_date": "2026-05-08",          // ditto
     "publication_date_long": "Friday, 8th of May 2026",
     "edition_label": "Late Night Edition"
   }
