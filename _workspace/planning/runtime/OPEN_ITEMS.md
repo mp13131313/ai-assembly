@@ -1553,6 +1553,212 @@ So validation of Step 1 is **expensive logging that doesn't gate anything**. Ath
 
 ---
 
+### C28b — Step 2 validator spec (operator gate, Option C halt-on-any-flag) 🟡 SPECIFIED 2026-05-04 PM
+
+After the C28 revised audit, operator chose to design a proper Step 2 validator that warns the operator + halts the pipeline on any flag (Option C). This entry is the implementation spec; supersedes the "If validation is wanted at all" alternative path above.
+
+**Design principle:** validation is an **operator gate, not a regen mechanism**. The orchestrator halts at validation; operator manually clears every flag before pipeline proceeds to editor. This intentionally abandons the overnight-unattended pattern in favour of operator-in-the-loop. Athens reality (operator on VM in tmux during conference) makes this workable; expected ~5-10 min operator wall per night to triage flags.
+
+---
+
+#### Three pillars, separately surfaced
+
+**Pillar 1 — Embarrassment** (don't publish what would torpedo the conceit / create reputational risk):
+
+| Check | Source field(s) | Severity ceiling |
+|---|---|---|
+| AI-self-acknowledgment ("as a language model", etc.) | hard-coded universal rule (not in any card field) | **HOLD (absolute fail)** |
+| Defamation / strong claims about living attendees | hard-coded universal rule | **HOLD (absolute fail)** |
+| `topics_requiring_care` violation | per-voice card field | **HOLD** |
+| `hard_limits` breach | per-voice card field | WARN |
+| `banned_modes` slip (corporate-summary, AI-meta, LinkedIn editorial, magazine-feature, conference-recap register) | per-voice card field | WARN |
+| `banned_language` — AI-slop subset (fascinating / interesting / important to note / crucial / innovative / thought-provoking) | per-voice card field, filtered to high-impact items | WARN |
+| First-person presence leak ("I sat in the audience") | `voice_temporal_stance` rule (c) | low-priority WARN |
+
+Foreign-vocabulary anachronisms within `banned_language` (Plato saying "dollars", Ada saying "computable") are **NOT flagged** — Tier 4 charm; smoothable in editing.
+
+**Pillar 2 — Engagement** (don't publish what reader won't read):
+
+| Check | Source | Severity ceiling | When |
+|---|---|---|---|
+| Form fidelity | `selected_form` (Step 2 decision) + `characteristic_output_structure` + `medium` | WARN | Every night |
+| Length compliance (mechanical, no LLM) | `length_and_format_constraints` per-voice envelope | WARN | Every night |
+| Grounding fidelity | `lineage.grounding_extraction_ids` + check for panelist names / specific claims from tonight | WARN | Every night |
+| **Cross-night echo** | tonight's `artifact_text` vs prior night's `published_artifacts/nights/night_<N-1>/<voice>.json`; optional secondary input `continuity_block_artifact_if_night_N` (the deltas voice was instructed to deliver) | WARN (mild echo info-only · moderate echo WARN · heavy echo HOLD) | Night 2 + Night 3 only |
+
+**Pillar 3 — Voice fidelity** (did the voice actually deliver what its card promised?):
+
+| Check | Source | Severity ceiling | When |
+|---|---|---|---|
+| **Characteristic moves performed** | `characteristic_moves` (per-voice list of signature moves the voice MUST perform — e.g. Dostoevsky's "moves into a remembered face", Battuta's "anchors at a halt", Hannah Arendt's "etymological doublet → single sentence → reformulated question") | WARN | Every night |
+| **Quality criteria pass** | `quality_criteria` (voice's own per-step pass/fail tests — 3-5 conditions each voice card declares the artifact must satisfy) | WARN | Every night |
+
+Conceptually: the voice itself is the authority on what "good" means for its own artifact. The validator runs the voice's own checklist against its output. Flags surface where the artifact failed its self-imposed tests.
+
+---
+
+#### Output schema (per voice)
+
+```json
+{
+  "schema_version": "1.0",
+  "voice_slug": "plato",
+  "embarrassment": {
+    "verdict": "PASS | WARN | HOLD",
+    "ai_self_acknowledgment": null | {"text": "...", "why": "..."},
+    "defamation_risk": null | {"text": "...", "why": "..."},
+    "topics_requiring_care_breach": null | {"text": "...", "field_cited": "...", "why": "..."},
+    "hard_limits_breach": [{"text": "...", "rule_cited": "...", "severity": "warn|hold"}],
+    "banned_modes_slip": [{"text": "...", "mode": "corporate-summary"}],
+    "banned_language_ai_slop": [{"text": "...", "word": "fascinating"}],
+    "first_person_presence_leak": [{"text": "..."}]
+  },
+  "engagement": {
+    "verdict": "PASS | WARN | HOLD",
+    "form_fidelity": null | {"declared": "dialogue", "observed": "monologue", "why": "..."},
+    "length_compliance": null | {"declared_range": [400, 600], "actual_words": 1247, "verdict": "over"},
+    "grounding_fidelity": null | {"extraction_ids_referenced": 0, "panelist_names_referenced": 0, "why": "no engagement with tonight's panel"},
+    "cross_night_echo": null | {"echo_level": "moderate", "shared_argument": "...", "shared_claims": [...]}
+  },
+  "voice_fidelity": {
+    "verdict": "PASS | WARN",
+    "characteristic_moves_performed": [
+      {"move": "moves into a remembered face", "performed": true, "where": "para 2"},
+      {"move": "anchors in a single sentence", "performed": false, "why": "no climactic single sentence visible"}
+    ],
+    "quality_criteria_results": [
+      {"criterion": "the convergence is named in the voice's vocabulary", "passed": true},
+      {"criterion": "at least one specific reservation registered", "passed": false, "why": "..."}
+    ]
+  },
+  "operator_recommendation": "publish | review | hold_for_regen",
+  "wall_clock_s": 47.3,
+  "model": "claude-sonnet-4-6"
+}
+```
+
+---
+
+#### Pipeline integration — Option C (halt on any flag)
+
+```
+... Voice Step 2 → [NEW] Step 2 Validation → [NEW] OPERATOR GATE → Editor → Publish
+                                                    ↑
+                                          halts on ≥1 WARN or HOLD;
+                                          waits for operator clearance
+```
+
+**Orchestrator state machine additions:**
+- New state: `awaiting_validation_clearance` — fired after Step 2 validation completes if `any voice has WARN or HOLD`
+- Orchestrator does NOT proceed to editor until operator clears all flagged voices via dashboard
+- Per-voice clearance written to `04_voice/operator_decisions/<voice>.json` with `{decision, decided_at, decided_by, notes}`
+- Decisions: `release` (publish as-is), `hold_for_regen` (skip from this night's publish; voice card needs patch for next night)
+
+**If all voices PASS after validation:** orchestrator proceeds automatically to editor. No operator gate fires.
+
+**Emergency / unattended escape hatches:**
+- `--auto-release-warns` orchestrator flag: treats WARN as PASS (HOLD still halts). For Nights 2/3 if operator confident
+- `--auto-release-all` flag: releases everything except HOLD; for unattended fallback
+- Per-voice override files `04_voice/operator_overrides/<voice>.json` set in advance
+- Dashboard "Force release all" button for emergency
+
+---
+
+#### Cost + wall
+
+- **Night 1: 3 LLM calls per voice** — embarrassment + engagement + voice-fidelity (length is mechanical)
+- **Nights 2+3: 4 LLM calls per voice** — add cross-night echo
+- Sonnet 4.6 (~$1.50/MTok input, $7.50/MTok output) — validators don't need Opus
+- Per-call ~$0.05
+- Athens total: 10 voices × (3 + 4 + 4) = 110 calls × $0.05 = **~$5.50**
+- Wall: parallel across voices + parallel across pillars within voice = ~2-3 min/night
+- Operator wall (gate): expected ~5-10 min per night to triage flags, decide release/hold
+
+vs the dropped Step 1 validation that was costing ~$9-15 across Athens for ~30 min wall + zero actionable value. **Net: saves $4-10 + ~25 min/night automated work + adds operator-in-the-loop quality control + voice-fidelity assurance.**
+
+---
+
+#### Implementation scope (~7-9 hr)
+
+**New code:**
+- `runtime/flows/voice/step2_validation.py` (~280 lines) — orchestrates 3 (or 4 on N2/N3) checks per voice in parallel
+- `runtime/flows/shared/prompts/voice_step2_validation_embarrassment.md` (universal rules + per-voice field interpolation: knowledge_boundary, voice_temporal_stance, banned_language[ai_slop], banned_modes, hard_limits, topics_requiring_care, translation_protocol)
+- `runtime/flows/shared/prompts/voice_step2_validation_engagement.md` (form + grounding checks: medium, characteristic_output_structure, lineage.grounding_extraction_ids)
+- `runtime/flows/shared/prompts/voice_step2_validation_voice_fidelity.md` (characteristic_moves performed + quality_criteria pass)
+- `runtime/flows/shared/prompts/voice_step2_validation_cross_night_echo.md` (Night 2+ only)
+- Length-compliance check is mechanical (no prompt — read `length_and_format_constraints`, count words, compare)
+
+**Pipeline wiring:**
+- `runtime/flows/voice_flow.py` — fire validation after Step 2 completes; write per-voice JSON to `04_voice/step2_validation/<voice>.json`
+- `runtime/scripts/overnight_orchestrator.py` — new `awaiting_validation_clearance` state; gates editor stage on per-voice operator decisions
+- `runtime/flows/editor_flow.py` + `runtime/flows/publish_flow.py` — read `04_voice/operator_decisions/` and exclude held-for-regen voices
+
+**Dashboard:**
+- `runtime/ingest/dashboard.py` — `collect_voice_detail` adds three pill rows per voice (Embarrassment + Engagement + Voice fidelity) with verdict + issue counts
+- `runtime/ingest/templates/admin_voice.html` — new Validation section + Review modal + Release/Hold buttons
+- `runtime/ingest/app.py` POST `/admin/voice/<slug>/release` + `/hold` (admin-gated)
+- New `/admin/tonight` state pill: "AWAITING OPERATOR — N voices flagged, waiting for clearance"
+
+**Tests:** ~15-20 new tests (validator unit + orchestrator state + dashboard routes + operator-decision integration with editor/publish)
+
+---
+
+#### Decisions baked in
+
+1. **Halt model: Option C (any WARN OR HOLD halts orchestrator)** — operator chose this over per-voice exclusion (A) and HOLD-only halt (B). Validation has teeth; operator-in-the-loop every flagged night.
+2. **Severity preserved despite halt-on-any:** HOLD vs WARN tags help operator triage speed (HOLD = "fix needed, hold for regen"; WARN = "review, likely release"), even though both halt.
+3. **Hard-coded universal rules** for AI-self-ack + defamation (not in any card field) — these are cross-cutting Athens rules.
+4. **`banned_language` partitioned** — only AI-slop subset surfaces as flag; foreign-vocabulary anachronisms are charm.
+5. **Cross-night echo** uses prior published artifact + continuity overlay — validates whether Continuity stage's instructions actually worked.
+6. **Three pillars (not two)** — embarrassment + engagement + voice fidelity. Embarrassment = "would publishing hurt us?"; engagement = "would the reader read?"; voice fidelity = "did the voice deliver what its card promised?". Voice fidelity uses voice's own self-imposed `quality_criteria` + `characteristic_moves` — the voice is the authority on what "good" means for itself.
+
+**Card fields tested (10 of 36 total fields per `card_assembly.py`):** knowledge_boundary, translation_protocol, topics_requiring_care, hard_limits, voice_temporal_stance, banned_language (filtered to AI-slop subset), banned_modes, medium, characteristic_output_structure, length_and_format_constraints, characteristic_moves, quality_criteria. Plus `lineage.grounding_extraction_ids` (cross-cutting), prior `published_artifacts/.../<voice>.json` (cross-night echo), and hard-coded universal rules (AI-self-ack, defamation).
+
+**Card fields NOT tested (and why):** the other 24 fields are texture-shaping primers (world, character, formative_experience), redundant with already-checked fields (rhetorical_mode, register_and_tone — covered by banned_modes), or too subjective for a fast operator-actionable check (constitution philosophical nuance, reasoning_method, disagreement_protocol, aesthetic_qualities, etc.). See full per-field rating table in this entry's preceding session notes.
+
+---
+
+#### Athens scenarios
+
+**Scenario A — clean night** (low probability for Night 1; more likely Night 2+ as operator tunes cards):
+- All 10 voices PASS both pillars
+- Orchestrator proceeds to editor automatically
+- Operator wakes up, sees clean dossier, no intervention
+- Total operator wall: 0 min
+
+**Scenario B — typical night** (expected most nights):
+- 6-8 voices PASS; 2-4 voices WARN on lexical-or-form-or-grounding
+- Orchestrator halts at validation gate
+- Operator opens dashboard, sees 2-4 voices flagged
+- Per voice: opens artifact in modal, reviews flag detail (~30s each), clicks Release
+- Dossier composes; editor + publish proceed
+- Total operator wall: ~5 min
+
+**Scenario C — bad night** (low probability but real):
+- 1+ voice HOLDs on AI-self-ack or topics_requiring_care
+- Orchestrator halts; operator opens, decides hold_for_regen
+- That voice excluded from publish; dossier published with N-1 voices
+- Operator notes voice-card patch needed before next night
+- Total operator wall: ~10-15 min + voice-card patch work between nights
+
+**Scenario D — operator unavailable / asleep / connection lost:**
+- Pipeline halts indefinitely at validation
+- Nothing publishes that night
+- Mitigation: `--auto-release-warns` flag pre-set in orchestrator config for backup nights
+- Or: per-voice `operator_overrides/` files set in advance to release-by-default
+
+---
+
+**Status:** specification complete; pre-Athens implementation pending (~7-9 hr engineering). Supersedes the prior "drop entirely OR invest in 5-check" framing in C28 above.
+
+**Supersedes for Athens:**
+- Drop Step 1 validation (still recommended): ~10 min change, saves $9-15
+- Implement C28b Step 2 validator + Option C operator gate: ~7-9 hr engineering, costs ~$5.50 across Athens, gives real operator surface + voice-fidelity assurance
+
+**C29 (parallelize Step 1 validation) is moot if Step 1 validation is dropped per C28.** New parallelism work for Step 2 validation is built into C28b spec (per-voice + per-pillar ThreadPool).
+
+---
+
 ### C27. Researcher drilldown progressive rendering 🟢 SHIPPED 2026-05-03 PM (dryrun)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** Operator wanted to see per-session extractions appear one at a time during Node 1, then clusters when Node 2 lands, then themes when Node 3 (grouping.json) lands. Previous behaviour: drilldown gated entirely on `grouping.json` existing — empty page until full Researcher complete.
