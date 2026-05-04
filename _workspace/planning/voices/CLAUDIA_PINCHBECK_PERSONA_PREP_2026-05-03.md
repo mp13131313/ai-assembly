@@ -1,8 +1,36 @@
 # Claudia Pinchbeck — Persona Card Construction Prep
 
-**Date:** 2026-05-03
-**Status:** Architectural work landed; ready to draft voice_config + 6 DR dossier sections once operator shares the Beauty Shot dossier file. Hybrid pipeline path agreed.
+**Date:** 2026-05-03 (original) | **Status update:** 2026-05-04 PM
+**Status:** Architectural work landed. **DRAFT card landed 2026-05-04 PM via operator-direct-author path** at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` (44 fields, ~45K bytes). Bypasses the persona pipeline; for **dryrun use only; NOT promotion-ready**. Authored from this prep doc + the v2 schema field set. See `voices/OPEN_ITEMS.md §26` for details. Real Stages A-F pipeline build remains pending — awaits Beauty Shot dossier + voice_mode/byline decisions.
 **Owner thread:** voices (persona-pipeline machinery produces the artifact); destination is runtime (Editor Pipeline consumes it).
+
+---
+
+## 2026-05-04 PM update — DRAFT card landed for dryrun
+
+**The dryrun draft exists.** Operator-direct-authored from this prep doc + the v2 schema field set. 44 fields, ~45K bytes. Path: `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json`.
+
+**What's captured:**
+- 4 reference traditions (Talk / TLS / Borges / Manchester Guardian)
+- One-spine-ten-bends per-voice register torque in `translation_protocol`
+- Form-fit honesty hard limit
+- Headline rule (small specific gesture)
+- Onion-drift hard ban
+- Beauty Shot reading discipline + desk's prose register split
+- Compound dossier medium (front-page teaser + theme article + summary + per-voice headnotes)
+- Confected pedigree (Vol. CXVI, Issues 42,193–42,195, Late Night Edition)
+- Universal "Voice of X" naming convention (matches the panel sweep applied 2026-05-04)
+
+**What's NOT in the dryrun draft (operator decisions still needed):**
+- Beauty Shot dossier integration — content is best-inference from prep doc; refine when shared
+- voice_mode = `observational` chosen as least-bad fit; per prep doc could be (b) extend schema with `editorial` or (c) custom subtype
+- Byline split decision (Option A single house byline vs Option B correspondent + desk for headnotes)
+- Pass 7a validation — none ran; card not validator-tested
+
+**When real Stages A-F build resumes (after Beauty Shot + decisions land):**
+The dryrun draft becomes a starting reference, not a starting point. Run the real build per the "Recommended workflow" below, then compare the dryrun's intuitions to the pipeline-validated card. Differences are diagnostic — they show where operator-direct-author drifted from what the pipeline-with-corpus would have produced.
+
+The dryrun's job is to unblock the runtime/editor flow dryrun (per operator request: "I just need it for a dryrun"), not to be the final card.
 
 ## For pickup on a fresh session
 

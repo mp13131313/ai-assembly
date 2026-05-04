@@ -1,27 +1,57 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-03)
+## Current branch state (2026-05-04)
 
-Active branch: `main`. The `voice-pipeline-v2.1-align-revert` feature
-branch (92 commits) was fast-forward merged into `main` on 2026-05-03
-and deleted (local + remote). All work — voice pipeline v2.1 + persona
-pipeline FU#55-62 + editor pipeline spec + infrastructure spec +
-orchestrator + lifecycle doc + 4 new shipped persona cards (Octopus
-rebuild, Plato patches, Hannah Arendt, Ada Lovelace) — is now on `main`.
+Active branch: `main`. All voice-build work is on `main` in both repos:
+the `code/` repo (`mp13131313/ai-assembly`) and the athens-2026 production
+project repo (`mp13131313/ai-assembly-athens2026-voices`). Code repo HEAD
+on 2026-05-04 PM: see `git log -1`. athens-2026 HEAD: `e8751f5` (Voice-of-X
+naming sweep across 10 voices).
 
 Persona pipeline at **v4** (`docs/AI_Assembly_Persona_Pipeline_v4.md`);
 `pipeline_version` string in code: `"4.0"`. v3.10 archived at
 `docs/_archive/`. Pipeline architecture includes chunked Pass 1.1–1.7
 merge, Phase B per-voice folder layout, Tier 3 code/project separation,
-and the FU#1–62 follow-up family (closed/frozen as of 2026-05-01).
+and the FU#1–62 follow-up family (closed/frozen as of 2026-05-01). v4
+prompt-architecture extension: 2026-05-04 added `corpus_constraint ==
+"lyrics_patterns_only"` conditional blocks in Pass 2 / Pass 4a / Pass 4b
+implementing the SACRED-GRAMMAR DEPLOYMENT LIMIT + prose-yard-reasoning
+artifact spec — generalizes to any future musical-corpus voice carrying
+living sacred grammar (Sufi-poet, gospel-tradition, Vodou-tradition).
+See voices/OPEN_ITEMS.md §24 for detail.
 
-Voice-build state for athens-2026 (2026-05-02 late-night): 7 of 10
-panel voices shipped (Plato, Cleopatra, Dostoevsky, Battuta, Octopus
-[compass-rebuilt], Hannah Arendt, Ada Lovelace); Marley pipeline
-mid-flight in current-tests with 35 verbatim-lyric passages populated;
-2 awaiting operator DR sessions (Whanganui, Scheherazade — each ~3-4 hr
-operator wall for manual claude.ai DR sessions). council_config.json
-wired with 7/10 voices' pipeline-built provocateur_profiles.
+Voice-build state for athens-2026 (2026-05-04 PM): **10 of 10 panel
+voices shipped + promoted + uniformly named** ("Voice of X" convention
+across persona_card.voice_name + provocateur_profile.name +
+council_config.members[].name + panel_roster.panel_members_final). Voice
+of Plato, Voice of Cleopatra, Voice of Fyodor Dostoevsky, Voice of Ibn
+Battuta, Voice of the Octopus, Voice of Hannah Arendt, Voice of Ada
+Lovelace, Voice of the Whanganui River (shipped 2026-05-03 evening),
+Voice of Scheherazade (shipped 2026-05-04 early-AM), Voice of Bob Marley
+(v2 Option-3 restructure shipped 2026-05-04 afternoon). council_config.json
+fully wired with all 10 pipeline-built provocateur_profiles. **Pre-Athens
+voice-build work is complete.**
+
+13th persona **`claudia_pinchbeck`** (the editor) — DRAFT card landed
+2026-05-04 PM at `current-tests/voices/claudia_pinchbeck/` for dryrun
+use only (operator-direct-author; bypasses pipeline; not promotion-ready).
+Real Stages A-F pipeline build pending operator's Beauty Shot dossier
+share + voice_mode/byline decisions.
+
+Pre-Athens follow-ups (operator-side, voice-build complete):
+- D1 internal position paragraph for Marley appropriation readiness
+  (drafts in voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md)
+- E1 Athens intro paragraph publish-or-hold decision with Till
+- Post-Athens Rastafari-orbit reader gate scheduling (calendar date +
+  name-search starts now per reviewer)
+- v4.1 prompt-side mediated-voice / sacred-grammar fix (post-Athens;
+  empirically validated across Plato + Whanganui + Scheherazade +
+  Marley v2)
+
+Pass 1c fetch audit (2026-05-04 PM): two minor extractor bugs filed as
+POST-ATHENS only — Plato Perseus 6 short-fetches + Bob Marley
+voiceofthesufferers.free.fr SSL cert mismatch. Neither affects shipped
+voice runtime; both rebuild-only fixes. See voices/OPEN_ITEMS.md §25.
 
 **Pickup pattern:** two workstreams, two subfolders.
 - For voice-build work: `_workspace/planning/voices/{ONBOARDING,OPEN_ITEMS,HANDOFF}.md`

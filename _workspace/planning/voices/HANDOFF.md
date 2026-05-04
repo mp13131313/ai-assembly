@@ -10,13 +10,17 @@
 
 | Repo | Branch | HEAD | Pushed |
 |---|---|---|---|
-| code | `main` | `<pending — this commit>` | (pending push) |
+| code | `main` | `f6fa58b` (this update pending push) | ✅ (prior; this update pending) |
 | athens-2026 | `main` | `e8751f5` | ✅ |
 
 **athens-2026 voices folder now carries 10 of 10** shipped cards — the panel is complete:
 `plato`, `cleopatra`, `dostoevsky`, `ibn_battuta`, `octopus`, `hannah_arendt`, `ada_lovelace`, `whanganui_river`, `scheherazade`, **`bob_marley` (NEW v2 today)**.
 
-Plus 13th persona staged (not yet shipped): **`claudia_pinchbeck`** (the editor) — architecture landed 2026-05-03; awaiting operator inputs to begin Stages A-F.
+**Universal "Voice of X" naming sweep applied** across all 10 voices (athens-2026 `e8751f5`). Long-form first-person self-identification stays in `council_member_name`.
+
+13th persona **`claudia_pinchbeck`** — operator-authored DRAFT card landed today at `current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` for dryrun use only. Bypasses the persona pipeline; not promotion-ready. Real Stages A-F build awaits Beauty Shot dossier + voice_mode/byline decisions.
+
+**Pass 1c fetch audit complete** (2026-05-04 PM). 10 athens-2026 voices + 3 current-tests duplicates. Findings: paywall + archive.org policy patterns produce 20-47% failure rates on cleopatra / hannah_arendt / ibn_battuta / octopus, but all voices have 4-7M chars of rich corpus from successful sources — no voice is corpus-starved. Two minor follow-ups filed as POST-ATHENS (do not affect runtime, only matter on rebuild): (a) Plato Perseus extractor bug — 6 sources fetched as 690-char error pages instead of dialogue text; (b) Bob Marley voiceofthesufferers.free.fr SSL cert mismatch on the Bullbay-reasoning interview URL. Audit details in OPEN_ITEMS §25.
 
 ---
 

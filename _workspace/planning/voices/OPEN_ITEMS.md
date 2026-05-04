@@ -919,3 +919,64 @@ Athens-2026 commit `e8751f5`.
 - **D1 — no Rastafari-orbit reader pre-Athens.** Internal position paragraph drafted as readiness mitigation. Post-Athens reader gate per reviewer: should be on calendar with date + name-search starting now ("if it's on the to-do list at the same priority level as everything else, it slips. If it's scheduled, it happens.")
 - **D2 — no estate-position assessment pre-Athens.** Marley estate is litigious about derivative-voice works; operator accepts gap.
 - **E1 — Athens intro paragraph publish-or-hold.** Pending Till's read on the room.
+
+---
+
+## 25. Pass 1c fetch audit (2026-05-04 PM) — POST-ATHENS follow-ups only
+
+Diagnostic-only audit across 10 athens-2026 voices + 3 current-tests duplicates.
+
+### Healthy
+
+| Voice | Sources | Total chars | Notes |
+|---|---|---|---|
+| Voice of Fyodor Dostoevsky | 7/7 ✓ | 7.0M | All Gutenberg |
+| Voice of Scheherazade | 14/14 ✓ | 1.2M | Operator-acquired Seale-Horta Annotated Arabian Nights (Thalia EPUB) |
+| Voice of the Whanganui River | 6/6 ✓ | 514K | Acts + Indigenous-authored scholarship |
+| Voice of Ada Lovelace | 19/20 ✓ | 2.7M | 1 Wikisource 404 |
+
+### Significant failure rates — all paywall/policy-blocked, expected
+
+| Voice | Sources | Failures | Pattern |
+|---|---|---|---|
+| Voice of Cleopatra | 49 | 10 (20%) | archive.org 403/404 + Trismegistos forbidden + JSTOR + Brill paywall. 27 rich + 11 medium remain. |
+| Voice of Hannah Arendt | 15 | 7 (47%) | archive.org 401/403/404 across multiple Arendt editions. 4.4M chars from 7 rich sources remain. |
+| Voice of Ibn Battuta | 18 | 8 (44%) | archive.org + JSTOR + shamela.ws blocked. 4.4M chars from 10 rich sources remain. |
+| Voice of the Octopus | 49 | 23 (47%) | Cell / Wiley / ScienceDirect / PNAS / biorxiv paywalls + JSTOR. 7.1M chars from 22 rich sources remain. |
+
+**Pattern findings:**
+- **Archive.org 401/403/404 is systemic** across cleopatra/arendt/ibn_battuta/octopus. Reflects archive.org's increasingly restrictive download/text policy on copyrighted books. **Expected, not a bug.**
+- **Academic-publisher paywalls** are systemic for octopus (biology journals).
+
+### Real bugs (worth fixing on next rebuild, do NOT affect runtime)
+
+1. **Plato Perseus 690-char short-fetches** — 6 of 26 Plato sources fetched as Perseus error pages (690 chars each) instead of dialogue text. URL fragments affected: `:text=Apol/Euthyph/Gorg/Sym/Tim`. **Real extractor bug.** Plato's voice still works because Pass 4a had 24 other Perseus + Gutenberg fetches, but ~30K of dialogue text is missing. ~30-60 min investigation + retry on next rebuild.
+
+2. **Bob Marley voiceofthesufferers.free.fr SSL cert mismatch** on `interview_1973-12_neville_willoughby.html` — single high-value source (the Bullbay reasoning interview, foundational dub-reasoning conversation). Marley's voice still works because v2 has 4 other major interviews (High Times 1976, Hot Press 1978, AADL 1975, Gleaner obituary). ~15 min retry with cert-verify disabled or via a mirror.
+
+### Why these are POST-ATHENS, not pre-Athens
+
+The shipped voices read from `07_persona_card_assembled.json`, not from Pass 1c output. Cards encode whatever Pass 4a/4b produced from the corpus available at build time — **already baked in**. Fixing Pass 1c content NOW would only change voice fields on a rebuild. Athens runtime is unaffected.
+
+### When to apply
+
+On the next major rebuild cycle (post-Athens, pre any future panel). Both fixes are <1 hr each. No pre-Athens action needed.
+
+---
+
+## 26. Claudia Pinchbeck DRAFT card (2026-05-04 PM, dryrun-only)
+
+Operator-direct-authored DRAFT card landed at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json`. **44 fields, ~45K bytes, bypasses the persona pipeline.**
+
+**Status: DRAFT — for dryrun use only; NOT promotion-ready.**
+
+Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth + the v2 schema field set. Captures the architectural moves: 4 reference traditions (Talk / TLS / Borges / Manchester Guardian), one-spine-ten-bends per-voice register torque, form-fit honesty, headline rule (small specific gesture), Onion-drift hard ban, Beauty Shot reading discipline + desk's prose register split, compound dossier medium, confected pedigree (Vol. CXVI, Issues 42,193–42,195, Late Night Edition).
+
+5 open questions documented in `metadata.open_questions`:
+- voice_mode = `observational` chosen as least-bad fit; per prep doc could be (b) extend schema with `editorial` or (c) custom subtype
+- council_member_name = misnomer (Claudia not on council); left as byline form per prep doc
+- voice_temporal_stance = third type schema doesn't natively describe (constructed-contemporary, period-formed) — custom rendering
+- Beauty Shot dossier file not yet shared by operator — content here is best-inference from prep doc; refine when shared
+- Card not validated by Pass 7a — dryrun-only; needs full pipeline run before promotion to athens-2026
+
+**Real Stages A-F pipeline build remains pending** — awaits Beauty Shot dossier + voice_mode/byline decisions per `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. The dryrun draft is a placeholder that lets the runtime test the editor flow against a populated card without blocking on the full build.
