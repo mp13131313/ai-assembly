@@ -203,6 +203,50 @@ framing_text: Cleopatra issued a prostagma.
         assert parsed["theme_abstract"].startswith("The theme reaches across")
         assert "four vocabularies" in parsed["theme_abstract"]
 
+    def test_parse_theme_fields_after_body_paragraphs(self):
+        """The closing prompt now emits theme_title + theme_abstract AFTER
+        body_paragraphs (swipe order: Page 2 article body → Page 3 theme).
+        body_paragraphs's regex must terminate at the theme_title label
+        without swallowing the theme content into the body.
+        """
+        raw = """**kicker:** A KICKER
+
+**headline:** A headline
+
+**subline:** A subline
+
+**front_abstract:** Front teaser.
+
+**body_paragraphs:**
+First paragraph of the article body.
+
+Second paragraph.
+
+* * *
+
+Third paragraph.
+
+**theme_title:** Page Three Title
+
+**theme_abstract:** Page Three abstract that orients a reader who arrives directly here.
+
+**headnotes:**
+voice_slug: plato
+artifact_title: DOCTORS OR COOKS?
+framing_text: Plato wrote a dialogue.
+"""
+        parsed = dg.parse_dossier_output(raw)
+        # body_paragraphs stops at theme_title — doesn't bleed
+        assert len(parsed["body_paragraphs"]) == 4  # 3 paras + asterism
+        assert "Page Three Title" not in " ".join(parsed["body_paragraphs"])
+        assert "Page Three abstract" not in " ".join(parsed["body_paragraphs"])
+        # theme fields parse cleanly
+        assert parsed["theme_title"] == "Page Three Title"
+        assert parsed["theme_abstract"].startswith("Page Three abstract")
+        # headnotes still parse
+        assert len(parsed["headnotes"]) == 1
+        assert parsed["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
+
     def test_parse_strips_markdown_chrome(self):
         raw = "**kicker:** ***WAIT***\n\n**headline:** _italic stuff_"
         parsed = dg.parse_dossier_output(raw)
