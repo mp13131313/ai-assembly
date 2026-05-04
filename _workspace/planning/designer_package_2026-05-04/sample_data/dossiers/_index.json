@@ -1,22 +1,62 @@
 {
-  "generated_at": "2026-05-04T10:56:36+0200",
+  "generated_at": "2026-05-04T15:50:51+0200",
   "nights_present": [
     1
   ],
-  "dossier_count": 1,
+  "dossier_count": 4,
   "dossiers": [
     {
       "night": 1,
       "dossier_no": 1,
       "filename": "dossier_001.json",
       "url_path": "/dossiers/night-1/dossier_001",
-      "kicker": "",
-      "headline": "",
+      "kicker": "THE EMPTY CHAIR",
+      "headline": "Three Voices Halt At The Chair That Held No One",
       "theme_id": "theme_001",
-      "theme_display_title": "The Patron's Claim to the Seal",
+      "theme_display_title": "The Excluded Face at the Table of Peace",
+      "issue_no": 42193,
+      "vol": "CXVI",
+      "publication_date": "2026-05-08"
+    },
+    {
+      "night": 1,
+      "dossier_no": 2,
+      "filename": "dossier_002.json",
+      "url_path": "/dossiers/night-1/dossier_002",
+      "kicker": "WHERE THE PANEL HAD RUN OUT OF TIME",
+      "headline": "Three Voices Reach Behind The Panel's Binary For Names And Dates",
+      "theme_id": "theme_003",
+      "theme_display_title": "Whether the West Admits of Formal Expression",
+      "issue_no": 42193,
+      "vol": "CXVI",
+      "publication_date": "2026-05-08"
+    },
+    {
+      "night": 1,
+      "dossier_no": 3,
+      "filename": "dossier_003.json",
+      "url_path": "/dossiers/night-1/dossier_003",
+      "kicker": "ON THE UNSEALED DECREE",
+      "headline": "Three Voices Decline The Panel's Premise At The Word Will",
+      "theme_id": "theme_004",
+      "theme_display_title": "The Decree That Was Never Sealed",
+      "issue_no": 42193,
+      "vol": "CXVI",
+      "publication_date": "2026-05-08"
+    },
+    {
+      "night": 1,
+      "dossier_no": 4,
+      "filename": "dossier_004.json",
+      "url_path": "/dossiers/night-1/dossier_004",
+      "kicker": "FROM THE PANEL ON POPULISM",
+      "headline": "The Voice Of Bob Marley Sets The Doctor's Bag Down And Names Babylon Twice",
+      "theme_id": "theme_002",
+      "theme_display_title": "The Sufferah and the Strongman",
       "issue_no": 42193,
       "vol": "CXVI",
       "publication_date": "2026-05-08"
     }
-  ]
+  ],
+  "editions_by_night": {}
 }

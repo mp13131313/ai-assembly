@@ -17,17 +17,31 @@ designer_package_2026-05-04/
 ├── README.md                     ← (you are here)
 ├── DESIGNER_BRIEFING.md          ← MAIN DOC — read this first
 ├── rebuild.sh                    ← rebuild this bundle from canonical sources
-└── sample_data/                  ← real publish-output for shape reference
-    ├── dossiers/                 per-night + per-dossier files (kicker, headline, etc.)
-    │   ├── _index.json           cross-night dossier index
-    │   └── night_1/
-    │       ├── _index.json       per-night dossier manifest (incl. voices_in_night nav)
-    │       └── dossier_001.json  ← real dossier file (caveat: prior run; v1-shaped, fields mostly empty)
-    ├── nights/                   per-voice published artifacts (audit; not for CMS render)
-    ├── themes/                   Researcher's per-theme deeper context (optional joins)
-    ├── voices/                   per-voice cross-night index
-    ├── extractions/              reverse-index lookups (audit)
-    └── traces/                   lineage graphs (audit)
+└── sample_data/
+    └── dossiers/                 ← THE FILES YOU NEED — self-contained
+        ├── _index.json           cross-night dossier index
+        └── night_1/
+            ├── _index.json       per-night dossier manifest (incl. voices_in_night nav)
+            ├── dossier_001.json  ← real dossier file (theme_001, multi-voice)
+            ├── dossier_002.json  ← real dossier file (theme_003)
+            ├── dossier_003.json  ← real dossier file (theme_004)
+            └── dossier_004.json  ← real dossier file (theme_002)
+```
+
+Each dossier file is **self-contained** — kicker, headline, subline,
+front_abstract, body_paragraphs, theme_title_for_dossier,
+theme_abstract_for_dossier, headnotes (one per voice with
+artifact_text body embedded), metadata. No need to fetch other files
+to render a dossier.
+
+**Other publish-pipeline outputs** (per-voice nights/, per-theme
+themes/, voices/, extractions/, traces/) are audit / optional joins —
+NOT included in the bundle by default since the CMS doesn't need
+them. To include them in the bundle (e.g., if you want the
+deeper-theme-context expansion option for Page 3), run:
+
+```bash
+./rebuild.sh --include-audit
 ```
 
 ## Octopus chromatophore renderer (NOT in bundle — canonical source)
@@ -83,15 +97,22 @@ bundle in one command:
 
 This re-copies:
 - `_workspace/planning/DESIGNER_BRIEFING_2026-05-04.md` → `DESIGNER_BRIEFING.md`
-- `<PROJECT_ROOT>/published_artifacts/` → `sample_data/`
+- `<PROJECT_ROOT>/published_artifacts/dossiers/` → `sample_data/dossiers/`
 
-By default the chromatophore renderer files are NOT copied (canonical
-source is `docs/runtime_assets/octopus_chromatophore/`). To include
-them as standalone copies in the bundle (e.g. for a zipped delivery
-to an off-repo designer):
+Flags:
+- `--include-audit` — also copy `nights/`, `themes/`, `voices/`,
+  `extractions/`, `traces/` (publish-side audit/lineage; not needed for
+  the core 4 dossier surfaces).
+- `--include-chromatophore` — also copy the Octopus WebGL renderer
+  files into a `chromatophore/` subfolder. Self-contained zippable
+  delivery for a designer who doesn't have repo access. Canonical
+  source: `docs/runtime_assets/octopus_chromatophore/`.
+
+To rebuild from a different PROJECT_ROOT (e.g., when a fresh dryrun
+completes):
 
 ```bash
-./rebuild.sh --include-chromatophore
+AI_ASSEMBLY_PROJECT_ROOT=/path/to/new_dryrun ./rebuild.sh
 ```
 
 ## Sample data caveats

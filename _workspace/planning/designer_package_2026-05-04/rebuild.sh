@@ -70,15 +70,36 @@ fi
 cp "$BRIEFING_SRC" "$BUNDLE_DIR/DESIGNER_BRIEFING.md"
 echo "  ✓ briefing copied ($(wc -l < "$BUNDLE_DIR/DESIGNER_BRIEFING.md" | tr -d ' ') lines)"
 
-# --- Sample data ---
+# --- Sample data — dossiers only by default ---
+# Dossiers are the unit of publication and the only file family the CMS
+# needs to render the 4 dossier surfaces (frontpage teaser, theme article,
+# theme page, artifact pages). Other published_artifacts/ subfolders
+# (nights/, themes/, voices/, extractions/, traces/) are audit / optional
+# joins — pass --include-audit to bundle them too.
+INCLUDE_AUDIT=0
+for arg in "$@"; do
+    if [ "$arg" = "--include-audit" ]; then
+        INCLUDE_AUDIT=1
+    fi
+done
+
 if [ ! -d "$SAMPLE_SRC" ]; then
     echo "  ⚠ sample_data source not found at $SAMPLE_SRC; skipping sample data"
 else
     rm -rf "$BUNDLE_DIR/sample_data"
     mkdir -p "$BUNDLE_DIR/sample_data"
-    cp -aR "$SAMPLE_SRC"/* "$BUNDLE_DIR/sample_data/" 2>/dev/null || true
-    n_files=$(find "$BUNDLE_DIR/sample_data" -type f | wc -l | tr -d ' ')
-    echo "  ✓ sample_data refreshed ($n_files files)"
+    if [ "$INCLUDE_AUDIT" -eq 1 ]; then
+        cp -aR "$SAMPLE_SRC"/* "$BUNDLE_DIR/sample_data/" 2>/dev/null || true
+        n_files=$(find "$BUNDLE_DIR/sample_data" -type f | wc -l | tr -d ' ')
+        echo "  ✓ sample_data refreshed (full — $n_files files)"
+    else
+        # Dossiers only: the cross-night index + each per-night folder.
+        if [ -d "$SAMPLE_SRC/dossiers" ]; then
+            cp -aR "$SAMPLE_SRC/dossiers" "$BUNDLE_DIR/sample_data/"
+        fi
+        n_files=$(find "$BUNDLE_DIR/sample_data" -type f | wc -l | tr -d ' ')
+        echo "  ✓ sample_data refreshed (dossiers only — $n_files files; pass --include-audit for full)"
+    fi
 fi
 
 # --- Chromatophore (opt-in) ---
