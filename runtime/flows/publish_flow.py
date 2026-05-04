@@ -58,7 +58,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-_REPO_ROOT = Path(__file__).resolve().parent
+# Match the pattern used by every other flow file: walk to runtime/ root
+# (parent of flows/) so `from flows.shared.io` resolves. Was `parent` only
+# (pointing at runtime/flows/) which broke the import; the catch-all error
+# below misled to "install python-dotenv" — the real problem was sys.path.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
@@ -69,8 +73,10 @@ try:
     from flows.shared.project_root import add_project_arg, resolve_project_root
 except ImportError as e:
     sys.stderr.write(
-        f"Missing dependency: {e.name}\n"
-        "Install with:  pip install python-dotenv\n"
+        f"publish_flow.py import failed: {e}\n"
+        "If 'flows' module not found: ensure CWD is runtime/ or set "
+        "PYTHONPATH=runtime when invoking.\n"
+        "If python-dotenv missing: pip install python-dotenv (in runtime venv).\n"
     )
     sys.exit(1)
 

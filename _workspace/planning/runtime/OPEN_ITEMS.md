@@ -483,7 +483,27 @@ Voice Pipeline hit the shell-empty-env bug (Claude Code agent shell pre-sets API
 
 All three flow entry-points now consistent with voice + persona pipeline patterns.
 
-### C3. publish_flow.py end-to-end exercise 🟡 (cross-night theme path bug fixed 2026-05-02; full exercise still pending)
+### C3. publish_flow.py end-to-end exercise ✅ EXERCISED + bug-fixed 2026-05-04 (surfaced new C32 finding)
+
+**Closing rationale (2026-05-04):** Ran `publish_flow.py` end-to-end against the MSC dryrun's Researcher/Provocateur/Voice outputs. Two outcomes:
+
+1. **Bug fix in publish_flow.py itself:** `_REPO_ROOT = Path(__file__).resolve().parent` was off-by-one (pointed at `runtime/flows/` instead of `runtime/`), making `from flows.shared.io` fail. The catch-all error then misled to "install python-dotenv" — wrong diagnosis. Fixed `_REPO_ROOT` to `parent.parent` matching the pattern in every other flow file. Also improved the error message.
+
+2. **Successful exercise:** publish_flow ran in 0.04s (pure file I/O, no LLM calls), producing:
+   - `themes/night_1/<theme_id>.json` — 4 files (matches Researcher's 4 themes)
+   - `extractions/<eid>.json` — 76 files (matches Researcher's 76 extractions)
+   - `traces/lineage_graph_night_1.json` — 136 nodes, 317 edges
+   - `traces/publish_manifest_night_1.json`
+
+3. **Surfaced new finding (filed as C32 below):** `voices/` (multi-night per-voice index) and `nights/` (per-night per-voice files) skipped because `voice/publish.py` strictly requires `step3_amended_artifacts/` which Athens skips per A1. Per-voice publish never fires under Athens's `--skip-step3` default — real Athens-blocking bug.
+
+Original C3 concern (full end-to-end exercise of publish_flow against real upstream outputs) is closed; the surfaced bug is tracked as C32.
+
+Filed history below preserved.
+
+---
+
+### ~~C3. publish_flow.py end-to-end exercise~~ 🟡 (filed 2026-04-29; closed 2026-05-04 — exercised + bug-fixed; surfaced C32)
 
 **Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"High priority — Athens-blocking-eligible".
 
@@ -517,16 +537,31 @@ This was Athens-eligible: although `voice_flow.py` auto-publishes per-night per-
 
 **Pre-Athens-must-do.** Continuity is a 3-night architecture; running Night 1 only doesn't test it.
 
-### C5. Multi-voice 3+ dry-run 🟡
+### C5. Multi-voice 3+ dry-run 🟡 RECONFIGURED 2026-05-04 — full 10 voices + editor + edition pipeline
 
-**Source:** Same.
+**Original (2026-04-29):** Step 3 cross-voice engagement only exercised on 2 voices (Plato + Cleopatra); 3+ needed to test multi-peer engagement vocabulary, editor scaling, closing-show theme-mapping.
 
-Step 3 cross-voice engagement only exercised on 2 voices (Plato + Cleopatra). 3+ would test:
-- Multi-peer engagement vocabulary (engaged_peers[] with 2+ entries per voice)
-- Editor layer scaling across more voices' outputs
-- Closing-show theme-mapping across more positions
+**Partial closure 2026-05-04:** MSC dryrun exercised 7 voices through Stages 0/1 → 2 → 3 → 4 (transcription + Researcher + Provocateur + Voice). 19 (voice, theme) pairs, 7 first-draft artifacts. Provocateur 7-voice triage matrix + per-voice formulations confirmed. Voice pipeline at 7-voice scale verified.
 
-**Trigger:** more voices finalized (Octopus + 1-2 more).
+**Reconfigured target (2026-05-04):** Full 10-voice end-to-end dryrun **including** the editor pipeline AND the downstream edition/publication pipeline. The 7-voice partial doesn't yet test:
+
+1. **All 10 voices** wired in council_config — Marley, Whanganui, Scheherazade not yet built (voices thread; Marley in flight, others gated on operator DR sessions). Ada Lovelace council_config entry stale (C10).
+2. **Editor pipeline (B1)** running with **v2 closing prompt** (current closing prompt is v1; produces malformed output per the wiring proof 2026-05-04). B1 sub-task: rewrite closing prompt to v2 contract.
+3. **Edition Pipeline (B3)** — broadsheet / microsite renderer consuming editor dossiers. Not yet built.
+4. **Publish pipeline (publish_flow.py)** end-to-end against the dryrun outputs (C3 — never run end-to-end against real Researcher/Provocateur/Voice/Editor outputs).
+5. **Cross-night state** — Convention A run_dirs across 3 nights with continuity overlay actually exercised (C4 — Multi-night sequence dry-run).
+
+**Dependencies (must ship for C5 reconfigured close):**
+- C10 Ada Lovelace council_config wiring (5 min) — pre-Athens-must-fix
+- Marley + Whanganui + Scheherazade voice cards shipped (voices thread, ~hours each)
+- B1 closing prompt rewrite to v2 (~30-60 min)
+- B3 Edition Pipeline / microsite renderer (operator designing; B2)
+- C3 publish_flow end-to-end exercise (cheap once B1+B3 ready)
+- C4 Multi-night sequence dry-run
+
+**Athens reality:** if all 10 voices + B1 + B3 + C4 ship in time, the final pre-Athens dryrun IS C5 reconfigured. If not, Athens runs with whatever subset is ready.
+
+**Status:** partially closed (7-voice partial); full closure dependent on the 6 dependencies above. **Cross-references:** C3, C4, C10, B1, B3.
 
 ### C6. Naming inconsistency cleanup ✅ CLOSED 2026-05-01 (misdiagnosed at filing — three names mark domain boundaries by design, not duplicate fields)
 
@@ -553,30 +588,23 @@ The rename at the publish-assembly boundary is a deliberate architectural transi
 
 **If post-Athens we want a smaller logs-readability win,** file a separate item scoped narrowly to log-line normalization without touching field names.
 
-### C7. Title source pipeline 🟡
+### C7. Title source pipeline ✅ CLOSED 2026-05-04 (resolved by B1 — Claudia writes artifact_title per voice)
 
-**Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"Medium priority" + decided 2026-04-29.
+**Closing rationale (2026-05-04):** Per-voice title source resolved by Editor Pipeline B1. Each voice's `artifact_title` is written by Claudia (the editor) inside her per-dossier output's `headnotes[i].artifact_title` slot — confirmed by operator 2026-05-04. The B9 architecture-resolved decision (per OPEN_ITEMS B9 entry) lands the per-voice headline poetics in Claudia's `translation_protocol` voice-card field with the dossier `headnotes[i].artifact_title` slot exposed to receive it.
 
-**Decision:** voice no longer produces title/subtitle (downstream concern; baked into voice prompts in commit `f6ee392`).
+Per-voice example titles she emits: Plato's "DOCTORS OR COOKS?", Cleopatra's "A PROSTAGMA, ISSUED AT NIGHT", etc. The slot is wired in the v2 schema; content arrives once Claudia's closing-prompt rewrite to v2 ships (B1 sub-task) AND her full 35-field card is built (voices thread per memo §10).
 
-**Open:** where do they come from for the microsite?
-- **Resolved by editor layer (B1)** — editor produces title + subtitle as part of its per-voice pass. This is the recommended path under PIPELINE_DOWNSTREAM_DESIGN.
-- Alternative: standalone auto-titler step (small Sonnet call reads artifact_text → emits title + subtitle)
-- Alternative: human editorial (operator authors per artifact)
-- Alternative: empty-title path through Athens + post-hoc
+Filed history below preserved for context.
 
-Triggers on A2 (editor layer) decision.
+---
 
-### C8. Voice-side artifact tuning items from real validation findings 🟡
+### ~~C7. Title source pipeline~~ 🟡 (filed 2026-04-29; closed 2026-05-04 — Claudia writes per-voice artifact_title) — see above for closing rationale
 
-**Source:** `OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md` §"Medium priority".
+### C8. Voice-side artifact tuning items from real validation findings ✅ MERGED INTO C20 2026-05-04
 
-From dryrun #2 (Plato solo) validator findings:
-- Plato underused `translation_protocol` in Step 1 (modern terms left raw — operator: keep as-is, voice-side artifact)
-- "our condition" / first-person-presence-in-room slips in theme_001 Step 1 prose (validator correctly caught these)
-- Theme_002 constitution slip (Plato gave thymos logos's job; shifted to monologic assertion vs elenchus)
+**Closing rationale (2026-05-04):** Findings absorbed into C20's broader voice-side recurrence patterns + framework-drift workstream. C8's theme_002 constitution slip on Plato **recurred empirically** in the MSC dryrun (C28 thorough audit), confirming the slip is content-specific recurrence (populism-territory themes) rather than one-off. Now tracked in C20's merge-note + the in-flight C28b voice-card-patches report.
 
-**None blocking.** Could sharpen via Plato card patches OR via Step 1 closing-instruction guards. Operator-side judgment call.
+See C20's "MERGED 2026-05-04" section for the full pattern analysis + recommended card-patch direction (Plato epistemology principle enforcement language + `quality_criteria` per-step elenctic-vs-doctrinal test).
 
 ### C9. Provocateur Night 2 / Night 3 (theme_id, member) exclusion filter ✅ LANDED 2026-05-01
 
@@ -690,17 +718,11 @@ Without this filter, Athens Nights 2 + 3 risked re-deploying voices to territory
 
 The follow-up was completed inline as part of C11. Sessions.json regenerated from latest HTML; speakers.json scaffold refreshed; new speakers enriched; name typos normalized across both files. Re-runnable: stash refreshed HTML at `projects/athens-2026/reference/_source/program_index.html` and re-run `generate_sessions_json.py` → `generate_speakers_json.py` → `populate_speakers_from_program_html.py` chain.
 
-### C12. HoBB email tool integration 🟡
+### C12. HoBB email tool integration ✅ CLOSED 2026-05-04 (superseded — Editor Pipeline v2 dropped Substack/email delivery)
 
-**Source:** `docs/AI_Assembly_Briefing_v3_1.md` §"Operational workstreams" + archive `specs/AI_Assembly_Architecture_v1.md` §"Stage D — Deliver to HoBB email tool".
+**Closing rationale (2026-05-04):** The original premise was "Stage D — Deliver to HoBB email tool" for Substack/newsletter delivery of dossiers. **Editor Pipeline v2 (2026-05-03 PM)** dropped the Substack bridge entirely; per CLAUDE.md spec "Substack bridge dropped, micro-site only." Email/newsletter is no longer a delivery channel in the v2 architecture, so HoBB email-tool API access is no longer needed.
 
-**Problem:** Substack / newsletter delivery requires API access to HoBB's email tool (Mailchimp / Campaign Monitor / HubSpot / Substack / Beehiiv / Ghost — most have REST APIs; some have native Prefect/n8n nodes).
-
-**Open:** which tool HoBB actually uses + obtaining API credentials. Architecture v1 flagged as "30-minute investigation."
-
-**Fallback:** manual paste from a shared folder if API integration isn't possible.
-
-**Pre-Athens-eligible.** Needs operator-side conversation with whoever runs HoBB's list.
+If post-Athens an email channel becomes desirable (e.g. daily-morning subscriber newsletter), this can be re-opened then with sharper scope. Closed as superseded; not deferred.
 
 ### C13. Recording protocol pre-Athens ✅ CLOSED 2026-05-03 (code part done; ops coordination tracked elsewhere)
 
@@ -768,7 +790,18 @@ No code change needed. Closing.
 
 External reviewer caught: the report's "Continuity → Night 3" section showed `continuity_block_if_night_2 — POSITIONS: (none)` for all 4 voices, suggesting either (a) renderer bug or (b) regression where N3 continuity actually empty. **Diagnosis: (a) renderer bug.** Actual N3 continuity files have field `continuity_block_if_night_3` (not `_if_night_2`); the renderer hardcoded `_if_night_2` for all continuity sections. Fixed in `/tmp/build_report.py` to use `f"continuity_block_if_night_{for_night}"`. Report regenerated; N3 continuity blocks now render correctly with rich content (2.5-4.2K chars per voice). Bugfix verification of `ccc6229` stands — Dostoevsky N3's *"I wrote that pause yesterday"* reference IS legitimate; he had a populated continuity overlay loaded onto his Night 3 card.
 
-### C18. Test 2 confound — focus-on-one branch untested 🟡 (filed 2026-05-01 from external review; refined by Test 2 v2 same day)
+### C18. Test 2 confound — focus-on-one branch untested ✅ CLOSED 2026-05-04 (Test 3 + MSC dryrun cover the gap)
+
+**Closing rationale (2026-05-04):** Two follow-ups since the original Test 2 v2 inadequacy answer the concern:
+
+1. **Test 3** (2026-05-02, post-routing+prompt refactor `d9ca3f9` + `dfb46f7`) — 2/4 voices fully focused on a single response, 1/4 anchored synthesis, 1/4 earned synthesis with field-grounded `weight_assessment`. Focus-on-one branch exercised and worked.
+2. **MSC dryrun** (2026-05-03/04) — 7 voices × 4 substantively-distinct MSC themes (international order / populism / West / EU democratic resilience). Per-artifact `focus_decision` shows most voices choosing focus-on-one with explicit rationale (Plato "Focus on Response 1.", Cleopatra synthesis-of-three-into-prostagma, Dostoevsky "Focus on Response 1.", Hannah Arendt "Focus on Response 4.", Plato 4/4 themes covered). Synthesis voices (Battuta, Octopus) declared explicit weighing rationale. Branch coverage adequate.
+
+Original concern resolved by these two empirical exercises. Filed history below preserved for context.
+
+---
+
+### ~~C18. Test 2 confound — focus-on-one branch untested~~ 🟡 (filed 2026-05-01 from external review; refined by Test 2 v2 same day) — see above for closing rationale
 
 External reviewer pushback on Test 2's "all 4 voices wove across all 3" finding: the 3 formulations were all variations on one theme (legitimacy of the invisible), so weaving was the natural choice.
 
@@ -929,7 +962,20 @@ Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect out
 
 **Pattern note:** when re-opened, lift the `_anthropic_call.stream_voice_call`'s `system: str | tuple[str, str]` + `cache_system: bool` pattern into `personas/flows/shared/clients.py:call_claude`. Apply opt-in caching at `pass_7pre_chunked.py:verify_batch` (restructure user prompt so primary_texts + merged_dossier come first as cached prefix, claim_items_json after the breakpoint). Use 5-min TTL (parallel batches fire within seconds; 1h TTL's 2× write penalty doesn't pay off).
 
-### C19c. Caching gaps in Researcher / Provocateur triage / Transcription 🔵 POST-ATHENS HYGIENE (filed 2026-05-03 PM)
+### C19c. Caching gaps in Researcher / Provocateur triage / Transcription 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: 🔵 post-Athens hygiene)
+
+**Promotion rationale (2026-05-04):** Operator chose to promote despite the marginal $3 absolute savings analysis. Implementation is mechanical (~80 min total across the 3 stages — Provocateur triage_voices ~20 min, Researcher Node 1 ~30 min, Transcription speaker_id+cleaning ~30 min combined), follows the formulation-caching pattern already in production. Pre-Athens-eligible.
+
+**Order of work (already specified in entry below):**
+1. Provocateur triage_voices (~$2.50, ~20 min)
+2. Researcher Node 1 (~$0.20, ~30 min)
+3. Transcription speaker_id + cleaning (~$0.20 combined, ~30 min)
+
+**Original filing 2026-05-03 below preserved.**
+
+---
+
+### ~~C19c (original, pre-promotion)~~. Caching gaps in Researcher / Provocateur triage / Transcription 🔵 POST-ATHENS HYGIENE (filed 2026-05-03 PM)
 
 **State:** caching audit during 2026-05-03 PM editor B1 session surfaced these gaps. Total Athens savings if filled: ~$3-8. Implementation: ~80 min. Marginal ROI; **skipped pre-Athens**.
 
@@ -959,7 +1005,65 @@ Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect out
 
 **Cross-reference:** OPEN_ITEMS C19a (Anthropic prompt caching, voice + Provocateur formulation already cached) + C19b (personas pipeline caching, deferred).
 
-### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism (handoff to persona thread) 🟡 (filed 2026-05-01)
+### C20. Voice-side recurrence patterns + Plato Socrates-death anachronism — SPLIT 2026-05-04 into C20a (runtime) + C20b (voices-thread)
+
+**Closing rationale (2026-05-04):** The original C20 covered both runtime engineering (continuity-overlay format) and voices-thread work (card patches). Splitting for clearer ownership:
+
+- **C20a (runtime engineering)** — Continuity-overlay format extension to carry "stock examples / signature moves / closing phrases already deployed this conference" register. 3 of the 4 original recurrence findings (Plato Theuth/Thamus, Battuta Tughluq beard-plucking, Dostoevsky closing-tic) require this; voice cards can't catch cross-night phrasing reuse on their own.
+- **C20b (voices-thread)** — Per-voice card patches. Plato Socrates-self-referencing-death already landed (athens-2026 `cf283bf`). Plato theme_002 epistemology slip + Ada/Battuta/Octopus framework drifts (from C28 thorough audit) all need card-side surgical patches. Subsumes C8 (merged 2026-05-04).
+
+Original C20 + C8-merge content preserved below for reference; the actionable work is now tracked under C20a + C20b.
+
+---
+
+### C20a. Continuity-overlay format extension — carry "moves already deployed" register 🟡 (split from C20 2026-05-04)
+
+**Problem:** Voices reuse signature moves and closing phrasings across nights without knowing they did so on prior nights. Continuity overlay (continuity_block_artifact_if_night_N) currently carries deltas the voice committed to deliver, but not a register of moves the voice has *already deployed* this conference.
+
+**Findings (from C20 cross-night recurrence audit, Test 1 2026-05-01):**
+1. **Plato Theuth/Thamus reach** — Phaedrus / writing-cannot-answer-when-questioned in N1, N2, AND Test 2 synthesis. Athens (9-12 briefings on Plato) → if 6+ reach for Theuth/Thamus, audience notices.
+2. **Battuta Tughluq beard-plucking** — Shaykh Shihāb al-Dīn beard-plucking in both N1 and N2 Step 1 with very similar phrasing.
+3. **Dostoevsky closing-tic** — N2 ends *"they have not yet earned the right to answer it"*; Test 2 synthesis ends *"any justice was ever made."* Move-shape (suspended judgment) is correct for Dostoevsky; specific phrasing risks calcifying.
+
+**Implementation direction:**
+- Extend `continuity_block_artifact_if_night_N` schema to include a `signature_moves_deployed` field — list of `{move_summary, where_used (night_X), short_quote}` populated by Continuity stage from prior-night artifact reading
+- Voice cards' Step 2 prompt sees this register before composing tonight's artifact: "you have already used these moves; consider whether tonight's matter genuinely calls for them again, or whether different moves serve better"
+- C28b's cross-night echo validator already catches the worst case (heavy echo = HOLD); this is the prevention-side complement
+
+**Effort:** ~2-3 hr — schema extension + Continuity stage update + Step 2 prompt addition + tests. Pre-Athens-eligible if voice cards on multi-night side warrant the investment.
+
+**Status:** filed; not Athens-blocking (C28b's cross-night echo HOLD catches the worst case). Defer if voices-thread work consumes the pre-Athens window. Reopen if Night 2/3 dryrun shows recurrence as a real problem.
+
+---
+
+### C20b. Voice-card patches for framework drift + recurrence (voices thread) 🟡 (split from C20 2026-05-04; absorbs C8)
+
+**Workstream:** voice-card surgical patches for known framework-drift modes. Operator-side / voices-thread, not runtime engineering.
+
+**Inventory of patches needed (per audit findings 2026-05-01 + 2026-05-04):**
+
+| Voice | Drift mode | Status | Source |
+|---|---|---|---|
+| Plato | Socrates-self-referencing-death anachronism | ✅ landed (athens-2026 `cf283bf`) — banned_modes[10] sharpened | C20 original |
+| Plato | theme_002 epistemology slip — pathos as epistēmē / monologic vs elenctic | 🟡 patch needed — sharpen epistemology principle's enforcement; add `quality_criteria` per-step "is the answer dialectical or doctrinal?" test | C8 (merged) + C28 audit recurrence |
+| Ada Lovelace | Principles 2 + 4 violations — formal-expressibility slippage; card-class collapse to two-part metaphor; indefinite-bound overstating | 🟡 patch needed — tighten Principle 2 enforcement; add hard_limits item against collapsing the three card-classes; sharpen the indefinite-bound guard | C28 thorough audit 2026-05-04 |
+| Ibn Battuta | naṣīḥa/fitna boundary breach (public denunciation of Tughluq); independent jurisprudential reasoning vs taqlīd; framework-abandonment ("does not reach a polity of plurality") | 🟡 patch needed — sharpen reportage-vs-denunciation distinction; reinforce taqlīd commitment; add hard_limits item against "framework does not reach" framing (sharʿ is portable) | C28 thorough audit 2026-05-04 |
+| Octopus | "Body does not gather" (denial vs refusing collapse); mechanistic explanation vs associative reasoning; boundary overreach after disclaiming | 🟡 patch needed — clarify "refuses collapse" vs "denies gathering"; reinforce relational/associative-reasoning hard_limit | C28 thorough audit 2026-05-04 |
+
+**Estimated effort:** ~30-60 min per voice for surgical card patches via Persona Pipeline `06_derive` step + manual review. Could be parallelised since voices are independent.
+
+**Athens reality:** with C28b shipped, even if patches don't ship pre-Athens, the operator gate catches these drifts at publish time. So C20b is not pure-blocker — but worth doing because:
+1. Patches reduce operator gate-clearance load (fewer flags per night)
+2. Athens content (WBBF panels) is more on-domain than MSC; some drifts may not surface, but the patches are correct regardless
+3. Persistence: framework-drift modes don't self-correct — once identified they recur
+
+**Status:** filed; voices-thread work. Cross-references: C28 audit (where the new drifts were detected) + C28b (the operator gate that catches them at publish time) + Persona Pipeline v4 (the build mechanism for patches).
+
+**Comprehensive report (in flight 2026-05-04):** the operator requested a deep voices-thread report on the Ada/Battuta/Octopus framework drift findings — pending write-up. Will land at `_workspace/planning/voices/REPORT_FRAMEWORK_DRIFT_2026_05_04.md`.
+
+---
+
+### ~~C20. Voice-side recurrence patterns + Plato Socrates-death anachronism~~ 🟡 (filed 2026-05-01; split 2026-05-04 — see C20a + C20b above)
 
 External reviewer flagged three voice-side moves that recurred across Test 1 nights. Operator added a fourth on inspection: a Plato anachronism that --skip-validation didn't catch.
 
@@ -988,6 +1092,27 @@ External reviewer flagged three voice-side moves that recurred across Test 1 nig
 **Three of the four findings (Theuth/Thamus + Tughluq + Dostoevsky-closing) now require runtime-side continuity-overlay implementation** carrying "stock examples / signature moves / closing phrases already deployed this conference" register. Voice continuity-after-Step-2 bugfix already landed (`ccc6229` voice_flow.py:458); the question now is whether the continuity overlay format carries used-moves register.
 
 **Cross-reference:** persona-thread tracking at `voices/OPEN_ITEMS.md` §16.5. Memo: `_workspace/planning/voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`.
+
+---
+
+**MERGED 2026-05-04: C8 (voice-side artifact tuning items from real validation findings) absorbed here.**
+
+C8's original findings (from dryrun #2 Plato solo, 2026-04-29):
+- Plato underused `translation_protocol` in Step 1 (modern terms left raw — operator: keep as-is, voice-side artifact)
+- "our condition" / first-person-presence-in-room slips in theme_001 Step 1 prose (validator correctly caught these)
+- **Theme_002 constitution slip — Plato gave thymos logos's job; shifted to monologic assertion vs elenchus**
+
+The third C8 finding (theme_002 constitution slip) **recurred empirically** in the MSC dryrun 2026-05-04 (C28 thorough audit) — same voice (Plato), same theme territory (theme_002 = Populism, the original was a populism-adjacent theme too). The audit's flag content for plato__theme_002:
+- *"Pain is one kind of knowing, and a true kind, and only one"* — elevates pathos to epistēmē (constitution: epistēmē is of what IS; perception/opinion is of what becomes/seems)
+- Doctrinal/declarative reasoning (`"This art is paideia, and paideia is the question that comes before the question of policy"`) instead of elenctic question-and-answer
+
+**Pattern:** Plato systematically slips on populism-territory themes — the theme demands engagement with the affective pull of demos (anger, frustration, the "lived experience" of citizens), and Plato's framework strains against treating those as load-bearing. **Recurrence is real, persistent, and content-specific.**
+
+This finding now sits in the broader Ada/Battuta/Octopus framework-drift report (C28b voice-card-patches workstream) — Plato is a 4th voice with a theme-specific drift mode. Resolution paths same as C20's existing menu (Path A card patch / Path B continuity overlay / Path C accept-as-tic). Plato's case is closer to Path A — the constitution + epistemology principles are clear; the slip is the voice failing to apply them under populism-territory pressure. Possible card patch: tighten epistemology principle's enforcement language for "pathos as epistēmē" framing; add to `quality_criteria` a per-step test "is the answer dialectical or doctrinal?"
+
+**Cross-reference:** C28 audit findings + the C28b voice-card-patches voices-thread report (in flight 2026-05-04).
+
+### ~~C8. Voice-side artifact tuning items from real validation findings~~ ✅ MERGED INTO C20 2026-05-04 — see C20's merge note above
 
 ---
 
@@ -1342,7 +1467,15 @@ Re-run sweep as many times as needed across the night as files trickle in. No ne
 
 ---
 
-### C25. Researcher Node 1 extraction is sequential — should parallelise 🟡 (filed 2026-05-03 dryrun, ~$25 in flight)
+### C25. Researcher Node 1 extraction is sequential — should parallelise 🟢 SHIPPED 2026-05-04 (commit `0e1b14e`)
+
+**Shipped 2026-05-04** in commit `0e1b14e`. ThreadPoolExecutor with `RESEARCHER_NODE1_BATCH=4` cap (env-overridable) replaces the sequential `for pkg_path in packages` loop. Athens wall savings: ~25-30 min/night (15 sessions sequential ~30-45 min → parallel ~8-12 min). 209/209 tests pass.
+
+Filed history below preserved.
+
+---
+
+### ~~C25 (original)~~. Researcher Node 1 extraction is sequential — should parallelise 🟡 (filed 2026-05-03 dryrun, ~$25 in flight)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** `researcher_flow.py:762-768` runs Node 1 (per-session extraction) in a sequential `for` loop — one Anthropic call per session, blocking. The Voice Pipeline parallelises across (voice, theme) pairs via `ThreadPoolExecutor`; Researcher does not. Looks like an oversight, not a deliberate design — extraction calls are independent and `validate_and_concat` operates on the full list at the end (order-agnostic).
 
@@ -1359,7 +1492,21 @@ Re-run sweep as many times as needed across the night as files trickle in. No ne
 
 ---
 
-### C26. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 (filed 2026-05-03 dryrun, architecture suggestion)
+### C26. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: post-Athens architecture suggestion)
+
+**Promotion rationale (2026-05-04):** Operator's dryrun pattern — running transcription_flow.py via CLI, hand-patching status.json so the dashboard reflects state — is exactly the friction this item resolves. During Athens itself, the operator will be observing via dashboard while transcription runs; having the orchestrator drive transcription (instead of fire-and-forget from ingest) gives:
+- Concurrency control on AssemblyAI calls (stagger 25 sessions across the night without overrunning rate limits)
+- Centralised retry / error recovery visible in dashboard
+- Dashboard mirrors orchestrator's view directly (no status.json blind spots)
+- Operator can re-fire failed transcriptions from dashboard without re-uploading
+
+Pre-Athens-eligible if budget allows; estimated ~3-5 hr engineering. If budget tight, defer to post-Athens.
+
+**Original filing 2026-05-03 below preserved.**
+
+---
+
+### ~~C26 (original, pre-promotion)~~. Ingest layer + transcription firing should be split (orchestrator drives both stages) 🟡 (filed 2026-05-03 dryrun, architecture suggestion)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** Operator observed that the runtime currently has **two distinct trigger paths** for transcription firing:
 - **Ingest layer** (FastAPI app `runtime/ingest/app.py`): producer uploads audio → ingest writes `status.json` (state=received → normalizing → transcribing) + spawns `transcription_flow.py` as detached subprocess.
@@ -1386,7 +1533,66 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C31. transcription_flow.py CLI OUTPUT_DIR default footgun 🟡 (filed 2026-05-04 dryrun)
+### C33. publish_flow.py needs dossier + edition coverage 🟡 (filed 2026-05-04 — surfaced when running publish_flow + considering Editor B1 ship)
+
+**Surfaced 2026-05-04** during C3 close. publish_flow.py is currently **voice-centric** (built before Editor B1 shipped): writes themes/extractions/voices/traces/nights. With B1 producing dossiers, the aggregation surface needs to extend.
+
+**Missing coverage:**
+1. **Per-night dossier index** — `published_artifacts/dossiers/night_<N>/_index.json` listing all dossiers published that night (kicker, headline, theme_id, voice_count, lineage). Editor writes individual `dossier_<NNN>.json` files but no per-night index.
+2. **Cross-night dossier multi-night index** — `published_artifacts/dossiers/_index.json` walking all nights. Microsite needs this to render the conference's full dossier list.
+3. **Lineage graph extension** — currently stops at `voice → step2_artifact`. Needs `voice → editor → dossier` arcs so audit trails reach published unit-of-publication.
+4. **Edition pipeline outputs** — once B3 (Edition / broadsheet renderer) ships, publish_flow should also walk its outputs and add to the manifest. Pending B3.
+
+**Implementation scope (~1-2 hr for items 1-3; item 4 gated on B3):**
+- New `_build_dossier_indexes(project_root, night)` function in publish_flow.py
+- Extend `_build_lineage_graph` to walk `published_artifacts/dossiers/night_<N>/*.json` + add editor → dossier nodes/edges
+- New CLI flags `--skip-dossiers` (mirror existing skip flags) for opt-out
+- Tests: ~5-8 new in test_publish_flow (currently no test file for publish_flow per repo audit)
+
+**Status:** filed; pre-Athens-eligible for items 1-3 (microsite-rendering dependency); item 4 deferred until B3 ships.
+
+---
+
+### C32. voice/publish.py requires step3 — never fires under Athens's --skip-step3 🔴 ATHENS-BLOCKING (filed 2026-05-04 dryrun, surfaced from C3 close)
+
+**Surfaced 2026-05-04 from C3 publish_flow exercise:** `voice_flow.py:507` only calls `publish_voice_artifacts_for_night` if `step3_results and not skip_step3`. Since Athens production CLI per A1 always passes `--skip-step3` (Step 3 dormant for Athens), the per-voice publish step **never fires** for Athens nights.
+
+**Consequences:**
+- `published_artifacts/nights/night_<N>/<voice>.json` per-voice published files NEVER WRITTEN
+- `_index.json` per-night index NEVER WRITTEN
+- `publish_flow.py`'s `voices/<slug>.json` multi-night index has nothing to walk (was 0 files in dryrun verification)
+- Microsite has no per-voice artifact files to render (assuming microsite consumes per-voice files; if it consumes only dossiers via editor, this matters less)
+
+**The fix path depends on Athens's microsite/edition design:**
+
+**Path A — patch voice/publish.py to also work from step2** (Athens-friendly, 30-60 min):
+- Currently `_load_step3` is required and `_load_step2` enriches metadata afterward
+- Inverted version: prefer step3 if present (Athens post-A1-reversal), fall back to step2 with adjusted enrichment + a `was_step3: false` marker in the published file
+- voice_flow.py:507 condition becomes `if step2_results` (always fires after Step 2; step3 is bonus enrichment)
+
+**Path B — accept that per-voice publish is editor-mediated** (zero engineering, design decision):
+- If the microsite renders dossiers (per Editor Pipeline v2 spec — "Unit of publication is the dossier"), per-voice files may be vestigial
+- voices' `artifact_text` is consumed inside the dossier composition; not published as standalone per-voice files
+- publish_flow.py's `voices/` multi-night index becomes editor-mediated multi-night dossier walks instead
+
+**Path C — both** (publish per-voice AND publish dossiers):
+- For audit + alternative viewing surfaces; per-voice + per-dossier coexist
+
+**Decision needed from operator:** does the microsite need per-voice published files for Athens? If yes → Path A (~30-60 min). If no → close as not-applicable.
+
+**Status:** filed; **Athens-blocking IF per-voice publish is needed**. Not blocking if Athens microsite renders only dossiers.
+
+---
+
+### C31. transcription_flow.py CLI OUTPUT_DIR default footgun 🟢 SHIPPED 2026-05-04 (commit `29b6041`)
+
+**Shipped 2026-05-04** in commit `29b6041`. New `_resolve_output_dir(audio_path)` defaults to `audio_path.parent` when `OUTPUT_DIR` env var is unset. Module-level `OUTPUT_DIR` usage replaced inside `process_session`. Production paths unaffected (ingest + orchestrator already set the env var explicitly). 209/209 tests pass.
+
+Filed history below preserved.
+
+---
+
+### ~~C31 (original)~~. transcription_flow.py CLI OUTPUT_DIR default footgun 🟡 (filed 2026-05-04 dryrun)
 
 **Surfaced during dev MSC dryrun setup (2026-05-04 AM):** `transcription_flow.py` defaults `OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", "."))` ([transcription_flow.py:91](runtime/flows/transcription_flow.py:91)). When operator runs the flow as a CLI without setting `OUTPUT_DIR` env var, outputs land in the current working directory.
 
@@ -1400,7 +1606,15 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C30. Voice Step 1 inter-batch sleep is over-conservative 🟡 (filed 2026-05-03 dryrun)
+### C30. Voice Step 1 inter-batch sleep is over-conservative 🟢 SHIPPED 2026-05-04 (commit `29b6041`)
+
+**Shipped 2026-05-04** in commit `29b6041`. `VOICE_BATCH_WAIT_S` default lowered 20s → 5s. Anthropic Tier 4 limits comfortably accommodate 4 parallel Opus 4.7 calls without inter-batch backoff. Athens wall savings: ~2-3 min/night. Override via env var if rate-limit issues surface. 209/209 tests pass.
+
+Filed history below preserved.
+
+---
+
+### ~~C30 (original)~~. Voice Step 1 inter-batch sleep is over-conservative 🟡 (filed 2026-05-03 dryrun)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** Voice Step 1 runner sleeps `VOICE_BATCH_WAIT_S=20s` between each batch of 4 Anthropic calls ([voice_flow.py:165](runtime/flows/voice_flow.py:165)) "to respect Anthropic rate limits". Empirical reality at Athens scale:
 
@@ -1416,7 +1630,13 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C29. Voice validation phase is partly serial — should parallelise 🟡 (filed 2026-05-03 dryrun)
+### C29. Voice validation phase is partly serial — should parallelise ✅ MOOT 2026-05-04 (Step 1 validation dropped per C28; nothing to parallelise)
+
+**Moot rationale (2026-05-04):** C28 dropped Step 1 validation entirely (default-OFF in voice_flow per commit `29b6041`); the parallelism gap this entry described no longer exists because the phase no longer runs. C28b's Step 2 validator has its own parallelism design built in (per-voice ThreadPool + per-pillar parallel execution within each voice). No action needed. Filed history below preserved.
+
+---
+
+### ~~C29 (original)~~. Voice validation phase is partly serial — should parallelise 🟡 (filed 2026-05-03 dryrun)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** Voice pipeline Stage 4 took 32 min wall against 19 pairs (38 validation calls). Two bottlenecks in the validation phase:
 
@@ -1443,7 +1663,15 @@ Only parallelism: outer ThreadPoolExecutor(max_workers=VOICE_STEP1_BATCH=4) runn
 
 ---
 
-### C28. Voice validation: drop Step 1 validation pre-Athens 🟡 (filed 2026-05-03; thorough audit 2026-05-04; **recommendation: drop or move to Step 2**)
+### C28. Voice validation: drop Step 1 validation pre-Athens 🟢 SHIPPED 2026-05-04 (commit `29b6041`); replaced by C28b Step 2 validator
+
+**Shipped 2026-05-04** in commit `29b6041`. `voice_flow.run_voice()` default flipped to `skip_validation=True`; `--enable-step1-validation` opt-in flag for diagnostic dryruns; `--skip-validation` kept as no-op for back-compat; orchestrator's per-night conditional removed (now redundant). Athens savings: ~$9-15 + ~30 min/night for zero downstream loss (no consumer of the flags). Replaced by C28b Step 2 validator (operator-gated, 3 pillars, real consumer). 209/209 tests pass.
+
+Filed history + thorough audit + revised audit + Step 2 design recommendation below preserved for context.
+
+---
+
+### ~~C28 (original)~~. Voice validation: drop Step 1 validation pre-Athens 🟡 (filed 2026-05-03; thorough audit 2026-05-04; **recommendation: drop or move to Step 2**)
 
 **Surfaced during dev MSC dryrun (2026-05-03 PM):** All 19 (voice, theme) Step 1 outputs flagged by validation. Audit conducted 2026-05-04 against the 19 validation files in the dryrun output.
 
@@ -1567,7 +1795,28 @@ So validation of Step 1 is **expensive logging that doesn't gate anything**. Ath
 
 ---
 
-### C28b — Step 2 validator spec (operator gate, Option C halt-on-any-flag) 🟡 SPECIFIED 2026-05-04 PM
+### C28b — Step 2 validator (operator gate, Option C halt-on-any-flag) 🟢 SHIPPED 2026-05-04 (commits `bedbb54` + `8b7c395`); Step 2 lineage `primary_theme_id` fix bundled
+
+**Shipped 2026-05-04** end-to-end in commits `bedbb54` (full implementation + lineage fix) + `8b7c395` (lineage simplification removing redundant response_n_to_theme_id map). 14 files changed; 1543 insertions; +27 new tests (236/236 pass).
+
+**What landed:**
+- `runtime/flows/voice/step2_validation.py` (~390 lines) — three pillars + cross-night echo, parallel ThreadPool per pillar
+- 4 prompts under `runtime/flows/shared/prompts/voice_step2_validation_*.md`
+- `voice_flow.py` integration (default-ON; `--skip-step2-validation` opt-out)
+- `overnight_orchestrator.py` Stage 3.5 gate (Option C halt-on-any-flag); `validation_gate_state()` helper
+- `editor/routing.py` + `voice/publish.py` respect `operator_decisions/<voice>.json` (skip held voices)
+- `dashboard.py` per-voice validation pills + gate banner; `_voice_summary` surfaces "AWAITING OPERATOR" state
+- `app.py` POST `/admin/voice/<slug>/release` + `/hold` routes (admin-gated)
+- `admin_voice.html` Validation section + Release/Hold buttons
+- 27 new tests in `tests/test_step2_validation.py`
+
+**Plus Step 2 lineage fix (the "would be massive failer" catch):** `voice/step2_first_draft_artifact.py` now resolves `lineage.primary_theme_id` at write time using the actual order Step 2 prompted the voice. `editor/routing.py` reads it directly (no order-inference fragility). Eliminates the bug where editor's "Response N → theme_id" lookup against `briefings[N-1].theme_id` could disagree with Step 2's "Response N" labelling.
+
+Filed spec below preserved for reference.
+
+---
+
+### ~~C28b (original spec)~~ — Step 2 validator spec (operator gate, Option C halt-on-any-flag) 🟡 SPECIFIED 2026-05-04 PM
 
 After the C28 revised audit, operator chose to design a proper Step 2 validator that warns the operator + halts the pipeline on any flag (Option C). This entry is the implementation spec; supersedes the "If validation is wanted at all" alternative path above.
 
