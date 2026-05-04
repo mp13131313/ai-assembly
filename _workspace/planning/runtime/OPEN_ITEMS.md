@@ -659,7 +659,38 @@ python flows/provocateur_flow.py runs/athens_2026_2026_05_09_night3 \
 
 Without this filter, Athens Nights 2 + 3 risked re-deploying voices to territory they had already covered — defeating the cross-night progression the briefing requires.
 
-### C10. Council config: replace `dev_stub_v2_with_selection_params` with real Provocateur Profiles 🔴
+### C10. Council config: replace `dev_stub_v2_with_selection_params` with real Provocateur Profiles 🟢 SHIPPED 2026-05-04 PM
+
+**Shipped 2026-05-04 PM** — full sweep across both council_configs after operator request "C10, yes, for all voices."
+
+**State at sync time:** all 10 voices had shipped `06_derive/01_provocateur_profile.json` artifacts under `athens-2026/voices/<slug>/`. The voices thread had completed Marley + Whanganui + Scheherazade between this sync and the prior HANDOFF snapshot.
+
+**Per-voice diff (athens-2026 council vs shipped profile):**
+- ✅ Plato, Cleopatra, Ibn Battuta, Scheherazade, Dostoevsky, Hannah Arendt, Bob Marley, Whanganui River, Octopus — already in sync (9/10)
+- ❌ Ada Lovelace — stale in 6 of 8 profile fields (`speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`)
+
+**Action 1 (athens-2026):** synced Ada's 6 stale fields from her shipped profile. `last_updated` bumped. Backup at `council_config.json.bak.c10sync`. **NOT yet committed/pushed in athens-2026 git** — separate repo, operator's call.
+
+**Action 2 (dryrun PROJECT_ROOT — `dev_msc_dryrun_1777840771`):** rebuilt `council_config.json` from scratch:
+- All 10 voices populated (was 7)
+- Each member's 8 profile fields imported verbatim from the shipped `06_derive/01_provocateur_profile.json`
+- **Short names preserved** ("Plato", "Cleopatra", etc.) for runtime compatibility — `member_slug("Plato")` → `"plato"` matches the folder name. Athens-2026 council uses "Voice of X" naming which would slugify to `"voice_of_plato"` — that's the §18 voices-thread "Voice of X" rollout question, deferred separately.
+- Verified: all 10 derived slugs (`plato`, `cleopatra`, `ibn_battuta`, `ada_lovelace`, `dostoevsky`, `hannah_arendt`, `octopus`, `bob_marley`, `whanganui_river`, `scheherazade`) match folder names with shipped persona cards.
+- Top-level fields preserved (`collective_landscape`, `audience`, `selection_parameters`, `version`).
+- Backup at `council_config.json.bak.c10sync`.
+
+**Caveats / outstanding:**
+- §18 "Voice of X" naming convention rollout still deferred — runtime's `member_slug` would slugify "Voice of Plato" → `voice_of_plato` (folder mismatch). If athens-2026 council ever becomes the runtime's source-of-truth, this rename must be addressed (either rename folders or add prefix-stripping to `member_slug`).
+- C20b voice-card patches (Plato/Ada/Battuta/Octopus framework drift surfaced in C28 audit) still pending on voices thread — not part of C10 sync.
+- Athens-2026 git repo Ada commit + push: operator's call.
+
+**Pre-Athens dryrun-readiness:** dryrun's council_config now has all 10 voices wired and ready for re-run from Provocateur → Voice → Editor → Publish.
+
+Filed history below preserved.
+
+---
+
+### ~~C10 (original)~~. Council config: replace `dev_stub_v2_with_selection_params` with real Provocateur Profiles 🔴
 
 **Source:** archive `session-artifacts/SESSION_HANDOFF.md` line 211 ("Council config members are stubs… Pre-Athens blocker").
 
