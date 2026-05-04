@@ -1563,7 +1563,7 @@ After the C28 revised audit, operator chose to design a proper Step 2 validator 
 
 #### Three pillars, separately surfaced
 
-**Pillar 1 — Embarrassment** (don't publish what would torpedo the conceit / create reputational risk):
+**Pillar 1 — Safeguards** (don't publish what would torpedo the conceit / create reputational risk):
 
 | Check | Source field(s) | Severity ceiling |
 |---|---|---|
@@ -1603,7 +1603,7 @@ Conceptually: the voice itself is the authority on what "good" means for its own
 {
   "schema_version": "1.0",
   "voice_slug": "plato",
-  "embarrassment": {
+  "safeguards": {
     "verdict": "PASS | WARN | HOLD",
     "ai_self_acknowledgment": null | {"text": "...", "why": "..."},
     "defamation_risk": null | {"text": "...", "why": "..."},
@@ -1666,7 +1666,7 @@ Conceptually: the voice itself is the authority on what "good" means for its own
 
 #### Cost + wall
 
-- **Night 1: 3 LLM calls per voice** — embarrassment + engagement + voice-fidelity (length is mechanical)
+- **Night 1: 3 LLM calls per voice** — safeguards + engagement + voice-fidelity (length is mechanical)
 - **Nights 2+3: 4 LLM calls per voice** — add cross-night echo
 - Sonnet 4.6 (~$1.50/MTok input, $7.50/MTok output) — validators don't need Opus
 - Per-call ~$0.05
@@ -1682,7 +1682,7 @@ vs the dropped Step 1 validation that was costing ~$9-15 across Athens for ~30 m
 
 **New code:**
 - `runtime/flows/voice/step2_validation.py` (~280 lines) — orchestrates 3 (or 4 on N2/N3) checks per voice in parallel
-- `runtime/flows/shared/prompts/voice_step2_validation_embarrassment.md` (universal rules + per-voice field interpolation: knowledge_boundary, voice_temporal_stance, banned_language[ai_slop], banned_modes, hard_limits, topics_requiring_care, translation_protocol)
+- `runtime/flows/shared/prompts/voice_step2_validation_safeguards.md` (universal rules + per-voice field interpolation: knowledge_boundary, voice_temporal_stance, banned_language[ai_slop], banned_modes, hard_limits, topics_requiring_care, translation_protocol)
 - `runtime/flows/shared/prompts/voice_step2_validation_engagement.md` (form + grounding checks: medium, characteristic_output_structure, lineage.grounding_extraction_ids)
 - `runtime/flows/shared/prompts/voice_step2_validation_voice_fidelity.md` (characteristic_moves performed + quality_criteria pass)
 - `runtime/flows/shared/prompts/voice_step2_validation_cross_night_echo.md` (Night 2+ only)
@@ -1694,7 +1694,7 @@ vs the dropped Step 1 validation that was costing ~$9-15 across Athens for ~30 m
 - `runtime/flows/editor_flow.py` + `runtime/flows/publish_flow.py` — read `04_voice/operator_decisions/` and exclude held-for-regen voices
 
 **Dashboard:**
-- `runtime/ingest/dashboard.py` — `collect_voice_detail` adds three pill rows per voice (Embarrassment + Engagement + Voice fidelity) with verdict + issue counts
+- `runtime/ingest/dashboard.py` — `collect_voice_detail` adds three pill rows per voice (Safeguards + Engagement + Voice fidelity) with verdict + issue counts
 - `runtime/ingest/templates/admin_voice.html` — new Validation section + Review modal + Release/Hold buttons
 - `runtime/ingest/app.py` POST `/admin/voice/<slug>/release` + `/hold` (admin-gated)
 - New `/admin/tonight` state pill: "AWAITING OPERATOR — N voices flagged, waiting for clearance"
@@ -1710,7 +1710,7 @@ vs the dropped Step 1 validation that was costing ~$9-15 across Athens for ~30 m
 3. **Hard-coded universal rules** for AI-self-ack + defamation (not in any card field) — these are cross-cutting Athens rules.
 4. **`banned_language` partitioned** — only AI-slop subset surfaces as flag; foreign-vocabulary anachronisms are charm.
 5. **Cross-night echo** uses prior published artifact + continuity overlay — validates whether Continuity stage's instructions actually worked.
-6. **Three pillars (not two)** — embarrassment + engagement + voice fidelity. Embarrassment = "would publishing hurt us?"; engagement = "would the reader read?"; voice fidelity = "did the voice deliver what its card promised?". Voice fidelity uses voice's own self-imposed `quality_criteria` + `characteristic_moves` — the voice is the authority on what "good" means for itself.
+6. **Three pillars (not two)** — safeguards + engagement + voice fidelity. Safeguards = "would publishing hurt us?"; engagement = "would the reader read?"; voice fidelity = "did the voice deliver what its card promised?". Voice fidelity uses voice's own self-imposed `quality_criteria` + `characteristic_moves` — the voice is the authority on what "good" means for itself.
 
 **Card fields tested (10 of 36 total fields per `card_assembly.py`):** knowledge_boundary, translation_protocol, topics_requiring_care, hard_limits, voice_temporal_stance, banned_language (filtered to AI-slop subset), banned_modes, medium, characteristic_output_structure, length_and_format_constraints, characteristic_moves, quality_criteria. Plus `lineage.grounding_extraction_ids` (cross-cutting), prior `published_artifacts/.../<voice>.json` (cross-night echo), and hard-coded universal rules (AI-self-ack, defamation).
 
