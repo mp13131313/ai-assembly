@@ -1717,6 +1717,80 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
+### C38. Voice Pipeline Step 2 doesn't enforce card's `length_and_format_constraints` cap 🟡 (filed 2026-05-04 PM, surfaced from voices thread)
+
+**Surfaced 2026-05-04 PM during v2 dryrun length-audit (voices/OPEN_ITEMS.md §27 below).**
+
+**Findings from `dev_msc_dryrun_v2_20260504/published_artifacts/voices/*.json` `artifact_summaries.[night].word_count`:**
+
+| Voice | Card spec | Dryrun word_count | Over-cap |
+|---|---|---|---|
+| Cleopatra | 300–500 | 421 | ✓ |
+| Whanganui River | 350–550 | 493 | ✓ |
+| Ada Lovelace | 350–550 | 537 | +37 |
+| Scheherazade | 350–550 | 560 | +60 |
+| Plato | 350–550 | 575 | +75 |
+| Ibn Battuta | 350–550 | 598 | +98 |
+| Octopus | structured + ~100–200 prose | 643 (prose) | +143 (prose side) |
+| Bob Marley | **350–500 explicit** (v2-anchored) | **739** | **+239** |
+| Hannah Arendt | 600–900 | 828 | +328 |
+| Dostoevsky | 350–550 | **980** | **+480** (~double the cap) |
+
+**8 of 10 voices over-ran the card-spec.** Only Cleopatra + Whanganui honored it. The conference's effective audience-attention cap is 500w (per operator 2026-05-04 PM); only 2 voices stayed within that.
+
+**Why this is a runtime issue, not voices issue:**
+
+The persona-pipeline side is fine:
+- Pass 4b prompt explicitly framed audience constraint three times: "the artifact ~750 people will encounter at breakfast" / "short, compelling morning read" / "Readable over coffee" (`personas/flows/shared/prompts/persona_pass_4b_artifact.md` lines 14-16, 119, 170)
+- Cards correctly captured the spec — most say 350–550w with corpus-anchored justifications
+- Marley v2 was specifically anchored at 350–500w with explicit justification
+
+The runtime side does not enforce it:
+- Voice Pipeline Step 2 takes the persona card as system prompt + Provocateur question as user message
+- The card's `length_and_format_constraints` field appears in the system prompt as descriptive text ("Write 350 to 550 words...")
+- But there's no `max_tokens` parameter derived from the card's length spec, no post-generation truncation, no iterative-retry-on-overflow
+- The model interprets the length instruction as a request, not a hard cap, and writes to its own internal "right length" sense — which trends to historical practice (Dostoevsky's actual Diary entries ran 600-1500w; Arendt's actual essays 1500-4000w; the model defaults near these regardless of card-spec)
+
+**Three implementation paths:**
+
+**(a) `max_tokens` parameter derived from card** (~30 min, cheapest)
+- Parse card's `length_and_format_constraints` for word range; derive `max_tokens ≈ words × 1.5` (rough English token-to-word ratio)
+- Pass to `messages.create()` for Step 2
+- **Tradeoff:** truncates mid-sentence at the boundary; not graceful
+
+**(b) Post-generation word-count + truncate-to-last-complete-sentence** (~1-2 hr)
+- Generate at default max_tokens; count words; if over cap, truncate at the last complete-sentence boundary under cap
+- **Tradeoff:** wastes tokens already paid for; truncation may cut load-bearing content
+
+**(c) Iterative retry with explicit cap-instruction + previous draft** (~2-3 hr; doubles cost)
+- Generate; if over cap, re-prompt with "previous draft was X words; rewrite to be under 500 words preserving the load-bearing structure" + the draft
+- **Tradeoff:** most respectful of voice quality; doubles API cost on overflows
+
+**Recommendation:** **(a) for Athens**, with `max_tokens` derived per-voice from card's upper-bound × 1.5. Add **(c) post-Athens** as quality-preservation refinement.
+
+**Per-voice max_tokens (if (a) is taken):**
+
+| Voice | Cap (words) | max_tokens (×1.5) |
+|---|---|---|
+| Cleopatra | 500 | 750 |
+| Plato / Battuta / Lovelace / Scheherazade / Whanganui | 500 | 750 |
+| Marley | 500 | 750 |
+| Octopus | structured (JSON + ~200w prose) | ~600 prose-side; JSON unconstrained |
+| Arendt | 500 (was 600-900 — see voices/OPEN_ITEMS.md §27) | 750 |
+| Dostoevsky | 500 | 750 |
+
+(All converge on ~750 max_tokens since the conference cap is uniform 500w.)
+
+**Cross-references:**
+- voices/OPEN_ITEMS.md §27 (length-anchoring discussion + dryrun audit findings + per-voice corpus-anchored length rationales — this is its voices-side counterpart)
+- Pass 4b prompt at `personas/flows/shared/prompts/persona_pass_4b_artifact.md` (audience-cap framing already correct, no changes needed)
+
+**Status:** filed; **pre-Athens-eligible** — without this, the Substack edition will publish artifacts that nominally honor "morning read" framing but actually require 5-10 minutes per voice to read, blowing the 30-60 min total morning attention budget the editor flow is calibrated for.
+
+**Side-note:** the operator earlier flagged that 400w should be the cap for the editor's theme article body (vs 500w for the artifacts). If C38 (a) lands, the same `max_tokens` discipline should apply to the editor's article generation in `runtime/flows/editor/dossier_generation.py` — derive 400w-cap × 1.5 = 600 max_tokens for article body. Editor headnotes (30-80w) and theme summaries (100-200w) would similarly cap.
+
+---
+
 ### C37. Provocateur output JSONs don't persist per-call tokens 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun cost calculation:** `triage_voices/<slug>.json` and `formulations/<theme>__<voice>.json` files only persist content (ranked_themes, formulation prose, selected_quotes, etc.) — NOT per-call `input_tokens` / `output_tokens` / `cache_creation_input_tokens` / `cache_read_input_tokens` / `model` / `wall_clock_s`.

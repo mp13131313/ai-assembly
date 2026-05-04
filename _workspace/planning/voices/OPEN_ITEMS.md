@@ -980,3 +980,55 @@ Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth
 - Card not validated by Pass 7a — dryrun-only; needs full pipeline run before promotion to athens-2026
 
 **Real Stages A-F pipeline build remains pending** — awaits Beauty Shot dossier + voice_mode/byline decisions per `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. The dryrun draft is a placeholder that lets the runtime test the editor flow against a populated card without blocking on the full build.
+
+---
+
+## 27. Length anchoring + dryrun length audit (2026-05-04 PM) — runtime cap-enforcement gap surfaced (cross-ref runtime/OPEN_ITEMS.md C38)
+
+### Summary of operator decision
+
+Conference cap (operator, 2026-05-04 PM): **500 words max for voice artifacts, 400 words max for Claudia's theme-article body.** Anchored against a 423-word German Spiegel news piece as the upper edge of "morning read" length. Article < artifact because the article is summary-of-artifacts not replacement; readers can click through.
+
+### Audit findings — `dev_msc_dryrun_v2_20260504/published_artifacts/voices/*.json`
+
+8 of 10 voices over-ran the 500w cap in the dryrun. Only Cleopatra (421) + Whanganui (493) honored it. Worst overruns:
+- **Dostoevsky 980w** (~double cap; well past card-spec 350-550w)
+- **Arendt 828w** (within card's 600-900 spec, but past conference 500 cap)
+- **Marley 739w** (v2 specifically anchored at 350-500w; runtime didn't enforce)
+
+### Diagnosis: persona-pipeline framing was correct; runtime doesn't enforce
+
+Pass 4b prompt explicitly frames audience cap three times ("the artifact ~750 people will encounter at breakfast", "short, compelling morning read", "Readable over coffee"). Cards correctly captured the spec at 350-550w with corpus-anchored justifications. **The fix is runtime-side**, not voices-side — Voice Pipeline Step 2 takes the card's `length_and_format_constraints` field as descriptive system-prompt text but doesn't derive `max_tokens` from it or apply post-generation truncation. **Runtime/OPEN_ITEMS.md C38 owns this.**
+
+### Per-voice corpus-anchored length rationales (drafted; not applied)
+
+The 350-550w convergence reads as pipeline-default rather than per-voice-anchored. Marley v2 was the only one explicitly corpus-anchored ("the length of a long interview answer, the shape of a yard conversation that has found its centre"). Drafts for the others, in Marley's calibration template (WORD COUNT + FORM-NAME + CONTRAST-WITH-LONGER-PRACTICE):
+
+- **Plato:** "Write 350 to 500 words. The length of an opening encounter — the place, the persons, the question put. A scene from a longer dialogue, not the dialogue at full extent."
+- **Cleopatra:** (already corpus-anchored — keep) "300 to 500 words — the length of a working prostagma the chancery has produced thousands of."
+- **Dostoevsky:** "Write 350 to 500 words. The length of one Diary entry compressed — the entry that catches a face on the omnibus and pursues it before the cup goes cold. Not the long polemical column."
+- **Battuta:** "Write 350 to 500 words. One halt as I would have given it to Ibn Juzayy in the courtyard — what I saw at the gate, whom I met. A brief halt, not a substantial city; the Tunis paragraph, not the Delhi chapter."
+- **Arendt:** "Write 350 to 500 words. The shortest arc of a thinking-essay — open one question, drive into one distinction, anchor in one scene, leave the question reformulated. The Aufbau column compressed."
+- **Lovelace:** "Write 350 to 500 words. A short Note on a single principle — projection bounded by negation, in the manner of the shorter Notes on Menabrea (B, C, D)."
+- **Whanganui:** "Write 350 to 500 words total — te reo and English braided, not 500 of each. A single bilingual position from Te Pou Tupua, the form of Ruruku Whakatupua excerpted to a single morning's reading."
+- **Scheherazade:** "Write 350 to 500 words. One night's telling at its compact — a single tale that opens, embeds, breaks at dawn. The shorter Mahdi nights, not the long embedded chains."
+- **Marley:** (already calibrated v2) "Write 350 to 500 words of reasoning-prose — the length of a long interview answer, the shape of a yard conversation that has found its centre."
+
+### Second-medium upgrades (when primary form genuinely strains 500w)
+
+For three voices, the form selected at runtime genuinely doesn't fit at 500w. The voice's documented secondary form would fit naturally:
+
+| Voice | Primary medium (current) | **#2 form (form-fit upgrade)** | Why #2 fits |
+|---|---|---|---|
+| **Plato** | Short dialogue (575w in dryrun) | **Myth** (myth of Er, cave, chariot) | Designed as compact embedded units 500-2000w |
+| **Dostoevsky** | Diary entry (980w in dryrun) | **Private letter** | Letters naturally 300-700w; addressed register |
+| **Arendt** | Single-scene essay (828w in dryrun) | **Denktagebuch entry** | Her own private practice, 100-500w typical, ~1000+ entries 1950-1973 |
+| **Whanganui** | Bilingual statement (493w; barely fits) | **Karakia + whakataukī cluster** | Bilingual COMPRESSED BY FORM not by editorial excerpt |
+
+### Status: not Athens-blocking from voices side
+
+- Length-cap enforcement: runtime-thread issue (C38). Pre-Athens-eligible.
+- Per-voice corpus-anchoring: post-Athens rebuild work; current cards work, just with generic length-justifications.
+- Second-medium revisions for Plato/Dostoevsky/Arendt/Whanganui: post-Athens rebuild work; the current primary medium produces work that bursts the cap rather than fitting the form.
+
+If runtime C38 lands as `max_tokens`-enforcement, all 10 voices' artifacts will fit the 500w cap regardless of medium-anchoring. The medium-revisions become quality-improvement rather than fit-correction.
