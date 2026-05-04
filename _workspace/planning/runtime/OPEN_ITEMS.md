@@ -1690,7 +1690,24 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
-### C38. Bob Marley × theme_001 Step 1 silent drop in v2 dryrun 🟡 (filed 2026-05-04 PM)
+### C38. Bob Marley × theme_001 Step 1 silent drop in v2 dryrun 🟢 SHIPPED 2026-05-04 PM (root cause found + manifest tracking added)
+
+**Shipped 2026-05-04 PM.** Root cause found in `_run_step1_batch` (and Step 2 / Step 3 / Continuity dispatchers): all four used a `try: results[k] = fut.result(); except Exception as e: logger.error(...)` pattern that caught exceptions into log-only output. The failed pair never propagated to the manifest — which is why `step1_pairs_succeeded: 25` showed against `step1_pairs_attempted: 26` with NO indication of WHICH pair failed or WHY. The original Marley × theme_001 root cause is unrecoverable (logs gone), but the silent-drop bug class is now closed across four stages.
+
+**Fix:**
+- New `_capture_failure(stage, key, exc)` helper in `voice_flow.py` builds a structured failure record (stage, voice_slug, theme_id, error_type, error_message capped at 500 chars, traceback_excerpt — last 6 traceback lines).
+- `_run_step1_batch` now returns `(results, failures)`. Caller threads `failures` into the manifest as `step1_failures: [...]`.
+- Step 2 + Step 3 + Continuity dispatchers in `run_voice` mirror the pattern with `step2_failures` / `step3_failures` / `continuity_failures` lists threaded into the manifest.
+- Manifest gains: `counts.step1_pairs_failed`, `counts.step2_voices_failed`, `counts.step3_voices_failed`, `counts.continuity_voices_failed` quick-glance counters + the per-stage detail arrays.
+- Final-summary log line surfaces failures explicitly when any are present: `FAILURES: step1=N step2=N step3=N continuity=N — see manifest.step{1,2,3}_failures + continuity_failures`.
+
+**Tests:** 6 new in `test_capture_failure.py` (Step 1 tuple key, Step 2/3/Continuity slug key, traceback excerpt presence, message truncation, extra-dict merge). All pass; 331 of full runtime suite green (1 pre-existing unrelated test deselected).
+
+**Filed history below preserved.**
+
+---
+
+### ~~C38 (original)~~. Bob Marley × theme_001 Step 1 silent drop in v2 dryrun 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun:** Step 1 produced 25/26 detailed_response files. The missing pair was `bob_marley × theme_001`. Provocateur briefing exists for that pair; voice manifest reports `step1_failures: 0` (the failure handler didn't catch it).
 
@@ -1791,7 +1808,15 @@ The runtime side does not enforce it:
 
 ---
 
-### C37. Provocateur output JSONs don't persist per-call tokens 🟡 (filed 2026-05-04 PM)
+### C37. Provocateur output JSONs don't persist per-call tokens 🟢 SHIPPED 2026-05-04 PM
+
+**Shipped 2026-05-04 PM.** `_stream_and_parse` in `provocateur_flow.py` now merges the `usage` block into the parsed result dict before returning. All three call sites (`triage_voice`, `triage_flags`, `formulate_for_member`) inherit the new fields, and the two that persist via `write_json_atomic` (`triage_voices/<slug>.json` + `formulations/<theme>__<voice>.json`) now carry `model` + `input_tokens` + `output_tokens` + `cache_creation_input_tokens` + `cache_read_input_tokens` + `wall_clock_s`. Defensive `isinstance(result, dict)` guard. Trivial change, no behavior impact. Closes the cost-monitoring gap for ~37 Provocateur calls/night.
+
+**Filed history below preserved.**
+
+---
+
+### ~~C37 (original)~~. Provocateur output JSONs don't persist per-call tokens 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun cost calculation:** `triage_voices/<slug>.json` and `formulations/<theme>__<voice>.json` files only persist content (ranked_themes, formulation prose, selected_quotes, etc.) — NOT per-call `input_tokens` / `output_tokens` / `cache_creation_input_tokens` / `cache_read_input_tokens` / `model` / `wall_clock_s`.
 
@@ -1813,7 +1838,22 @@ result["wall_clock_s"] = wall
 
 ---
 
-### C35. Bump default batch sizes for parallel Anthropic calls 🟡 (filed 2026-05-04 PM)
+### C35. Bump default batch sizes for parallel Anthropic calls 🟢 SHIPPED 2026-05-04 PM (defaults raised 4→6 across 6 sites)
+
+**Shipped 2026-05-04 PM.** Defaults raised 4 → 6 across:
+- `RESEARCHER_NODE1_BATCH` (researcher_flow.py)
+- `PROVOCATEUR_FORMULATION_BATCH` (provocateur_flow.py)
+- `VOICE_STEP1_BATCH` / `VOICE_STEP2_BATCH` / `VOICE_STEP3_BATCH` / `VOICE_CONTINUITY_BATCH` (voice_flow.py)
+- `EDITOR_BATCH` (editor_flow.py)
+- `VOICE_STEP2_VALIDATION_PILLAR_BATCH` (step2_validation.py)
+
+All env-overridable; drop back to 4 with env var if 429s surface during early Athens run. Projected ~80-125 min wall savings across Athens 3 nights.
+
+**Filed history below preserved.**
+
+---
+
+### ~~C35 (original)~~. Bump default batch sizes for parallel Anthropic calls 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun re-run:** operator asked if higher concurrency is an option. Current defaults across stages:
 
@@ -1852,7 +1892,17 @@ result["wall_clock_s"] = wall
 
 ---
 
-### C34. Runtime member_slug doesn't handle "Voice of X" naming convention 🟡 (filed 2026-05-04 PM)
+### C34. Runtime member_slug doesn't handle "Voice of X" naming convention 🟢 SHIPPED 2026-05-04 PM (Path A — strip prefix)
+
+**Shipped 2026-05-04 PM.** Path A taken: `member_slug` in `flows/shared/io.py` extended to strip a leading `Voice of ` / `Voice of the ` prefix (case-insensitive, tolerant of leading whitespace) before the existing slugify pass. Backward-compatible: short-name inputs (`"Plato"` → `"plato"`) slug as before; new "Voice of X" naming (`"Voice of the Whanganui River"` → `"whanganui_river"`) now resolves to the per-voice folder slug. Closes the gap for any future PROJECT_ROOT that adopts the athens-2026 council_config naming convention end-to-end.
+
+**Tests:** 16 new in `test_member_slug.py` covering legacy short names, voice-of prefix variants (10 voice cases), case-insensitivity, whitespace tolerance, and edge cases ("Voiceless" not stripped; "Voice" alone preserved; "The Voice of Reason" not stripped because "Voice" isn't at the start).
+
+**Filed history below preserved.**
+
+---
+
+### ~~C34 (original)~~. Runtime member_slug doesn't handle "Voice of X" naming convention 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during C10 council_config sync:** athens-2026 has rolled out the "Voice of X" naming convention across persona cards' `voice_name` + provocateur_profile's `name` + council_config's `members[].name` + panel_roster's `panel_members_final` (athens-2026 commit `e8751f5`). The runtime's `member_slug` function (`flows/shared/io.py`) slugifies "Voice of Plato" → `voice_of_plato`, which doesn't match the folder name `plato/`.
 

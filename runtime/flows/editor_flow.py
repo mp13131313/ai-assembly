@@ -75,7 +75,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-EDITOR_BATCH = int(os.environ.get("EDITOR_BATCH", "4"))
+EDITOR_BATCH = int(os.environ.get("EDITOR_BATCH", "6"))
 
 
 def _voices_routed_to(routing: dict[str, Any], theme_id: str) -> list[str]:

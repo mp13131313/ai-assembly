@@ -349,13 +349,30 @@ def _stream_and_parse(
         )
 
     try:
-        return extract_json(full_text)
+        result = extract_json(full_text)
     except json.JSONDecodeError as e:
         preview = full_text[:500].replace("\n", "\\n")
         raise ValueError(
             f"{task_label}: JSON parse failed. out_tokens={usage.output_tokens}, "
             f"stop_reason={stop_reason}. First 500 chars: {preview}"
         ) from e
+
+    # C37: persist per-call usage on the result so downstream cost
+    # rollups (per-stage tokens, cache-hit-rate, wall-clock distribution)
+    # can include Provocateur. Voice Step 1/2/3 + Editor + Continuity
+    # already persist these on their output JSONs; this closes the gap.
+    if isinstance(result, dict):
+        result["model"] = CLAUDE_MODEL
+        result["input_tokens"] = usage.input_tokens
+        result["output_tokens"] = usage.output_tokens
+        result["cache_creation_input_tokens"] = (
+            getattr(usage, "cache_creation_input_tokens", 0) or 0
+        )
+        result["cache_read_input_tokens"] = (
+            getattr(usage, "cache_read_input_tokens", 0) or 0
+        )
+        result["wall_clock_s"] = round(wall, 3)
+    return result
 
 
 # --- Task 1: Triage (v3 — split into Part A per-voice + Part B flags) ----
@@ -1511,7 +1528,7 @@ def run_provocateur(
     # Opus 4.7 is rate-limited at 8K output tokens/min and each Formulation
     # call produces ~3K output, so 4 concurrent calls per minute is the
     # sustainable steady-state. Configurable via env vars for tuning.
-    batch_size = int(os.environ.get("PROVOCATEUR_FORMULATION_BATCH", "4"))
+    batch_size = int(os.environ.get("PROVOCATEUR_FORMULATION_BATCH", "6"))
     # 5s default mirrors the C30 fix on voice/step1 (was 20s — too
     # conservative for Anthropic Tier 4 limits at 4 concurrent Opus 4.7
     # calls). Override via env var if rate-limit pressure surfaces.

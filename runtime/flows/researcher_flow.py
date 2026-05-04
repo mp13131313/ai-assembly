@@ -106,7 +106,7 @@ THEMING_MAX_TOKENS = 24000  # was 8000 pre-thinking
 # with 15 sessions × ~2-3 min each = 30-45 min serial. Parallel at
 # max_workers=4 ≈ 8-12 min. Anthropic Tier 4 limits accommodate
 # (4 parallel Opus 4.7 extraction calls ~80K input + 12K output/min).
-RESEARCHER_NODE1_BATCH = int(os.environ.get("RESEARCHER_NODE1_BATCH", "4"))
+RESEARCHER_NODE1_BATCH = int(os.environ.get("RESEARCHER_NODE1_BATCH", "6"))
 
 
 def _thinking_kwargs(budget_tokens: int) -> dict:
@@ -779,7 +779,8 @@ def run_researcher(run_root: str) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Node 1: extraction per session. Parallel across sessions (cap at
-    # RESEARCHER_NODE1_BATCH = 4 concurrent Anthropic calls per C25). Each
+    # RESEARCHER_NODE1_BATCH concurrent Anthropic calls per C25; default
+    # 6 per C35 2026-05-04 — Tier 4 limits comfortably accommodate). Each
     # session's extraction is independent + atomic; results written to disk
     # as they land so partial progress survives crash/timeout. Order-agnostic
     # for downstream — validate_and_concat operates on the full list.

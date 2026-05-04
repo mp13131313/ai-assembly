@@ -121,7 +121,14 @@ def member_slug(name: str) -> str:
 
     Lowercases, collapses any run of non-alphanumerics to a single
     underscore, strips leading/trailing underscores.
+
+    C34 (2026-05-04): strip the "Voice of [the] " prefix introduced by
+    the athens-2026 naming convention rollout (commit `e8751f5`) so a
+    council_config that uses "Voice of Plato" / "Voice of the Octopus"
+    still resolves to the per-voice folder slugs `plato/` / `octopus/`.
+    Backward-compatible: short names ("Plato") slug as before.
     """
+    name = re.sub(r"^\s*Voice\s+of\s+(?:the\s+)?", "", name, flags=re.IGNORECASE)
     return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
 

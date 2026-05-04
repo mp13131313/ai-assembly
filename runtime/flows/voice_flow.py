@@ -41,6 +41,7 @@ import json
 import os
 import sys
 import time
+import traceback as _tb
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -73,10 +74,10 @@ except ImportError as e:
     sys.exit(1)
 
 
-VOICE_STEP1_BATCH = int(os.environ.get("VOICE_STEP1_BATCH", "4"))
-VOICE_STEP2_BATCH = int(os.environ.get("VOICE_STEP2_BATCH", "4"))
-VOICE_STEP3_BATCH = int(os.environ.get("VOICE_STEP3_BATCH", "4"))
-VOICE_CONTINUITY_BATCH = int(os.environ.get("VOICE_CONTINUITY_BATCH", "4"))
+VOICE_STEP1_BATCH = int(os.environ.get("VOICE_STEP1_BATCH", "6"))
+VOICE_STEP2_BATCH = int(os.environ.get("VOICE_STEP2_BATCH", "6"))
+VOICE_STEP3_BATCH = int(os.environ.get("VOICE_STEP3_BATCH", "6"))
+VOICE_CONTINUITY_BATCH = int(os.environ.get("VOICE_CONTINUITY_BATCH", "6"))
 # C30 (2026-05-04): lowered from 20s → 5s. Anthropic Tier 4 limits comfortably
 # accommodate 4 parallel Opus 4.7 calls (~100K input + ~8K output tokens/min)
 # without inter-batch backoff. 20s default was over-conservative; ~2-3 min/night
@@ -124,6 +125,42 @@ def _theme_display_titles_from_briefings(
     return out
 
 
+# --- Failure record helper -------------------------------------------
+
+def _capture_failure(
+    *,
+    stage: str,
+    key: Any,
+    exc: BaseException,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build a structured failure record so silent drops surface in the
+    manifest instead of vanishing into log noise.
+
+    C38 (2026-05-04 — Marley × theme_001 silent-drop incident): batch
+    dispatchers were `try: results[k] = fut.result(); except: logger.error()`
+    — the failed pair was logged but never propagated to manifest, so an
+    operator scanning the manifest saw `step1_pairs_succeeded: 25` against
+    `step1_pairs_attempted: 26` with NO record of which pair failed or
+    why. This helper standardises the record shape across stages.
+    """
+    tb_lines = _tb.format_exception(type(exc), exc, exc.__traceback__)
+    tb_excerpt = "".join(tb_lines).strip().splitlines()[-6:]
+    record = {
+        "stage": stage,
+        "error_type": type(exc).__name__,
+        "error_message": str(exc)[:500],
+        "traceback_excerpt": "\n".join(tb_excerpt),
+    }
+    if isinstance(key, tuple) and len(key) == 2:
+        record["voice_slug"], record["theme_id"] = key
+    else:
+        record["voice_slug"] = key
+    if extra:
+        record.update(extra)
+    return record
+
+
 # --- Step 1 batch runner ----------------------------------------------
 
 def _run_step1_batch(
@@ -132,14 +169,20 @@ def _run_step1_batch(
     run_dir: Path,
     project_root: Path,
     council_names: dict[str, str],
-) -> dict[tuple[str, str], dict[str, Any]]:
+) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]]]:
     """Run Step 1 across (voice, formulation) pairs in batches.
 
     Batch size = VOICE_STEP1_BATCH; wait VOICE_BATCH_WAIT_S between
     batches to respect Anthropic rate limits.
+
+    Returns `(results, failures)`. C38: failed pairs are captured into
+    `failures` (with error type + message + traceback excerpt) so the
+    caller can persist them in the manifest. Previously failures were
+    only `logger.error`-d and silently absent from the manifest count.
     """
     logger = get_logger("voice_flow")
     results: dict[tuple[str, str], dict[str, Any]] = {}
+    failures: list[dict[str, Any]] = []
     total = len(pairs)
     for batch_start in range(0, total, VOICE_STEP1_BATCH):
         batch = pairs[batch_start : batch_start + VOICE_STEP1_BATCH]
@@ -165,10 +208,13 @@ def _run_step1_batch(
                 try:
                     results[key] = fut.result()
                 except Exception as e:  # noqa: BLE001
-                    logger.error(f"Step 1 failed for {key}: {e}")
+                    logger.error(
+                        f"Step 1 failed for {key}: {type(e).__name__}: {e}"
+                    )
+                    failures.append(_capture_failure(stage="step1", key=key, exc=e))
         if batch_start + VOICE_STEP1_BATCH < total:
             time.sleep(VOICE_BATCH_WAIT_S)
-    return results
+    return results, failures
 
 
 # --- Validation runner ------------------------------------------------
@@ -341,7 +387,13 @@ def run_voice(
     t_start = time.time()
 
     # ---- Step 1 ----
-    step1_results = _run_step1_batch(pairs, night, run_dir, project_root, council_names)
+    step1_results, step1_failures = _run_step1_batch(
+        pairs, night, run_dir, project_root, council_names
+    )
+    if step1_failures:
+        logger.warning(
+            f"Step 1: {len(step1_failures)} pair(s) failed — see manifest.step1_failures"
+        )
 
     # Group Step 1 results by voice for downstream steps.
     step1_by_voice: dict[str, list[dict[str, Any]]] = {}
@@ -379,6 +431,7 @@ def run_voice(
     # ---- Step 2 (parallel across voices) ----
     logger.info(f"  Step 2: running for {len(step1_by_voice)} voices")
     step2_results: dict[str, dict[str, Any]] = {}
+    step2_failures: list[dict[str, Any]] = []
     with ThreadPoolExecutor(max_workers=VOICE_STEP2_BATCH) as ex:
         futures = {
             ex.submit(
@@ -397,7 +450,8 @@ def run_voice(
             try:
                 step2_results[slug] = fut.result()
             except Exception as e:  # noqa: BLE001
-                logger.error(f"Step 2 failed for {slug}: {e}")
+                logger.error(f"Step 2 failed for {slug}: {type(e).__name__}: {e}")
+                step2_failures.append(_capture_failure(stage="step2", key=slug, exc=e))
 
     # ---- Step 2 Validation (operator gate per C28b, parallel across voices) ----
     # Three pillars per voice (Safeguards + Engagement + Voice fidelity)
@@ -442,6 +496,7 @@ def run_voice(
 
     # ---- Step 3 (parallel across voices, requires ALL voices' Step 2) ----
     step3_results: dict[str, dict[str, Any]] = {}
+    step3_failures: list[dict[str, Any]] = []  # populated only if step 3 runs
     if not skip_step3:
         logger.info(f"  Step 3: running for {len(step2_results)} voices")
         with ThreadPoolExecutor(max_workers=VOICE_STEP3_BATCH) as ex:
@@ -467,7 +522,8 @@ def run_voice(
                 try:
                     step3_results[slug] = fut.result()
                 except Exception as e:  # noqa: BLE001
-                    logger.error(f"Step 3 failed for {slug}: {e}")
+                    logger.error(f"Step 3 failed for {slug}: {type(e).__name__}: {e}")
+                    step3_failures.append(_capture_failure(stage="step3", key=slug, exc=e))
     else:
         logger.info("  Step 3: SKIPPED (--skip-step3) — DEV USE ONLY")
 
@@ -528,6 +584,7 @@ def run_voice(
     # step3 having run. continuity.py already tolerates step3_output=None
     # at runtime (it iterates over Step 1 + 2 + 3 and skips missing parts).
     continuity_results: dict[str, dict[str, Any]] = {}
+    continuity_failures: list[dict[str, Any]] = []  # populated only if continuity runs
     if not skip_continuity and night < 3 and completed_voices:
         logger.info(f"  Continuity: generating for {len(completed_voices)} voices (for night {night + 1})")
         with ThreadPoolExecutor(max_workers=VOICE_CONTINUITY_BATCH) as ex:
@@ -546,7 +603,10 @@ def run_voice(
                 try:
                     continuity_results[slug] = fut.result()
                 except Exception as e:  # noqa: BLE001
-                    logger.error(f"Continuity failed for {slug}: {e}")
+                    logger.error(f"Continuity failed for {slug}: {type(e).__name__}: {e}")
+                    continuity_failures.append(
+                        _capture_failure(stage="continuity", key=slug, exc=e)
+                    )
     else:
         if night >= 3:
             logger.info("  Continuity: SKIPPED (last night — no Night 4 to feed)")
@@ -558,6 +618,11 @@ def run_voice(
     wall_total = round(time.time() - t_start, 2)
 
     # ---- Manifest ----
+    # C38 (2026-05-04): per-stage failures arrays land in the manifest so
+    # operator review can see WHICH pair/voice failed and WHY without
+    # scanning live logs. counts.<stage>_failures is the quick-glance
+    # number; the per-stage arrays carry error_type + error_message +
+    # traceback_excerpt per failure record.
     manifest = {
         "pipeline": "voice",
         "pipeline_version": "v2",
@@ -569,11 +634,19 @@ def run_voice(
         "counts": {
             "step1_pairs_attempted": len(pairs),
             "step1_pairs_succeeded": len(step1_results),
+            "step1_pairs_failed": len(step1_failures),
             "step2_voices_succeeded": len(step2_results),
+            "step2_voices_failed": len(step2_failures),
             "step3_voices_succeeded": len(step3_results),
+            "step3_voices_failed": len(step3_failures),
             "continuity_voices_succeeded": len(continuity_results),
+            "continuity_voices_failed": len(continuity_failures),
             "validation_flagged": len(validation_failures),
         },
+        "step1_failures": step1_failures,
+        "step2_failures": step2_failures,
+        "step3_failures": step3_failures,
+        "continuity_failures": continuity_failures,
         "validation_failures": validation_failures,
         "publish_summary": publish_summary,
         "wall_clock_s": wall_total,
@@ -593,6 +666,18 @@ def run_voice(
         f"step3={len(step3_results)}, continuity={len(continuity_results)}, "
         f"flagged={len(validation_failures)}"
     )
+    # C38: surface any per-stage failures explicitly so they don't hide
+    # behind the success counters when an operator skims the closing line.
+    total_failed = (
+        len(step1_failures) + len(step2_failures)
+        + len(step3_failures) + len(continuity_failures)
+    )
+    if total_failed:
+        logger.warning(
+            f"  FAILURES: step1={len(step1_failures)} step2={len(step2_failures)} "
+            f"step3={len(step3_failures)} continuity={len(continuity_failures)} "
+            f"— see manifest.step{1,2,3}_failures + continuity_failures"
+        )
     logger.info(f"  manifest: {out_dir / 'manifest.json'}")
     return manifest
 

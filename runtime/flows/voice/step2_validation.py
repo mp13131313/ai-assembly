@@ -59,7 +59,7 @@ STEP2_VALIDATION_MAX_TOKENS = int(
     os.environ.get("VOICE_STEP2_VALIDATION_MAX_TOKENS", "4096")
 )
 STEP2_VALIDATION_PILLAR_BATCH = int(
-    os.environ.get("VOICE_STEP2_VALIDATION_PILLAR_BATCH", "4")
+    os.environ.get("VOICE_STEP2_VALIDATION_PILLAR_BATCH", "6")
 )
 
 # Subset of banned_language that gets surfaced as AI-slop flags.
