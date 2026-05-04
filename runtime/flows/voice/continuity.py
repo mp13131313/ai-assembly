@@ -191,8 +191,9 @@ def generate_continuity(
         cache_system=False,  # single-call flow; 2.0× write with no reads is net cost
     )
 
-    # The model returns JSON with two keys, with the night number
-    # substituted for "N+1". We accept either spelling.
+    # The model returns JSON with two prose keys + the new
+    # signature_moves_deployed_last_night array (C20a 2026-05-04).
+    # Night number substituted for "N+1"; accept either spelling.
     parsed = extract_json(raw_text)
     cb_reasoning = (
         parsed.get(f"continuity_block_if_night_{next_night}")
@@ -204,6 +205,40 @@ def generate_continuity(
         or parsed.get("continuity_block_artifact_if_night_N+1")
         or ""
     )
+    new_moves = parsed.get("signature_moves_deployed_last_night") or []
+    # Defensive: if the model emitted a single object instead of a list,
+    # wrap it; if anything else, drop it.
+    if isinstance(new_moves, dict):
+        new_moves = [new_moves]
+    elif not isinstance(new_moves, list):
+        new_moves = []
+
+    # Carry forward prior nights' register: read continuity_night_<N>.json
+    # (the file consumed BEFORE Night N) and merge its accumulated
+    # signature_moves_deployed with last night's new moves. This way Night
+    # 3's continuity register carries Night 1's + Night 2's deployed moves.
+    prior_moves: list[dict[str, Any]] = []
+    if night_just_completed >= 2:
+        prior_path = (
+            project_root
+            / "voices"
+            / voice_slug
+            / f"continuity_night_{night_just_completed}.json"
+        )
+        if prior_path.exists():
+            try:
+                with open(prior_path, encoding="utf-8") as f:
+                    prior = json.load(f)
+                prior_moves = prior.get("signature_moves_deployed") or []
+                if not isinstance(prior_moves, list):
+                    prior_moves = []
+            except (OSError, json.JSONDecodeError) as e:
+                logger.warning(
+                    f"  Continuity: failed to read prior register at "
+                    f"{prior_path.name} ({type(e).__name__}); proceeding with new moves only."
+                )
+                prior_moves = []
+    signature_moves_deployed = prior_moves + new_moves
 
     output = {
         "voice_slug": voice_slug,
@@ -211,6 +246,7 @@ def generate_continuity(
         "for_night": next_night,
         f"continuity_block_if_night_{next_night}": cb_reasoning,
         f"continuity_block_artifact_if_night_{next_night}": cb_artifact,
+        "signature_moves_deployed": signature_moves_deployed,
         "generated_date": time.strftime("%Y-%m-%d"),
         "model": CONTINUITY_MODEL,
         "input_tokens": final.usage.input_tokens,

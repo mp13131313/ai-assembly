@@ -1043,7 +1043,31 @@ Original C20 + C8-merge content preserved below for reference; the actionable wo
 
 ---
 
-### C20a. Continuity-overlay format extension — carry "moves already deployed" register 🟡 (split from C20 2026-05-04)
+### C20a. Continuity-overlay format extension — carry "moves already deployed" register 🟢 SHIPPED 2026-05-04 PM
+
+**Shipped 2026-05-04 PM.** Schema extended on the continuity-overlay output:
+
+- **`voice_continuity.md` prompt** — third structured output `signature_moves_deployed_last_night` (list of `{move_summary, where_used, short_quote}`). Continuity model identifies last night's signature moves (stock anecdotes, signature phrasings, distinctive closing shapes) — 2-5 entries per night, empty list acceptable. Pipeline-facing field, separate from the two prose blocks.
+- **`continuity.py::generate_continuity`** — parses the new field defensively (dict→[dict] / non-list→[] / missing→[]). On Night 2+ reads the prior night's `continuity_night_<N>.json` and merges its accumulated `signature_moves_deployed` with the LLM's new entries. So Night 3's continuity register carries Night 1's + Night 2's deployed moves.
+- **`card_assembly.py::load_persona_card`** — overlay carries `signature_moves_deployed` onto the card alongside the two existing continuity_block fields.
+- **`card_assembly.py::_render_continuity`** — Step 2 only (Step 1 + Step 3 unaffected); renders a "MOVES YOU HAVE ALREADY DEPLOYED THIS CONFERENCE" section listing every accumulated entry with the warning *"re-using a stock anecdote, signature phrasing, or distinctive closing shape across multiple nights risks calcifying it into a tic the audience notices."* Empty/missing register → no section rendered. Night 1 → no section rendered.
+
+**Tests:** 17 new in `test_continuity_register.py`:
+- TestRenderContinuityRegister (9): Night 1 empty / Step 1 not rendered / Step 3 not rendered / Step 2 Night 2 rendered / Step 2 Night 3 full register / empty list no section / missing field no section / quote optional / non-dict entry skipped
+- TestLoadPersonaCardCarriesRegister (3): override → card / no override → absent / Night 1 no load
+- TestCrossNightMerge (5): Night 2 no prior + new moves only / Night 3 carries Night 1 + Night 2 / dict→list defensive / garbage→[] defensive / missing field → []
+
+Full runtime suite: 279/279 pass (was 262 + 17 new).
+
+**Complement to C28b:** C28b's cross-night echo validator catches HEAVY echo at validation gate (HOLD verdict). C20a is the prevention-side complement — voice sees the register at Step 2 composition time and can choose different moves. The two together cover both ends of the recurrence problem.
+
+**Athens cost impact:** zero (continuity calls already happen; new field rides along inside the same Sonnet 4.6 call). Per-night register payload is ~5 entries × ~30 tokens = ~150 tokens added to Step 2's system prompt — well within cache-eligible prefix.
+
+Filed history below preserved.
+
+---
+
+### ~~C20a (original)~~. Continuity-overlay format extension — carry "moves already deployed" register 🟡 (split from C20 2026-05-04)
 
 **Problem:** Voices reuse signature moves and closing phrasings across nights without knowing they did so on prior nights. Continuity overlay (continuity_block_artifact_if_night_N) currently carries deltas the voice committed to deliver, but not a register of moves the voice has *already deployed* this conference.
 

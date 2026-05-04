@@ -200,6 +200,13 @@ def load_persona_card(
             ):
                 if key in override:
                     card[key] = override[key]
+            # C20a (2026-05-04): cross-night signature-moves register —
+            # accumulated across all prior nights so Night 2 sees Night 1's
+            # moves and Night 3 sees Night 1's + Night 2's. Rendered into
+            # Step 2's system prompt as a "moves already deployed this
+            # conference" warning section. Empty/missing → not rendered.
+            if "signature_moves_deployed" in override:
+                card["signature_moves_deployed"] = override["signature_moves_deployed"]
 
     return card
 
@@ -307,8 +314,9 @@ def _render_continuity(card: dict[str, Any], night: int, step: int) -> str:
     """Render Night 2+ continuity blocks into the system prompt.
 
     Step 1 reads continuity_block_if_night_N (positions/moves/threads).
-    Step 2 reads continuity_block_artifact_if_night_N (focus/stance/form).
-    Step 3 reads BOTH.
+    Step 2 reads continuity_block_artifact_if_night_N (focus/stance/form)
+      AND the cross-night signature_moves_deployed register (C20a).
+    Step 3 reads BOTH continuity blocks.
     Night 1 has no continuity; returns empty string.
     """
     if night < 2:
@@ -324,6 +332,32 @@ def _render_continuity(card: dict[str, Any], night: int, step: int) -> str:
         blocks.append("\n---\n\n# YOUR PIECE FROM NIGHT N-1 (memory of focus, stance, form)\n\n")
         blocks.append(_render_value(cb_artifact))
         blocks.append("\n")
+    # Step 2 only: the cross-night signature-moves register. Voice sees
+    # what they've already deployed this conference and decides whether
+    # tonight's matter genuinely calls for the same moves again or
+    # whether different moves serve better. Empty list → no section.
+    if step == 2:
+        moves = card.get("signature_moves_deployed") or []
+        if moves:
+            blocks.append(
+                "\n---\n\n# MOVES YOU HAVE ALREADY DEPLOYED THIS CONFERENCE\n\n"
+                "Below is a register of signature moves your prior nights' artifacts deployed. "
+                "Re-using a stock anecdote, signature phrasing, or distinctive closing shape across "
+                "multiple nights risks calcifying it into a tic the audience notices. Before tonight's "
+                "artifact, consider for each move whether tonight's matter genuinely calls for it again, "
+                "or whether a different move serves better.\n\n"
+            )
+            for entry in moves:
+                if not isinstance(entry, dict):
+                    continue
+                summary = entry.get("move_summary", "")
+                where = entry.get("where_used", "")
+                quote = entry.get("short_quote", "")
+                blocks.append(f"- **{summary}** (`{where}`)")
+                if quote:
+                    blocks.append(f" — “{quote}”")
+                blocks.append("\n")
+            blocks.append("\n")
     return "".join(blocks)
 
 
