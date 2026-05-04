@@ -302,9 +302,14 @@ class TestPollOnce:
             ("04_voice", "manifest.json"),
         ]:
             _make_sentinel(run_dir, sub, fn)
-        publish_dir = project_root / "published_artifacts" / "nights" / "night_1"
-        publish_dir.mkdir(parents=True)
-        (publish_dir / "_index.json").write_text("{}")
+        # publish_flow's terminal sentinel is the per-night manifest at
+        # published_artifacts/traces/publish_manifest_night_<N>.json. The
+        # nights/_index.json is now written at the end of voice_flow
+        # (post-C32), so it can't be the publish-done signal — that
+        # would short-circuit past editor + publish_flow.
+        traces_dir = project_root / "published_artifacts" / "traces"
+        traces_dir.mkdir(parents=True)
+        (traces_dir / "publish_manifest_night_1.json").write_text("{}")
         status = orch.poll_once(project_root, 1)
         assert status["state"] == "complete"
 
@@ -349,9 +354,12 @@ class TestStageProgression:
         )
 
         def _publish_sentinel():
-            d = project_root / "published_artifacts" / "nights" / "night_1"
+            # publish_flow's terminal sentinel — see TestPollOnce
+            # comment for why this is the per-night manifest, not the
+            # nights/_index.json (which voice_flow now writes too).
+            d = project_root / "published_artifacts" / "traces"
             d.mkdir(parents=True, exist_ok=True)
-            (d / "_index.json").write_text("{}")
+            (d / "publish_manifest_night_1.json").write_text("{}")
 
         stub_fire.side_effects["publish"] = _publish_sentinel
 

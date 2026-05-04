@@ -365,8 +365,15 @@ def poll_once(
     provocateur_done = (run_dir / "03_provocateur" / "manifest.json").exists()
     voice_done = (run_dir / "04_voice" / "manifest.json").exists()
     editor_done = (run_dir / "05_editor" / "manifest.json").exists()
-    publish_index = project_root / "published_artifacts" / "nights" / f"night_{night}" / "_index.json"
-    publish_done = publish_index.exists()
+    # publish_flow's terminal sentinel is its own per-night manifest
+    # (published_artifacts/traces/publish_manifest_night_<N>.json), NOT
+    # the per-voice nights/_index.json which is now written at the end of
+    # voice_flow itself (post-C32). Using nights/_index.json as the
+    # publish-done signal would short-circuit the orchestrator past
+    # editor + publish_flow once voice/publish.py fires from Step 2 — the
+    # bug surfaced in dryrun_v2 2026-05-04 PM where editor never fired.
+    publish_manifest = project_root / "published_artifacts" / "traces" / f"publish_manifest_night_{night}.json"
+    publish_done = publish_manifest.exists()
 
     if publish_done or (skip_publish and (editor_done or (voice_done and not editor_flow_exists()))):
         return {"state": "complete", "detail": "pipeline complete", "ts": _now_iso()}
