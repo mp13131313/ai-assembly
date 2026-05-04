@@ -1427,24 +1427,65 @@ Only parallelism: outer ThreadPoolExecutor(max_workers=VOICE_STEP1_BATCH=4) runn
 
 ---
 
-### C28. High volume of voice validation flags on MSC dryrun — audit 🟡 (filed 2026-05-03 dryrun)
+### C28. High volume of voice validation flags on MSC dryrun — audit 🟡 (filed 2026-05-03; thorough audit 2026-05-04)
 
-**Surfaced during dev MSC dryrun (2026-05-03 PM):** Running 7 athens-2026 voices × 4 MSC themes through Voice pipeline Step 1 + validation, the validation pass produces a high volume of ISSUES flags across both anachronism + constitution checks. Sample (Ada Lovelace × "What 'the West' is"):
+**Surfaced during dev MSC dryrun (2026-05-03 PM):** All 19 (voice, theme) Step 1 outputs flagged by validation. Audit conducted 2026-05-04 against the 19 validation files in the dryrun output.
 
-- **Anachronism flagged** ~10 distinct phrases as untranslated modern terms: "the West", "populist bullying", "Eurocentric", "Wests", "rules-based order", "developing world", "executable", "computable", "in Gaza, in Ukraine, in Greenland" (treated as self-evident contemporary instances)
-- **Constitution flagged** specific Lovelace doctrinal violations (Principle 2 — formal expression test slid into vague analogy; Principle 4 — card-class architecture collapsed to two-part metaphor)
+**Empirical pass/fail matrix (19 pairs, 7 voices × 1-4 themes each):**
 
-**Pre-Athens audit needed:**
-1. Are validators **calibrated correctly**, or are they over-flagging? Compare against prior dryrun #4 (Plato + Cleopatra dual on athens-friendly themes) — if flag density was much lower there, MSC content surfaces actual voice-card gaps; if similar density, validators may be too strict.
-2. Per-voice anachronism guardrails: voice cards' translation_protocol may need stronger directives for genuinely off-domain content (or the briefings may need stronger reframing prompts to translate modern terms BEFORE the voice sees them).
-3. Constitution check vocabulary: does Lovelace's constitution doc need clearer Principle-2/4 enforcement language, or is the violation real and the response just bad in this case?
-4. **Flag-output schema audit**: is the volume of detail in `text` field the right target for editor consumption, or should validators output structured per-issue records the editor can iterate over?
+| Voice | Anach pass | Const pass | Note |
+|---|---|---|---|
+| Plato (4 themes) | 0/4 | 3/4 | Const fails only on theme_002 (Populism) |
+| Cleopatra (3 themes) | 0/3 | 3/3 | Constitution rock-solid |
+| Dostoevsky (3 themes) | 0/3 | 3/3 | Constitution rock-solid |
+| Hannah Arendt (4 themes) | 0/4 | 4/4 | Constitution rock-solid |
+| Ada Lovelace (2 themes) | 0/2 | 0/2 | Both validators fail every pair |
+| Ibn Battuta (2 themes) | 0/2 | 0/2 | Both validators fail every pair |
+| Octopus (1 theme) | 0/1 | 0/1 | Only theme; both fail |
+| **Totals** | **0/19** | **13/19** | |
 
-**Triage path:** Start with sample-level read-through after the dryrun completes. Open `04_voice/validation/<voice>__<theme>.json` for a few problematic pairs. Decide: is the voice misbehaving (voice-card patch) or is the validator hyperactive (validator prompt tuning) or both?
+**Anachronism: 0/19 PASS = 100% failure (the smoking gun).** Constitution: 13/19 PASS, 6/19 ISSUES.
 
-**Status:** filed; not blocking dryrun. Athens has tighter on-domain content (WBBF panels) where this gap should narrow naturally; MSC is the worst-case off-domain stress test.
+**Anachronism flag-density per response:** 10–25 flag mentions per (voice, theme) pair. Sampled flags are LEGITIMATE catches by the validator's spec letter:
+- Plato slips on "dollars", "isomorphism", "analog", "index case" — modern lexicon used untranslated
+- Cleopatra slips on "Charter system", "Security Council" — modern political/legal terms
+- Dostoevsky slips on "Versailles" + naming modern panelists by name as if observing them
+- Hannah Arendt slips on "EU", "High Representative", "rules-based order" untranslated after first quotation
+- Ada Lovelace slips on "Eurocentric", "executable", "computable"
+- Ibn Battuta slips on "American amīr Waltz", "the small country of Estonia"
+- Octopus has mixed flags (some voice-native terms like "substrate" mis-flagged as anachronism)
 
-**See also:** `04_voice/validation/*.json` written during 2026-05-03 dryrun — under `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/04_voice/validation/`.
+**Validators are working correctly per the spec.** Not over-flagging in the false-positive sense (~95% of flags are real). The 100% failure rate is **structural**: for off-domain MSC content (NATO/Trump/populism), the voices touch modern terminology dozens of times. The validator returns ISSUES if **any single instance** is found — there's no severity threshold, no count threshold. Probability of zero slips approaches zero on this content.
+
+**Constitution check is the more useful diagnostic.** The 6 ISSUES are SUBSTANTIVE framework drift:
+- Ada Lovelace: misuses Babbage card-architecture as a loose two-part metaphor (omits variable cards); slides from "fundamental relations formally expressible" to "anything reflexive is computable" (Principles 2 + 4)
+- Octopus: violates its own perceptual principle by saying "The body I render does not gather" — constitution permits refusing collapse, not denying gathering
+- Ibn Battuta: openly denounces a Muslim ruler ("Tughluq, the great violator of the Way") — constitution says practice naṣīḥa, refuse fitna; also reasons independently rather than following the madhhab
+- Plato (theme_002 only): slipped on the populism-specific framing
+
+The 4 voices that passed constitution cleanly (Plato 3/4, Cleopatra, Dostoevsky, Hannah Arendt) held their frameworks even on off-domain content. The 3 voices that failed both validators (Ada, Battuta, Octopus) have **real card gaps for off-domain modern political content** — their frameworks struggle when the panel's vocabulary is alien to their world.
+
+---
+
+**Decisions out of the audit:**
+
+**1. Anachronism check: change output schema (not the prompt).** Binary PASS/ISSUES is the wrong granularity for any non-toy content. Two paths:
+- **(a) Severity tiers** in the validator output: `lexical_slip` (untranslated modern term in metaphor — low impact) vs `frame_violation` (voice claiming first-person in reader's setting — high impact). Validator returns counts per tier; orchestrator decides PASS/ISSUES based on threshold.
+- **(b) Flag count threshold**: keep PASS/ISSUES, but PASS becomes "≤N slips per K words" not "zero slips". Easier change, less actionable for editor consumption.
+
+Recommended: **(a)** — severity tiers — because the editor needs to know whether the artifact is publishable as-is (lexical slips smoothable in editing) or genuinely framework-broken (needs voice regen). This requires editor-pipeline-side adjustment too. Pre-Athens fix size: ~1-2 hr for validator prompt rewrite + parser update + editor consumption pattern.
+
+**2. Constitution check: keep as-is.** Useful binary signal that distinguishes voice quality. Athens content (WBBF panels) is more on-domain so flag rate should drop naturally; the 3 problem voices' card patches are voice-thread work.
+
+**3. Per-voice anachronism guardrails:** voice cards' `translation_protocol` may need stronger off-domain directives for the 3 voices that struggle most. Voices thread.
+
+**4. Briefing pre-translation:** Provocateur briefings could pre-translate modern terms into voice-friendly framings BEFORE the voice sees them ("the moderator — a chair-of-debate role in your terms a symposiarch / hegemon"). Reduces the voice's translation burden. Pre-Athens consideration.
+
+**Athens implication:** WBBF content is more on-domain than MSC, so flag volume will be lower. But binary anachronism PASS/ISSUES will still be ~100% ISSUES for any non-trivial modern panel content. **The output-schema change is necessary even for Athens.** Without it the editor sees 100% flagged dossiers and can't act on the signal.
+
+**Status:** thorough audit complete; awaiting operator triage on the recommendations. Severity-tier change is the highest-leverage pre-Athens fix (~1-2 hr).
+
+**See also:** `04_voice/validation/*.json` written during 2026-05-03 dryrun — under `projects/current-tests/dev_msc_dryrun_1777840771/runs/athens_night_1/04_voice/validation/`. Validator prompts at `runtime/flows/shared/prompts/voice_step1_validation_anachronism.md` + `voice_step1_validation_constitution.md`.
 
 ---
 
