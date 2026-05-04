@@ -437,10 +437,22 @@ def identify_speakers(turns, session):
     # Speaker ID output is small (mappings + flags, typically <2K tokens).
     # Use a tight per-call cap so we stay under the SDK's 21K non-streaming
     # threshold regardless of the global CLAUDE_MAX_TOKENS budget.
+    # C19c (2026-05-04): wrap system in cache_control. SPEAKER_ID_SYSTEM is
+    # static and ~1.7K tokens — at the borderline of Opus's ~1024-token cache
+    # minimum. Across ~20 sessions/Athens-night, calls 2-N read what call 1
+    # wrote (per-session roster + transcript travel in user message). If the
+    # system stays below the model's activation threshold, the breakpoint is
+    # silently ignored — no penalty.
     resp = client.messages.create(
         model=SPEAKER_ID_MODEL,
         max_tokens=4096,
-        system=SPEAKER_ID_SYSTEM,
+        system=[
+            {
+                "type": "text",
+                "text": SPEAKER_ID_SYSTEM,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
         messages=[{"role": "user", "content": user}],
     )
     logger.info(
@@ -479,11 +491,22 @@ def clean_transcript(named_turns, session, vocabulary):
     # has a 10-minute connection timeout that's incompatible with long
     # cleaning passes on larger transcripts. Streaming holds the connection
     # open via SSE chunks and lets us collect the full response safely.
+    # C19c (2026-05-04): wrap system in cache_control. CLEANING_SYSTEM is
+    # static (~0.4K tokens — almost certainly below Opus's cache-activation
+    # minimum, so this is mostly defensive: if the prompt grows past the
+    # threshold later, caching kicks in automatically; if not, the breakpoint
+    # is silently ignored).
     chunks = []
     with client.messages.stream(
         model=CLAUDE_MODEL,
         max_tokens=CLAUDE_MAX_TOKENS,
-        system=CLEANING_SYSTEM,
+        system=[
+            {
+                "type": "text",
+                "text": CLEANING_SYSTEM,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
         messages=[{"role": "user", "content": user}],
     ) as stream:
         for text in stream.text_stream:

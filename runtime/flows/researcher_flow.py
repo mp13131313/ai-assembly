@@ -292,12 +292,25 @@ def extract_session(session_package_path: str) -> dict:
 
     # Streaming required for outputs that may exceed the SDK's 21K
     # non-streaming threshold.
+    # C19c (2026-05-04): wrap system in cache_control. EXTRACTION_SYSTEM
+    # is a static module-level constant, identical across all 24 calls
+    # per Athens night → call N reads what call 1 wrote. Per-session
+    # roster + transcript travel in the user message (uncached). Cache
+    # activates only when system size meets the model minimum (~1024
+    # tokens for Opus); below that the breakpoint is silently ignored.
+    cached_system = [
+        {
+            "type": "text",
+            "text": EXTRACTION_SYSTEM,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
     t0 = time.time()
     chunks = []
     with client.messages.stream(
         model=CLAUDE_MODEL,
         max_tokens=EXTRACTION_MAX_TOKENS,
-        system=EXTRACTION_SYSTEM,
+        system=cached_system,
         messages=[{"role": "user", "content": user}],
         **_thinking_kwargs(EXTRACTION_THINKING_BUDGET),
     ) as stream:

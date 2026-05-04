@@ -293,10 +293,13 @@ def _stream_and_parse(
     block (5-min ephemeral). C19a: enabled for Formulation calls — each
     voice has 3-5 formulations sharing the same voice-profile-filled
     system prompt, so caching saves ~80% of input cost on reads 2-N.
-    NOT enabled for Triage (per-voice ranking has unique system prompt
-    per call; triage_flags is a single call) — pure write cost with no
-    reads. Min 4096 cached tokens for Opus; voice-profile-filled
-    Formulation systems are well above this.
+    C19c (2026-05-04): also enabled for Triage Part A (per-voice
+    ranking) — voice profile moved out of system into user message, so
+    system is now identical across all ~10 voices' triage calls per
+    night and gets cache hits on reads 2-N. Triage Part B remains a
+    single call; not enabled (pure write cost, no reads). Min 4096
+    cached tokens for Opus; both Formulation systems and the new shared
+    Triage system are well above this.
     """
     t0 = time.time()
     chunks = []
@@ -412,8 +415,12 @@ def triage_voice(
     model_themes = _build_model_themes(themes)
     voice_profile_str = _format_member_profiles([voice])
 
+    # C19c (2026-05-04): system prompt no longer carries the per-voice
+    # profile (now in the user message), so it's identical across all
+    # ~10 voices' triage calls per night → cacheable. The shared content
+    # (instructions + landscape + audience + themes_with_clusters) is
+    # ~22K tokens; reads 2-N save ~80% of input cost vs. uncached.
     system = _fill_template(TRIAGE_VOICE_SYSTEM, {
-        "voice_profile": voice_profile_str,
         "collective_landscape": council["collective_landscape"],
         "audience": council["audience"],
         "themes_with_clusters": json.dumps(
@@ -421,6 +428,7 @@ def triage_voice(
         ),
     })
     user = (
+        f"This voice's profile:\n\n{voice_profile_str}\n\n"
         f"Rank the day's themes for {voice['name']} per the instructions. "
         f"Return only the JSON object."
     )
@@ -433,6 +441,7 @@ def triage_voice(
         max_tokens=TRIAGE_MAX_TOKENS,
         task_label=label,
         logger=logger,
+        cache_system=True,  # C19c: ~10 voices share system per night
     )
     # Defensive: ensure voice name is echoed back even if model omitted it
     result.setdefault("voice", voice["name"])

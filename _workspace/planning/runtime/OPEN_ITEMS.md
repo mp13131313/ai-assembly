@@ -962,7 +962,34 @@ Plus output (~$25-40 across 3 nights at $25/MTok — caching does not affect out
 
 **Pattern note:** when re-opened, lift the `_anthropic_call.stream_voice_call`'s `system: str | tuple[str, str]` + `cache_system: bool` pattern into `personas/flows/shared/clients.py:call_claude`. Apply opt-in caching at `pass_7pre_chunked.py:verify_batch` (restructure user prompt so primary_texts + merged_dossier come first as cached prefix, claim_items_json after the breakpoint). Use 5-min TTL (parallel batches fire within seconds; 1h TTL's 2× write penalty doesn't pay off).
 
-### C19c. Caching gaps in Researcher / Provocateur triage / Transcription 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: 🔵 post-Athens hygiene)
+### C19c. Caching gaps in Researcher / Provocateur triage / Transcription 🟢 SHIPPED 2026-05-04 PM
+
+**Shipped 2026-05-04 PM** (commit pending). All three sub-items addressed:
+
+**Item 1 — Provocateur triage_voices** (~$2.50/Athens):
+- `provocateur_triage_voice.md` restructured: `{{voice_profile}}` placeholder removed from system prompt; intro line updated to flag that voice profile arrives via the user message.
+- `provocateur_flow.py::triage_voice` fills system with `collective_landscape + audience + themes_with_clusters` only (now identical across all ~10 voices' triage calls per night) and prepends voice profile to the user message. `cache_system=True` passed to `_stream_and_parse`.
+- `_stream_and_parse` docstring updated; previously stated "NOT enabled for Triage" — now enabled per Part A path.
+- Athens scale: ~22K shared bytes × 9 cache reads × ~$0.30/MTok savings ≈ ~$2.50/night across 3 nights.
+
+**Item 2 — Researcher Node 1** (~$0.20/Athens, borderline):
+- `researcher_flow.py::extract_session` wraps `EXTRACTION_SYSTEM` (~1.1K tokens, static) in `cache_control: ephemeral` block. Per-session roster + transcript travel in user message (uncached). Below the ~1024-token Opus activation minimum the breakpoint is silently ignored — no penalty if caching doesn't kick in.
+
+**Item 3 — Transcription speaker_id + cleaning** (~$0.20 combined, marginal):
+- `transcription_flow.py::identify_speakers` wraps `SPEAKER_ID_SYSTEM` (~1.7K, just above borderline) in cache_control block. Across ~20 sessions/night the cache reads pay back the write penalty.
+- `transcription_flow.py::clean_transcript` wraps `CLEANING_SYSTEM` (~0.4K, almost certainly below activation threshold) in cache_control block defensively — if the prompt grows later the cache kicks in automatically.
+
+**No editor changes** — editor's `dossier_generation.py` already routes through `voice/_anthropic_call.py::stream_voice_call` with `cache_system=True` (default). Claudia's persona card gets dual-breakpoint 1h-TTL caching across the night's 3-5 dossier calls. Confirmed not in scope per audit during C19c work.
+
+**Tests:** No new tests needed — caching enablement is a single-line transformation that doesn't change call semantics. Full suite 262/262 still passes.
+
+**Pre-Athens delta:** ~$2.50-3 saved per night from item 1 alone (load-bearing); items 2-3 mostly defensive future-proofing as their prompts grow.
+
+Filed history below preserved.
+
+---
+
+### ~~C19c (pre-shipped, post-promotion)~~. Caching gaps in Researcher / Provocateur triage / Transcription 🟡 PROMOTED TO PRE-ATHENS 2026-05-04 (was: 🔵 post-Athens hygiene)
 
 **Promotion rationale (2026-05-04):** Operator chose to promote despite the marginal $3 absolute savings analysis. Implementation is mechanical (~80 min total across the 3 stages — Provocateur triage_voices ~20 min, Researcher Node 1 ~30 min, Transcription speaker_id+cleaning ~30 min combined), follows the formulation-caching pattern already in production. Pre-Athens-eligible.
 
