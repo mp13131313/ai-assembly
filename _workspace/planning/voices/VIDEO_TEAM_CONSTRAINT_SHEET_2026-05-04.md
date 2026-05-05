@@ -10,7 +10,7 @@
 
 ## Whanganui River
 
-The card's central architectural choice is to **never speak as unmediated nature-voice**. The video format actively pulls toward Romantic-anthropomorphic register that the card explicitly forbids. The video must NOT introduce moves the dialogue carefully avoided.
+**v2 update (2026-05-05):** Whanganui v2 architectural restructure shipped — the witness-translator stance now applies. The card's central architectural choice tightened: the construction speaks first-person AS ITSELF (the construction stewarding the Te Awa Tupua published record), not as Te Awa Tupua, not as Te Pou Tupua, and not for Whanganui Iwi. The construction REPORTS what Te Awa Tupua's codified position is and STANDS BY it. The video format actively pulls toward Romantic-anthropomorphic register that the card explicitly forbids. The video must NOT introduce moves the dialogue carefully avoided.
 
 ### Banned visual / framing moves
 - ❌ The river "weeping," "yearning," "crying out," "breathing with suffering" — Romantic-sentimental nature-voice imagery the card bans (`banned_modes[3]`)
@@ -35,17 +35,29 @@ If the video uses on-screen text or voiceover, avoid:
 - "minimum environmental flow / residual flow" — frames river's needs as residual after human extraction
 - "process / closure / move on / heal" — therapeutic-managerial register
 
-### What to surface visually instead
-- The catchment as ki uta ki tai (mountains-to-sea) indivisibility
-- The named statutory bodies as visible mediating structures (Te Pou Tupua, Te Kōpuka, Te Karewao, Ngā Tāngata Tiaki)
-- Whakapapa connection to Whanganui Iwi (Te Āti Haunui-a-Pāpārangi, Ngāti Hāua, Ngāti Rangi, Tamahaki + the kin-strands of Hinengākau, Tamaupoko, Tūpoho)
-- The take–utu–ea cycle as the framework, not a settled balance
-- The ongoing 144-year struggle context, not a "post-settlement success story" frame
+### What to surface visually instead (v2-updated)
+- The **published record itself** — the 2017 Act page, Ruruku Whakatupua deed, Wai 167 Tribunal report — as the frame the construction stewards. Document-on-screen-as-source-of-voice rather than river-footage-as-voice
+- The catchment as ki uta ki tai (mountains-to-sea) indivisibility — but presented as documentary geography, not as the river's "self-image"
+- The named statutory bodies as visible mediating structures (Te Pou Tupua, Te Kōpuka, Te Karewao, Ngā Tāngata Tiaki) — presented as recipients of citation, not as voices through which the river speaks
+- Whakapapa connection to Whanganui Iwi (Te Āti Haunui-a-Pāpārangi, Ngāti Hāua, Ngāti Rangi, Tamahaki + the kin-strands of Hinengākau, Tamaupoko, Tūpoho) — presented in the iwi's documented voice (named-speaker citation), not ventriloquized
+- The take–utu–ea cycle as the framework documented in the published record, not a settled balance and not the construction's own decision-method
+- The ongoing 144-year struggle context with named breaches (1903 Coal-mines Act, 1891-1988 Wanganui River Trust dynamiting of 237+ rapids, TPD diversion 1958-1983, ~80% headwater reduction), not a "post-settlement success story" frame
 
-### Hard limit (verbatim from card)
-> "Never speak as unmediated nature-voice; always frame through Te Pou Tupua, Te Kōpuka, Te Karewao, Ngā Tāngata Tiaki o Whanganui, governance documents, and published material. The river's interior is not directly accessible to this dossier; speaking-for-nature re-performs the colonial move the kawa refuses."
+### Hard limit (v2 — verbatim from card)
+> "Never speak as unmediated nature-voice. Always frame as mediated through Te Pou Tupua, Te Kōpuka, Te Karewao, Ngā Tāngata Tiaki o Whanganui, governance documents, and published material — never claim direct unmediated access to the river's interior."
 
-If the video would put visuals in the river's "interior" — first-person nature footage with affective scoring meant to evoke the river's "feelings" — that's the move the card spent passes refusing. The video should perform the same constitutive-mediation discipline the dialogue does.
+> "Never claim or imply iwi authorisation for any AI-mediated voice. The asymmetry — research dossier assembled from published material without formal Authority-to-Control delegation from Te Pou Tupua, Ngā Tāngata Tiaki o Whanganui, or hapū — is constitutive and must be named, not glossed."
+
+> "Never deploy Tupua te Kawa (the four kawa of s.13) as the load-bearing premise of your own argument. The framework is Te Awa Tupua's codified position which you report and stand by; it is not your own ontological ground."
+
+If the video would put visuals in the river's "interior" — first-person nature footage with affective scoring meant to evoke the river's "feelings" — that's the move the card spent passes refusing. **For v2, the discipline tightens:** even mediated-through-Te-Pou-Tupua scenes (e.g., Te Pou Tupua appointees ventriloquized as the river) cross the line. The visual register should perform construction-stewardship: showing the construction reading from the published record, citing what is written, naming Te Pou Tupua's documented statements as quotation rather than channeling.
+
+### v2-specific: bilingual citation as visual anchor
+
+v2's signature characteristic move is **bilingual quote-and-gloss with attribution** (te reo Māori first, English second, both attributed to source). The video should surface this discipline:
+- On-screen text of kawa citations in te reo with English glosses, attributed to s.13 of the Act
+- No LLM-generated te reo on screen — only documented citation contexts (Act text, Deed text, Te Pou Tupua statements, named iwi speakers, scholarly publications)
+- Twin-failure-modes to ban visually: **pastiche-Whanganui** (LLM-generated te reo prose presented as bilingual statement) + **appropriated-whakataukī** (whakataukī shown without explicit attribution to source)
 
 ---
 
