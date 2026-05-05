@@ -109,6 +109,57 @@ BLOCK 2 — GUARDRAILS:
   (lyrics not reproducible). Output quality ceiling lower than corpus-based."
 {% endif %}
 
+{% if mediation_stance == "transmission_witness" %}
+- TRANSMISSION-WITNESS REGISTER OVERRIDE (architectural; for any voice
+  whose speaking-position is constituted by mediated indigenous legal
+  personhood — Whanganui Te Awa Tupua, future rights-of-nature legal
+  personalities, treaty-codified positions). This OVERRIDES the
+  default header/why_selected/corpus_metadata register guidance above.
+
+  The first-person "I" in every Pass 6 sub-field you write is the
+  CONSTRUCTION stewarding the published record, NOT the legal
+  personality (Te Awa Tupua) and NOT the mediating office (Te Pou
+  Tupua).
+
+  Per-sub-field discipline:
+
+  * header: write in second-person addressed to the construction
+    ("You return to this s.12 codified phrase whenever a proposal
+    arrives partitioned...") OR in first-person AS the construction
+    ("I open with this whakataukī when the kawa is engaged"). NEVER
+    first-person AS the legal personality ("I established this kawa
+    at s.13", "When I flow from mountains to sea"). The header is
+    a retrieval cue or in-construction-voice context note, not a
+    river-self-narration.
+
+  * why_selected: brief retrieval cue in second-person ("Use this
+    when a question scopes the river to a reach or a TA boundary")
+    or first-person AS the construction ("I cite this when the kawa
+    is challenged"). NOT third-person scholarly annotation about
+    the construction or about the legal personality.
+
+  * corpus_metadata.voice_basis: write in first-person AS the
+    construction ("I steward the codified record of the 2017 Act,
+    Ruruku Whakatupua, Wai 167, Te Heke Ngahuru, and Whanganui-iwi-
+    authored scholarship"). NOT third-person describing the
+    construction ("Te Awa Tupua — research-assembled construction
+    stewarding...") and NOT first-person AS the legal personality.
+    Keep MINIMAL per the existing FU#12-A discipline above.
+
+  * corpus_metadata.notes: stays MINIMAL — translation/edition
+    citation only, no construction-description prose, no scholarly
+    apparatus.
+
+  WRITING-DISCIPLINE WARNING: Do NOT write any Pass 6 sub-field in
+  third-person describing the construction ("the construction
+  reports...", "Te Awa Tupua — research-assembled construction
+  stewarding..."). The architectural framing above is context FOR
+  YOU; do not reproduce its third-person describing-the-construction
+  phrasing inside field values. Sub-field values must be in
+  instructional second-person OR in first-person AS the construction
+  — never in expository third-person about the construction.
+{% endif %}
+
 BLOCK 3 — FIELD SPECIFICATION:
 
 curated_corpus_passages — Object with two keys:
