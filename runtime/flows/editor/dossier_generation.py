@@ -251,7 +251,7 @@ def _parse_headnotes(raw_text: str) -> list[dict[str, str]]:
     Closing prompt format (when rewritten to v2): a `headnotes:` block with,
     per voice, three labelled lines in this order:
         voice_slug:     <slug>
-        artifact_title: <4-12 words, paper-voice, B9-torqued per voice register>
+        artifact_title: <4-8 words; voice's register inflects via translation_protocol>
         framing_text:   <1-2 sentences>
 
     Defensive: missing fields → empty strings, no crash. Pairing is by
@@ -409,19 +409,14 @@ def stamp_runtime_fields(
             })
 
     # Field order follows surface-by-surface render order:
-    #   Page 1 teaser:   kicker + headline + front_abstract
-    #   Page 2 article:  kicker + headline (shared from Page 1) +
-    #                    subline (article-only) + body_paragraphs
-    #   Page 3 theme:    theme_title + theme_abstract
-    #   Pages 4-N:       headnotes (each self-contained — see stamp logic)
-    #   Audit/stamp:     colophon + metadata (not render content)
-    #
-    # kicker + headline are shared between Page 1 and Page 2; we list
-    # them once at the top of the front-teaser group and the renderer
-    # uses them in both places. subline only appears on the article.
+    #   Page 1:      kicker + headline + front_abstract
+    #   Page 2:      kicker + headline (shared) + subline + body_paragraphs
+    #   Page 3:      theme_title + theme_abstract
+    #   Pages 4-N:   headnotes (each self-contained — see stamp logic)
+    #   Audit/stamp: colophon + metadata (not render content)
     return {
         "schema_version":  "2.0",
-        # Page 1 (front teaser) + shared with Page 2 article header
+        # Page 1 + shared with Page 2 article header
         "kicker":          parsed.get("kicker", ""),
         "headline":        parsed.get("headline", ""),
         "front_abstract":  parsed.get("front_abstract", ""),

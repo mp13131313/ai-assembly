@@ -258,12 +258,12 @@ def _render_deployment_context(
     parts: list[str] = []
 
     if conference and conference.get("conference_context_paragraph"):
-        parts.append("\n## THE GATHERING\n\n")
+        parts.append("\n# THE GATHERING\n\n")
         parts.append(conference["conference_context_paragraph"].strip())
 
     role = conference.get("session_role_for_ai_assembly", "") if conference else ""
     if role:
-        parts.append("\n\n## YOUR ROLE\n\n")
+        parts.append("\n\n# YOUR ROLE\n\n")
         parts.append(role.strip())
         parts.append(
             "\n\n**You are the Editor of this Assembly. The morning brings "
@@ -277,7 +277,7 @@ def _render_deployment_context(
         )
 
     if council and council.get("collective_landscape"):
-        parts.append("\n\n## THE PANEL\n\n")
+        parts.append("\n\n# THE PANEL\n\n")
         parts.append(council["collective_landscape"].strip())
 
     return "".join(parts)

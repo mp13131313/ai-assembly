@@ -107,12 +107,12 @@ MIN_CARD = {
 class TestRenderDeploymentContext:
     def test_gathering_present_when_conference_given(self):
         out = _render_deployment_context(COUNCIL, CONFERENCE)
-        assert "## THE GATHERING" in out
+        assert "# THE GATHERING" in out
         assert "World Beautiful Business Forum" in out
 
     def test_role_present_with_reconciling_line(self):
         out = _render_deployment_context(COUNCIL, CONFERENCE)
-        assert "## YOUR ROLE" in out
+        assert "# YOUR ROLE" in out
         # The base session_role text
         assert "AI Democracy Marathon's night shift" in out
         # The reconciling line — Tim is the Editor, chrome carries without sanding
@@ -122,7 +122,7 @@ class TestRenderDeploymentContext:
 
     def test_panel_present_when_council_given(self):
         out = _render_deployment_context(COUNCIL, CONFERENCE)
-        assert "## THE PANEL" in out
+        assert "# THE PANEL" in out
         assert "Ten voices" in out
 
     def test_audience_NOT_injected(self):
@@ -130,8 +130,8 @@ class TestRenderDeploymentContext:
         register; deployment-context block does not include the audience
         text from council_config."""
         out = _render_deployment_context(COUNCIL, CONFERENCE)
-        assert "## YOUR READERS" not in out
-        assert "## THE READERS" not in out
+        assert "# YOUR READERS" not in out
+        assert "# THE READERS" not in out
         assert "well-curated openness" not in out  # audience text fragment
 
     def test_empty_when_no_sources(self):
@@ -139,14 +139,14 @@ class TestRenderDeploymentContext:
 
     def test_partial_sources(self):
         only_conference = _render_deployment_context(None, CONFERENCE)
-        assert "## THE GATHERING" in only_conference
-        assert "## YOUR ROLE" in only_conference
-        assert "## THE PANEL" not in only_conference
+        assert "# THE GATHERING" in only_conference
+        assert "# YOUR ROLE" in only_conference
+        assert "# THE PANEL" not in only_conference
 
         only_council = _render_deployment_context(COUNCIL, None)
-        assert "## THE GATHERING" not in only_council
-        assert "## YOUR ROLE" not in only_council
-        assert "## THE PANEL" in only_council
+        assert "# THE GATHERING" not in only_council
+        assert "# YOUR ROLE" not in only_council
+        assert "# THE PANEL" in only_council
 
 
 # --- assemble_system_prompt integration --------------------------------
@@ -156,10 +156,10 @@ class TestAssembleSystemPromptIntegration:
         prefix, tail = assemble_system_prompt(
             MIN_CARD, night=1, council=COUNCIL, conference=CONFERENCE
         )
-        assert "## THE GATHERING" in prefix
-        assert "## YOUR ROLE" in prefix
-        assert "## THE PANEL" in prefix
-        assert "## THE GATHERING" not in tail
+        assert "# THE GATHERING" in prefix
+        assert "# YOUR ROLE" in prefix
+        assert "# THE PANEL" in prefix
+        assert "# THE GATHERING" not in tail
 
     def test_night_substitutes_in_temporal_stance(self):
         for n in (1, 2, 3):
@@ -191,9 +191,9 @@ class TestAssembleSystemPromptIntegration:
         prefix, tail = assemble_system_prompt(
             MIN_CARD, night=1, council=None, conference=None
         )
-        assert "## THE GATHERING" not in prefix
-        assert "## YOUR ROLE" not in prefix
-        assert "## THE PANEL" not in prefix
+        assert "# THE GATHERING" not in prefix
+        assert "# YOUR ROLE" not in prefix
+        assert "# THE PANEL" not in prefix
         # But the prefix is still rendered
         assert len(prefix) > 100
         assert "Tim Leberecht" in prefix
@@ -217,8 +217,8 @@ class TestAssembleSystemPromptIntegration:
         prefix, _ = assemble_system_prompt(
             MIN_CARD, night=1, council=COUNCIL, conference=CONFERENCE
         )
-        assert "## THE GATHERING" in prefix
-        assert "## THE PANEL" in prefix
+        assert "# THE GATHERING" in prefix
+        assert "# THE PANEL" in prefix
 
 
 # --- Closing prompt (editor_dossier.md) renders new blocks ----
