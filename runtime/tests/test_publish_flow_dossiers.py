@@ -110,7 +110,7 @@ def _dossier(
             "publication_date": f"2026-05-{6 + night:02d}",
             "publication_date_long": f"May {6 + night}, 2026",
             "edition_label": f"Night {night}",
-            "generated_by": "claudia_pinchbeck",
+            "generated_by": "tim_leberecht",
             "model": "claude-opus-4-7",
             "thinking_enabled": True,
         },

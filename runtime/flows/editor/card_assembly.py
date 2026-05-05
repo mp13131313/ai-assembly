@@ -4,7 +4,7 @@ Mirrors `runtime/flows/voice/card_assembly.py` with editor-specific routing
 per docs/AI_Assembly_Editor_Pipeline.md §"Editor card → System Prompt
 Assembly". The differences:
 
-  - Card lives at <PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json
+  - Card lives at <PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json
     (not under voices/)
   - Engagement section has 2 fields, not 3 (no unique_contribution — Claudia
     is structurally distinct from panel voices)
@@ -103,7 +103,7 @@ _ARTIFACT = (
 _ALWAYS_DROP_TOP_LEVEL = ("metadata", "smoke_test_chains")
 _NESTED_STRIP = ("curated_corpus_passages", "corpus_metadata")
 
-EDITOR_CARD_SUBPATH = Path("editor") / "claudia_pinchbeck" / "07_persona_card_assembled.json"
+EDITOR_CARD_SUBPATH = Path("editor") / "tim_leberecht" / "07_persona_card_assembled.json"
 
 
 # --- Loaders --------------------------------------------------------------
