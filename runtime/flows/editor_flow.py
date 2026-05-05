@@ -15,7 +15,7 @@ Per spec v2 (`docs/AI_Assembly_Editor_Pipeline.md`):
 Reads (per spec v2 §"What the Editor Pipeline Knows"):
   <run_dir>/04_voice/step2_first_draft_artifacts/<voice>.json
   <run_dir>/03_provocateur/briefings/<voice>.json
-  <PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json
+  <PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json
   <PROJECT_ROOT>/published_artifacts/dossiers/night_<N-1>/*.json (Night 2/3)
 
 Writes:

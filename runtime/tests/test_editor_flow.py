@@ -25,7 +25,7 @@ from flows.editor import routing  # noqa: E402
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
-STUB_CARD_PATH = FIXTURES_DIR / "claudia_pinchbeck_stub.json"
+STUB_CARD_PATH = FIXTURES_DIR / "tim_leberecht_stub.json"
 
 
 # --- card_assembly -------------------------------------------------------
@@ -167,7 +167,7 @@ def test_editor_flow_end_to_end_mocked(tmp_path, monkeypatch):
     project_root = tmp_path / "project"
     project_root.mkdir()
     # Stage Claudia's stub card under PROJECT_ROOT
-    editor_dir = project_root / "editor" / "claudia_pinchbeck"
+    editor_dir = project_root / "editor" / "tim_leberecht"
     editor_dir.mkdir(parents=True)
     (editor_dir / "07_persona_card_assembled.json").write_text(STUB_CARD_PATH.read_text())
 
@@ -233,7 +233,7 @@ def test_editor_flow_handles_failed_dossier(tmp_path, monkeypatch):
     manifest records the failure."""
     project_root = tmp_path / "project"
     project_root.mkdir()
-    editor_dir = project_root / "editor" / "claudia_pinchbeck"
+    editor_dir = project_root / "editor" / "tim_leberecht"
     editor_dir.mkdir(parents=True)
     (editor_dir / "07_persona_card_assembled.json").write_text(STUB_CARD_PATH.read_text())
 
