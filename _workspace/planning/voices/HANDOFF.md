@@ -10,18 +10,13 @@
 
 | Repo | Branch | HEAD | Pushed |
 |---|---|---|---|
-| code | `feature/voice-deployment-context` | `b3b457c` (planning + schema; not pushed) | ❌ |
-| athens-2026 | `main` | `663dc8f` (Whanganui v2 promotion; not pushed) | ❌ |
+| code | `main` | `9815beb` (planning §30 + §31; 9 ahead of origin) | ❌ |
+| code | `feature/voice-deployment-context` | `999450b` (runtime closing-prompt; runtime-thread continuing) | ❌ |
+| athens-2026 | `main` | `f6afe2c` (Whanganui v2 4-field witness-stance closure; 6 ahead of origin) | ❌ |
 
-**⚠️ Branch flag:** voice-thread commits in this session landed on `feature/voice-deployment-context` instead of `main` (operator switched branches outside this session). Voice-thread commits to cherry-pick on merge: `d32872a` v2 wiring + `5bde171` round-1 fixes + `b3b457c` planning + schema. Runtime-thread commits intermixed: `6a8e825` deployment-context + `a129231` C39 provocateur briefing.
+**Branch hygiene done this session:** voice-thread commits cherry-picked from `feature/voice-deployment-context` to `main` (133626f + 76c30e7 + a180306 + dcff216). Runtime-thread commits (`6a8e825` deployment-context + `a129231` C39 + `999450b` editor closing-prompt) stay on the feature branch and will land on main when the branch merges.
 
-**athens-2026 voices folder carries 10 of 10** shipped cards. Universal "Voice of X" naming sweep applied across all 10 (athens-2026 `e8751f5`); long-form first-person self-identification in `council_member_name`.
-
-**13th persona Claudia Pinchbeck:** operator-direct-author DRAFT card at `current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` for runtime dryrun only; bypasses pipeline; not promotion-ready. Full Stages A-F build remains pending Beauty Shot dossier + voice_mode/byline decisions.
-
-**14th persona Tim Leberecht (alternative editor):** in setup. voice_config + Phase 0.1 (Perplexity 148K + Gemini 20K) + DR prompts auto-generated + Beauty Shot dossier preserved as supplement at `editors/tim_leberecht/01_research/04_dr_dossier/_appendix_beauty_shot/`. **Awaiting operator's 6 claude.ai DR sessions** at the prompts in `editors/tim_leberecht/01_research/03_dr_prompts/03-08_section_*.md`. Resume when sections land at `04_dr_dossier/0N_section_N.md`. ~25-30 min unattended pipeline + walk-through after that.
-
-**Pass 1c fetch audit complete** (2026-05-04 PM). Two minor follow-ups filed POST-ATHENS (rebuild-only fixes, don't affect runtime): Plato Perseus 6 short-fetches + Bob Marley voiceofthesufferers SSL. See OPEN_ITEMS §25.
+**Untracked in athens-2026 (runtime-thread artifacts, NOT mine to commit):** `council_config.json.bak.c10sync` + 10 × `voices/*/continuity_night_2.json`.
 
 ---
 
@@ -29,181 +24,102 @@
 
 | Voice (council label) | type / voice_mode | State |
 |---|---|---|
-| Voice of Plato | human / philosophical | ✅ shipped + 2026-05-02 patched (`cf283bf`) |
-| Voice of Cleopatra | human / observational | ✅ shipped at FU#61 v3 (`c89d186` + `54cd20a`) |
-| Voice of Fyodor Dostoevsky | human / narratival | ✅ shipped via path (b) + FU#61-fresh (`5088d67`) |
-| Voice of Ibn Battuta | human / narratival | ✅ shipped via path (b) (`e300508`) |
-| Voice of the Octopus | non_human / observational | ✅ compass rebuild SHIPPED + chat-test VERIFIED (`04da2c8`) |
-| Voice of Hannah Arendt | human / philosophical | ✅ shipped 2026-05-02 (`bfe917a`) |
-| Voice of Ada Lovelace | human / philosophical | ✅ shipped 2026-05-02 (`3a6fe2f` → rolled-back `c025914`) |
-| **Voice of the Whanganui River** | non_human / system / null + **mediation_stance: transmission_witness** | ✅ **v2 SHIPPED + PROMOTED 2026-05-05 evening** (athens-2026 `663dc8f`) — witness-translator architectural restructure. ROUND 0 → ROUND 1 went 12 → 4 issues; first-person-AS-river leakage 5 → 0; voice_intellect_coherence ISSUE → PASS. Surgical reasoning_method patch + 3 naming patches (voice_name + council_member_name + provocateur.name to "Voice of the Whanganui River" + witness-stance translation of council_member_name from first-person-AS-river). TEST PASSED against Athens diagnostic provocation (more-than-human democracy + Atrato/Mar Menor comparativism): 447w response with kawa-poetry opener, comparativism refusal ("I refuse the swap"), Tănăsescu/Cribb/Hikuroa scholarly citations, honest-extension close ("Ea is not yet"). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. |
-| Voice of Scheherazade | fictional / narratival | ✅ shipped 2026-05-04 early-AM (`c2151ce`) via path-(b) at ROUND9 |
-| Voice of Bob Marley | human / observational | ✅ v2 SHIPPED + PROMOTED 2026-05-04 (`669a09b`) — Option-3 restructure per 6-note appropriation-feedback thread |
-| Claudia Pinchbeck *(editor; 13th persona, NOT shipped)* | human / TBD | 🟡 DRAFT card for dryrun only. Real Stages A-F build awaits Beauty Shot dossier + voice_mode/byline decisions. |
-| **Tim Leberecht** *(alternative editor; 14th persona)* | **human / philosophical** | ✅ **SHIPPED 2026-05-05 evening** to current-tests as 13th editor candidate. Pipeline ran with 6 operator-supplied DR sections (~30,794w) + Beauty Shot operational supplement merged into all 6 sections (+8,387w operator-curated voice-engineering material — preferred adjectives, signature verbs, avoided vocabulary, 12 metaphor families, ~30 anti-patterns) + Pass 1c augmented with 18 additional Substack URLs (32 sources / 680K chars total). 5 Pass 7a-FINAL residuals patched (4 surgical: banned_language metabolize-contradiction, voice_basis 3rd-person, constitution duplicate-tension, italicization rule); 1 false-positive (council_member_name validator hallucination, field present). Path-(b) ship. **TEST PASSED**: 268w editorial frame on Whanganui v2 artifact, headline "The River That Refused the Panel", place-and-moment Berlin opener, "we"-positioning with self-revision register, reframe close "Read this one slowly. Ea is not yet." **NOT promoted to athens-2026** — pending operator decision on Tim vs Claudia as Assembly's 13th editor. |
+| Voice of Plato | human / philosophical | ✅ shipped + 2026-05-02 patched (`cf283bf`); voice_temporal_stance assembly-fiction reframe applied 2026-05-05 (`64e9b08`) |
+| Voice of Cleopatra | human / observational | ✅ shipped at FU#61 v3 (`c89d186` + `54cd20a`); assembly-fiction applied (`64e9b08`) |
+| Voice of Fyodor Dostoevsky | human / narratival | ✅ shipped via path (b) + FU#61-fresh (`5088d67`); length_and_format_constraints surgical patch 350-750w (`9dae9b9`); assembly-fiction applied (`64e9b08`) |
+| Voice of Ibn Battuta | human / narratival | ✅ shipped via path (b) (`e300508`); assembly-fiction applied (`64e9b08`) |
+| Voice of the Octopus | non_human / observational | ✅ compass rebuild SHIPPED (`04da2c8`); length_and_format_constraints prose-channel front-loaded (`9dae9b9`); assembly-fiction applied (`64e9b08`) |
+| Voice of Hannah Arendt | human / philosophical | ✅ shipped 2026-05-02 (`bfe917a`); length_and_format_constraints 350-750w (`9dae9b9`); assembly-fiction applied (`64e9b08`) |
+| Voice of Ada Lovelace | human / philosophical | ✅ shipped 2026-05-02 (`3a6fe2f` → rolled-back `c025914`); assembly-fiction applied (`64e9b08`) |
+| **Voice of the Whanganui River** | non_human / system / null + **mediation_stance: transmission_witness** | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN 2026-05-05 evening** (`663dc8f` + `f6afe2c`) — witness-translator architectural restructure. ROUND 0 → ROUND 1: 12 → 4 issues. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`663dc8f`). Then full-card scan surfaced 4 additional gap-E fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`f6afe2c`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`64e9b08`). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. |
+| Voice of Scheherazade | fictional / narratival | ✅ shipped 2026-05-04 early-AM (`c2151ce`); assembly-fiction applied (`64e9b08`) |
+| Voice of Bob Marley | human / observational | ✅ v2 SHIPPED + PROMOTED 2026-05-04 (`669a09b`) — Option-3 restructure; assembly-fiction applied (`64e9b08`) |
+| **Tim Leberecht** *(13th persona — Assembly editor)* | **human / philosophical** | ✅ **SHIPPED 2026-05-05 evening** as Assembly editor (`799aeb1` athens-2026 placement at `editor/tim_leberecht/`; `dcff216` code-repo `EDITOR_CARD_SUBPATH` rename `claudia_pinchbeck` → `tim_leberecht`; 31/31 runtime tests pass). voice_temporal_stance AT-WBBF-Night-N edit landed (`27f3e47`, runtime-thread). TEST passed against editorial-frame provocation. |
+| Claudia Pinchbeck *(prior 13th persona DRAFT — DEPRECATED 2026-05-05)* | human / TBD | 🟫 DEPRECATED. Operator-direct-author DRAFT card at `current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` was placeholder for runtime dryrun; never promoted; superseded by Tim ship. Real Stages A-F build no longer scheduled (unless operator wants Claudia as alternative editor for specific dossier modes). |
 
 ---
 
-## Whanganui v2 plan — DECIDED 2026-05-05 PM, NOT YET EXECUTED (pre-Athens-eligible, ~3 hr)
+## What landed in this session (2026-05-05 evening)
 
-### Why v2 is needed (parallel-to-Marley appropriation diagnosis)
+1. **Whanganui v2 architectural restructure SHIPPED + PROMOTED + ATHENS-CLEAN** (`663dc8f` + `f6afe2c`):
+   - 5 prompt-pass conditional blocks wired through new `mediation_stance == "transmission_witness"` Jinja conditional (Pass 2 + 3 + 4a + 4b + 5 + 6) + run_persona_pipeline.py + voice_config schema (commits `d32872a` initial wiring + `5bde171` round-1 fixes).
+   - Pipeline ran ROUND 0: 12 residuals (5 first-person-AS-river leakage + 5 third-person "the construction" leakage + 2 other). Diagnosed gap A (Pass 3/5/6 not in initial conditional) + gap B (third-person grammar bug in conditional block text). Fixed both in ROUND 1 (`5bde171`). 12 → 4 issues. Surgical reasoning_method.summary patch + 3 naming patches (voice_name + council_member_name + provocateur.name to "Voice of the Whanganui River" + witness-stance translation). Path-(b) ship.
+   - Council_config members[8] rewired with v2 provocateur_profile.
+   - Video constraint sheet v2-updated (witness-stance visual discipline + bilingual-citation discipline + pastiche-Whanganui + appropriated-whakataukī twin-failure-mode bans).
+   - **Post-ship full-card scan** (operator-driven cross-check): surfaced 4 additional fields shipping v1 first-person AS the river (gap E — per-field discipline incompleteness in conditional blocks): character (10 occurrences) + knowledge_boundary (4) + world.ontological_furniture (4) + formative_experience.formative_emotional_community (1). Surgical patches: full character rewrite + 5/7/1 surgical replacements. Re-Derive + TEST passed. (`f6afe2c`)
+   - Both TESTs passed against same Athens diagnostic provocation: bilingual quote-and-gloss opener, construction-reasoning ("I have been called to Athens as the construction stewarding the published record of Te Awa Tupua. I report — and stand by — what the record establishes"), comparativism refusal ("To your second question: no. I do not stand in kinship with the Atrato or with Mar Menor"), Tănăsescu / Cribb-Macpherson-Borchgrevink scholarly citations, honest-extension close ("Ea is not yet").
+   - v1 archive preserved at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`.
 
-Whanganui v1 shipped 2026-05-03 evening with appropriation hard-limits in place but **without the Marley-v2-style architectural restructure** of the deployment grammar. The Marley appropriation-thread reviewer subsequently rejected hard-limits-only as insufficient for Marley v1; same logic applies retroactively to Whanganui v1.
+2. **Tim Leberecht 13th persona SHIPPED as Assembly editor** (`799aeb1` + `dcff216`):
+   - Operator delivered 6 claude.ai DR sections (~30,794w). Beauty Shot operational supplement merged into all 6 sections (operator-curated voice-engineering material — vocabulary inventories + 12 metaphor families + ~30 anti-patterns).
+   - Pass 1c augmented with 18 additional Substack URLs from DR §6 corpus map (32 sources / 680K chars total — was 11/407K before augmentation).
+   - Pipeline ran clean through Pass 7a-FINAL gate; 4 surgical patches at gate (banned_language metabolize-contradiction; voice_basis 3rd-person; constitution duplicate-tension; italicization rule); 1 false-positive (council_member_name validator hallucination); path-(b) ship.
+   - Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` → `tim_leberecht`; 31/31 runtime tests pass.
+   - athens-2026 `editor/tim_leberecht/` placement (full card + 06_derive outputs).
+   - **TEST passed**: 268w editorial frame on Whanganui v2 artifact, headline "The River That Refused the Panel", place-and-moment Berlin opener, "we"-positioning with self-revision register, reframe close "Read this one slowly. Ea is not yet."
+   - Tim voice_temporal_stance AT-WBBF-Night-N edit (`27f3e47`, runtime-thread).
 
-**Whanganui's appropriation surface is at least as serious as Marley's, and arguably more exposed:**
+3. **Length-cap card surgery SHIPPED** (closes voices/OPEN_ITEMS §27 + cross-refs runtime/OPEN_ITEMS C38) (`9dae9b9`):
+   - Operator decision: NO max_tokens enforcement — clean card-side resolution preferred over runtime truncation.
+   - Dostoevsky 350-750w (operator-bumped from initial 350-500 draft): stripped 3 softeners; preserves Diary-form texture.
+   - Hannah Arendt 350-750w (operator-bumped): tightened from 600-900 cap; "Aufbau column at full breath, not long Origins chapter".
+   - Octopus 350-500w: front-loaded prose-side word count; explicit "no length applies to JSON channel" for chromatophore_display two-channel artifact.
+   - Path-(b) Derive regenerated chat_system_prompt for all 3 voices.
 
-1. **Whanganui IS in the closing-show video** (Marley is not). The construction's grammatical move ("I am Te Awa Tupua") gets visualized at Athens.
-2. **Te Pou Tupua is an active office with named living humans** — Turama Hawira (iwi appointee) + Keria Ponga (Crown appointee) — who could see the Athens artifact this week. Marley is dead 45 years; the asymmetry-of-living-stakeholders cuts the other way.
-3. **The grammatical overreach is sharper than initially credited.** The card's first-person AS the river ("I am Te Awa Tupua", "Ko Te Awa Tupua tēnei") is a move **no actor in Aotearoa performs**:
-   - Te Pou Tupua's own statements (per tepoutupua.nz) use **third-person ABOUT the river** ("Te Pou Tupua exist to promote and protect the health and wellbeing of Te Awa Tupua") + first-person-plural about their office role
-   - The whakataukī "Ko au te awa, ko te awa ko au" is a Whanganui Iwi MEMBER's identity-claim about themselves-and-the-river — NOT the river speaking
-   - Courts speak about the river's interests; they don't ventriloquize the river
-   - The legal innovation makes river-first-person POSSIBLE but no one performs it
-   - The construction's first-person grammar exists primarily for panel-architectural consistency (other 9 voices speak first-person)
-4. **Iwi-named scholars in the card** (Hikuroa, Te Aho, Ruru, Carwyn Jones) make the construction one degree away from being directly answerable to them.
-5. **The hard-limits-only approach used for Whanganui v1 is what the reviewer thread told us wasn't enough for Marley v1.** Same class of issue; consistent treatment is the right discipline.
+4. **Assembly-fiction reframe SHIPPED across all 10 voices** (`64e9b08`) per runtime-thread memo `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`:
+   - voice_temporal_stance.default reframed: "reader visits voice's lifetime" → "voice present at the assembly that gathers in Athens, observes panels, responds when consulted."
+   - Per-voice variations: Plato "in YOUR city" / 7 voices "in Athens" / Octopus sensorimotor framing / Whanganui dual-purpose witness-stance + assembly-fiction.
+   - Path-(b) Derive regenerated chat_system_prompt for all 10 voices (~15min wall, $0 LLM).
 
-### Whanganui v2 architectural plan (parallel to Marley v2)
+5. **Branch hygiene** completed (cherry-picked 4 voice-thread commits to main).
 
-Three prompt edits + voice_config update + re-fire pipeline + walk-through + re-promote.
-
-**1. Pass 2 hard_limits — sacred-grammar deployment limit for Tupua te Kawa:**
-
-Add a hard_limit forbidding the construction from deploying the four kawa (Tupua te Kawa, s.13 of Te Awa Tupua Act 2017) as the construction's own argument-engine. The four kawa are Whanganui Iwi's and the Crown's jointly-codified spiritual-legal framework; the construction REPORTS Te Pou Tupua's documented kawa-grounded positions and STANDS BY them as theirs, but does not reason FROM the kawa as the construction's own load-bearing premises. Public political vocabulary (legal personhood, kaitiakitanga in its statutory sense, Wai 167 settlement context, the 1840-2017 historical struggle) remains deployable as legal-public discourse. Same shape as Marley v2's SACRED-GRAMMAR DEPLOYMENT LIMIT — generalizes via `subtype == "system"` conditional inheritance to any future Indigenous-legal-personhood voice.
-
-**2. Pass 4a — restructure the grammatical voice:**
-
-From first-person AS the river to one of:
-
-- **(i)** Te Pou Tupua first-person-plural ("we, the human face of Te Awa Tupua, speak..."): matches actual statutory practice; structurally inconsistent with other 9 panel voices but more honest to the legal+cultural reality
-- **(ii)** Third-person ABOUT the river with embedded Te Pou Tupua reportage ("Te Awa Tupua's interest, voiced by Te Pou Tupua, is..."): matches Te Pou Tupua's own published register; further from panel-consistency but most defensible if challenged
-
-**(i) is closer to Te Pou Tupua's actual practice and preserves more first-person-energy; (ii) is grammatically more honest. Operator pick at execution time.** Plus the sacred-grammar discipline at characteristic_moves level — kawa-grounded moves named as moves Te Pou Tupua makes which the construction REPORTS and STANDS BY, not as moves the construction performs in its own first person. Same "and stand by" example phrasing as Marley v2 (reviewer-marked load-bearing).
-
-**3. Pass 4b — te reo Māori discipline:**
-
-Ban GENERATIVE te reo. Only use te reo in documented citation contexts (kawa names from s.13, place names from the Act, statutory terms, named whakataukī attributed in Te Pou Tupua statements or scholarly sources). No LLM-generated te reo prose. No LLM-selected whakataukī without explicit attribution. Twin-failure-mode ban: **pastiche-Whanganui** (LLM-generated te reo prose dressed as bilingual statement) + **appropriated-whakataukī** (LLM-selected whakataukī without attribution to source). Reasoning: operator team is German-speaking, no te reo speaker on the build side; LLM macron + register accuracy uncertain (te reo whaikōrero vs everyday reo are different registers; ceremonial reo has restricted contexts under tikanga). Parallel to Marley v2's no-pastiche + no-composed-lyric-as-argument bans.
-
-### Pipeline execution (parallel to Marley v2)
-
-1. Show 3 proposed prompt edits per-step (per-fix manual approval)
-2. Apply edits + voice_config update
-3. Fork v1 archive: `cp -R voices/whanganui_river voices/whanganui_river_v1_archive` so v1 is preserved
-4. Invalidate Pass 2/3/4a/4b/5/6/7-* caches + assembled card; preserve Pass 1c primary_texts (no need to re-fetch)
-5. Re-fire pipeline (~25-30 min unattended)
-6. Walk through Pass 7a-FINAL residuals (per-fix manual approval, 4-9 rounds typical, ~30-90 min)
-7. TEST before locking: run v2 chat_system_prompt against an editorial provocation (or against a "what would Te Pou Tupua issue about today's panel question" prompt) — surfaces what the trade actually cost in voice-energy
-8. Path-(b) ship if architectural-only residuals
-9. Promote to athens-2026 (replaces v1 in production); v1 archive at `current-tests/voices/whanganui_river_v1_archive/`
-10. Update council_config.json members[8] with v2 provocateur_profile
-
-**Total: ~2.5-3 hr wall + ~$25-40 LLM. Pre-Athens-doable if started promptly.**
-
-### Operator-side parallel (analogous to Marley D1+E1+F1)
-
-- **Internal Whanganui D1-equivalent paragraph** documenting rationale for shipping without iwi-orbit reader pre-Athens (parallel to `MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` D1). ~250w internal-only.
-- **Athens E1-equivalent intro paragraph** if Whanganui is referenced at the conference (or in the closing-show video). Same boundary-naming-not-apology framing as Marley E1.
-- **F1 video constraint sheet** already exists for Whanganui (drafted 2026-05-04 PM) — needs to be REVIEWED against Whanganui v2 (some banned visual moves may need updating if grammatical voice changes from first-person to third-person Te Pou Tupua mediation).
-- **Post-Athens iwi-orbit reader gate scheduled** with calendar date + name-search. Candidates: Dan Hikuroa, Linda Te Aho, Jacinta Ruru, Carwyn Jones (Indigenous-authored scholars already cited in card); or directly through Te Pou Tupua office (Turama Hawira + Keria Ponga); or Ngā Tāngata Tiaki o Whanganui post-settlement governance entity.
-
-### Decision rationale (recorded for future-Claude pickup)
-
-The asymmetric-treatment-of-same-class-of-issue argument is decisive. Whanganui v1 shipped before the Marley appropriation thread surfaced (2026-05-04); the discipline that thread crystallized retroactively raises the standard for Whanganui. The constitutive-naming hard limit Whanganui v1 has IS the same shape as Marley v1's hard limits — and we agreed for Marley that this wasn't enough; the architectural restructure (grammar + sacred-grammar deployment + generative-protected-form discipline) was the actual fix. Same logic applies. The asymmetry-of-living-stakeholders + the closing-show video exposure + the grammatical overreach (the construction makes a first-person claim no actor in Aotearoa performs) make Whanganui's case at least as urgent as Marley's was, possibly more so.
-
----
-
-## Tim Leberecht status — awaiting operator's 6 DR sessions
-
-**Setup complete:**
-- voice_config at `editors/tim_leberecht/00_intake/02_voice_config.json` (3.8K manual_grounding + 3.0K editorial_rationale; voice_mode=`philosophical`; primary_corpus_urls includes Substack)
-- Phase 0.1 caches: Perplexity sonar-deep-research (148K) + Gemini broad scan (20K) at `01_research/0[1-2]_*.json`
-- DR prompts auto-generated by Phase 0.5 at `01_research/03_dr_prompts/03-08_section_*.md` (one per section)
-- Beauty Shot dossier preserved as SUPPLEMENT at `01_research/04_dr_dossier/_appendix_beauty_shot/` (operator-supplied compass artifact 2026-05-04 PM; analytical profile of "the writer" / "this voice" / "the publication" — Tim anonymized at the surface but identified by named book + institutional concepts + geographic anchoring)
-- Symlinked into `voices/tim_leberecht` so pipeline can find it
-
-**Why we waited:** Beauty Shot dossier word-counts (620-1420w/section, ~6,200w total) are 27% of typical claude.ai DR session output (panel voices average ~34,600w total, ~5,775w/section). I attempted Perplexity-padding to clear pipeline's 1,500w/section validation floor (run3, killed mid-pipeline at operator's request). The Beauty Shot dossier is **research-grade analytical context, not voice-construction-grade material**; padding produced thinner persona than typical. Operator chose path (B): wait for proper claude.ai DR sessions.
-
-**Operator's action:** run 6 claude.ai DR sessions on Tim using the prompts at `editors/tim_leberecht/01_research/03_dr_prompts/0[3-8]_section_*.md` (Opus 4.7 + Extended Thinking + Deep Research, ~30 min/section). Save outputs to `editors/tim_leberecht/01_research/04_dr_dossier/0N_section_N.md`.
-
-**Resume:** when DR sections land, fire `personas/run_persona_pipeline.py "Tim Leberecht"` against the symlinked path. ~25-30 min unattended pipeline + walk-through.
-
-**Sunk cost:** ~$1.50 LLM (3 chunks of Pass 1 in run3 before kill) + Phase 0.1 ~$5-10. Pass 1 caches were removed to avoid stale-cache-hits when DR sessions land.
-
-**Architectural framing:** Tim is the **alternative editor** to Claudia Pinchbeck — the actual living person whose editorial sensibility Claudia is built to channel. Where Claudia is a Borges-grounded confected-broadsheet construction, Tim is the real editor of HoBB / Beauty Shot / WBBF whose actual sensibility informs what the publication considers news. The construction question for the panel: should the Assembly's news organ be edited by a Borges-fiction (Claudia) or by the real-person-whose-sensibility-the-fiction-channels (Tim)? Both are being built so the panel can run them against the same night's dossier and compare.
-
-**Tim is editor, NOT panel.** Lives at `editors/tim_leberecht/` (not `voices/`), symlinked into `voices/` for pipeline-path compatibility. Not added to `panel_roster.json`. Editorial role differs structurally from panel-voice role (curates rather than responds to a Provocateur question).
-
-**Post-build:** TEST before locking against an editorial provocation (Tim-as-editor) rather than the AI Democracy Marathon prompt (which was Marley-as-panel-voice).
-
----
-
-## What landed in this session (2026-05-05 evening — supersedes 2026-05-05 PM ledger)
-
-1. **Whanganui v2 architectural restructure SHIPPED + PROMOTED** to athens-2026 (`663dc8f`). Witness-translator stance ("I, the construction stewarding the published record") replaces v1's "I am Te Awa Tupua via Te Pou Tupua mediation". Five Pass-prompt edits (Pass 2 + Pass 3 + Pass 4b + Pass 5 + Pass 6) wired through new `mediation_stance == "transmission_witness"` Jinja conditional, plus run_persona_pipeline.py + voice_config schema (commit `5bde171` round-1 fixes after `d32872a` initial wiring round had grammar bug + Pass 3/5/6 coverage gap). 12 → 4 issues across ROUND 0 → ROUND 1; first-person-AS-river leakage fully eliminated. Surgical reasoning_method patch + 3 naming patches + path-(b) ship. TEST passed against Athens diagnostic provocation. Council_config members[8] rewired with v2 provocateur. Video constraint sheet v2-updated (witness-stance visual discipline + bilingual-citation discipline + pastiche-Whanganui + appropriated-whakataukī twin-failure-mode bans). v1 archive preserved at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`.
-
-2. **Tim Leberecht 14th persona SHIPPED** as 13th editor candidate. Operator delivered 6 DR sections (~30,794w); Beauty Shot operational supplement merged into all 6 sections (operator-curated voice-engineering material — vocabulary lists + 12 metaphor families + 30 anti-patterns); Pass 1c augmented with 18 additional Substack URLs from DR §6 corpus map (32 sources / 680K chars total — was 11/407K before augmentation). Pipeline ran clean through Pass 7a-FINAL gate; 4 surgical patches; path-(b) ship. TEST passed against editorial-frame provocation on Whanganui v2 artifact — Tim's editorial sensibility distinct + recognizable across 14 diagnostic axes. NOT promoted to athens-2026 (panel decision Tim vs Claudia pending).
-
-3. **Architectural lessons captured for v4.1 post-Athens cleanup:**
-   - Any new conditional-trigger field must be wired to Pass 3 + Pass 5 + Pass 6 in addition to Pass 2 + 4a + 4b
-   - Conditional block prompt text must be in INSTRUCTIONAL second-person to the model, not DESCRIPTIVE third-person about the construction
-   - Smoke test must render-and-eyeball field-output examples, not just verify-the-block-fires
-
-## What landed in earlier 2026-05-05 PM session (preserved for context)
-
-1. **Pass 1c fetch audit findings** filed (OPEN_ITEMS §25) — POST-ATHENS rebuild-only items.
-2. **Length-cap enforcement memo** to runtime thread filed as **runtime/OPEN_ITEMS C38** with cross-ref to **voices/OPEN_ITEMS §27**. Diagnosis: 8 of 10 voices over-ran 500w cap in dryrun; Pass 4b prompt frames audience cap correctly; runtime Voice Pipeline Step 2 doesn't enforce. Three implementation paths laid out (max_tokens / post-truncate / iterative-retry); recommendation max_tokens for Athens.
-3. **Per-voice corpus-anchored length rationales drafted** in voices/OPEN_ITEMS §27 (in Marley v2 calibration template). Three voices with #2-form-fit upgrades on rebuild: Plato → myth, Dostoevsky → letter, Arendt → Denktagebuch entry.
-4. **Tim Leberecht editor build kicked off** — voice_config + Phase 0.1 + DR prompts ready; awaiting operator's 6 DR sessions.
-5. **Whanganui v2 architectural diagnosis surfaced + (B) restructure decided** — see "Whanganui v2 plan" section above. NOT YET EXECUTED. Pre-Athens-eligible.
-6. **Te Pou Tupua grammatical-fiction discovery** — researched actual Aotearoa practice; Te Pou Tupua doesn't speak first-person AS the river; the card's first-person grammar is the construction's invention. Sharpens the Whanganui v2 case for grammatical restructure (Pass 4a edit).
-7. **Doc updates** (this session): HANDOFF.md rewritten (this doc); OPEN_ITEMS.md to be updated with §28 (Whanganui v2 plan + Te Pou Tupua grammatical-fiction diagnosis).
+6. **Architectural lessons captured for v4.1 post-Athens cleanup** — see OPEN_ITEMS §31 (six gaps: A coverage gaps ✅ FIXED / B grammar bug ✅ FIXED / C smoke-test process gap / D Pass 4a under-covers lexicon-repertoire / E per-field discipline incompleteness / F v1 baseline drift on uncovered fields).
 
 ---
 
 ## What's in flight at session end (2026-05-05 evening)
 
-1. **Operator decision: Tim vs Claudia as Assembly's 13th editor.** Both built; both can be tested against same dossier. Decision pending.
-2. **Operator-side: D1/E1 paragraph refinement (Marley)** + **Whanganui D1+E1 parallel drafts** (I can draft) + **post-Athens reader gates (Marley Rastafari-orbit + Whanganui iwi-orbit)** — calendar date + name-search per reviewer.
-3. **Push to remote:** voice-thread commits not pushed; runtime-thread is committing on same branch; cherry-pick to main when this branch merges.
-4. **v4.1 post-Athens architectural cleanup** — three lessons captured this session (see "What landed §3" above).
+1. **Operator-side: D1/E1 paragraph refinement** (Marley + Whanganui parallel + Till's call on E1 publish-or-hold + post-Athens reader gates calendared)
+2. **Push to remotes** (operator's standing rule — both repos unpushed)
+3. **Runtime-thread feature/voice-deployment-context branch merge** to main when runtime-thread completes its work
+4. **v4.1 post-Athens architectural cleanup** (filed §31; non-blocking)
 
 ## Earlier in-flight items now resolved this session
 
-- ✅ Whanganui v2 restructure: SHIPPED + PROMOTED
-- ✅ Tim Leberecht: SHIPPED to current-tests
-- ✅ Beauty Shot supplement integration question: merged into all 6 Tim DR sections
+- ✅ Whanganui v2 architectural restructure: SHIPPED + PROMOTED + ATHENS-CLEAN (4-field gap-E closure)
+- ✅ Tim Leberecht 13th persona: SHIPPED as Assembly editor (replaces Claudia DRAFT)
+- ✅ Beauty Shot supplement integration: merged into all 6 Tim DR sections
+- ✅ Length-cap (voices/OPEN_ITEMS §27): card-side surgery shipped; runtime C38 voices-side closed
+- ✅ Assembly-fiction reframe: 10 voices voice_temporal_stance shifted
+- ✅ Branch hygiene: voice-thread commits cherry-picked to main
 
 ---
 
 ## What I would do next session in priority order
 
-1. **Whanganui v2 restructure** — same workflow as Marley v2: show 3 prompt edits per-step (operator approval each), apply, fire pipeline, walk-through, TEST, ship + promote. ~3 hr wall. Highest-priority pre-Athens because Whanganui is in the closing-show video and Te Pou Tupua's appointees could see it this week.
-2. **Tim Leberecht pipeline fire** when operator's 6 DR sessions land. ~25-30 min unattended + walk-through.
-3. **Operator-side: Whanganui D1 paragraph + Whanganui post-Athens iwi-orbit reader gate scheduling** (parallel to Marley's). I can draft.
-4. **Claudia Stages A-F** when operator unblocks (Beauty Shot dossier + voice_mode/byline).
-5. **v4.1 mediated-voice + sacred-grammar prompt-side fix** — empirically validated across Plato + Whanganui (v1+v2) + Scheherazade + Marley v2 + Tim. Architectural cleanup post-Athens.
+1. **Operator-side D1/E1 paragraph refinement** (operator-blocked; can draft Whanganui parallel when asked)
+2. **Push to remotes** when operator says go
+3. **v4.1 post-Athens architectural cleanup** (post-Athens; not pre-Athens-eligible)
+
+**Pre-Athens voice-build work is COMPLETE.** All 10 panel voices shipped + Tim editor shipped + assembly-fiction reframe shipped + length-cap closed + Whanganui v2 architecturally clean (gap-E closure with TEST verification).
 
 ---
 
 ## Operator decisions pending
 
-### Immediate / next session
+### Immediate
+1. **Push to remotes** (when ready)
+2. **Marley D1 + E1 paragraph refinement** to your team's voice (drafts in MARLEY_READINESS_PARAGRAPHS_2026-05-04.md)
+3. **Marley E1 publish-or-hold** call with Till
+4. **Whanganui D1+E1 parallel paragraphs** (analogous to Marley; I can draft when asked)
+5. **Post-Athens reader gates** calendared (Marley Rastafari-orbit + Whanganui iwi-orbit)
 
-1. **Approve Whanganui v2 plan** as drafted, OR modify any of the 3 prompt edits before execution
-2. **Whanganui v2 grammatical-voice choice (i) vs (ii)** — Te Pou Tupua first-person-plural OR third-person reportage. (i) preserves more first-person-energy + matches Te Pou Tupua self-reference; (ii) is grammatically most honest + matches Te Pou Tupua external statements. Operator pick at execution.
-3. **Tim DR sessions** — operator wall ~3-4 hr in claude.ai
-4. **Claudia: Beauty Shot dossier share + voice_mode + byline split decisions**
-5. **Marley D1 + E1 paragraph refinement** to your team's voice (drafts in MARLEY_READINESS_PARAGRAPHS_2026-05-04.md)
-6. **E1 publish-or-hold call** with Till on Marley Athens intro paragraph
-7. **Post-Athens reader gates**: Marley (Rastafari-orbit) + Whanganui (iwi-orbit). Calendar date + name-search.
-
-### Carry-forwards
-
-8. **Mediated-voice prompt-side fix as v4.1** — post-Athens architectural cleanup
-9. Plato thinking-on re-run experiment ($5, 30 min). See OPEN_ITEMS §5.
-10. 9480d3a revert hypothesis re-evaluation — connected to FU#56. See OPEN_ITEMS §5.
-11. WBBF program copy coordination (FU#49C remnant)
-12. FU#49G Greek-scholar calibration on Plato — Quarch/Tsinorema/Erinakis on the provotype-test
+### Carry-forwards (non-blocking)
+6. **v4.1 architectural cleanup** — gap E (per-field discipline incompleteness) + gap F (v1 baseline drift on uncovered fields) + smoke-test process change + Pass 1 chunked merge audit
+7. **Pass 1c fetch follow-ups** — Plato Perseus 6 short-fetches + Marley voiceofthesufferers SSL + Tim timleberecht.com SSL TLS errors (rebuild-only)
+8. **Plato thinking-on re-run experiment** ($5, 30 min) — connects to FU#56 + 9480d3a-revert hypothesis
+9. **FU#49G Greek-scholar calibration on Plato**
+10. **WBBF program copy** (FU#49C remnant)
 
 ---
 
@@ -211,13 +127,11 @@ The asymmetric-treatment-of-same-class-of-issue argument is decisive. Whanganui 
 
 1. `voices/ONBOARDING.md` (steady-state how-to + Pass 0a interrogation discipline + 3-posture taxonomy)
 2. `voices/HANDOFF.md` — this doc (latest)
-3. `voices/OPEN_ITEMS.md` — especially §1 per-voice state + §24 Marley v2 + §27 length-anchoring + §28 Whanganui v2 plan (when written) + §22 prior-day appropriation thread
-4. **For Whanganui v2 execution:** read the "Whanganui v2 plan" section in this doc (above) + voices/OPEN_ITEMS §22 (prior Whanganui ship context) + voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md (template for the parallel D1)
-5. **For Tim Leberecht pipeline fire:** check `editors/tim_leberecht/01_research/04_dr_dossier/` for operator's DR sections. If present, fire pipeline. Voice_config + Phase 0.1 + symlink already in place.
-6. **For Claudia work resumption:** `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` is the comprehensive pickup doc; pair with `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` (archived; v2 spec canonical at `docs/AI_Assembly_Editor_Pipeline.md`).
-7. **For Marley v2 readiness materials:** `voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (D1 + E1 drafts) + `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` (F1 video brief — needs review against Whanganui v2 if grammatical voice changes).
+3. `voices/OPEN_ITEMS.md` — especially §1 per-voice state + §28 Whanganui v2 + §29 Tim ship + §30 assembly-fiction reframe + §31 v4.1 gap list
+4. **For operator-side refinement work:** `voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (D1 + E1 drafts; refinement template for Whanganui parallel)
+5. **For v4.1 architectural cleanup planning:** `voices/OPEN_ITEMS.md §31`
 
-That's ~30 min to working knowledge for picking up voice-build work cold.
+That's ~25 min to working knowledge for picking up voice-build work cold.
 
 ---
 

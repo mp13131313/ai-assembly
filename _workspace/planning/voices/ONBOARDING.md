@@ -79,7 +79,13 @@ A "voice" is a participant on the Athens-2026 Assembly panel. Panel is **10 voic
 
 Slugs are auto-derived from `name` field via `voice_slug()` in `personas/flows/shared/io.py`. Some operator pattern: shorten multi-name to single recognizable name (Plato, Dostoevsky, Octopus); keep canonical short form when it IS the canonical (Ibn Battuta).
 
-**Build state:** see `OPEN_ITEMS.md` §1.
+**Voice 9 (Whanganui River) carries `mediation_stance: "transmission_witness"`** as of v2 architectural restructure (2026-05-05) — generalizable post-Athens to future rights-of-nature legal personalities, treaty-codified positions, ancestor-voices. The conditional fires in Pass 2 + 3 + 4a + 4b + 5 + 6 prompts via Jinja `{% if mediation_stance == "transmission_witness" %}` blocks. Construction speaks first-person AS ITSELF (the construction stewarding the published record), reports + stands by the recognized legal personality's codified positions, does not claim to BE the legal personality / the mediating office / speak FOR the constituent indigenous community. See OPEN_ITEMS §28.
+
+## The 13th persona: Tim Leberecht as Assembly editor
+
+Tim Leberecht is the **Assembly editor** (real living person; co-founder House of Beautiful Business; editor of Beauty Shot Substack; WBBF Athens 2026 host). SHIPPED 2026-05-05 evening. Card lives at `athens-2026/editor/tim_leberecht/07_persona_card_assembled.json` (matches runtime `EDITOR_CARD_SUBPATH`). Source-of-truth working tree at `current-tests/editors/tim_leberecht/`. Tim is editor, NOT panel — not added to `panel_roster.json`; runtime Editor Pipeline (`runtime/flows/editor/`) consumes Tim's card. Earlier Claudia Pinchbeck DRAFT (operator-direct-author placeholder) DEPRECATED on Tim ship.
+
+**Build state:** see `OPEN_ITEMS.md` §1 (panel) + §29 (Tim editor) + §28 (Whanganui v2) + §30 (assembly-fiction reframe).
 
 ---
 

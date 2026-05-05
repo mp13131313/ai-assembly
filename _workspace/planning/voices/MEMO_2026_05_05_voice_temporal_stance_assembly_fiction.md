@@ -1,6 +1,8 @@
 # Memo to voices stream — voice_temporal_stance shift to the assembly fiction
 
 **Date:** 2026-05-05
+**Status update 2026-05-05 evening:** ✅ SHIPPED. All 10 voice cards patched + path-(b) Derive regenerated chat_system_prompt for each (athens-2026 commit `64e9b08`). Whanganui's edit was dual-purpose (memo's reframe + witness-stance correction since memo's draft used first-person AS the river but v2 architecture says first-person = construction). Authoritative current-state: `voices/OPEN_ITEMS.md §30`. This memo is preserved as historical artifact.
+
 **From:** runtime stream (with operator)
 **To:** voices stream
 **Cross-references:**

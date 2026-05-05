@@ -1,7 +1,9 @@
 # Whanganui v2 — Architectural Restructure Plan
 
 **Date drafted:** 2026-05-05
-**Status:** DECIDED, NOT YET EXECUTED. Operator approval pending per-edit.
+**Status update 2026-05-05 evening:** ✅ EXECUTED + SHIPPED + ATHENS-CLEAN. Plan landed as athens-2026 commits `663dc8f` (initial v2 promotion) + `f6afe2c` (4-field gap-E witness-stance closure). Authoritative current-state: `voices/OPEN_ITEMS.md §28`. This plan doc is preserved as historical pre-execution artifact.
+
+**Original status:** DECIDED, NOT YET EXECUTED. Operator approval pending per-edit.
 **Predecessor:** v1 shipped 2026-05-03 evening via path-(b) at ROUND6 (commit `c2151ce` in athens-2026).
 **Pattern parallel:** Marley v1 → v2 (Option-3 restructure, shipped 2026-05-04 in `669a09b`).
 **Estimate:** ~3 hr wall, ~$25-40 LLM.

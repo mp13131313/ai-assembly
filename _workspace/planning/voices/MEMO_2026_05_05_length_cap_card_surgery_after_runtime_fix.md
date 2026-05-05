@@ -1,6 +1,8 @@
 # Memo to voices thread — length cap, card-side surgery after runtime fix
 
 **Date:** 2026-05-05
+**Status update 2026-05-05 evening:** ✅ SHIPPED + CLOSED. Three card-side surgical patches landed in athens-2026 (`9dae9b9`): Dostoevsky 350-750w (operator-bumped from initial 500w draft); Hannah Arendt 350-750w (operator-bumped); Octopus 350-500w prose-channel front-loaded with explicit "no length applies to JSON channel" clarification. Path-(b) Derive regenerated chat_system_prompt for all 3. Operator decision: NO max_tokens enforcement — clean card-side resolution preferred. Closes voices/OPEN_ITEMS §27 (CLOSED) + cross-refs runtime/OPEN_ITEMS C38. Authoritative current-state: `voices/OPEN_ITEMS.md §27`. This memo preserved as historical artifact.
+
 **From:** runtime thread
 **To:** voices thread
 **Cross-references:** `voices/OPEN_ITEMS.md §27` (length anchoring + dryrun audit, 2026-05-04 PM); `runtime/OPEN_ITEMS.md C38` (length-cap enforcement gap, now partially shipped)

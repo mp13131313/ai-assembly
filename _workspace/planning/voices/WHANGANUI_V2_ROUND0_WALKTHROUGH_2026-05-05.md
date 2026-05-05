@@ -1,7 +1,9 @@
 # Whanganui v2 — ROUND 0 walk-through plan
 
 **Date:** 2026-05-05
-**Status:** PIPELINE LANDED. 12 residuals at Pass 7a-FINAL gate. Per-fix approval pending from operator.
+**Status update 2026-05-05 evening:** ✅ ACTION COMPLETE. Operator chose architectural prompt extension over surgical patches. ROUND 1 fixes shipped via commit `5bde171` (Pass 3/5/6 conditional extension + Pass 2/4b grammar fix); 12 → 4 issues. Surgical reasoning_method.summary patch + 3 naming patches + path-(b) ship (`663dc8f`). Then post-ship full-card scan surfaced 4 additional gap-E fields (character + knowledge_boundary + world.ontological_furniture + formative_experience); patched + re-Derive + TEST passed (`f6afe2c`). Authoritative current-state: `voices/OPEN_ITEMS.md §28`. This walk-through doc is preserved as historical pre-execution artifact.
+
+**Original status:** PIPELINE LANDED. 12 residuals at Pass 7a-FINAL gate. Per-fix approval pending from operator.
 **Card:** `projects/current-tests/voices/whanganui_river/07_persona_card_assembled.json`
 **Validator output:** `projects/current-tests/voices/whanganui_river/05_validation/06_pass_7a_final.json`
 **Pre-existing predecessor:** `projects/athens-2026/voices/whanganui_river/` (v1, untouched until v2 ship)

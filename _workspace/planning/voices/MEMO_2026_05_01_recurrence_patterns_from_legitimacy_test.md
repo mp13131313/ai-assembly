@@ -3,6 +3,7 @@
 **To:** persona / voices thread
 **From:** runtime thread
 **Date:** 2026-05-01
+**Status update 2026-05-05 evening:** ✅ ACTIONED. All 4 findings resolved via voices/OPEN_ITEMS.md §16.5 (decisions table 2026-05-02): #1 Plato Socrates-self-referencing-death anachronism patched via Path A (athens-2026 `cf283bf`); #2 Plato Theuth/Thamus + #3 Battuta Tughluq beard-plucking + #4 Dostoevsky closing-on-suspended-judgment all routed to runtime continuity overlay (Path B, runtime/OPEN_ITEMS C20). Authoritative current-state: `voices/OPEN_ITEMS.md §16.5`. This memo preserved as historical artifact.
 **Re:** four voice-side findings worth voice-card consideration before Athens
 **Test artifacts:** `projects/current-tests/voice-pipeline-dryrun/runs/legitimacy_test1_night{1,2,3}/` + `legitimacy_test2_single_night/` + `legitimacy_test2_v2_divergent_titles/`
 **Test report:** `voice-pipeline-dryrun/legitimacy_test_report.md`

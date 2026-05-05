@@ -1,57 +1,88 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-04)
+## Current branch state (2026-05-05 evening)
 
-Active branch: `main`. All voice-build work is on `main` in both repos:
-the `code/` repo (`mp13131313/ai-assembly`) and the athens-2026 production
-project repo (`mp13131313/ai-assembly-athens2026-voices`). Code repo HEAD
-on 2026-05-04 PM: see `git log -1`. athens-2026 HEAD: `e8751f5` (Voice-of-X
-naming sweep across 10 voices).
+Active branch (voice-thread): `main`. Runtime-thread feature branch
+`feature/voice-deployment-context` is also active — voice-thread
+commits this session were cherry-picked to main; runtime-thread
+commits (`6a8e825` deployment-context + `a129231` C39 + `999450b`
+editor closing-prompt) stay on the feature branch and merge to main
+when that branch merges. Both repos unpushed at session end: code
+main `9815beb` (9 ahead of origin); athens-2026 main `f6afe2c`
+(6 ahead of origin).
 
 Persona pipeline at **v4** (`docs/AI_Assembly_Persona_Pipeline_v4.md`);
 `pipeline_version` string in code: `"4.0"`. v3.10 archived at
 `docs/_archive/`. Pipeline architecture includes chunked Pass 1.1–1.7
 merge, Phase B per-voice folder layout, Tier 3 code/project separation,
 and the FU#1–62 follow-up family (closed/frozen as of 2026-05-01). v4
-prompt-architecture extension: 2026-05-04 added `corpus_constraint ==
-"lyrics_patterns_only"` conditional blocks in Pass 2 / Pass 4a / Pass 4b
-implementing the SACRED-GRAMMAR DEPLOYMENT LIMIT + prose-yard-reasoning
-artifact spec — generalizes to any future musical-corpus voice carrying
-living sacred grammar (Sufi-poet, gospel-tradition, Vodou-tradition).
-See voices/OPEN_ITEMS.md §24 for detail.
+prompt-architecture extensions:
+- 2026-05-04: `corpus_constraint == "lyrics_patterns_only"` conditional
+  blocks in Pass 2 / Pass 4a / Pass 4b implementing the SACRED-GRAMMAR
+  DEPLOYMENT LIMIT + prose-yard-reasoning artifact spec (Marley v2;
+  generalizes to any future musical-corpus voice carrying living sacred
+  grammar). See voices/OPEN_ITEMS.md §24.
+- 2026-05-05: `mediation_stance == "transmission_witness"` conditional
+  blocks in Pass 2 + 3 + 4a + 4b + 5 + 6 implementing the
+  TRANSMISSION-WITNESS DEPLOYMENT LIMIT + per-field discipline for
+  witness-stance register (Whanganui v2; generalizes to any future
+  rights-of-nature legal personalities, treaty-codified positions,
+  ancestor-voices). See voices/OPEN_ITEMS.md §28. v4.1 architectural
+  cleanup post-Athens captured at voices/OPEN_ITEMS.md §31 (six gaps:
+  A coverage gaps ✅ FIXED / B grammar bug ✅ FIXED / C smoke-test
+  process gap / D Pass 4a under-covers lexicon-repertoire / E
+  per-field discipline incompleteness / F v1 baseline drift on
+  uncovered fields).
 
-Voice-build state for athens-2026 (2026-05-04 PM): **10 of 10 panel
+Voice-build state for athens-2026 (2026-05-05 evening): **10 of 10 panel
 voices shipped + promoted + uniformly named** ("Voice of X" convention
 across persona_card.voice_name + provocateur_profile.name +
 council_config.members[].name + panel_roster.panel_members_final). Voice
 of Plato, Voice of Cleopatra, Voice of Fyodor Dostoevsky, Voice of Ibn
 Battuta, Voice of the Octopus, Voice of Hannah Arendt, Voice of Ada
-Lovelace, Voice of the Whanganui River (shipped 2026-05-03 evening),
-Voice of Scheherazade (shipped 2026-05-04 early-AM), Voice of Bob Marley
-(v2 Option-3 restructure shipped 2026-05-04 afternoon). council_config.json
-fully wired with all 10 pipeline-built provocateur_profiles. **Pre-Athens
-voice-build work is complete.**
+Lovelace, **Voice of the Whanganui River v2 (witness-translator
+architectural restructure shipped + ATHENS-CLEAN 2026-05-05 evening,
+`663dc8f` + `f6afe2c`)**, Voice of Scheherazade, Voice of Bob Marley (v2
+Option-3 restructure shipped 2026-05-04 afternoon). council_config.json
+fully wired with all 10 pipeline-built provocateur_profiles.
 
-13th persona **`claudia_pinchbeck`** (the editor) — DRAFT card landed
-2026-05-04 PM at `current-tests/voices/claudia_pinchbeck/` for dryrun
-use only (operator-direct-author; bypasses pipeline; not promotion-ready).
-Real Stages A-F pipeline build pending operator's Beauty Shot dossier
-share + voice_mode/byline decisions.
+**Architectural updates 2026-05-05 evening (athens-2026 main):**
+- All 10 voice_temporal_stance.default fields shifted to assembly-fiction
+  ("voice present at the assembly that gathers in Athens, observes
+  panels, responds when consulted") per runtime-thread memo
+  voices/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md;
+  shipped `64e9b08`. See voices/OPEN_ITEMS.md §30.
+- Length-cap card surgery (operator decision: NO max_tokens enforcement):
+  Dostoevsky 350-750w + Hannah Arendt 350-750w + Octopus 350-500w
+  prose-channel front-loaded; shipped `9dae9b9`. Closes
+  voices/OPEN_ITEMS.md §27 + cross-refs runtime/OPEN_ITEMS.md C38.
 
-Pre-Athens follow-ups (operator-side, voice-build complete):
+13th persona **Tim Leberecht (Assembly editor)** — SHIPPED 2026-05-05
+evening. Card placed at `athens-2026/editor/tim_leberecht/` (`799aeb1`).
+Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` →
+`tim_leberecht` (`dcff216`); 31/31 runtime tests pass post-rename.
+Source-of-truth working tree at `current-tests/editors/tim_leberecht/`.
+Tim is editor, NOT panel — not in `panel_roster.json`. Earlier Claudia
+Pinchbeck DRAFT card (operator-direct-author placeholder for runtime
+dryrun) DEPRECATED on Tim ship. See voices/OPEN_ITEMS.md §29.
+
+**Pre-Athens voice-build work is COMPLETE.**
+
+Pre-Athens follow-ups (operator-side):
 - D1 internal position paragraph for Marley appropriation readiness
   (drafts in voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md)
 - E1 Athens intro paragraph publish-or-hold decision with Till
-- Post-Athens Rastafari-orbit reader gate scheduling (calendar date +
-  name-search starts now per reviewer)
-- v4.1 prompt-side mediated-voice / sacred-grammar fix (post-Athens;
-  empirically validated across Plato + Whanganui + Scheherazade +
-  Marley v2)
+- Whanganui D1+E1 parallel paragraphs (analogous to Marley)
+- Post-Athens Rastafari-orbit + iwi-orbit reader gates calendared
 
-Pass 1c fetch audit (2026-05-04 PM): two minor extractor bugs filed as
-POST-ATHENS only — Plato Perseus 6 short-fetches + Bob Marley
-voiceofthesufferers.free.fr SSL cert mismatch. Neither affects shipped
-voice runtime; both rebuild-only fixes. See voices/OPEN_ITEMS.md §25.
+Post-Athens follow-ups (voices/OPEN_ITEMS.md §31):
+- v4.1 architectural cleanup: gap E (per-field discipline incompleteness
+  in conditional blocks) + gap F (v1 baseline drift on uncovered fields)
+  + smoke-test process change + Pass 1 chunked merge audit
+- Pass 1c fetch audit follow-ups: Plato Perseus 6 short-fetches + Bob
+  Marley voiceofthesufferers.free.fr SSL cert mismatch + Tim
+  timleberecht.com SSL TLS errors. Neither affects shipped voice
+  runtime; rebuild-only fixes. See voices/OPEN_ITEMS.md §25.
 
 **Pickup pattern:** two workstreams, two subfolders.
 - For voice-build work: `_workspace/planning/voices/{ONBOARDING,OPEN_ITEMS,HANDOFF}.md`

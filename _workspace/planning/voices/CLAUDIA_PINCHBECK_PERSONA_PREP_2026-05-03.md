@@ -1,8 +1,9 @@
 # Claudia Pinchbeck — Persona Card Construction Prep
 
-**Date:** 2026-05-03 (original) | **Status update:** 2026-05-04 PM
-**Status:** Architectural work landed. **DRAFT card landed 2026-05-04 PM via operator-direct-author path** at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` (44 fields, ~45K bytes). Bypasses the persona pipeline; for **dryrun use only; NOT promotion-ready**. Authored from this prep doc + the v2 schema field set. See `voices/OPEN_ITEMS.md §26` for details. Real Stages A-F pipeline build remains pending — awaits Beauty Shot dossier + voice_mode/byline decisions.
-**Owner thread:** voices (persona-pipeline machinery produces the artifact); destination is runtime (Editor Pipeline consumes it).
+**Date:** 2026-05-03 (original) | **Status update:** 2026-05-05 evening
+**Status:** 🟫 **DEPRECATED.** Tim Leberecht has been chosen as the Assembly editor and SHIPPED to athens-2026 (operator decision 2026-05-05 evening; see `voices/OPEN_ITEMS.md §29`). Claudia Pinchbeck DRAFT card stays in `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` as historical artifact (44 fields, ~45K bytes, operator-direct-author placeholder for runtime dryrun). No real Stages A-F build scheduled (unless operator decides to use Claudia as alternative editor for specific dossier modes — currently no plan). This prep doc is preserved as historical reference for the architectural reasoning + 4-tradition voice triangulation that informed the construction-of-an-editor question. Tim's actual ship was via the standard persona pipeline (operator's 6 claude.ai DR sessions + Beauty Shot operational supplement merged). See `voices/OPEN_ITEMS.md §26` (DEPRECATED status note) + §29 (Tim ship).
+
+**Owner thread:** voices (was persona-pipeline machinery to produce the artifact; deprecated). Tim's runtime destination at `athens-2026/editor/tim_leberecht/` (Editor Pipeline consumes it).
 
 ---
 

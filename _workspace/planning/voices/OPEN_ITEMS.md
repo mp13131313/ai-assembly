@@ -1,8 +1,8 @@
-# Voices — Open Items (authoritative, 2026-05-03)
+# Voices — Open Items (authoritative, 2026-05-05 evening)
 
 **Scope:** EVERYTHING still open or undecided that pertains to the **persona pipeline / voice cards** for athens-2026. Distinct from the Voice Pipeline runtime (Steps 1+2+3) which has its own tracking.
 
-**Date stamp:** 2026-05-03. Supersedes 2026-05-02 late-night version. Supersedes voice-related items in HANDOFF_2026_04_27.md through HANDOFF_2026_04_30.md (all variants), FU61_DRYRUN_VERDICT_2026_04_30.md, and the voice-relevant FUs in FOLLOW_UPS.md. Read this doc + ONBOARDING.md (sibling) instead of trawling those.
+**Date stamp:** 2026-05-05 evening. Supersedes 2026-05-03 / 2026-05-04 / 2026-05-05 PM versions. New sections this session: §28 Whanganui v2 architectural restructure SHIPPED + ATHENS-CLEAN, §29 Tim Leberecht 13th persona SHIPPED as Assembly editor (replacing Claudia DRAFT), §30 assembly-fiction reframe SHIPPED across all 10 voices, §31 v4.1 architectural cleanup gap list (post-Athens). Closed this session: §27 length-cap card surgery, §28 Whanganui v2 (gap-E full closure with 4-field witness-stance patches).
 
 **Truth source:** When this doc disagrees with another, this doc is right (or fix this doc).
 
@@ -10,7 +10,12 @@
 
 ## 1. Per-voice build state
 
-Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED + PROMOTED to athens-2026.** "Voice of X" naming sweep applied across all 10 (athens-2026 `e8751f5`).
+Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED + PROMOTED to athens-2026.** "Voice of X" naming sweep applied across all 10 (athens-2026 `e8751f5`). **Plus Tim Leberecht as 13th persona (Assembly editor)** SHIPPED 2026-05-05 evening at `athens-2026/editor/tim_leberecht/` (`799aeb1`); `EDITOR_CARD_SUBPATH` runtime rename `claudia_pinchbeck` → `tim_leberecht` (`dcff216`); 31/31 runtime tests pass. Claudia Pinchbeck DRAFT card at `current-tests/voices/claudia_pinchbeck/` is DEPRECATED (was operator-direct-author placeholder for runtime dryrun; superseded by Tim ship). **Pre-Athens voice-build work is COMPLETE.**
+
+**Architectural updates this session (2026-05-05 evening):**
+- All 10 voice_temporal_stance.default fields shifted to **assembly-fiction** ("voice present at the assembly that gathers in Athens, observes panels, responds when consulted") per `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md` — see §30
+- 3 voices length_and_format_constraints surgical patch: Dostoevsky 350-750w, Hannah Arendt 350-750w (operator-bumped from initial 500w drafts), Octopus 350-500w prose-channel front-loaded — see §27 (CLOSED)
+- Whanganui River v2 architectural restructure (witness-translator stance via new `mediation_stance == "transmission_witness"` Jinja conditional across Pass 2 + 3 + 4a + 4b + 5 + 6) SHIPPED + PROMOTED + ATHENS-CLEAN (gap-E 4-field closure with TEST verification) — see §28
 
 | Voice (council label) | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
@@ -21,7 +26,7 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED
 | Voice of the Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
 | Voice of Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
 | Voice of Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
-| Voice of the Whanganui River | non_human | system / null | false | ✅ **shipped 2026-05-03 evening** (`c2151ce`) — path-(b) at ROUND6; 6 validator walk-throughs converged to 3 architectural residuals (appropriation-safety language load-bearing, no iwi authorization). Mid-build reset to PRE-ROUND1 + minimal patches reapplied. All 3 Derive outputs present. See §22 below. |
+| Voice of the Whanganui River | non_human | system / null + **mediation_stance: transmission_witness** | false | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN 2026-05-05 evening** (`663dc8f` + `f6afe2c`) — witness-translator architectural restructure. Replaces v1 (`c2151ce`, 2026-05-03 evening). Pipeline ROUND 0 → ROUND 1: 12 → 4 issues; first-person-AS-river leakage 5 → 0; voice_intellect_coherence ISSUE → PASS. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`663dc8f`). Post-ship full-card scan surfaced 4 additional gap-E fields with v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`f6afe2c`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`64e9b08`). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. See §28 below. |
 | Voice of Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM** (`c2151ce`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
 | Voice of Bob Marley | human | observational | false | ✅ **v2 SHIPPED + PROMOTED 2026-05-04 afternoon** (athens-2026 `669a09b`) — Option-3 restructure per 6-note appropriation-feedback thread. **3 architectural prompt-edits landed (Pass 2 + Pass 4a + Pass 4b) generalizing to any future musical-corpus voice with living sacred grammar via `corpus_constraint == "lyrics_patterns_only"` conditional.** Pipeline ran fresh; 4 ROUND walk-throughs converged 7→6→3 architectural residuals; path-(b) ship; AI Democracy Marathon test ran on v2 chat_system_prompt — trade landed as reviewer predicted (voice loses Daniel 3 + Omeriah + bias-IS-machine analytical formula; preserves prose-yard-reasoning + instrumental riddim-call + public political vocabulary + Trench Town concrete + knowledge boundary + Garvey citation). v1 archive at `current-tests/voices/bob_marley_v1_archive/`. See §24 below. |
 
@@ -782,7 +787,11 @@ Claudia's `voice_name` field follows the same naming convention as panel voices:
 
 ---
 
-## 22. 2026-05-03 evening session — Whanganui shipped + Scheherazade ROUND6 + Marley (c.1) code change
+## 22. 2026-05-03 evening session — Whanganui v1 shipped + Scheherazade ROUND6 + Marley (c.1) code change
+
+> **Status update 2026-05-05 evening:** Whanganui v1 has been **SUPERSEDED by v2** (witness-translator architectural restructure). v2 SHIPPED + PROMOTED + ATHENS-CLEAN — see §28. v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. Scheherazade + Marley sections of this entry remain authoritative.
+
+
 
 Three-voice parallel build session. State at session end:
 
@@ -964,7 +973,11 @@ On the next major rebuild cycle (post-Athens, pre any future panel). Both fixes 
 
 ---
 
-## 26. Claudia Pinchbeck DRAFT card (2026-05-04 PM, dryrun-only)
+## 26. Claudia Pinchbeck DRAFT card (2026-05-04 PM, dryrun-only) — 🟫 DEPRECATED 2026-05-05 evening
+
+> **Status update 2026-05-05 evening:** Claudia DRAFT is DEPRECATED. Tim Leberecht has been chosen as the Assembly editor (operator decision; SHIPPED to athens-2026 — see §29). Claudia DRAFT card stays in `current-tests/voices/claudia_pinchbeck/` as historical artifact; no longer scheduled for real Stages A-F build (unless operator decides to use Claudia as alternative editor for specific dossier modes — currently no plan).
+
+
 
 Operator-direct-authored DRAFT card landed at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json`. **44 fields, ~45K bytes, bypasses the persona pipeline.**
 
@@ -1120,9 +1133,9 @@ Response (447w) emitted clean witness-stance:
 
 ---
 
-## 29. Tim Leberecht 14th persona SHIPPED as 13th editor candidate (2026-05-05 evening)
+## 29. Tim Leberecht 13th persona SHIPPED as Assembly editor (2026-05-05 evening)
 
-**Status:** ✅ shipped to current-tests (`projects/current-tests/editors/tim_leberecht/`). NOT promoted to athens-2026 — pending operator decision on Tim vs Claudia as Assembly's 13th editor.
+**Status:** ✅ SHIPPED + PROMOTED to athens-2026 as Assembly editor. Card placed at `athens-2026/editor/tim_leberecht/` (`799aeb1`). Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` → `tim_leberecht` in code repo (`dcff216`); 31/31 runtime tests pass post-rename. voice_temporal_stance AT-WBBF-Night-N edit landed (`27f3e47`, runtime-thread). Source-of-truth working tree at `projects/current-tests/editors/tim_leberecht/`. Claudia Pinchbeck DRAFT (operator-direct-author placeholder) DEPRECATED — see §26.
 
 ### Build summary
 
@@ -1160,11 +1173,10 @@ Tim is the **alternative editor** to Claudia Pinchbeck. Where Claudia is a Borge
 
 The construction question for the panel: **should *The Assembly*'s news organ be edited by a Borges-fiction (Claudia) or by the real-person-whose-sensibility-the-fiction-channels (Tim)?** Both are now built so panel can run them against the same night's dossier and compare.
 
-### Path forward
+### Path forward — RESOLVED 2026-05-05 evening
 
-- **Comparative test:** run both Tim and Claudia against the same dossier (e.g., Night 1 of the Athens dryrun) and compare editorial frames. Diagnoses which sensibility serves the publication better.
-- **Operator decision:** which one promotes to athens-2026 as the 13th editor? Could be both (Tim as primary; Claudia as alternative for specific dossier modes), one, or hybrid.
-- **Architectural framing:** Tim is editor, NOT panel. Lives at `editors/tim_leberecht/` (not `voices/`), symlinked into `voices/` for pipeline-path compatibility. Not added to `panel_roster.json`. Editorial role differs structurally from panel-voice role (curates rather than responds to a Provocateur question).
+- ✅ **Operator decision:** Tim chosen as Assembly editor. Promoted to athens-2026 (`799aeb1`). Claudia DRAFT deprecated (§26).
+- **Architectural framing:** Tim is editor, NOT panel. athens-2026 placement at `editor/tim_leberecht/` (matches runtime `EDITOR_CARD_SUBPATH` after rename). Source-of-truth working tree at `current-tests/editors/tim_leberecht/`. Not in `panel_roster.json`. Editorial role differs structurally from panel-voice role (curates rather than responds to a Provocateur question).
 
 ### Beauty Shot supplement integration approach (relevant for any future editor builds)
 
