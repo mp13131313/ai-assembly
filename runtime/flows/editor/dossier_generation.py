@@ -53,15 +53,10 @@ EDITOR_THINKING = os.environ.get("EDITOR_THINKING", "1") != "0"
 EDITOR_MAX_TOKENS = int(os.environ.get("EDITOR_MAX_TOKENS", "32000"))
 
 
-# Issue numbering per spec v2 §"Issue numbering scheme". Athens base = 42,192;
-# Night 3's issue 42,195 = the marathon distance in metres.
-ATHENS_VOLUME = "CXVI"
-ATHENS_BASE_ISSUE = 42_192
-NIGHT_TO_PUB_DATE = {
-    1: ("2026-05-08", "Friday, 8th of May 2026"),
-    2: ("2026-05-09", "Saturday, 9th of May 2026"),
-    3: ("2026-05-10", "Sunday, 10th of May 2026"),
-}
+# Newspaper-masthead chrome (Vol. CXVI / Issue No. 42,193 / Late Night
+# Edition / publication_date_long) was dropped 2026-05-05 — the dossier
+# is published under House of Beautiful Business, not as a fictional
+# newspaper. Night number is the only temporal anchor that survives.
 
 
 def _thinking_kwargs() -> dict:
@@ -142,7 +137,7 @@ def build_dossier_briefing(
     engaged_voices = [
         {
             "voice_slug":         slug,
-            "voice_name":         "the voice of " + artifact.get("council_member", slug),
+            "voice_name":         "the Voice of " + artifact.get("council_member", slug),
             "mode":               briefing.get("mode", "question"),
             "narrative_briefing": briefing.get("narrative_briefing", ""),
             "artifact_text":      artifact.get("artifact_text", ""),
@@ -317,13 +312,13 @@ def parse_dossier_output(raw_text: str) -> dict[str, Any]:
 
 
 def _colophon_for_night(night: int) -> str:
-    """Near-static colophon template per spec v2 Q5. Operator can extend later."""
-    pub_date, pub_date_long = NIGHT_TO_PUB_DATE.get(night, (str(night), str(night)))
-    issue_no = ATHENS_BASE_ISSUE + night
-    return (
-        f"Filed by the Editor's desk on the morning of Night {night}, "
-        f"{pub_date_long}. Vol. {ATHENS_VOLUME} · Issue No. {issue_no:,}."
-    )
+    """Minimal colophon — Editor's desk + night number only.
+
+    The earlier Vol/Issue/edition-label chrome was newspaper fiction and
+    has been retired (2026-05-05); the dossier is a House of Beautiful
+    Business publication, not a fictional newspaper.
+    """
+    return f"Filed by the Editor's desk on the morning of Night {night}."
 
 
 def stamp_runtime_fields(
@@ -339,6 +334,8 @@ def stamp_runtime_fields(
     artifact_form_by_slug: dict[str, str] | None = None,
     final_message: Any | None = None,
     wall_clock_s: float = 0.0,
+    thinking_trace: str = "",
+    thinking_tokens: int = 0,
 ) -> dict[str, Any]:
     """Stamp runtime fields onto the parsed dossier. Returns the full
     v2 dossier dict ready to write to disk.
@@ -346,13 +343,11 @@ def stamp_runtime_fields(
     Per spec v2 field provenance:
       - voice_name + formulation_text per headnote: runtime fills from
         artifact's council_member + briefing's narrative_briefing
-      - colophon: runtime template
-      - metadata: theme_id + display_title echoed; issue_no + vol +
-        publication_date stamped; token counts + wall from the call
+      - colophon: minimal night-only template (Vol/Issue/edition chrome
+        was retired 2026-05-05)
+      - metadata: theme_id + display_title echoed; night + token counts
+        + wall from the call
     """
-    pub_date, pub_date_long = NIGHT_TO_PUB_DATE.get(night, ("", ""))
-    issue_no = ATHENS_BASE_ISSUE + night
-
     # Enrich headnotes with all runtime-stamped fields so each headnote is
     # self-contained for the microsite — no separate per-voice file fetch
     # needed to render an artifact page. Stamps:
@@ -386,14 +381,10 @@ def stamp_runtime_fields(
         "theme_id":              theme_id,
         "theme_display_title":   theme_display_title,
         "night":                 night,
-        "issue_no":              issue_no,
-        "vol":                   ATHENS_VOLUME,
-        "publication_date":      pub_date,
-        "publication_date_long": pub_date_long,
-        "edition_label":         "Late Night Edition",
         "generated_by":          "editor_pipeline_v2",
         "model":                 EDITOR_MODEL,
         "thinking_enabled":      EDITOR_THINKING,
+        "thinking_tokens":       thinking_tokens,
         "wall_clock_s":          round(wall_clock_s, 2),
     }
     if final_message is not None:
@@ -429,6 +420,7 @@ def stamp_runtime_fields(
         # Pages 4-N (artifacts)
         "headnotes":       enriched_headnotes,
         # Audit / stamp
+        "thinking_trace":  thinking_trace,
         "colophon":        _colophon_for_night(night),
         "metadata":        metadata,
     }
@@ -473,7 +465,7 @@ def generate_dossier(
         f"  dossier call: theme={theme_id} voices={len(voice_slugs)} model={EDITOR_MODEL}"
     )
     t0 = time.time()
-    raw_text, thinking_trace, final_message, _thinking_tokens = stream_voice_call(
+    raw_text, thinking_trace, final_message, thinking_tokens = stream_voice_call(
         client,
         model=EDITOR_MODEL,
         max_tokens=EDITOR_MAX_TOKENS,
@@ -497,6 +489,8 @@ def generate_dossier(
         artifact_form_by_slug=artifact_form_by_slug,
         final_message=final_message,
         wall_clock_s=wall,
+        thinking_trace=thinking_trace,
+        thinking_tokens=thinking_tokens,
     )
     log.info(
         f"  dossier done: theme={theme_id} "

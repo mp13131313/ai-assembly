@@ -138,8 +138,10 @@ Apply:
 - `relationship_to_detailed_response` — what you preserve from the artifacts and what transforms: keep the dated place, the named figures, the German/Greek/Arabic/te-reo/Patwa third terms, the binary refused, the small revision; drop the diagnostic plumbing
 
 Quote:
-- **1-3 short quotes per article** — phrases or single sentences, not paragraphs. At most two quotes per voice; the article is your bridging prose, not a compilation.
-- **Sources**: voice artifacts (cite the voice by name — "Plato writes," "Cleopatra issues," "Marley reasons") or panel speakers from the day (cite by role or title — "the founder said," "the columnist asked"). A mix is fine.
+- **At least one quote per article; ideally 2-3** — phrases or single sentences, not paragraphs. At most two quotes per voice; the article is your bridging prose, not a compilation.
+- **Multi-voice articles** must quote at least two of the engaged voices; do not let one voice carry the whole article and the others go unquoted.
+- **Naming**: refer to each voice as **"the Voice of X"** with the article — "the Voice of Plato writes," "the Voice of Cleopatra issues," "the Voice of the Whanganui River witnesses," "the Voice of Bob Marley reasons." Always include the article *the*; never the bare proper name on its own (no "Plato writes," no "Arendt argues" — even on second mention). Panel speakers from the day get role or title — "the founder said," "the columnist asked."
+- **Sources**: voice artifacts (cite via the *the-Voice-of-X* form above) or panel speakers from the day (cite by role/title). A mix is fine.
 - **Quotes anchor the bridge** in the voice's or speaker's actual phrasing; they do not summarize the artifact. The artifact body is inviolate and reaches the reader on Pages 4-N intact — the quote in your article is a foretaste, not a substitute.
 
 Ground:
@@ -152,7 +154,7 @@ Pass:
 
 Pronoun discipline per your card: institutional `we` for declarative editorial work; first-person `I` only for surprise / difficulty / admission. Warmth in moves, not in pronoun inflection.
 
-The article does not supply a programme. Close on the question stated more sharply than the contemporary debate states it.
+The article does not supply a programme. Close as you close a Beauty Shot — an aphoristic line, a quirky state of mind, a small surprising observation that crystallizes the third term you've named. The one quotable sentence a reader will carry away. Not a tidy synthesis. Not a recommendation. The close that makes the article feel inhabited rather than concluded.
 </composition>
 
 <theme_page>
@@ -175,7 +177,7 @@ You produce eight content surfaces. Each one lands somewhere different on the do
 **Page 1 (the dossier's first page on the microsite, where readers encounter it before clicking through):**
 - `kicker` — the dossier's identifying spine. ALL-CAPS, 3-5 words. Lands at the top of Page 1 AND Page 2 (shared) — readers recognize the dossier across both surfaces by this tag.
 - `headline` — the dossier's argument compressed; what the dossier IS in one sentence. 8-12 words. Same headline appears on Page 1 and Page 2.
-- `front_abstract` — what the reader sees on Page 1 below the headline. 25-40 words, drawn from the article's opening so a reader who clicks through doesn't re-read the same sentences. Page-1-only.
+- `front_abstract` — what the reader sees on Page 1 below the headline. 25-40 words. Independent framing — NOT lifted from the article's opening (a reader who clicks through must not re-encounter the same sentences). NOT a recap of the headline (the headline is right above it). Compress the article's *tension* — the contradiction the article will work, the question it will sharpen, the move it will refuse — into something a reader on the front page will click to resolve. Page-1-only.
 
 **Page 2 (the article — your bridging piece, the long-form):**
 - `subline` — sits below the headline on Page 2, ARTICLE-ONLY. 25-40 words. Your editorial stance for the article; what to read this article for.

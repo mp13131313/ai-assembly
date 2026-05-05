@@ -30,15 +30,16 @@
   <div class="empty">
     <p>No run directory for Night {{ night }} yet.</p>
   </div>
-{% elif not payload.editor_dir_present %}
-  <div class="empty">
-    <p>Editor pipeline hasn't run yet for Night {{ night }}.</p>
-    <p class="muted">
-      Will appear here once Voice Pipeline finishes and the orchestrator fires editor_flow.
-    </p>
-  </div>
 {% else %}
 
+{% if not payload.editor_dir_present %}
+<section class="voice-summary">
+  <p class="muted">
+    Editor pipeline hasn't run yet for Night {{ night }}.
+    Will appear once Voice Pipeline finishes and the orchestrator fires editor_flow.
+  </p>
+</section>
+{% else %}
 {% set c = payload.counts %}
 <section class="voice-summary">
   <p class="muted">
@@ -51,6 +52,7 @@
     {% endif %}
   </p>
 </section>
+{% endif %}
 
 {# --- Dossier failures (if any) ----------------------------------- #}
 {% if payload.dossier_failures %}
@@ -67,10 +69,12 @@
 {% endif %}
 
 {# --- Voice routing (Stage 1 output) ------------------------------ #}
-{% if payload.voices_routing %}
 <section class="grid-block">
   <h2>Voice routing</h2>
   <p class="muted">Stage 1 deterministic routing of voices to dossiers via <code>focus_decision</code> parser.</p>
+  {% if not payload.voices_routing %}
+    <p class="muted">No voice routing written yet.</p>
+  {% else %}
   <table class="overview">
     <thead>
       <tr><th>Voice</th><th>Primary theme</th><th>Dossier</th><th>Source</th></tr>
@@ -91,8 +95,8 @@
       {% endfor %}
     </tbody>
   </table>
+  {% endif %}
 </section>
-{% endif %}
 
 {% if payload.refusals %}
 <section class="grid-block">
@@ -124,6 +128,7 @@
           <th>Kicker</th>
           <th>Headline</th>
           <th>Body</th>
+          <th>Quotes</th>
           <th>Headnotes</th>
           <th>Wall</th>
           <th>File</th>
@@ -144,10 +149,15 @@
             <td class="muted">
               {{ d.n_body_paragraphs }} para · {{ d.n_words }} words
             </td>
+            <td class="muted">
+              {{ d.n_quotes }}
+              {% if d.n_quotes == 0 %} <span title="below quote-rule floor (1-3 per article)">⚠</span>{% endif %}
+            </td>
             <td class="muted">{{ d.n_headnotes }}</td>
             <td class="muted">
               {% if d.wall_clock_s %}{{ d.wall_clock_s }}s{% else %}—{% endif %}
               {% if d.input_tokens %}<br>{{ d.input_tokens }}/{{ d.output_tokens }} tok{% endif %}
+              {% if d.thinking_tokens %}<br>think {{ '{:,}'.format(d.thinking_tokens) }}{% endif %}
             </td>
             <td class="muted file-links">
               <a href="/admin/render?path=runs/{{ payload.run_id }}/05_editor/dossiers/{{ d.filename }}">{{ d.filename }}</a>

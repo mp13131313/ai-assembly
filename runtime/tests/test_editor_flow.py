@@ -111,14 +111,14 @@ def test_load_prior_editions_trims_to_articles(tmp_path):
         "headnotes": [{"voice_slug": "plato", "voice_name": "Plato"}],
         "front_abstract": "FA",
         "colophon": "...",
-        "metadata": {"issue_no": 42_193, "vol": "CXVI"},
+        "metadata": {"theme_id": "theme_001", "night": 1},
     }
     (pub_dir / "dossier_001.json").write_text(json.dumps(full_dossier))
 
     prior = publish.load_prior_editions(pr, night=2)
     assert len(prior) == 1
     assert prior[0]["night"] == 1
-    assert prior[0]["issue_no"] == 42_193
+    assert "issue_no" not in prior[0]
     assert len(prior[0]["dossiers"]) == 1
     trimmed = prior[0]["dossiers"][0]
     assert set(trimmed.keys()) == {"kicker", "headline", "body_paragraphs"}
@@ -219,7 +219,8 @@ framing_text: F-cleopatra
     dossier = json.loads(dossier_path.read_text())
     assert dossier["kicker"] == "TEST KICKER"
     assert len(dossier["headnotes"]) == 2
-    assert dossier["metadata"]["issue_no"] == 42_193
+    assert dossier["metadata"]["night"] == 1
+    assert dossier["metadata"]["theme_id"] == "theme_001"
 
     # Manifest counts
     assert manifest["counts"]["dossiers_succeeded"] == 1

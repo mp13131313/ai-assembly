@@ -54,11 +54,6 @@ if str(_REPO_ROOT) not in sys.path:
 from flows.shared.io import write_json_atomic  # noqa: E402
 
 
-# Per docs/AI_Assembly_Editor_Pipeline.md §"Issue numbering scheme" + memo §7.
-ATHENS_VOLUME = "CXVI"
-ATHENS_BASE_ISSUE = 42_192
-
-
 REFUSAL_MARKERS = (
     "refused",
     "silence",
@@ -98,6 +93,21 @@ SYNTHESIS_MARKERS = (
     "synthesis",
 )
 
+# Single-response markers — voices that received exactly one Step 1 output
+# may write "Single focus on this response" or "Focus on the single
+# response" rather than "Focus on Response 1", because there's no Response 2
+# to disambiguate against. When themes_covered has length 1, this resolves
+# without ambiguity.
+_SINGLE_RESPONSE_MARKERS = (
+    "single focus on this response",
+    "focus on the single response",
+    "single response",
+    "the single response",
+    "this response",
+    "the only response",
+    "the lone response",
+)
+
 
 def _parse_focus_to_primary_theme(
     focus_decision: str,
@@ -105,6 +115,10 @@ def _parse_focus_to_primary_theme(
     themes_covered: list[str],
     *,
     artifact_lineage: dict[str, Any] | None = None,
+    artifact_text: str = "",
+    synthesis_client: Any | None = None,
+    voice_slug: str = "",
+    logger: logging.Logger | None = None,
 ) -> tuple[str, str]:
     """Returns (primary_theme_id, source_label).
 
@@ -113,6 +127,14 @@ def _parse_focus_to_primary_theme(
     voice saw step1_outputs), use that directly. Falls back to the
     Response-N parser against briefings[] for older artifacts that
     pre-date the resolved field.
+
+    Synthesis path (Case 2): if focus_decision matches synthesis markers
+    AND the voice covered >=2 themes AND `synthesis_client` is provided,
+    delegate to synthesis_router.route_synthesis_voice — one Sonnet call
+    that reads the artifact + each candidate theme's title/abstract/
+    formulation and decides which theme this synthesis lands on. If the
+    client is None (unit-test path) or the call fails, falls back to
+    lowest-numbered.
     """
     fd = (focus_decision or "").strip()
     fd_lower = fd.lower()
@@ -134,12 +156,73 @@ def _parse_focus_to_primary_theme(
             if theme_id:
                 return theme_id, "Case A (legacy) — Response N parsed against briefings order"
 
-    if any(marker in fd_lower for marker in SYNTHESIS_MARKERS):
-        if themes_covered:
-            return (
-                sorted(themes_covered)[0],
-                "Case 2 — synthesis, lowest-numbered tiebreaker",
-            )
+    # Case B — single-response session: the voice received exactly one
+    # Step 1 output and wrote "Single focus on this response" /
+    # "Focus on the single response" / similar. Unambiguous because
+    # themes_covered has length 1.
+    if (
+        len(themes_covered) == 1
+        and any(marker in fd_lower for marker in _SINGLE_RESPONSE_MARKERS)
+    ):
+        return (
+            themes_covered[0],
+            "Case B — single-response session (only one theme covered)",
+        )
+
+    is_synthesis = any(marker in fd_lower for marker in SYNTHESIS_MARKERS)
+
+    if is_synthesis and themes_covered:
+        # Single theme covered → no choice to make; skip the LLM call.
+        if len(themes_covered) == 1:
+            return themes_covered[0], "Case 2 — synthesis, single theme covered"
+        if synthesis_client is not None:
+            from flows.editor.synthesis_router import route_synthesis_voice
+            candidates = []
+            for tid in themes_covered:
+                # Find the briefing entry for this theme to pull display
+                # title / abstract / formulation. briefings[] is the per-
+                # voice list of formulations; each entry's theme_id matches
+                # one candidate. Skip themes the voice never saw a briefing
+                # for (defensive — should not happen).
+                bf = next(
+                    (b for b in (briefings or []) if b.get("theme_id") == tid),
+                    None,
+                )
+                if not bf:
+                    continue
+                ftr = bf.get("full_theme_record", {}) or {}
+                candidates.append({
+                    "theme_id": tid,
+                    "theme_display_title": (
+                        bf.get("theme_display_title")
+                        or ftr.get("theme_display_title")
+                        or ""
+                    ),
+                    "theme_abstract_from_researcher": ftr.get(
+                        "theme_abstract_from_researcher", ""
+                    ),
+                    "narrative_briefing": bf.get("narrative_briefing", ""),
+                    "cluster_titles": [
+                        c.get("cluster_title", "")
+                        for c in (ftr.get("clusters") or [])
+                    ],
+                })
+            if candidates:
+                chosen, rationale = route_synthesis_voice(
+                    voice_slug=voice_slug,
+                    artifact_text=artifact_text,
+                    candidates=candidates,
+                    client=synthesis_client,
+                    logger=logger,
+                )
+                if chosen:
+                    return chosen, f"Case 2 — synthesis (LLM-routed): {rationale}"
+        # synthesis_client is None (unit-test path) OR the router fell
+        # through with no chosen — keep deterministic lowest-numbered.
+        return (
+            sorted(themes_covered)[0],
+            "Case 2 — synthesis, lowest-numbered tiebreaker (no router available)",
+        )
 
     if themes_covered:
         return (
@@ -227,6 +310,7 @@ def route_themes(
     night: int,
     *,
     dossier_lead_order: list[str] | None = None,
+    synthesis_client: Any | None = None,
     logger: logging.Logger | None = None,
 ) -> dict[str, Any]:
     """Build the theme_routing.json payload for one night.
@@ -235,6 +319,11 @@ def route_themes(
     order (lead dossier first). If None, the deterministic default is
     most-contributors-first with theme_id ascending tiebreak. Operator can
     override by hand-editing the resulting manifest before Stage 2 fires.
+
+    `synthesis_client`: optional Anthropic client used by the synthesis
+    router (Case 2). If None, synthesis voices fall back to the legacy
+    lowest-numbered tiebreaker — kept that way so unit tests don't need
+    a mocked client.
 
     Returns the routing manifest dict.
     """
@@ -274,6 +363,10 @@ def route_themes(
             briefings_by_voice.get(slug),
             themes_covered,
             artifact_lineage=lineage,
+            artifact_text=a.get("artifact_text", "") or "",
+            synthesis_client=synthesis_client,
+            voice_slug=slug,
+            logger=log,
         )
         if not primary_theme:
             log.warning(
@@ -343,9 +436,6 @@ def route_themes(
     return {
         "schema_version": "1.0",
         "night": night,
-        "athens_base_issue": ATHENS_BASE_ISSUE,
-        "issue_no": ATHENS_BASE_ISSUE + night,
-        "vol": ATHENS_VOLUME,
         "themes_to_dossiers": themes_to_dossiers,
         "voices_routing": voices_routing,
         "refusals": refusals,
@@ -360,12 +450,18 @@ def write_routing_manifest(
     night: int,
     *,
     dossier_lead_order: list[str] | None = None,
+    synthesis_client: Any | None = None,
     logger: logging.Logger | None = None,
 ) -> dict[str, Any]:
-    """Compute + write theme_routing.json. Returns the manifest dict."""
+    """Compute + write theme_routing.json. Returns the manifest dict.
+
+    `synthesis_client`: optional Anthropic client for synthesis routing.
+    Pass-through to route_themes; see its docstring.
+    """
     manifest = route_themes(
         run_dir, night,
         dossier_lead_order=dossier_lead_order,
+        synthesis_client=synthesis_client,
         logger=logger,
     )
     out_dir = run_dir / "05_editor"

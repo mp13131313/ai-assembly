@@ -103,6 +103,33 @@ def test_case_a_lowercase_response(run_dir):
     assert bat["primary_theme"] == "theme_002"
 
 
+def test_case_b_single_response_session(run_dir):
+    """Voice received only one Step 1 output → wrote 'Single focus on this
+    response' / 'Focus on the single response' instead of 'Response 1'.
+    Routes cleanly to the single themes_covered entry, no fall-through
+    warning."""
+    _write_step2_artifact(run_dir, "octopus",
+                          focus_decision="Single focus on this response.",
+                          themes_covered=["theme_004"])
+    _write_briefing(run_dir, "octopus", ["theme_004"])
+    manifest = routing.route_themes(run_dir, night=1)
+    o = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "octopus")
+    assert o["primary_theme"] == "theme_004"
+    assert "Case B" in o["primary_theme_source"]
+
+
+def test_case_b_single_response_alt_phrasing(run_dir):
+    """Alternative phrasing 'Focus on the single response' also matches."""
+    _write_step2_artifact(run_dir, "river",
+                          focus_decision="Focus on the single response.",
+                          themes_covered=["theme_003"])
+    _write_briefing(run_dir, "river", ["theme_003"])
+    manifest = routing.route_themes(run_dir, night=1)
+    r = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "river")
+    assert r["primary_theme"] == "theme_003"
+    assert "Case B" in r["primary_theme_source"]
+
+
 def test_case_a_response_n_out_of_range(run_dir):
     """If Response N exceeds briefing count, fall through to synthesis or
     Case 3. (Defensive — shouldn't happen if briefings are well-formed.)"""
@@ -119,16 +146,84 @@ def test_case_a_response_n_out_of_range(run_dir):
 # --- Case C: pure synthesis ----------------------------------------------
 
 
-def test_case_c_pure_synthesise(run_dir):
-    """Cleopatra's 'Synthesise.' → mechanical lowest-numbered tiebreaker."""
+def test_case_c_pure_synthesise_no_client_falls_back(run_dir):
+    """Cleopatra's 'Synthesise.' with no synthesis_client → fallback path
+    (lowest-numbered tiebreaker). Mirrors the unit-test path where the
+    LLM router isn't wired up."""
     _write_step2_artifact(run_dir, "cleopatra",
                           focus_decision="Synthesise.",
                           themes_covered=["theme_003", "theme_002", "theme_001"])
     _write_briefing(run_dir, "cleopatra", ["theme_003", "theme_002", "theme_001"])
     manifest = routing.route_themes(run_dir, night=1)
     cleo = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "cleopatra")
-    assert cleo["primary_theme"] == "theme_001"  # lowest-numbered
+    assert cleo["primary_theme"] == "theme_001"  # lowest-numbered fallback
     assert "Case 2" in cleo["primary_theme_source"]
+    assert "no router available" in cleo["primary_theme_source"].lower()
+
+
+def test_case_c_pure_synthesise_with_router_picks(run_dir):
+    """When a synthesis_client is supplied, the router decides instead of
+    lowest-numbered. Mock the Anthropic call to return theme_002."""
+    from unittest.mock import MagicMock
+
+    _write_step2_artifact(run_dir, "cleopatra",
+                          focus_decision="Synthesise across all three.",
+                          themes_covered=["theme_003", "theme_002", "theme_001"])
+    _write_briefing(run_dir, "cleopatra", ["theme_003", "theme_002", "theme_001"])
+
+    fake_block = MagicMock(type="text", text=(
+        "chosen_theme_id: theme_002\n"
+        "rationale: the artifact's central reframing turns on theme_002's seal/body distinction."
+    ))
+    fake_message = MagicMock(content=[fake_block])
+    fake_client = MagicMock()
+    fake_client.messages.create.return_value = fake_message
+
+    manifest = routing.route_themes(run_dir, night=1, synthesis_client=fake_client)
+    cleo = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "cleopatra")
+    assert cleo["primary_theme"] == "theme_002"
+    assert "LLM-routed" in cleo["primary_theme_source"]
+    assert "seal/body" in cleo["primary_theme_source"]
+    fake_client.messages.create.assert_called_once()
+
+
+def test_case_c_synthesise_router_unknown_theme_falls_back(run_dir):
+    """If router returns a theme_id not in candidates, fall back to
+    lowest-numbered with explanatory rationale."""
+    from unittest.mock import MagicMock
+
+    _write_step2_artifact(run_dir, "cleopatra",
+                          focus_decision="Synthesise.",
+                          themes_covered=["theme_003", "theme_002", "theme_001"])
+    _write_briefing(run_dir, "cleopatra", ["theme_003", "theme_002", "theme_001"])
+
+    fake_block = MagicMock(type="text", text="chosen_theme_id: theme_999\nrationale: bogus")
+    fake_message = MagicMock(content=[fake_block])
+    fake_client = MagicMock()
+    fake_client.messages.create.return_value = fake_message
+
+    manifest = routing.route_themes(run_dir, night=1, synthesis_client=fake_client)
+    cleo = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "cleopatra")
+    assert cleo["primary_theme"] == "theme_001"  # lowest-numbered fallback
+    assert "unknown theme_id" in cleo["primary_theme_source"]
+
+
+def test_case_c_synthesise_single_theme_skips_llm(run_dir):
+    """Synthesis voice covering only ONE theme — no choice to make, skip
+    the LLM call entirely. The synthesis_client should NOT be invoked."""
+    from unittest.mock import MagicMock
+
+    _write_step2_artifact(run_dir, "cleopatra",
+                          focus_decision="Synthesise.",
+                          themes_covered=["theme_005"])
+    _write_briefing(run_dir, "cleopatra", ["theme_005"])
+
+    fake_client = MagicMock()
+    manifest = routing.route_themes(run_dir, night=1, synthesis_client=fake_client)
+    cleo = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "cleopatra")
+    assert cleo["primary_theme"] == "theme_005"
+    assert "single theme" in cleo["primary_theme_source"].lower()
+    fake_client.messages.create.assert_not_called()
 
 
 # --- Refusal -------------------------------------------------------------
@@ -174,22 +269,6 @@ def test_multi_voice_routing_groups(run_dir):
     assert manifest["themes_to_dossiers"][0]["n_engaged_voices"] == 2
     assert manifest["themes_to_dossiers"][1]["theme_id"] == "theme_b"
     assert manifest["themes_to_dossiers"][1]["n_engaged_voices"] == 1
-
-
-# --- Issue numbering -----------------------------------------------------
-
-
-def test_issue_no_per_night(run_dir):
-    _write_step2_artifact(run_dir, "v1", focus_decision="Focus on Response 1",
-                          themes_covered=["theme_a"])
-    _write_briefing(run_dir, "v1", ["theme_a"])
-    m1 = routing.route_themes(run_dir, night=1)
-    m2 = routing.route_themes(run_dir, night=2)
-    m3 = routing.route_themes(run_dir, night=3)
-    assert m1["issue_no"] == 42_193
-    assert m2["issue_no"] == 42_194
-    assert m3["issue_no"] == 42_195
-    assert m3["vol"] == "CXVI"
 
 
 # --- write_routing_manifest writes to disk -------------------------------

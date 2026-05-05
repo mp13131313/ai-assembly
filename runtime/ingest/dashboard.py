@@ -1293,12 +1293,16 @@ def collect_editor_detail(night: int) -> dict[str, Any]:
     dossier_files = sorted((editor_dir / "dossiers").glob("dossier_*.json")) \
         if (editor_dir / "dossiers").exists() else []
 
+    import re as _re
+    _quote_re = _re.compile(r'(["“][^"”\n]{4,300}?["”])')
     dossiers = []
     for path in dossier_files:
         d = _read_json_or_none(path) or {}
         meta = d.get("metadata", {})
         body_paragraphs = d.get("body_paragraphs", []) or []
         word_count = sum(len((p or "").split()) for p in body_paragraphs if p != "* * *")
+        body_text = "\n\n".join(p for p in body_paragraphs if p != "* * *")
+        n_quotes = len(_quote_re.findall(body_text))
         dossiers.append({
             "dossier_no":         _extract_dossier_no(path),
             "theme_id":           meta.get("theme_id"),
@@ -1307,11 +1311,13 @@ def collect_editor_detail(night: int) -> dict[str, Any]:
             "headline":           d.get("headline", ""),
             "n_body_paragraphs":  len(body_paragraphs),
             "n_words":            word_count,
+            "n_quotes":           n_quotes,
             "n_headnotes":        len(d.get("headnotes", []) or []),
             "filename":           path.name,
             "mtime":              _file_mtime_iso(path),
             "input_tokens":       meta.get("input_tokens"),
             "output_tokens":      meta.get("output_tokens"),
+            "thinking_tokens":    meta.get("thinking_tokens"),
             "wall_clock_s":       meta.get("wall_clock_s"),
         })
     dossiers.sort(key=lambda x: (x["dossier_no"] or 0))

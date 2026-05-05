@@ -59,8 +59,6 @@ def _make_editor_tree(run_dir: Path) -> None:
     _write(ed / "theme_routing.json", {
         "schema_version": "2.0",
         "night": 1,
-        "issue_no": 42193,
-        "vol": "CXVI",
         "themes_to_dossiers": [
             {"theme_id": "theme_001", "dossier_no": 1, "theme_title": "T1", "n_engaged_voices": 2},
             {"theme_id": "theme_002", "dossier_no": 2, "theme_title": "T2", "n_engaged_voices": 2},
@@ -87,7 +85,7 @@ def _make_editor_tree(run_dir: Path) -> None:
         "metadata": {
             "theme_id": "theme_001",
             "theme_display_title": "On The Question",
-            "issue_no": 42193,
+            "night": 1,
             "input_tokens": 18000,
             "output_tokens": 3500,
             "wall_clock_s": 75.2,

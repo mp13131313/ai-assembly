@@ -3,18 +3,17 @@
 
 {% set md = data.metadata or {} %}
 
-{# === Masthead chrome (per-dossier metadata; site renders this in production) === #}
+{# === Masthead — theme + night only. Vol/Issue/edition chrome was
+     newspaper fiction; dropped 2026-05-05. === #}
 <section class="grid-block dossier-masthead muted">
   <p>
     <strong>{{ md.theme_display_title or md.theme_id or 'Theme' }}</strong>
     · Night {{ md.night }}
-    · Vol. {{ md.vol }} · Issue No. {{ '{:,}'.format(md.issue_no) if md.issue_no else '?' }}
-    · {{ md.publication_date_long or md.publication_date or '' }}
-    · {{ md.edition_label or '' }}
   </p>
   <p>
     <small>schema {{ data.schema_version or '?' }} · {{ md.model or '' }}
     {% if md.input_tokens %} · in {{ '{:,}'.format(md.input_tokens) }} / out {{ '{:,}'.format(md.output_tokens) }} tokens
+    {% if md.thinking_tokens %} · think {{ '{:,}'.format(md.thinking_tokens) }}{% endif %}
     · cache w {{ '{:,}'.format(md.cache_creation_input_tokens or 0) }} / r {{ '{:,}'.format(md.cache_read_input_tokens or 0) }}
     · wall {{ '%.1fs' % (md.wall_clock_s or 0) }}{% endif %}</small>
   </p>
@@ -35,6 +34,41 @@
     </details>
   {% endif %}
 
+  {# Quote audit — pulls every quoted passage from body, attributes each
+     to one of the engaged voices via context window. At-a-glance check
+     against the editor's quote rule (1-3 per article; multi-voice
+     should quote ≥2 voices; max 2 per voice). #}
+  {% set _quotes = data.body_paragraphs | pulled_quotes(data.headnotes or []) %}
+  {% set _voice_quotes = _quotes | rejectattr('voice', 'equalto', '') | list %}
+  {% set _voices_quoted = _voice_quotes | map(attribute='voice') | unique | list %}
+  <details class="dossier-quotes-pulled" {% if _voice_quotes | length == 0 %}open{% endif %}>
+    <summary class="muted">
+      <small>quotes in article: <strong>{{ _voice_quotes | length }}</strong> voice
+        {% if _quotes | length - _voice_quotes | length > 0 %}
+          + {{ _quotes | length - _voice_quotes | length }} panel/title{% endif %}
+        {% if _voice_quotes | length == 0 %}<span title="below quote-rule floor">⚠ below floor (1-3 voice quotes per article)</span>
+        {% elif _voice_quotes | length > 3 %}<span title="above quote-rule ceiling">⚠ above ceiling (max 3 voice quotes per article)</span>{% endif %}
+        {% set _n_engaged = (data.headnotes or []) | length %}
+        {% if _n_engaged >= 2 %} · voices quoted: <strong>{{ _voices_quoted | length }}</strong>/{{ _n_engaged }}
+          {% if _voices_quoted | length < 2 %}<span title="multi-voice article should quote ≥2 voices">⚠ multi-voice should quote ≥2</span>{% endif %}
+        {% endif %}
+      </small>
+    </summary>
+    {% if _quotes %}
+    <ul class="dossier-quotes-list">
+      {% for q in _quotes %}<li>&ldquo;{{ q.text }}&rdquo;
+        {% if q.voice %}<span class="muted"> — {{ q.voice }}</span>
+        {% else %}<span class="muted"> — <em>panel speaker / session title</em></span>{% endif %}
+      </li>{% endfor %}
+    </ul>
+    <p class="muted"><small>
+      Quotes attributed to <em>panel speaker / session title</em> are valid per the editor's prompt
+      (panel speakers are cited by role/title in prose; session titles appear in quote-marks as
+      typeset titles). Only voice quotes count toward the quote-rule floor + multi-voice check.
+    </small></p>
+    {% endif %}
+  </details>
+
   {# Article body — body_paragraphs[]; * * * is asterism break #}
   <div class="dossier-body">
     {% for p in data.body_paragraphs or [] %}
@@ -46,8 +80,21 @@
     {% endfor %}
   </div>
 
-  <p class="muted dossier-byline-foot"><small>By Claudia Pinchbeck · — C.P.</small></p>
+  <p class="muted dossier-byline-foot"><small>From the Editor's desk</small></p>
 </section>
+
+{% if data.thinking_trace %}
+<section class="grid-block dossier-thinking-trace">
+  <details>
+    <summary class="muted">
+      <small>thinking trace ({{ data.thinking_trace | length }} chars
+        {% if md.thinking_tokens %}· {{ '{:,}'.format(md.thinking_tokens) }} billed thinking tokens{% endif %})
+      </small>
+    </summary>
+    <pre class="prose-block">{{ data.thinking_trace }}</pre>
+  </details>
+</section>
+{% endif %}
 
 {# === Page 3 — Theme page (Claudia's paper-voice theme intro) === #}
 {% if data.theme_title_for_dossier or data.theme_abstract_for_dossier %}

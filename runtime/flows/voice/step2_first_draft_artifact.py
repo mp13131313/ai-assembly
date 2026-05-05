@@ -197,31 +197,117 @@ def _derive_themes_covered(
 
 _RESPONSE_N_RE = re.compile(r"response\s*(\d+)", re.IGNORECASE)
 
+_SYNTHESIS_MARKERS = (
+    "synthesise",
+    "synthesize",
+    "weave across all",
+    "weave",
+    "across all",
+    "synthesis",
+)
+
 
 def _resolve_primary_theme_id(
     focus_decision: str,
     step1_outputs: list[dict[str, Any]],
-) -> str | None:
+    *,
+    voice_slug: str = "",
+    run_dir: Path | None = None,
+    artifact_text: str = "",
+    client: Any = None,
+    logger: Any = None,
+) -> tuple[str | None, str]:
     """Resolve `focus_decision` to a primary theme_id at write time.
 
-    Step 2 prompted the voice with `Detailed response 1 of N`, `2 of N`,
-    etc. in the order it received `step1_outputs`. Each step1_output
-    already carries its own theme_id in `lineage.theme_id` — so when the
-    voice writes `Focus on Response N`, the answer is just
-    `step1_outputs[N-1].lineage.theme_id`.
+    Returns (theme_id_or_None, source_label).
 
-    Returns None for synthesis-style focus_decisions ("woven across all
-    three", "synthesise", etc.) — those are intentionally multi-theme.
+    Resolution order:
+
+    1. **Single-response session**: voice received exactly one Step 1
+       output. Whatever phrasing the voice used ("Focus on Response 1",
+       "Single focus on this response", "Focus on the single response"),
+       the answer is unambiguous — that one theme.
+
+    2. **Response N**: voice was prompted with `Detailed response 1 of N`,
+       `2 of N`, etc. in the order it received `step1_outputs`. Each
+       step1_output carries its own theme_id; "Focus on Response N"
+       resolves to `step1_outputs[N-1].lineage.theme_id`.
+
+    3. **Synthesis** (focus_decision contains a synthesis marker AND >1
+       step1 output): hand off to `synthesis_router.route_synthesis_voice`
+       — one Sonnet call that reads the artifact + each candidate theme's
+       title/abstract/briefing and picks. Requires `client` + `run_dir`
+       + `voice_slug` to load the briefing and run the call. If any of
+       those are missing (e.g. unit-test path), returns None and the
+       caller falls back. (Editor Stage 1 will then pick it up via its
+       own synthesis-router call as a safety-net.)
+
+    Returns (None, "unresolved") only when none of the above apply.
     """
-    if not focus_decision:
-        return None
-    m = _RESPONSE_N_RE.search(focus_decision.lower())
-    if not m:
-        return None
-    n = int(m.group(1))
-    if 1 <= n <= len(step1_outputs):
-        return step1_outputs[n - 1]["lineage"]["theme_id"]
-    return None
+    if not focus_decision and not step1_outputs:
+        return None, "unresolved"
+
+    # 1. Single-response — unambiguous regardless of phrasing.
+    if len(step1_outputs) == 1:
+        return step1_outputs[0]["lineage"]["theme_id"], "single-response session"
+
+    # 2. Response N parsed against the order the voice saw.
+    fd_lower = focus_decision.lower() if focus_decision else ""
+    m = _RESPONSE_N_RE.search(fd_lower)
+    if m:
+        n = int(m.group(1))
+        if 1 <= n <= len(step1_outputs):
+            return step1_outputs[n - 1]["lineage"]["theme_id"], "Response N"
+
+    # 3. Synthesis — call the LLM router if we have the wiring.
+    is_synthesis = any(marker in fd_lower for marker in _SYNTHESIS_MARKERS)
+    if is_synthesis and len(step1_outputs) > 1 and client is not None and run_dir is not None and voice_slug:
+        try:
+            from flows.editor.synthesis_router import route_synthesis_voice
+            briefing_path = run_dir / "03_provocateur" / "briefings" / f"{voice_slug}.json"
+            with briefing_path.open(encoding="utf-8") as f:
+                briefing = json.load(f)
+            formulations_by_theme = {
+                f.get("theme_id"): f for f in briefing.get("formulations", [])
+            }
+            candidates = []
+            for o in step1_outputs:
+                tid = o["lineage"]["theme_id"]
+                f = formulations_by_theme.get(tid) or {}
+                ftr = f.get("full_theme_record", {}) or {}
+                candidates.append({
+                    "theme_id": tid,
+                    "theme_display_title": (
+                        f.get("theme_display_title")
+                        or o.get("theme_display_title")
+                        or ""
+                    ),
+                    "theme_abstract_from_researcher": ftr.get(
+                        "theme_abstract_from_researcher", ""
+                    ),
+                    "narrative_briefing": f.get("narrative_briefing", ""),
+                    "cluster_titles": [
+                        c.get("cluster_title", "")
+                        for c in (ftr.get("clusters") or [])
+                    ],
+                })
+            chosen, rationale = route_synthesis_voice(
+                voice_slug=voice_slug,
+                artifact_text=artifact_text,
+                candidates=candidates,
+                client=client,
+                logger=logger,
+            )
+            if chosen:
+                return chosen, f"synthesis-routed: {rationale}"
+        except Exception as exc:
+            if logger is not None:
+                logger.warning(
+                    f"step2 synthesis-router failed for {voice_slug}: "
+                    f"{type(exc).__name__}: {exc}; leaving primary_theme_id null"
+                )
+
+    return None, "unresolved (editor will route)"
 
 
 def run_step2_for_voice(
@@ -283,12 +369,21 @@ def run_step2_for_voice(
         parsed["focus_decision"], step1_outputs
     )
 
-    # Resolve voice's "Focus on Response N" → primary_theme_id at write
-    # time. step1_outputs[N-1] already carries the canonical theme_id in
-    # its lineage — no need for an external map. Editor reads
-    # lineage.primary_theme_id directly. None for synthesis-style focus.
-    primary_theme_id = _resolve_primary_theme_id(
-        parsed["focus_decision"], step1_outputs
+    # Resolve focus_decision → primary_theme_id at write time. Three
+    # paths: (a) single-response sessions resolve to that one theme;
+    # (b) "Focus on Response N" resolves via step1_outputs order;
+    # (c) synthesis cases call synthesis_router.route_synthesis_voice
+    # with the artifact + candidate themes and bake in the chosen theme.
+    # Editor reads lineage.primary_theme_id directly. None only on
+    # genuine ambiguity / router failure.
+    primary_theme_id, primary_theme_source = _resolve_primary_theme_id(
+        parsed["focus_decision"],
+        step1_outputs,
+        voice_slug=voice_slug,
+        run_dir=run_dir,
+        artifact_text=parsed["artifact_text"],
+        client=client,
+        logger=logger,
     )
 
     # Build lineage block (consumed Step 1 paths + union of grounding ids).
@@ -319,10 +414,11 @@ def run_step2_for_voice(
             "themes_covered": themes_covered,
             "formulation_ids_engaged": formulation_ids,
             # Authoritative answer to "which theme did the voice focus on?"
-            # Resolved at write time from focus_decision against the same
-            # step1_outputs the voice saw. Editor reads this directly — no
-            # order inference needed. null for synthesis-style focus.
+            # Resolved at write time. Editor reads this directly — no
+            # order inference needed. null only when synthesis routing
+            # itself failed (the editor has its own router as safety net).
             "primary_theme_id": primary_theme_id,
+            "primary_theme_id_source": primary_theme_source,
             "all_grounding_extraction_ids": sorted(all_grounding),
             "all_session_ids": sorted(all_sessions),
         },

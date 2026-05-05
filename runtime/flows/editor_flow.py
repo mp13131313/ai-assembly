@@ -102,6 +102,12 @@ def run_editor_pipeline(
 
     assert_run_dir_night_matches(run_dir, night)
 
+    # One Anthropic client across the whole flow — Stage 1 synthesis-router
+    # call (if any) and Stage 2 dossier calls share it. SDK is thread-safe
+    # with internal pooling.
+    from anthropic import Anthropic
+    client = Anthropic()
+
     # ---- Stage 1: routing ------------------------------------------------
     if skip_routing:
         routing_path = run_dir / "05_editor" / "theme_routing.json"
@@ -115,7 +121,9 @@ def run_editor_pipeline(
         logger.info(f"Stage 1 SKIPPED — using existing {routing_path}")
     else:
         logger.info("Stage 1: theme routing")
-        routing = write_routing_manifest(run_dir, night, logger=logger)
+        routing = write_routing_manifest(
+            run_dir, night, synthesis_client=client, logger=logger,
+        )
         logger.info(
             f"  routed {len(routing['voices_routing'])} voices into "
             f"{len(routing['themes_to_dossiers'])} dossier(s); "
@@ -145,9 +153,7 @@ def run_editor_pipeline(
             )
         logger.info(f"  --single-dossier filter: only {single_dossier}")
 
-    # One Anthropic client per call (thread-safe; Anthropic SDK has internal pooling).
-    from anthropic import Anthropic
-    client = Anthropic()
+    # `client` was instantiated above for Stage 1's synthesis router; reuse.
 
     dossier_results: dict[str, dict[str, Any]] = {}
     dossier_failures: list[dict[str, Any]] = []

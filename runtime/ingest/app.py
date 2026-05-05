@@ -64,6 +64,96 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["track_css"] = track_css_class
 templates.env.globals["static_version"] = STATIC_VERSION
 
+# regex_findall: extract every match of `pattern` from a string.
+# Used in admin_render_dossier.html to pull quoted passages out of
+# body paragraphs for the at-a-glance "Quotes in article" audit.
+import re as _re
+templates.env.filters["regex_findall"] = lambda s, pattern: _re.findall(pattern, s or "")
+
+
+# pulled_quotes: scan body_paragraphs for quoted passages, attribute each
+# to one of the engaged voices by looking at the ~120-char window before
+# the quote for any voice's name. Returns list of dicts:
+#   {"text": "...", "voice": "the Voice of Plato" | "" }.
+# Used in admin_render_dossier.html for the at-a-glance quote audit.
+_QUOTE_RE = _re.compile(r'(?:["“])([^"”\n]{4,300}?)(?:["”])')
+
+def _pulled_quotes(body_paragraphs, headnotes):
+    """Extract quoted passages + attribute each to an engaged voice.
+
+    Anchors on `voice_slug` (e.g. "cleopatra", "ibn_battuta",
+    "whanganui_river") rather than `voice_name` because voice_name in
+    the dossier carries the voice's full ceremonial self-introduction
+    (e.g. "Voice of I am Cleopatra Thea Philopator, daughter of
+    Ptolemy…") while Tim's body prose uses the simple form
+    ("the Voice of Cleopatra"). Builds slug-token needles and picks
+    the rightmost match within the 200-char window before the quote.
+    """
+    voices = []
+    for h in (headnotes or []):
+        slug = (h.get("voice_slug") or "").lower()
+        if not slug:
+            continue
+        tokens = [t for t in slug.replace("_", " ").split() if t]
+        title = " ".join(t.capitalize() for t in tokens)
+        if slug == "whanganui_river":
+            display = "the Voice of the Whanganui River"
+        elif slug == "octopus":
+            display = "the Voice of the Octopus"
+        else:
+            display = f"the Voice of {title}"
+        needles = []
+        if len(tokens) > 1:
+            needles.append(" ".join(tokens))
+            needles.append(tokens[-1])
+            needles.append(tokens[0])
+        else:
+            needles.append(tokens[0])
+        needles = [n for n in needles if len(n) >= 4]
+        voices.append({"display": display, "needles": needles})
+
+    # Paragraph-by-paragraph attribution: a quote is attributed to the
+    # voice most recently named in the same paragraph; if no voice is
+    # named there, fall back to the previous paragraph's attribution
+    # (continuity within a section).
+    out = []
+    last_voice = ""
+    for p in (body_paragraphs or []):
+        if p == "* * *":
+            last_voice = ""  # break attribution chain at section breaks
+            continue
+        p_lower = p.lower()
+        # Find the rightmost voice mention in this paragraph.
+        para_voice = ""
+        best_pos = -1
+        for v in voices:
+            for needle in v["needles"]:
+                pos = p_lower.rfind(needle)
+                if pos > best_pos:
+                    best_pos = pos
+                    para_voice = v["display"]
+        # Each quote in this paragraph: prefer the voice mentioned BEFORE
+        # the quote in this paragraph; else the paragraph's named voice;
+        # else the previous paragraph's voice.
+        for m in _QUOTE_RE.finditer(p):
+            before = p_lower[: m.start()]
+            quote_voice = ""
+            best_local = -1
+            for v in voices:
+                for needle in v["needles"]:
+                    pos = before.rfind(needle)
+                    if pos > best_local:
+                        best_local = pos
+                        quote_voice = v["display"]
+            if not quote_voice:
+                quote_voice = para_voice or last_voice
+            out.append({"text": m.group(1), "voice": quote_voice})
+        if para_voice:
+            last_voice = para_voice
+    return out
+
+templates.env.filters["pulled_quotes"] = _pulled_quotes
+
 _STATE_DISPLAY = {
     "received":               "received",
     "normalizing":            "normalizing",

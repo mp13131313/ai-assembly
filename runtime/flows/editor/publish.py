@@ -65,7 +65,7 @@ def load_prior_editions(
     """Read prior nights' published dossiers, trim to just the articles
     per spec v2 Q2 (kicker + headline + body_paragraphs only).
 
-    Returns a list of {night, issue_no, dossiers: [{kicker, headline,
+    Returns a list of {night, dossiers: [{kicker, headline,
     body_paragraphs}]} entries — one per prior night, in chronological order.
 
     Empty list on Night 1 (no prior nights).
@@ -92,17 +92,8 @@ def load_prior_editions(
                 "body_paragraphs": full.get("body_paragraphs", []),
             })
         if dossiers_trimmed:
-            # Use the first dossier's metadata.issue_no if present; else derive.
-            issue_no = None
-            try:
-                first_path = next(prior_dir.glob("dossier_*.json"))
-                with first_path.open(encoding="utf-8") as f:
-                    issue_no = json.load(f).get("metadata", {}).get("issue_no")
-            except (StopIteration, OSError, json.JSONDecodeError):
-                pass
             out.append({
-                "night":     prior_night,
-                "issue_no":  issue_no,
-                "dossiers":  dossiers_trimmed,
+                "night":    prior_night,
+                "dossiers": dossiers_trimmed,
             })
     return out

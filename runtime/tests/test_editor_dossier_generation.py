@@ -97,7 +97,7 @@ class TestBuildDossierBriefing:
         assert len(briefing["theme"]["clusters"]) == 1
         assert briefing["theme"]["clusters"][0]["extractions"][0]["id"] == "e1"
         assert len(briefing["engaged_voices"]) == 1
-        assert briefing["engaged_voices"][0]["voice_name"] == "the voice of Plato"
+        assert briefing["engaged_voices"][0]["voice_name"] == "the Voice of Plato"
         assert briefing["engaged_voices"][0]["narrative_briefing"] == "<plato briefing for theme_001>"
         assert briefing["engaged_voices"][0]["artifact_text"] == "<plato artifact>"
 
@@ -279,7 +279,7 @@ class TestStampRuntime:
             theme_id="theme_001",
             theme_display_title="On The Question",
             voice_slugs=["plato"],
-            voice_name_by_slug={"plato": "the voice of Plato"},
+            voice_name_by_slug={"plato": "the Voice of Plato"},
             formulation_by_slug={"plato": "<formulation>"},
         )
         assert dossier["schema_version"] == "2.0"
@@ -287,15 +287,15 @@ class TestStampRuntime:
         assert dossier["headline"] == "H"
         assert dossier["body_paragraphs"] == ["p1", "p2"]
         # Headnote enriched with voice_name + formulation_text
-        assert dossier["headnotes"][0]["voice_name"] == "the voice of Plato"
+        assert dossier["headnotes"][0]["voice_name"] == "the Voice of Plato"
         assert dossier["headnotes"][0]["formulation_text"] == "<formulation>"
         assert dossier["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
         assert dossier["headnotes"][0]["framing_text"] == "F-plato"
         # Metadata
         assert dossier["metadata"]["theme_id"] == "theme_001"
-        assert dossier["metadata"]["issue_no"] == 42_193
-        assert dossier["metadata"]["vol"] == "CXVI"
         assert dossier["metadata"]["night"] == 1
+        assert "issue_no" not in dossier["metadata"]  # masthead chrome retired
+        assert "vol" not in dossier["metadata"]
 
     def test_stamp_carries_theme_title_and_abstract(self):
         """theme_title_for_dossier + theme_abstract_for_dossier land on
@@ -349,8 +349,8 @@ class TestStampRuntime:
             theme_id="theme_001",
             theme_display_title="On The Question",
             voice_slugs=["cleopatra", "plato"],
-            voice_name_by_slug={"cleopatra": "the voice of Cleopatra",
-                                "plato": "the voice of Plato"},
+            voice_name_by_slug={"cleopatra": "the Voice of Cleopatra",
+                                "plato": "the Voice of Plato"},
             formulation_by_slug={"cleopatra": "<f-cleo>", "plato": "<f-plato>"},
             artifact_text_by_slug={"cleopatra": "[full prostagma body — γινέσθωι]",
                                    "plato": "[full dialogue body]"},
@@ -403,9 +403,9 @@ class TestStampRuntime:
         )
         assert dossier["theme_title_for_dossier"] == ""
         assert dossier["theme_abstract_for_dossier"] == ""
-        # Colophon present
+        # Colophon — minimal night-only (masthead chrome retired 2026-05-05)
         assert "Editor's desk" in dossier["colophon"]
-        assert "Issue No. 42,193" in dossier["colophon"]
+        assert "Night 1" in dossier["colophon"]
 
     def test_stamp_missing_voice_in_parsed_headnotes(self):
         """Routing routed plato + cleopatra here; Claudia's parsed output
@@ -439,16 +439,20 @@ class TestStampRuntime:
         # Plato's artifact_title preserved
         assert dossier["headnotes"][0]["artifact_title"] == "DOCTORS OR COOKS?"
 
-    def test_issue_numbers_per_night(self):
-        for night, expected in ((1, 42193), (2, 42194), (3, 42195)):
+    def test_colophon_minimal_per_night(self):
+        """Masthead chrome (Vol/Issue/edition) was retired 2026-05-05.
+        Colophon now carries the night number only."""
+        for night in (1, 2, 3):
             parsed = {"kicker": "", "headline": "", "subline": "",
                       "body_paragraphs": [], "headnotes": [], "front_abstract": ""}
             dossier = dg.stamp_runtime_fields(
                 parsed, night=night, theme_id="t", theme_display_title="T",
                 voice_slugs=[], voice_name_by_slug={}, formulation_by_slug={},
             )
-            assert dossier["metadata"]["issue_no"] == expected
-            assert f"Issue No. {expected:,}" in dossier["colophon"]
+            assert dossier["metadata"]["night"] == night
+            assert f"Night {night}" in dossier["colophon"]
+            assert "Vol." not in dossier["colophon"]
+            assert "Issue No." not in dossier["colophon"]
 
 
 # --- generate_dossier (end-to-end with mocked Anthropic) -----------------
@@ -506,9 +510,9 @@ framing_text: Cleopatra framed otherwise.
         assert dossier["headline"] == "Test Headline About An Event"
         assert len(dossier["body_paragraphs"]) == 2
         assert len(dossier["headnotes"]) == 2
-        assert dossier["headnotes"][0]["voice_name"] == "the voice of Plato"
+        assert dossier["headnotes"][0]["voice_name"] == "the Voice of Plato"
         assert dossier["headnotes"][0]["artifact_title"] == "TEST PLATO TITLE"
-        assert dossier["headnotes"][1]["voice_name"] == "the voice of Cleopatra"
+        assert dossier["headnotes"][1]["voice_name"] == "the Voice of Cleopatra"
         assert dossier["headnotes"][1]["artifact_title"] == "A TEST PROSTAGMA"
         assert dossier["metadata"]["input_tokens"] == 1000
         assert dossier["metadata"]["output_tokens"] == 500
