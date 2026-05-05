@@ -1,4 +1,8 @@
-# Voices — Handoff (session-end snapshot, 2026-05-05 evening — supersedes 2026-05-05 PM + 2026-05-04 PM)
+# Voices — Handoff (session-end snapshot, 2026-05-06 — supersedes 2026-05-05 evening + 2026-05-05 PM + 2026-05-04 PM)
+
+> **2026-05-06 update (additive to 2026-05-05 evening session below):** Operator audit caught Athens-blocking subtle appropriation residual in Whanganui v2's bilingual opener — English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries. 3 card patches shipped (athens-2026 `8c3e9a7`): hard_limits +1 (forbid unframed cited-te reo first-person), characteristic_moves[0] tightened (speaker-frame in signature move), quality_criteria +1 (BILINGUAL-CITATION SPEAKER-FRAME). Re-Derive + TEST passed: new opener carries explicit *"Whanganui Iwi's identity-claim with the River: I am the River and the River is me"* + *"as Whanganui Iwi have spoken it across seven generations before the Crown was forced to recognise it"*. v4.1 gap G filed (extend Pass 4b te reo discipline to require explicit speaker-framing for cited te reo whose grammatical first-person could be misread as construction's voice). See OPEN_ITEMS §28 + §31.
+
+
 
 **Companion:** `OPEN_ITEMS.md` (open-items list) + `ONBOARDING.md` (how-to / fresh-pickup). Session-end pickup snapshot.
 

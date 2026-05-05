@@ -1064,9 +1064,19 @@ If runtime C38 lands as `max_tokens`-enforcement, all 10 voices' artifacts will 
 
 ---
 
-## 28. Whanganui v2 architectural restructure SHIPPED + PROMOTED (2026-05-05 evening)
+## 28. Whanganui v2 architectural restructure SHIPPED + PROMOTED + ATHENS-CLEAN (2026-05-05 evening + 2026-05-06 kawa-speaker-frame closure)
 
-**Status:** ✅ shipped (athens-2026 `663dc8f`); supersedes v1 (commit `c2151ce`, 2026-05-03 evening).
+**Status:** ✅ shipped (athens-2026 `663dc8f` initial v2 + `f6afe2c` 4-field gap-E closure + `8c3e9a7` kawa-speaker-frame closure); supersedes v1 (commit `c2151ce`, 2026-05-03 evening).
+
+> **Athens-clean update 2026-05-06:** Operator audit caught a subtle Athens-blocking appropriation residual in the bilingual quote-and-gloss opener. Te reo of the third kawa correctly attributed to s.13(c), but English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries — a reader could hear it as the construction speaking AS the river. The §28 architectural insight predicted this ("the whakataukī Ko au te awa, ko te awa ko au is Whanganui Iwi's identity-claim with the river — NOT the river speaking") but the v2 conditional discipline didn't enforce explicit speaker-framing for cited-te reo first-person. Three card patches shipped (`8c3e9a7`):
+>
+> - `hard_limits` +1 (8 → 9): forbids cited te reo Māori first-person whakataukī without explicit speaker-frame; names *Ko au te awa, ko te awa ko au* specifically as Whanganui Iwi's identity-claim, not river speaking, not construction's claim.
+> - `characteristic_moves[0].description` tightened: bilingual quote-and-gloss signature move now carries speaker-frame discipline inline; example phrasing *"Whanganui Iwi's identity-claim with the river: I am the River and the River is me"*, not bare *"I am the River and the River is me"*.
+> - `quality_criteria` +1 (5 → 6): BILINGUAL-CITATION SPEAKER-FRAME criterion testing whether English gloss explicitly names whose voice the "I" belongs to.
+>
+> Re-Derive (path-(b)) regenerated chat_system_prompt. TEST passed against same Athens diagnostic provocation. New opener: *"Ko au te Awa, ko te Awa ko au — the great River flows from the mountains to the sea; **Whanganui Iwi's identity-claim with the River: I am the River and the River is me**. I cite the third kawa as codified at s.13(c) of the Te Awa Tupua Act 2017, **and as Whanganui Iwi have spoken it across seven generations before the Crown was forced to recognise it**."* Speaker-frame explicit. Construction's grammatical "I" unambiguously distinct from kawa's first-person.
+
+
 
 ### Architecture: witness-translator (transmission-witness) stance
 
@@ -1237,7 +1247,9 @@ Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_st
 
 **E. Per-field discipline incompleteness in conditional blocks** 🔴 OPEN (NEW — surfaced 2026-05-05 evening via voice_temporal_stance discovery) — v2 conditionals enumerate per-field discipline only for SOME of each pass's output fields. Specifically Pass 2's witness-block addressed hard_limits explicitly; did NOT enumerate voice_temporal_stance, knowledge_boundary, world, formative_experience.*, character, translation_protocol, topics_requiring_care. Result: fields with implicit first-person tendency inherit BLOCK 3 field-spec instruction "first-person from within the voice's own world" — model resolves the conflict with witness-block by picking river-first-person. Whanganui v2's voice_temporal_stance shipped with v1's first-person-AS-the-river ("I speak from the legal-ecological present of MY ongoing existence...MY framework"); caught only because the runtime memo flagged for unrelated assembly-fiction reframe.
 
-**F. v1 baseline drift on uncovered fields** 🟡 OPEN (related to E) — for voices with strong v1 patterns in fields the v2 conditional doesn't enumerate, the LLM might preserve v1 content rather than re-write to v2 stance. Could be Pass 1.x merger cache-hit on chunked merger output that never got re-evaluated under v2. Worth investigating which Whanganui v2 fields might still carry v1 content (knowledge_boundary, character, world, etc.).
+**F. v1 baseline drift on uncovered fields** ✅ FIXED for Whanganui v2 (athens-2026 `f6afe2c`) — operator-driven full-card scan after gap E surfaced 4 additional fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed. For other voices with v2-style architecture: still 🟡 OPEN; whenever a new mediation_stance voice ships, full-card scan must follow ROUND 1 walk-through.
+
+**G. Pass 4b te reo discipline doesn't enforce explicit speaker-framing for cited-te reo first-person** 🔴 NEW 2026-05-06 — surfaced via operator audit of Whanganui v2 bilingual opener. Pass 4b's te reo discipline addresses LLM-generated te reo + appropriated whakataukī, but doesn't enforce explicit speaker-framing for cited te reo whose grammatical first-person ("Ko au te awa, ko te awa ko au") could be misread as the construction's voice. The bilingual quote-and-gloss signature move needs a sub-discipline: when the cited te reo carries first-person grammar, the English gloss must explicitly name whose voice the "I" belongs to — never let the gloss float unframed where the construction's own "I" could be read into it. ✅ FIXED for Whanganui v2 specifically via 3 card patches (athens-2026 `8c3e9a7`); architectural prompt-side fix deferred to v4.1. Generalizable to any future voice citing first-person sacred-grammar from a tradition the construction is not authorized from inside (Sufi-poet *ana al-Haqq*; gospel-tradition *I am that I am*; etc.).
 
 ### Fix pattern for v4.1 (post-Athens)
 
@@ -1245,3 +1257,4 @@ Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_st
 2. Add a final "any other field not enumerated above must use the witness-stance register" catch-all
 3. Add output sample render to the smoke-test process
 4. Audit Pass 1 chunked merge for whether it pre-processes content that bypasses Pass 2+ witness-conditional override
+5. Extend Pass 4b te reo discipline (gap G) to require explicit speaker-frame for cited-te reo first-person — generalize to any cited sacred-grammar first-person carrying appropriation risk if the construction's "I" could be read into it
