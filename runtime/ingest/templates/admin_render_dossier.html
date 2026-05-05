@@ -35,17 +35,19 @@
   {% endif %}
 
   {# Quote audit — pulls every quoted passage from body, attributes each
-     to one of the engaged voices via context window. At-a-glance check
-     against the editor's quote rule (1-3 per article; multi-voice
-     should quote ≥2 voices; max 2 per voice). #}
-  {% set _quotes = data.body_paragraphs | pulled_quotes(data.headnotes or []) %}
-  {% set _voice_quotes = _quotes | rejectattr('voice', 'equalto', '') | list %}
+     to one of the engaged voices OR a panel speaker (joined from
+     reference/speakers.json at write time). At-a-glance check against
+     the editor's quote rule. #}
+  {% set _quotes = data.body_paragraphs | pulled_quotes(data.headnotes or [], data.panel_speakers or []) %}
+  {% set _voice_quotes = _quotes | selectattr('kind', 'equalto', 'voice') | list %}
+  {% set _panel_quotes = _quotes | selectattr('kind', 'equalto', 'panel') | list %}
+  {% set _other_quotes = _quotes | selectattr('kind', 'equalto', '') | list %}
   {% set _voices_quoted = _voice_quotes | map(attribute='voice') | unique | list %}
   <details class="dossier-quotes-pulled" {% if _voice_quotes | length == 0 %}open{% endif %}>
     <summary class="muted">
       <small>quotes in article: <strong>{{ _voice_quotes | length }}</strong> voice
-        {% if _quotes | length - _voice_quotes | length > 0 %}
-          + {{ _quotes | length - _voice_quotes | length }} panel/title{% endif %}
+        {% if _panel_quotes %} + {{ _panel_quotes | length }} panel speaker{% endif %}
+        {% if _other_quotes %} + {{ _other_quotes | length }} title/other{% endif %}
         {% if _voice_quotes | length == 0 %}<span title="below quote-rule floor">⚠ below floor (1-3 voice quotes per article)</span>
         {% elif _voice_quotes | length > 3 %}<span title="above quote-rule ceiling">⚠ above ceiling (max 3 voice quotes per article)</span>{% endif %}
         {% set _n_engaged = (data.headnotes or []) | length %}
@@ -57,14 +59,14 @@
     {% if _quotes %}
     <ul class="dossier-quotes-list">
       {% for q in _quotes %}<li>&ldquo;{{ q.text }}&rdquo;
-        {% if q.voice %}<span class="muted"> — {{ q.voice }}</span>
-        {% else %}<span class="muted"> — <em>panel speaker / session title</em></span>{% endif %}
+        {% if q.kind == 'voice' %}<span class="muted"> — {{ q.voice }}</span>
+        {% elif q.kind == 'panel' %}<span class="muted"> — {{ q.voice }} <em>(panel speaker)</em></span>
+        {% else %}<span class="muted"> — <em>session title / unattributed</em></span>{% endif %}
       </li>{% endfor %}
     </ul>
     <p class="muted"><small>
-      Quotes attributed to <em>panel speaker / session title</em> are valid per the editor's prompt
-      (panel speakers are cited by role/title in prose; session titles appear in quote-marks as
-      typeset titles). Only voice quotes count toward the quote-rule floor + multi-voice check.
+      Voice quotes count toward the quote-rule floor + multi-voice check.
+      Panel-speaker quotes are valid per the editor's prompt (cite by name + role).
     </small></p>
     {% endif %}
   </details>

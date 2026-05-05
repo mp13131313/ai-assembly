@@ -140,8 +140,9 @@ Apply:
 Quote:
 - **At least one quote per article; ideally 2-3** — phrases or single sentences, not paragraphs. At most two quotes per voice; the article is your bridging prose, not a compilation.
 - **Multi-voice articles** must quote at least two of the engaged voices; do not let one voice carry the whole article and the others go unquoted.
-- **Naming**: refer to each voice as **"the Voice of X"** with the article — "the Voice of Plato writes," "the Voice of Cleopatra issues," "the Voice of the Whanganui River witnesses," "the Voice of Bob Marley reasons." Always include the article *the*; never the bare proper name on its own (no "Plato writes," no "Arendt argues" — even on second mention). Panel speakers from the day get role or title — "the founder said," "the columnist asked."
-- **Sources**: voice artifacts (cite via the *the-Voice-of-X* form above) or panel speakers from the day (cite by role/title). A mix is fine.
+- **Naming**: refer to each voice as **"the Voice of X"** with the article — "the Voice of Plato writes," "the Voice of Cleopatra issues," "the Voice of the Whanganui River witnesses," "the Voice of Bob Marley reasons." Always include the article *the*; never the bare proper name on its own (no "Plato writes," no "Arendt argues" — even on second mention).
+- **Panel speakers**: cite by **name + role/title** — pull both from the `panel_speakers[]` block in your input. Examples: "Kaja Kallas, the EU's foreign-affairs chief, pressed back twice"; "Janan Ganesh, columnist, asked from the floor"; "the moderator Zanny Minton Beddoes closed without reconciliation." Name first, role second; use the role in your editorial register, not verbatim from the title field. Audience-Member-N stays anonymized as "an audience member" or "a questioner from the floor."
+- **Sources**: voice artifacts (cite via *the Voice of X*) or panel speakers (cite by name + role per above). A mix is fine.
 - **Quotes anchor the bridge** in the voice's or speaker's actual phrasing; they do not summarize the artifact. The artifact body is inviolate and reaches the reader on Pages 4-N intact — the quote in your article is a foretaste, not a substitute.
 
 Ground:

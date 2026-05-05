@@ -97,6 +97,7 @@ from flows.shared.io import (
     extract_json,
     get_logger,
     get_member_by_name,
+    load_conference_facts,
     load_council_config,
     load_prompt,
     member_slug,
@@ -254,6 +255,100 @@ def load_prior_assignments_by_member(
                 if title_norm and title_norm not in out[member_name]:
                     out[member_name].append(title_norm)
     return out
+
+
+# --- Deployment context (THE GATHERING / THE SPEAKERS) ------------------
+#
+# Mirrors the deployment-context block injected into the editor's system
+# prompt (see flows/editor/card_assembly.py::_render_deployment_context).
+# Voice + Editor pipelines have had this since 2026-05-04; Provocateur
+# was the gap. With it the Provocateur sees:
+#   THE GATHERING   — what conference this is, audience character, stakes
+#   THE SPEAKERS    — the humans on stage (names + titles + affiliations
+#                     from reference/speakers.json) so triage + formulation
+#                     can use real-person context, not just speaker names
+#
+# Loaded once per flow invocation, threaded into the three system prompts
+# (triage_voice, triage_flags, formulation) via _fill_template. No new
+# LLM calls — just richer context for the existing ones.
+
+
+def _load_speakers_reference() -> list[dict[str, Any]]:
+    """Load PROJECT_ROOT/reference/speakers.json. Returns [] on failure
+    so triage/formulation still proceed without speaker context."""
+    try:
+        from flows.shared.project_root import resolve_project_root
+        project_root = resolve_project_root(None, repo_root=None)
+        path = project_root / "reference" / "speakers.json"
+        if not path.exists():
+            return []
+        with path.open(encoding="utf-8") as f:
+            data = json.load(f)
+        return list(data.get("speakers") or [])
+    except (FileNotFoundError, ValueError, SystemExit, OSError, json.JSONDecodeError):
+        return []
+
+
+def _render_the_gathering(conference: dict[str, Any] | None) -> str:
+    """Render THE GATHERING block from conference_facts.
+
+    Source: `conference_context_paragraph` — operator-curated description
+    of the gathering's character, audience, and stakes. Empty string if
+    the field is missing (test fixtures without conference_facts).
+    """
+    if not conference:
+        return ""
+    para = (conference.get("conference_context_paragraph") or "").strip()
+    if not para:
+        return ""
+    return f"# THE GATHERING\n\n{para}"
+
+
+def _render_the_speakers(speakers: list[dict[str, Any]]) -> str:
+    """Render THE SPEAKERS block from reference/speakers.json.
+
+    A bullet list of name — title — affiliation entries, in the order the
+    speakers reference file lists them. Audience-Member entries are
+    omitted (they're anonymized in articles anyway). Empty string if no
+    speakers reference is loaded.
+    """
+    rows = [
+        s for s in speakers
+        if (s.get("name") or "").strip()
+        and not s["name"].lower().startswith("audience member")
+    ]
+    if not rows:
+        return ""
+    lines = ["# THE SPEAKERS", "", "The humans on the conference's stage during the panels you are triaging — who they are, by name + role + affiliation. When formulating questions or tagging audience friction, weight what each speaker brings to the panel beyond what the extractions name.", ""]
+    for s in rows:
+        name = (s.get("name") or "").strip()
+        title = (s.get("title") or "").strip()
+        aff = (s.get("affiliation") or "").strip()
+        bits = [name]
+        if title:
+            bits.append(title)
+        if aff:
+            bits.append(aff)
+        lines.append("- " + " — ".join(bits))
+    return "\n".join(lines)
+
+
+def _load_provocateur_deployment_context() -> tuple[str, str]:
+    """Load + render (the_gathering, the_speakers) for the Provocateur.
+
+    Both render to "" on failure so flow proceeds without them. Called
+    once per flow invocation; result is threaded into all three system
+    prompts (triage_voice, triage_flags, formulation).
+    """
+    try:
+        conference = load_conference_facts()
+    except (FileNotFoundError, ValueError, SystemExit):
+        conference = None
+    speakers = _load_speakers_reference()
+    return (
+        _render_the_gathering(conference),
+        _render_the_speakers(speakers),
+    )
 
 
 def _fill_template(template: str, substitutions: dict[str, str]) -> str:
@@ -437,7 +532,10 @@ def triage_voice(
     # ~10 voices' triage calls per night → cacheable. The shared content
     # (instructions + landscape + audience + themes_with_clusters) is
     # ~22K tokens; reads 2-N save ~80% of input cost vs. uncached.
+    the_gathering, the_speakers = _load_provocateur_deployment_context()
     system = _fill_template(TRIAGE_VOICE_SYSTEM, {
+        "the_gathering": the_gathering,
+        "the_speakers": the_speakers,
         "collective_landscape": council["collective_landscape"],
         "audience": council["audience"],
         "themes_with_clusters": json.dumps(
@@ -493,7 +591,10 @@ def triage_flags(themes: list[dict], council: dict) -> dict:
     client = Anthropic()
 
     model_themes = _build_model_themes(themes)
+    the_gathering, the_speakers = _load_provocateur_deployment_context()
     system = _fill_template(TRIAGE_FLAGS_SYSTEM, {
+        "the_gathering": the_gathering,
+        "the_speakers": the_speakers,
         "collective_landscape": council["collective_landscape"],
         "audience": council["audience"],
         "themes_with_clusters": json.dumps(
@@ -1017,7 +1118,10 @@ def formulate_for_member(
     friction_level = flags.get("audience_friction", "moderate")
     fault_desc = flags.get("fault_line_description") or "no specific fault line identified"
 
+    the_gathering, the_speakers = _load_provocateur_deployment_context()
     system = _fill_template(FORMULATION_SYSTEM, {
+        "the_gathering": the_gathering,
+        "the_speakers": the_speakers,
         "collective_landscape": council["collective_landscape"],
         "member_profile": member_profile_str,
         "audience": council["audience"],

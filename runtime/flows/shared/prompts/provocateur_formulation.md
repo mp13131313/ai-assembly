@@ -142,6 +142,10 @@ Same theme (the legitimacy of automated public-service decisions), one member wi
   
   Proposition: "When the previous human system was demonstrably more discriminatory than the algorithmic replacement, defending the human system on the grounds that it 'felt human' is sentimentality dressed as ethics — the kind of thing that protects bad processes from being replaced. Defend or refute."
 
+{{the_gathering}}
+
+{{the_speakers}}
+
 THIS MEMBER'S PROFILE
 
 {{member_profile}}

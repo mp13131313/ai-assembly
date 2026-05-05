@@ -91,6 +91,56 @@ def _read_artifact(voice_slug: str, run_dir: Path) -> dict[str, Any]:
         return json.load(f)
 
 
+def _load_speakers_index(run_dir: Path) -> dict[str, dict[str, str]]:
+    """Load PROJECT_ROOT/reference/speakers.json and return name → entry map.
+
+    PROJECT_ROOT is run_dir.parent.parent (run_dir is
+    `<PROJECT_ROOT>/runs/athens_night_N/`). Returns {} on missing file —
+    panel-speaker enrichment is optional, dossier still generates.
+    """
+    project_root = run_dir.parent.parent
+    speakers_path = project_root / "reference" / "speakers.json"
+    if not speakers_path.exists():
+        return {}
+    try:
+        with speakers_path.open(encoding="utf-8") as f:
+            data = json.load(f)
+        return {
+            entry["name"]: entry
+            for entry in (data.get("speakers") or [])
+            if entry.get("name")
+        }
+    except (OSError, json.JSONDecodeError, KeyError):
+        return {}
+
+
+def _panel_speakers_for_briefing(
+    theme: dict[str, Any],
+    speakers_index: dict[str, dict[str, str]],
+) -> list[dict[str, str]]:
+    """From the theme's clusters[*].extractions[*].speaker, build a deduped
+    list of {name, title, affiliation} for every panel speaker referenced
+    in the briefing. Audience members + speakers missing from the
+    speakers index get a minimal record (name only). Order preserved by
+    first appearance.
+    """
+    seen: set[str] = set()
+    out: list[dict[str, str]] = []
+    for c in theme.get("clusters", []) or []:
+        for e in c.get("extractions", []) or []:
+            name = (e.get("speaker") or "").strip()
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            entry = speakers_index.get(name) or {}
+            out.append({
+                "name":        name,
+                "title":       entry.get("title", ""),
+                "affiliation": entry.get("affiliation", ""),
+            })
+    return out
+
+
 def build_dossier_briefing(
     theme_id: str,
     voice_slugs: list[str],
@@ -151,10 +201,20 @@ def build_dossier_briefing(
         for slug, briefing, artifact in zip(voice_slugs, briefings, artifacts)
     ]
 
+    panel_speakers = _panel_speakers_for_briefing(
+        theme, _load_speakers_index(run_dir)
+    )
+
     return {
         "night": night,
         "theme": theme,
         "engaged_voices": engaged_voices,
+        # panel_speakers — deduped {name, title, affiliation} for everyone
+        # referenced in the theme's extractions. Tim cites them by name +
+        # role per the closing instruction; downstream the dossier
+        # carries this list so the dashboard can attribute panel-speaker
+        # quotes precisely.
+        "panel_speakers": panel_speakers,
         "prior_editions": prior_editions or [],
     }
 
@@ -336,6 +396,7 @@ def stamp_runtime_fields(
     wall_clock_s: float = 0.0,
     thinking_trace: str = "",
     thinking_tokens: int = 0,
+    panel_speakers: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """Stamp runtime fields onto the parsed dossier. Returns the full
     v2 dossier dict ready to write to disk.
@@ -419,6 +480,12 @@ def stamp_runtime_fields(
         "theme_abstract_for_dossier": parsed.get("theme_abstract_for_dossier", ""),
         # Pages 4-N (artifacts)
         "headnotes":       enriched_headnotes,
+        # panel_speakers referenced anywhere in the theme's clusters/
+        # extractions, with name + title + affiliation joined from
+        # reference/speakers.json. Used by the dashboard to attribute
+        # panel-speaker quotes precisely; not displayed on the microsite
+        # by default.
+        "panel_speakers":  panel_speakers or [],
         # Audit / stamp
         "thinking_trace":  thinking_trace,
         "colophon":        _colophon_for_night(night),
@@ -491,6 +558,7 @@ def generate_dossier(
         wall_clock_s=wall,
         thinking_trace=thinking_trace,
         thinking_tokens=thinking_tokens,
+        panel_speakers=briefing.get("panel_speakers", []),
     )
     log.info(
         f"  dossier done: theme={theme_id} "

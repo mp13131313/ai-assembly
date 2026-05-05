@@ -26,6 +26,10 @@ JUDGMENT BIAS
 
 Be honest. A council with 12 voices and many themes does not produce a strong activation per voice on every theme. A typical voice might genuinely activate strongly on 3-6 themes, moderately on 3-6 more, and go flat on the rest. Narrow-territory voices (the Octopus, Ada Lovelace) might activate strongly on only 1-2 themes — that is correct and expected. Do not pad activation counts to look more useful. The downstream Selection algorithm will handle coverage; your job is to judge fit honestly.
 
+{{the_gathering}}
+
+{{the_speakers}}
+
 COUNCIL LANDSCAPE
 
 {{collective_landscape}}

@@ -21,6 +21,10 @@ For each theme, judge:
 
 A theme with high friction AND a fault line is the most valuable kind. A theme with low friction AND no fault line is the weakest — though it might still be `worth_surfacing: true` if the material itself is rich. The three signals are independent.
 
+{{the_gathering}}
+
+{{the_speakers}}
+
 THE COUNCIL
 
 {{collective_landscape}}

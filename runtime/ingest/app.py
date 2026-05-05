@@ -78,16 +78,17 @@ templates.env.filters["regex_findall"] = lambda s, pattern: _re.findall(pattern,
 # Used in admin_render_dossier.html for the at-a-glance quote audit.
 _QUOTE_RE = _re.compile(r'(?:["“])([^"”\n]{4,300}?)(?:["”])')
 
-def _pulled_quotes(body_paragraphs, headnotes):
-    """Extract quoted passages + attribute each to an engaged voice.
+def _pulled_quotes(body_paragraphs, headnotes, panel_speakers=None):
+    """Extract quoted passages + attribute each to an engaged voice or
+    panel speaker.
 
-    Anchors on `voice_slug` (e.g. "cleopatra", "ibn_battuta",
-    "whanganui_river") rather than `voice_name` because voice_name in
-    the dossier carries the voice's full ceremonial self-introduction
-    (e.g. "Voice of I am Cleopatra Thea Philopator, daughter of
-    Ptolemy…") while Tim's body prose uses the simple form
-    ("the Voice of Cleopatra"). Builds slug-token needles and picks
-    the rightmost match within the 200-char window before the quote.
+    Voice attribution anchors on `voice_slug` because voice_name carries
+    a long ceremonial form Tim doesn't use in prose. Panel-speaker
+    attribution anchors on the speaker's name + name-tokens from the
+    dossier's `panel_speakers[]` list (joined from
+    `reference/speakers.json` at write time). A quote attributed to a
+    voice wins over a panel-speaker match in the same paragraph (voices
+    own the artifact register).
     """
     voices = []
     for h in (headnotes or []):
@@ -112,42 +113,78 @@ def _pulled_quotes(body_paragraphs, headnotes):
         needles = [n for n in needles if len(n) >= 4]
         voices.append({"display": display, "needles": needles})
 
-    # Paragraph-by-paragraph attribution: a quote is attributed to the
-    # voice most recently named in the same paragraph; if no voice is
-    # named there, fall back to the previous paragraph's attribution
-    # (continuity within a section).
+    # Build panel-speaker needles. Skip "Audience Member N" entries —
+    # Tim anonymizes them as "an audience member" so per-name attribution
+    # would be wrong. Display: "Kaja Kallas (Vice-President of the
+    # European Commission)" — name + bracketed short title for the chip.
+    panel = []
+    for ps in (panel_speakers or []):
+        name = (ps.get("name") or "").strip()
+        if not name or name.lower().startswith("audience member"):
+            continue
+        # Last-name needle: most attributions in prose use the surname or
+        # full name. "Kaja Kallas" → ["kaja kallas", "kallas"]; single-name
+        # speakers (e.g. "Cleopatra") → just that.
+        name_lower = name.lower()
+        name_tokens = [t for t in name_lower.split() if len(t) >= 4]
+        if not name_tokens:
+            continue
+        needles = [name_lower]
+        if len(name_tokens) > 1:
+            needles.append(name_tokens[-1])  # surname
+        title = (ps.get("title") or "").strip()
+        # Short title for display: cut at first comma or " and "; trim
+        # to ~60 chars max. The full title is available in the dossier
+        # JSON for anyone who wants it.
+        short_title = title.split(",")[0].split(" and ")[0].strip()
+        if len(short_title) > 60:
+            short_title = short_title[:57] + "…"
+        display = f"{name} — {short_title}" if short_title else name
+        panel.append({"display": display, "needles": needles})
+
+    # Paragraph-by-paragraph attribution. For each quote:
+    #   1. Voice mentioned BEFORE the quote in the same paragraph wins.
+    #   2. Else: panel speaker mentioned BEFORE the quote in the same
+    #      paragraph (so voices outrank speakers when both appear).
+    #   3. Else: paragraph-level voice or speaker (whichever was named
+    #      anywhere in the paragraph; voice still preferred).
+    #   4. Else: previous paragraph's voice (continuity within a section).
+    # Returned dict carries `voice` (the display string) and `kind`
+    # ("voice" / "panel" / "") so the template can label appropriately.
+    def _rightmost(text, candidates):
+        best_disp, best_pos = "", -1
+        for c in candidates:
+            for needle in c["needles"]:
+                pos = text.rfind(needle)
+                if pos > best_pos:
+                    best_pos = pos
+                    best_disp = c["display"]
+        return best_disp, best_pos
+
     out = []
     last_voice = ""
     for p in (body_paragraphs or []):
         if p == "* * *":
-            last_voice = ""  # break attribution chain at section breaks
+            last_voice = ""
             continue
         p_lower = p.lower()
-        # Find the rightmost voice mention in this paragraph.
-        para_voice = ""
-        best_pos = -1
-        for v in voices:
-            for needle in v["needles"]:
-                pos = p_lower.rfind(needle)
-                if pos > best_pos:
-                    best_pos = pos
-                    para_voice = v["display"]
-        # Each quote in this paragraph: prefer the voice mentioned BEFORE
-        # the quote in this paragraph; else the paragraph's named voice;
-        # else the previous paragraph's voice.
+        para_voice, _ = _rightmost(p_lower, voices)
+        para_panel, _ = _rightmost(p_lower, panel)
         for m in _QUOTE_RE.finditer(p):
             before = p_lower[: m.start()]
-            quote_voice = ""
-            best_local = -1
-            for v in voices:
-                for needle in v["needles"]:
-                    pos = before.rfind(needle)
-                    if pos > best_local:
-                        best_local = pos
-                        quote_voice = v["display"]
-            if not quote_voice:
-                quote_voice = para_voice or last_voice
-            out.append({"text": m.group(1), "voice": quote_voice})
+            qv, _ = _rightmost(before, voices)
+            kind = "voice" if qv else ""
+            display = qv
+            if not display:
+                qp, _ = _rightmost(before, panel)
+                if qp:
+                    display, kind = qp, "panel"
+            if not display:
+                display = para_voice or para_panel or last_voice
+                kind = "voice" if (para_voice or last_voice) else (
+                    "panel" if para_panel else ""
+                )
+            out.append({"text": m.group(1), "voice": display, "kind": kind})
         if para_voice:
             last_voice = para_voice
     return out
