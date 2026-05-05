@@ -1,15 +1,74 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-05 evening)
+## Current branch state (2026-05-06 early morning, post-late-session)
 
-Active branch (voice-thread): `main`. Runtime-thread feature branch
-`feature/voice-deployment-context` is also active — voice-thread
-commits this session were cherry-picked to main; runtime-thread
-commits (`6a8e825` deployment-context + `a129231` C39 + `999450b`
-editor closing-prompt) stay on the feature branch and merge to main
-when that branch merges. Both repos unpushed at session end: code
-main `9815beb` (9 ahead of origin); athens-2026 main `f6afe2c`
-(6 ahead of origin).
+Active branch (runtime-thread): `feature/editor-deployment-context` —
+last push `419fcac` (panel-speaker attribution + Provocateur deployment
+context). Validator-bug fix uncommitted at session-end (will commit
+on next session). Athens-2026 at `f6afe2c` unchanged.
+
+**Late-session work (2026-05-05 PM → 2026-05-06 AM, all on
+`feature/editor-deployment-context`):**
+
+- Tim's closing prompt rebuilt to mirror voice Step 1 + Step 2 merged
+  structure (14 blocks); newspaper/edition framing dropped; three-pole
+  bridge task; "the Voice of X" naming convention; quote rule with
+  floor + multi-voice ≥2 voices requirement; aphoristic Beauty-Shot
+  close direction. Commit `1de4081`.
+- Synthesis routing — replaced editor's arbitrary lowest-numbered
+  tiebreaker with one-call Sonnet router that reads artifact + each
+  candidate theme's title/abstract/briefing and picks. Same logic
+  pushed UPSTREAM into voice Step 2's `_resolve_primary_theme_id` —
+  new artifacts land authoritative `lineage.primary_theme_id` at
+  write time even for synthesis cases. Editor's safety-net Cases 2/B
+  retained for legacy. Commit `2a80e8e`.
+- Panel-speaker attribution end-to-end — `dossier_generation.py`
+  joins `reference/speakers.json` into a `panel_speakers[]` block on
+  Tim's user prompt + persisted on dossier output. Tim's prompt
+  updated to cite by name + role/title. Dashboard quote audit splits
+  voice-quote vs panel-speaker counts; per-quote attribution by name.
+  Commit `419fcac`.
+- Provocateur deployment context — new `THE GATHERING` (from
+  conference_facts) + `THE SPEAKERS` (from reference/speakers.json)
+  blocks injected into all three Provocateur system prompts
+  (triage_voice + triage_flags + formulation). No new LLM calls.
+  Commit `419fcac`.
+- Newspaper masthead chrome retired — `ATHENS_VOLUME` /
+  `ATHENS_BASE_ISSUE` constants + `NIGHT_TO_PUB_DATE` map +
+  metadata.{issue_no, vol, publication_date, edition_label} fields
+  stripped end-to-end (data, render template, tests). Colophon
+  collapses to night-only. Commit `2a80e8e`.
+- Dashboard masthead now night-only; thinking-trace (collapsible) +
+  thinking_tokens visible in dossier render view; quote audit shows
+  attribution per quote (voice vs panel speaker). Voice routing +
+  Dossiers section headers always render with empty-state messages.
+  Commits `2a80e8e` + `419fcac`.
+- Validator field-name bug — [step2_validation.py:238-239](runtime/flows/voice/step2_validation.py:238)
+  was reading `lineage.grounding_extraction_ids` + `lineage.session_ids`
+  but Step 2 lineage uses the `all_` prefix (union across Step 1
+  outputs). Fix reads `all_*` first with bare-name fallback for
+  back-compat. **UNCOMMITTED** at session-end. Tested: 2 voices
+  flipped WARN→PASS in re-validation (Arendt + Marley); 3 stayed
+  WARN with substantive findings (Plato / Ibn Battuta / Whanganui).
+
+**5-voice end-to-end dryrun (2026-05-06 ~00:00–00:12):** isolated
+project root `current-tests/dev_5voice_dryrun_2026_05_05/` ran
+Provocateur → Voice (Step 1 + Step 2) → Editor for theme_002
+(populism) across Plato + Ibn Battuta + Hannah Arendt + Bob Marley +
+Whanganui River. Provocateur produced per-voice theme reframings
+("The Office and the Soul" for Plato, "The People, Singular" for
+Arendt, etc.). Editor composed 1 dossier (562w body, 5 headnotes).
+Validation findings post-fix: see above. Total cost ~$10-15.
+
+**Unfixed v2 finding from dryrun:** Whanganui artifact opens
+*"Ko au te Awa, ko te Awa ko au. I am the River and the River is me"*
+attributed to s.13(c). Even with citation, the OPENING speech-act
+performs first-person-as-river, violating the v2 witness-translator
+stance. Validator caught it (transmission-fidelity FAIL: "kawa used
+as own argument-engine"). Fix needs a sentence in
+`voice_step2_artifact.md` requiring `mediation_stance ==
+"transmission_witness"` voices to open in third-person reportage on
+the corpus before any first-person construction-stewarding prose.
 
 Persona pipeline at **v4** (`docs/AI_Assembly_Persona_Pipeline_v4.md`);
 `pipeline_version` string in code: `"4.0"`. v3.10 archived at

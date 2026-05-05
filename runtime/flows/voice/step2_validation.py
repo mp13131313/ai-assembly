@@ -235,8 +235,20 @@ def check_engagement(
       - lineage.grounding_extraction_ids + session names — grounding fidelity
     """
     system = load_prompt("voice_step2_validation_engagement")
-    grounding_ids = lineage.get("grounding_extraction_ids", []) or []
-    session_ids = lineage.get("session_ids", []) or []
+    # Step 2 lineage carries the union under the `all_` prefix because
+    # Step 2 unions across the voice's Step 1 outputs. Step 1 lineage uses
+    # the bare names. Read both with the `all_` variant winning so the
+    # validator works regardless of which lineage is passed in.
+    grounding_ids = (
+        lineage.get("all_grounding_extraction_ids")
+        or lineage.get("grounding_extraction_ids")
+        or []
+    )
+    session_ids = (
+        lineage.get("all_session_ids")
+        or lineage.get("session_ids")
+        or []
+    )
     user = (
         f"### medium\n{_render_field(card.get('medium'))}\n\n"
         f"### characteristic_output_structure\n{_render_field(card.get('characteristic_output_structure'))}\n\n"
