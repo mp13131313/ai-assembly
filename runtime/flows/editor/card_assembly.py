@@ -37,7 +37,11 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import load_prompt  # noqa: E402
+from flows.shared.io import (  # noqa: E402
+    load_conference_facts,
+    load_council_config,
+    load_prompt,
+)
 from flows.shared.project_root import resolve_project_root  # noqa: E402
 
 
@@ -188,25 +192,123 @@ def _render_section(
 # --- System prompt assembly ----------------------------------------------
 
 
+def _try_load_deployment_sources(
+    council: dict[str, Any] | None,
+    conference: dict[str, Any] | None,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Best-effort loaders for council_config + conference_facts.
+
+    Used by `assemble_system_prompt` to fetch deployment context when
+    callers don't pass it explicitly. Failures (missing PROJECT_ROOT,
+    missing files, schema errors) return None so test fixtures that
+    don't set up the JSON sources still produce a valid system prompt.
+    Mirrors the helper in voice/card_assembly.py.
+    """
+    if council is None:
+        try:
+            council = load_council_config()
+        except (FileNotFoundError, ValueError, SystemExit):
+            council = None
+    if conference is None:
+        try:
+            conference = load_conference_facts()
+        except (FileNotFoundError, ValueError, SystemExit):
+            conference = None
+    return council, conference
+
+
+def _render_deployment_context(
+    council: dict[str, Any] | None,
+    conference: dict[str, Any] | None,
+) -> str:
+    """Render the editor's deployment-context block: room / role / panel.
+
+    Three sub-blocks lifted from operator-curated JSON:
+
+    - **THE GATHERING** — `conference_facts.conference_context_paragraph`.
+      Names WBBF's character (twelve thematic tracks, Aegean Intelligence
+      framing, marketing-vs-substance contrast, agency centre of gravity).
+
+    - **YOUR ROLE** — `conference_facts.session_role_for_ai_assembly` plus
+      a reconciling line that names Tim's editor role explicitly and
+      resolves the breakfast-vs-anti-breakfast tension between his card's
+      `medium` ("reader at breakfast") and the project conceit ("not
+      breakfast reading"). The chrome carries voices' work to the morning
+      without sanding the edges off; chrome must hold the same three bars.
+
+    - **THE PANEL** — `council_config.collective_landscape`. Names the
+      ten voices Tim is editing, their traditions, the panel-specific
+      fault lines. Tim sees only voices routed to a given dossier per
+      call; full panel composition lives in the cached prefix so he
+      knows what's adjacent / what other dossiers might be carrying.
+
+    Audience block intentionally omitted: Tim's persona card already
+    calibrates his register to this audience (he co-curates it through
+    HoBB; his Beauty Shot register IS this audience's register).
+    Adding the council_config audience block here would re-encode what
+    his card carries through register/medium/world/resists. The
+    anti-shallow specifics (well-curated openness as failure mode) are
+    absorbed into Block 2's session_role text.
+
+    Returns "" if neither source is available — system prompt proceeds
+    without deployment context (test fixtures + edge cases).
+    """
+    if council is None and conference is None:
+        return ""
+    parts: list[str] = []
+
+    if conference and conference.get("conference_context_paragraph"):
+        parts.append("\n## THE GATHERING\n\n")
+        parts.append(conference["conference_context_paragraph"].strip())
+
+    role = conference.get("session_role_for_ai_assembly", "") if conference else ""
+    if role:
+        parts.append("\n\n## YOUR ROLE\n\n")
+        parts.append(role.strip())
+        parts.append(
+            "\n\n**You are the Editor of this Assembly. The morning brings "
+            "your dossiers to the readers — but this is not 'breakfast reading' "
+            "in the digestible-content sense. Your editorial chrome (kicker, "
+            "headline, article, theme page, headnotes) carries the voices' "
+            "work to the morning without sanding the edges off. The voices' "
+            "artifacts are inviolate; your work is the chrome around them, "
+            "and the chrome must hold the same three bars the voices' work "
+            "is held to.**"
+        )
+
+    if council and council.get("collective_landscape"):
+        parts.append("\n\n## THE PANEL\n\n")
+        parts.append(council["collective_landscape"].strip())
+
+    return "".join(parts)
+
+
 def assemble_system_prompt(
     card: dict[str, Any],
     *,
     night: int = 1,
+    council: dict[str, Any] | None = None,
+    conference: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
-    """Assemble Claudia's dossier-generation system prompt.
+    """Assemble Tim's dossier-generation system prompt.
 
     Returns (prefix, tail) for prefix-cache control. The prefix is identical
     across all dossier calls within a night; the tail carries the closing
     instruction (the same `editor_dossier.md` prompt for every call).
 
-    `night` is accepted for API symmetry with the voice pipeline but is not
-    used in the prompt itself — Claudia's editorial frame is night-agnostic;
-    night-specific context comes via the user prompt (theme + artifacts).
+    `night` substitutes `{night}` placeholder in voice_temporal_stance —
+    Tim's card text is "overnight after Night {night}'s panels" and gets
+    rendered with the actual night (1, 2, or 3). Same substitution
+    applies to any other field that uses the placeholder.
+
+    Optional `council` / `conference` params for explicit-pass test usage.
+    Production callers (orchestrator + editor_flow CLI) hit the loader
+    fallback and resolve from PROJECT_ROOT.
     """
     if night not in (1, 2, 3):
         raise ValueError(f"night must be 1, 2, or 3 (got {night})")
 
-    # Filter always-drop fields. Claudia has no reference_only_passages, but
+    # Filter always-drop fields. Tim has no reference_only_passages, but
     # defensively strip if present.
     filtered = {
         k: v for k, v in card.items()
@@ -215,7 +317,7 @@ def assemble_system_prompt(
     filtered.pop("reference_only_passages", None)
 
     # ---- Prefix (byte-identical across all dossier calls per night) ----
-    name = filtered.get("council_member_name", "Claudia Pinchbeck")
+    name = filtered.get("council_member_name", "Tim Leberecht")
     prefix_parts = [f"You are {name}.\n"]
 
     # IDENTITY
@@ -235,6 +337,19 @@ def assemble_system_prompt(
          "hard_limits", "voice_temporal_stance"),
     ))
 
+    # ---- Deployment context (room / role / panel) ----
+    # Sourced from PROJECT_ROOT/conference_facts.json + council_config.json.
+    # Cached as part of the system prefix (1h TTL); identical across all
+    # per-dossier calls within a night. Audience block intentionally
+    # omitted — Tim's card carries audience-calibration through his
+    # register/medium/world/resists. See _render_deployment_context.
+    council_loaded, conference_loaded = _try_load_deployment_sources(
+        council, conference
+    )
+    deployment_block = _render_deployment_context(council_loaded, conference_loaded)
+    if deployment_block:
+        prefix_parts.append(deployment_block)
+
     # ---- Tail (loads after the cache breakpoint) ----
     tail_parts = []
     tail_parts.append(_render_section(filtered, "REASONING METHOD", _REASONING_METHOD))
@@ -245,4 +360,9 @@ def assemble_system_prompt(
     closing = load_prompt("editor_dossier")
     tail_parts.append(f"\n---\n\n# YOUR TASK\n\n{closing}\n")
 
-    return "".join(prefix_parts), "".join(tail_parts)
+    # `{night}` substitution: Tim's voice_temporal_stance.default carries
+    # the placeholder "overnight after Night {night}'s panels"; substitute
+    # the actual night number now. Applies to any field that uses {night}.
+    prefix = "".join(prefix_parts).replace("{night}", str(night))
+    tail = "".join(tail_parts).replace("{night}", str(night))
+    return prefix, tail
