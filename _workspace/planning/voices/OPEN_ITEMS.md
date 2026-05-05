@@ -985,6 +985,9 @@ Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth
 
 ## 27. Length anchoring + dryrun length audit (2026-05-04 PM) — runtime cap-enforcement gap surfaced (cross-ref runtime/OPEN_ITEMS.md C38)
 
+> **Update 2026-05-05:** Runtime prompt fix landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carry structural softeners or wrong-target ranges that the prompt fix can't reach. **Surgical card-rewrites for those three documented in `voices/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.** Other 7 voices' overruns expected to compress within cap once next full-panel dryrun re-runs against post-fix prompt; quality-improvement rewrites (per the §27 calibration template below) hold for post-Athens.
+
+
 ### Summary of operator decision
 
 Conference cap (operator, 2026-05-04 PM): **500 words max for voice artifacts, 400 words max for Claudia's theme-article body.** Anchored against a 423-word German Spiegel news piece as the upper edge of "morning read" length. Article < artifact because the article is summary-of-artifacts not replacement; readers can click through.
