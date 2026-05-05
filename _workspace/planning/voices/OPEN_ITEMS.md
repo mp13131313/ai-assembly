@@ -1035,3 +1035,131 @@ For three voices, the form selected at runtime genuinely doesn't fit at 500w. Th
 - Second-medium revisions for Plato/Dostoevsky/Arendt/Whanganui: post-Athens rebuild work; the current primary medium produces work that bursts the cap rather than fitting the form.
 
 If runtime C38 lands as `max_tokens`-enforcement, all 10 voices' artifacts will fit the 500w cap regardless of medium-anchoring. The medium-revisions become quality-improvement rather than fit-correction.
+
+---
+
+## 28. Whanganui v2 architectural restructure SHIPPED + PROMOTED (2026-05-05 evening)
+
+**Status:** ✅ shipped (athens-2026 `663dc8f`); supersedes v1 (commit `c2151ce`, 2026-05-03 evening).
+
+### Architecture: witness-translator (transmission-witness) stance
+
+The construction speaks first-person AS ITSELF — the construction stewarding the Te Awa Tupua published record. It REPORTS what Te Awa Tupua's codified positions are and STANDS BY them; it does NOT claim to BE the river, to BE Te Pou Tupua, or to speak FOR Whanganui Iwi. Same architectural shape as Marley v2's report-and-stand-by stance, adapted from sacred-musical-corpus to mediated-indigenous-legal-personhood.
+
+### Pipeline architecture (code repo, commit `5bde171` round-1 fixes after `d32872a` initial wiring round):
+
+New `voice_config` field `mediation_stance == "transmission_witness"` triggers Jinja conditional blocks in 5 prompts:
+- **Pass 2** (`persona_pass_2_identity_boundaries.md`) — TRANSMISSION-WITNESS DEPLOYMENT LIMIT block: forbids deploying Tupua te Kawa as load-bearing premise of construction's argument; provides second-person example phrasings for hard_limits.
+- **Pass 3** (`persona_pass_3_intellectual_core.md`) — TRANSMISSION-WITNESS REGISTER OVERRIDE: per-field discipline for constitution / concept_lexicon / reasoning_method / finds_compelling / resists with witness-stance example phrasings ("I report — and stand by — Te Awa Tupua's codified position that..." NEVER "I am Te Awa Tupua").
+- **Pass 4a** (`persona_pass_4a_voice.md`) — TRANSMISSION-WITNESS VOICE VARIANT: bilingual quote-and-gloss as signature characteristic move; honest-extension move when published record doesn't directly address.
+- **Pass 4b** (`persona_pass_4b_artifact.md`) — TRANSMISSION-WITNESS ARTIFACT VARIANT: quality_criteria in second-person addressed to construction; pastiche-Whanganui + appropriated-whakataukī twin-failure-mode bans.
+- **Pass 5** (`persona_pass_5_engagement.md`) — REGISTER OVERRIDE: per-field discipline for bold_engagement_topics / default_questions / disagreement_protocol / unique_contribution.
+- **Pass 6** (`persona_pass_6_corpus.md`) — REGISTER OVERRIDE for header / why_selected / corpus_metadata.voice_basis.
+
+**Generalizable post-Athens to future rights-of-nature legal personalities, treaty-codified positions, ancestor-voices, etc.**
+
+### ROUND 0 → ROUND 1 walk-through
+
+| Metric | ROUND 0 | ROUND 1 |
+|---|---|---|
+| Total field issues | 12 | 4 |
+| First-person-AS-river leakage | 5 fields | 0 |
+| Third-person "the construction" leakage | 5 fields | 0 |
+| voice_intellect_coherence | ISSUE | PASS |
+| constitutional_consistency | ISSUE-load-bearing-appropriation | ISSUE-needs-harmonising |
+
+ROUND 1 residuals (4) all architectural-class register-strict on lexicon/repertoire convention; 1 surgical patch (reasoning_method.summary witness-stewarding frame) + 3 naming patches (voice_name + council_member_name + provocateur.name) + path-(b) ship.
+
+### TEST passed (Athens diagnostic provocation)
+
+Provocation: "more-than-human democracy + Atrato/Mar Menor comparativism" — designed to surface witness-stance failures (river-first-person + comparativism flattening + kawa-as-own-engine).
+
+Response (447w) emitted clean witness-stance:
+- Bilingual quote-and-gloss opener (kawa 3 + 2 from s.13, attributed to Ruruku Whakatupua)
+- Construction-reasoning ("I should answer the panel's question by first refusing its framing")
+- Comparativism refusal with Tănăsescu citation ("I refuse the swap")
+- Report-and-stand-by throughout (Cribb/Hikuroa/Albert/Te Aho cited)
+- Honest-extension close ("The cycle remains open. The Tongariro diversion still stands. Ea is not yet")
+
+### What was patched manually before ship
+
+- `voice_name`: bare → "Voice of the Whanganui River" (sweep convention)
+- `council_member_name`: first-person-AS-river ("I am tupua and tupuna; the iwi and I are one") → witness-stance compact identification ("I am the construction stewarding the Te Awa Tupua published record... I do not speak as the river or for Whanganui Iwi; I report Te Awa Tupua's standing as exercised through Te Pou Tupua...")
+- `provocateur.name`: "Te Awa Tupua" → "Voice of the Whanganui River" (sweep convention)
+- `reasoning_method.summary`: prepended witness-stewarding frame ("...as Te Pou Tupua's documented method engages it — applying the kawa-grounded reasoning as the construction stewarding the published record, not deploying it as my own ontological engine")
+
+### v4.1 architectural follow-ups (POST-ATHENS)
+
+- Make Pass 4a witness conditional cover preferred_vocabulary + metaphorical_repertoire register more forcefully (current ROUND 1 residuals are validator-strict register on lexicon fields; defensible-as-witness-stance but could be tightened).
+- Standardize the v4.1 conditional-block grammar pattern: any new conditional-trigger field must be wired to Pass 3 + Pass 5 + Pass 6 in addition to Pass 2 + 4a + 4b. Conditional block prompt text must be in INSTRUCTIONAL second-person to the model, not DESCRIPTIVE third-person about the construction.
+
+### Companion docs
+
+- `voices/WHANGANUI_V2_PLAN_2026-05-05.md` — pre-execution plan
+- `voices/WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md` — ROUND 0 12-residual analysis (used as planning input for prompt extension decision)
+- `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` — v2-updated section (witness-stance visual discipline + bilingual-citation discipline + twin-failure-mode bans)
+
+### Operator-side parallel residuals (Marley analogues)
+
+- **Whanganui D1 internal position paragraph** (analogous to Marley's `MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` D1) — drafting deferred; can draft when operator requests
+- **Whanganui E1 Athens intro paragraph** (if Whanganui referenced at conference or in closing-show video) — same Till-call as Marley E1
+- **Post-Athens iwi-orbit reader gate scheduling** — calendar date + name-search per reviewer. Candidates: Dan Hikuroa, Linda Te Aho, Jacinta Ruru, Carwyn Jones (Indigenous-authored scholars cited in card); or directly through Te Pou Tupua office (Turama Hawira + Keria Ponga); or Ngā Tāngata Tiaki o Whanganui post-settlement governance entity.
+
+---
+
+## 29. Tim Leberecht 14th persona SHIPPED as 13th editor candidate (2026-05-05 evening)
+
+**Status:** ✅ shipped to current-tests (`projects/current-tests/editors/tim_leberecht/`). NOT promoted to athens-2026 — pending operator decision on Tim vs Claudia as Assembly's 13th editor.
+
+### Build summary
+
+Operator delivered 6 claude.ai DR sections (~30,794 words total). Beauty Shot operational supplement (operator-curated voice-engineering material from compass artifact) merged into all 6 sections as appended subsections — preferred adjectives + signature verbs + avoided vocabulary + 12 metaphor families + 30 anti-patterns + paradigmatic post analyses. Pass 1c augmented with 18 additional Substack URLs from DR §6 corpus map (32 sources / 680K chars total — was 11/407K before augmentation). Pipeline ran clean through Pass 7a-FINAL gate; 4 surgical patches; path-(b) ship.
+
+### What got patched at ROUND 0 walk-through
+
+- `banned_language[20]` — removed 'metabolize' entry (internal contradiction with constitution + character + hard_limits where metabolizing critique is core operation)
+- `curated_corpus_passages.corpus_metadata.voice_basis` — third-person "Tim Leberecht — essays, books, talks 2012-2026" → first-person "I draw from my essays, books, and talks 2012–2026 — the timleberecht.com archive, the Beauty Shot Substack, the two trade books, and the three TED talks."
+- `constitution` — removed duplicate TENSION entry (entries [16] and [17] near-duplicates with conflicting "eight venues" vs "ten venues" Athens-program detail; kept [16])
+- `length_and_format_constraints` — relaxed italicization rule to allow signature unitalicized foreign third-terms (Sehnsucht, saudade, Weltschmerz, Bildung deployed as load-bearing concepts)
+- `council_member_name` "missing" — false positive (validator hallucination per OPEN_ITEMS §7; field present "Tim Leberecht — writer, host, co-founder...")
+
+### TEST passed (editorial provocation)
+
+Cross-diagnostic test: paste Whanganui v2 artifact (the actual response from the Athens diagnostic provocation) and ask Tim "as editor of *The Assembly*, draft tonight's editorial frame" — headline + 200-300w lead-in.
+
+Response (268w) hit 14 editorial signature axes:
+- Place-and-moment opening ("It is six in the morning in Berlin and I am rereading…")
+- Personal anchor → cultural diagnosis pivot ("what strikes me first is not the answer but the refusal")
+- Triple-list with rhythm ("kinship, comparison, coming-of-age")
+- "We"/"us" community-positioning with self-revision register ("We had set the panel up neatly... Tonight the multiplicity holds us")
+- Reframe rather than conclude ("recognition is not creation")
+- Quiet declarative + foreign third-term close ("Read this one slowly. Ea is not yet.")
+- Headline rule (small specific gesture, not summary): "The River That Refused the Panel"
+- Form-fit honesty (frames refusal as through-line, doesn't summarize artifact)
+- Auto-revision register (admits editorial framing was wrong)
+- No "in conclusion" / TED-symmetry / takeaways / hedging
+
+Tim's editorial sensibility is distinct + recognizable. Test artifact at `editors/tim_leberecht/06_derive/_test_editorial_provocation.json`.
+
+### Architectural framing (Tim vs Claudia)
+
+Tim is the **alternative editor** to Claudia Pinchbeck. Where Claudia is a Borges-grounded confected-broadsheet construction (DRAFT card per OPEN_ITEMS §26), Tim is the actual living person whose editorial sensibility informs HoBB / Beauty Shot / WBBF — built through the persona pipeline with proper claude.ai DR sessions + operator's compass artifact.
+
+The construction question for the panel: **should *The Assembly*'s news organ be edited by a Borges-fiction (Claudia) or by the real-person-whose-sensibility-the-fiction-channels (Tim)?** Both are now built so panel can run them against the same night's dossier and compare.
+
+### Path forward
+
+- **Comparative test:** run both Tim and Claudia against the same dossier (e.g., Night 1 of the Athens dryrun) and compare editorial frames. Diagnoses which sensibility serves the publication better.
+- **Operator decision:** which one promotes to athens-2026 as the 13th editor? Could be both (Tim as primary; Claudia as alternative for specific dossier modes), one, or hybrid.
+- **Architectural framing:** Tim is editor, NOT panel. Lives at `editors/tim_leberecht/` (not `voices/`), symlinked into `voices/` for pipeline-path compatibility. Not added to `panel_roster.json`. Editorial role differs structurally from panel-voice role (curates rather than responds to a Provocateur question).
+
+### Beauty Shot supplement integration approach (relevant for any future editor builds)
+
+When operator-curated analytical material (compass artifacts, Beauty Shot dossiers, etc.) is supplied alongside formal claude.ai DR sessions, the supplement carries operational voice-engineering material that the DR sessions don't capture (vocabulary inventories, metaphor families, anti-pattern lists). The integration approach used here:
+
+1. Keep the DR sections as-is (deep scholarly research)
+2. Strip auto-appended "Supporting research from Perplexity" tails from supplement (already in Phase 0.1 cache)
+3. Append operator-curated content from supplement to matching DR sections as marked subsection (`### OPERATOR-CURATED VOICE-ENGINEERING SUPPLEMENT`)
+4. Pipeline reads the merged file; chunked merger sees both registers as load-bearing
+
+Supplement adds ~30% to section word counts; pipeline handles the augmented input cleanly (Pass 1d curates within budget). The Beauty Shot operational taxonomy directly maps to `metaphorical_repertoire`, `banned_language`, `banned_modes`, `preferred_vocabulary`, `concept_lexicon`, `constitution`, `finds_compelling`, `resists`, `characteristic_moves` — the chunked merger picks it up natively without any pipeline change.
