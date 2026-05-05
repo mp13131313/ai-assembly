@@ -1665,6 +1665,46 @@ This split means transcription is fire-and-forget from upload (no rate-limiting,
 
 ---
 
+### C39. Provocateur briefing layer — too thin to support chat-test-quality voice composition 🟡 (filed 2026-05-05)
+
+**Surfaced 2026-05-05** during the deployment-context branch dryrun comparison + chat-test diagnostic.
+
+**Background.** Operator chat-tested Plato directly: pasted the WBBF program HTML (12 tracks, 126 sessions, 202 speaker bios, track taglines, curators) into a Claude project as system context, then asked an open question ("they are coming to your town, how do you feel about it?"). The Plato responses lit up — across three turns, Plato wrote:
+1. A Socratic dialogue with Lysicles using the Gorgias kolakeia distinction to test "beautiful business" against chrēmatistikē-vs-real-ergon
+2. A specific dialogue about a session ("WHAT IS A GOOD LIFE IN A MORE-THAN-HUMAN WORLD?") using the wrestling-circle analogy to dismantle "16 philosophers + no moderator" as elenchos vs chorus
+3. A 700-word letter to those 16 philosophers in the manner of the Seventh Letter, threading Republic / Phaedrus / Symposium
+
+**The structural diagnosis.** What was fed to chat-Plato is structurally analogous to what the Provocateur briefing feeds to runtime-voice. Both are "the substance the voice engages." But the runtime briefing produced by `_render_narrative_briefing` ([provocateur_flow.py:1070](runtime/flows/provocateur_flow.py:1070)) carries only:
+- THEME (single theme_display_title)
+- CONTEXT FROM TODAY'S SESSIONS (per-theme narrative summary)
+- EXTRACTION (selected_quotes attributed by speaker role/title — not name+bio)
+- FORMULATION (the formulated question/proposition)
+
+What the chat-test had that the runtime briefing doesn't:
+- **Track context** — voice doesn't know "this theme falls under Department of Depth" vs "AI Democracy Marathon." The 12 track taglines (~225 tokens, in `conference_facts.json` — currently NOT plumbed) carry the conference's *thematic question architecture*.
+- **Cross-theme view** — voice sees only its per-theme briefings; doesn't see the panel-wide thematic landscape that night.
+- **Speaker bios** — extractions cite "Bayo Akomolafe" by attribution, but voice has no idea who that is. `projects/athens-2026/reference/speakers.json` carries 219 enriched bios (97.8% per C11) — not currently plumbed into briefings.
+- **Program-shape** — voice doesn't see what other tracks the conference is staging, what session formats are being asked, what curators frame each track.
+
+**Structural caveat — runtime can't fully replicate the chat-test richness.** The chat test had **open framing** ("how do you feel about it") + **whole-program scope** + **multi-turn refinement**. Runtime has **sharp formulation** + **per-theme scope** + **single-shot Step 1 → Step 2**. Even with much richer briefings, runtime voices will still produce theme-bounded reasoning. The chat-test letter-to-the-16-philosophers move came from Plato wandering across program turf the prompt didn't put in front of him; the runtime forecloses that wandering by design (Provocateur picks a theme + writes a formulation; voice engages that theme; Step 2 synthesizes).
+
+**Path forward — three sub-items, ordered by impact:**
+
+1. **Track context per theme** (~30 min, biggest bang): extend `package_voice_briefings` in [provocateur_flow.py](runtime/flows/provocateur_flow.py) to include `track_taglines` from `conference_facts.json` for each theme's track. Each theme's briefing entry gains `track_name` + `track_tagline` + `track_curator` (if present). Voice Step 1 prompt sees "this theme falls under [Track] — [tagline]" alongside the formulation.
+
+2. **Speaker bios for cited speakers** (~1 hr): extend `_render_narrative_briefing` to include a `WHO SPOKE TODAY ON THIS THEME` block — pull bios from `reference/speakers.json` for each speaker cited in `selected_quotes`. Voice no longer cites "Bayo Akomolafe" as a name without context; sees the one-liner + key affiliations.
+
+3. **Cross-theme tonight-overview (optional)** (~2-3 hr): a per-night briefing artifact that lists all themes the panel is engaging tonight — names, formulations, voice assignments. Lives at `<run_dir>/03_provocateur/tonight_overview.json` and gets injected into voice Step 1 user prompt as an `OTHER THEMES TONIGHT` block. Risk: invites voice to wander cross-theme at Step 1 (which Step 2 should be doing) — could blur Step 1's reasoning discipline. Test if it actually helps before shipping.
+
+**Cross-references:**
+- `feature/voice-deployment-context` branch (commit `9eecd56`) — landed THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS in voice system prefix; descriptive room/panel/audience framing. Helps but doesn't carry program-substance.
+- Dryrun comparison 2026-05-05: word counts went UP panel-wide (+348w net) under deployment-context; voices DID engage more concretely (Plato moved to canonical Adeimantos; Battuta moved to specific year/wabāʾ; Whanganui opened with the canonical refrain) but still produced theme-bounded outputs. Richness lever sits at the briefing layer, not the deployment-context layer.
+- Marley × theme_001 silent-drop reproduced under C38 manifest tracking — root cause confirmed as Anthropic content filter (`APIStatusError: Output blocked by content filtering policy`). Same theme content trips the filter both runs; not a runtime bug, a card-content × theme-content interaction. Worth investigating Marley's `hard_limits` vs the theme_001 transcript content.
+
+**Status:** filed; **post-Athens-eligible** for sub-items 2+3. Sub-item 1 (track context per theme) is **pre-Athens-eligible** — small, additive, doesn't change Provocateur prompt semantics, just enriches the briefing JSON with already-available fields. Estimate ~30 min impl + 15 min test.
+
+---
+
 ### C36. Voice pipeline streaming — per-voice Step 2 starts when that voice's Step 1 done 🟡 (filed 2026-05-04 PM)
 
 **Surfaced 2026-05-04 PM during v2 dryrun re-run:** operator asked "now that ada is done with private thinking — will she start step 2?" Answer: no. Voice pipeline currently has a sync barrier between Step 1 and Step 2 — Step 2 fires for ALL voices in parallel only after EVERY voice's Step 1 completes.
