@@ -983,9 +983,22 @@ Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth
 
 ---
 
-## 27. Length anchoring + dryrun length audit (2026-05-04 PM) — runtime cap-enforcement gap surfaced (cross-ref runtime/OPEN_ITEMS.md C38)
+## 27. Length anchoring + dryrun length audit — ✅ CLOSED 2026-05-05 evening
 
-> **Update 2026-05-05:** Runtime prompt fix landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carry structural softeners or wrong-target ranges that the prompt fix can't reach. **Surgical card-rewrites for those three documented in `voices/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.** Other 7 voices' overruns expected to compress within cap once next full-panel dryrun re-runs against post-fix prompt; quality-improvement rewrites (per the §27 calibration template below) hold for post-Athens.
+> **Update 2026-05-05 evening:** ✅ CLOSED voices-side. Three card-side surgical patches shipped to athens-2026 (`9dae9b9`):
+> - **dostoevsky** `length_and_format_constraints`: stripped 3 softeners ("typically", "expand to meet it" sentence, "however long"); leads imperative + number; **range 350-750w** (operator-bumped from initial 350-500 draft). Preserves Diary-form texture.
+> - **hannah_arendt**: tightened from 600-900 → **350-750w** (operator-bumped from initial 350-500 draft); anchors form as "Aufbau column at full breath, not long Origins chapter"; preserves architectural refusals.
+> - **octopus**: front-loaded prose-side word count ("Tank-side prose: **350 to 500 words**"); explicitly clarified "no length applies to JSON channel" for chromatophore_display two-channel artifact.
+>
+> Path-(b) Derive regenerated chat_system_prompt for all 3 voices against patched cards. Combined with the runtime prompt fix (`61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md), all 3 voices should now compress within their respective caps in the next dryrun **without** max_tokens or post-truncation enforcement. **Operator decision (2026-05-05 evening): NO max_tokens enforcement — clean card-side resolution preferred over runtime truncation.**
+>
+> Cross-ref: closes runtime/OPEN_ITEMS.md C38 from the voices side (runtime-thread can close C38 unless they want max_tokens as a defensive backstop independent of the card-side fix).
+>
+> Other 7 voices' overruns expected to compress within cap once next full-panel dryrun re-runs against post-fix prompt + post-card-surgery; quality-improvement rewrites (per the §27 calibration template below — second-medium upgrades for Plato → Myth, Whanganui → Karakia cluster) hold for post-Athens.
+
+**Original §27 content preserved below for context:**
+
+> **Original 2026-05-04 PM context:** Runtime prompt fix had landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever was real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carried structural softeners or wrong-target ranges that the prompt fix couldn't reach. Surgical card-rewrites for those three documented in `voices/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.
 
 
 ### Summary of operator decision
