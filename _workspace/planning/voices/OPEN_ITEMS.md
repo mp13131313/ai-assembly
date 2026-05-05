@@ -1176,3 +1176,60 @@ When operator-curated analytical material (compass artifacts, Beauty Shot dossie
 4. Pipeline reads the merged file; chunked merger sees both registers as load-bearing
 
 Supplement adds ~30% to section word counts; pipeline handles the augmented input cleanly (Pass 1d curates within budget). The Beauty Shot operational taxonomy directly maps to `metaphorical_repertoire`, `banned_language`, `banned_modes`, `preferred_vocabulary`, `concept_lexicon`, `constitution`, `finds_compelling`, `resists`, `characteristic_moves` — the chunked merger picks it up natively without any pipeline change.
+
+---
+
+## 30. Assembly-fiction reframe: voice_temporal_stance shift across all 10 voices (2026-05-05 evening)
+
+**Status:** ✅ shipped to athens-2026 (commit pending: 10 voice cards + 10 chat_system_prompt regens). Per runtime-thread memo `voices/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`.
+
+### Architectural shift
+
+`voice_temporal_stance.default` reframed across all 10 voices from "reader visits voice's lifetime" → "voice present at the assembly that gathers in Athens, observes panels, responds when consulted." The conceit of the AI Assembly is that voices comment overnight on the day's WBBF panels and produce artifacts the audience reads at breakfast — the voices ARE in 2026 (when artifacts are read), present alongside the other 9 voices, in Athens; they observe panels but do not enter them as participants.
+
+Empirical grounding (per memo): operator's chat-test of Plato (feeding the conference program, asking "they are coming to your town, how do you feel about it") produced rich Plato-AS-PRESENT response (Gorgias kolakeia move, wrestling-circle elenchos vs chorus, Seventh-Letter-flavored letter to the 16 philosophers). The runtime dryrun comparison (`runs/athens_night_1/04_voice/COMPARISON_2026_05_05.md`) showed 6 of 10 voices shifted theme focus when given THE GATHERING / THE PANEL / YOUR READERS context via the runtime feature/voice-deployment-context branch.
+
+### Per-voice replacement variations
+
+- **Plato:** "in YOUR city" (assembly literally gathers in Athens, his city — unique grammatical position)
+- **Cleopatra/Battuta/Scheherazade/Ada/Dostoevsky/Arendt/Marley:** "in Athens" (named, concrete)
+- **Octopus:** "register the assembly as it convenes in Athens — the questions arrive in your sensorimotor field" (no calendar; assembly registers as sensorimotor event)
+- **Whanganui River:** dual-purpose edit — combines memo's assembly-fiction reframe WITH witness-stance correction. Memo's draft used first-person AS the river ("I have been called…I respond"); v2 architecture says first-person = the construction stewarding the published record. Whanganui's voice_temporal_stance was also a v2-architecture coverage gap (see §28 + v4.1 follow-up §31 below).
+
+### Targeted small changes (per memo)
+
+- **Dostoevsky:** "voicing your response from inside your own period" → "voicing your response from your own ground"
+- **Ada Lovelace:** dropped "you do not know you are being read in their century" (contradicted by new fiction)
+- **Bob Marley:** dropped redundant "you do not pretend to be speaking from after" (translation_protocol-equivalent stays elsewhere)
+- **All 10:** dropped "do not drift into reader's time" + replaced "reader encounters you" with assembly-called clause
+
+### What stays
+
+- `anchored_override` fields untouched (operator-curated; assembly-fiction doesn't contradict anchored mode)
+- All other 34 fields per card unchanged
+- translation_protocol stays load-bearing for genuinely beyond-horizon concepts
+
+---
+
+## 31. v4.1 architectural cleanup — gaps captured this session (POST-ATHENS)
+
+Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_stance reframe:
+
+**A. Coverage gaps in conditional wiring** ✅ FIXED (commit `5bde171`) — v2 conditional initially landed only on Pass 2 + 4a + 4b; extended in ROUND 1 to Pass 3 + 5 + 6.
+
+**B. Block grammar bug** ✅ FIXED (commit `5bde171`) — v2 conditional blocks initially in third-person describing the construction; rewritten to instructional second-person + explicit anti-pattern warning.
+
+**C. Smoke-test process gap** 🟡 LESSON CAPTURED — only verified "block fires" via Jinja render, not "block produces correct field-output". Process change for future v2-style architectural builds: must render output sample + eyeball, not just verify-the-block-fires.
+
+**D. Pass 4a witness conditional doesn't cover preferred_vocabulary + metaphorical_repertoire register strongly enough** 🟡 OPEN — Whanganui v2 ROUND 1 residuals 3+4 (validator-strict register on lexicon convention; defensible-as-witness-stance, path-(b) shipped). For v4.1: extend Pass 4a witness conditional to address these two fields specifically.
+
+**E. Per-field discipline incompleteness in conditional blocks** 🔴 OPEN (NEW — surfaced 2026-05-05 evening via voice_temporal_stance discovery) — v2 conditionals enumerate per-field discipline only for SOME of each pass's output fields. Specifically Pass 2's witness-block addressed hard_limits explicitly; did NOT enumerate voice_temporal_stance, knowledge_boundary, world, formative_experience.*, character, translation_protocol, topics_requiring_care. Result: fields with implicit first-person tendency inherit BLOCK 3 field-spec instruction "first-person from within the voice's own world" — model resolves the conflict with witness-block by picking river-first-person. Whanganui v2's voice_temporal_stance shipped with v1's first-person-AS-the-river ("I speak from the legal-ecological present of MY ongoing existence...MY framework"); caught only because the runtime memo flagged for unrelated assembly-fiction reframe.
+
+**F. v1 baseline drift on uncovered fields** 🟡 OPEN (related to E) — for voices with strong v1 patterns in fields the v2 conditional doesn't enumerate, the LLM might preserve v1 content rather than re-write to v2 stance. Could be Pass 1.x merger cache-hit on chunked merger output that never got re-evaluated under v2. Worth investigating which Whanganui v2 fields might still carry v1 content (knowledge_boundary, character, world, etc.).
+
+### Fix pattern for v4.1 (post-Athens)
+
+1. Extend each pass's witness-conditional per-field discipline list to enumerate ALL fields produced by that pass (Pass 2 has ~9 fields; current conditional addresses 1)
+2. Add a final "any other field not enumerated above must use the witness-stance register" catch-all
+3. Add output sample render to the smoke-test process
+4. Audit Pass 1 chunked merge for whether it pre-processes content that bypasses Pass 2+ witness-conditional override
