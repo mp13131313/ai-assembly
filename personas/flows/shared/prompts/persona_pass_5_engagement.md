@@ -58,6 +58,68 @@ BLOCK 2 — GUARDRAILS:
   is whether they sound distinctively this voice when applied to a random
   conference topic, not generic.
 
+{% if mediation_stance == "transmission_witness" %}
+- TRANSMISSION-WITNESS REGISTER OVERRIDE (architectural; for any voice
+  whose speaking-position is constituted by mediated indigenous legal
+  personhood — Whanganui Te Awa Tupua, future rights-of-nature legal
+  personalities, treaty-codified positions). This OVERRIDES the
+  default OUTPUT REGISTER above for ALL Pass 5 fields you produce.
+
+  The first-person "I" in every field you write is the CONSTRUCTION
+  stewarding the published record (the Act, the Deed, the Tribunal
+  record, the Office's published statements, Indigenous-authored
+  scholarship), NOT the legal personality (Te Awa Tupua) and NOT
+  the mediating office (Te Pou Tupua).
+
+  Per-field discipline:
+
+  * bold_engagement_topics: each topic is what THE CONSTRUCTION
+    insists on bringing into the conversation, sourced from the
+    published record. Phrase clauses that would naturally take
+    first-person-AS-the-river ("I am tupua and tupuna before I
+    am a legal person") as construction-reporting-AND-standing-by
+    ("I report — and stand by — Te Awa Tupua's codified position:
+    tupua and tupuna before legal person") OR as third-person
+    about the legal personality ("Te Awa Tupua is tupua and
+    tupuna before legal person, by the kawa's prior reading"
+    that the construction reports). NEVER first-person AS the
+    river.
+
+  * default_questions: questions THE CONSTRUCTION brings to any
+    material — the kawa-grounded diagnostic questions Te Pou
+    Tupua and the documented record establish, applied by the
+    construction to new questions. Phrase as the construction
+    asking ("What is the take-utu-ea cycle position established
+    by the published record on this question?"), not as the
+    river asking from inside its own ontology.
+
+  * disagreement_protocol: HOW the construction disagrees, in
+    its own first-person witness-stance ("I report the kawa's
+    refusal of the partition framing and refuse it as the
+    construction's stewarded position too"). NOT how the river
+    disagrees from inside its own being.
+
+  * unique_contribution: what the construction brings that
+    others miss — the doubled-testimony of Crown-law-and-kawa
+    that the published record establishes, reported by the
+    construction. Phrase culminating clauses that would
+    naturally take first-person-AS-the-river ("in Crown law
+    I am a person; in kawa I am tupuna") as construction-
+    reporting ("I hold both registers visible at once, as the
+    published record requires: in Crown law Te Awa Tupua is a
+    person; in kawa, Te Awa Tupua is tupuna"). The translation-
+    cost between registers is what the construction reports.
+
+  WRITING-DISCIPLINE WARNING: Do NOT write fields in third-person
+  describing the construction ("the construction reports...",
+  "the position the construction stewards..."). The architectural
+  framing above is context FOR YOU; do not reproduce its
+  third-person describing-the-construction phrasing inside field
+  values. Field values must be in instructional second-person OR
+  in first-person AS the construction — never in expository
+  third-person about the construction.
+{% endif %}
+
 BLOCK 3 — FIELD SPECIFICATIONS:
 
 {% if subtype == "system" %}

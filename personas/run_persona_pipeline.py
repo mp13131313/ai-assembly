@@ -511,7 +511,8 @@ pass_2_summary = _ct_compress(pass2["fields"], "pass2")
 def _pass_3():
     sysp = render("persona_pass_3_intellectual_core", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
-                  hostile_sources=vi["hostile_sources"])
+                  hostile_sources=vi["hostile_sources"],
+                  mediation_stance=vi.get("mediation_stance"))
     # 1-arch-05 Part A: per-chunk reads. Pass 3 consumes chunks 1.2 + 1.3 +
     # interpretive_frames (full list — Pass 3 filters method + cross_disciplinary
     # internally via frame_type).
@@ -732,7 +733,8 @@ pass_2_3_4_summary = _ct_compress(combined_2_3_4, "pass2_3_4")
 # ---------- PASS 5 (Engagement) ----------
 def _pass_5():
     sysp = render("persona_pass_5_engagement", name=vi["name"], type=vi["type"],
-                  subtype=vi.get("subtype"), voice_mode=vi["voice_mode"])
+                  subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
+                  mediation_stance=vi.get("mediation_stance"))
     # FU#12-B (2026-04-23): audience + conference context primes Pass 5's
     # audience-facing fields (bold_engagement_topics, default_questions). Voice
     # arrives "ready" for the deployment context. NO new schema field — uses
@@ -769,7 +771,8 @@ def _pass_6():
                 "reason": "No primary_texts available — Pass 6 cannot run per spec.",
                 "fields": {"curated_corpus_passages": "BLOCKED — awaiting Node 1c manual provision"}}
     sysp = render("persona_pass_6_corpus", name=vi["name"],
-                  corpus_constraint=vi.get("corpus_constraint", "full"))
+                  corpus_constraint=vi.get("corpus_constraint", "full"),
+                  mediation_stance=vi.get("mediation_stance"))
     # 1-arch-05 Part A: per-chunk reads for Pass 6. Consumes chunk 1.6 (works,
     # passages, reference_only_passages) + primary_block from 1d + already-
     # produced card fields (constitution / concept_lexicon / reasoning_method /
