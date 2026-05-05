@@ -73,7 +73,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import load_prompt
+from flows.shared.io import (
+    load_conference_facts,
+    load_council_config,
+    load_prompt,
+    member_slug,
+)
 from flows.shared.project_root import resolve_project_root
 
 
@@ -363,10 +368,120 @@ def _render_continuity(card: dict[str, Any], night: int, step: int) -> str:
 
 # --- System prompt assembly per step ----------------------------------
 
+def _try_load_deployment_sources(
+    council: dict[str, Any] | None,
+    conference: dict[str, Any] | None,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Best-effort loaders for council_config + conference_facts.
+
+    Used by `assemble_system_prompt` to fetch deployment context when
+    callers don't pass it explicitly. Failures (missing PROJECT_ROOT,
+    missing files, schema errors) return None so test fixtures that
+    don't set up the JSON sources still produce a valid system prompt
+    — the deployment-context block degrades to empty rather than
+    raising. Production paths (orchestrator + voice_flow CLI) always
+    have these files at PROJECT_ROOT.
+    """
+    if council is None:
+        try:
+            council = load_council_config()
+        except (FileNotFoundError, ValueError, SystemExit):
+            council = None
+    if conference is None:
+        try:
+            conference = load_conference_facts()
+        except (FileNotFoundError, ValueError, SystemExit):
+            conference = None
+    return council, conference
+
+
+def _render_deployment_context(
+    council: dict[str, Any] | None,
+    conference: dict[str, Any] | None,
+    self_voice_slug: str | None,
+    step: int,
+) -> str:
+    """Render the deployment-context block: room / panel / readers.
+
+    Three (sometimes four) sub-blocks lifted from operator-curated JSON:
+
+    - **THE GATHERING** — `conference_facts.conference_context_paragraph`.
+      Names the conference's character (twelve thematic tracks, Aegean
+      Intelligence framing, marketing-vs-substance contrast, agency
+      centre of gravity). Same on every step.
+
+    - **THE PANEL** — `council_config.collective_landscape`. Panel-as-
+      friction-structure framing, member roster with tradition tags,
+      panel fault lines derived from member fields. Same on every step.
+
+    - **YOUR FELLOW VOICES** — Step 2 only. Names the other 9 voices
+      (excludes self) and frames the listing as anti-translation
+      permission. Step 1 is private reasoning; full peer roster at
+      reasoning-time invites premature peer-positioning. Step 2 is
+      composition where peer-awareness genuinely earns its place.
+
+    - **YOUR READERS** — `council_config.audience`. Synced 1:1 with
+      `audience_profile.json::participant_profile` (canonical source per
+      `docs/AUDIENCE_BRIEF.md`). Descriptive — what readers activate
+      on, what they go flat on, where their stretch is.
+
+    Intentional omission: `conference_facts.session_role_for_ai_assembly`
+    is NOT injected here, even though it carries the project's three-
+    bars + anti-smoothing directives. Reason: that text reads as an
+    imperative ("the voice marks ... rather than smoothing ..."), and
+    putting prescriptive language in the deployment-context layer
+    conflates with the persona card's task-instruction layer (`<task>`,
+    `<weighing>`, `<focus>`, etc. in the closing prompt). Deployment
+    context stays descriptive; the persona card retains its monopoly
+    on prescription.
+
+    Returns "" if neither source is available — the system prompt
+    proceeds without deployment context (test fixtures + edge cases).
+    """
+    if council is None and conference is None:
+        return ""
+    parts: list[str] = []
+
+    if conference and conference.get("conference_context_paragraph"):
+        parts.append("\n## THE GATHERING\n\n")
+        parts.append(conference["conference_context_paragraph"].strip())
+
+    if council and council.get("collective_landscape"):
+        parts.append("\n\n## THE PANEL\n\n")
+        parts.append(council["collective_landscape"].strip())
+
+    if step == 2 and council and self_voice_slug:
+        peers = [
+            m["name"] for m in council.get("members", [])
+            if member_slug(m.get("name", "")) != self_voice_slug
+        ]
+        if peers:
+            parts.append("\n\n## YOUR FELLOW VOICES\n\n")
+            parts.append(
+                "Your work appears alongside the others on shared themes:\n\n"
+            )
+            for p in peers:
+                parts.append(f"- {p}\n")
+            parts.append(
+                "\nNone of these voices translate themselves into a common "
+                "register. The gathering is built to hold the friction of their "
+                "differences. You speak from your tradition; the room does not "
+                "need you to soften."
+            )
+
+    if council and council.get("audience"):
+        parts.append("\n\n## YOUR READERS\n\n")
+        parts.append(council["audience"].strip())
+
+    return "".join(parts)
+
+
 def assemble_system_prompt(
     card: dict[str, Any],
     step: int,
     night: int = 1,
+    council: dict[str, Any] | None = None,
+    conference: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
     """Assemble the system prompt for one step.
 
@@ -456,6 +571,28 @@ def assemble_system_prompt(
             ),
         )
     )
+
+    # ----- Deployment context (room / panel / readers) ---------------
+    # Sourced from PROJECT_ROOT/conference_facts.json + council_config.json.
+    # Stable per-deployment so it sits in the cache-shared prefix (shared
+    # across step 1/2/3 calls for the same voice on the same night).
+    # `session_role_for_ai_assembly` deliberately omitted — see
+    # `_render_deployment_context` docstring. Loader is best-effort:
+    # missing files / no PROJECT_ROOT → empty block, system prompt
+    # proceeds without deployment context.
+    council_loaded, conference_loaded = _try_load_deployment_sources(
+        council, conference
+    )
+    self_slug = (
+        member_slug(filtered["council_member_name"])
+        if filtered.get("council_member_name")
+        else None
+    )
+    deployment_block = _render_deployment_context(
+        council_loaded, conference_loaded, self_slug, step
+    )
+    if deployment_block:
+        prefix_parts.append(deployment_block)
 
     # ----- Step-specific tail ----------------------------------------
     # Everything after BOUNDARIES diverges by step. Rendered separately

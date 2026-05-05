@@ -279,6 +279,39 @@ def load_council_config(path: Path | str | None = None) -> dict[str, Any]:
     return cfg
 
 
+def load_conference_facts(path: Path | str | None = None) -> dict[str, Any]:
+    """Load conference_facts.json from PROJECT_ROOT.
+
+    Carries deployment-side context not bound to any one voice — the
+    gathering's identity, dates, venues, twelve thematic tracks,
+    `conference_context_paragraph` (room character) and
+    `session_role_for_ai_assembly` (the conceit-of-the-experiment text).
+
+    Voice card_assembly reads this for the deployment-context system-
+    prompt block (room/panel/audience). Persona pipeline Pass 0a also
+    reads it for voice_config classification.
+
+    Returns the parsed dict with no schema enforcement (the file is
+    operator-curated; missing fields fail at the consumer's get-with-
+    default).
+
+    Raises:
+        FileNotFoundError: If the file doesn't exist at the expected path.
+    """
+    if path is None:
+        from flows.shared.project_root import resolve_project_root
+        config_path = resolve_project_root(None, repo_root=None) / "conference_facts.json"
+    else:
+        config_path = Path(path)
+    if not config_path.exists():
+        raise FileNotFoundError(
+            f"conference_facts.json not found at {config_path}. "
+            f"Expected a JSON file at $PROJECT_ROOT/conference_facts.json."
+        )
+    with open(config_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 def get_logger(name: str) -> Any:
     """Return a logger that works inside or outside a Prefect run context.
 
