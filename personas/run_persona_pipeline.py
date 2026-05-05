@@ -485,7 +485,8 @@ def _pass_2():
     sysp = render("persona_pass_2_identity_boundaries", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"],
-                  corpus_constraint=vi.get("corpus_constraint", "full"))
+                  corpus_constraint=vi.get("corpus_constraint", "full"),
+                  mediation_stance=vi.get("mediation_stance"))
     # 1-arch-05 Part A: per-chunk reads. Pass 2 consumes chunks 1.1 + 1.5 +
     # voice_level_debate subset of interpretive_frames (1.2).
     userp = render(
@@ -667,7 +668,8 @@ def _pass_4a():
     sysp = render("persona_pass_4a_voice", name=vi["name"], type=vi["type"],
                   subtype=vi.get("subtype"), voice_mode=vi["voice_mode"],
                   hostile_sources=vi["hostile_sources"],
-                  corpus_constraint=vi.get("corpus_constraint", "full"))
+                  corpus_constraint=vi.get("corpus_constraint", "full"),
+                  mediation_stance=vi.get("mediation_stance"))
     # 1-arch-05 Part A: per-chunk reads. Pass 4a consumes chunk 1.4 (full:
     # moves + register + vocabulary + analytical_context_voice) + cross-refs
     # (available_pathe from 1.1, reasoning_method_summary from 1.3) + filtered
@@ -701,7 +703,8 @@ pass_2_3_4a_summary = _ct_compress(combined_2_3_4a, "pass2_3_4a")
 # ---------- PASS 4b (Artifact) ----------
 def _pass_4b():
     sysp = render("persona_pass_4b_artifact", name=vi["name"], type=vi["type"],
-                  corpus_constraint=vi.get("corpus_constraint", "full"))
+                  corpus_constraint=vi.get("corpus_constraint", "full"),
+                  mediation_stance=vi.get("mediation_stance"))
     userp = render("persona_pass_4b_user",
                    pass_2_3_4a_summary=pass_2_3_4a_summary,
                    rhetorical_mode=json.dumps(pass4a["fields"].get("rhetorical_mode", "")),

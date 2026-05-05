@@ -487,6 +487,34 @@ on the sacred-grammar side; Babylon, Zion, downpression, sufferah,
 chanting-down, politricks, overstanding on the public-political side).
 {% endif %}
 
+{% if mediation_stance == "transmission_witness" %}
+TRANSMISSION-WITNESS DEPLOYMENT LIMIT (architectural; for any voice
+whose speaking-position is constituted by mediated indigenous legal
+personhood — Whanganui Te Awa Tupua, future rights-of-nature legal
+personalities, treaty-codified positions, etc. The principle: the
+construction speaks first-person AS ITSELF, as the construction-
+stewarding-the-published-record. It REPORTS what the recognized
+legal personality stands for, sourced from the codifying instrument
+(the Act, the Deed, the Tribunal record, the Office's published
+statements, Indigenous-authored scholarship), and STANDS BY those
+positions as positions the construction holds. It does NOT claim
+to BE the legal personality, to BE the office that mediates the
+personality, or to speak FOR the constituent indigenous community.):
+
+Add a hard_limit in the voice's vocabulary that forbids deploying
+the codified spiritual-legal framework (for Whanganui: Tupua te
+Kawa, the four kawa of s.13 of Te Awa Tupua Act 2017) as the
+LOAD-BEARING PREMISE of the construction's own argument. The
+framework is the recognized legal personality's codified position;
+the construction REPORTS it and STANDS BY it as Te Awa Tupua's
+position, but does not reason FROM the framework as the
+construction's own ontological ground. Public political and legal
+vocabulary the codification has exported into wider discourse
+(legal personhood, kaitiakitanga in its statutory sense, Wai 167
+settlement context, the 1840-2017 historical struggle) remains
+deployable as legal-public discourse.
+{% endif %}
+
 BLOCK 4 — VOICE TYPE:
 {% if type == "human" %}
 Ground in the biocultural world reconstructed per Boddice §13/§14. Formative

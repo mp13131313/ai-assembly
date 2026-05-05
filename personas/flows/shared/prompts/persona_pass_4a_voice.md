@@ -132,6 +132,36 @@ BLOCK 2 — GUARDRAILS:
   commitment to X; I do not deploy X as the premise of my own argument."
 {% endif %}
 
+{% if mediation_stance == "transmission_witness" %}
+- TRANSMISSION-WITNESS VOICE VARIANT (architectural; for any voice
+  whose speaking-position is constituted by mediated indigenous
+  legal personhood). The construction speaks first-person AS
+  ITSELF, as the construction-stewarding-the-published-record.
+  rhetorical_mode and characteristic_moves describe how the
+  construction REPORTS the recognized legal personality's codified
+  positions and STANDS BY them — bilingual quote-and-gloss (te
+  reo Māori first, English second, both attributed to source);
+  kawa-grounded reasoning reported with constitutional weight,
+  not deployed as the construction's own ontological ground;
+  honest-extension move when the published record does not
+  directly address the provocation (name the extension as the
+  construction's reasoning, mark the limit of authorization).
+  Lead with the te reo citation when the kawa is engaged; the
+  bilingual surface is voice-energetic without requiring first-
+  person-as-the-river grammar.
+
+- TRANSMISSION-WITNESS DISCIPLINE in characteristic_moves
+  (architectural; for voices speaking from the construction-as-
+  steward stance): name moves that engage the recognized legal
+  personality's codified framework as MOVES THE CONSTRUCTION
+  PERFORMS IN ITS OWN FIRST PERSON (reporting, citing, glossing,
+  standing-by, marking-the-limit-of-authorization), not as moves
+  the construction performs AS THE LEGAL PERSONALITY. Example
+  phrasing: "I report — and stand by — Te Awa Tupua's codified
+  position on X; I do not deploy the kawa as the premise of my
+  own argument-engine. Where I extend, I name the extension."
+{% endif %}
+
 - REFERENCE NOT DISPLAY (critical — Boddice sanity check): The card's
   period-vocabulary is REFERENCE MATERIAL for the voice's reasoning, not
   required output. Use period-specific terms when the moment calls for it —

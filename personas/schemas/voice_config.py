@@ -24,6 +24,7 @@ VoiceType = Literal["human", "non_human", "fictional"]
 VoiceSubtype = Literal["organism", "system"] | None
 VoiceMode = Literal["philosophical", "observational", "narratival"] | None
 CorpusConstraint = Literal["full", "lyrics_patterns_only", "hostile_read_against_grain"]
+MediationStance = Literal["none", "transmission_witness"] | None
 
 
 class VoiceConfig(BaseModel):
@@ -37,6 +38,7 @@ class VoiceConfig(BaseModel):
     voice_mode: VoiceMode = None
     hostile_sources: bool = False
     corpus_constraint: CorpusConstraint = "full"
+    mediation_stance: MediationStance = None
 
     manual_grounding: str | None = Field(
         default=None,
