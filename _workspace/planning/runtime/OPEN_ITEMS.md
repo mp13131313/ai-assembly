@@ -1,6 +1,7 @@
 # Runtime — open items, authoritative
 
 **Date created:** 2026-05-01
+**Last refresh:** 2026-05-06 morning (post `0e2a897` — thinking config FU#60 restored; editor gating + auto-fire + edition picker shipped; full 5-voice dryrun completed)
 **Scope:** Everything pertaining to the runtime pipeline (`runtime/flows/*` + downstream Athens-facing surfaces) that is open. Includes items from the Step 3 redesign session, FU#61/62 work, prior FOLLOW_UPS.md entries, prior HANDOFF docs, OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md, and the PIPELINE_DOWNSTREAM_DESIGN architectural doc.
 **Replaces (for runtime scope only):** OPEN_ITEMS_VOICE_PIPELINE_2026_04_29.md (which can be archived). Persona-pipeline FUs in FOLLOW_UPS.md remain there as the persona thread's source of truth.
 **Authority:** This is the runtime authoritative truth going forward. Changes to runtime scope land here.
@@ -36,7 +37,50 @@ Admin console                operator infra (NOT BUILT)
 
 ---
 
-## TL;DR — runtime state, May 1 2026
+## TL;DR — runtime state, 2026-05-06 morning
+
+**Pipeline end-to-end ready** (Provocateur → Voice → Editor → publish + edition picker):
+- Voice Pipeline Steps 1+2 + validation + continuity (Step 3 dormant for Athens)
+- Editor Pipeline ✅ SHIPPED `1437dfc` + closing prompt rebuilt `1de4081` + synthesis routing `2a80e8e` + panel-speaker attribution `419fcac` + per-voice review gate `b5b8d72` + auto-fire `b5b8d72` + edition picker (B3) `b5b8d72`
+- Provocateur deployment context `419fcac` (THE GATHERING + THE SPEAKERS injected into all three system prompts)
+- Validator field-name bug `48f4c9d` (was returning false-positive WARNs across all voices)
+- All 8 LLM-call sites consistent on FU#60 form `0e2a897`
+
+**5-voice end-to-end dryrun executed 2026-05-06 ~00:00–00:12** (separate project root `current-tests/dev_5voice_dryrun_2026_05_05/`): Provocateur → Voice (Step 1+2) → Editor produced 1 dossier across Plato + Ibn Battuta + Hannah Arendt + Bob Marley + Whanganui River for theme_002 (populism). Per-voice Provocateur reframings ("The Office and the Soul" for Plato, etc.). Validation post-fix: 2 PASS (Arendt, Marley), 3 WARN with substantive findings (Plato, Ibn Battuta, Whanganui). ~$10-15.
+
+**Operator workflow ready for Athens:**
+1. Voice pipeline runs → produces Step 2 artifacts + validation
+2. Operator visits `/admin/tonight/voice` → reads validation → clicks Release / Hold-for-regen on each
+3. Editor auto-fires when last voice reviewed → dossiers + edition_lead land 2-3 min later
+4. No CLI invocation needed for editor stage post-voice-completion
+
+**Athens-blocking, still external to runtime:**
+- B2 Microsite (operator designing) 🔴
+- B5 Closing-show pipelines 🔴
+- B6 Day 4 goodbye 🔴
+- B7 Render layer for non-text artifacts ⚠️ partial (Octopus JSX shipped; Marley → Suno still pending)
+- B10 VM provisioning 🟡 specified, awaiting operator input on domain + microsite hosting
+- D1 Marley appropriation paragraph (operator writing)
+- E1 Athens intro paragraph publish-or-hold decision (with Till)
+
+**Athens-blocking RESOLVED in this session:**
+- ~~B1 Editor / Frame layer~~ ✅ closing prompt v2-rebuilt + panel-speaker attribution + synthesis routing — ready for first usable output
+- ~~B3 Edition Pipeline~~ ✅ algorithmic lead-theme picker shipped
+- ~~B8 Admin console (action surface)~~ 🟡 partial: per-voice Release/Hold buttons + auto-fire complete; Fire-editor manual button still missing but auto-fire makes it less needed
+
+**Designed conceptually, not yet built:**
+- Microsite (operator designing) — drives editor output schema per A2 F
+- Closing-show pipelines, Day 4 goodbye, render layer for non-text artifacts (full)
+
+**Spec/impl divergences worth knowing:**
+- ~~Voice Pipeline validation regen-on-flag is unimplemented (FU#62)~~ ✅ RESOLVED 2026-05-01: validation is diagnostic-only; Athens policy Night 1 ON / Nights 2+3 OFF
+- ~~Validation wall-time is ~20-40 min/night actual vs spec's 3-5 min claim~~ ✅ RESOLVED 2026-05-01
+
+---
+
+## OBSOLETE TL;DR (preserved as-is for historical reference)
+
+### TL;DR — runtime state, May 1 2026
 
 **Built and validated:**
 - Voice Pipeline Steps 1+2+3 + validation + continuity + publish (commits `180a18f`, `aca0e4c`, `fa88db7`, `ddec38a`, plus 04-29/04-30 hardening)
@@ -293,32 +337,40 @@ Result:
 
 **Per Frame Concept §"production implications":** `docs/AI_Assembly_Microsite_Concept.md` mini-concept landing as part of operator's design work.
 
-### B3. Edition Pipeline (lead-theme picker) 🟡 SCOPE NARROWED 2026-05-04 PM
+### B3. Edition Pipeline (lead-theme picker) ✅ SHIPPED 2026-05-06 (commit `b5b8d72`)
 
-**Operator decision 2026-05-04 PM:** "Broadsheet" pipeline as a separate cross-dossier publication is OFF the roadmap entirely (not even post-Athens). The "edition" concept is per-night and currently does **one thing**: pick which dossier is tonight's lead.
+**Resolution 2026-05-06 (option 2 — algorithmic):** New module
+`runtime/flows/editor/edition.py` implements the deterministic
+lead-theme picker per the operator's option-2 direction. Hooked into
+`run_editor_pipeline` as Stage 3 after dossier writes.
 
-**State:** UNBUILT. Placeholder fields provisioned in the publish surface (commit `14a74be`):
-- `published_artifacts/dossiers/night_<N>/_index.json` carries `edition_lead: null`
-- `published_artifacts/dossiers/_index.json` carries `editions_by_night: {}`
-
-**Shape when populated:**
-```jsonc
-"edition_lead": { "lead_dossier_no": 2 }
-"editions_by_night": { "1": { "lead_dossier_no": 2 }, ... }
+**Algorithm (deterministic, tunable via constants):**
 ```
+score = n_engaged_voices × ENGAGEMENT_WEIGHT (10)
+      + FRICTION_VALUES[audience_friction] (high=100, mod=50, low=10)
+      + (FAULT_LINE_BONUS=50 if theme_flags.fault_line_present else 0)
+```
+Highest score wins; tiebreak by lowest theme_id (deterministic across
+reruns). Operator can override after the fact by hand-editing the
+per-night `_index.json` — runtime won't clobber unless re-fired.
 
-**Microsite use:**
-- Page 1 lead-vs-grid layout — read `edition_lead.lead_dossier_no` to know which dossier renders in the lead position. Fall back to algorithmic / operator override when null.
-- "Past Editions" archive — read `editions_by_night` to show one lead per night without re-fetching every per-night `_index.json`.
+**What gets written:**
+- `published_artifacts/dossiers/night_<N>/_index.json` — full per-night
+  payload with `edition_lead.lead_dossier_no` + per-dossier roll-up
+  (kicker, headline, subline, theme_id, voice_count, voices_routed[])
+- `published_artifacts/dossiers/_index.json` — root aggregator with
+  `editions_by_night` map + flat `dossiers` list across all nights
 
-**Implementation options when ready (not yet decided):**
-1. **Operator picks by hand** (manual override file; no LLM)
-2. **Algorithmic** (deterministic — e.g., dossier with most engaged voices, or theme flagged `audience_friction: high`)
-3. **Small LLM pass** (Sonnet 4.6 reads the night's dossiers, picks lead + emits a one-line rationale)
+**Audit:** `manifest.edition.scoring_audit` carries per-dossier scores
+so operator can see why the winner won (and flag if they disagree).
 
-Estimated effort once decided: 1-2 hr for option 1 or 2; 2-3 hr for option 3. Pre-Athens-eligible if the microsite needs the lead-vs-grid distinction by the conference.
+**Sub-options not chosen (kept as future paths):**
+- Option 1 (manual operator override) — already supported via direct
+  `_index.json` edits; algorithmic pick is the floor not a ceiling.
+- Option 3 (LLM pass) — deferred; not needed if algorithmic produces
+  acceptable picks at Athens. Re-open if scoring tie patterns hurt.
 
-**Cross-references:** Designer briefing at `_workspace/planning/DESIGNER_BRIEFING_2026-05-04.md` documents the placeholder shape for downstream consumers.
+**Cross-references:** Designer briefing at `_workspace/planning/DESIGNER_BRIEFING_2026-05-04.md` documents the placeholder shape (now actively populated).
 
 ### B4. Substack draft pipeline pass ✅ CLOSED 2026-05-04 (superseded — Editor Pipeline v2 dropped Substack as delivery channel)
 
@@ -374,17 +426,23 @@ Per Frame Concept §"Day 4 goodbye": HoBB editorial voice + one panel voice's fi
 
 **Cross-thread:** persona-thread side complete. Card declares the contract; runtime owns consumption. Cross-references `voices/OPEN_ITEMS.md` §15 (Octopus compass rebuild).
 
-### B8. Admin console 🔴
+### B8. Admin console 🟡 PARTIAL (operator action surface partially shipped 2026-05-06)
 
-**State:** UNBUILT. Operator infrastructure for orchestrating overnight pipelines + council sync + log tail.
+**State:** read-only dashboard ✅ shipped (`/admin/tonight/*` drilldowns); per-voice **Release / Hold-for-regen** action buttons ✅ shipped (write `04_voice/operator_decisions/<slug>.json`); **editor auto-fire on review-completion** ✅ shipped 2026-05-06 (commit `b5b8d72`).
 
-**Per ONBOARDING.md:** essential for Athens execution; operator needs:
-- Per-stage launch + retry buttons (transcription, researcher, provocateur, voice, publish, editor)
-- Live log tail
-- Council sync (operator approves/edits Provocateur briefings before voice runs?)
-- Validation flag review (Night 1 morning workflow per FU#62 recommendation)
+**What shipped 2026-05-06 (commit `b5b8d72`):**
+- `flows/editor/routing.gating_status(run_dir)` classifies voices as PASS / released / held / pending-review.
+- `run_editor_pipeline` refuses to run if any routed voice is pending review (writes `05_editor/gating_blocked.json`). CLI `--bypass-gating` for tests.
+- `_maybe_auto_fire_editor(night)` in `runtime/ingest/app.py`: after each Release/Hold dashboard click, checks gate state. If ready AND no manifest yet AND no in-flight lockfile, fires `editor_flow.py` as a detached subprocess. Idempotent.
+- Operator workflow: visit `/admin/tonight/voice` → Release / Hold each voice → editor fires automatically when last voice is reviewed → dossiers + `edition_lead` land on dashboard 2-3 min later.
 
-**Spec status:** undocumented. Needs operator product decisions on workflow.
+**Still missing (low priority post-auto-fire):**
+- Explicit "Fire editor" manual button (less needed; auto-fire covers the production path)
+- Per-stage launch buttons for upstream stages (transcription / researcher / provocateur) — operator runs these from CLI today
+- Live log tail (operator can `tail -f` per-stage logs)
+- Council-sync UI (operator hand-edits council_config when needed)
+
+**Spec status:** undocumented. Needs operator product decisions on remaining workflow gaps. Auto-fire closes the most critical gap (operator-detached editor firing).
 
 ### B9. Per-voice headline poetics 🟢 ARCHITECTURE RESOLVED 2026-05-03 PM (content authoring belongs to voices thread)
 
@@ -1835,6 +1893,152 @@ result["wall_clock_s"] = wall
 ```
 
 **Status:** filed; pre-Athens-eligible (small but enables exact cost monitoring during the 3-night run). Trivial change, no behavior impact.
+
+---
+
+### C40. Editor pipeline gating + auto-fire from dashboard 🟢 SHIPPED 2026-05-06 (commit `b5b8d72`)
+
+Closes the operator-action gap that surfaced during the 5-voice
+dryrun: dashboard had Release / Hold-for-regen buttons writing
+`operator_decisions/<voice>.json`, but editor pipeline only
+EXCLUDED held voices — unreviewed voices flowed through identically
+to released ones. Operator's "review window" had no gate.
+
+**Implementation:**
+- `flows/editor/routing.gating_status(run_dir)` — classifies each
+  Step-2-artifact voice as PASS / released / held / pending-review.
+  `ready` is True only when zero are pending.
+- `run_editor_pipeline` runs Stage 0 gate before Stage 1: if not
+  ready, writes `05_editor/gating_blocked.json` and returns a
+  manifest-shaped dict with `gating_blocked=True`. CLI `--bypass-gating`
+  for tests.
+- `runtime/ingest/app.py::_maybe_auto_fire_editor(night)` — after
+  each Release/Hold dashboard click, checks gate state. If ready
+  AND no manifest yet AND no in-flight lockfile, fires
+  `editor_flow.py` as a detached subprocess. Idempotent (lockfile
+  + manifest existence guard).
+- Subprocess inherits `AI_ASSEMBLY_PROJECT_ROOT` from dashboard env.
+
+Operator workflow: visit `/admin/tonight/voice` → Release/Hold each
+voice → editor fires automatically when last voice is reviewed →
+dossiers + `edition_lead` land 2-3 min later via auto-refresh.
+
+Tests: 245/245 pass.
+
+---
+
+### C39. Synthesis-router architectural commit 🟢 SHIPPED 2026-05-05/06 (commit `2a80e8e`)
+
+Closes B1's TODO ("synthesis-only voice routing helper") AND extends
+the fix UPSTREAM into voice Step 2.
+
+**What replaced what:**
+
+- Editor stage: `flows/editor/routing.py` Case 2 was
+  "lowest-numbered theme_id in themes_covered" — arbitrary; threw
+  away the synthesis voice's actual emphasis. Replaced with a
+  one-call Sonnet 4.6 router (`flows/editor/synthesis_router.py`)
+  that reads artifact_text + each candidate theme's display_title
+  + Researcher abstract + voice-specific narrative_briefing, and
+  picks. Returns `(theme_id, rationale)`. Rationale persists in
+  `voices_routing[].primary_theme_source` for dashboard surfacing.
+  ~$0.05/call, ~5-10s wall, no thinking.
+- Voice Step 2 stage: `flows/voice/step2_first_draft_artifact.py`
+  `_resolve_primary_theme_id` upgraded — now handles three paths
+  at write-time: (a) single-response session resolves to that one
+  theme regardless of phrasing; (b) "Focus on Response N" parsed
+  against step1_outputs order; (c) synthesis case calls the router
+  with briefing-derived candidates and bakes the chosen theme into
+  `lineage.primary_theme_id`. New artifacts always land authoritative
+  primary_theme_id; editor's Cases 2/B become safety-nets for legacy.
+  Adds `lineage.primary_theme_id_source` for audit.
+
+**Tests:** 4 synthesis-router unit tests + 2 Case B tests + e2e
+through editor flow. Verified live in 5-voice dryrun: synthesis
+router fired for Cleopatra (4 themes covered) and Ibn Battuta
+(2 themes covered) at editor stage; both produced grounded
+rationales (~5s each).
+
+---
+
+### C38. Panel-speaker attribution end-to-end 🟢 SHIPPED 2026-05-05/06 (commit `419fcac`)
+
+Closes the loop voice-pipeline → editor → dashboard for "panel
+speakers cited by name + role" instead of role-only.
+
+**Chain:**
+1. `flows/editor/dossier_generation.py::build_dossier_briefing`
+   joins `reference/speakers.json` into a `panel_speakers[]` list
+   (name + title + affiliation per speaker referenced in any
+   cluster's extractions). Threaded through Tim's user prompt.
+2. Tim's closing prompt updated: cite by NAME + role
+   ("Kaja Kallas, the EU's foreign-affairs chief"), not role-only.
+3. `panel_speakers[]` persisted on the dossier output JSON.
+4. `runtime/ingest/app.py::_pulled_quotes` filter takes
+   `panel_speakers[]` as third arg; matches surnames to attribute
+   panel-speaker quotes precisely. Returns `kind` field
+   ("voice" / "panel" / "") so the template labels correctly.
+5. `admin_render_dossier.html` quote audit splits voice-quote count
+   from panel-speaker count; per-quote attribution displays as
+   "the Voice of X" or "Kaja Kallas — Vice-President of the EC".
+
+---
+
+### C37. Provocateur deployment context (`THE GATHERING` + `THE SPEAKERS`) 🟢 SHIPPED 2026-05-06 (commit `419fcac`)
+
+Closes the gap between voice + editor (which already had
+deployment-context blocks via `feature/voice-deployment-context`)
+and Provocateur (which was reading `council_config.audience` only,
+no conference facts, no speaker reference).
+
+**Implementation:** `provocateur_flow.py` gains
+`_load_provocateur_deployment_context()` returning rendered
+`THE GATHERING` (from `conference_facts.conference_context_paragraph`)
++ `THE SPEAKERS` (from `reference/speakers.json`, audience-member
+entries filtered out). Both injected as new template placeholders
+into all three Provocateur prompts (`provocateur_triage_voice.md`,
+`provocateur_triage_flags.md`, `provocateur_formulation.md`). No
+new LLM calls — just richer context for existing ones.
+
+**Why it matters:** Provocateur's triage + formulation passes
+make audience-shaped decisions (`audience_friction` tagging,
+question/proposition mode selection, speaker-aware framings).
+Previously it saw speaker NAMES in extractions but didn't know
+who they are. Now sees full title + affiliation context.
+
+---
+
+### C36. Validator field-name bug (Step 2 validation) 🟢 SHIPPED 2026-05-06 (commit `48f4c9d`)
+
+Surfaced during the 5-voice dryrun: ALL 5 voices got WARN with
+identical "voice was given zero panel material" narrative — even
+though Step 1 lineage proved grounding extraction IDs were
+present. Root cause:
+
+- `flows/voice/step2_validation.py:238-239` was reading
+  `lineage.grounding_extraction_ids` + `lineage.session_ids`
+- But Step 2 lineage carries the union under the `all_` prefix
+  (`all_grounding_extraction_ids` + `all_session_ids`) because
+  Step 2 unions across the voice's Step 1 outputs.
+- Bare names exist on Step 1 lineage; only the union exists on
+  Step 2. Validator was always reading `[]`.
+
+**Fix:** Read `all_*` first with bare-name fallback so the function
+works for both Step 1 and Step 2 lineage shapes.
+
+**Empirical effect:** re-validation post-fix flipped Arendt + Marley
+WARN→PASS (false-positives removed); Plato + Ibn Battuta + Whanganui
+retained WARN with substantive findings (engagement-not-panel-anchored,
+voice-fidelity moves missing, kawa-as-own-argument-engine). Validator
+went from "always lying about grounding" to "honest pillar-by-pillar
+verdicts."
+
+**Bonus:** validator engagement prompt (`voice_step2_validation_engagement.md`)
+softened with a "counting + register caveats" section so confident
+"voice given zero panel material" narrative warnings are tempered.
+Per-typological-register voices (Arendt's "the eighteenth-century
+minister", Marley's "the sister from New York") no longer
+auto-flag-as-fabrication.
 
 ---
 
