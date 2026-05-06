@@ -10,6 +10,8 @@ Closed this session-cluster (2026-05-05 evening + 2026-05-06):
 - §29 Tim Leberecht 13th persona SHIPPED as Assembly editor (replacing Claudia DRAFT)
 - §30 assembly-fiction reframe SHIPPED across all 10 voices
 - §31 gap A + B + F ✅ FIXED for Whanganui v2; gap C lesson captured; gaps D + E + G filed for v4.1 (post-Athens)
+- **anchored_override cleanup**: nulled across all 8 voices that had it populated (Whanganui + Octopus already null); dead config at Athens runtime per `runtime/flows/voice/card_assembly.py` — Voice Pipeline uses `default` only. athens-2026 `82a0af9`. Reversible via git history.
+- **Runtime-thread cleanup `ec15c82`**: removed May-4 continuity_night_2 dryrun artifacts + stale council_config backup + extended .gitignore. The runtime-thread WIP flagged across many sessions is now gone.
 
 Several historical/done planning docs archived to `_workspace/archive/session-artifacts/` 2026-05-06: `WHANGANUI_V2_PLAN_2026-05-05.md`, `WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md`, `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`, `MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`, `MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`, `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` — content migrated into authoritative OPEN_ITEMS sections.
 
