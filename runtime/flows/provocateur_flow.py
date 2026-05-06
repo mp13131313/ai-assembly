@@ -1542,9 +1542,24 @@ def run_provocateur(
         else None
     )
 
-    # Wait on results, assemble in council member order
+    # Wait on results, assemble in council member order. Key by the
+    # INPUT voice name rather than the result's `voice` field — the model's
+    # JSON sometimes drops the "Voice of" prefix ("Scheherazade" instead
+    # of "Voice of Scheherazade"), and `setdefault("voice", voice["name"])`
+    # in triage_voice() is a no-op when the model already emitted a
+    # `voice` key. Normalize both fresh + cached results so downstream
+    # consumers (selection.json, formulation prompts) see the canonical
+    # council name regardless of what the model emitted.
     fresh_voice_results = [f.result() for f in voice_futures]
-    fresh_voice_by_name = {r["voice"]: r for r in fresh_voice_results}
+    for v, r in zip(to_run, fresh_voice_results):
+        r["voice"] = v["name"]
+    fresh_voice_by_name = {v["name"]: r for v, r in zip(to_run, fresh_voice_results)}
+    # Also override on cached (already_done) results: an earlier run might
+    # have written disk files with the model's stripped emission.
+    for member in council["members"]:
+        cached = already_done.get(member["name"])
+        if cached is not None:
+            cached["voice"] = member["name"]
     triage_voice_results = [
         already_done.get(v["name"]) or fresh_voice_by_name[v["name"]]
         for v in council["members"]
