@@ -1633,9 +1633,19 @@ def run_provocateur(
             ckpt = formulations_dir / f"{theme_id}__{_member_slug(member_name)}.json"
             if ckpt.exists():
                 try:
-                    already_done_formulations.append(
-                        json.loads(ckpt.read_text(encoding="utf-8"))
-                    )
+                    loaded = json.loads(ckpt.read_text(encoding="utf-8"))
+                    # Normalize the `member` field to the canonical
+                    # council member_name. The model occasionally emits
+                    # a stripped form ("Hannah Arendt" vs the canonical
+                    # "Voice of Hannah Arendt"); `formulate_for_member`'s
+                    # `result.setdefault("member", member_name)` is a
+                    # no-op when the model already emitted a `member`
+                    # key. Without this normalization, formulation_by_pair
+                    # below ends up keyed by the stripped form and the
+                    # packaging lookup misses, leaving the voice's
+                    # briefing with 0 formulations.
+                    loaded["member"] = member_name
+                    already_done_formulations.append(loaded)
                     continue
                 except Exception as e:
                     logger.warning(f"  failed to load {ckpt}: {e}, re-running")
@@ -1684,6 +1694,11 @@ def run_provocateur(
             for (theme, member_name, tf) in batch
         ]
         batch_results = [f.result() for f in batch_futures]
+        # Normalize the `member` field on each fresh result to the
+        # canonical pair[1] name. See the loop above for the cached-
+        # results normalization (same rationale).
+        for (_, member_name, _), result in zip(batch, batch_results):
+            result["member"] = member_name
         fresh_formulations.extend(batch_results)
         done_so_far = len(already_done_formulations) + len(fresh_formulations)
         logger.info(
