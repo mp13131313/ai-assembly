@@ -41,22 +41,15 @@ CONTINUITY_MODEL = os.environ.get(
     "claude-sonnet-4-6",
 )
 CONTINUITY_THINKING = os.environ.get("VOICE_CONTINUITY_THINKING", "1") != "0"
-CONTINUITY_THINKING_EFFORT = os.environ.get("VOICE_CONTINUITY_EFFORT", "medium")
 CONTINUITY_MAX_TOKENS = int(os.environ.get("VOICE_CONTINUITY_MAX_TOKENS", "8000"))
 
 
 def _thinking_kwargs() -> dict:
-    """Adaptive thinking + effort=medium for continuity (Sonnet 4.6).
-    See voice/step1_private_reasoning._thinking_kwargs for full rationale.
-    Continuity is a compression task, not deep reasoning — `medium`
-    effort by default; bump via VOICE_CONTINUITY_EFFORT env var.
-    """
+    """Adaptive thinking kwargs for continuity (Sonnet 4.6, FU#60 form).
+    See voice/step1_private_reasoning._thinking_kwargs for full rationale."""
     if not CONTINUITY_THINKING:
         return {}
-    return {
-        "thinking": {"type": "adaptive"},
-        "effort": CONTINUITY_THINKING_EFFORT,
-    }
+    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def _load_voice_step1_outputs(

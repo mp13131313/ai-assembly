@@ -39,7 +39,6 @@ VOICE_MODEL = os.environ.get(
     os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
 )
 VOICE_THINKING = os.environ.get("VOICE_THINKING", "1") != "0"
-VOICE_THINKING_EFFORT = os.environ.get("VOICE_THINKING_EFFORT", "high")
 STEP2_MAX_TOKENS = int(os.environ.get("VOICE_STEP2_MAX_TOKENS", "64000"))
 
 
