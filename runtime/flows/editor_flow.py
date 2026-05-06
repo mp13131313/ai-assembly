@@ -95,12 +95,56 @@ def run_editor_pipeline(
     skip_routing: bool = False,
     single_dossier: str | None = None,
     no_cache: bool = False,
+    bypass_gating: bool = False,
 ) -> dict[str, Any]:
-    """End-to-end Editor Pipeline. Returns the manifest dict."""
+    """End-to-end Editor Pipeline. Returns the manifest dict.
+
+    Per-voice review gate (default ON; bypass with `bypass_gating=True`):
+        Refuses to run if any voice with a Step 2 artifact has neither
+        a PASS validation verdict nor an explicit operator decision
+        (release/hold_for_regen). Writes the gating status to
+        `<run_dir>/05_editor/gating_blocked.json` and returns it as a
+        manifest-shaped dict with `pipeline="editor"` and
+        `gating_blocked=True` so callers can tell the difference from
+        a successful run.
+    """
     logger = get_logger("editor_flow")
     t_start = time.time()
 
     assert_run_dir_night_matches(run_dir, night)
+
+    # ---- Stage 0: per-voice review gate ----------------------------------
+    if not bypass_gating:
+        from flows.editor.routing import gating_status
+        gate = gating_status(run_dir)
+        if not gate["ready"]:
+            logger.warning(
+                f"Editor gate BLOCKED: {len(gate['voices_pending_review'])} "
+                f"voice(s) pending review: {gate['voices_pending_review']}. "
+                f"Each voice needs either a PASS validation verdict or an "
+                f"explicit operator decision (release / hold_for_regen)."
+            )
+            out_dir = run_dir / "05_editor"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            blocked_payload = {
+                "pipeline": "editor",
+                "schema_version": "2.0",
+                "night": night,
+                "gating_blocked": True,
+                "gating_status": gate,
+                "blocked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            }
+            write_json_atomic(out_dir / "gating_blocked.json", blocked_payload)
+            return blocked_payload
+        # Clear any stale gating-blocked marker from a prior run.
+        stale = run_dir / "05_editor" / "gating_blocked.json"
+        if stale.exists():
+            stale.unlink()
+        logger.info(
+            f"Editor gate OPEN: {len(gate['voices_pass'])} PASS · "
+            f"{len(gate['voices_released'])} released · "
+            f"{len(gate['voices_held'])} held"
+        )
 
     # One Anthropic client across the whole flow — Stage 1 synthesis-router
     # call (if any) and Stage 2 dossier calls share it. SDK is thread-safe
@@ -206,6 +250,20 @@ def run_editor_pipeline(
             dossier_results[theme_id] = dossier
             logger.info(f"  wrote {run_path.name} (run_dir + published)")
 
+    # ---- Stage 3: edition lead-pick + per-night/root indices ------------
+    edition_audit: dict[str, Any] = {}
+    if dossier_results:
+        from flows.editor.edition import finalize_edition
+        logger.info("Stage 3: edition lead-pick + indices")
+        edition_audit = finalize_edition(
+            run_dir=run_dir,
+            project_root=project_root,
+            night=night,
+            routing=routing,
+            dossiers_by_theme=dossier_results,
+            logger=logger,
+        )
+
     # ---- Manifest -------------------------------------------------------
     wall_total = round(time.time() - t_start, 2)
     manifest = {
@@ -226,6 +284,7 @@ def run_editor_pipeline(
             "refusals":           len(routing.get("refusals", [])),
         },
         "dossier_failures": dossier_failures,
+        "edition":          edition_audit,
         "wall_clock_s":     wall_total,
         "config": {
             "EDITOR_BATCH":  EDITOR_BATCH,
@@ -257,6 +316,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="Run Stage 2 for one theme only (theme_id).")
     ap.add_argument("--no-cache", action="store_true",
                     help="Disable prompt caching (useful when iterating on Claudia's card).")
+    ap.add_argument("--bypass-gating", action="store_true",
+                    help="Skip the per-voice review gate (refuses to run if any "
+                         "voice is pending review). Use only for tests / one-off "
+                         "forces; production runs should review and release voices "
+                         "via the dashboard before firing the editor.")
     add_project_arg(ap)
     args = ap.parse_args(argv)
 
@@ -270,8 +334,11 @@ def main(argv: list[str] | None = None) -> int:
         skip_routing=args.skip_routing,
         single_dossier=args.single_dossier,
         no_cache=args.no_cache,
+        bypass_gating=args.bypass_gating,
     )
-    if manifest["counts"]["dossiers_failed"]:
+    if manifest.get("gating_blocked"):
+        return 3  # distinct exit code for gate-blocked vs run-failure
+    if manifest.get("counts", {}).get("dossiers_failed"):
         return 2
     return 0
 

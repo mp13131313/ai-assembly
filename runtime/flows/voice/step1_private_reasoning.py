@@ -45,31 +45,33 @@ VOICE_MODEL = os.environ.get(
     os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
 )
 VOICE_THINKING = os.environ.get("VOICE_THINKING", "1") != "0"
+VOICE_THINKING_EFFORT = os.environ.get("VOICE_THINKING_EFFORT", "high")
 STEP1_MAX_TOKENS = int(os.environ.get("VOICE_STEP1_MAX_TOKENS", "64000"))
 
 
 def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs.
+    """Adaptive thinking kwargs with explicit effort = high.
 
-    Adaptive mode lets the model decide how much to think; the only
-    supported thinking mode on Opus 4.7. Returns no `temperature` key
-    by design — per Anthropic docs §"Feature compatibility":
-    "Thinking isn't compatible with `temperature` or `top_k`
-    modifications." The SDK default for temperature is 1.0; we let it
-    stand by omitting the key.
+    Per Anthropic docs (https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking):
+    On Opus 4.7, manual `type: "enabled"` returns 400 — only `type:
+    "adaptive"` is supported. Effort goes at the request top level:
+    `effort: "low" | "medium" | "high"`. `display` is only valid on
+    `type: "enabled"` (default on 4.7 adaptive is "omitted").
 
-    (Earlier voice-pipeline + researcher_flow drafts set
-    `temperature: 1.0` explicitly, copying a pattern from the
-    pre-Opus-4.7 manual-thinking era. That set was empirically
-    harmless on Opus 4.7 — thinking still happened — but technically
-    a docs violation. Removed for compliance + future-proofing.)
+    We default to `effort: "high"` so reasoning is consistent across
+    voices — earlier "adaptive without effort" runs showed some voices
+    returning 0 thinking tokens (model decided to skip), which produced
+    weaker artifacts. Override via VOICE_THINKING_EFFORT env var.
+
+    Returns no `temperature` — per docs, thinking isn't compatible with
+    `temperature` or `top_k` modifications.
     """
     if not VOICE_THINKING:
         return {}
-    # display: "summarized" — Opus 4.7 default is "omitted" which returns
-    # empty thinking blocks (we're billed regardless). Setting summarized
-    # makes traces visible for audit. Matches personas/clients.py FU#60.
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
+    return {
+        "thinking": {"type": "adaptive"},
+        "effort": VOICE_THINKING_EFFORT,
+    }
 
 
 _TAIL_RE = re.compile(

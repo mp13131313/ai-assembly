@@ -41,6 +41,8 @@ from .config import (
     ALLOWED_EXTENSIONS,
     MAX_UPLOAD_BYTES,
     MIN_FREE_BYTES,
+    PROJECT_ROOT,
+    REPO_ROOT,
     STATIC_DIR,
     STATIC_VERSION,
     TEMPLATES_DIR,
@@ -867,6 +869,73 @@ def _write_operator_decision(
     return out_path
 
 
+def _maybe_auto_fire_editor(night: int) -> dict:
+    """If the per-voice review gate is now ready (all voices PASS or
+    Released or Held) AND the editor hasn't already produced a manifest,
+    fire `editor_flow.py` as a detached subprocess. Returns
+    `{fired: bool, reason: str}` for telemetry.
+
+    Idempotent: subsequent calls after a successful fire will see
+    `manifest.json` and skip. Subsequent calls while the editor is
+    in-flight will see no manifest yet and may double-fire — guarded by
+    a lockfile `05_editor/.editor_running.lock`.
+    """
+    run_dir = dashboard.run_dir_for_night(night)
+    if run_dir is None or not run_dir.exists():
+        return {"fired": False, "reason": "no run_dir"}
+    manifest = run_dir / "05_editor" / "manifest.json"
+    if manifest.exists():
+        return {"fired": False, "reason": "editor already ran (manifest exists)"}
+    lockfile = run_dir / "05_editor" / ".editor_running.lock"
+    if lockfile.exists():
+        return {"fired": False, "reason": "editor already in-flight (lockfile)"}
+
+    # Reach into routing.gating_status without importing at module top
+    # (keeps test surface clean).
+    import sys as _sys
+    runtime_root = REPO_ROOT
+    if str(runtime_root) not in _sys.path:
+        _sys.path.insert(0, str(runtime_root))
+    from flows.editor.routing import gating_status
+    gate = gating_status(run_dir)
+    if not gate["ready"]:
+        return {
+            "fired": False,
+            "reason": f"gate not ready ({len(gate['voices_pending_review'])} pending)",
+            "gate": gate,
+        }
+
+    # Fire detached subprocess. Lockfile guards against double-fire while
+    # in-flight; the editor pipeline writes manifest.json on completion
+    # which permanently silences future fire attempts.
+    import subprocess
+    lockfile.parent.mkdir(parents=True, exist_ok=True)
+    lockfile.write_text(
+        json.dumps({"started_at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    )
+    log_path = run_dir / "05_editor" / "auto_fire.log"
+    cmd = [
+        str(runtime_root / "venv" / "bin" / "python3.12"),
+        str(runtime_root / "flows" / "editor_flow.py"),
+        str(run_dir),
+        "--night", str(night),
+    ]
+    # Detach: fire-and-forget so the HTTP request returns immediately.
+    # subprocess removes the lockfile by virtue of the editor writing
+    # manifest.json (which suppresses re-fire on next request).
+    subprocess.Popen(
+        cmd,
+        stdout=open(log_path, "w"),
+        stderr=subprocess.STDOUT,
+        start_new_session=True,
+        env={
+            **os.environ,
+            "AI_ASSEMBLY_PROJECT_ROOT": str(PROJECT_ROOT),
+        },
+    )
+    return {"fired": True, "reason": "auto-fired editor pipeline", "log": str(log_path)}
+
+
 @app.post("/admin/voice/{voice_slug}/release")
 def admin_voice_release(
     voice_slug: str,
@@ -874,9 +943,11 @@ def admin_voice_release(
     _: str = Depends(require_admin),
 ):
     """Operator decision: release this voice's artifact as-is despite
-    validation flags. Writes operator_decisions/<voice>.json."""
+    validation flags. Writes operator_decisions/<voice>.json. Auto-fires
+    the editor pipeline if the per-voice review gate is now ready."""
     n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
     _write_operator_decision(voice_slug, "release", n)
+    _maybe_auto_fire_editor(n)
     return RedirectResponse(
         url=f"/admin/tonight/voice?night={n}",
         status_code=303,
@@ -890,9 +961,12 @@ def admin_voice_hold(
     _: str = Depends(require_admin),
 ):
     """Operator decision: hold this voice's artifact for regen. Excluded
-    from dossier composition + per-night publish per C28b."""
+    from dossier composition + per-night publish per C28b. Auto-fires
+    the editor pipeline if holding this voice was the last gate-blocker
+    (i.e. the remaining voices are all PASS or Released)."""
     n = night if night in dashboard.ATHENS_NIGHTS else dashboard.latest_active_night()
     _write_operator_decision(voice_slug, "hold_for_regen", n)
+    _maybe_auto_fire_editor(n)
     return RedirectResponse(
         url=f"/admin/tonight/voice?night={n}",
         status_code=303,

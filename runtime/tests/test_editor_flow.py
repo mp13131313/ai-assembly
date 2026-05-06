@@ -201,7 +201,7 @@ framing_text: F-cleopatra
     monkeypatch.setattr("anthropic.Anthropic", lambda *a, **kw: MagicMock())
 
     from flows.editor_flow import run_editor_pipeline
-    manifest = run_editor_pipeline(run_dir, night=1, project_root=project_root)
+    manifest = run_editor_pipeline(run_dir, night=1, project_root=project_root, bypass_gating=True)
 
     # Stage 1 wrote routing
     routing_path = run_dir / "05_editor" / "theme_routing.json"
@@ -279,7 +279,7 @@ def test_editor_flow_handles_failed_dossier(tmp_path, monkeypatch):
     monkeypatch.setattr("anthropic.Anthropic", lambda *a, **kw: MagicMock())
 
     from flows.editor_flow import run_editor_pipeline
-    manifest = run_editor_pipeline(run_dir, night=1, project_root=project_root)
+    manifest = run_editor_pipeline(run_dir, night=1, project_root=project_root, bypass_gating=True)
 
     assert manifest["counts"]["dossiers_failed"] == 1
     assert manifest["counts"]["dossiers_succeeded"] == 1

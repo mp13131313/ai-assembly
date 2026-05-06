@@ -233,6 +233,105 @@ def _parse_focus_to_primary_theme(
     return ("", "Case 3 — no themes_covered; refusal handling expected")
 
 
+def _load_operator_decisions(run_dir: Path) -> dict[str, str]:
+    """Read `04_voice/operator_decisions/*.json` and return a slug →
+    decision map. Decision values are "release" | "hold_for_regen".
+    Voices with no decision file are absent from the result.
+    """
+    dec_dir = run_dir / "04_voice" / "operator_decisions"
+    if not dec_dir.exists():
+        return {}
+    out: dict[str, str] = {}
+    for p in sorted(dec_dir.glob("*.json")):
+        try:
+            with p.open(encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        slug = data.get("voice_slug") or p.stem
+        decision = data.get("decision")
+        if slug and decision in ("release", "hold_for_regen"):
+            out[slug] = decision
+    return out
+
+
+def _load_validation_verdicts(run_dir: Path) -> dict[str, str]:
+    """Read `04_voice/step2_validation/*.json` and return a slug →
+    overall_verdict map (PASS | WARN | FAIL). Voices without a
+    validation file are absent.
+    """
+    val_dir = run_dir / "04_voice" / "step2_validation"
+    if not val_dir.exists():
+        return {}
+    out: dict[str, str] = {}
+    for p in sorted(val_dir.glob("*.json")):
+        try:
+            with p.open(encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        slug = data.get("voice_slug") or p.stem
+        verdict = data.get("overall_verdict")
+        if slug and verdict:
+            out[slug] = verdict
+    return out
+
+
+def gating_status(run_dir: Path) -> dict[str, Any]:
+    """Per-voice review gate for the editor pipeline.
+
+    A voice is "ready" if any of:
+      - explicit `release` operator decision (operator reviewed + accepted)
+      - explicit `hold_for_regen` operator decision (excluded from editor)
+      - PASS verdict on Step 2 validation (no review needed)
+
+    A voice is "pending review" if:
+      - has WARN/FAIL verdict AND no operator decision
+
+    The editor pipeline should refuse to run if any routed voice is
+    pending review. Auto-fire (after release/hold writes) checks this
+    state and triggers the editor only when `ready` is True.
+
+    Returns:
+        {
+          "ready": bool,
+          "voices_pass": [...],
+          "voices_released": [...],
+          "voices_held": [...],
+          "voices_pending_review": [...]
+        }
+    """
+    verdicts = _load_validation_verdicts(run_dir)
+    decisions = _load_operator_decisions(run_dir)
+
+    # The set of voices in scope is the set of voices with Step 2
+    # artifacts on disk — not the routing manifest, since routing may
+    # not yet have run when this is called.
+    artifacts_dir = run_dir / "04_voice" / "step2_first_draft_artifacts"
+    voice_slugs = sorted(
+        p.stem for p in artifacts_dir.glob("*.json")
+    ) if artifacts_dir.exists() else []
+
+    pass_, released, held, pending = [], [], [], []
+    for slug in voice_slugs:
+        if decisions.get(slug) == "hold_for_regen":
+            held.append(slug)
+        elif decisions.get(slug) == "release":
+            released.append(slug)
+        elif verdicts.get(slug) == "PASS":
+            pass_.append(slug)
+        else:
+            pending.append(slug)
+
+    return {
+        "ready": len(pending) == 0,
+        "voices_pass": pass_,
+        "voices_released": released,
+        "voices_held": held,
+        "voices_pending_review": pending,
+    }
+
+
 def _load_held_voices(run_dir: Path) -> set[str]:
     """Voices the operator marked `hold_for_regen` per C28b. Excluded
     from dossier composition + publish."""

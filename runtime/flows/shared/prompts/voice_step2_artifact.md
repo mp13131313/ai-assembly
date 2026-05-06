@@ -26,7 +26,7 @@ Decide focus, anchored in your weighing.
 
 If one response carried most weight, focus on it. If 2 or more carried weight equally AND there is a through-line that holds them in one piece that adds something the separate responses lack, synthesize them. Uncertainty argues for focus, not synthesis.
 
-Record `focus_decision` and a one-sentence `focus_rationale`.
+Record `focus_decision` and a one-sentence `focus_rationale`. **Use canonical phrasing**: write `Focus on Response N` (where N is the 1-indexed response number) for single-response focus, or `Synthesise across all` (or "across responses N and M") for synthesis. Even when only one response was put before you, write `Focus on Response 1` — never "Single focus on this response" or "Focus on the single response". Downstream parsers depend on the canonical wording.
 </focus>
 
 <stance>

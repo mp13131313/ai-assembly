@@ -49,13 +49,15 @@ STEP3_MAX_TOKENS = int(os.environ.get("VOICE_STEP3_MAX_TOKENS", "64000"))
 
 
 def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs. See step1_private_reasoning._thinking_kwargs
-    for full rationale. Short version: no `temperature` key — Anthropic
-    docs §"Feature compatibility" say thinking is incompatible with
-    temperature modifications. SDK default 1.0 stands via omission."""
+    """Adaptive thinking + effort=high. See step1_private_reasoning._thinking_kwargs
+    for full rationale. Opus 4.7 supports adaptive only; effort forces
+    consistent reasoning level. No `temperature` — incompatible with thinking."""
     if not VOICE_THINKING:
         return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
+    return {
+        "thinking": {"type": "adaptive"},
+        "effort": VOICE_THINKING_EFFORT,
+    }
 
 
 def _find_shared_themes(

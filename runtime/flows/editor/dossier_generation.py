@@ -50,6 +50,7 @@ EDITOR_MODEL = os.environ.get(
     os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
 )
 EDITOR_THINKING = os.environ.get("EDITOR_THINKING", "1") != "0"
+EDITOR_THINKING_EFFORT = os.environ.get("EDITOR_THINKING_EFFORT", "high")
 EDITOR_MAX_TOKENS = int(os.environ.get("EDITOR_MAX_TOKENS", "32000"))
 
 
@@ -60,10 +61,15 @@ EDITOR_MAX_TOKENS = int(os.environ.get("EDITOR_MAX_TOKENS", "32000"))
 
 
 def _thinking_kwargs() -> dict:
-    """Adaptive thinking, summarized display. Mirrors voice pipeline pattern."""
+    """Adaptive thinking + effort=high. Mirrors voice pipeline pattern.
+    Per Anthropic docs, Opus 4.7 supports adaptive only; effort goes
+    at the request top level. Bump/lower via EDITOR_THINKING_EFFORT."""
     if not EDITOR_THINKING:
         return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
+    return {
+        "thinking": {"type": "adaptive"},
+        "effort": EDITOR_THINKING_EFFORT,
+    }
 
 
 # --- Dossier briefing assembly --------------------------------------------

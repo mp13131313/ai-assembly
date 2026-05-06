@@ -31,7 +31,11 @@ Reader bounces if the artifact is generic philosophy/commentary that could be ab
 
 If artifact reads as untethered from the panel, flag with `{"extraction_ids_referenced": <count>, "panelist_names_referenced": <count>, "why": "<brief explanation>"}`.
 
-Note: voice need not cite extraction_ids verbatim. References to panelists by name, paraphrased panel claims, or named-panel positions all count as grounding.
+**Counting + register caveats** (avoid false positives):
+- **Voices need not cite extraction_ids verbatim.** References to panelists by name, paraphrased panel claims, or named-panel positions all count as grounding.
+- **Some voices' authentic register works through types, not names.** Hannah Arendt's *Origins of Totalitarianism* register names "the eighteenth-century minister" not "Necker"; Plato's dialogues use generic interlocutors; Marley's reasoning yard names "the sister from New York" rather than "Alexandria Ocasio-Cortez". Typological reference IS engagement when it tracks specific panel positions — judge by whether the artifact's argument-shape responds to what was actually said, not by counting proper-name occurrences.
+- **Role-only attribution can be legitimate.** "The Czech President" instead of "Petr Pavel" is paraphrase, not fabrication, when the position-content tracks the actual extraction. Only flag fabrication if the artifact attributes claims to roles/people who never made those claims in the source.
+- **Be conservative with confident narratives.** Phrases like "the voice was given zero panel material" are claims about input, not about the artifact's quality — and you may be reading a partial input view. Stick to evidence in the artifact_text itself; describe what the artifact does (or doesn't do) with grounding, not what the voice was supposedly given.
 
 ---
 
