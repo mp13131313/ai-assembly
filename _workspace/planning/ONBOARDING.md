@@ -95,6 +95,8 @@ Subfolder-specific calibration (e.g., "always `--skip-validation` for dryrun wor
 
 The 6 dated persona-thread handoffs (`HANDOFF_2026_04_27.md … _NIGHT.md`) and `BRIEF_OPUS_4_7_THINKING_AUDIT_2026_04_29.md` were archived 2026-05-01 to `_workspace/archive/voices_consolidation_2026_05_01/` (commit `82e5a65`). Going forward, voices session-state lives in `voices/HANDOFF.md` (replaced each session).
 
+**Sessions 2026-05-05 evening + 2026-05-06 archive sweep:** six superseded planning docs (their content migrated into authoritative `voices/OPEN_ITEMS.md` sections §27–§31 + status headers added before move) were archived to `_workspace/archive/session-artifacts/`: `WHANGANUI_V2_PLAN_2026-05-05.md`, `WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md`, `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`, `MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`, `MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`, `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`. Active `voices/` planning docs after sweep: `HANDOFF.md`, `ONBOARDING.md`, `OPEN_ITEMS.md`, `MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (active operator-refinement work), `VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` (durable production constraint sheet), `TIM_LEBERECHT_CARD_REVIEW_2026-05-05.md` (recent reference review).
+
 ---
 
 ## Doc hygiene — what lives where, what gets archived

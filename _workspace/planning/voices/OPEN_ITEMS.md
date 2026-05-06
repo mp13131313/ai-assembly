@@ -1,8 +1,17 @@
-# Voices — Open Items (authoritative, 2026-05-05 evening)
+# Voices — Open Items (authoritative, 2026-05-06)
 
 **Scope:** EVERYTHING still open or undecided that pertains to the **persona pipeline / voice cards** for athens-2026. Distinct from the Voice Pipeline runtime (Steps 1+2+3) which has its own tracking.
 
-**Date stamp:** 2026-05-05 evening. Supersedes 2026-05-03 / 2026-05-04 / 2026-05-05 PM versions. New sections this session: §28 Whanganui v2 architectural restructure SHIPPED + ATHENS-CLEAN, §29 Tim Leberecht 13th persona SHIPPED as Assembly editor (replacing Claudia DRAFT), §30 assembly-fiction reframe SHIPPED across all 10 voices, §31 v4.1 architectural cleanup gap list (post-Athens). Closed this session: §27 length-cap card surgery, §28 Whanganui v2 (gap-E full closure with 4-field witness-stance patches).
+**Date stamp:** 2026-05-06. Supersedes 2026-05-03 / 2026-05-04 / 2026-05-05 PM / 2026-05-05 evening versions.
+
+Closed this session-cluster (2026-05-05 evening + 2026-05-06):
+- §27 length-cap card surgery (Dosto/Arendt 350-750w + Octopus 350-500w prose-channel front-loaded)
+- §28 Whanganui v2 architectural restructure SHIPPED + ATHENS-CLEAN (witness-translator stance + 4-field gap-E closure + kawa-speaker-frame closure)
+- §29 Tim Leberecht 13th persona SHIPPED as Assembly editor (replacing Claudia DRAFT)
+- §30 assembly-fiction reframe SHIPPED across all 10 voices
+- §31 gap A + B + F ✅ FIXED for Whanganui v2; gap C lesson captured; gaps D + E + G filed for v4.1 (post-Athens)
+
+Several historical/done planning docs archived to `_workspace/archive/session-artifacts/` 2026-05-06: `WHANGANUI_V2_PLAN_2026-05-05.md`, `WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md`, `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`, `MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`, `MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`, `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` — content migrated into authoritative OPEN_ITEMS sections.
 
 **Truth source:** When this doc disagrees with another, this doc is right (or fix this doc).
 
@@ -486,7 +495,7 @@ Athens-2026 git history is the recovery mechanism for any pre-promotion state if
 
 ## 16. Legitimacy-test findings (runtime thread, 2026-05-01) — voice-card patches needed
 
-Source: `voices/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (full memo) + `projects/current-tests/voice-pipeline-dryrun/legitimacy_test_report.md`. Runtime thread ran multi-test exercise on the 4 shipped voices (Plato, Cleopatra, Dostoevsky, Battuta) with mock formulations on legitimacy / recognition / public-realm. 5 Step 2 artifacts per voice. Pipeline machinery checked out; voice-card patterns did not, fully cleanly. Four findings:
+Source: `_workspace/archive/session-artifacts/MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md` (full memo) + `projects/current-tests/voice-pipeline-dryrun/legitimacy_test_report.md`. Runtime thread ran multi-test exercise on the 4 shipped voices (Plato, Cleopatra, Dostoevsky, Battuta) with mock formulations on legitimacy / recognition / public-realm. 5 Step 2 artifacts per voice. Pipeline machinery checked out; voice-card patterns did not, fully cleanly. Four findings:
 
 ### 16.1 Plato — Socrates-self-referencing-his-own-death anachronism 🔴 (sharpest finding, highest priority)
 
@@ -741,7 +750,7 @@ When verified:
 
 ### Comprehensive prep document
 
-**`voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`** — self-contained handoff for fresh-session pickup. Carries: who Claudia is, source materials read, four reference traditions (Talk of the Town / TLS until 1974 / Borges / Manchester Guardian "London Letter"), prose-vs-attention split, one-spine-ten-bends principle, form-fit honesty rule, headline rule, 13 failure modes, canonical reference texts, corrected field distribution (formative_experience/character/translation_protocol all load-bearing — earlier underweighting corrected), open architectural questions (voice_mode, schema strain on artifact cluster), recommended hybrid pipeline workflow with Stages A-F, time + cost estimate (~7-9 hr wall, ~$20-40), what's not in scope.
+**`_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md`** — self-contained handoff for fresh-session pickup. Carries: who Claudia is, source materials read, four reference traditions (Talk of the Town / TLS until 1974 / Borges / Manchester Guardian "London Letter"), prose-vs-attention split, one-spine-ten-bends principle, form-fit honesty rule, headline rule, 13 failure modes, canonical reference texts, corrected field distribution (formative_experience/character/translation_protocol all load-bearing — earlier underweighting corrected), open architectural questions (voice_mode, schema strain on artifact cluster), recommended hybrid pipeline workflow with Stages A-F, time + cost estimate (~7-9 hr wall, ~$20-40), what's not in scope.
 
 ### Companion runtime memo
 
@@ -983,7 +992,7 @@ Operator-direct-authored DRAFT card landed at `projects/current-tests/voices/cla
 
 **Status: DRAFT — for dryrun use only; NOT promotion-ready.**
 
-Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth + the v2 schema field set. Captures the architectural moves: 4 reference traditions (Talk / TLS / Borges / Manchester Guardian), one-spine-ten-bends per-voice register torque, form-fit honesty, headline rule (small specific gesture), Onion-drift hard ban, Beauty Shot reading discipline + desk's prose register split, compound dossier medium, confected pedigree (Vol. CXVI, Issues 42,193–42,195, Late Night Edition).
+Authored from `_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth + the v2 schema field set. Captures the architectural moves: 4 reference traditions (Talk / TLS / Borges / Manchester Guardian), one-spine-ten-bends per-voice register torque, form-fit honesty, headline rule (small specific gesture), Onion-drift hard ban, Beauty Shot reading discipline + desk's prose register split, compound dossier medium, confected pedigree (Vol. CXVI, Issues 42,193–42,195, Late Night Edition).
 
 5 open questions documented in `metadata.open_questions`:
 - voice_mode = `observational` chosen as least-bad fit; per prep doc could be (b) extend schema with `editorial` or (c) custom subtype
@@ -1011,7 +1020,7 @@ Authored from `voices/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` ground truth
 
 **Original §27 content preserved below for context:**
 
-> **Original 2026-05-04 PM context:** Runtime prompt fix had landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever was real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carried structural softeners or wrong-target ranges that the prompt fix couldn't reach. Surgical card-rewrites for those three documented in `voices/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.
+> **Original 2026-05-04 PM context:** Runtime prompt fix had landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever was real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carried structural softeners or wrong-target ranges that the prompt fix couldn't reach. Surgical card-rewrites for those three documented in `_workspace/archive/session-artifacts/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.
 
 
 ### Summary of operator decision
@@ -1131,8 +1140,8 @@ Response (447w) emitted clean witness-stance:
 
 ### Companion docs
 
-- `voices/WHANGANUI_V2_PLAN_2026-05-05.md` — pre-execution plan
-- `voices/WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md` — ROUND 0 12-residual analysis (used as planning input for prompt extension decision)
+- `_workspace/archive/session-artifacts/WHANGANUI_V2_PLAN_2026-05-05.md` — pre-execution plan
+- `_workspace/archive/session-artifacts/WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md` — ROUND 0 12-residual analysis (used as planning input for prompt extension decision)
 - `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` — v2-updated section (witness-stance visual discipline + bilingual-citation discipline + twin-failure-mode bans)
 
 ### Operator-side parallel residuals (Marley analogues)
@@ -1203,7 +1212,7 @@ Supplement adds ~30% to section word counts; pipeline handles the augmented inpu
 
 ## 30. Assembly-fiction reframe: voice_temporal_stance shift across all 10 voices (2026-05-05 evening)
 
-**Status:** ✅ shipped to athens-2026 (commit pending: 10 voice cards + 10 chat_system_prompt regens). Per runtime-thread memo `voices/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`.
+**Status:** ✅ shipped to athens-2026 (commit pending: 10 voice cards + 10 chat_system_prompt regens). Per runtime-thread memo `_workspace/archive/session-artifacts/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`.
 
 ### Architectural shift
 

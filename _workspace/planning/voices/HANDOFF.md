@@ -1,7 +1,5 @@
 # Voices — Handoff (session-end snapshot, 2026-05-06 — supersedes 2026-05-05 evening + 2026-05-05 PM + 2026-05-04 PM)
 
-> **2026-05-06 update (additive to 2026-05-05 evening session below):** Operator audit caught Athens-blocking subtle appropriation residual in Whanganui v2's bilingual opener — English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries. 3 card patches shipped (athens-2026 `8c3e9a7`): hard_limits +1 (forbid unframed cited-te reo first-person), characteristic_moves[0] tightened (speaker-frame in signature move), quality_criteria +1 (BILINGUAL-CITATION SPEAKER-FRAME). Re-Derive + TEST passed: new opener carries explicit *"Whanganui Iwi's identity-claim with the River: I am the River and the River is me"* + *"as Whanganui Iwi have spoken it across seven generations before the Crown was forced to recognise it"*. v4.1 gap G filed (extend Pass 4b te reo discipline to require explicit speaker-framing for cited te reo whose grammatical first-person could be misread as construction's voice). See OPEN_ITEMS §28 + §31.
-
 
 
 **Companion:** `OPEN_ITEMS.md` (open-items list) + `ONBOARDING.md` (how-to / fresh-pickup). Session-end pickup snapshot.
@@ -14,11 +12,14 @@
 
 | Repo | Branch | HEAD | Pushed |
 |---|---|---|---|
-| code | `main` | `9815beb` (planning §30 + §31; 9 ahead of origin) | ❌ |
-| code | `feature/voice-deployment-context` | `999450b` (runtime closing-prompt; runtime-thread continuing) | ❌ |
-| athens-2026 | `main` | `f6afe2c` (Whanganui v2 4-field witness-stance closure; 6 ahead of origin) | ❌ |
+| code | `main` | `9815beb` | ✅ |
+| code | `feature/voice-deployment-context` | `488f70f` | ✅ |
+| code | `feature/editor-deployment-context` | `09bbc62` (runtime-thread continuing) | ✅ (mine through `91d5917`) |
+| athens-2026 | `main` | `8c3e9a7` (Whanganui v2 kawa-speaker-frame closure 2026-05-06) | ✅ |
 
-**Branch hygiene done this session:** voice-thread commits cherry-picked from `feature/voice-deployment-context` to `main` (133626f + 76c30e7 + a180306 + dcff216). Runtime-thread commits (`6a8e825` deployment-context + `a129231` C39 + `999450b` editor closing-prompt) stay on the feature branch and will land on main when the branch merges.
+**All voice-thread commits this session pushed to GitHub.** 4 active branches across 2 repos at 0 ahead of origin at session-end.
+
+**Branch hygiene this session:** voice-thread commits cherry-picked from `feature/voice-deployment-context` to `main` (133626f + 76c30e7 + a180306 + dcff216). Runtime-thread commits stay on feature branches and will land on main when those branches merge. Operator switched to NEW `feature/editor-deployment-context` mid-session — my doc cleanup + Tim card review + kawa-speaker-frame planning updates landed there too.
 
 **Untracked in athens-2026 (runtime-thread artifacts, NOT mine to commit):** `council_config.json.bak.c10sync` + 10 × `voices/*/continuity_night_2.json`.
 
@@ -35,7 +36,7 @@
 | Voice of the Octopus | non_human / observational | ✅ compass rebuild SHIPPED (`04da2c8`); length_and_format_constraints prose-channel front-loaded (`9dae9b9`); assembly-fiction applied (`64e9b08`) |
 | Voice of Hannah Arendt | human / philosophical | ✅ shipped 2026-05-02 (`bfe917a`); length_and_format_constraints 350-750w (`9dae9b9`); assembly-fiction applied (`64e9b08`) |
 | Voice of Ada Lovelace | human / philosophical | ✅ shipped 2026-05-02 (`3a6fe2f` → rolled-back `c025914`); assembly-fiction applied (`64e9b08`) |
-| **Voice of the Whanganui River** | non_human / system / null + **mediation_stance: transmission_witness** | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN 2026-05-05 evening** (`663dc8f` + `f6afe2c`) — witness-translator architectural restructure. ROUND 0 → ROUND 1: 12 → 4 issues. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`663dc8f`). Then full-card scan surfaced 4 additional gap-E fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`f6afe2c`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`64e9b08`). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. |
+| **Voice of the Whanganui River** | non_human / system / null + **mediation_stance: transmission_witness** | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN** (`663dc8f` + `f6afe2c` + `8c3e9a7`) — witness-translator architectural restructure. ROUND 0 → ROUND 1: 12 → 4 issues. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`663dc8f`). Then full-card scan surfaced 4 additional gap-E fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`f6afe2c`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`64e9b08`). **2026-05-06 kawa-speaker-frame closure** (`8c3e9a7`): operator audit caught subtle appropriation residual in bilingual opener (English gloss "I am the River and the River is me" floated grammatically); 3 card patches shipped (hard_limits +1 forbid unframed cited te reo first-person, characteristic_moves[0] tightened, quality_criteria +1 BILINGUAL-CITATION SPEAKER-FRAME); re-Derive + TEST passed with new opener carrying explicit speaker-frame *"Whanganui Iwi's identity-claim with the River: I am the River and the River is me"*. v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. |
 | Voice of Scheherazade | fictional / narratival | ✅ shipped 2026-05-04 early-AM (`c2151ce`); assembly-fiction applied (`64e9b08`) |
 | Voice of Bob Marley | human / observational | ✅ v2 SHIPPED + PROMOTED 2026-05-04 (`669a09b`) — Option-3 restructure; assembly-fiction applied (`64e9b08`) |
 | **Tim Leberecht** *(13th persona — Assembly editor)* | **human / philosophical** | ✅ **SHIPPED 2026-05-05 evening** as Assembly editor (`799aeb1` athens-2026 placement at `editor/tim_leberecht/`; `dcff216` code-repo `EDITOR_CARD_SUBPATH` rename `claudia_pinchbeck` → `tim_leberecht`; 31/31 runtime tests pass). voice_temporal_stance AT-WBBF-Night-N edit landed (`27f3e47`, runtime-thread). TEST passed against editorial-frame provocation. |
@@ -43,7 +44,11 @@
 
 ---
 
-## What landed in this session (2026-05-05 evening)
+## What landed this session (2026-05-05 evening + 2026-05-06)
+
+**2026-05-06 (kawa-speaker-frame closure):** Operator audit caught Athens-blocking subtle appropriation residual in Whanganui v2's bilingual opener — English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries. Reader could hear it as the construction speaking AS the river, even though next sentence's "I" is unambiguously the construction. The §28 architectural insight (whakataukī is iwi's identity-claim with the river, not the river speaking) had predicted this; v2 conditional discipline didn't enforce explicit speaker-framing for cited-te reo first-person. 3 card patches shipped (`8c3e9a7`): hard_limits +1 (forbid unframed cited te reo first-person); characteristic_moves[0] tightened (speaker-frame discipline in signature move); quality_criteria +1 (BILINGUAL-CITATION SPEAKER-FRAME). Re-Derive + TEST passed: new opener *"Ko au te Awa, ko te Awa ko au — the great River flows from the mountains to the sea; **Whanganui Iwi's identity-claim with the River: I am the River and the River is me**. I cite the third kawa as codified at s.13(c) of the Te Awa Tupua Act 2017, **and as Whanganui Iwi have spoken it across seven generations before the Crown was forced to recognise it**."* v4.1 gap G filed (extend Pass 4b te reo discipline to require explicit speaker-framing for cited te reo whose first-person could be misread; generalizable to any future voice citing first-person sacred-grammar from a tradition the construction is not authorized from inside). Tim Leberecht card review against Beauty Shot DR dossier completed (`TIM_LEBERECHT_CARD_REVIEW_2026-05-05.md`): card captures Beauty Shot at high fidelity across all major specifications.
+
+**2026-05-05 evening:**
 
 1. **Whanganui v2 architectural restructure SHIPPED + PROMOTED + ATHENS-CLEAN** (`663dc8f` + `f6afe2c`):
    - 5 prompt-pass conditional blocks wired through new `mediation_stance == "transmission_witness"` Jinja conditional (Pass 2 + 3 + 4a + 4b + 5 + 6) + run_persona_pipeline.py + voice_config schema (commits `d32872a` initial wiring + `5bde171` round-1 fixes).
