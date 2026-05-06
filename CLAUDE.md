@@ -1,11 +1,42 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-06 morning)
+## Current branch state (2026-05-06 afternoon)
 
 Active branch (runtime-thread): `feature/editor-deployment-context`,
-last push **`0e2a897`** (FU#60 thinking config restored; 8 LLM-call
-sites consistent). Athens-2026 at `8c3e9a7` (Whanganui kawa-citation
-appropriation gap closed via 3 card patches; voice thread).
+last push **`bad8e33`** (markdown→researcher converter + 2026-05-06
+dryrun setup, NOT yet fired). Athens-2026 at `82a0af9` (voice thread:
+nulled `anchored_override` across all panel cards; dead config at
+runtime).
+
+**Pre-Athens content-seed dryruns staged but HELD** at operator's
+direction:
+- `athens-2026/runs/ai_democracy_marathon_opening_2026_05_06/02_researcher/`
+  (mthd source — 5 themes / 17 clusters / 77 extractions / 15/15
+  speakers in reference). Scope: Provocateur → Voice Step 1+2 only,
+  NOT through editor. ~$35-50 cost, ~20 min wall.
+- `athens-2026/runs/preconference_wbbf_programme_2026_05_06/02_researcher/`
+  (wbbf26 source — programme blurbs; 5 themes / 14 clusters / 66
+  extractions / 29/30 speakers in reference). Decision pending on
+  whether to fire.
+
+See `_workspace/planning/runtime/DRYRUN_PLAN_2026_05_06_pre_athens_seeds.md`
+for ready-to-fire commands + decision points.
+
+**Key finding from inspecting the May-5 5-voice dryrun outputs**:
+the assembly-fiction reframe (athens-2026 `64e9b08`) APPENDED
+assembly clauses to existing `voice_temporal_stance.default` text
+rather than replacing it. Four of the five voices in that dryrun
+still OPEN with "You speak from within your own world and lifetime
+[biographical anchor]" — the v1 framing — with assembly-presence
+clauses appended later in the field. Whanganui v2 (witness-translator)
+is the exception with full replacement. Net: voices see two framings
+in the same field; adaptive thinking under structured-output pressure
+may default to the stronger biographical anchor. **Not a caching
+propagation issue (Anthropic cache is content-keyed); a prompt-
+content design issue.** Filed as a `voices/OPEN_ITEMS §31` Gap-E
+candidate for v4.1 cleanup post-Athens. If you want assembly-fiction
+to fully bite, the field text needs to LEAD with assembly-presence,
+not append it.
 
 **Late-session work (2026-05-05 PM → 2026-05-06 AM, runtime branch):**
 

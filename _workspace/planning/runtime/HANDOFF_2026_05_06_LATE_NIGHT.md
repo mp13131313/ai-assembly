@@ -1,10 +1,21 @@
-# Handoff — late-night session 2026-05-05 PM → 2026-05-06 AM
+# Handoff — late-night session 2026-05-05 PM → 2026-05-06 PM
 
-**Branch:** `feature/editor-deployment-context` at **`0e2a897`** (pushed).
-**athens-2026:** `8c3e9a7` — Whanganui kawa-citation appropriation gap closed by voice thread (3 card patches; not in this thread but landed during this window).
+**Branch:** `feature/editor-deployment-context` at **`bad8e33`** (pushed).
+**athens-2026:** `82a0af9` — null `anchored_override` across all 10 panel cards (voice thread); preceded by `8c3e9a7` Whanganui kawa-citation gap closure.
 **Tests:** 245/245 runtime pass.
 **Dashboard:** uvicorn on `:8766` pointed at
 `current-tests/dev_5voice_dryrun_2026_05_05/`. Auth `admin` / `dev`.
+
+**LATEST update 2026-05-06 PM** (additions to the night's work, scroll past for the original entries):
+
+- `2a51cf1` — planning(voices) + README + ONBOARDING amendments
+- `ec15c82` (athens-2026) — runtime cleanup: deleted 10 May-4 dryrun artifacts + extended `.gitignore` to keep `runs/` + `*.bak.*` + `voices/*/continuity_night_*.json` local
+- `bad8e33` — `runtime/scripts/markdown_to_researcher_output.py` converter + DRYRUN_PLAN_2026_05_06 doc; both pre-Athens content-seed dryruns staged but **HELD at operator direction**:
+  - mthd → `athens-2026/runs/ai_democracy_marathon_opening_2026_05_06/02_researcher/` (15/15 speakers, 5 themes / 17 clusters / 77 extractions). Operator scope: Provocateur → Voice (Step 1+2) only — NO editor stage.
+  - wbbf26 → `athens-2026/runs/preconference_wbbf_programme_2026_05_06/02_researcher/` (29/30 speakers, 5 themes / 14 clusters / 66 extractions). Decision pending.
+
+**Key finding 2026-05-06 PM (inspecting May-5 5-voice dryrun outputs):**
+The assembly-fiction reframe (athens-2026 `64e9b08`) APPENDED assembly clauses to existing `voice_temporal_stance.default` text rather than replacing it. 4/5 voices in that dryrun still OPEN with *"You speak from within your own world and lifetime [biographical anchor]"* — the v1 framing — with assembly-presence clauses appended later. Whanganui v2 (witness-translator) is the only full replacement. **Not a caching propagation issue** (Anthropic cache is content-keyed; cards on disk during dryrun were post-`64e9b08`). It's a prompt-content design issue — voices see two framings in the same field; adaptive thinking may default to the stronger biographical anchor. Filed as `voices/OPEN_ITEMS §31` Gap-E candidate for v4.1 post-Athens.
 
 ---
 
