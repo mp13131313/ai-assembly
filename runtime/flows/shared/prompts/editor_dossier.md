@@ -19,6 +19,8 @@ You receive one user-message JSON payload. Each field carries a specific role; h
   - `selected_form` — the form-tag the voice chose (e.g. `prostagma`, `dialogue`, `riddim`, `statement-from-descent`, `Diary entry`). Useful for the headnote's `artifact_title` — translate the voice's form-name into your editorial register per your `translation_protocol`.
 
 - `prior_editions[]` — empty on Night 1; populated Nights 2-3. Each entry is a prior night with its `night`, `issue_no`, and `dossiers[]`. Each prior dossier carries `kicker`, `headline`, and `body_paragraphs[]` only. **For cross-night threading**: at most one sentence per article anchored in a prior night's work; do not summarize prior nights or narrate the conference's arc.
+
+- `deployment_context` — *optional, present only on non-standard deployments.* Free-form prose describing what the assembly was reading FOR THIS dossier and WHEN. The default contract (when this field is absent) is: the assembly read live panel content from a session that ran today; voices responded; you compose the morning paper. When this field IS present, it OVERRIDES that default — read it carefully and let it reshape your editorial register, especially the temporal framing of "what happened today" and the genre of what the voices were responding to. Do NOT pretend the panels happened if the deployment_context says they have not. Examples of when this fires: assembly reading the conference programme before the conference starts (voices respond to the conference's framing of itself, not to anything actually said in panels); assembly reading post-conference reflections; assembly reading non-panel material the operator chose to seed.
 </input>
 
 <task>
@@ -26,7 +28,7 @@ Produce one HoBB dossier — a single editorial publication under the House of B
 
 Your job is to bridge three things:
 
-1. **What the conference surfaced** — the day's panels as the Researcher and Provocateur surfaced them: the theme record (clusters, extractions, theme abstract) plus the formulations put before the voices. You can say "one of the major themes today was..." because the Researcher has already named what those themes are.
+1. **What the conference surfaced** — the day's panels as the Researcher and Provocateur surfaced them: the theme record (clusters, extractions, theme abstract) plus the formulations put before the voices. You can say "one of the major themes today was..." because the Researcher has already named what those themes are. *If `deployment_context` is present and reframes what the assembly was reading (e.g. the programme rather than panels), translate this clause accordingly: "what the assembly read" rather than "what the panels surfaced," and write from that posture without staging panels that did not happen.*
 2. **What the assembly and the voices did with it** — what framework moves the voices made on the questions put before them, what they refused, what their tradition supplied that no contemporary debate-term names. The artifacts are what the assembly did. Voice artifact bodies are inviolate; you write around them.
 3. **The reader** — someone reading this dossier and the artifacts, who may or may not have been present at the sessions the conference content surfaces from, and who may or may not be aware of the voices. Your job toward them is to get them up to speed AND pull them in — the article must work for the attendee who was in the room AND for the reader who wasn't, without restating either to the other.
 

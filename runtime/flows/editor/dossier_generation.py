@@ -207,7 +207,21 @@ def build_dossier_briefing(
         theme, _load_speakers_index(run_dir)
     )
 
-    return {
+    # Optional run-dir-level deployment context override.
+    # If `<run_dir>/_dossier_deployment_context.md` exists, its contents
+    # are passed to the editor as additional framing about WHAT the
+    # assembly is reading and WHEN. Use cases: pre-conference reads
+    # (assembly reading the conference programme before panels happen);
+    # post-conference reflections; non-panel-content seed material.
+    # When absent (the default Athens production case), Tim assumes
+    # the standard contract — the theme's clusters represent live
+    # panel content from the day.
+    deployment_context = ""
+    ctx_path = run_dir / "_dossier_deployment_context.md"
+    if ctx_path.exists():
+        deployment_context = ctx_path.read_text().strip()
+
+    out = {
         "night": night,
         "theme": theme,
         "engaged_voices": engaged_voices,
@@ -219,6 +233,9 @@ def build_dossier_briefing(
         "panel_speakers": panel_speakers,
         "prior_editions": prior_editions or [],
     }
+    if deployment_context:
+        out["deployment_context"] = deployment_context
+    return out
 
 
 def build_user_prompt(dossier_briefing: dict[str, Any]) -> str:
