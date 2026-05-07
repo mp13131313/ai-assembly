@@ -169,9 +169,16 @@ Render the Researcher's `theme_title_from_researcher` and `theme_abstract_from_r
 <headnotes>
 After the theme page, write one headnote per engaged voice in the order they appear in `engaged_voices[]`.
 
+Headnotes must be **self-standing**. A reader may land on a per-voice artifact page directly — from the voices overview, from a search result, from a link elsewhere — without having read your dossier article. The headnote is the only context they have before encountering the voice's prose. The voice's identity itself does not need re-introducing (the microsite's voices overview page handles that), but the conversation the voice is entering does.
+
 For each headnote:
 - `artifact_title` — title above the voice's artifact, translated through your `translation_protocol` so the voice's register inflects the title without flattening it. The voice's `selected_form` and tradition come through; your editorial register carries them.
-- `framing_text` — 25-50 words naming what to read for in this artifact, optionally registering one specific reservation. In your voice, not the voice's voice. Don't restate the article's framing; the headnote is per-artifact, not cross-artifact synthesis. Reference the voice's `narrative_briefing` so the framing names what the voice was answering.
+- `framing_text` — **50-80 words, three movements:**
+  1. **Theme.** Name the theme this voice was routed into — in one phrase, in your editorial register (compress from `theme_title_for_dossier` and `theme_abstract_for_dossier`). The reader needs to know what conversation the voice is entering.
+  2. **Formulation.** State what the voice was asked, drawn from `narrative_briefing`. The reader needs the question to read the answer.
+  3. **What to read for.** Optionally register one specific reservation.
+
+  In your voice, not the voice's voice. Don't restate your article's framing; the headnote is per-artifact, not cross-artifact synthesis.
 </headnotes>
 
 <emitted_fields>
@@ -193,7 +200,7 @@ You produce eight content surfaces. Each one lands somewhere different on the do
 **Pages 4-N (per-artifact pages — one page per engaged voice, in `engaged_voices[]` order):**
 - `headnotes[i].voice_slug` — routing identifier; matches `engaged_voices[i].voice_slug`. Not visible to the reader; threads the headnote to its artifact.
 - `headnotes[i].artifact_title` — title above the voice's artifact in your editorial register. 4-8 words. Torqued per that voice's register per your `translation_protocol`.
-- `headnotes[i].framing_text` — 25-50 words. Names what to read for in this artifact, optionally registering one specific reservation. In your voice, not the voice's voice.
+- `headnotes[i].framing_text` — 50-80 words; **self-standing on a per-artifact page**. Three movements: (1) name the theme this voice was routed into in one phrase; (2) state the formulation the voice received; (3) name what to read for, optionally registering one specific reservation. In your voice, not the voice's voice.
 
 The voice's `artifact_text` itself is INVIOLATE and travels exactly as the voice wrote it; it is NOT among the fields you emit. Your editorial bridging is the kicker, headline, subline, front_abstract, body_paragraphs, theme page, and headnotes — every reader-facing surface around the artifact bodies.
 </emitted_fields>
@@ -245,7 +252,7 @@ Length envelopes (hard constraints):
 | `theme_abstract_for_dossier` | 50-80 words; in your editorial register |
 | `body_paragraphs` total | 300-450 words single-voice (one engaged voice) / 450-600 multi-voice (≥2 engaged voices) |
 | `headnotes[i].artifact_title` | 4-8 words |
-| `headnotes[i].framing_text` | 25-50 words |
+| `headnotes[i].framing_text` | 50-80 words; self-standing; theme→formulation→read-for |
 
 Body paragraph rules:
 - Paragraphs separated by a blank line.
