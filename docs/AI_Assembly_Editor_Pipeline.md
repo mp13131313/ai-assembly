@@ -11,6 +11,25 @@
 
 ## Changelog
 
+### v2.1 (2026-05-07) — `deployment_context` override mechanism
+
+Adds a thin extension to v2 — an optional override for the dossier briefing's per-call input that lets the operator reframe what Tim is editing without touching code or main prompt.
+
+**What it does:** when `<run_dir>/_dossier_deployment_context.md` exists, its contents are injected as a `deployment_context` field in the per-dossier user prompt. The closing-prompt input spec at `runtime/flows/shared/prompts/editor_dossier.md` documents the field as override of the default panels-happened-today contract: when present, Tim translates "the panels said" / "today's session" / "speakers from the floor" into the alternative register the deployment_context describes (programme reading / participant reflections / non-panel-content seed material).
+
+**When it fires:** the default contract assumes the day's panels happened and Tim composes the morning paper. For non-canonical run dirs — a conference-programme-read produced before Day 1, a reflection-import bundle, an operator-staged seed — the default contract makes Tim stage events that did not occur. The deployment_context override prevents this by giving Tim a different posture for the run.
+
+**Default behaviour unchanged** when the override file is absent. All canonical Athens-night-N runs continue to operate under v2's panels-happened contract without modification.
+
+**Implementation:**
+- `runtime/flows/editor/dossier_generation.py::build_dossier_briefing` checks for the override file and injects the contents as `deployment_context` (string) into the user-prompt JSON.
+- `runtime/flows/shared/prompts/editor_dossier.md` documents `deployment_context` as an optional input field with translation guidance for the bridging task.
+- No code change required at run time when the file is absent.
+
+**Empirical validation (2026-05-07):** wbbf26 pre-Athens dryrun first ran under default contract → produced "RECOGNISED, NOT GRANTED / The vote found a flip; three voices found the instrument" headline staging a panel vote that hadn't happened. Re-fired with deployment_context = "the assembly reading the WBBF programme before the conference opens" → all 4 dossiers correctly framed: "WHO STAYS AWAKE / What the more-than-human programme delegates while the assembled sleep"; "Reading the programme before any panel has begun"; etc. End-to-end mechanism validated.
+
+**Operator note:** for any run dir not named `athens_night_<N>`, check whether the run requires a deployment_context — see `_workspace/planning/ONBOARDING.md` cross-cutting DON'T.
+
 ### v2 (2026-05-03 PM) — runtime contract refinements; canonical going forward
 
 This version supersedes v1 + the runtime memo on per-call input/output contracts. v1's architectural prose (Eight Principles, Claudia, The Paper) is preserved; sections covering inputs / dossier shape / Stage 1 routing / Stage 2 generation / output schema / microsite render contract are rewritten against the refined contract.

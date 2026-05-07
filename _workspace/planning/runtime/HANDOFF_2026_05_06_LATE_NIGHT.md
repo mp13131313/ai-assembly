@@ -1,12 +1,25 @@
-# Handoff — late-night session 2026-05-05 PM → 2026-05-06 PM
+# Handoff — late-night session 2026-05-05 PM → 2026-05-07 early Day 1
 
-**Branch:** `feature/editor-deployment-context` at **`bad8e33`** (pushed).
-**athens-2026:** `82a0af9` — null `anchored_override` across all 10 panel cards (voice thread); preceded by `8c3e9a7` Whanganui kawa-citation gap closure.
-**Tests:** 245/245 runtime pass.
-**Dashboard:** uvicorn on `:8766` pointed at
-`current-tests/dev_5voice_dryrun_2026_05_05/`. Auth `admin` / `dev`.
+**Branch:** `feature/editor-deployment-context` at **`bad8e33`** (last push) plus this-session changes pending commit.
+**athens-2026:** `82a0af9` (voice thread: nulled `anchored_override`) plus this-session `published_artifacts/` from production-equivalent dryruns pending commit.
+**Tests:** 245/245 runtime pass (pre-this-session).
+**Dashboard:** uvicorn on `:8766` pointed at athens-2026; `runs/athens_night_1` symlink-aliased to `runs/ai_democracy_marathon_opening_2026_05_06`, `runs/athens_night_2` symlink-aliased to `runs/preconference_wbbf_programme_2026_05_06` (so dashboard's hardcoded `athens_night_<N>` naming surfaces the dryruns; symlinks ephemeral).
 
-**LATEST update 2026-05-06 PM** (additions to the night's work, scroll past for the original entries):
+**LATEST update 2026-05-07 EARLY DAY 1:**
+
+- **Pre-Athens content-seed dryruns FIRED end-to-end** — both mthd + wbbf26 ran Provocateur → Voice (Step 1+2) → Editor. Operator ruled them as production-equivalent runs. Outputs at `athens-2026/runs/<runname>/` (gitignored) + `athens-2026/published_artifacts/dossiers/night_1/` (committed as production this session).
+- mthd: 10/10 voice artifacts; 5/5 dossiers; edition lead = dossier_001 (*Standing for the more-than-human*; score 180).
+- wbbf26: 10/10 voice artifacts; 4/4 dossiers (v1 default contract, then re-fired v2 with `_dossier_deployment_context.md` for pre-conference framing); edition lead = dossier_001 (*The more-than-human horizon*; score 200). v1 had Tim staging a fictional "vote" headline that hadn't happened; v2 with deployment_context corrected throughout.
+- **Editor `deployment_context` override mechanism shipped** (this-session): `runtime/flows/editor/dossier_generation.py` reads optional `<run_dir>/_dossier_deployment_context.md` and injects content as `deployment_context` field in user prompt. Prompt at `runtime/flows/shared/prompts/editor_dossier.md` documents the field as override of the default panels-happened-today contract. Default behavior unchanged when override absent. Empirically validated end-to-end on wbbf26 dryrun.
+- **Vendor reflection preprocessor shipped** (this-session): `runtime/scripts/reflections_to_session_package.py` per operator's Reflection Import Format spec. Validates reflection-side contract, maps to session_package shape (each `reflections[i]` → turn at role=audience confidence=high, speaker=`Participant {i+1}`). Tested on operator demo (10 German reflections, marketing/Nachhaltigkeit topic): vendor JSON → preprocessor → vendor_intake → 01_transcription/<sid>/ landed clean (0 warnings). Updates `_workspace/planning/ONBOARDING.md` cross-cutting DON'T to point operators at the preprocessor instead of stale audio-flow text in `docs/AI_Assembly_Transcription_Pipeline.md`.
+- **Bug fixes during dryrun execution** — Provocateur Voice-of-X naming mismatch at Triage (commit `f733be3`) + Formulation (commit `a6be256`); Fyodor Dostoevsky folder-slug rename in athens-2026 (commit `35336f1`). Without these the dryruns silently dropped Hannah Arendt + Fyodor Dostoevsky from Step 1/2 outputs.
+- **External-reader review on wbbf26 voices** (operator-shared 2026-05-07 AM) — produced 3-group taxonomy (apparatus-transposition / register-faithful-but-too-clean / different-relation), 2 concrete factual errors (Cleopatra P.Bingen 45 dating; Marley "Marathon philosopher" coinage), 3 Lovelace diction slips, plus confirmation Octopus + Scheherazade + Whanganui v2 architectural choices succeeded. Findings consolidated at `_workspace/planning/voices/MEMO_2026_05_07_card_patches_from_external_reader.md` (300-line memo: B-list 9 card patches; C-list architectural patterns; D-list temporal-stance findings including Hannah AF/hard_limits collision). **Card patches will be applied by voices stream.**
+- **`voices/OPEN_ITEMS.md §31` updated** — Gap-H (Group-1 apparatus-transposition seams), Gap-I (Step 2 composition flattens digression/instance), Gap-J (single-field architectural edits need per-voice card-coherence audit) added per memo proposals.
+- **Cross-cutting DON'T added** in `_workspace/planning/ONBOARDING.md`: ASK what the editor's deployment_context is for non-canonical run dirs (anything other than `athens_night_<N>`). Empirical evidence: wbbf26 v1 default contract staged fictional panel events.
+
+---
+
+**Earlier 2026-05-06 PM update** (additions to the night's work, scroll past for the original entries):
 
 - `2a51cf1` — planning(voices) + README + ONBOARDING amendments
 - `ec15c82` (athens-2026) — runtime cleanup: deleted 10 May-4 dryrun artifacts + extended `.gitignore` to keep `runs/` + `*.bak.*` + `voices/*/continuity_night_*.json` local

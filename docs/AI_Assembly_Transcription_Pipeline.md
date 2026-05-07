@@ -7,6 +7,33 @@
 
 ---
 
+## Changelog (v2.2 — May 7 2026) — reflection-import preprocessor + spec divergence note
+
+Reflections were specified in this document as audio recordings that go through Stage 0 normalization and Stage 1 ASR, with filenames like `{session_id}__reflection__{slug}.{ext}`. **That is now stale.** Reflections actually arrive from a vendor as already-transcribed JSON in the operator-authored `Reflection Import Format` (one JSON file per session, with `source` / `session_id` / `collected_at` / `reflections[]`). They skip Stage 0 and Stage 1 entirely.
+
+**The integration point** is between Stage 0 and Stage 1: a small preprocessing step at `runtime/scripts/reflections_to_session_package.py` converts the vendor reflection JSON into the `session_package.json` shape that `runtime/flows/vendor_intake.py` validates and lands at `01_transcription/<session_id>/`. From there the Researcher reads the session_package.json identically to a transcribed-audio session.
+
+**The mapping per spec:**
+
+- Each `reflections[i]` becomes ONE turn.
+- `speaker = "Participant {i+1}"` (1-indexed, array order preserved).
+- `role = "audience"`.
+- `confidence = "high"`.
+- `text` = vendor's cleaned monologue (no re-cleaning runtime-side).
+- `participant_id` and `duration_seconds` from the vendor are preserved as `_vendor_*` diagnostic fields on the turn.
+- `language` (optional, ISO 639-1) is preserved when present (for non-English reflections).
+- Session-side metadata (title, description, contributor roster) is merged from `reference/sessions.json` if the session_id is registered there; otherwise minimal placeholder metadata derived from the reflection JSON itself.
+
+**§7 Step 1 ingest** (filename conventions for `session_003__reflection__alice.m4a` etc.) is **stale** for the reflection-recording case. Audio session ingest is unchanged. The reflection-recording filename pattern is aspirational/outdated; it does not describe what the actual vendor flow delivers.
+
+**§14 Step 4 Cleaning** prompts that distinguish `recording_type: session` vs `recording_type: reflection` are likewise stale for reflections — vendor-cleaned text bypasses the Cleaning step. Audio-recording sessions continue to use the existing Cleaning prompts.
+
+**Empirical validation (2026-05-07):** operator-supplied demo (10 German participant reflections, marketing/Nachhaltigkeit topic) ran end-to-end vendor JSON → preprocessor → vendor_intake → 01_transcription/<session_id>/session_package.json with 0 warnings. Each reflection became one audience turn; metadata preserved; downstream Researcher contract met.
+
+**Operator note:** `_workspace/planning/ONBOARDING.md` cross-cutting DON'T points at the preprocessor as the canonical handler; the §7 audio-flow language for reflections in this document should be ignored when reflections are involved.
+
+---
+
 ## Changelog (v2.1 — Apr 14 2026)
 
 A single additive change from v2, in response to validating Opus 4.7 + adaptive thinking on the Researcher Pipeline (v2.4). The Researcher upgrade produced a large quality improvement for clustering and theming but did not generalize to the Transcription Pipeline's main LLM calls (Cleaning, drift verification). Speaker ID was the only Transcription step where Opus could plausibly help edge cases, so it gains a per-run model override.

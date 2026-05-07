@@ -1,26 +1,80 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-06 afternoon)
+## Current branch state (2026-05-07 early Day 1)
 
 Active branch (runtime-thread): `feature/editor-deployment-context`,
-last push **`bad8e33`** (markdown→researcher converter + 2026-05-06
-dryrun setup, NOT yet fired). Athens-2026 at `82a0af9` (voice thread:
-nulled `anchored_override` across all panel cards; dead config at
-runtime).
+last push **`bad8e33`** plus this-session changes pending commit (editor
+deployment_context mechanism + reflection preprocessor + voices-stream
+memo + doc updates). Athens-2026 at `82a0af9` plus this-session
+`published_artifacts/` from the two pre-Athens production-equivalent
+runs pending commit.
 
-**Pre-Athens content-seed dryruns staged but HELD** at operator's
-direction:
-- `athens-2026/runs/ai_democracy_marathon_opening_2026_05_06/02_researcher/`
-  (mthd source — 5 themes / 17 clusters / 77 extractions / 15/15
-  speakers in reference). Scope: Provocateur → Voice Step 1+2 only,
-  NOT through editor. ~$35-50 cost, ~20 min wall.
-- `athens-2026/runs/preconference_wbbf_programme_2026_05_06/02_researcher/`
-  (wbbf26 source — programme blurbs; 5 themes / 14 clusters / 66
-  extractions / 29/30 speakers in reference). Decision pending on
-  whether to fire.
+**Pre-Athens content-seed dryruns FIRED end-to-end** (production-
+equivalent; operator ruled them as production runs):
+- `athens-2026/runs/ai_democracy_marathon_opening_2026_05_06/` (mthd
+  source — 5 themes / 17 clusters / 77 extractions / 15/15 speakers
+  in reference). Provocateur → Voice (Step 1+2) → Editor with default
+  panel-content framing. 10/10 voice artifacts. 5/5 dossiers; edition
+  lead = dossier_001 (*Standing for the more-than-human*; score 180).
+- `athens-2026/runs/preconference_wbbf_programme_2026_05_06/` (wbbf26
+  source — programme blurbs; 5 themes / 14 clusters / 66 extractions
+  / 29/30 speakers). Provocateur → Voice → Editor v1 (default), then
+  re-fired Editor v2 with `_dossier_deployment_context.md` reframing
+  the run as the assembly reading the WBBF programme **before** the
+  conference opens. 10/10 voice artifacts. 4/4 dossiers; edition lead
+  = dossier_001 (*The more-than-human horizon*; score 200).
+
+Total dryrun spend ~$16. Bug fixes shipped during dryrun execution:
+Voice-of-X naming mismatch in Provocateur (Triage `f733be3` +
+Formulation `a6be256`), Fyodor Dostoevsky folder-slug rename in
+athens-2026 (`35336f1`).
+
+**External-reader review** on the wbbf26 voice artifacts (operator-
+shared 2026-05-07 AM) produced a 3-group taxonomy of voice-craft
+seams (apparatus-transposition / register-faithful-but-too-clean /
+different-relation), 2 concrete factual errors (Cleopatra P.Bingen
+45 dating; Marley "Marathon philosopher" coinage), 3 diction slips
+(Lovelace), and confirmation that the §28/§24 architectural choices
+succeeded for Octopus + Scheherazade + Whanganui.
+
+Findings consolidated at
+`_workspace/planning/voices/MEMO_2026_05_07_card_patches_from_external_reader.md`
+(B-list of 9 per-voice card patches incl. Hannah Arendt AF/hard_limits
+reconciliation; C-list architectural patterns; D-list temporal-stance
+findings). Card patches will be applied by voice stream.
 
 See `_workspace/planning/runtime/DRYRUN_PLAN_2026_05_06_pre_athens_seeds.md`
-for ready-to-fire commands + decision points.
+for the original ready-to-fire commands + decision points.
+
+**Editor `deployment_context` override mechanism** (this-session new):
+`runtime/flows/editor/dossier_generation.py` reads optional
+`<run_dir>/_dossier_deployment_context.md` and injects its content as
+a `deployment_context` field in the per-dossier user prompt; the
+editor prompt at `runtime/flows/shared/prompts/editor_dossier.md`
+honours it as override of the default panels-happened-today contract
+(translates "the panels said" → "the programme promises" / etc.).
+Default behavior unchanged when the override file is absent.
+
+**IMPORTANT for future Claude sessions firing the editor on a non-
+Athens-night-N run:** check whether `_dossier_deployment_context.md`
+exists at the run_dir root, and if the run's content type is unclear
+(panel transcripts vs programme blurbs vs reflections vs other-seed),
+**ASK the operator before firing** what the run is reading and
+what register Tim should compose in. Do not assume the panel-
+happened-today default for non-canonical runs. (See cross-cutting
+DON'T in `_workspace/planning/ONBOARDING.md`.)
+
+**Vendor reflection preprocessor** (this-session new):
+`runtime/scripts/reflections_to_session_package.py` converts vendor
+reflection JSON (per operator's `Reflection Import Format` spec) into
+a `session_package.json` shape that `runtime/flows/vendor_intake.py`
+validates and lands at `01_transcription/<session_id>/` — same
+contract as audio-vendor sessions; downstream Researcher reads
+identically. Each `reflections[i]` becomes one turn with
+`speaker="Participant {i+1}"`, `role=audience`, `confidence=high`,
+preserving original `participant_id`/`duration_seconds` as
+`_vendor_*` diagnostic fields. Tested on operator-supplied demo
+(10 German reflections, marketing/Nachhaltigkeit topic).
 
 **Key finding from inspecting the May-5 5-voice dryrun outputs**:
 the assembly-fiction reframe (athens-2026 `64e9b08`) APPENDED
@@ -48,6 +102,10 @@ not append it.
 | `48f4c9d` | Validator field-name bug — `step2_validation.py` was reading `lineage.grounding_extraction_ids` but Step 2 writes the union as `lineage.all_grounding_extraction_ids`. Fix reads `all_*` with bare-name fallback. Re-validation flipped 2 voices WARN→PASS (false positives removed). |
 | `b5b8d72` | Editor per-voice review gate (closes 1b/1c) — `gating_status()` classifies voices PASS / released / held / pending-review; `editor_flow.run_editor_pipeline` refuses to run if any pending; CLI `--bypass-gating` for tests. Dashboard auto-fire — `_maybe_auto_fire_editor()` after release/hold writes; idempotent via lockfile + manifest. **Edition Pipeline B3 SHIPPED** — algorithmic lead-theme picker (n_voices×10 + audience_friction_score + fault_line bonus); writes per-night `_index.json` with `edition_lead.lead_dossier_no` + rebuilds root index. Single-response phrasing canonicalized in `voice_step2_artifact.md`. Validator engagement prompt softened (typological-register caveats added). |
 | `0e2a897` | **Thinking config FU#60 RESTORED across all 8 LLM-call sites.** Earlier in this session I had drifted voice + editor `_thinking_kwargs` to `{"thinking": {"type": "adaptive"}, "effort": "high"}` — wrong on two counts: (a) `effort` belongs in `output_config={"effort":...}` not top level (was being silently dropped); (b) `high` IS the API default per spec. Reverted everywhere to FU#60 form `{"thinking": {"type": "adaptive", "display": "summarized"}}`. Now identical at: voice/step1 + step2 + step3 + continuity + editor/dossier_generation + researcher_flow + provocateur_flow + personas/clients. |
+| `f733be3` | **Provocateur Voice-of-X naming fix #1 (Triage stage).** Model was emitting `voice: "Scheherazade"` (stripped prefix) while runtime kept the council member's full `"Voice of Scheherazade"` name; `setdefault` was no-op and `fresh_voice_by_name` lookup keyed by stripped form. Re-keyed on input `to_run[i]["name"]` and normalized both fresh + cached results. Closes the KeyError that had silently dropped Hannah Arendt's briefing during dryrun firing. |
+| `a6be256` | **Provocateur Voice-of-X naming fix #2 (Formulation stage).** Same pattern as Triage: Hannah's formulation files had `"member": "Hannah Arendt"` (stripped) while Plato's had `"Voice of Plato"`; `formulation_by_pair` lookup missed for Hannah → 0 formulations packaged into briefing → no Step 1/2 outputs. Fixed at both cached-load and fresh-collect points in the loop. After both fixes, Provocateur re-pack produces Hannah's complete 5-formulation briefing. |
+| (unpushed) | **Editor `deployment_context` override mechanism shipped.** `runtime/flows/editor/dossier_generation.py` reads optional `<run_dir>/_dossier_deployment_context.md` and injects content as `deployment_context` field in user prompt; `runtime/flows/shared/prompts/editor_dossier.md` documents it as override of default panels-happened-today contract. Tested on wbbf26 dryrun: v1 with default contract staged a fictional panel "vote" that hadn't happened ("RECOGNISED, NOT GRANTED / The vote found a flip"); v2 with deployment_context = pre-conference reading correctly framed all 4 dossiers as reading-the-programme ("WHO STAYS AWAKE / What the more-than-human programme delegates"). Validates the architectural patch end-to-end. |
+| (unpushed) | **Vendor reflection preprocessor shipped.** `runtime/scripts/reflections_to_session_package.py` per operator's Reflection Import Format spec. Validates reflection-side contract, maps to vendor_intake's session_package.json shape with `Participant {i+1}` turns at role=audience confidence=high, preserves vendor diagnostic metadata. Tested on operator-supplied demo (10 German reflections). End-to-end pass: vendor JSON → preprocessor → vendor_intake → 01_transcription/<sid>/session_package.json (0 warnings). |
 
 **5-voice end-to-end dryrun (2026-05-06 ~00:00–00:12):** isolated
 project root `current-tests/dev_5voice_dryrun_2026_05_05/` exercised
