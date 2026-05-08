@@ -1896,6 +1896,31 @@ result["wall_clock_s"] = wall
 
 ---
 
+### C41. Provocateur briefing layer — track context + cross-theme overview still thin 🟡 (filed 2026-05-05 on feature/voice-deployment-context as C39; renumbered + carried over 2026-05-08 during pre-merge consolidation)
+
+**Background.** Filed 2026-05-05 from chat-test diagnostic + deployment-context dryrun. Original commit `a129231` on feature/voice-deployment-context has the full diagnostic narrative — operator chat-tested Plato by feeding the WBBF program HTML (12 tracks + 126 sessions + 202 speaker bios + curators) as system context; Plato produced rich, specific, multi-turn responses (Gorgias kolakeia move on "beautiful business," wrestling-circle dismantling of "16 philosophers + no moderator," Seventh-Letter-flavored letter to those 16). Structural diagnosis: what was fed to chat-Plato is structurally analogous to what `_render_narrative_briefing` in [provocateur_flow.py:1070](runtime/flows/provocateur_flow.py:1070) feeds runtime-voice, but runtime briefing is thinner.
+
+**Caveat (preserved from original):** runtime can't fully replicate chat-test richness. Chat had open framing + whole-program scope + multi-turn refinement; runtime has sharp formulation + per-theme scope + single-shot Step 1 → Step 2. Even with much richer briefings, runtime voices produce theme-bounded reasoning by design.
+
+**Status of three sub-items 2026-05-08:**
+
+1. **Track context per theme** (~30 min, **pre-Athens-eligible**) — STILL OPEN. Extend `package_voice_briefings` in `provocateur_flow.py` to include `track_name` + `track_tagline` + `track_curator` from `conference_facts.json` per theme. Voice Step 1 sees "this theme falls under [Track] — [tagline]" alongside the formulation. Additive — no Provocateur prompt-semantics change, just enriches the briefing JSON with already-available conference fields.
+
+2. ~~**Speaker bios for cited speakers**~~ ✅ SHIPPED 2026-05-05/06 (commit `419fcac`) — `_render_narrative_briefing` and the Provocateur system prompts now inject `THE SPEAKERS` block from `reference/speakers.json` (triage_voice + triage_flags + formulation). Editor's `dossier_generation` joins panel speakers identically. The "Voice no longer cites Bayo Akomolafe as a name without context" goal is met end-to-end.
+
+3. **Cross-theme tonight-overview** (~2-3 hr, post-Athens) — STILL OPEN. Per-night artifact at `<run_dir>/03_provocateur/tonight_overview.json` injected into voice Step 1 user prompt as `OTHER THEMES TONIGHT` block. Risk: blurs Step 1's reasoning discipline (invites cross-theme wandering at Step 1 instead of Step 2 synthesis). Test before shipping.
+
+**Marley × theme_001 silent-drop note (preserved from original):** root cause confirmed as Anthropic content filter (`APIStatusError: Output blocked by content filtering policy`); same theme content trips filter both runs. Not a runtime bug — card×theme content interaction worth Marley-card investigation. C38 manifest tracking (SHIPPED 2026-05-04 PM) closes the silent-drop bug class.
+
+**Cross-references:**
+- Original commit `a129231` on feature/voice-deployment-context (full narrative).
+- C38 (manifest tracking, SHIPPED 2026-05-04) — closes silent-drop bug class.
+- `419fcac` (panel-speaker attribution end-to-end) — closes sub-item 2.
+
+**Status:** sub-item 1 **pre-Athens-eligible** (~30 min impl + 15 min test, additive); sub-item 3 post-Athens.
+
+---
+
 ### C40. Editor pipeline gating + auto-fire from dashboard 🟢 SHIPPED 2026-05-06 (commit `b5b8d72`)
 
 Closes the operator-action gap that surfaced during the 5-voice
