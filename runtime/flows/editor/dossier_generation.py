@@ -275,6 +275,7 @@ _FIELD_LABEL_RE = {
     "headline":                   re.compile(r"^\s*[*_#\-]*\s*headline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "subline":                    re.compile(r"^\s*[*_#\-]*\s*subline\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "front_abstract":             re.compile(r"^\s*[*_#\-]*\s*front[_\s]*abstract\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
+    "pull_quote":                 re.compile(r"^\s*[*_#\-]*\s*pull[_\s]*quote\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "theme_title_for_dossier":    re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*title[_\s]*for[_\s]*dossier\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
     "theme_abstract_for_dossier": re.compile(r"^\s*[*_#\-]*\s*theme[_\s]*abstract[_\s]*for[_\s]*dossier\s*[*_]*\s*[:=]\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+|\Z)", re.I | re.M | re.S),
 }
@@ -373,6 +374,7 @@ def parse_dossier_output(raw_text: str) -> dict[str, Any]:
         "headline": "",
         "subline": "",
         "front_abstract": "",
+        "pull_quote": "",
         "theme_title_for_dossier": "",
         "theme_abstract_for_dossier": "",
         "body_paragraphs": [],
@@ -493,6 +495,7 @@ def stamp_runtime_fields(
         "front_abstract":  parsed.get("front_abstract", ""),
         # Page 2 (article only)
         "subline":         parsed.get("subline", ""),
+        "pull_quote":      parsed.get("pull_quote", ""),
         "body_paragraphs": parsed.get("body_paragraphs", []),
         # Page 3 (theme)
         "theme_title_for_dossier":    parsed.get("theme_title_for_dossier", ""),

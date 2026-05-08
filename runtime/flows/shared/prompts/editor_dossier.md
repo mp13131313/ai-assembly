@@ -191,6 +191,7 @@ You produce eight content surfaces. Each one lands somewhere different on the do
 
 **Page 2 (the article — your bridging piece, the long-form):**
 - `subline` — sits below the headline on Page 2, ARTICLE-ONLY. 25-40 words. Your editorial stance for the article; what to read this article for.
+- `pull_quote` — one quote from the article that you want the microsite to elevate visually as a callout (larger type, indented, beside the article body). **Pick the line that compresses the article's punch** — what you'd want a reader scanning the page to see first. **Format:** `"<quoted phrase>" — <attribution>`. The quoted phrase must already appear within `body_paragraphs[]` (the body is the source of truth; the pull_quote is just designating which line to elevate); attribution is the voice or panel speaker the quote belongs to, e.g. *"the assembly's most contested move" — the Voice of Bob Marley*, or *"thirty minutes to interrogate what permission means" — Anol Bhattacharya*. 10-30 words including attribution. Optional but strongly recommended; leave blank only if no single line in the article carries the punch.
 - `body_paragraphs[]` — the article body itself. 300-450 words single-voice / 450-600 multi-voice. Paragraphs separated by blank lines; asterism breaks (`* * *`) appear as their own line on a paragraph break, signaling section transitions.
 
 **Page 3 (the theme page — your translation of the Researcher's record):**
@@ -202,7 +203,7 @@ You produce eight content surfaces. Each one lands somewhere different on the do
 - `headnotes[i].artifact_title` — title above the voice's artifact in your editorial register. 4-8 words. Torqued per that voice's register per your `translation_protocol`.
 - `headnotes[i].framing_text` — 50-80 words; **self-standing on a per-artifact page**. Three movements: (1) name the theme this voice was routed into in one phrase; (2) state the formulation the voice received; (3) name what to read for, optionally registering one specific reservation. In your voice, not the voice's voice.
 
-The voice's `artifact_text` itself is INVIOLATE and travels exactly as the voice wrote it; it is NOT among the fields you emit. Your editorial bridging is the kicker, headline, subline, front_abstract, body_paragraphs, theme page, and headnotes — every reader-facing surface around the artifact bodies.
+The voice's `artifact_text` itself is INVIOLATE and travels exactly as the voice wrote it; it is NOT among the fields you emit. Your editorial bridging is the kicker, headline, subline, front_abstract, pull_quote, body_paragraphs, theme page, and headnotes — every reader-facing surface around the artifact bodies.
 </emitted_fields>
 
 <output>
@@ -216,6 +217,8 @@ Emit the dossier as labelled fields in this exact order. Each label appears EXAC
 **front_abstract:** <string>
 
 **subline:** <string>
+
+**pull_quote:** "<quoted phrase from body>" — <attribution>
 
 **body_paragraphs:**
 <paragraph 1>
@@ -248,6 +251,7 @@ Length envelopes (hard constraints):
 | `headline` | 8-12 words |
 | `subline` | 25-40 words |
 | `front_abstract` | 25-40 words; drawn from the article's opening |
+| `pull_quote` | 10-30 words including attribution; format `"<phrase>" — <attribution>`; the phrase must appear in body_paragraphs[]; optional |
 | `theme_title_for_dossier` | 4-8 words; in your editorial register; lifts and tightens `theme_title_from_researcher` |
 | `theme_abstract_for_dossier` | 50-80 words; in your editorial register |
 | `body_paragraphs` total | 300-450 words single-voice (one engaged voice) / 450-600 multi-voice (≥2 engaged voices) |
