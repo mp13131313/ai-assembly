@@ -94,7 +94,11 @@ EXTRACTION_MAX_TOKENS = 40000  # was 32000 pre-thinking
 # declarative title + abstract + extraction_ids. The dev_msc_test run at
 # 85 extractions → 34 clusters used ~5-6K output tokens with Sonnet; with
 # a 20K thinking budget on top we need 40K ceiling.
-CLUSTERING_MAX_TOKENS = 40000  # was 16000 pre-thinking
+CLUSTERING_MAX_TOKENS = 64000  # was 16000 pre-thinking; 40000 in v3; bumped 64K
+                               # 2026-05-08 after Athens Night 1 hit ceiling
+                               # on 215 extractions (40K/40K output tokens
+                               # consumed; clustering JSON truncated mid-write).
+                               # 64K = thinking budget headroom + ~30K JSON.
 
 # Round 2 (theming) output is small — cluster_ids only, no raw text
 # repetition. ~20 themes × ~250 tokens each = 5K. With 15K thinking
