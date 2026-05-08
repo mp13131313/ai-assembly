@@ -92,6 +92,7 @@ def reflections_to_session_package(
     reflection_payload: dict[str, Any],
     *,
     project_root: Path | None = None,
+    session_id_override: str | None = None,
 ) -> dict[str, Any]:
     """Convert a vendor reflection JSON payload to a session_package shape.
 
@@ -101,13 +102,20 @@ def reflections_to_session_package(
     - each reflections[i] has participant_id + duration_seconds + text
 
     Raises ValueError on contract violations.
+
+    `session_id_override` — when the vendor used their internal UUID instead
+    of our canonical Athens session_id (e.g. `b30ef731-...` rather than
+    `day_one_demos_..._1330`), pass our canonical id here. The override
+    becomes the metadata.session_id; the vendor's original is preserved
+    on metadata as `_vendor_internal_session_id` for audit.
     """
     if not isinstance(reflection_payload, dict):
         raise ValueError("reflection payload is not a JSON object")
 
-    session_id = reflection_payload.get("session_id")
-    if not session_id or not isinstance(session_id, str):
+    vendor_session_id = reflection_payload.get("session_id")
+    if not vendor_session_id or not isinstance(vendor_session_id, str):
         raise ValueError("missing or non-string session_id")
+    session_id = session_id_override or vendor_session_id
 
     reflections = reflection_payload.get("reflections")
     if not isinstance(reflections, list) or len(reflections) == 0:
@@ -143,6 +151,8 @@ def reflections_to_session_package(
     # Tag the import provenance so we know where this came from at audit time.
     metadata["_reflection_source"] = reflection_payload.get("source", "unknown")
     metadata["_collected_at"] = reflection_payload.get("collected_at", "")
+    if session_id_override and vendor_session_id != session_id_override:
+        metadata["_vendor_internal_session_id"] = vendor_session_id
 
     speakers_present = sorted({t["speaker"] for t in turns})
     return {
@@ -160,6 +170,7 @@ def main():
     ap.add_argument("input", help="Path to vendor reflection JSON")
     ap.add_argument("--out", help="Output path for session_package.json")
     ap.add_argument("--project-root", help="PROJECT_ROOT for session metadata merge")
+    ap.add_argument("--session-id", help="Override session_id (use canonical Athens session_id when vendor sent their internal UUID)")
     args = ap.parse_args()
 
     inp = Path(args.input).resolve()
@@ -175,7 +186,11 @@ def main():
     elif os.environ.get("AI_ASSEMBLY_PROJECT_ROOT"):
         project_root = Path(os.environ["AI_ASSEMBLY_PROJECT_ROOT"]).resolve()
 
-    pkg = reflections_to_session_package(payload, project_root=project_root)
+    pkg = reflections_to_session_package(
+        payload,
+        project_root=project_root,
+        session_id_override=args.session_id,
+    )
 
     if args.out:
         out = Path(args.out).resolve()
