@@ -1,13 +1,44 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-07 early Day 1)
+## Current branch state (2026-05-08 mid-day, Athens Day 1+2 transition)
 
-Active branch (runtime-thread): `feature/editor-deployment-context`,
-last push **`bad8e33`** plus this-session changes pending commit (editor
-deployment_context mechanism + reflection preprocessor + voices-stream
-memo + doc updates). Athens-2026 at `82a0af9` plus this-session
-`published_artifacts/` from the two pre-Athens production-equivalent
-runs pending commit.
+Active branch (runtime-thread): **`main`** at **`1337d04`** (operator
+merged `feature/editor-deployment-context` to main between sessions).
+Athens-2026 at **`7908707`** (vendor reflection JSONs landed). Voice
+Pipeline mid-flight on athens_night_1 at write time (10 voices firing
+under the new voice_temporal_stance.default architecture; ETA ~30 min).
+
+**Athens Night 1 production progress (2026-05-07 → 2026-05-08):**
+- ✅ Transcription: 12/12 sessions landed (9 audio via AssemblyAI + 3
+  vendor reflection JSONs via reflection preprocessor + vendor_intake).
+  1,454 turns / 80,082 words. Two Act One sessions used manual
+  speaker_id passthrough (Sonnet + Opus both produced malformed JSON
+  on 47-speaker output; operator-fix path: write passthrough out_02 →
+  resume from cleaning-only).
+- ✅ Researcher: 205 extractions / 37 clusters / 11 themes (clustering
+  hit 40K ceiling on 215-extraction first-pass; bumped CLUSTERING_MAX_TOKENS
+  to 64K, retry succeeded at 38K/64K = 59% utilization).
+- ✅ Provocateur: 46 formulations across 10 voices (8 themes selected,
+  3 dropped); per-voice coverage 5/5 for 7 voices, 4/5 for Whanganui +
+  Octopus, 3/5 for Ada (per natural Triage activation distribution).
+- 🔄 Voice: test fire on Hannah + Plato landed clean (Hannah's
+  AF/hard_limits collision RESOLVED — she now opens with self-aware
+  acknowledgement of her own synthesis); full 10-voice fire in flight.
+- ⏳ Editor: pending Voice completion.
+
+**Architectural validation: voice_temporal_stance.default rewrite
+shipped via athens-2026 commits `25ec751` (epistemic-honesty hook
+removed) + `5cc04ad` (Hannah v1-leakage closed) + `3fd94e6` (operator
+short drafts) IS WORKING.** Hannah's Athens artifact opens *"There is a
+comedy in being asked this... I am told that yesterday a voice bearing
+my name was synthesized to address the assembly..."* — positions as
+the synthesized voice acknowledging itself, refuses ventriloquism,
+critiques AI/digital using her apparatus rather than as native
+vocabulary. The §31 Gap-J / Memo §A.9 collision concern is
+empirically resolved.
+
+**Pre-Athens content-seed dryruns FIRED end-to-end** (production-
+equivalent; operator ruled them as production runs):
 
 **Pre-Athens content-seed dryruns FIRED end-to-end** (production-
 equivalent; operator ruled them as production runs):
