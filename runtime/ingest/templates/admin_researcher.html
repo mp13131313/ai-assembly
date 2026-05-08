@@ -13,9 +13,12 @@
 
 <nav class="night-picker">
   <span class="muted">
-    <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/grouping.json">
-      <code>{{ payload.run_id }}/02_researcher/grouping.json</code>
-    </a>
+    Files:
+    <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/grouping.json"><code>grouping.json</code></a>
+    {% if payload.clusters_present %}
+      · <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/clusters.json"><code>clusters.json</code></a>
+    {% endif %}
+    · <a href="/admin/file?path=runs/{{ payload.run_id }}/02_researcher/all_extractions.json"><code>all_extractions.json</code></a>
   </span>
   <span class="muted">· polled {{ payload.polled_at }}</span>
 </nav>
