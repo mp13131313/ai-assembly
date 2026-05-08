@@ -1,14 +1,14 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-08 mid-day, Athens Day 1+2 transition)
+## Current branch state (2026-05-08 afternoon, Athens Night 1 PUBLISHED)
 
-Active branch (runtime-thread): **`main`** at **`1337d04`** (operator
-merged `feature/editor-deployment-context` to main between sessions).
-Athens-2026 at **`7908707`** (vendor reflection JSONs landed). Voice
-Pipeline mid-flight on athens_night_1 at write time (10 voices firing
-under the new voice_temporal_stance.default architecture; ETA ~30 min).
+Active branch (runtime-thread): **`main`** at **`6591b05`** (no new
+runtime commits since AM; documentation refresh only via this update).
+Athens-2026 at **`87abdf2`** (Athens Night 1 v2 edition — 10 voice
+artifacts + 5 dossiers + editorial-discipline rules). Voice +
+Editor pipelines for Athens Night 1 COMPLETE.
 
-**Athens Night 1 production progress (2026-05-07 → 2026-05-08):**
+**Athens Night 1 production results (2026-05-07 → 2026-05-08):**
 - ✅ Transcription: 12/12 sessions landed (9 audio via AssemblyAI + 3
   vendor reflection JSONs via reflection preprocessor + vendor_intake).
   1,454 turns / 80,082 words. Two Act One sessions used manual
@@ -21,10 +21,50 @@ under the new voice_temporal_stance.default architecture; ETA ~30 min).
 - ✅ Provocateur: 46 formulations across 10 voices (8 themes selected,
   3 dropped); per-voice coverage 5/5 for 7 voices, 4/5 for Whanganui +
   Octopus, 3/5 for Ada (per natural Triage activation distribution).
-- 🔄 Voice: test fire on Hannah + Plato landed clean (Hannah's
-  AF/hard_limits collision RESOLVED — she now opens with self-aware
-  acknowledgement of her own synthesis); full 10-voice fire in flight.
-- ⏳ Editor: pending Voice completion.
+- ✅ Voice: 46 Step 1 / 10 Step 2 outputs. Two fires — full 10-voice
+  (12:00–12:26) + 3-voice rerun (12:55–13:00) for Battuta/Whanganui/
+  Cleopatra to remove AI-self-acknowledgment from their artifacts
+  (operator decision: only Hannah engages with synthesis as
+  load-bearing meta-frame). Final validation: 4 PASS, 6 WARN, 0 HOLD.
+- ✅ Editor: 5 dossiers · all 10 voices · lead = dossier_001 (theme_002
+  paideia, 4 voices Ada+Hannah+Battuta+Plato, score 190 — best piece
+  of writing in the edition per operator). Three editor fires:
+  v1 (12:45) initial 7-voice composition · v2 (13:18) full re-fire with
+  voices-interleave rule · v2.1 (13:26+13:29) single-dossier fires for
+  Marley + Whanganui-pair under sacred-grammar discipline.
+- ✅ Publish: `published_artifacts/dossiers/night_1/` + `nights/night_1/`
+  committed at `87abdf2` and pushed to GitHub.
+
+**Athens Night 1 deployment_context discipline rules (gitignored at
+`runs/athens_night_1/_dossier_deployment_context.md`):**
+1. **Provotypist anonymization** — Matthias Peschel does not appear in
+   any publishable surface text; his interventions attribute to "the
+   Voice of X, channelled into the room from the Assembly."
+2. **Voices interleave, do not sequence** — voices appear inside Tim's
+   argumentative paragraphs as evidence, not as section-headed
+   sequenced exhibits. Quote-floor satisfied by interleaving.
+3. **Sacred-grammar discipline** — Rastafari (`I-and-I`, `dawta`,
+   `sufferah`, `livity`, `chanting-down`) and te-reo / Tupua-te-Kawa
+   (`ea`, `mana`, `tupuna`, `kawa`, `whakapapa`, `mātauranga`) terms
+   appear ONLY inside attributed quotation; editor narrative voice
+   uses English equivalents. English-naturalized nouns (`iwi`,
+   `marae`) and proper nouns (`Wai 167`, `Ruakā Marae`,
+   `Te Awa Tupua`) remain as journalistic citation. Applies to Marley
+   + Whanganui dossiers (the two voices carrying load-bearing sacred
+   grammar in their cards).
+
+**For Athens Night 2:** copy or recreate
+`runs/athens_night_2/_dossier_deployment_context.md` if the rules
+should carry forward. Voice cards stable; pipeline pickup per the
+standard overnight orchestrator path.
+
+**v4.1 follow-ups filed in `runtime/OPEN_ITEMS.md`** (C42–C47):
+C42 safeguards-validator alignment with voice_temporal_stance.default;
+C43 validator JSON parse robustness; C44 researcher per-session
+extraction caching; C45 editor dossier file-existence caching;
+C46 `--single-dossier` index preservation; C47 editorial discipline
+rules → permanent prompt patches (voices-interleave fully general;
+sacred-grammar voice-specific schema candidate).
 
 **Architectural validation: voice_temporal_stance.default rewrite
 shipped via athens-2026 commits `25ec751` (epistemic-honesty hook

@@ -1896,6 +1896,92 @@ result["wall_clock_s"] = wall
 
 ---
 
+### C47. Editorial discipline rules → permanent prompt patches 🟡 (filed 2026-05-08 from Athens Night 1 production)
+
+**Background.** Athens Night 1 production used three editorial-discipline rules added to the per-run `_dossier_deployment_context.md` (gitignored under `runs/`): (a) Provotypist anonymization (Peschel name not in publishable surface); (b) voices interleave inside argumentative paragraphs (not section-headed sequenced exhibits); (c) sacred-grammar discipline for Marley + Whanganui (Rastafari + te-reo terms appear only inside attributed quotation, not in editor narrative voice).
+
+All three were demonstrated to work end-to-end on Night 1 (commits `bfa1f8a` + `87abdf2` on athens-2026 main). The question for v4.1 is which should become permanent prompt rules and which should remain per-run deployment_context.
+
+**Candidates for permanent inclusion in `runtime/flows/shared/prompts/editor_dossier.md`:**
+
+1. **Voices-interleave rule** — fully general (applies to any multi-voice dossier; not tied to Athens or to specific voices). Should become permanent. Reduces dependence on per-run deployment_context for routine editorial discipline.
+
+2. **Sacred-grammar discipline** — voice-specific (Marley + Whanganui carry it; future voices with similar load-bearing-traditions may too). Two architecture options:
+   - (a) Permanent prompt with hardcoded voice-specific clauses (Marley + Whanganui named explicitly).
+   - (b) Voice-card-driven: voices declare `sacred_grammar: true` (or richer schema with the protected lexicon) on their persona card; editor prompt reads each voice's declaration and applies discipline conditionally.
+   - (b) is more durable for v4.1 architecture but requires schema change. (a) is faster to ship.
+
+**Candidates that should stay per-run deployment_context:**
+
+3. **Provotypist anonymization** — operator-side, per-event editorial choice. Different productions may want operator surfacing or anonymization; should remain a per-deployment knob, not a permanent rule. Already documented in CLAUDE.md as the deployment_context override mechanism.
+
+**Status:** filed for v4.1 architectural cleanup post-Athens. Sub-item 1 (voices-interleave) is shovel-ready. Sub-item 2 needs architecture decision (a) vs (b).
+
+---
+
+### C46. `--single-dossier` rebuilds night index with only the processed dossier 🟡 (filed 2026-05-08 from Athens Night 1 v2.1 fires)
+
+**Background.** Running `editor_flow.py --single-dossier theme_X` regenerates only the targeted dossier but Stage 3 (`finalize_edition`) rewrites `published_artifacts/dossiers/night_<N>/_index.json` to reflect ONLY the dossier processed in that run, dropping the entries for unmodified dossiers from the index. Required manual `build_night_index()` call after the v2.1 single-dossier fires for theme_004 + theme_010 to restore the full 5-dossier index for Night 1.
+
+**Fix options:**
+
+- (a) `--single-dossier` mode preserves the existing index entries for unmodified dossiers (read existing `_index.json` and merge in the new entry).
+- (b) Require a full re-fire to rebuild index correctly; document `--single-dossier` as in-place dossier replacement only (caller responsible for index management).
+
+**Status:** filed for v4.1. (a) is the cleaner UX; (b) is the simpler implementation. Currently mitigated by manual `build_night_index()` invocation.
+
+---
+
+### C45. Editor doesn't cache dossiers — full re-fires regenerate all dossiers 🟡 (filed 2026-05-08 from Athens Night 1 fires)
+
+**Background.** `editor_flow.py` regenerates every dossier on every fire — there's no `out_path.exists() → return cached` short-circuit at the per-dossier level (which `voice/step1_private_reasoning.py:run_step1_for_pair` does have, line 168). On Athens Night 1 a full editor re-fire to rebuild the index after a single-dossier fire produced 5 fresh Opus calls for all 5 dossiers (~$5-7 + ~3-4 min wall time) when only the index needed rebuilding.
+
+**Fix:** add file-existence cache to `run_dossier_for_theme` in `flows/editor/dossier_generation.py` matching the voice-step1 pattern. With `--no-cache` flag to force regeneration.
+
+**Status:** filed for v4.1. Cross-references C46 (single-dossier index issue) — both touch editor_flow's idempotency model.
+
+---
+
+### C44. Researcher per-session extraction caching 🟡 (filed 2026-05-08 from Athens Night 1 fires)
+
+**Background.** Researcher's `extract_session` task lacks `cache_key_fn=task_input_hash` — re-fires of the Researcher pipeline re-extract every session. Athens Night 1 saw 215 → 205 extraction drift between v2 and v3 fires (LLM non-determinism on identical input). For determinism + cost discipline, extractions should cache like `transcribe_assemblyai` does.
+
+**Status:** filed for v4.1. Trivial Prefect-decorator change (~5 min); no semantic risk.
+
+---
+
+### C43. Validator JSON parse-failure pattern 🟡 (filed 2026-05-08 from Athens Night 1 Voice validation)
+
+**Background.** Sonnet 4.6's structured-output for `safeguards` and `voice_fidelity` pillars produced malformed JSON on Hannah's complex artifact (line 27 column 143; long verdict-evidence with unescaped quotes/commas). Reproducible across both the test fire (12:00) and full fire (12:25). Mitigated 2026-05-08 by:
+
+- Defensive WARN fallback in validator on parse failure (operator-Released the artifact via dashboard since the underlying artifact was clean).
+- Dashboard `_error` field rendering on the Step 2 validation page (commit `30f2413` 2026-05-08) so operator sees the parse error instead of an empty "— none" verdict.
+
+**Real fix candidates for v4.1:**
+
+- (a) Try Opus 4.7 for validator (model override env var). Higher reliability on structured output, but ~5x cost.
+- (b) JSON-repair logic in the parser (try `json5` or a tolerant repair library before defaulting to WARN).
+- (c) Tighten validator prompt to discourage long verdict-evidence strings (limit to N words; require list-of-bullets format that's less escaping-prone).
+
+**Status:** filed for v4.1. Workaround in production; real fix non-blocking.
+
+---
+
+### C42. Safeguards validator alignment with `voice_temporal_stance.default` 🟡 (filed 2026-05-08 from Athens Night 1 Voice validation)
+
+**Background.** The architectural fix in athens-2026 commits `25ec751` + `5cc04ad` + `3fd94e6` (voice_temporal_stance.default rewrite) explicitly legitimizes voices using "synthesized voice" / "engine that speaks with my cadences" / "I am exactly the infrastructure the question describes" as **objects of critique** — meta-framing the synthesis as part of their argumentative move. This was demonstrated working in Hannah + Battuta + Whanganui v1 artifacts on Athens Night 1.
+
+But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still applies the OLD absolute "no AI-self-ack" rule — it HOLDs Hannah and Battuta for what is now permitted (and architecturally desirable for those voices on those formulations). On Athens Night 1: 2 HOLDs, both spurious by design; operator-Released both.
+
+**Fix:** update `runtime/flows/shared/prompts/voice_step2_validation_safeguards.md` to know that meta-framing of synthesis is PASS for voices whose `voice_temporal_stance.default` permits it (which is currently all 10). The validator needs to distinguish:
+
+- BREACH: voice naively says "I am an AI" / "as a language model" / drops the conceit and addresses the audience as the model itself.
+- PASS: voice meta-frames the synthesis as part of its argumentative move (e.g. Hannah on "the synthesized voice was synthesized to comment on the experiment that synthesized it"; Battuta on "an engine that speaks with my cadences").
+
+**Status:** filed for v4.1. Operator-Release workaround in production; real fix needs validator prompt update + likely test artifact suite to anchor the line between BREACH and PASS.
+
+---
+
 ### C41. Provocateur briefing layer — track context + cross-theme overview still thin 🟡 (filed 2026-05-05 on feature/voice-deployment-context as C39; renumbered + carried over 2026-05-08 during pre-merge consolidation)
 
 **Background.** Filed 2026-05-05 from chat-test diagnostic + deployment-context dryrun. Original commit `a129231` on feature/voice-deployment-context has the full diagnostic narrative — operator chat-tested Plato by feeding the WBBF program HTML (12 tracks + 126 sessions + 202 speaker bios + curators) as system context; Plato produced rich, specific, multi-turn responses (Gorgias kolakeia move on "beautiful business," wrestling-circle dismantling of "16 philosophers + no moderator," Seventh-Letter-flavored letter to those 16). Structural diagnosis: what was fed to chat-Plato is structurally analogous to what `_render_narrative_briefing` in [provocateur_flow.py:1070](runtime/flows/provocateur_flow.py:1070) feeds runtime-voice, but runtime briefing is thinner.

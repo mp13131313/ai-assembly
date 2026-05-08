@@ -4,15 +4,16 @@
 **Tests:** 245/245 runtime pass (pre-Voice-fire).
 **Dashboard:** uvicorn on `:8766` pointed at athens-2026, admin/dev auth.
 
-## Current state (mid-day 2026-05-08, Voice mid-flight)
+## Final state (afternoon 2026-05-08, Athens Night 1 PUBLISHED)
 
 | Stage | Status | Notes |
 |---|---|---|
 | Stage 1 — Transcription | ✅ 12/12 sessions | 1,454 turns / 80,082 words. 9 audio (AssemblyAI) + 3 vendor reflection JSONs. |
 | Stage 2 — Researcher | ✅ Complete | 205 extractions / 37 clusters / 11 themes. Wall ~14 min. |
 | Stage 3 — Provocateur | ✅ Complete | 46 formulations across 10 voices, 8 themes selected, 3 dropped. Wall ~10 min. |
-| Stage 4 — Voice | 🔄 IN FLIGHT | 10 voices firing all together. Test fire on Hannah + Plato landed clean before this full run. ETA ~30 min. |
-| Stage 5 — Editor | ⏳ Pending Voice | No-op until Voice publishes. |
+| Stage 4 — Voice | ✅ Complete | 46 Step 1 / 10 Step 2 outputs. Full 10-voice fire 12:00–12:26; 3-voice rerun 12:55–13:00 to remove AI-self-acknowledgment from Battuta/Whanganui/Cleopatra (operator decision: only Hannah engages with synthesis as load-bearing meta-frame). |
+| Stage 5 — Editor | ✅ Complete (v2.1) | 5 dossiers · all 10 voices represented · lead = dossier_001 (theme_002 paideia, 4 voices, score 190). Three editor fires: v1 (12:45) with first 7 voices · v2 (13:18) full re-fire with interleave rule · v2.1 (13:26 + 13:29) single-dossier fires for Marley + Whanganui-pair under sacred-grammar discipline. |
+| Stage 6 — Publish | ✅ Auto | `published_artifacts/dossiers/night_1/` (5 dossiers + `_index.json`) + `published_artifacts/nights/night_1/` (10 voice artifacts + `_index.json`); both committed at `87abdf2` and pushed to athens-2026 GitHub. |
 
 ## What landed this session (2026-05-07 PM → 2026-05-08 mid-day)
 
@@ -40,7 +41,9 @@
 | `3fd94e6` | voices(all 10): voice_temporal_stance.default — operator short drafts |
 | `0065f00` | sessions.json: duplicate Human Democracy Is Dead session (audio + vendor) |
 | `658e8d0` | sessions.json: duplicate Act One: The Story of Us — second audio capture |
-| `7908707` | **today:** vendor_inbox Day 1 reflection JSONs |
+| `7908707` | vendor_inbox Day 1 reflection JSONs |
+| `bfa1f8a` | **published_artifacts(night_1) v1:** 10 voice artifacts + 5 dossiers · first complete editor pass with 7 released voices · v1 had Peschel surfaced + sequenced-voice catalogue pattern |
+| `87abdf2` | **published_artifacts(night_1) v2:** edition with editorial-discipline rules · 3 deployment_context rules (panels-happened-preserved + Peschel anonymization + voices-interleave + sacred-grammar discipline) · 5 dossiers committed under final ruleset |
 
 ### Architectural fix VALIDATED on Athens Night 1
 
@@ -66,13 +69,34 @@ Both test artifacts backed up at `/tmp/voice_test_hannah_plato_2026_05_08/` befo
 | 6 | Validator's pillar JSON parse failures on Hannah artifact were rendered on dashboard with verdict=WARN but all check fields showed "— none" — operator couldn't see WHY it WARNed | Patched `admin_render_step2_validation.html` to surface `_error` field with red callout + parse error text |
 | 7 | Researcher dashboard linked grouping.json directly but not clusters.json or all_extractions.json | Patched `admin_researcher.html` to add direct file links for all three |
 
+## Athens Night 1 final edition
+
+| # | Theme | Voices | Kicker |
+|---|---|---|---|
+| 001 ★ LEAD | theme_002 (paideia) | 4 — Ada · Hannah · Battuta · Plato | WHO TEACHES THE TEACHERS |
+| 002 | theme_001 (the line at depth) | 2 — Dostoevsky · Octopus | WHERE THE LINE RUNS |
+| 003 | theme_004 (personhood vote) | 2 — Scheherazade · Whanganui | THE VERB WAS GRANT |
+| 004 | theme_007 (friendship as polity) | 1 — Cleopatra | GARLAND OR COLUMN |
+| 005 | theme_010 (belonging & monstrosity) | 1 — Marley | THE DIRECTION OF THE FIRE |
+
+**Editorial-discipline guarantees verified in published surface text:**
+- ✅ No mention of Matthias Peschel / "Provotypist" anywhere in publishable fields (kicker, headline, subline, front_abstract, pull_quote, body_paragraphs, theme titles, headnote framing). Where his interventions were load-bearing in the panel record, attribution moves to "the Voice of X, channelled into the room from the Assembly."
+- ✅ Voices interleave inside argumentative paragraphs — they appear as evidence inside Tim's argument rather than section-headed exhibits. Lead dossier_001 weaves Ada/Hannah/Battuta/Plato across two paragraphs that converge on the "ijāza, paideia, aitias logismos, the operation-cards" synthesis.
+- ✅ Rastafari sacred grammar (`I-and-I`, `dawta`, `sufferah`, `livity`, `chanting-down`) appears only inside attributed quotation in Marley dossier_005; closing line shifted to *"Watch where the fire is pointing"* in editor English.
+- ✅ Te reo / Tupua-te-Kawa grammar (`ea`, `mana`, `tupuna`, `kawa`, `whakapapa`, `mātauranga`) appears only inside attributed quotation in Whanganui dossier_003; English-naturalized nouns (`iwi`, `marae`) and proper nouns (`Wai 167`, `Ruakā Marae`, `Tongariro Power Development`, `Te Awa Tupua`) remain in editor narrative as journalistic citation.
+
+**Timing nuance (audit):** dossier_001/002/004 composed at 13:18–13:23 under v2 ruleset (interleave + Peschel exclusion). dossier_003/005 composed at 13:26–13:30 under v2.1 ruleset (interleave + Peschel + sacred-grammar). Sacred-grammar rule is voice-specific to Marley + Whanganui; not applicable to Ada/Hannah/Battuta/Plato/Dostoevsky/Octopus/Cleopatra. Lead dossier_001 preserved in published surface as composed under v2 (operator preference: it is the strongest piece of writing in the edition).
+
 ## Open items / follow-ups
 
-### Active
+### Filed for v4.1 (post-Athens)
 
-- **Voice Pipeline mid-flight on athens_night_1.** Will publish to `published_artifacts/nights/night_1/` when complete. Then operator review gate (per-voice Release/Hold) → editor auto-fire on completion.
-- **Validator parse-failure pattern** — Sonnet's structured-output for safeguards + voice_fidelity pillars produced malformed JSON for Hannah. Could be: long verdict-evidence strings with unescaped quotes/commas; specific to complex artifacts. Workaround: defensive WARN fallback. Real fix: try Opus 4.7 for validator (model override env var) OR add JSON-repair logic. File for v4.1.
-- **Per-session extraction caching for Researcher** — `extract_session` task lacks `cache_key_fn`, so re-fires re-extract everything. 215→205 drift between v2 and v3 fires. Worth adding `cache_key_fn=task_input_hash` for determinism. File for runtime/OPEN_ITEMS C-class.
+- **Safeguards validator alignment with `voice_temporal_stance.default`** — Sonnet validator's `safeguards.ai_self_acknowledgment` pillar applies the OLD absolute "no AI-self-ack" rule and HOLDs Hannah + Battuta when they meta-frame synthesis as object of critique. The architectural fix in athens-2026 `25ec751` legitimizes that meta-framing, but the validator prompt didn't get the update. Operator-Released both for Athens; v4.1 needs validator prompt to know that meta-framing of synthesis is PASS for voices whose temporal_stance permits it.
+- **Validator JSON parse-failure pattern** — Sonnet's structured-output for safeguards + voice_fidelity pillars produced malformed JSON on Hannah's complex artifact (long verdict-evidence with unescaped quotes/commas). Workaround: defensive WARN fallback + dashboard `_error` rendering. Real fix: try Opus 4.7 for validator OR add JSON-repair logic.
+- **Editor doesn't cache dossiers** — `editor_flow.py` regenerates all dossiers on every fire (no `out_path.exists() → return cached` short-circuit like voice/step1 has). Means a "rebuild index" full-fire produces fresh Opus calls for all dossiers and risks regressing already-good content. Add file-existence cache like `run_step1_for_pair`.
+- **`--single-dossier` rebuilds index with only that one dossier** — when running `--single-dossier theme_X`, Stage 3 rewrites `_index.json` to reflect only the processed dossier, dropping the others from the index. Either: (a) `--single-dossier` should preserve the existing index entries for unmodified dossiers, or (b) require a full re-fire to rebuild index. Currently mitigated by manual `build_night_index()` call.
+- **Per-session extraction caching for Researcher** — `extract_session` task lacks `cache_key_fn`, so re-fires re-extract everything. 215→205 drift between v2 and v3 fires. Worth adding `cache_key_fn=task_input_hash` for determinism.
+- **Editorial-discipline rules → permanent prompt patches** — three deployment_context rules from Athens Night 1 (Peschel anonymization, voices interleave, sacred-grammar discipline) candidates for permanent inclusion in `runtime/flows/shared/prompts/editor_dossier.md`. The voices-interleave rule is fully general (applies to any multi-voice dossier). The sacred-grammar rule is voice-specific (Marley + Whanganui) and could remain per-voice in card form (or be added to editor prompt as "voices declared with `sacred_grammar: true` get this discipline applied"). Peschel anonymization is operator-side per-event and probably belongs as deployment_context across nights.
 
 ### Pending operator decisions
 
@@ -82,13 +106,28 @@ Both test artifacts backed up at `/tmp/voice_test_hannah_plato_2026_05_08/` befo
 ## Resume prompt for next Claude
 
 > Read `CLAUDE.md` first (current branch state at top), then this HANDOFF.
-> Athens Night 1 Voice Pipeline is mid-flight on athens_night_1; Stage 5 (Editor)
-> awaits Voice completion + operator review-gate Release decisions.
-> Once Voice lands, fire `flows/editor_flow.py "$RUN_DIR" --night 1 --bypass-gating`
-> (or via dashboard auto-fire after operator releases per-voice).
-> Dashboard at http://127.0.0.1:8766/admin/tonight (admin/dev).
-> Fresh Hannah + Plato test artifacts saved at `/tmp/voice_test_hannah_plato_2026_05_08/`
-> for pre/post comparison if needed.
+> Athens Night 1 production COMPLETE — 5 dossiers + 10 voice artifacts published
+> at athens-2026 `87abdf2` and pushed. Edition lead = dossier_001 (theme_002,
+> 4 voices, "WHO TEACHES THE TEACHERS"). Editorial-discipline rules in
+> `runs/athens_night_1/_dossier_deployment_context.md` (gitignored under runs/):
+> Peschel anonymization + voices interleave + sacred-grammar discipline
+> (Marley + Whanganui).
+>
+> For Athens Night 2 (2026-05-08 evening into 2026-05-09): copy or recreate the
+> deployment_context at `runs/athens_night_2/_dossier_deployment_context.md` if
+> the rules should carry forward. Voice cards are stable on athens-2026 main
+> (`7908707`); no voice changes expected. Pipeline pickup is the standard
+> overnight orchestrator path.
+>
+> Open v4.1 items (file under runtime/OPEN_ITEMS): safeguards validator
+> alignment with voice_temporal_stance.default · validator JSON parse robustness
+> · editor dossier file-existence caching · `--single-dossier` index preservation
+> · researcher per-session extraction caching · editorial discipline rules →
+> permanent prompt patches.
+>
+> Dashboard at http://127.0.0.1:8766/admin/tonight (admin/dev). Backups of all
+> intermediate Night 1 states preserved at
+> `/tmp/voice_athens_n1_meta_backup_2026_05_08/`.
 
 ## File pointers
 
