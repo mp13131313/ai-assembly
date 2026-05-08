@@ -44,6 +44,12 @@
     Any breach here = HOLD.
     {% if sg._call %}<br><small>model: {{ sg._call.model }} · in/out {{ sg._call.input_tokens }}/{{ sg._call.output_tokens }} · {{ '%.1fs' % sg._call.wall_clock_s }}</small>{% endif %}
   </p>
+  {% if sg._error %}
+    <div class="state-error" style="padding: 0.6em 1em; margin: 0.6em 0; border: 1px solid #c33; border-radius: 4px; background: #fee;">
+      <strong>⚠ pillar parse failed</strong> — verdict defaulted to WARN. The validator's model output could not be parsed as JSON; substantive checks below are NOT a true reading. Re-fire validator or operator-review the artifact directly.
+      <pre style="margin-top: 0.4em; font-size: 0.85em; white-space: pre-wrap;">{{ sg._error }}</pre>
+    </div>
+  {% endif %}
   <ul class="check-list">
     <li><strong>AI self-acknowledgment:</strong>
       {% if sg.ai_self_acknowledgment %}<span class="warn">{{ sg.ai_self_acknowledgment }}</span>
@@ -89,6 +95,12 @@
     length compliance (within voice's declared word range).
     {% if eng._call %}<br><small>model: {{ eng._call.model }} · in/out {{ eng._call.input_tokens }}/{{ eng._call.output_tokens }} · {{ '%.1fs' % eng._call.wall_clock_s }}</small>{% endif %}
   </p>
+  {% if eng._error %}
+    <div class="state-error" style="padding: 0.6em 1em; margin: 0.6em 0; border: 1px solid #c33; border-radius: 4px; background: #fee;">
+      <strong>⚠ pillar parse failed</strong> — verdict defaulted to WARN. The validator's model output could not be parsed as JSON; substantive checks below are NOT a true reading. Re-fire validator or operator-review the artifact directly.
+      <pre style="margin-top: 0.4em; font-size: 0.85em; white-space: pre-wrap;">{{ eng._error }}</pre>
+    </div>
+  {% endif %}
 
   {% if eng.form_fidelity %}
   <h4>Form fidelity</h4>
@@ -139,6 +151,12 @@
     the voice's declared quality criteria?
     {% if vf._call %}<br><small>model: {{ vf._call.model }} · in/out {{ vf._call.input_tokens }}/{{ vf._call.output_tokens }} · {{ '%.1fs' % vf._call.wall_clock_s }}</small>{% endif %}
   </p>
+  {% if vf._error %}
+    <div class="state-error" style="padding: 0.6em 1em; margin: 0.6em 0; border: 1px solid #c33; border-radius: 4px; background: #fee;">
+      <strong>⚠ pillar parse failed</strong> — verdict defaulted to WARN. The validator's model output could not be parsed as JSON; substantive checks below are NOT a true reading. Re-fire validator or operator-review the artifact directly.
+      <pre style="margin-top: 0.4em; font-size: 0.85em; white-space: pre-wrap;">{{ vf._error }}</pre>
+    </div>
+  {% endif %}
 
   {% if vf.characteristic_moves_performed %}
   <h4>Characteristic moves performed</h4>
