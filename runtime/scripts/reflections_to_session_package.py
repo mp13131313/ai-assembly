@@ -161,7 +161,14 @@ def reflections_to_session_package(
             "turns": turns,
             "speakers_present": speakers_present,
         },
-        "review_queue": [],  # vendor_intake injects empty stub if missing; pre-fill
+        # review_queue must be a DICT matching the transcription_flow.py schema
+        # so the Researcher's `review_queue.get("verify_markers", [])` call
+        # doesn't AttributeError on a list. Empty stubs across all three keys.
+        "review_queue": {
+            "low_confidence_attributions": [],
+            "diarization_flags": [],
+            "verify_markers": [],
+        },
     }
 
 
