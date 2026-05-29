@@ -83,6 +83,7 @@ Subfolder-specific DON'Ts live in the respective `runtime/ONBOARDING.md` and `vo
 - **Voice Pipeline first, chat-test as instrument.** Voice Pipeline (runtime) consumes specific card fields via API per-step; that's the production target.
 - **Model/effort economy.** Per-voice pipeline operation + chat-test paste-and-assess is Sonnet-shaped. Architectural decisions and complex code reading are Opus-shaped. Default to Sonnet 4.6 for execution, escalate to Opus 4.7 for design or cross-file reasoning.
 - **Defaults to strips, defer additions, validate empirically.** Adding instructions has costs (prompt-density, instruction-competition, performance tics). Stripping doesn't. Per 2026-04-28 revert lesson.
+- **"Make it universal" after critiquing an exception usually means universally ABSENT.** When the operator critiques an existing element X with "why does only A have this?" and then says "I want it universal," the default reading is **universally absent** (the question framed A as the unwanted exception), NOT universally present. If genuinely ambiguous, ASK. Per 2026-05-08 lesson: misread "I want it universal" as "add the epistemic-honesty hook to all 10 voices" when the operator meant "remove it from all 10 including the one organic instance" — cost a commit-pair round-trip. (The specific hook ban is filed under cross-cutting DON'Ts above; this is the general communication-pattern calibration.)
 
 Subfolder-specific calibration (e.g., "always `--skip-validation` for dryrun work" — runtime-specific) lives in the respective `<subfolder>/ONBOARDING.md`.
 

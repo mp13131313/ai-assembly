@@ -1896,6 +1896,20 @@ result["wall_clock_s"] = wall
 
 ---
 
+### C48. Voice-pipeline deployment-context implementation — shelved on branch, disposition is runtime-thread's call 🟡 (surfaced 2026-05-08 by voices-thread pre-merge consolidation)
+
+**What this is.** `feature/voice-deployment-context` commit `6a8e825` ("runtime(voice/card_assembly): inject deployment context (room/panel/readers) into voice system prefix") — 139 LOC in `runtime/flows/voice/card_assembly.py` + 285-line `runtime/tests/test_deployment_context.py` (15 tests) — injects THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS blocks into the voice Step 1/2 system prefix. **NOT on main.**
+
+**Why it's shelved (full trace).** The original commit message ends "Awaiting dryrun comparison before merge." The comparison fired (`projects/current-tests/dev_msc_dryrun_v2_20260504/runs/athens_night_1/04_voice/COMPARISON_2026_05_05.md`, 1024 lines): 6/10 voices shifted theme focus, +348w net, voices "engaged more concretely" — but the conclusion (filed in the original C39, now `C41`) was "**richness lever sits at the briefing layer, not the deployment-context layer**." The runtime thread then took a DIFFERENT path: Provocateur deployment-context (`419fcac`) + Editor `deployment_context` override (`ea7f4a8`/`0957ac4`) shipped to main, addressing the GATHERING/SPEAKERS context at the Provocateur + Editor stages instead of the voice stage. The voice-pipeline implementation was never merged or cherry-picked.
+
+**Current state.** `feature/voice-deployment-context` kept alive (operator decision 2026-05-08, option a — zero cost, preserves the implementation). Branch holds the only copy of `6a8e825` + its tests. main does NOT have voice-stage deployment-context injection.
+
+**Disposition deferred to runtime/production thread** (it owns these branches + this code). Options when revisited post-Athens: (a) merge `6a8e825` to add voice-stage deployment-context ON TOP OF the Provocateur/Editor placements (they're additive, not alternatives — dryrun showed it helps); (b) formally retire as superseded; (c) leave branch dormant. The voices-thread merely surfaced this during branch consolidation; **not the voices-thread's call to merge or delete.**
+
+**Cross-references:** `C41` (the briefing-layer richness conclusion that redirected effort); CLAUDE.md branch-state history; original `6a8e825` commit message (full implementation spec).
+
+---
+
 ### C47. Editorial discipline rules → permanent prompt patches 🟡 (filed 2026-05-08 from Athens Night 1 production)
 
 **Background.** Athens Night 1 production used three editorial-discipline rules added to the per-run `_dossier_deployment_context.md` (gitignored under `runs/`): (a) Provotypist anonymization (Peschel name not in publishable surface); (b) voices interleave inside argumentative paragraphs (not section-headed sequenced exhibits); (c) sacred-grammar discipline for Marley + Whanganui (Rastafari + te-reo terms appear only inside attributed quotation, not in editor narrative voice).
