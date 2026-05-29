@@ -119,7 +119,7 @@ on Nights 2–3 was **manual per-stage fires, not the orchestrator** — once
 direct fires are in flight, do NOT also start the orchestrator (it sees
 `normalized` state and dispatches duplicate transcriptions on top).
 
-**v4.1 follow-ups filed in `runtime/OPEN_ITEMS.md`** (C42–C51):
+**v4.1 follow-ups filed in `runtime/OPEN_ITEMS.md`** (C42–C52):
 C42 safeguards-validator alignment with voice_temporal_stance.default;
 C43 validator JSON parse robustness; C44 researcher per-session
 extraction caching; C45 editor dossier file-existence caching;
@@ -130,7 +130,8 @@ JSON-decode → manual passthrough (recurring transcription failure:
 N1 ×2 + N2 ×1 + N3 ×2); C50 `nights/_index.json` clobbered by
 single-voice publish (surfaced Athens N3 — left 6 voice pages
 unpublished); C51 per-theme published artifacts (`themes/night_N/`)
-never generated for any night.** C42 + C43 both RECURRED in Nights 2–3
+never generated for any night; C52 event-agnostic config externalization
+(Athens-isms hardcoded in `code` — not a zero-edit redeploy).** C42 + C43 both RECURRED in Nights 2–3
 (C42 forced the Whanganui N3 operator-release; C43 validator
 parse-fallback on Marley N2 + Whanganui N3) — recurrence notes appended
 to each entry.

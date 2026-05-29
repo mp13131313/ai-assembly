@@ -1922,6 +1922,28 @@ result["wall_clock_s"] = wall
 
 ---
 
+### C52. Event-agnostic config externalization — `code` has hardcoded Athens-isms 🟡 (filed 2026-05-29 from a portability audit)
+
+**Background.** Tier-3 separation works for event *content*: voice cards, `conference_facts.json`, `panel_roster.json`, `audience_profile.json`, `council_config.json`, `reference/sessions.json` + `speakers.json` all live at `PROJECT_ROOT` and swap with **no code change**. But the *code* hardcodes several Athens-specific assumptions, so the repo is **not a zero-edit pull-and-run** for a new event.
+
+**Functional hardcoding (would need editing at a new event):**
+- `runtime/ingest/config.py:91` `DAY_TO_RUN` — maps `"Day One/Two/Three" → "athens_night_1/2/3"`; it's the ingest session→run-dir router (`ingest/sessions.py:160`). Belongs in `PROJECT_ROOT` config, not code.
+- **3-night ceiling:** `runtime/flows/voice/card_assembly.py:401` `if night not in (1,2,3): raise`; `DAY_TO_RUN` only maps 3 days; the card schema only has `continuity_block_if_night_2` / `_if_night_3` (continuity wired for exactly nights 2+3, not an arbitrary count).
+- `athens_night_<N>` run-dir naming hardcoded in `ingest/dashboard.py:35`, `flows/vendor_intake.py:95` (`NIGHT_TO_RUN_DIR`), `scripts/reset_run.py:63` (regex `athens_night_(\d+)$`).
+- Day labels `["Day One","Day Two","Day Three"]` in `ingest/app.py:397,763` + `vendor_intake.py:94`.
+- Athens dates in setup script `scripts/generate_sessions_json.py:42`.
+- `card_assembly.py:240` `deployment="athens"` default (has a forward hook for non-Athens, but defaults to Athens).
+
+(The ~100 other "Athens" hits in code are comments / cost-notes — cosmetic, not coupling.)
+
+**Structural assumption (deeper).** The pipeline is shaped around an overnight, multi-night cadence: read today's panels → respond next morning → cross-night continuity. A similar multi-day panel conference fits with the edits above; a different *shape* / output-mode (single-day, or the one-shot annotated-encyclical in `SPEC_2026_05_27_magnifica_humanitas_annotated_pipeline.md`) needs new code — that spec is the template and evidence the team already knows this.
+
+**Fix:** move event config (day→run map, run-dir prefix, day count + labels, dates) out of `ingest/config.py` into a `PROJECT_ROOT/event_config.json`; make night-count + continuity logic count-agnostic (generalize the `continuity_block_if_night_N` card-schema pattern or drive it off the configured night count). ~half-day, concentrated in `ingest/config.py` + `card_assembly.py` + `vendor_intake.py` + `ingest/dashboard.py` + `ingest/app.py`.
+
+**Status:** filed for v4.1 / whenever a second event is on the table. **Not blocking** — Athens is complete; this only matters for redeployment. Audit verdict: another ≤3-day same-shape conference is deployable with modest parameterizing; a different event shape needs new code.
+
+---
+
 ### C48. Voice-pipeline deployment-context implementation — shelved on branch, disposition is runtime-thread's call 🟡 (surfaced 2026-05-08 by voices-thread pre-merge consolidation)
 
 **What this is.** `feature/voice-deployment-context` commit `6a8e825` ("runtime(voice/card_assembly): inject deployment context (room/panel/readers) into voice system prefix") — 139 LOC in `runtime/flows/voice/card_assembly.py` + 285-line `runtime/tests/test_deployment_context.py` (15 tests) — injects THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS blocks into the voice Step 1/2 system prefix. **NOT on main.**

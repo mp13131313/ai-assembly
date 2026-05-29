@@ -31,7 +31,9 @@ per-voice pages across Nights 1–3. Both repos clean + pushed; runtime tests gr
 
 - **Improve (v4.1, none blocking):** validator-prompt alignment (C42/C43), speaker_id
   JSON robustness (C49), publish idempotency (C50), per-theme publish decision (C51),
-  editor dossier caching (C45), discipline rules → permanent prompts (C47).
+  editor dossier caching (C45), discipline rules → permanent prompts (C47),
+  event-agnostic config externalization (C52 — `code` has hardcoded Athens-isms;
+  not a zero-edit redeploy).
 - **External, not built:** microsite (B2), closing-show pipelines (B5), Day-4 goodbye
   (B6), full non-text render layer (B7), VM provisioning (B10).
 - **Voice-build (voices thread):** Plato anachronism patch (§16.1), per-voice
