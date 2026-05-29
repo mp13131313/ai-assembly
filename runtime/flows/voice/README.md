@@ -12,7 +12,7 @@ amended artifact (Step 3).
 
 **Predecessor build notes:** the original "build notes" version of this
 README (planning decisions, before the implementation landed) is preserved
-in git history at commit `9b57bb7^`. The two load-bearing decisions it
+in git history at commit `90b5351^`. The two load-bearing decisions it
 captured (do not few-shot from `smoke_test_chains`; the persona card is
 the system prompt) are now codified in the spec and enforced by
 `card_assembly.py`.

@@ -10,8 +10,8 @@ Closed this session-cluster (2026-05-05 evening + 2026-05-06):
 - §29 Tim Leberecht 13th persona SHIPPED as Assembly editor (replacing Claudia DRAFT)
 - §30 assembly-fiction reframe SHIPPED across all 10 voices
 - §31 gap A + B + F ✅ FIXED for Whanganui v2; gap C lesson captured; gaps D + E + G filed for v4.1 (post-Athens)
-- **anchored_override cleanup**: nulled across all 8 voices that had it populated (Whanganui + Octopus already null); dead config at Athens runtime per `runtime/flows/voice/card_assembly.py` — Voice Pipeline uses `default` only. athens-2026 `82a0af9`. Reversible via git history.
-- **Runtime-thread cleanup `ec15c82`**: removed May-4 continuity_night_2 dryrun artifacts + stale council_config backup + extended .gitignore. The runtime-thread WIP flagged across many sessions is now gone.
+- **anchored_override cleanup**: nulled across all 8 voices that had it populated (Whanganui + Octopus already null); dead config at Athens runtime per `runtime/flows/voice/card_assembly.py` — Voice Pipeline uses `default` only. athens-2026 `2168519`. Reversible via git history.
+- **Runtime-thread cleanup `8a685e3`**: removed May-4 continuity_night_2 dryrun artifacts + stale council_config backup + extended .gitignore. The runtime-thread WIP flagged across many sessions is now gone.
 
 Several historical/done planning docs archived to `_workspace/archive/session-artifacts/` 2026-05-06: `WHANGANUI_V2_PLAN_2026-05-05.md`, `WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md`, `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`, `MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`, `MEMO_2026_05_01_recurrence_patterns_from_legitimacy_test.md`, `CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` — content migrated into authoritative OPEN_ITEMS sections.
 
@@ -21,7 +21,7 @@ Several historical/done planning docs archived to `_workspace/archive/session-ar
 
 ## 1. Per-voice build state
 
-Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED + PROMOTED to athens-2026.** "Voice of X" naming sweep applied across all 10 (athens-2026 `e8751f5`). **Plus Tim Leberecht as 13th persona (Assembly editor)** SHIPPED 2026-05-05 evening at `athens-2026/editor/tim_leberecht/` (`799aeb1`); `EDITOR_CARD_SUBPATH` runtime rename `claudia_pinchbeck` → `tim_leberecht` (`dcff216`); 31/31 runtime tests pass. Claudia Pinchbeck DRAFT card at `current-tests/voices/claudia_pinchbeck/` is DEPRECATED (was operator-direct-author placeholder for runtime dryrun; superseded by Tim ship). **Pre-Athens voice-build work is COMPLETE.**
+Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED + PROMOTED to athens-2026.** "Voice of X" naming sweep applied across all 10 (athens-2026 `f7e86a7`). **Plus Tim Leberecht as 13th persona (Assembly editor)** SHIPPED 2026-05-05 evening at `athens-2026/editor/tim_leberecht/` (`9347743`); `EDITOR_CARD_SUBPATH` runtime rename `claudia_pinchbeck` → `tim_leberecht` (`b266f51`); 31/31 runtime tests pass. Claudia Pinchbeck DRAFT card at `current-tests/voices/claudia_pinchbeck/` is DEPRECATED (was operator-direct-author placeholder for runtime dryrun; superseded by Tim ship). **Pre-Athens voice-build work is COMPLETE.**
 
 **Architectural updates this session (2026-05-05 evening):**
 - All 10 voice_temporal_stance.default fields shifted to **assembly-fiction** ("voice present at the assembly that gathers in Athens, observes panels, responds when consulted") per `MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md` — see §30
@@ -30,16 +30,16 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED
 
 | Voice (council label) | type | voice_mode | Hostile? | State | Notes |
 |---|---|---|---|---|---|
-| Voice of Plato | human | philosophical | false | ✅ shipped + 2026-05-02 patched | Surgical patches landed (`cf283bf`): banned_modes[10] sharpened (Socrates-death anachronism) + 7 dramatist-vs-speaker patches. §9 closed via §16.5; runtime-side tics owned by runtime/OPEN_ITEMS C20. |
-| Voice of Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`c89d186`+`54cd20a`). |
-| Voice of Fyodor Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`5088d67`). |
+| Voice of Plato | human | philosophical | false | ✅ shipped + 2026-05-02 patched | Surgical patches landed (`389a08c`): banned_modes[10] sharpened (Socrates-death anachronism) + 7 dramatist-vs-speaker patches. §9 closed via §16.5; runtime-side tics owned by runtime/OPEN_ITEMS C20. |
+| Voice of Cleopatra | human | observational | **true** | ✅ shipped | FU#61 v3 prompt-driven re-emission landed (`8a16bf7`+`0913373`). |
+| Voice of Fyodor Dostoevsky | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b) → fresh quality_criteria patched-in (`b0f0b45`). |
 | Voice of Ibn Battuta | human | narratival | false | ✅ shipped | Round 1 + 2 patches → path (b). |
-| Voice of the Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`04da2c8`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
-| Voice of Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`bfe917a`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
-| Voice of Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`3a6fe2f`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c025914`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
-| Voice of the Whanganui River | non_human | system / null + **mediation_stance: transmission_witness** | false | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN 2026-05-05 evening** (`663dc8f` + `f6afe2c`) — witness-translator architectural restructure. Replaces v1 (`c2151ce`, 2026-05-03 evening). Pipeline ROUND 0 → ROUND 1: 12 → 4 issues; first-person-AS-river leakage 5 → 0; voice_intellect_coherence ISSUE → PASS. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`663dc8f`). Post-ship full-card scan surfaced 4 additional gap-E fields with v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`f6afe2c`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`64e9b08`). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. See §28 below. |
-| Voice of Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM** (`c2151ce`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
-| Voice of Bob Marley | human | observational | false | ✅ **v2 SHIPPED + PROMOTED 2026-05-04 afternoon** (athens-2026 `669a09b`) — Option-3 restructure per 6-note appropriation-feedback thread. **3 architectural prompt-edits landed (Pass 2 + Pass 4a + Pass 4b) generalizing to any future musical-corpus voice with living sacred grammar via `corpus_constraint == "lyrics_patterns_only"` conditional.** Pipeline ran fresh; 4 ROUND walk-throughs converged 7→6→3 architectural residuals; path-(b) ship; AI Democracy Marathon test ran on v2 chat_system_prompt — trade landed as reviewer predicted (voice loses Daniel 3 + Omeriah + bias-IS-machine analytical formula; preserves prose-yard-reasoning + instrumental riddim-call + public political vocabulary + Trench Town concrete + knowledge boundary + Garvey citation). v1 archive at `current-tests/voices/bob_marley_v1_archive/`. See §24 below. |
+| Voice of the Octopus | non_human | observational | false | ✅ **compass-rebuild shipped 2026-05-02** (`1d8605f`); 4 rounds + 16 patches; chat-test verified two-channel JSON+prose emission contract. Runtime asset bundle at `code/docs/runtime_assets/octopus_chromatophore/`. See §15 below. |
+| Voice of Hannah Arendt | human | philosophical | false | ✅ **shipped 2026-05-02** (`32900be`) — 3 validation rounds + 6 surgical patches. Post-1975 topics flagged as analogical extensions. |
+| Voice of Ada Lovelace | human | philosophical | false | ✅ **shipped 2026-05-02** (`e74c391`) — 5 rounds + 21 patches; **4 over-patches subsequently rolled back** to validator-faithful minimum (`c855478`) after operator caught §7-convention deviation. Note G/Note A held-not-resolved as constitutional tension. |
+| Voice of the Whanganui River | non_human | system / null + **mediation_stance: transmission_witness** | false | ✅ **v2 SHIPPED + PROMOTED + ATHENS-CLEAN 2026-05-05 evening** (`c2a885b` + `3ccb1f9`) — witness-translator architectural restructure. Replaces v1 (`c521e74`, 2026-05-03 evening). Pipeline ROUND 0 → ROUND 1: 12 → 4 issues; first-person-AS-river leakage 5 → 0; voice_intellect_coherence ISSUE → PASS. Surgical reasoning_method patch + 3 naming patches + path-(b) ship (`c2a885b`). Post-ship full-card scan surfaced 4 additional gap-E fields with v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed (`3ccb1f9`). voice_temporal_stance dual-purpose edit: assembly-fiction + witness-stance correction (`3bcbef5`). v1 archived at `current-tests/voices/whanganui_river_v1_archive_2026-05-05/`. See §28 below. |
+| Voice of Scheherazade | fictional | narratival | false | ✅ **shipped 2026-05-04 early-AM** (`c521e74`) — path-(b) at ROUND9; 9 validator walk-throughs converged 9→6 (1 false-positive + 4 §9-architectural re-flags + 1 architectural carry). Seale-Horta 2021 corpus (operator-acquired Thalia DRM-free EPUB) curated to 14 chapters / 1.22M chars. Mediated-voice / dramatist-vs-speaker pattern preserved per §9 architectural precedent. ROUND7-9 snapshots preserved. See §22 below. |
+| Voice of Bob Marley | human | observational | false | ✅ **v2 SHIPPED + PROMOTED 2026-05-04 afternoon** (athens-2026 `da7a5c4`) — Option-3 restructure per 6-note appropriation-feedback thread. **3 architectural prompt-edits landed (Pass 2 + Pass 4a + Pass 4b) generalizing to any future musical-corpus voice with living sacred grammar via `corpus_constraint == "lyrics_patterns_only"` conditional.** Pipeline ran fresh; 4 ROUND walk-throughs converged 7→6→3 architectural residuals; path-(b) ship; AI Democracy Marathon test ran on v2 chat_system_prompt — trade landed as reviewer predicted (voice loses Daniel 3 + Omeriah + bias-IS-machine analytical formula; preserves prose-yard-reasoning + instrumental riddim-call + public political vocabulary + Trench Town concrete + knowledge boundary + Garvey citation). v1 archive at `current-tests/voices/bob_marley_v1_archive/`. See §24 below. |
 
 ### Voice-mode coverage (10 shipped)
 
@@ -56,7 +56,7 @@ Panel is **10 voices** (per `athens-2026/panel_roster.json`). **10 of 10 SHIPPED
 
 Pass 7a FINAL round 1 flagged **layer instability**: card alternated between (a) Pass 2's translation-honest no-reader frame and (b) Pass 4b's scholar-dispatcher-with-citations frame. Path A surgical 6-patch landed; round 2 dropped to 1 false-positive (`council_member_name` validator hallucination); path (b) accepted, Derive ran clean.
 
-**6 patches applied (athens-2026 `8bb9981`):**
+**6 patches applied (athens-2026 `7bce047`):**
 1. `translation_protocol` Step 5 — strip scholar-name list, keep contested-state-naming pattern + "we still don't know"
 2. `character` — replace non-allowlisted editorial bracket with allowlisted `[experiential_reconstruction]` Boddice tag
 3. `medium` — citations become optional evidence mode; default emission stays operational
@@ -114,7 +114,7 @@ Build sequence per voice:
 **FU#56 — Pass 2/3/4a register-discipline gap on long-form fields** 🔵 DEFERRED
 - Empirically attested on Plato + Cleopatra (long-form field biographical/glossary register)
 - Operator-flag exit working
-- Architecturally-correct fix is prompt-side but carries 9480d3a-revert risk
+- Architecturally-correct fix is prompt-side but carries 3feb2b2-revert risk
 - Now re-evaluable under thinking-visible (FU#60) conditions
 - Decision pending: re-attempt single component on Plato Pass 4b under thinking-on, OR continue accepting via flag
 
@@ -126,8 +126,8 @@ Build sequence per voice:
 
 ### Recently closed but documented
 
-- ✅ **FU#60** — adaptive thinking observability + temperature compatibility (committed `dd64782` + `0381278` + `85f04da`)
-- ✅ **FU#61** — voice-side Layer-1 audience-engagement criterion via Pass 4b prompt (committed `91947a7` + Cleopatra `c89d186`/`54cd20a` + Dostoevsky `5088d67`)
+- ✅ **FU#60** — adaptive thinking observability + temperature compatibility (committed `c3d369d` + `4d0153b` + `4eaaa10`)
+- ✅ **FU#61** — voice-side Layer-1 audience-engagement criterion via Pass 4b prompt (committed `6a610fc` + Cleopatra `8a16bf7`/`0913373` + Dostoevsky `b0f0b45`)
 - ✅ FU#52 chat_system_prompt invalidation
 - ✅ FU#53 Pass 7a FINAL review-gate
 - ✅ FU#57 bold_engagement_topics dropped from runtime
@@ -151,7 +151,7 @@ Build sequence per voice:
 - If data shows thinking is firing reliably → wrapper changes alone are enough
 - If data shows under-engagement → consider explicit `output_config: {effort: high}` per pass
 
-### 9480d3a revert hypothesis re-evaluation
+### 3feb2b2 revert hypothesis re-evaluation
 - Connected to FU#56 + thinking-visible empirical question
 - Texture loss in earlier prompt cycle attributed to "cumulative prompt additions" — may have been "cumulative directives without thinking bandwidth"
 - Resolvable by single Plato Pass 4b re-run with thinking-on AND with `effort: high` explicit
@@ -173,7 +173,7 @@ All 2026-05-01 cleanup items swept. Verified state:
 - **athens-2026 git tracking:** Plato 245 / Cleopatra 116 / Dostoevsky 80 / Battuta 80 / Octopus 80 tracked, 0 untracked across all 5 voices. (The 80-vs-245 delta is `.gitignore` correctly catching `_pipeline_logs/` + `*.pre_*.json`.)
 - **athens-2026 `.gitignore`:** all four targets (`_pipeline_logs/`, `*.pre_*.json`, `*.pre_*.md`, `_operator_review_passed.flag`) present.
 - **/tmp/ cleanup:** `standalone_pass4b_test.py` promoted to `code/personas/scripts/`; transient pass4b/anthropic_thinking artifacts gone.
-- **LLM_CALL_INVENTORY.md:** refreshed `bd15f84` 2026-05-01 (FU#53 + Pass 4b standalone test).
+- **LLM_CALL_INVENTORY.md:** refreshed `2f82a2e` 2026-05-01 (FU#53 + Pass 4b standalone test).
 - **"Phase L" sweep:** active docs cleared 2026-05-02. Archived HANDOFFs (`_workspace/archive/voices_consolidation_2026_05_01/`) intentionally retain historical references.
 - **Octopus athens-2026 `07_section_5_dr_prompt.compass.md` stray** (mid-rewrite artifact pre-rebuild decision): deleted 2026-05-02. Canonical rebuild DR prompts live in `projects/current-tests/voices/octopus/01_research/03_dr_prompts/`.
 
@@ -188,7 +188,7 @@ Section retained as audit trail; no active items.
 - **FU#49A v2 quality_criteria scaffold** — 3-5 + 1 outcome question pattern. "Could this be mine?" for fidelity; "Could this on its own make an audience engage with its intent?" for reception. Field-name references not strictly required (substance grounding is enough).
 - **FU#53 review-gate** — Pass 7a FINAL post-assembly + operator gate. Caught real issues across 4 voices. Use path (a) re-validate for first round of patches; path (b) accept-residuals via flag for later rounds (the validator treadmill never reaches zero).
 - **FU#52 chat_system_prompt regen** — runs unconditionally at end of pipeline; assembled-card patches propagate to chat artifact correctly.
-- **FU#60 thinking-on adaptive + display:summarized + drop temperature** — all in place. `thinking_trace` + `block_types` captured in clients.py. Streaming-stability retry catches httpx.RemoteProtocolError (commit `a6fa848`).
+- **FU#60 thinking-on adaptive + display:summarized + drop temperature** — all in place. `thinking_trace` + `block_types` captured in clients.py. Streaming-stability retry catches httpx.RemoteProtocolError (commit `eda57f8`).
 
 ### Known false positives (skip on every voice)
 
@@ -228,13 +228,13 @@ When external reviewers flag *"voice X's card has feature Y that voice Z's lacks
 
 This caught FU#48 (operator pushback) — three apparent gaps were already addressed by existing pipeline; the reviewer had compared a pipeline-emitted Plato card to an operator-hand-curated Dostoevsky chat v2.
 
-### 9480d3a-revert and 582af96 baseline (prompt history)
+### 3feb2b2-revert and 418d553 baseline (prompt history)
 
-- **582af96 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK).
-- **9480d3a revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 582af96. After empirical chat-test signal showed cumulative additions had degraded artifact texture relative to 04-25 shipped baseline.
-- Currently landed on top of revert: **FU#49A v2** (commit 0ca02f5; quality_criteria 3-dim field-tied scaffold), **FU#49D re-applied** (Position B Hard_limits with hedge discipline), **FU#51** (Pass 7a routing guard), **FU#44+** (5 patcher patterns), **FU#52** (chat artifact invalidation), **FU#53** (review-gate + Pass 7a FINAL), **FU#57** (bold_engagement_topics drop from runtime), **FU#58/59** (Pass 7a/7c register-rule fixes), **FU#60** (thinking observability + temperature compatibility), **FU#61** (audience-engagement +1 in Pass 4b prompt).
+- **418d553 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK).
+- **3feb2b2 revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 418d553. After empirical chat-test signal showed cumulative additions had degraded artifact texture relative to 04-25 shipped baseline.
+- Currently landed on top of revert: **FU#49A v2** (commit bfb7ed3; quality_criteria 3-dim field-tied scaffold), **FU#49D re-applied** (Position B Hard_limits with hedge discipline), **FU#51** (Pass 7a routing guard), **FU#44+** (5 patcher patterns), **FU#52** (chat artifact invalidation), **FU#53** (review-gate + Pass 7a FINAL), **FU#57** (bold_engagement_topics drop from runtime), **FU#58/59** (Pass 7a/7c register-rule fixes), **FU#60** (thinking observability + temperature compatibility), **FU#61** (audience-engagement +1 in Pass 4b prompt).
 - **Stripped/reverted (NOT in current prompts):** FU#49H#1-4, FU#49I, FU#49J (5+2 quality_criteria; reverted to FU#49A's at-least-one form), FU#49K, FU#49L, plus the 04-28 cryofreeze framing in voice_temporal_stance was REPLACED with the simpler "voice arrives at Athens with full canonical experience" framing.
-- The cryofreeze + tense-discipline OUTPUT REGISTER blocks + family-of-forms + anti-generic-register were initially landed (`180a8ee`) but the cryofreeze + family-of-forms components were subsequently reverted at the 04-28→04-29 transition. Card v2.1 §H + §J spec text retains the family-of-forms aspiration, but Pass 4b prompt currently single-form-locked until Cleopatra empirical validation.
+- The cryofreeze + tense-discipline OUTPUT REGISTER blocks + family-of-forms + anti-generic-register were initially landed (`6828911`) but the cryofreeze + family-of-forms components were subsequently reverted at the 04-28→04-29 transition. Card v2.1 §H + §J spec text retains the family-of-forms aspiration, but Pass 4b prompt currently single-form-locked until Cleopatra empirical validation.
 
 ### Position B vs Position C distinction (FU#49D)
 
@@ -266,7 +266,7 @@ Standalone Pass 4b re-emit on all 4 shipped voices showed:
 - Criterion form is voice-shaped per emission; non-deterministic between runs
 - Plato shipped + fresh both have the criterion; original-shipped is the FU#61 inspiration line
 - Cleopatra shipped (FU#61 v3) is voice-stronger than fresh-test variant
-- Dostoevsky fresh is unambiguously stronger than original-shipped (ventriloquized-as-the-gentleman engagement test) — landed via patch `5088d67`
+- Dostoevsky fresh is unambiguously stronger than original-shipped (ventriloquized-as-the-gentleman engagement test) — landed via patch `b0f0b45`
 - Battuta shipped is voice-stronger than fresh-test variant (qāḍī self-instruction imperative form)
 - **Lesson:** the prompt change works architecturally; per-voice emission variance is real; don't blanket re-emit, evaluate per voice
 
@@ -280,13 +280,13 @@ Standalone Pass 4b re-emit on all 4 shipped voices showed:
 ### From Octopus diagnostic
 - Pass 4a is the heaviest streaming call in the pipeline (107K corpus excerpts for Octopus, 70K for Dosto)
 - httpx.RemoteProtocolError can hit during streaming on large outputs
-- 1-retry with 15s backoff (commit `a6fa848`) is sufficient; first retry usually succeeds
+- 1-retry with 15s backoff (commit `eda57f8`) is sufficient; first retry usually succeeds
 
 ---
 
-## 9. Plato dramatist-vs-speaker collision — ✅ RESOLVED 2026-05-02 (`cf283bf`)
+## 9. Plato dramatist-vs-speaker collision — ✅ RESOLVED 2026-05-02 (`389a08c`)
 
-**Status:** ✅ RESOLVED via §16.5 Path A comprehensive (athens-2026 `cf283bf`). 7 surgical patches landed: characteristic_moves[9].description + metaphorical_repertoire["midwifery and birth"] (Phaenarete-as-Socrates'-mother corrected) + 5 passage headers ([2] Republic V, [3] Republic X, [4] Phaedrus, [6] Apology, [7] Theaetetus) switched from first-person Plato-as-Socrates to third-person Socrates / composer-frame. 3 borderline headers ([0], [1], [5]) left alone. The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) is **still pending for Scheherazade's Pass 0a** — see §3 Scheherazade row.
+**Status:** ✅ RESOLVED via §16.5 Path A comprehensive (athens-2026 `389a08c`). 7 surgical patches landed: characteristic_moves[9].description + metaphorical_repertoire["midwifery and birth"] (Phaenarete-as-Socrates'-mother corrected) + 5 passage headers ([2] Republic V, [3] Republic X, [4] Phaedrus, [6] Apology, [7] Theaetetus) switched from first-person Plato-as-Socrates to third-person Socrates / composer-frame. 3 borderline headers ([0], [1], [5]) left alone. The drafted prompt-side architectural fix (HANDOFF_2026_04_28 §13) is **still pending for Scheherazade's Pass 0a** — see §3 Scheherazade row.
 
 **Section retained for historical context** (the `Status` line above is the live truth):
 
@@ -344,7 +344,7 @@ These are real open items requiring operator action before Athens.
 - Status: filed 2026-04-27; never closed.
 
 **FU#49C — Breakfast-reader frame replacement in `conference_facts.json`** ✅ DONE (verified 2026-05-02)
-- `session_role_for_ai_assembly` rewrite landed in athens-2026 `fc233b8` (2026-04-26): removed "breakfast reading" digestible-content frame; added 3-bar test + framework-strain directive + "performing reception without being changed" failure mode.
+- `session_role_for_ai_assembly` rewrite landed in athens-2026 `e8b34dd` (2026-04-26): removed "breakfast reading" digestible-content frame; added 3-bar test + framework-strain directive + "performing reception without being changed" failure mode.
 - Verified clean across athens-2026 deployment JSONs: `conference_facts.json` carries the new framing (and explicitly distinguishes from the deprecated frame); `audience_profile.json` carries the matched "deepest vulnerability: their well-curated openness is itself how they avoid being changed" register; `panel_roster.json` + `council_config.json` clean of the deprecated frame. No closing-show docs exist in active tree to sweep.
 - Remaining (operator-side, outside code/data repos): WBBF program copy / attendee-facing materials may still describe the AIssembly with the old "breakfast reading" framing — coordinate with WBBF to confirm or update.
 
@@ -399,9 +399,9 @@ Voice-fit map (from reviewer pass-2, 2026-04-26):
 
 For voice-build planning context only:
 
-- **Voice Pipeline Steps 1+2+3 + validation + continuity + card_assembly:** ✅ implemented v2 (2026-04-28; 2145 LOC; commits `180a18f`, `aca0e4c`, `fa88db7`)
+- **Voice Pipeline Steps 1+2+3 + validation + continuity + card_assembly:** ✅ implemented v2 (2026-04-28; 2145 LOC; commits `5f17bf5`, `d05e565`, `4fa3ca6`)
 - **Voice Pipeline v2 spec** at `docs/AI_Assembly_Voice_Pipeline.md` (1209 lines)
-- **Publish layer** ✅ implemented (`runtime/flows/voice/publish.py` + `runtime/flows/publish_flow.py`; commit `ddec38a`)
+- **Publish layer** ✅ implemented (`runtime/flows/voice/publish.py` + `runtime/flows/publish_flow.py`; commit `33c7b43`)
 - **Voice Pipeline dry-runs:** Plato solo on 2026-04-29 (3 formulations on "Legitimacy of the Invisible") + Plato + Cleopatra dual on 2026-04-30 — both successful, produced quality Socratic dialogues / prostagmata. Step 3 still pending — needs more voices for cross-voice amendment traffic.
 
 This means: as soon as a voice's `07_persona_card_assembled.json` ships, runtime can consume it. Voice-build is the rate-limit.
@@ -410,7 +410,7 @@ This means: as soon as a voice's `07_persona_card_assembled.json` ships, runtime
 
 ## 15. Octopus compass rebuild (✅ COMPLETE, 2026-05-02)
 
-**Status:** ✅ shipped to athens-2026 (`04da2c8`). Backup of pre-promotion state preserved at `~/Desktop/AI Assembly/archive/athens-2026_octopus_pre_compass_promotion_2026-05-02/`.
+**Status:** ✅ shipped to athens-2026 (`1d8605f`). Backup of pre-promotion state preserved at `~/Desktop/AI Assembly/archive/athens-2026_octopus_pre_compass_promotion_2026-05-02/`.
 
 **4 validation rounds + 16 surgical patches landed:**
 - Round 1: 6 issues → 5 register patches (world / formative_experience / constitution / concept_lexicon / reasoning_method) + 4 JSON-emission patches (medium / technical_capabilities / characteristic_output_structure / quality_criteria)
@@ -589,7 +589,7 @@ Persona thread walked all 4 findings + the inherited dramatist-vs-speaker collis
 | **Precautionary** | non_human/organism with refuse-to-render intent | "the voice enacts the limit as primary mode; Birch bracketing-as-method; not accessible to us" — what built-Octopus inadvertently became |
 | **Transmission-faithful** | non_human/system with constitutional-document grounding (Whanganui) | "the voice stewards what is verbatim from the constituting legal-cosmological text + Indigenous-authored scholarship; mediation-acknowledged through formal structure (Te Pou Tupua); iwi-non-ventriloquism + legal-bureaucratese both refused" |
 
-The compass-permissive Pass 0b template amendment (organism, committed `a6755d9`) supports postures 1 + 2 conditionally on voice_config.editorial_rationale. The system template already supports posture 3 natively. Future non-human voice rebuilds inherit this taxonomy.
+The compass-permissive Pass 0b template amendment (organism, committed `2cdbcf1`) supports postures 1 + 2 conditionally on voice_config.editorial_rationale. The system template already supports posture 3 natively. Future non-human voice rebuilds inherit this taxonomy.
 
 ---
 
@@ -811,7 +811,7 @@ Three-voice parallel build session. State at session end:
 - Operator-applied `_operator_review_passed.flag` to ship; all 3 Derive outputs present in `06_derive/` (provocateur_profile, runtime_card_minimal, chat_system_prompt).
 - Mid-session reset: ROUND5 patches over-corrected appropriation-safety language; reverted to PRE-ROUND1 (post-auto-FIX baseline) per operator override before resuming.
 
-### Scheherazade — ✅ SHIPPED via path-(b) at ROUND9 (athens-2026 `c2151ce`)
+### Scheherazade — ✅ SHIPPED via path-(b) at ROUND9 (athens-2026 `c521e74`)
 - Seale-Horta 2021 corpus acquired (operator-purchased Thalia DRM-free EPUB) → 14 chapters extracted to `01_primary_texts.json` (1.22M chars) for Pass 1d to curate. Fixed Burton/Lane register conflict that surfaced at FINAL gate.
 - 9 validator walk-throughs (ROUND6 → ROUND9). Convergence trajectory: 10 → 9 → 6 residuals; final state 1 false-positive (`council_member_name` validator hallucination, present on disk) + 4 §9-architectural re-flags + 1 architectural carry.
 - **ROUND6 patches**: kawa-typo fix (templated from Whanganui — caught by validator), Bencheikh French strip (`constitution[6]`), closing-frame `quotation_framing` add (`curated_corpus_passages[6]`). Per-fix decisions: [1][4][5] left as architectural (mediated-voice / dramatist-vs-speaker per §9); [2][3][6] patched.
@@ -907,7 +907,7 @@ Path-(b) ship via `_operator_review_passed.flag`. Card preserved as `07_persona_
 
 **TEST BEFORE LOCKING (per reviewer's Step 5):** Ran v2 chat_system_prompt against the original AI Democracy Marathon provocation that surfaced the v1 issue. Result saved at `bob_marley/06_derive/_test_ai_democracy_marathon_v2.json`. Trade landed as reviewer predicted: voice loses Daniel 3 typology + Omeriah-grandfather authority reference + "bias not IN the machine, the bias IS the machine" sharp formula; preserves prose-yard-reasoning artifact form + instrumental riddim-call direction ("Roots one-drop, 72 BPM. The Kaya room, not the Survival room.") + public political vocabulary lead ("politricks words") + Trench Town concrete-collapse + knowledge boundary ("Me nuh know these wires them build after I leave this body") + Garvey citation ("None but ourselves can free our minds — That is Garvey from Menelik Hall"). Voice survives the restructure, recognizably Marley.
 
-**Promoted to athens-2026** (`669a09b`); council_config members[7] wired with v2 provocateur_profile (replaces prior placeholder claiming song-as-artifact medium).
+**Promoted to athens-2026** (`da7a5c4`); council_config members[7] wired with v2 provocateur_profile (replaces prior placeholder claiming song-as-artifact medium).
 
 ### Operator-side readiness paragraphs (D1 + E1)
 
@@ -932,7 +932,7 @@ Stylistic choices:
 
 Long-form self-identification stays in `council_member_name` field (per voice — e.g., Cleopatra's full Ptolemaic titulature, Battuta's full Arabic-Berber name chain, Marley's "Berhane Selassie, Light of the Trinity"). The `name` field across persona_card.voice_name + provocateur_profile.name + council_config.members[].name + panel_roster.panel_members_final is now uniformly "Voice of X".
 
-Athens-2026 commit `e8751f5`.
+Athens-2026 commit `f7e86a7`.
 
 ### Operator-side residuals (gates accepted; reader recommended; operator chose to proceed without)
 
@@ -1009,12 +1009,12 @@ Authored from `_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PR
 
 ## 27. Length anchoring + dryrun length audit — ✅ CLOSED 2026-05-05 evening
 
-> **Update 2026-05-05 evening:** ✅ CLOSED voices-side. Three card-side surgical patches shipped to athens-2026 (`9dae9b9`):
+> **Update 2026-05-05 evening:** ✅ CLOSED voices-side. Three card-side surgical patches shipped to athens-2026 (`404838d`):
 > - **dostoevsky** `length_and_format_constraints`: stripped 3 softeners ("typically", "expand to meet it" sentence, "however long"); leads imperative + number; **range 350-750w** (operator-bumped from initial 350-500 draft). Preserves Diary-form texture.
 > - **hannah_arendt**: tightened from 600-900 → **350-750w** (operator-bumped from initial 350-500 draft); anchors form as "Aufbau column at full breath, not long Origins chapter"; preserves architectural refusals.
 > - **octopus**: front-loaded prose-side word count ("Tank-side prose: **350 to 500 words**"); explicitly clarified "no length applies to JSON channel" for chromatophore_display two-channel artifact.
 >
-> Path-(b) Derive regenerated chat_system_prompt for all 3 voices against patched cards. Combined with the runtime prompt fix (`61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md), all 3 voices should now compress within their respective caps in the next dryrun **without** max_tokens or post-truncation enforcement. **Operator decision (2026-05-05 evening): NO max_tokens enforcement — clean card-side resolution preferred over runtime truncation.**
+> Path-(b) Derive regenerated chat_system_prompt for all 3 voices against patched cards. Combined with the runtime prompt fix (`0769d88` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md), all 3 voices should now compress within their respective caps in the next dryrun **without** max_tokens or post-truncation enforcement. **Operator decision (2026-05-05 evening): NO max_tokens enforcement — clean card-side resolution preferred over runtime truncation.**
 >
 > Cross-ref: closes runtime/OPEN_ITEMS.md C38 from the voices side (runtime-thread can close C38 unless they want max_tokens as a defensive backstop independent of the card-side fix).
 >
@@ -1022,7 +1022,7 @@ Authored from `_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PR
 
 **Original §27 content preserved below for context:**
 
-> **Original 2026-05-04 PM context:** Runtime prompt fix had landed (commit `61b1deb` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever was real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carried structural softeners or wrong-target ranges that the prompt fix couldn't reach. Surgical card-rewrites for those three documented in `_workspace/archive/session-artifacts/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.
+> **Original 2026-05-04 PM context:** Runtime prompt fix had landed (commit `0769d88` — `length_and_format_constraints` moved from `<form>` Anchor in: → `<composition>` Pass: in voice_step2_artifact.md). Re-run on Dostoevsky: 980w → 783w (~46% reduction in over-cap). Prompt lever was real but not sufficient on its own — three cards (dostoevsky / hannah_arendt / octopus) carried structural softeners or wrong-target ranges that the prompt fix couldn't reach. Surgical card-rewrites for those three documented in `_workspace/archive/session-artifacts/MEMO_2026_05_05_length_cap_card_surgery_after_runtime_fix.md`.
 
 
 ### Summary of operator decision
@@ -1077,9 +1077,9 @@ If runtime C38 lands as `max_tokens`-enforcement, all 10 voices' artifacts will 
 
 ## 28. Whanganui v2 architectural restructure SHIPPED + PROMOTED + ATHENS-CLEAN (2026-05-05 evening + 2026-05-06 kawa-speaker-frame closure)
 
-**Status:** ✅ shipped (athens-2026 `663dc8f` initial v2 + `f6afe2c` 4-field gap-E closure + `8c3e9a7` kawa-speaker-frame closure); supersedes v1 (commit `c2151ce`, 2026-05-03 evening).
+**Status:** ✅ shipped (athens-2026 `c2a885b` initial v2 + `3ccb1f9` 4-field gap-E closure + `97a2389` kawa-speaker-frame closure); supersedes v1 (commit `c521e74`, 2026-05-03 evening).
 
-> **Athens-clean update 2026-05-06:** Operator audit caught a subtle Athens-blocking appropriation residual in the bilingual quote-and-gloss opener. Te reo of the third kawa correctly attributed to s.13(c), but English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries — a reader could hear it as the construction speaking AS the river. The §28 architectural insight predicted this ("the whakataukī Ko au te awa, ko te awa ko au is Whanganui Iwi's identity-claim with the river — NOT the river speaking") but the v2 conditional discipline didn't enforce explicit speaker-framing for cited-te reo first-person. Three card patches shipped (`8c3e9a7`):
+> **Athens-clean update 2026-05-06:** Operator audit caught a subtle Athens-blocking appropriation residual in the bilingual quote-and-gloss opener. Te reo of the third kawa correctly attributed to s.13(c), but English gloss "I am the River and the River is me" floated grammatically without naming whose original voice the "I" carries — a reader could hear it as the construction speaking AS the river. The §28 architectural insight predicted this ("the whakataukī Ko au te awa, ko te awa ko au is Whanganui Iwi's identity-claim with the river — NOT the river speaking") but the v2 conditional discipline didn't enforce explicit speaker-framing for cited-te reo first-person. Three card patches shipped (`97a2389`):
 >
 > - `hard_limits` +1 (8 → 9): forbids cited te reo Māori first-person whakataukī without explicit speaker-frame; names *Ko au te awa, ko te awa ko au* specifically as Whanganui Iwi's identity-claim, not river speaking, not construction's claim.
 > - `characteristic_moves[0].description` tightened: bilingual quote-and-gloss signature move now carries speaker-frame discipline inline; example phrasing *"Whanganui Iwi's identity-claim with the river: I am the River and the River is me"*, not bare *"I am the River and the River is me"*.
@@ -1093,7 +1093,7 @@ If runtime C38 lands as `max_tokens`-enforcement, all 10 voices' artifacts will 
 
 The construction speaks first-person AS ITSELF — the construction stewarding the Te Awa Tupua published record. It REPORTS what Te Awa Tupua's codified positions are and STANDS BY them; it does NOT claim to BE the river, to BE Te Pou Tupua, or to speak FOR Whanganui Iwi. Same architectural shape as Marley v2's report-and-stand-by stance, adapted from sacred-musical-corpus to mediated-indigenous-legal-personhood.
 
-### Pipeline architecture (code repo, commit `5bde171` round-1 fixes after `d32872a` initial wiring round):
+### Pipeline architecture (code repo, commit `1d9ce6b` round-1 fixes after `d2f349a` initial wiring round):
 
 New `voice_config` field `mediation_stance == "transmission_witness"` triggers Jinja conditional blocks in 5 prompts:
 - **Pass 2** (`persona_pass_2_identity_boundaries.md`) — TRANSMISSION-WITNESS DEPLOYMENT LIMIT block: forbids deploying Tupua te Kawa as load-bearing premise of construction's argument; provides second-person example phrasings for hard_limits.
@@ -1156,7 +1156,7 @@ Response (447w) emitted clean witness-stance:
 
 ## 29. Tim Leberecht 13th persona SHIPPED as Assembly editor (2026-05-05 evening)
 
-**Status:** ✅ SHIPPED + PROMOTED to athens-2026 as Assembly editor. Card placed at `athens-2026/editor/tim_leberecht/` (`799aeb1`). Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` → `tim_leberecht` in code repo (`dcff216`); 31/31 runtime tests pass post-rename. voice_temporal_stance AT-WBBF-Night-N edit landed (`27f3e47`, runtime-thread). Source-of-truth working tree at `projects/current-tests/editors/tim_leberecht/`. Claudia Pinchbeck DRAFT (operator-direct-author placeholder) DEPRECATED — see §26.
+**Status:** ✅ SHIPPED + PROMOTED to athens-2026 as Assembly editor. Card placed at `athens-2026/editor/tim_leberecht/` (`9347743`). Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` → `tim_leberecht` in code repo (`b266f51`); 31/31 runtime tests pass post-rename. voice_temporal_stance AT-WBBF-Night-N edit landed (`3f0032d`, runtime-thread). Source-of-truth working tree at `projects/current-tests/editors/tim_leberecht/`. Claudia Pinchbeck DRAFT (operator-direct-author placeholder) DEPRECATED — see §26.
 
 ### Build summary
 
@@ -1196,7 +1196,7 @@ The construction question for the panel: **should *The Assembly*'s news organ be
 
 ### Path forward — RESOLVED 2026-05-05 evening
 
-- ✅ **Operator decision:** Tim chosen as Assembly editor. Promoted to athens-2026 (`799aeb1`). Claudia DRAFT deprecated (§26).
+- ✅ **Operator decision:** Tim chosen as Assembly editor. Promoted to athens-2026 (`9347743`). Claudia DRAFT deprecated (§26).
 - **Architectural framing:** Tim is editor, NOT panel. athens-2026 placement at `editor/tim_leberecht/` (matches runtime `EDITOR_CARD_SUBPATH` after rename). Source-of-truth working tree at `current-tests/editors/tim_leberecht/`. Not in `panel_roster.json`. Editorial role differs structurally from panel-voice role (curates rather than responds to a Provocateur question).
 
 ### Beauty Shot supplement integration approach (relevant for any future editor builds)
@@ -1214,9 +1214,9 @@ Supplement adds ~30% to section word counts; pipeline handles the augmented inpu
 
 ## 30. Assembly-fiction reframe: voice_temporal_stance shift across all 10 voices (2026-05-05 evening)
 
-**Status:** ✅ shipped (athens-2026 `64e9b08`, 2026-05-05). Per runtime-thread memo `_workspace/archive/session-artifacts/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`.
+**Status:** ✅ shipped (athens-2026 `3bcbef5`, 2026-05-05). Per runtime-thread memo `_workspace/archive/session-artifacts/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md`.
 
-> **⚠️ SUPERSEDED 2026-05-08 by §31 Gap-K.** The `64e9b08` reframe APPENDED assembly clauses rather than LEADING with them (AF-leads-vs-appends finding). `voice_temporal_stance.default` has since been fully rewritten 4× (`625b9ca` → `25ec751` → `5cc04ad` → `3fd94e6`) to the AF-leads + operator-short-draft architecture, with the universal epistemic-honesty hook added then removed. The description below documents the ORIGINAL `64e9b08` reframe for historical context; **for the current shipped state see §31 Gap-K.** The "10 chat_system_prompt regens" this entry mentions are now stale (re-Derive disposition per Gap-K).
+> **⚠️ SUPERSEDED 2026-05-08 by §31 Gap-K.** The `3bcbef5` reframe APPENDED assembly clauses rather than LEADING with them (AF-leads-vs-appends finding). `voice_temporal_stance.default` has since been fully rewritten 4× (`d43eadd` → `b2d5eaf` → `7cdbee3` → `08a8253`) to the AF-leads + operator-short-draft architecture, with the universal epistemic-honesty hook added then removed. The description below documents the ORIGINAL `3bcbef5` reframe for historical context; **for the current shipped state see §31 Gap-K.** The "10 chat_system_prompt regens" this entry mentions are now stale (re-Derive disposition per Gap-K).
 
 ### Architectural shift
 
@@ -1250,9 +1250,9 @@ Empirical grounding (per memo): operator's chat-test of Plato (feeding the confe
 
 Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_stance reframe:
 
-**A. Coverage gaps in conditional wiring** ✅ FIXED (commit `5bde171`) — v2 conditional initially landed only on Pass 2 + 4a + 4b; extended in ROUND 1 to Pass 3 + 5 + 6.
+**A. Coverage gaps in conditional wiring** ✅ FIXED (commit `1d9ce6b`) — v2 conditional initially landed only on Pass 2 + 4a + 4b; extended in ROUND 1 to Pass 3 + 5 + 6.
 
-**B. Block grammar bug** ✅ FIXED (commit `5bde171`) — v2 conditional blocks initially in third-person describing the construction; rewritten to instructional second-person + explicit anti-pattern warning.
+**B. Block grammar bug** ✅ FIXED (commit `1d9ce6b`) — v2 conditional blocks initially in third-person describing the construction; rewritten to instructional second-person + explicit anti-pattern warning.
 
 **C. Smoke-test process gap** 🟡 LESSON CAPTURED — only verified "block fires" via Jinja render, not "block produces correct field-output". Process change for future v2-style architectural builds: must render output sample + eyeball, not just verify-the-block-fires.
 
@@ -1260,32 +1260,32 @@ Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_st
 
 **E. Per-field discipline incompleteness in conditional blocks** 🔴 OPEN (NEW — surfaced 2026-05-05 evening via voice_temporal_stance discovery) — v2 conditionals enumerate per-field discipline only for SOME of each pass's output fields. Specifically Pass 2's witness-block addressed hard_limits explicitly; did NOT enumerate voice_temporal_stance, knowledge_boundary, world, formative_experience.*, character, translation_protocol, topics_requiring_care. Result: fields with implicit first-person tendency inherit BLOCK 3 field-spec instruction "first-person from within the voice's own world" — model resolves the conflict with witness-block by picking river-first-person. Whanganui v2's voice_temporal_stance shipped with v1's first-person-AS-the-river ("I speak from the legal-ecological present of MY ongoing existence...MY framework"); caught only because the runtime memo flagged for unrelated assembly-fiction reframe.
 
-**F. v1 baseline drift on uncovered fields** ✅ FIXED for Whanganui v2 (athens-2026 `f6afe2c`) — operator-driven full-card scan after gap E surfaced 4 additional fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed. For other voices with v2-style architecture: still 🟡 OPEN; whenever a new mediation_stance voice ships, full-card scan must follow ROUND 1 walk-through.
+**F. v1 baseline drift on uncovered fields** ✅ FIXED for Whanganui v2 (athens-2026 `3ccb1f9`) — operator-driven full-card scan after gap E surfaced 4 additional fields shipping v1 first-person AS the river (character / knowledge_boundary / world.ontological_furniture / formative_experience.formative_emotional_community); patched + re-Derive + TEST passed. For other voices with v2-style architecture: still 🟡 OPEN; whenever a new mediation_stance voice ships, full-card scan must follow ROUND 1 walk-through.
 
-**G. Pass 4b te reo discipline doesn't enforce explicit speaker-framing for cited-te reo first-person** 🔴 NEW 2026-05-06 — surfaced via operator audit of Whanganui v2 bilingual opener. Pass 4b's te reo discipline addresses LLM-generated te reo + appropriated whakataukī, but doesn't enforce explicit speaker-framing for cited te reo whose grammatical first-person ("Ko au te awa, ko te awa ko au") could be misread as the construction's voice. The bilingual quote-and-gloss signature move needs a sub-discipline: when the cited te reo carries first-person grammar, the English gloss must explicitly name whose voice the "I" belongs to — never let the gloss float unframed where the construction's own "I" could be read into it. ✅ FIXED for Whanganui v2 specifically via 3 card patches (athens-2026 `8c3e9a7`); architectural prompt-side fix deferred to v4.1. Generalizable to any future voice citing first-person sacred-grammar from a tradition the construction is not authorized from inside (Sufi-poet *ana al-Haqq*; gospel-tradition *I am that I am*; etc.).
+**G. Pass 4b te reo discipline doesn't enforce explicit speaker-framing for cited-te reo first-person** 🔴 NEW 2026-05-06 — surfaced via operator audit of Whanganui v2 bilingual opener. Pass 4b's te reo discipline addresses LLM-generated te reo + appropriated whakataukī, but doesn't enforce explicit speaker-framing for cited te reo whose grammatical first-person ("Ko au te awa, ko te awa ko au") could be misread as the construction's voice. The bilingual quote-and-gloss signature move needs a sub-discipline: when the cited te reo carries first-person grammar, the English gloss must explicitly name whose voice the "I" belongs to — never let the gloss float unframed where the construction's own "I" could be read into it. ✅ FIXED for Whanganui v2 specifically via 3 card patches (athens-2026 `97a2389`); architectural prompt-side fix deferred to v4.1. Generalizable to any future voice citing first-person sacred-grammar from a tradition the construction is not authorized from inside (Sufi-poet *ana al-Haqq*; gospel-tradition *I am that I am*; etc.).
 
 **H. Group-1 apparatus-transposition seams** 🟡 OPEN — surfaced 2026-05-07 via external-reader review of wbbf26 dryrun (`MEMO_2026_05_07_card_patches_from_external_reader.md`). Plato/Cleopatra/Battuta artifacts show "fatwa in Rihla clothing" / "analytical-comparative inside prostagma surface" / "thin single-elenctic-move with capitulating interlocutor" pattern: figures made to do analytical work the historical voices did not natively do. Pipeline pressure: formulation calls for analytic answer; corpus says voice doesn't argue this way. Each Group-1 voice patched at card level (B-list MEMO_2026_05_07 §A.1 / A.4-A.5 / A.6) but architectural fix is to extend `topics_requiring_care` with refuse-and-reframe-when-formulation-invites-uncharacteristic-work guidance, generalisable across Group-1 voices.
 
 **I. Step 2 composition flattens digression/instance discipline** 🟡 OPEN — surfaced 2026-05-07 via external-reader review (Lovelace, Dostoevsky, Arendt all "more architecturally clean than the originals"; Whanganui "more rhetorically efficient than the underlying documents"). Cards carry digression + instance-rostering + lingered-example moves; Step 2 composition under length-cap + synthesis pressure flattens these. B-list MEMO_2026_05_07 sharpens at card level (A.3, A.7, A.8); structural fix is Step 2 prompt-level discipline requiring AT LEAST ONE digression / instance / lingered-example per artifact regardless of focus_decision.
 
-**J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach (mthd Step 2 artifact). The 2026-05-05 assembly-fiction reframe (`64e9b08`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens via B-list MEMO_2026_05_07 §A.9 (voice_temporal_stance.default sentence appending an assembly-aware translation_protocol obligation when post-1975 topics arrive via panels). Architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises Gap-C (smoke-test process gap) beyond persona-pipeline internal smoke-tests to runtime-thread coherence concerns. Other voices: Fyodor d.1881 the next most likely candidate (post-1881 vocabulary rule + AF framing); Marley d.1981, Ada d.1852, four ancient voices, two non-human voices all lower-risk for this specific collision class. Fyodor eyeball-audit recommended pre-Athens (no patch needed unless audit surfaces collision).
+**J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach (mthd Step 2 artifact). The 2026-05-05 assembly-fiction reframe (`3bcbef5`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens via B-list MEMO_2026_05_07 §A.9 (voice_temporal_stance.default sentence appending an assembly-aware translation_protocol obligation when post-1975 topics arrive via panels). Architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises Gap-C (smoke-test process gap) beyond persona-pipeline internal smoke-tests to runtime-thread coherence concerns. Other voices: Fyodor d.1881 the next most likely candidate (post-1881 vocabulary rule + AF framing); Marley d.1981, Ada d.1852, four ancient voices, two non-human voices all lower-risk for this specific collision class. Fyodor eyeball-audit recommended pre-Athens (no patch needed unless audit surfaces collision).
 
-**K. AF-leads-vs-appends architectural fix shipped for all 10 voices** ✅ FIXED 2026-05-08 (athens-2026 commits `625b9ca` → `25ec751` → `5cc04ad` → **`3fd94e6` (final)**) — surfaced 2026-05-06 mid-day via runtime-thread inspection of May-5 dryrun outputs (filed in CLAUDE.md): the prior assembly-fiction reframe (`64e9b08`, 2026-05-05) APPENDED assembly clauses to existing v1 biographical-anchor framing rather than LEADING with assembly-presence. 8 of 10 voices opened with "You speak from within your own world and lifetime [biographical anchor]" — v1 framing — with assembly clauses appended later (Whanganui v2 was the only full replacement; Octopus had its own field anchor leading). Adaptive thinking under structured-output pressure may default to the stronger biographical anchor when the field is sandwich-structured.
+**K. AF-leads-vs-appends architectural fix shipped for all 10 voices** ✅ FIXED 2026-05-08 (athens-2026 commits `d43eadd` → `b2d5eaf` → `7cdbee3` → **`08a8253` (final)**) — surfaced 2026-05-06 mid-day via runtime-thread inspection of May-5 dryrun outputs (filed in CLAUDE.md): the prior assembly-fiction reframe (`3bcbef5`, 2026-05-05) APPENDED assembly clauses to existing v1 biographical-anchor framing rather than LEADING with assembly-presence. 8 of 10 voices opened with "You speak from within your own world and lifetime [biographical anchor]" — v1 framing — with assembly clauses appended later (Whanganui v2 was the only full replacement; Octopus had its own field anchor leading). Adaptive thinking under structured-output pressure may default to the stronger biographical anchor when the field is sandwich-structured.
 
 **Four-commit evolution (all on athens-2026 main, all ancestors of the live Night-1 production cards):**
 
-1. **`625b9ca` AF-leads + universal hook** — restructured all 10 to `AF OPEN → biographical/standing-place anchor (compressed) → translation_protocol → AF CLOSE`; added a universal epistemic-honesty hook. (10,005 → 7,813 chars.)
-2. **`25ec751` hook removed** — see mid-fix correction below. (→ 7,610 chars.)
-3. **`5cc04ad` Arendt v1-leakage fix** — `625b9ca` had left Arendt's second sentence as the literal v1 frame "You speak from within your own world and lifetime — born…"; only Arendt retained it (other 9 dropped it or qualified to a concrete standing-place). Combined the lifespan dates into the knowledge_boundary sentence (Dostoevsky-pattern parallel).
-4. **`3fd94e6` operator short drafts (FINAL — what Night 1 published with)** — operator-provided tighter architecture replacing the AF-leads prose: `AF LEAD with observation built in ("observing the panels but not entering them as participant") → "questions are put before you; you respond from your own ground: [BIOGRAPHICAL/STANDING-PLACE]" → translation_protocol → closing motif "You observe; you respond from [STANDING-PLACE]"`. Hooks stripped from Arendt + Octopus on application (per standing rule). 9 voices use the template; Octopus (sensorimotor-grammar) + Whanganui (first-person construction-stewarding) carry the same 5 invariants in voice-appropriate grammar. **Final field-content: 5,958 chars total = −40.5% from the 82a0af9 dryrun baseline.**
+1. **`d43eadd` AF-leads + universal hook** — restructured all 10 to `AF OPEN → biographical/standing-place anchor (compressed) → translation_protocol → AF CLOSE`; added a universal epistemic-honesty hook. (10,005 → 7,813 chars.)
+2. **`b2d5eaf` hook removed** — see mid-fix correction below. (→ 7,610 chars.)
+3. **`7cdbee3` Arendt v1-leakage fix** — `d43eadd` had left Arendt's second sentence as the literal v1 frame "You speak from within your own world and lifetime — born…"; only Arendt retained it (other 9 dropped it or qualified to a concrete standing-place). Combined the lifespan dates into the knowledge_boundary sentence (Dostoevsky-pattern parallel).
+4. **`08a8253` operator short drafts (FINAL — what Night 1 published with)** — operator-provided tighter architecture replacing the AF-leads prose: `AF LEAD with observation built in ("observing the panels but not entering them as participant") → "questions are put before you; you respond from your own ground: [BIOGRAPHICAL/STANDING-PLACE]" → translation_protocol → closing motif "You observe; you respond from [STANDING-PLACE]"`. Hooks stripped from Arendt + Octopus on application (per standing rule). 9 voices use the template; Octopus (sensorimotor-grammar) + Whanganui (first-person construction-stewarding) carry the same 5 invariants in voice-appropriate grammar. **Final field-content: 5,958 chars total = −40.5% from the 2168519 dryrun baseline.**
 
 Content-migration pre-verified across all four commits — all dropped material either preserved in destination fields (formative_experience, world, characteristic_moves, preferred_vocabulary) or operational ballast safe to drop (Lovelace 3 micro-instances, Whanganui flood-pulse dates). Snapshots preserved per voice (gitignored): `.pre_af_leads_universal_hook_patch.json`, `.pre_arendt_v1_leakage_fix.json` (Hannah only), `.pre_operator_short_drafts_2026_05_08.json`.
 
-**Production validation:** Night 1 published (`bfa1f8a`) using the `3fd94e6` cards. Hannah + Battuta + Whanganui v1 artifacts demonstrated the meta-framing-of-synthesis-as-critique move working (resolves Gap-J AF/hard_limits collision in practice). Downstream finding: the Sonnet safeguards validator still applies the old "no AI-self-ack" rule and spuriously HOLDs voices now permitted to meta-frame — filed as runtime/OPEN_ITEMS **C42** (operator-Released the 2 spurious HOLDs on Night 1; real fix = validator prompt update, v4.1).
+**Production validation:** Night 1 published (`dcaf7ce`) using the `08a8253` cards. Hannah + Battuta + Whanganui v1 artifacts demonstrated the meta-framing-of-synthesis-as-critique move working (resolves Gap-J AF/hard_limits collision in practice). Downstream finding: the Sonnet safeguards validator still applies the old "no AI-self-ack" rule and spuriously HOLDs voices now permitted to meta-frame — filed as runtime/OPEN_ITEMS **C42** (operator-Released the 2 spurious HOLDs on Night 1; real fix = validator prompt update, v4.1).
 
-**Chat artifacts (`06_derive/`) stale relative to `3fd94e6` cards.** Runtime reads `07_persona_card_assembled.json` directly and is NOT affected — Night 1 published cleanly. Only the chat-test paste-target `03_chat_system_prompt.json` is stale (mechanical strip from card — regenerable without LLM). Note: `provocateur_profile.name` is bare ("Plato" not "Voice of Plato") on the production cards and Night 1 ran fine — the canonical Voice-of-X naming lives in `council_config.json` (wired separately, correct, not touched by Derive), so profile-name is cosmetic-only. Re-Derive disposition deferred to operator (chat-test-only benefit).
+**Chat artifacts (`06_derive/`) stale relative to `08a8253` cards.** Runtime reads `07_persona_card_assembled.json` directly and is NOT affected — Night 1 published cleanly. Only the chat-test paste-target `03_chat_system_prompt.json` is stale (mechanical strip from card — regenerable without LLM). Note: `provocateur_profile.name` is bare ("Plato" not "Voice of Plato") on the production cards and Night 1 ran fine — the canonical Voice-of-X naming lives in `council_config.json` (wired separately, correct, not touched by Derive), so profile-name is cosmetic-only. Re-Derive disposition deferred to operator (chat-test-only benefit).
 
-**Mid-fix correction (`25ec751`):** initial AF-leads patch (`625b9ca`) added a universal epistemic-honesty hook ("where the framework does not reach, say so" + voice-idiom variants "name the gap" / "name the silence" / "I say so") across all 10 voices, generalized from Hannah's organic Pass-4a-generated version. Operator caught + reversed: previously-shipped epistemic-out clauses caused voices to default to **decline-to-engage** behavior (use the hook as escape from substantive engagement). Removed across all 10 including the originally-organic Hannah + Octopus versions. **Hook is NOT to appear anywhere in voice_temporal_stance.default going forward** — standing rule, filed in `planning/ONBOARDING.md` cross-cutting DON'Ts.
+**Mid-fix correction (`b2d5eaf`):** initial AF-leads patch (`d43eadd`) added a universal epistemic-honesty hook ("where the framework does not reach, say so" + voice-idiom variants "name the gap" / "name the silence" / "I say so") across all 10 voices, generalized from Hannah's organic Pass-4a-generated version. Operator caught + reversed: previously-shipped epistemic-out clauses caused voices to default to **decline-to-engage** behavior (use the hook as escape from substantive engagement). Removed across all 10 including the originally-organic Hannah + Octopus versions. **Hook is NOT to appear anywhere in voice_temporal_stance.default going forward** — standing rule, filed in `planning/ONBOARDING.md` cross-cutting DON'Ts.
 
 ### Fix pattern for v4.1 (post-Athens)
 

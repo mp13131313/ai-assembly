@@ -2,7 +2,7 @@
 ## AI Assembly — Role Specification
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v2.1 — current 2026-04-29. Implementation landed 2026-04-28 (commits `180a18f` + `aca0e4c`); v2.1 alignment with the 2026-04-28 persona-prompt revert (commit `9480d3a`) landed 2026-04-29. Replaces v1 partial draft (archived at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`).
+**Status:** v2.1 — current 2026-04-29. Implementation landed 2026-04-28 (commits `5f17bf5` + `d05e565`); v2.1 alignment with the 2026-04-28 persona-prompt revert (commit `3feb2b2`) landed 2026-04-29. Replaces v1 partial draft (archived at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`).
 **Purpose:** Specifies the runtime Voice Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract end-to-end** — it defines what the Voice Pipeline reads, what it writes, in what order, with which models, in which prompts, at which checkpoints. Implementation: `runtime/flows/voice_flow.py` + `runtime/flows/voice/*.py` (not yet built).
 
 **Predecessor:** v1 partial at `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md`. v1 covered Steps 1+2 conceptually only; omitted Step 3 entirely; was materially stale on the persona card contract (no `voice_temporal_stance`, no FU#49, referenced 12 voices when panel is 10).
@@ -11,7 +11,7 @@
 
 ## Changelog: v2.1 (2026-04-29)
 
-**Aligns the Voice Pipeline with the 2026-04-28 persona-prompt revert (commit `9480d3a`).** That revert restored Pass 2/3/4a/4b/5 to the 582af96 baseline, dropping cumulative additions that had degraded runtime artifact texture relative to the 2026-04-25 shipped-Plato baseline:
+**Aligns the Voice Pipeline with the 2026-04-28 persona-prompt revert (commit `3feb2b2`).** That revert restored Pass 2/3/4a/4b/5 to the 418d553 baseline, dropping cumulative additions that had degraded runtime artifact texture relative to the 2026-04-25 shipped-Plato baseline:
 
 | Removed persona-side | Voice Pipeline alignment |
 |---|---|
@@ -20,9 +20,9 @@
 | `medium` family-of-forms 30-line rewrite (Pass 4b) | `medium` may describe a single form OR multiple variants. Step 2 honors what's written: where single, that is the form; where multiple, voice picks per matter. Step 2 still records `selected_form` + `form_rationale` (trivial when single-form, substantive when multiple) |
 | `characteristic_output_structure` per-form requirement | Field describes voice's actual arc, single or per-form per the card |
 | `length_and_format_constraints` per-form variance | Honor as written; not presupposed conditional-on-form |
-| `relationship_to_detailed_response` trace-tensions paragraph | Reverted to 582af96 spec |
+| `relationship_to_detailed_response` trace-tensions paragraph | Reverted to 418d553 spec |
 | Universal anti-generic-register `banned_modes` entry (Pass 4a) | Voice's `banned_modes` is voice-specific (per-voice items the voice's corpus actually rules out); Step 2/3 prompts honor `banned_modes` as written |
-| FU#49A v1 generativity-criterion mandate (Pass 4b) | FU#49A v2 (commit `0ca02f5`, 2026-04-29) replaced with field-tied 3-dim structure (REASONING / VOICE / FORM); `quality_criteria` is now 3-5 specific testable criteria, each tying named card fields together |
+| FU#49A v1 generativity-criterion mandate (Pass 4b) | FU#49A v2 (commit `bfb7ed3`, 2026-04-29) replaced with field-tied 3-dim structure (REASONING / VOICE / FORM); `quality_criteria` is now 3-5 specific testable criteria, each tying named card fields together |
 
 **Also:** Voice Pipeline `_unwrap_voice_temporal_stance` corrected to prefer `default` for Athens (was incorrectly preferring `anchored_override` whenever populated; commit landed 2026-04-29 same change set).
 
@@ -42,7 +42,7 @@
 
 Self-review of the v2.1 alignment commit surfaced two more items for the same alignment scope:
 
-- **FU#57 (commit `8887af0`, 2026-04-29) was missed in the spec doc.** Code + voice prompts already reflected FU#57 (bold_engagement_topics dropped from runtime + chat artifact); but the Voice Pipeline spec doc still routed it across all 3 steps and quoted bold_engagement_topics bullets in the Step 1/2/3 closing-instruction extracts. Fixed: matrix row 18 → ❌ DROP all 3 steps; quoted bullets removed from extracts; strip-rules count 4 → 5; field count clarified as 35 runtime-loaded + 1 build-side audit only.
+- **FU#57 (commit `9e8df77`, 2026-04-29) was missed in the spec doc.** Code + voice prompts already reflected FU#57 (bold_engagement_topics dropped from runtime + chat artifact); but the Voice Pipeline spec doc still routed it across all 3 steps and quoted bold_engagement_topics bullets in the Step 1/2/3 closing-instruction extracts. Fixed: matrix row 18 → ❌ DROP all 3 steps; quoted bullets removed from extracts; strip-rules count 4 → 5; field count clarified as 35 runtime-loaded + 1 build-side audit only.
 - **`voice_continuity.md` instruction logical bug.** First-pass v2.1 said "Honour the voice's `voice_temporal_stance` as written in its card" — but the continuity summariser does NOT have card access (its system prompt is `voice_continuity.md` only; user prompt is detailed responses + artifact text). Fixed: instruction now reads "Read the voice's detailed responses and artifact (provided in the user prompt below) — these already exhibit the voice's grammar and the way the voice stands toward time. Match that grammar in the summary." The summariser picks up temporal stance from the exemplar, not from a card it doesn't have.
 - **`voice/README.md`** had one cosmetic "tense discipline" leak in the env var table — adjusted.
 
@@ -56,8 +56,8 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 |---|---|---|---|
 | **Step 3 (Amendment)** | Mentioned in Briefing v3.1 conceptually; entirely unspecified in v1 | **Full spec landed** with FU#49E reviewer's cross-framework-examination framing as the system prompt seed | §"Step 3 — Amended Artifact" below |
 | **Card → system prompt assembly** | Inline in Step 1/Step 2 templates; no canonical routing table | **Single canonical field-routing table** for all 36 generated card fields + 2 continuity nulls + 5 strip rules (post-FU#57: 35 runtime-loaded + 1 build-side audit only) | §"Card → System Prompt Assembly" below |
-| **`voice_temporal_stance`** | Field did not exist in v1 (added 2026-04-21 as Pass 2 output) | **Treated as foundational** — loaded into Step 1 + Step 2 + Step 3 unwrapped to its prose form. Athens uses `default` (the fluid-across-time framing per the 2026-04-28 revert: voice speaks from within its own world and lifetime, the reader has come to consult the voice). The Voice Pipeline does not impose any temporal framing the card does not license | Card v2 + Pass 2 (582af96 baseline) |
-| **`medium` field** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Voice's `medium` is honored as written** — single-form OR multi-form depending on what the card describes for the voice. Where multi-form, Step 2 selects per matter; where single-form, Step 2 just uses it. Step 3 may select a different form if `medium` admits it | Pass 4b (582af96 baseline) |
+| **`voice_temporal_stance`** | Field did not exist in v1 (added 2026-04-21 as Pass 2 output) | **Treated as foundational** — loaded into Step 1 + Step 2 + Step 3 unwrapped to its prose form. Athens uses `default` (the fluid-across-time framing per the 2026-04-28 revert: voice speaks from within its own world and lifetime, the reader has come to consult the voice). The Voice Pipeline does not impose any temporal framing the card does not license | Card v2 + Pass 2 (418d553 baseline) |
+| **`medium` field** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Voice's `medium` is honored as written** — single-form OR multi-form depending on what the card describes for the voice. Where multi-form, Step 2 selects per matter; where single-form, Step 2 just uses it. Step 3 may select a different form if `medium` admits it | Pass 4b (418d553 baseline) |
 | **Anti-generic-register hard constraint** | — | Voice's `banned_modes` enumerates the per-voice register failures it must avoid (its corpus does not produce these). Step 2 + Step 3 prompts honor `banned_modes` as written; no universal entry is presupposed | Pass 4a `banned_modes` |
 | **Panel size** | "12 voices × ~3 formulations = ~36 detailed responses" | **10 voices × ~3 formulations = ~30 detailed responses** (Tang + Thiel removed 2026-04-28 — living humans don't fit the deathbed-across-time framing) | HANDOFF_2026_04_28 §1 |
 | **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/HANDOFF.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
@@ -135,7 +135,7 @@ The Voice Pipeline loads `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled
 
 - **4 root identity fields:** `voice_name`, `voice_mode`, `pipeline_version`, `generated_date`
 - **35 v2 card fields** flat at root (Identity, Constitution, Boundaries, Reasoning, Engagement, Voice, Artifact)
-- **`voice_temporal_stance`** (added 2026-04-21; current shape per 582af96 baseline as of 2026-04-28 revert): two-part object with `default` + `anchored_override`. **For Athens, always use `default`** — voice speaks from within its own world and lifetime; the reader has come to consult the voice, the voice has not gone forward to the reader's time. The `anchored_override` field is for chat-test deployments (consumed by the chat_system_prompt builder in `personas/`) and MUST NOT be used at Voice Pipeline runtime — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this
+- **`voice_temporal_stance`** (added 2026-04-21; current shape per 418d553 baseline as of 2026-04-28 revert): two-part object with `default` + `anchored_override`. **For Athens, always use `default`** — voice speaks from within its own world and lifetime; the reader has come to consult the voice, the voice has not gone forward to the reader's time. The `anchored_override` field is for chat-test deployments (consumed by the chat_system_prompt builder in `personas/`) and MUST NOT be used at Voice Pipeline runtime — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this
 - **2 continuity null fields** (`continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`): null on Night 1, populated at runtime via the continuity override on Night 2+
 - **`reference_only_passages`** (copyright-sensitive tier-2 corpus, e.g. Marley lyrics): `{passages: [...], runtime_contract_note: "..."}`. **Step 1 only** — drops from Step 2 + Step 3
 - **`metadata` block** (provenance, validation status, FU#13 fix log, etc.): **always dropped** before assembly
@@ -248,7 +248,7 @@ The Voice Pipeline assembles three different system prompts per voice — one fo
 | 10 | `translation_protocol` | ✓ | ✓ | ✓ | Method, not lookup table; pull modern → voice's terms |
 | 11 | `topics_requiring_care` | ✓ | ✓ | ✓ | Engage with care, don't avoid |
 | 12 | `hard_limits` | ✓ | ✓ | ✓ | Position-B preamble: forbids framework-ABANDONMENT, permits corpus-internal CROSS-EXAMINATION |
-| 13 | `voice_temporal_stance.default` | ✓ | ✓ | ✓ | **Fluid-across-time framing per the 582af96 baseline** (post-2026-04-28 revert). Voice speaks from within its own world and lifetime; reader has come to consult voice. **Athens always uses `default`** even when `anchored_override` is populated (`anchored_override` is for chat-test deployments only) — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this |
+| 13 | `voice_temporal_stance.default` | ✓ | ✓ | ✓ | **Fluid-across-time framing per the 418d553 baseline** (post-2026-04-28 revert). Voice speaks from within its own world and lifetime; reader has come to consult voice. **Athens always uses `default`** even when `anchored_override` is populated (`anchored_override` is for chat-test deployments only) — `_unwrap_voice_temporal_stance(deployment="athens")` enforces this |
 | **REASONING / ENGAGEMENT — routed per field** |||||
 | 14 | `reasoning_method` | ✓ | | ✓ | The 5-8-step process this voice characteristically follows. Step 3 reasons about other voices' artifacts before amending |
 | 15 | `finds_compelling` | ✓ | | ✓ | Selectivity — argument textures that draw the voice in |
@@ -1310,15 +1310,15 @@ These are draft validation notes; refine against the first actual Athens dry run
 
 - `docs/AI_Assembly_Briefing_v3_1.md` — project source of truth + 3-layer experimental test (Encounter / Content / Expansion)
 - **`docs/AI_Assembly_Frame_Concept_v1.md` — frame layer (broadsheet / newsreel / micro-site / Substack / Day 4 goodbye). Voice Pipeline produces the artifacts that arrive UNMEDIATED on the micro-site; the frame is downstream and does not wrap Voice Pipeline output. The Edition Pipeline (separate, downstream of Step 3) reads all 10 amended artifacts and produces the broadsheet front page.**
-- `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + register rule (note: §H family-of-forms + §J voice-IN-the-present + tense discipline amendments were reverted 2026-04-28 per commit `9480d3a`; current persona prompts are at the 582af96 baseline)
+- `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + register rule (note: §H family-of-forms + §J voice-IN-the-present + tense discipline amendments were reverted 2026-04-28 per commit `3feb2b2`; current persona prompts are at the 418d553 baseline)
 - `docs/AI_Assembly_Persona_Pipeline_v4.md` — the persona build pipeline that produces the cards this Voice Pipeline consumes
 - `docs/AI_Assembly_Provocateur_Pipeline.md` — Stage 4 Packaging defines this Voice Pipeline's input contract (the briefings)
 - `docs/CURRENT_STATE.md` — gap analysis + critical path; Voice Pipeline is Phase D (this spec lands; build follows)
 - `personas/HANDOFF.md` — cross-repo runtime contract; authoritative on what to drop / keep when assembling system prompts
-- `_workspace/planning/HANDOFF_2026_04_28.md` — handoff covering the persona-prompt revert (commit `9480d3a`); see also `_workspace/planning/HANDOFF_DRYRUN_2026_04_29.md` for the Voice Pipeline first-dry-run pickup
+- `_workspace/planning/HANDOFF_2026_04_28.md` — handoff covering the persona-prompt revert (commit `3feb2b2`); see also `_workspace/planning/HANDOFF_DRYRUN_2026_04_29.md` for the Voice Pipeline first-dry-run pickup
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker; FU#49M (`strain_markers[]` schema as Step 2 contract, post-Athens), FU#42 (split-card architecture, post-Athens), FU#49F (per-voice framework-strain log on micro-site, post-Athens)
 - `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md` — preceding partial draft (historical)
 
 ---
 
-*End of v2.1 spec. Reflects the 2026-04-28 persona-prompt revert (commit `9480d3a`): voice_temporal_stance is the 582af96 fluid-across-time framing; `medium` is honored as written (single-form OR multi-form per voice's actual corpus); `banned_modes` is per-voice; no separate tense-discipline mandate (the card carries what it carries). Implementation landed 2026-04-28 (commits `180a18f` + `aca0e4c`); v2.1 alignment landed 2026-04-29.*
+*End of v2.1 spec. Reflects the 2026-04-28 persona-prompt revert (commit `3feb2b2`): voice_temporal_stance is the 418d553 fluid-across-time framing; `medium` is honored as written (single-form OR multi-form per voice's actual corpus); `banned_modes` is per-voice; no separate tense-discipline mandate (the card carries what it carries). Implementation landed 2026-04-28 (commits `5f17bf5` + `d05e565`); v2.1 alignment landed 2026-04-29.*

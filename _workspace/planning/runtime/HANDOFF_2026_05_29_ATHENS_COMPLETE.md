@@ -1,7 +1,7 @@
 # Handoff — Athens COMPLETE (all three nights published) · 2026-05-29
 
-**Branch:** code `main` @ `fb47e45` (this doc-cleanup commit will advance it).
-athens-2026 `main` @ `3dc4e16`. Both pushed.
+**Branch:** code `main` @ `fa28b4d` (this doc-cleanup commit will advance it).
+athens-2026 `main` @ `394914b`. Both pushed.
 **Predecessor handoffs:** Night 1 detail archived at
 `_workspace/archive/runtime-handoffs/HANDOFF_2026_05_08_ATHENS_DAY_1.md`.
 

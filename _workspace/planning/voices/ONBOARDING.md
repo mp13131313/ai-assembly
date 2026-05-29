@@ -159,7 +159,7 @@ python3 run_persona_pipeline.py "<Voice Name>" --project ...
 
 **Round 3+:** Path (b). The validator never reaches zero — round 3+ produces register-strict critiques that aren't runtime-blocking. Accept and ship.
 
-**Operator pattern across 7 shipped voices:** Plato / Cleopatra / Dostoevsky / Battuta / Octopus / Hannah Arendt / Ada Lovelace. Most landed at 2-3 rounds + path (b). Octopus = 4 rounds (compass rebuild surfaced more); Ada = **5 rounds during the build, then 4 over-patches rolled back** (`c025914`) after operator caught the §7-convention deviation. **Budget 2 rounds; surface verdict + ask operator before any round 3.** The post-Ada discipline note: round 1 patch cleanly-actionable; round 2 patch cleanly-actionable; end of round 2 — surface verdict + ask explicitly *"ship now via path-(b) or another round?"*. Don't keep patching unilaterally; the validator treadmill never zeros and patches beyond round 2 trend toward editorial expansion rather than validator-faithful fixes.
+**Operator pattern across 7 shipped voices:** Plato / Cleopatra / Dostoevsky / Battuta / Octopus / Hannah Arendt / Ada Lovelace. Most landed at 2-3 rounds + path (b). Octopus = 4 rounds (compass rebuild surfaced more); Ada = **5 rounds during the build, then 4 over-patches rolled back** (`c855478`) after operator caught the §7-convention deviation. **Budget 2 rounds; surface verdict + ask operator before any round 3.** The post-Ada discipline note: round 1 patch cleanly-actionable; round 2 patch cleanly-actionable; end of round 2 — surface verdict + ask explicitly *"ship now via path-(b) or another round?"*. Don't keep patching unilaterally; the validator treadmill never zeros and patches beyond round 2 trend toward editorial expansion rather than validator-faithful fixes.
 
 ---
 
@@ -175,7 +175,7 @@ These recur across voices — pattern-recognize them quickly:
 ### Sometimes skip (register-strict, not runtime-blocking)
 
 - **`quality_criteria` evaluator-question form** ("Does the piece...") — Plato shipped with this form and chat-tested fine. Don't patch unless paired with operator preference for imperative form.
-- **Long-form-field biographical/glossary register** (FU#56 territory) — accepted via path (b) since 9480d3a-revert risk on prompt-side fix.
+- **Long-form-field biographical/glossary register** (FU#56 territory) — accepted via path (b) since 3feb2b2-revert risk on prompt-side fix.
 
 ### Always patch (real issues)
 
@@ -190,7 +190,7 @@ These recur across voices — pattern-recognize them quickly:
 ### Voice-specific (one-offs)
 
 - Cleopatra round 2 needed source-attribution stripping + Jowett-vs-banned_language patches + bilingual-stack discipline. See `voices/cleopatra/` git history.
-- Dostoevsky needed Nietzschean → period-native (3 places), modern named comparators removed, internal-production stripped. See `5088d67` commit.
+- Dostoevsky needed Nietzschean → period-native (3 places), modern named comparators removed, internal-production stripped. See `b0f0b45` commit.
 - Battuta needed voice_temporal_stance horizon collapse + opening-line first-person commitment + 3 bold_engagement_topics flourish-trimmings + 1 disagreement_protocol theatrical-line drop. See backup at `voices/ibn_battuta/07_persona_card_assembled.pre_round1_patches.json`.
 
 ---
@@ -206,7 +206,7 @@ Banked from the Octopus compass rebuild (2026-05-02) + Whanganui rebuild design 
 | **Transmission-faithful** | `subtype=system` with constitutional-document grounding (Whanganui — Te Awa Tupua Act 2017). Apply when the entity has a formal legal-cosmological text the iwi/community + state jointly authored. | Stewards what is verbatim from the constituting text + Indigenous-authored scholarship + critique scholarship. Voice speaks AS the entity via formal mediating structure (Te Pou Tupua for Whanganui). Bilingual integrated register (te-reo / Indigenous-language primary). | iwi-ventriloquism (voice speaks FOR the community instead of AS the legally-recognized entity); legal-bureaucratese (juridical-English-only; loses kin-cosmological substrate) |
 
 **The Pass 0b base templates** are configured for these postures:
-- `pass_0b_non_human_organism.md` (committed `a6755d9`, 2026-05-02) is **compass-permissive** — surfaces both precautionary and phenomenologically-permissive philosophical traditions; voice_config.editorial_rationale determines which the voice adopts
+- `pass_0b_non_human_organism.md` (committed `2cdbcf1`, 2026-05-02) is **compass-permissive** — surfaces both precautionary and phenomenologically-permissive philosophical traditions; voice_config.editorial_rationale determines which the voice adopts
 - `pass_0b_non_human_system.md` is **transmission-faithful by native design** — surfaces verbatim-quotation + iwi-non-ventriloquism + bilingual dual-register vocabulary + CARE-as-citation-discipline
 
 **Operator decision at voice_config drafting time:** which posture does this voice inhabit? Encode that in editorial_rationale + manual_grounding so Pass 0b's tailoring layer surfaces the correct philosophical scaffolding in the auto-generated DR prompts. (For non-organism types — `human`, `fictional` — the posture choice is between philosophical / narratival / observational `voice_mode`, not between these three non-human postures.)
@@ -268,7 +268,7 @@ Empirically:
 | `persona_pass_7*.md` | Pass 7-pre / 7-anach / 7a / 7b / 7c / 7a FINAL validation suite |
 | `persona_coherence_threading.md` | CT compress — summarizes prior pass outputs for next-pass context |
 
-**Most-edited prompt this period:** `persona_pass_4b_artifact.md` — landed FU#49A v2 quality_criteria scaffold (`0ca02f5`) + FU#61 audience-engagement +1 (`91947a7`).
+**Most-edited prompt this period:** `persona_pass_4b_artifact.md` — landed FU#49A v2 quality_criteria scaffold (`bfb7ed3`) + FU#61 audience-engagement +1 (`6a610fc`).
 
 **Pre-hardened prompts (informational):** `persona_pass_6_corpus.md` carries FU#43 source-side hardening (minimal `corpus_metadata` emission, paraphrase-safer caution at generation time) and the patcher-family prompts carry FU#44 register-drift extension. Both landed pre-revert; effect on operator workflow is fewer corpus_metadata + register-drift patches needed at the gate.
 
@@ -281,7 +281,7 @@ Empirically:
 - **`{type: "adaptive"}` thinking** + `display: "summarized"` (Opus 4.7 default is `omitted`)
 - **Drops `temperature`** when `thinking=True` (Anthropic docs §"Feature compatibility")
 - **Captures `thinking_trace` + `block_types`** in returned dict (additive)
-- **1-retry on `httpx.RemoteProtocolError` / `ReadError` / `ReadTimeout`** with 15s backoff (Pass 4a streaming-drop on large outputs needed this; commit `a6fa848`)
+- **1-retry on `httpx.RemoteProtocolError` / `ReadError` / `ReadTimeout`** with 15s backoff (Pass 4a streaming-drop on large outputs needed this; commit `eda57f8`)
 
 If a future pass dies at streaming, check the log for `httpx.RemoteProtocolError` — usually self-heals on the retry.
 
@@ -289,7 +289,7 @@ If a future pass dies at streaming, check the log for `httpx.RemoteProtocolError
 
 ## Pass 4b prompt — the FU#61 +1
 
-Current (committed `91947a7`) `quality_criteria` block in `persona_pass_4b_artifact.md`:
+Current (committed `6a610fc`) `quality_criteria` block in `persona_pass_4b_artifact.md`:
 
 ```
 - quality_criteria: 3-5 specific, testable criteria. Each criterion
@@ -371,17 +371,17 @@ These voices write THROUGH dramatic personae. Plato through Socrates / Athenian 
 
 ---
 
-## 9480d3a revert + 582af96 baseline (prompt history)
+## 3feb2b2 revert + 418d553 baseline (prompt history)
 
-**582af96 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK). When troubleshooting prompt regressions, this is the reference state to diff against.
+**418d553 baseline** = the verified-good Pass 2/3/4a/4b/5 prompt state predating the texture-degrading FU#49 cumulative additions. This is the prompt state Plato 2026-04-25 shipped under (chat-tested OK). When troubleshooting prompt regressions, this is the reference state to diff against.
 
-**9480d3a revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 582af96, after empirical chat-test signal showed cumulative additions had degraded artifact texture.
+**3feb2b2 revert** (2026-04-28) = full revert of FU#49H/I/J/K/L/D back to 418d553, after empirical chat-test signal showed cumulative additions had degraded artifact texture.
 
 **Currently landed on top of revert:** FU#49A v2 (quality_criteria), FU#49D re-applied (hard_limits Position B), FU#51 (Pass 7a routing guard), FU#44+ (5 patcher patterns), FU#52 (chat invalidation), FU#53 (review-gate + Pass 7a FINAL), FU#57 (drop bold_engagement_topics from runtime), FU#58/59 (Pass 7a/7c register fixes), FU#60 (thinking observability), FU#61 (audience-engagement +1 in Pass 4b).
 
 **Stripped/reverted (NOT in current prompts):** FU#49H#1-4, FU#49I, FU#49J (5+2 quality_criteria), FU#49K, FU#49L, the 04-28 cryofreeze framing was REPLACED with "voice arrives at Athens with full canonical experience."
 
-**The FU#56 + FU#49 revert risk class:** adding cumulative prompt directives without empirical chat-test on a fresh voice runs the risk that produced the 9480d3a revert. Test on a low-stakes voice before broad rollout. The thinking-on hypothesis (FU#60-instrumented re-test under thinking-visible) is the empirically-resolvable form of this question for FU#56 specifically.
+**The FU#56 + FU#49 revert risk class:** adding cumulative prompt directives without empirical chat-test on a fresh voice runs the risk that produced the 3feb2b2 revert. Test on a low-stakes voice before broad rollout. The thinking-on hypothesis (FU#60-instrumented re-test under thinking-visible) is the empirically-resolvable form of this question for FU#56 specifically.
 
 ---
 

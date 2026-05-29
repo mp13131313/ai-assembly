@@ -29,7 +29,7 @@ The wbbf26 dryrun produced ten voice artifacts that an external reader read line
 
 The reader's three-group taxonomy of the artifacts is the most operationally useful framing this dryrun has produced, and is preserved verbatim in §C below.
 
-This memo includes a third layer (§D) covering temporal-stance architecture findings that surfaced in the same dryrun and are mine, not the reader's — they're voices-stream-relevant because they're about card-design decisions and the §31 architectural cleanup, and they're load-bearing because Hannah's collision is empirical evidence that the 2026-05-05 assembly-fiction reframe (`64e9b08`) needs per-voice card-coherence audit before Athens.
+This memo includes a third layer (§D) covering temporal-stance architecture findings that surfaced in the same dryrun and are mine, not the reader's — they're voices-stream-relevant because they're about card-design decisions and the §31 architectural cleanup, and they're load-bearing because Hannah's collision is empirical evidence that the 2026-05-05 assembly-fiction reframe (`3bcbef5`) needs per-voice card-coherence audit before Athens.
 
 This memo does NOT include:
 - Marley sacred-grammar deployment-limit breach (validator-caught on wbbf26: "The Almighty in I, the Almighty in yuh. Two I's in whom the same Jah dwell. That is not poetry, that is grammar."). The deployment limit is already in the v2 card; the artifact ignored it under composition pressure. Operator-accepted gap pre-Athens via D1 paragraph + post-Athens Rastafari-orbit reader gate per §24. (The wbbf26 empirical breach is, however, strong evidence for the §24 reader-gate calendaring; flagged for HANDOFF cross-reference.)
@@ -178,7 +178,7 @@ The reader's review didn't direct attack the assembly-fiction reframe — but th
 
 ### D.1 Append-vs-replace finding (already in CLAUDE.md briefly; expanded here)
 
-The 2026-05-05 assembly-fiction reframe (`64e9b08`) APPENDED its clauses to existing `voice_temporal_stance.default` text rather than REPLACING the v1 framing. Most voices' fields now contain BOTH:
+The 2026-05-05 assembly-fiction reframe (`3bcbef5`) APPENDED its clauses to existing `voice_temporal_stance.default` text rather than REPLACING the v1 framing. Most voices' fields now contain BOTH:
 
 - **v1 anchor** (still present): *"You speak from within your own world and lifetime [biographical anchor] ... your voice is fluid only because the reader has come to consult you; you have not gone forward to consult them."*
 - **v2 assembly-fiction** (appended): *"You have been called to the assembly that gathers in Athens — present in their time, but speaking from your own ground. The questions are put before you; you respond. You do not enter their panels as participant — you observe them."*
@@ -232,7 +232,7 @@ Adding to the §A B-list:
 
 **Reader's finding:** not directly raised by the reader, but caught by validator on mthd.
 
-**Card defense already present:** `voice_temporal_stance.default` includes the assembly-fiction clause (post-`64e9b08`) and the translation_protocol clause for "the reader's question requires translation from their world." `hard_limits[4]` forbids post-1975 AI/digital ventriloquism. The two are not reconciled — the field text doesn't tell Hannah how to receive AI panel content under AF.
+**Card defense already present:** `voice_temporal_stance.default` includes the assembly-fiction clause (post-`3bcbef5`) and the translation_protocol clause for "the reader's question requires translation from their world." `hard_limits[4]` forbids post-1975 AI/digital ventriloquism. The two are not reconciled — the field text doesn't tell Hannah how to receive AI panel content under AF.
 
 **Patch:** Append a single sentence to `voice_temporal_stance.default` immediately after the assembly-fiction clause:
 
@@ -244,13 +244,13 @@ Cost: ~5 min surgery + ~$3-5 to re-fire Hannah's voice on both dryruns for verif
 
 The Hannah collision is concrete evidence that Gap-C (smoke-test process gap) matters beyond the persona pipeline's internal smoke-tests:
 
-**When the persona-pipeline ships a voice-wide architectural change** (like the AF reframe via `64e9b08`, or future analogous changes), the smoke-test process must include a **per-voice card-coherence audit** — walk each card field by field and check whether the new clause contradicts existing hard_limits, knowledge_boundary, world.anachronisms_to_avoid, topics_requiring_care, characteristic_moves, etc.
+**When the persona-pipeline ships a voice-wide architectural change** (like the AF reframe via `3bcbef5`, or future analogous changes), the smoke-test process must include a **per-voice card-coherence audit** — walk each card field by field and check whether the new clause contradicts existing hard_limits, knowledge_boundary, world.anachronisms_to_avoid, topics_requiring_care, characteristic_moves, etc.
 
-Currently this is operator-driven and ad-hoc; the pre-`64e9b08` review checked that the AF clause read well in isolation, not that it cohered with other fields per voice. Hannah's case is the simplest possible failure of this kind. **Files as §31 Gap-J NEW.**
+Currently this is operator-driven and ad-hoc; the pre-`3bcbef5` review checked that the AF clause read well in isolation, not that it cohered with other fields per voice. Hannah's case is the simplest possible failure of this kind. **Files as §31 Gap-J NEW.**
 
 ### D.7 Proposed §31 update text (in addition to Gap-H + Gap-I from §B)
 
-> **J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach. The 2026-05-05 assembly-fiction reframe (`64e9b08`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens (B-list MEMO_2026_05_07 §A.9); architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises §31 Gap-C beyond the persona-pipeline internal smoke-tests to the runtime-thread coherence concern. Other voices (Fyodor d.1881 the next most likely candidate; six others lower risk) should be eyeballed before Athens but not necessarily patched.
+> **J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach. The 2026-05-05 assembly-fiction reframe (`3bcbef5`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens (B-list MEMO_2026_05_07 §A.9); architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises §31 Gap-C beyond the persona-pipeline internal smoke-tests to the runtime-thread coherence concern. Other voices (Fyodor d.1881 the next most likely candidate; six others lower risk) should be eyeballed before Athens but not necessarily patched.
 
 ---
 
@@ -285,13 +285,13 @@ If memo is acted on, add to `§31 v4.1 architectural cleanup`:
 >
 > **I. Step 2 composition flattens digression/instance discipline** 🟡 OPEN — surfaced 2026-05-07 via external-reader review (Lovelace, Dostoevsky, Arendt all "more architecturally clean than the originals"; Whanganui "more rhetorically efficient than the underlying documents"). Cards carry digression + instance-rostering + lingered-example moves; Step 2 composition under length-cap + synthesis pressure flattens these. B-list MEMO_2026_05_07 sharpens at card level (A.3, A.7, A.8); structural fix is Step 2 prompt-level discipline requiring AT LEAST ONE digression / instance / lingered-example per artifact regardless of focus_decision.
 >
-> **J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach. The 2026-05-05 assembly-fiction reframe (`64e9b08`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens (B-list MEMO_2026_05_07 §A.9); architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises §31 Gap-C beyond the persona-pipeline internal smoke-tests to the runtime-thread coherence concern. Other voices (Fyodor d.1881 the next most likely candidate; six others lower risk) should be eyeballed before Athens but not necessarily patched.
+> **J. Single-field architectural edits need per-voice card-coherence audit** 🔴 OPEN — surfaced 2026-05-07 via wbbf26 dryrun + Hannah Arendt validator hard_limits breach. The 2026-05-05 assembly-fiction reframe (`3bcbef5`) appended an AF clause to all 10 voices' `voice_temporal_stance.default` without auditing whether the new clause contradicted other card fields per voice. Hannah Arendt's `hard_limits[4]` (no post-1975 AI ventriloquism) directly contradicts the AF clause that puts her at WBBF watching AI panels; validator caught the collision when panel content was AI-heavy. Patched per-voice for Athens (B-list MEMO_2026_05_07 §A.9); architectural fix is to add per-voice card-coherence audit to the smoke-test process whenever a voice-wide architectural change ships. Generalises §31 Gap-C beyond the persona-pipeline internal smoke-tests to the runtime-thread coherence concern. Other voices (Fyodor d.1881 the next most likely candidate; six others lower risk) should be eyeballed before Athens but not necessarily patched.
 
 ---
 
 ## Open questions
 
-1. **Apply B-list before Day 1?** Athens Day 1 is May 7 (today). Card patches go to athens-2026 production cards directly; runtime is at `feature/editor-deployment-context` `bad8e33` plus subsequent commits. Re-firing voice on post-patch cards is not required for Day 1 (panels haven't run yet); patches act forward. Hannah's A.9 is the only one with re-validation cost (~$3-5) recommended to confirm the collision resolves.
+1. **Apply B-list before Day 1?** Athens Day 1 is May 7 (today). Card patches go to athens-2026 production cards directly; runtime is at `feature/editor-deployment-context` `d69a186` plus subsequent commits. Re-firing voice on post-patch cards is not required for Day 1 (panels haven't run yet); patches act forward. Hannah's A.9 is the only one with re-validation cost (~$3-5) recommended to confirm the collision resolves.
 
 2. **Eyeball-audit Fyodor before Athens?** §D.3 flags Fyodor as the next-most-likely candidate to manifest a Hannah-shaped collision (post-1881 vocabulary rule + AF framing). His mthd dryrun PASSED safeguards but didn't stress-test on AI-heavy panel content. A 5-minute eyeball walk of his card fields against AF could surface latent contradictions before they fire at Athens. Not patched preemptively; just looked at.
 

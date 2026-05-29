@@ -2,9 +2,9 @@
 
 ## Current branch state (2026-05-29, Athens Nights 1–3 ALL PUBLISHED)
 
-Active branch (runtime-thread): **`main`** at **`563f3ef`** (dashboard
+Active branch (runtime-thread): **`main`** at **`f64614c`** (dashboard
 status-color + upload-error-flash + `.json`→render-redirect fixes; ingest
-suite 114/114). Athens-2026 at **`3dc4e16`**. **All three Athens nights
+suite 114/114). Athens-2026 at **`394914b`**. **All three Athens nights
 are PUBLISHED**: 13 dossiers + 30 per-voice pages across Nights 1–3,
 committed + pushed to both repos 2026-05-29.
 
@@ -92,7 +92,7 @@ sacred-grammar discipline for Marley + Whanganui). Per-night additions:
   voices-interleave rule · v2.1 (13:26+13:29) single-dossier fires for
   Marley + Whanganui-pair under sacred-grammar discipline.
 - ✅ Publish: `published_artifacts/dossiers/night_1/` + `nights/night_1/`
-  committed at `87abdf2` and pushed to GitHub.
+  committed at `50d88e1` and pushed to GitHub.
 
 **Athens Night 1 deployment_context discipline rules (gitignored at
 `runs/athens_night_1/_dossier_deployment_context.md`):**
@@ -137,8 +137,8 @@ parse-fallback on Marley N2 + Whanganui N3) — recurrence notes appended
 to each entry.
 
 **Architectural validation (Athens-confirmed):** the
-`voice_temporal_stance.default` rewrite (athens-2026 `25ec751` +
-`5cc04ad` + `3fd94e6`) IS WORKING — voices meta-frame their own
+`voice_temporal_stance.default` rewrite (athens-2026 `b2d5eaf` +
+`7cdbee3` + `08a8253`) IS WORKING — voices meta-frame their own
 synthesis as an object of critique rather than uncritically extending
 it; the §31 Gap-J / Memo §A.9 collision is empirically resolved.
 
@@ -211,7 +211,7 @@ of Plato, Voice of Cleopatra, Voice of Fyodor Dostoevsky, Voice of Ibn
 Battuta, Voice of the Octopus, Voice of Hannah Arendt, Voice of Ada
 Lovelace, **Voice of the Whanganui River v2 (witness-translator
 architectural restructure shipped + ATHENS-CLEAN 2026-05-05 evening,
-`663dc8f` + `f6afe2c`)**, Voice of Scheherazade, Voice of Bob Marley (v2
+`c2a885b` + `3ccb1f9`)**, Voice of Scheherazade, Voice of Bob Marley (v2
 Option-3 restructure shipped 2026-05-04 afternoon). council_config.json
 fully wired with all 10 pipeline-built provocateur_profiles.
 
@@ -220,16 +220,16 @@ fully wired with all 10 pipeline-built provocateur_profiles.
   ("voice present at the assembly that gathers in Athens, observes
   panels, responds when consulted") per runtime-thread memo
   _workspace/archive/session-artifacts/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md;
-  shipped `64e9b08`. See voices/OPEN_ITEMS.md §30.
+  shipped `3bcbef5`. See voices/OPEN_ITEMS.md §30.
 - Length-cap card surgery (operator decision: NO max_tokens enforcement):
   Dostoevsky 350-750w + Hannah Arendt 350-750w + Octopus 350-500w
-  prose-channel front-loaded; shipped `9dae9b9`. Closes
+  prose-channel front-loaded; shipped `404838d`. Closes
   voices/OPEN_ITEMS.md §27 + cross-refs runtime/OPEN_ITEMS.md C38.
 
 13th persona **Tim Leberecht (Assembly editor)** — SHIPPED 2026-05-05
-evening. Card placed at `athens-2026/editor/tim_leberecht/` (`799aeb1`).
+evening. Card placed at `athens-2026/editor/tim_leberecht/` (`9347743`).
 Runtime `EDITOR_CARD_SUBPATH` renamed `claudia_pinchbeck` →
-`tim_leberecht` (`dcff216`); 31/31 runtime tests pass post-rename.
+`tim_leberecht` (`b266f51`); 31/31 runtime tests pass post-rename.
 Source-of-truth working tree at `current-tests/editors/tim_leberecht/`.
 Tim is editor, NOT panel — not in `panel_roster.json`. Earlier Claudia
 Pinchbeck DRAFT card (operator-direct-author placeholder for runtime
@@ -287,7 +287,7 @@ Everything lives under `~/Desktop/AI Assembly/`:
     ├── runs/{personas,runtime}/  # v3.10 baseline + historical runs
     ├── phase-l-plato/      # dormant: Plato shipped to athens-2026 2026-04-26
     ├── phase-l-dostoevsky/ # dormant: Dostoevsky shipped to athens-2026 2026-04-30
-    ├── arch_03_baseline_snapshot/, sentinel_baselines/, personas_prompts_PRE_582af96_REVERT_*/  # dev artifacts
+    ├── arch_03_baseline_snapshot/, sentinel_baselines/, personas_prompts_PRE_418d553_REVERT_*/  # dev artifacts
 ```
 
 Project-level files at `<PROJECT_ROOT>/` root (NOT under `inputs/`):
@@ -480,7 +480,7 @@ All canonical pipeline specs are in `docs/`:
   path B); Athens policy Night 1 ON / Nights 2+3 OFF. Athens production
   CLI: `voice_flow.py <run_dir> --night N --skip-step3 [--skip-validation
   if Night 2/3]`. Routing refactor + prompt rewrites + prefix caching +
-  cache token tracking landed 2026-05-02 PM (commits `d9ca3f9` + `dfb46f7`);
+  cache token tracking landed 2026-05-02 PM (commits `ffad93f` + `9e1c987`);
   synthesis-bias structurally addressed; Test 3 validated. Athens 3-night
   cost ~$60-80 (was claimed $540-700 under deprecated $15/$75 pricing).
 - `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline **v2** (refinements
@@ -499,7 +499,7 @@ All canonical pipeline specs are in `docs/`:
   is publish concern; closing prompt rewrite pending). Predecessor memo at
   `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md`
   is **archived** (folded into v2 spec). **Implementation shipped
-  2026-05-03 PM** (commit `1437dfc`): `runtime/flows/editor_flow.py` +
+  2026-05-03 PM** (commit `fc5c2fb`): `runtime/flows/editor_flow.py` +
   `runtime/flows/editor/*.py` (routing/card_assembly/dossier_generation/
   publish) + `/admin/tonight/editor` drilldown + 38 tests. Pending:
   Claudia's full 35-field card (voices thread), closing prompt rewrite

@@ -43,7 +43,7 @@ This doc itself is now superseded for new tracking by the per-workstream OPEN_IT
 
 ### ✅ Phase 4.5 — COMPLETE 2026-04-24 (pre-Plato pipeline finalization)
 
-**Status:** FU#2-retry-bug + FU#38 + FU#41 all landed post-review-analysis. Commits: `de623bd` (FU#2 retry), `22a2e54` (FU#38 vocab strip across 6 prompts), `b9c1eb2` (FU#41 chat-ready artifact + 13 tests).
+**Status:** FU#2-retry-bug + FU#38 + FU#41 all landed post-review-analysis. Commits: `4b1da31` (FU#2 retry), `622287f` (FU#38 vocab strip across 6 prompts), `8e05e3f` (FU#41 chat-ready artifact + 13 tests).
 
 **Empirical origin:**
 Two external reviewers of the chat v2 Dostoevsky output (2026-04-24) identified:
@@ -135,14 +135,14 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 ### 🟡 Phase 2 — Important quality-of-life before Plato
 
 #### FU#7 — Operator-facing pipeline summary ✅ APPLIED 2026-04-24
-- **Landed:** commit `87f7794`. Additive `CARD COMPLETE` block after the existing PIPELINE COMPLETE output in `run_persona_pipeline.py`. Surfaces voice name + slug + card size, validation_status + human_review_status, fix-pass effectiveness (patches applied/emitted/failed/skipped + anachronism_flags + field_issues + post_fix_verdict), Pass 7-pre audit (per-status breakdown + boddice flag count), top concerns (severity-ordered HIGH/MED/LOW), recommended action (synthesized from verdicts), artifact paths (card + provocateur_profile + evaluation_rubric + fix_log + synthesis_audit). Two helper functions: `_compose_top_concerns` and `_compose_recommended_action`.
+- **Landed:** commit `ed60e8c`. Additive `CARD COMPLETE` block after the existing PIPELINE COMPLETE output in `run_persona_pipeline.py`. Surfaces voice name + slug + card size, validation_status + human_review_status, fix-pass effectiveness (patches applied/emitted/failed/skipped + anachronism_flags + field_issues + post_fix_verdict), Pass 7-pre audit (per-status breakdown + boddice flag count), top concerns (severity-ordered HIGH/MED/LOW), recommended action (synthesized from verdicts), artifact paths (card + provocateur_profile + evaluation_rubric + fix_log + synthesis_audit). Two helper functions: `_compose_top_concerns` and `_compose_recommended_action`.
 
 #### FU#10-modified — Fix-pass test coverage ✅ APPLIED 2026-04-24
-- **Landed:** commit `3cb0a02`. Extracted `apply_patch_in_place` from `run_persona_pipeline.py` to new module `flows/shared/patch_walker.py` (enabling unit testing without triggering orchestrator top-level execution). New `tests/test_fix_pass.py` with 21 tests: 8 path-walker happy paths (top-level string/dict, list index, nested field, deeply nested, multi-level, sibling-no-mutation), 6 error paths (empty, missing mid-key, non-list index terminal/mid, out-of-range terminal/mid), 7 `_fix_log.json` schema tests (required keys, int counters, invariant `applied + failed + skipped <= emitted`, patches list, patch entry keys, status enum, Phase 2 regression fixture). Suite: 128 → 149 tests (+21). NOT covered: integration test with mocked Claude (deferred, ~2 hr scaffolding), snapshot directory creation (tested manually), idempotency guard (requires orchestrator).
+- **Landed:** commit `79175e4`. Extracted `apply_patch_in_place` from `run_persona_pipeline.py` to new module `flows/shared/patch_walker.py` (enabling unit testing without triggering orchestrator top-level execution). New `tests/test_fix_pass.py` with 21 tests: 8 path-walker happy paths (top-level string/dict, list index, nested field, deeply nested, multi-level, sibling-no-mutation), 6 error paths (empty, missing mid-key, non-list index terminal/mid, out-of-range terminal/mid), 7 `_fix_log.json` schema tests (required keys, int counters, invariant `applied + failed + skipped <= emitted`, patches list, patch entry keys, status enum, Phase 2 regression fixture). Suite: 128 → 149 tests (+21). NOT covered: integration test with mocked Claude (deferred, ~2 hr scaffolding), snapshot directory creation (tested manually), idempotency guard (requires orchestrator).
 - **Note on spec drift:** FOLLOW_UPS description referenced "fallback to surgical writer re-run on validation failure" from FU#3; that path was superseded by FU#13 linear patcher, so the test scope is the FU#13 contract (schema + path-walker + patch-apply semantics).
 
 #### FU#9 — Merge chunk max_tokens audit ✅ APPLIED 2026-04-24
-- **Landed:** commit `2aee7aa` (code) + this audit (no code change needed on chunks). Verdict: current `max_tokens=48000` default in `chunk_runner.py` is adequate for Dostoevsky-class rich voices.
+- **Landed:** commit `c398f5e` (code) + this audit (no code change needed on chunks). Verdict: current `max_tokens=48000` default in `chunk_runner.py` is adequate for Dostoevsky-class rich voices.
 - **Empirical audit (Dostoevsky Phase 2 chunks):**
   - Pass 1.1 biographical: 24,238 tokens (50% of 48K, 23,762 headroom)
   - Pass 1.2 intellectual: 23,748 tokens (49%, 24,252 headroom)
@@ -210,7 +210,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#2 — Chunk Pass 7-pre per-citation verification (parallel batches) ✅ APPLIED 2026-04-24
 - **Origin:** This session (2026-04-23), after Pass 7-pre max_tokens bumped 4× during arch-03 development.
 - **Empirically blocked Dostoevsky 2026-04-24:** full re-run on FU#32 prompts hit 128K ceiling TWICE (initial Pass 7-pre + post-fix re-verification). Card grew to 418,019 raw chars of citation verification output. Try/except wraps shipped gracefully but skipped verification both times — card shipped WITHOUT citation-verification audit.
-- **Landed:** three-stage architecture in `personas/flows/shared/pass_7pre_chunked.py` (commit `3d09aff`, 675 lines + 7 new prompt files):
+- **Landed:** three-stage architecture in `personas/flows/shared/pass_7pre_chunked.py` (commit `c330f62`, 675 lines + 7 new prompt files):
   - Stage 1 (extract): 1 Sonnet call reads card-only → emits `{claim, source_fields, claim_type}` items. Small output, well under ceiling. max_tokens=32000.
   - Stage 2 (verify): N parallel Sonnet calls (ThreadPoolExecutor, max_workers=4), each ~25 claim items + primary_texts + merged_dossier. max_tokens=16000 per batch. Defensive: LLM-dropped items padded UNVERIFIED; batch failures caught and wrapped.
   - Stage 3 (boddice): small Sonnet call for `[experiential_reconstruction]` + `[projection_warning]` tag check. Runs in parallel with Stage 2. max_tokens=8000.
@@ -226,7 +226,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#21 — Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract ✅ LANDED 2026-04-28
 - **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
 - **Problem:** Two-tier corpus design (Marley lyrics in private reasoning only) is documented in `personas/HANDOFF.md`. Runtime Voice Pipeline Step 2 assembly code MUST drop the field before rendering.
-- **Resolution:** Voice Pipeline v2 implemented as commit `180a18f` includes the strip rule in `runtime/flows/voice/card_assembly.py`:
+- **Resolution:** Voice Pipeline v2 implemented as commit `5f17bf5` includes the strip rule in `runtime/flows/voice/card_assembly.py`:
   - Line 315-317: `if step in (2, 3): filtered.pop("reference_only_passages", None)` — Step 2/3 drop
   - Line 364-369: `if step == 1 and "reference_only_passages" in filtered:` then render under its own section — Step 1 keeps
 - **Verified 2026-04-29** during FU#21 closure check.
@@ -285,7 +285,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#32 — Positive-compensation prompt refinement (Pass 2-6) ✅ APPLIED 2026-04-24
 - **Origin:** 2026-04-23 session-end review synthesis. Diagnosed as **the most direct fix** for the voice-tissue regression observed in Phase 1.
 - **Problem:** FU#12-A's hardening is asymmetric — it tells the writer "strip X" (curator metadata, scholar attribution, provenance brackets) without "compensate with Y" (use the voice's own incarnate grammar instead). Writer responds by producing conservative/taxonomic language ACROSS the board, not just where stripping was needed. Empirical: `character` field regressed from incarnate ("You are a man of gordost'...") to taxonomic ("you do not think in four-humours grammar").
-- **Landed:** paired every "don't do X" instruction in FU#12-A with explicit "do Y" positive compensation across 6 Pass 2-6 prompts. Commits: `b19a640` `b853972` `479f5c9` `af39679` `7c687f8` `4c577c8`. 128/128 tests pass.
+- **Landed:** paired every "don't do X" instruction in FU#12-A with explicit "do Y" positive compensation across 6 Pass 2-6 prompts. Commits: `8ae15b0` `ae2deda` `243ad40` `378cd2c` `3b3f6dd` `ee9fe59`. 128/128 tests pass.
   - "Don't use scholar attribution names" → "write the voice's OWN framing of the same ground"
   - "Don't use provenance tags" → "write the operational instruction directly in the voice's frame"
   - "Avoid taxonomic grammar" → **META-STRIP against taxonomic retreat + INHABIT vs NAME test: for period voices, voice's load-bearing lexemes in native language anchored in biographical arc; for contemporary voices, equivalent in-tradition lexicons**
@@ -297,7 +297,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - Fewer fix-pass patches needed (15 vs Phase 1's 33) — cleaner upstream generation.
 
 #### FU#1 — Layer 2 preservation audit (chunks → 04_generation synthesis) ✅ APPLIED 2026-04-24
-- **Landed as:** `personas/scripts/arch_03_synthesis_audit.py` (commit `4f9e23a`). Companion to existing `arch_03_preservation_audit.py` (Layer 1). Consumption map mirrors `_per_chunk_vars()` + render() calls in `run_persona_pipeline.py`. Metrics per (chunk, consumer-pass) pair: density, vocab_recall, citation_survival, frame_type_survival (1-arch-06 specific). Red-flag detection for <15% recall. Supports `--snapshot-path` + `--compare-snapshot` (A/B delta with directional arrows).
+- **Landed as:** `personas/scripts/arch_03_synthesis_audit.py` (commit `0d3a5c5`). Companion to existing `arch_03_preservation_audit.py` (Layer 1). Consumption map mirrors `_per_chunk_vars()` + render() calls in `run_persona_pipeline.py`. Metrics per (chunk, consumer-pass) pair: density, vocab_recall, citation_survival, frame_type_survival (1-arch-06 specific). Red-flag detection for <15% recall. Supports `--snapshot-path` + `--compare-snapshot` (A/B delta with directional arrows).
 - **First A/B run result:** see FU#32 empirical validation above. Phase 1 baseline snapshot vs post-FU#32 delta confirms no regression + Pass 4a substantial gain.
 
 #### FU#33 — Patcher scope extensions
@@ -312,7 +312,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - **Why the brackets survive:** the FU#13 patcher operates on `field_issues[]` emitted by Pass 7a. Pass 7a's rubric doesn't flag `[projection_warning:]` brackets as a register violation (they're voice-honest annotation per Boddice §12), so the patcher never sees them. They're legitimate per the schema but operator-visible as "still in the prose" on a sign-off read.
 - **Extensions needed (re-prioritized post-Phase-2-inspection):**
   - **P1: Universal bracket-tag residue scan across live prose fields ✅ LANDED 2026-04-25, AMENDED same day** — `flows/shared/bracket_strip.py` deterministic regex pass.
-    - **Initial implementation (commit `6c0daf5`):** orchestrator hook as Pass 7d-clean (AFTER Pass 7c, BEFORE Derive). Strip allowlist included Boddice tags (`[experiential_reconstruction]`, `[projection_warning:...]`).
+    - **Initial implementation (commit `9a2f9dc`):** orchestrator hook as Pass 7d-clean (AFTER Pass 7c, BEFORE Derive). Strip allowlist included Boddice tags (`[experiential_reconstruction]`, `[projection_warning:...]`).
     - **Amendment (2026-04-25 same day):** TWO empirical issues surfaced on Plato:
       1. **Boddice tags MUST be preserved.** Stripping `[experiential_reconstruction]` and `[projection_warning:...]` made Pass 7-pre boddice_tag_flags go 0 → 9. The biocultural-discipline check expects these tags inline (per `persona_pass_7pre_boddice_check.md`: "`[experiential_reconstruction]` must accompany any claim about what the voice felt/lived/witnessed... `[projection_warning]` must accompany any modern English term used faute de mieux"). They are content-meaningful annotations, not pipeline scaffolding. Removed from strip allowlist.
       2. **Strip placement should be BEFORE validators, not after.** Original placement (after Pass 7c) produced stale validation reports — Pass 7a flagged residues that the strip then removed. Moved to Pass 6.5-clean (after Pass 6, before Pass 7-pre) so all validators see the cleaned content from the start; their reports reflect shipped state.
@@ -323,7 +323,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
     - Generalizes across voices: Pass 6.5-clean is now part of the standard pipeline; voices 3-12 will run it automatically with the corrected allowlist + placement.
   - **P2: Read Pass 7-pre's `INCONSISTENT` citation flags into patcher input ✅ LANDED 2026-04-26** in `personas/run_persona_pipeline.py:1013-1078`. INCONSISTENT items are merged into Pass 7a's `field_issues[]` array with field-path-to-pass routing (path prefix → flagged_pass mapping for passes 2/3/4a/4b/5/6). Empirical activation: Plato 2026-04-29 surfaced 2 INCONSISTENT items (Phaedrus 246a + 275d-e Jowett translations) which were correctly routed; the FU#13 single-shot guard prevented automatic re-patching but the operator review gate (FU#53) caught them.
   - P3 (closed): transliteration-consistency + spell-check. Phase 2 card is clean on both.
-- **Effort:** All three sub-items closed. P1 LANDED 2026-04-25 (commit `6c0daf5`); P2 LANDED 2026-04-26; P3 closed by upstream improvements.
+- **Effort:** All three sub-items closed. P1 LANDED 2026-04-25 (commit `9a2f9dc`); P2 LANDED 2026-04-26; P3 closed by upstream improvements.
 - **Activation:** Plato's first card empirically activated P1 (42 residues). Plato 2026-04-29 empirically activated P2 (2 Jowett-translation flags routed correctly).
 - **Relation:** orthogonal to voice-tissue work — addressed mechanical-defect class of issues the patcher missed.
 - **Status:** ✅ FULLY LANDED — all three sub-items closed.
@@ -343,7 +343,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#38 — Voice-self-reference vocabulary strip (Pass 2-6) ✅ APPLIED 2026-04-24
 - **Origin:** 2026-04-24 external reviewer critique of Dostoevsky chat v2 card (two independent reviewers). Reviewer 1 flagged "kenotic beauty" specifically as a defect the FU#13 patcher missed. Reviewer 2 generalized: post-voice-lifetime critical vocabulary that scholars coined to describe the voice leaks back into voice-native prose even after scholar-attribution NAMES are stripped per FU#12-A.
 - **Problem:** FU#12-A's register hardening stripped scholar NAMES (Bakhtin, Eikhenbaum, Kasatkina) from runtime field values. It did NOT strip scholar-coined TERMS (polyphonic, kenotic, chronotope, dialogical, carnivalesque, sideshadowing) that entered common critical English and often leak into field values describing the voice's own operations. Empirically verified on Phase 2 Dostoevsky card (FU#32 re-run): polyphonic (8×), kenotic (8×), chronotope (2×), dialogic embodiment (1×), dialogical (1×). FU#13 patcher caught "sideshadowing" but missed these. Per-voice: every voice has its own post-horizon critical vocabulary list.
-- **Landed:** commit `22a2e54`. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern with a 6th STRIP item across all 6 Pass 2-6 prompts. Per-voice examples in prompt (post-1920 Dostoevsky criticism, post-1950 Plato criticism, post-1990 cognitive philosophy on non-human voices) are exemplary — the writer applies the temporal-cultural test to the voice at hand.
+- **Landed:** commit `622287f`. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern with a 6th STRIP item across all 6 Pass 2-6 prompts. Per-voice examples in prompt (post-1920 Dostoevsky criticism, post-1950 Plato criticism, post-1990 cognitive philosophy on non-human voices) are exemplary — the writer applies the temporal-cultural test to the voice at hand.
 - **Per-voice test (encoded in prompt):** "Would this voice, IN THEIR OWN LIFETIME, have reached for this English adjective to describe their own work? If no (because the term postdates them or belongs to a critical tradition they did not participate in), do not mirror the vocabulary in field values even if the merge dossier contains it."
 - **DO INSTEAD pattern:** express the same ground in the voice's own incarnate grammar. Worked examples for Dostoevsky encoded in prompt: "beauty that has passed through the crucible and remained beloved" inhabits "kenotic beauty"; "many voices at once, none singly yours, arguing inside the character as the character argues outside" inhabits "polyphonic"; "the threshold where time stages spiritual crisis" inhabits "chronotope".
 - **Generalization:** all 12 voices. Each voice's post-horizon critical-term list is different; the TEST is the same.
@@ -375,7 +375,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 #### FU#41 — Chat-ready system prompt as 4th Derive artifact ✅ APPLIED 2026-04-24
 - **Origin:** 2026-04-24 reviewer 2 empirical observation. Operator's hand-produced chat v2 card for Dostoevsky (deployed as Claude project custom instructions for chat-test validation) was compared to pipeline's `07_persona_card_assembled.json`: **27 of 35 shared fields byte-for-byte identical; 8 differ only by ~10-100 chars of minor operator polish.** The chat artifact is a mechanical strip-out of Voice-Pipeline-only fields — no content generation work. Content generation is the pipeline's job.
 - **Problem:** Every chat-test validation required operator to manually hand-build the chat artifact from the assembled card. Error-prone (easy to forget to strip `smoke_test_chains` or `reference_only_passages`), tedious at 12-voice scale, and (more importantly) the manual step inserted operator judgment where mechanical transform suffices.
-- **Landed:** commit `b9c1eb2`. New module `personas/flows/shared/chat_prompt_builder.py` (123 lines) + 13 tests in `tests/test_chat_prompt_builder.py`. Orchestrator integration at `run_persona_pipeline.py:1585-1588` writes the 4th Derive artifact (`voices/<slug>/06_derive/03_chat_system_prompt.json`) after assembly completes.
+- **Landed:** commit `8e05e3f`. New module `personas/flows/shared/chat_prompt_builder.py` (123 lines) + 13 tests in `tests/test_chat_prompt_builder.py`. Orchestrator integration at `run_persona_pipeline.py:1585-1588` writes the 4th Derive artifact (`voices/<slug>/06_derive/03_chat_system_prompt.json`) after assembly completes.
 - **Transformation (mechanical, no editorial work):**
   - DROP 10 Voice-Pipeline-only fields: `metadata`, `smoke_test_chains`, `reference_only_passages`, `medium`, `characteristic_output_structure`, `length_and_format_constraints`, `technical_capabilities`, `relationship_to_detailed_response`, `continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`
   - PRESERVE all other ~34 fields at root
@@ -393,7 +393,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - **Architectural reframing:** chat deployment is treated as a TEST of the configured deployment (e.g., Athens 2026 Voice Pipeline run), not a separate deployment surface. Chat output should match what the runtime will produce — same length window, same artifact structure, same audience-aware priming.
   - **Strip set after Amendment A (5 fields):** `metadata`, `smoke_test_chains`, `reference_only_passages`, `continuity_block_if_night_2`, `continuity_block_artifact_if_night_2`.
   - **Promoted to preserve (5 fields):** `medium`, `characteristic_output_structure`, `length_and_format_constraints`, `technical_capabilities`, `relationship_to_detailed_response`.
-  - **Landed:** commit `aa4ce85`. `chat_prompt_builder.py` strip list edited; tests updated; suite 186→187.
+  - **Landed:** commit `6bbfc2e`. `chat_prompt_builder.py` strip list edited; tests updated; suite 186→187.
 
 - **AMENDMENT B 2026-04-25 (same day, second pass) — strip set grown 5→11 (spec-shell suppression):** empirically motivated by Plato chat-test thinking-trace meta-reasoning. The model produced trace text like *"metadata points to a test environment for a Plato-voice mode... legitimate philosophical voice exercise rather than something problematic... I'm seeing that this system prompt contains both Plato persona instructions and standard Claude behavior guidelines."* The model was reading specification-shell fields as "this is a persona spec" rather than "I am the voice." Pass 7a's gpt-5.4 verdict had warned the same thing: *"several fields still contain editorial scaffolding, schema tags, or scholarly/meta phrasing that would make the model reason about the specification instead of from within the voice."*
   - **5 spec-shell meta fields added to strip (top-level):** `voice_name` (third-person identity scaffold; identity should be in `epistemic_frame_statement` first/second-person prose), `voice_mode` (schema label like "philosophical" reads as mode-selection signal), `pipeline_version` (provenance — "3.10-chat" reads as test/dev pipeline), `generated_date` (provenance), `council_member_name` (Voice-Pipeline scaffolding announcing council role).
@@ -429,7 +429,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   Three candidate causes (non-exclusive):
   1. **Corpus asymmetry.** Plato scholarship is exceptionally well-indexed (SEP, IEP, BMCR, OUP, NDPR all have authoritative consolidated entries). DR's search-round convergence is faster than for Dostoevsky's more fragmentary Russian-language + specialized-journal landscape (Saraskina, Kasatkina, Shrayer, Vassena).
   2. **DR-infrastructure update.** claude.ai's Deep Research had 4 days of potential model/pipeline changes between 2026-04-20 Dosto runs and 2026-04-24 Plato runs. Unverifiable from outside.
-  3. **Section-mode research-discipline stripping.** Commit `1fd43f2` moved research discipline into `_pass_0b_research_discipline.md` with `{% if not section_mode %}` conditionals. Stripped from section-mode: the `(Bakhtin on polyphony; Frank on Dostoevsky; Vlastos on Socratic Plato)` scholar examples, "Your training covers most of them; trust that" training-trust cue, "No word-count floor to hit; no word-count ceiling to stay under" + "six thematic areas should each receive substantive coverage" word-count framing, and the "§5–§6 failing to arrive" monolithic warning. All of these damp verification pressure; their absence may encourage earlier synthesis.
+  3. **Section-mode research-discipline stripping.** Commit `d538497` moved research discipline into `_pass_0b_research_discipline.md` with `{% if not section_mode %}` conditionals. Stripped from section-mode: the `(Bakhtin on polyphony; Frank on Dostoevsky; Vlastos on Socratic Plato)` scholar examples, "Your training covers most of them; trust that" training-trust cue, "No word-count floor to hit; no word-count ceiling to stay under" + "six thematic areas should each receive substantive coverage" word-count framing, and the "§5–§6 failing to arrive" monolithic warning. All of these damp verification pressure; their absence may encourage earlier synthesis.
   Implication for FU#29 baseline work: when using Plato + Dostoevsky as sentinel voices, **expect asymmetric session times** (Plato ~10 min, Dosto ~30 min). Diff-tooling should normalize on output depth/scholar-citation-count, not on session duration. If future regression investigation needs controlled timing, restore the stripped discipline phrases in the section-mode branch as a testbed.
 
 #### FU#30 — Card-richness vs runtime-quality empirical check
@@ -467,31 +467,31 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 #### FU#43 — Pass 6 `corpus_metadata` source-side hardening ✅ APPLIED 2026-04-25
 - **Origin:** Plato 2026-04-25 first run had Pass 7a flag `curated_corpus_passages.corpus_metadata` as "production metadata leaked into prose" (issue #7); patcher trimmed it (patch #6 in `_fix_log.json`). Pattern recurs across voices.
-- **Landed:** `bf49a0a`. Edited `persona_pass_6_corpus.md` to explicitly tell Pass 6: keep `corpus_metadata.notes` EMPTY or one short translation-tradition line ("Cooper-Hackett ed. 1997"; "Jowett 1892"). Forbid voice biography, voice-instruction prose, public-domain disclaimers, curator essays, passage summaries. Cross-references FU#41 Amendment B nested-strip as source-of-truth intent.
+- **Landed:** `679314c`. Edited `persona_pass_6_corpus.md` to explicitly tell Pass 6: keep `corpus_metadata.notes` EMPTY or one short translation-tradition line ("Cooper-Hackett ed. 1997"; "Jowett 1892"). Forbid voice biography, voice-instruction prose, public-domain disclaimers, curator essays, passage summaries. Cross-references FU#41 Amendment B nested-strip as source-of-truth intent.
 - **Effect for voices 3-12:** Pass 6 emits minimal corpus_metadata at source; patcher doesn't need to re-trim per voice. Saves ~$0.20-0.50 patcher work per voice + cycle time.
 
 #### FU#44 — Patcher prompt register-drift extension ✅ APPLIED 2026-04-25
 - **Origin:** Plato 2026-04-25 Pass 7a flagged 7 field_issues post-fix. Two recurring patterns the patcher missed:
   1. **Third-person scholarly diction** — "the corpus", "the [Voice]ian person", "[Voice] held that...", "reticence in the corpus".
   2. **Internal contradictions** — `topics_requiring_care.guidance` instructing voice to acknowledge facts that `knowledge_boundary` says voice cannot know (Plato + Popper-eugenics-history).
-- **Landed:** `bf49a0a`. Edited `persona_pass_7a_fix.md` with worked-example patterns under rule 3 (register-drift rewrites: "the corpus" → second-person possessive, "the [Voice]ian person" → first/second-person, "[Voice] held that..." → first/second-person rewrite). Added new rule 4: internal-contradiction patches (rewrite cross-knowledge_boundary guidance into voice-native terms). Renumbered subsequent rules 4→5, 5→6, 6→7.
+- **Landed:** `679314c`. Edited `persona_pass_7a_fix.md` with worked-example patterns under rule 3 (register-drift rewrites: "the corpus" → second-person possessive, "the [Voice]ian person" → first/second-person, "[Voice] held that..." → first/second-person rewrite). Added new rule 4: internal-contradiction patches (rewrite cross-knowledge_boundary guidance into voice-native terms). Renumbered subsequent rules 4→5, 5→6, 6→7.
 - **Effect for voices 3-12:** patcher catches register-drift specifically, reducing residual REVISION_NEEDED flags after fix-pass. Lower operator-triage friction at every CARD COMPLETE step.
 
 #### FU#45 — Cache-invalidation helper script ✅ APPLIED 2026-04-25
 - **Origin:** Plato 2026-04-25 re-run cycles cost an extra ~$5 + 30min when the operator (and Claude) targeted `04_generation/02_excerpt_selections.json` for Pass 1d cache invalidation; the actual path is `03_corpus/02_excerpt_selections.json`. `rm -f` failed silently; the pipeline cache-hit; the wider Pass 1d budget didn't apply.
-- **Landed:** `bf49a0a`. New `personas/scripts/invalidate_cache.py` knows the path map for every pass + handles composite paths (chat artifact, fix log) that don't have their own helper function. Supports `--pass <name>` (single), `--from-pass <name>` (cascade), `--list`, `--dry-run`.
+- **Landed:** `679314c`. New `personas/scripts/invalidate_cache.py` knows the path map for every pass + handles composite paths (chat artifact, fix log) that don't have their own helper function. Supports `--pass <name>` (single), `--from-pass <name>` (cascade), `--list`, `--dry-run`.
 - **Usage:** `venv/bin/python scripts/invalidate_cache.py --voice plato --project /path/to/project --from-pass 1d`
 - **Effect for voices 3-12:** operator iteration cycles use the helper instead of manual `rm -f`. No more silent path-mismatch failures.
 
 #### FU#46 — Pass 1d excerpt budget bump (30K → 60K) ✅ APPLIED 2026-04-25
 - **Origin:** Plato 2026-04-25 first run had 25/151 Pass 7-pre claims UNVERIFIED at 30K budget. Well-attested Platonic doctrines (anamnēsis, divided line, meletē thanatou, etc.) lived in merged_dossier but Pass 1d's 6 selections couldn't anchor them in 30K of curated excerpts.
-- **Landed:** `cba8fc5`. Edited `persona_pass_1d_excerpt_selection.md`: budget 30K → 60K, per-source 10K → 15K. Per-source cap keeps single-source dominance in check.
+- **Landed:** `507b7ad`. Edited `persona_pass_1d_excerpt_selection.md`: budget 30K → 60K, per-source 10K → 15K. Per-source cap keeps single-source dominance in check.
 - **Effect for voices 3-12:** richer-corpus voices (Plato, Arendt, possibly Scheherazade) anchor more claims to primary text. Smaller-corpus voices not affected (per-source cap + LLM judgement still bounds selection).
 
 #### CC#1 — Move `05_primary_text_urls.json` out of `01_research/` ✅ APPLIED 2026-04-26
 - **Origin:** This session, surfaced reading `paths.py`.
 - **Problem:** Historical-layout vestige. In v3.10 the URL list came directly from Perplexity research (true research artifact). 1-arch-07 (2026-04-22) changed the source — URLs now derived post-merge from `02_merge/pass_1_6/works.json` + `passages.json`. Destination path kept for backward-compat but file is no longer a research output.
-- **Landed:** commit `ef91fb6`. Moved from `voices/<slug>/01_research/05_primary_text_urls.json` → `voices/<slug>/03_corpus/00_primary_text_urls.json`. `paths.py:69-72` updated; `tests/test_paths.py` test moved from `TestResearchFiles` to `TestCorpusFiles` and asserts new filename. Existing files migrated for Plato + Dostoevsky.
+- **Landed:** commit `b7e45dc`. Moved from `voices/<slug>/01_research/05_primary_text_urls.json` → `voices/<slug>/03_corpus/00_primary_text_urls.json`. `paths.py:69-72` updated; `tests/test_paths.py` test moved from `TestResearchFiles` to `TestCorpusFiles` and asserts new filename. Existing files migrated for Plato + Dostoevsky.
 
 #### FU#47 — Voice Pipeline Step 1 mode-switching for non-analytical voices
 - **Origin:** External reviewer 2026-04-26 comparing Plato (pipeline-emitted) vs Dostoevsky (chat v2, operator-hand-curated). Surfaced architectural diagnosis: Plato's actual method IS analytical-procedural (Socratic dialectic IS reducible to logical operations); the Voice Pipeline's Step 1 (analytical workshop / thinking-procedure) → Step 2 (artifact rendering) split fits Plato cleanly. Dostoevsky's method is scenic-incarnational; Step 1 as a separable analytical workshop is structurally foreign. Reviewer's verbatim: *"the Step 1 trace cannot be authentic Dostoevsky-thinking; it can only be analytical-thinking-about-what-Dostoevsky-would-write."*
@@ -527,8 +527,8 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Scope split — six workstreams (revised):**
   - **49A — Build layer (persona pipeline, LANDED 2026-04-26 → REVERTED 2026-04-28 → V2 LANDED 2026-04-29):**
     - **2026-04-26 v1 landing**: Pass 4b prompt updates — generativity criterion in quality_criteria + preserve-trace-tensions in relationship_to_detailed_response + length variance 350-550 / 800-1500.
-    - **2026-04-28 revert** (commit `9480d3a`): empirical chat-test showed cumulative prompt-side additions (49A v1 + cryofreeze framing + tense-discipline + family-of-forms) had degraded runtime artifact texture relative to 2026-04-25 shipped-Plato baseline. ALL 49A v1 content reverted alongside other texture-degrading additions; the 5 generation prompts (Pass 2/3/4a/4b/5) restored byte-for-byte to 582af96 baseline.
-    - **2026-04-29 v2 landing** (commit `0ca02f5`): rebuilt the quality_criteria field-spec from scratch over a 15-test exemplar journey. The v1 procedural-mandate approach produced checkbox-satisfaction; v2 uses a 3-dim field-tied scaffold ("Could this be mine?" overarching test across REASONING / VOICE / FORM dimensions, with field list "consult as needed" framing). Plato re-run under v2 produced 5 field-named criteria including organic trace-preservation ("has the piece done the elenctic work, or has it merely reported that such work could be done?") without any procedural mandate triggering it.
+    - **2026-04-28 revert** (commit `3feb2b2`): empirical chat-test showed cumulative prompt-side additions (49A v1 + cryofreeze framing + tense-discipline + family-of-forms) had degraded runtime artifact texture relative to 2026-04-25 shipped-Plato baseline. ALL 49A v1 content reverted alongside other texture-degrading additions; the 5 generation prompts (Pass 2/3/4a/4b/5) restored byte-for-byte to 418d553 baseline.
+    - **2026-04-29 v2 landing** (commit `bfb7ed3`): rebuilt the quality_criteria field-spec from scratch over a 15-test exemplar journey. The v1 procedural-mandate approach produced checkbox-satisfaction; v2 uses a 3-dim field-tied scaffold ("Could this be mine?" overarching test across REASONING / VOICE / FORM dimensions, with field list "consult as needed" framing). Plato re-run under v2 produced 5 field-named criteria including organic trace-preservation ("has the piece done the elenctic work, or has it merely reported that such work could be done?") without any procedural mandate triggering it.
     - **Trace-preservation in `relationship_to_detailed_response` and length-variance in `length_and_format_constraints` were NOT re-landed in v2** — they were part of v1 and reverted alongside. The empirical hypothesis from the 04-28 revert was that cumulative additions caused texture loss; v2 deliberately landed only the ONE most load-bearing piece (quality_criteria field-tied scaffold). Trace-preservation tested anyway emerged organically through the v2 field-tied criteria framing.
     - **Side-experiment 2026-04-29 (form-variance)**: tested two relax-the-medium-spec options on Plato standalone (Option 1: system-prompt nudge permits 2-3 forms; Option 3: user-prompt nudge same). Plato declined both — correctly identified his corpus as dialogue-dominated. Both variants slightly degraded named-scene specificity in `medium`. Conclusion: cross-form variance for Plato is wrong (his corpus IS single-form). Real test pending Cleopatra (genuinely multi-form: prostagma + ordinance + embassy speech + ritual). See FU#55 below.
   - **49B — Runtime layer (Voice Pipeline workstream):** Step 2 generativity teeth (Rec 1: anti-premature-closure pressure; "the published artifact should not feel more settled than the thinking that produced it"). Defer post-Athens or coordinate with runtime team.
@@ -637,11 +637,11 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Related:** FU#13 (linear patcher single-shot — design intentional, not changed by this), FU#5 (FU#5 snapshot mechanism — already gives operator the diff capability), FU#46 (excerpt budget — adjacent gate-thinking).
 
 #### Note on chat_system_prompt.json invalidation gap (related to FU#52)
-- The 7a-fix downstream-cache invalidation list (`run_persona_pipeline.py:1297-1305`) deletes `pass_7_pre`, `pass_7_anachronism`, `pass_7a`, `pass_7b`, `pass_7c`, `derive_raw`, `assembled_card`, `provocateur_profile`, `evaluation_rubric` — but NOT `chat_system_prompt`. This works in the happy path because the end-of-pipeline `write_chat_system_prompt(...)` overwrites unconditionally. But if the run is interrupted between fix-pass and completion, the chat prompt file silently mismatches the assembled card. **Fix:** add `_paths.chat_system_prompt(SLUG, PROJECT_ROOT)` to the invalidation list. Trivial 1-line change. Not blocking for Athens but worth landing with FU#52 work. ✅ APPLIED 2026-04-29 in commit `c40419c` as part of FU#52 work.
+- The 7a-fix downstream-cache invalidation list (`run_persona_pipeline.py:1297-1305`) deletes `pass_7_pre`, `pass_7_anachronism`, `pass_7a`, `pass_7b`, `pass_7c`, `derive_raw`, `assembled_card`, `provocateur_profile`, `evaluation_rubric` — but NOT `chat_system_prompt`. This works in the happy path because the end-of-pipeline `write_chat_system_prompt(...)` overwrites unconditionally. But if the run is interrupted between fix-pass and completion, the chat prompt file silently mismatches the assembled card. **Fix:** add `_paths.chat_system_prompt(SLUG, PROJECT_ROOT)` to the invalidation list. Trivial 1-line change. Not blocking for Athens but worth landing with FU#52 work. ✅ APPLIED 2026-04-29 in commit `e11b65b` as part of FU#52 work.
 
 #### FU#53 — Pipeline review-gate refactor: Pass 7a FINAL + operator gate ✅ LANDED 2026-04-29
 - **Origin:** Plato 2026-04-29 standalone post-7c re-fire of Pass 7a (per FU#52 step 4) caught 4 cross-pass contradictions invisible to the in-pipeline 7a/7a-fix: `banned_language[16]` TESTING annotation in bare-string form, `banned_modes[10,11]` TESTING annotations + author/character register break, `corpus_metadata.source_count` = 7 (actual 4), and `curated_corpus_passages` Jowett translations contradicting `banned_language` Jowett-rejection. The in-pipeline 7a structurally cannot see cross-field contradictions because it validates per-pass slices, not the assembled card. Promoting the post-7c re-fire to a first-class pipeline stage closes the gap.
-- **Landed in commit `ddbe194` (2026-04-29):**
+- **Landed in commit `b8b4782` (2026-04-29):**
   - New `paths.pass_7a_final()` + `paths.operator_review_flag()`
   - New `_pass_7a_final()` runner function (mirrors `_pass_7a` but reads assembled card from disk; gpt-5.4 high → Gemini fallback ladder)
   - New `_build_assembled_card_dict()` helper called twice (skeleton + final); on FINAL call it reads on-disk content to preserve operator patches and only rewrites the metadata block
@@ -678,7 +678,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Related:** FU#49E (Voice Pipeline Step 3 spec), FU#49M (`strain_markers[]` runtime contract), Voice Pipeline spec §"Card → System Prompt Assembly".
 
 #### FU#55 — Form-variance test, rolling per-voice (Pass 4b fork-test pattern) 🟡 IN PROGRESS
-- **Origin:** 2026-04-29 session investigated whether the persona pipeline could produce 2-3 distinct artifact forms per voice instead of single-form lock-in. Card v2.1 §H specified family-of-forms emission; landed in commit `e6fc634` (2026-04-28); reverted in `9480d3a` (2026-04-28 evening) because cumulative prompt additions empirically degraded artifact texture relative to 2026-04-25 baseline. Current state has NO family-of-forms emission in any prompt.
+- **Origin:** 2026-04-29 session investigated whether the persona pipeline could produce 2-3 distinct artifact forms per voice instead of single-form lock-in. Card v2.1 §H specified family-of-forms emission; landed in commit `6ec9dca` (2026-04-28); reverted in `3feb2b2` (2026-04-28 evening) because cumulative prompt additions empirically degraded artifact texture relative to 2026-04-25 baseline. Current state has NO family-of-forms emission in any prompt.
 - **Two nudge variants tested (Pass 4b standalone fork):**
   - **Option 1 (system prompt nudge):** change BLOCK 3 `medium` from "One phrase" to "default form, with optional 2-3 native variations if corpus warrants" + parallel changes to `characteristic_output_structure` + `length_and_format_constraints`
   - **Option 3 (user prompt nudge):** single permissive sentence in user prompt only
@@ -706,7 +706,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - If 1-2/10 voices exercise cleanly with texture preserved: per-voice opt-in (voice_config flag for those voices).
   - If 3+/10 voices exercise cleanly: re-evaluate landing OPT1 universally (with 04-28-revert risk awareness; chat-test-validate before merging).
 - **Side question still active:** does the 04-28 texture-loss diagnosis hold for family-of-forms in isolation, or only for the cumulative cryofreeze + tense + family-of-forms package? Plato + Cleopatra both showed slight texture loss under OPT1 even when declining the permission — suggestive that prompt-bloat alone causes texture loss, not the multi-form attempt itself. But still inconclusive.
-- **Related:** Card v2.1 §H (current spec describes family-of-forms but prompts don't implement it), `9480d3a` revert commit (the empirical texture-loss event), FU#49A v2 (the only piece of the 04-28 stack that survived to land cleanly).
+- **Related:** Card v2.1 §H (current spec describes family-of-forms but prompts don't implement it), `3feb2b2` revert commit (the empirical texture-loss event), FU#49A v2 (the only piece of the 04-28 stack that survived to land cleanly).
 
 #### FU#56 — Pass 2/3/4a register-discipline gap on long-form fields (TRIGGER: Cleopatra build) 🔵
 - **Origin:** 2026-04-29 Plato finalization. After 12 surgical patches resolved the cleanly-actionable residuals (TESTING annotations, register breaks, anachronism vocabulary, doctrinal slips, Jowett translation contradictions, source-attribution metadata), 3 successive Pass 7a FINAL re-fires (gpt-5.4 high) kept surfacing register critiques on a recurring set of fields:
@@ -715,7 +715,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - `concept_lexicon` — impersonal dictionary register ("The lowest part of the soul: bodily desire...") rather than first-person usage cues ("When I say X, I mean...")
   - `metaphorical_repertoire` — taxonomic prose ("The Sun as offspring...", "The Cave as the master image...") rather than first-person repertoire ("I return to light and sight when...")
   - `preferred_vocabulary` — glossary glosses ("the calculating, spirited, and appetitive parts of the soul, each with its proper virtue") rather than usage directives ("Use to agathon for...")
-- **Diagnosis:** the patterns are properties of the **prompts at 582af96 baseline**, not of Plato specifically. The 04-26 shipped Plato had the same patterns; chat-test passed despite them. So they are validator-strict-but-not-runtime-blocking critiques. But they ARE real critiques — the cards leak biographical/scholarly/glossary register where the runtime would benefit from first-person usage register.
+- **Diagnosis:** the patterns are properties of the **prompts at 418d553 baseline**, not of Plato specifically. The 04-26 shipped Plato had the same patterns; chat-test passed despite them. So they are validator-strict-but-not-runtime-blocking critiques. But they ARE real critiques — the cards leak biographical/scholarly/glossary register where the runtime would benefit from first-person usage register.
 - **Why prompt-side, not card-side:** patching individual cards is whack-a-mole — the prompts will produce the same patterns on Cleopatra, Marley, Octopus, etc. The architecturally-correct fix is to add register-discipline guardrails to the Pass 2/3/4a system prompts:
   - Pass 2 `formative_experience`: forbid bare BCE dating; require first/second-person framing ("What formed me most was..." / "Long before this gathering, the city killed Socrates"). voice_temporal_stance.default already says this for the temporal-stance field — extend the discipline.
   - Pass 3 `concept_lexicon`: require first-person usage register ("When I say X, I mean..." + "Do not use X for...") instead of dictionary-style "X is..."
@@ -723,7 +723,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Risk:** the 04-28 revert was driven by EMPIRICAL texture loss when too many cumulative prompt additions piled up. Adding register-discipline blocks to Pass 2/3/4a risks the same. **Mitigation:** test on Cleopatra (the natural next voice). If Cleopatra regenerates cleanly under the new guardrails AND chat-tests as well as 04-26 Plato, land for voices 3-12. If she regenerates with texture loss, revert and accept the gap as pre-Athens-known-limitation.
 - **Why Plato is acceptable as-shipped:** chat-test on 04-26 passed against the same prompt patterns. The 12 patches landed today address every cleanly-actionable issue. Remaining flags are register-strict-validator critiques, not runtime quality blockers. Operator-review-passed flag set 2026-04-29.
 - **Trigger:** Cleopatra Pass 4b run (athens-2026 voice 3 buildout). Same trigger as FU#55; bundle the experiments together (form-variance test + register-discipline test on the same Cleopatra build).
-- **🔴 IMPORTANT: do NOT modify Pass 2/3/4a prompts BEFORE Cleopatra runs.** The whole point of FU#56's empirical test is to see what the current 582af96-baseline prompts produce on a multi-form-corpus voice — Cleopatra is the counterfactual. If we modify the prompts first, we erase the comparison signal AND repeat the 04-28 revert risk pattern (cumulative prompt additions → texture loss). Cleopatra runs on the EXACT current prompts (verified byte-for-byte against 0ca02f5 + 125d4c5 on 2026-04-29). After observing her Pass 7a FINAL output, decide: (a) she produces clean fields — FU#56 moot, close; (b) she produces same biographical/glossary register — empirical case for prompt fix strengthens; (c) different register issues — re-scope FU#56.
+- **🔴 IMPORTANT: do NOT modify Pass 2/3/4a prompts BEFORE Cleopatra runs.** The whole point of FU#56's empirical test is to see what the current 418d553-baseline prompts produce on a multi-form-corpus voice — Cleopatra is the counterfactual. If we modify the prompts first, we erase the comparison signal AND repeat the 04-28 revert risk pattern (cumulative prompt additions → texture loss). Cleopatra runs on the EXACT current prompts (verified byte-for-byte against bfb7ed3 + bd6ada1 on 2026-04-29). After observing her Pass 7a FINAL output, decide: (a) she produces clean fields — FU#56 moot, close; (b) she produces same biographical/glossary register — empirical case for prompt fix strengthens; (c) different register issues — re-scope FU#56.
 
 #### FU#57 — Drop `bold_engagement_topics` from runtime system prompts ✅ LANDED 2026-04-29
 - **Origin:** 2026-04-29 chat-test observation by operator: pre-12-patch Plato card chat-tested better when `bold_engagement_topics` was stripped from the chat artifact — the voice reasoned more freely.
@@ -744,7 +744,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Empirical validation pending:** chat-test 5-10 Plato prompts under the new chat artifact; compare engagement quality vs. previous chat artifact. If new is better → confirms FU#57 reasoning. If equivalent → still architecturally cleaner. If new is worse → revert candidate (rare but possible).
 - **Related to FU#30** — this is now one concrete data point in the "card-richness vs runtime-quality" empirical question.
 - **Cost estimate:** ~1-2 hr for Pass 2/3/4a prompt edits + 1 Cleopatra full re-run + chat-test comparison.
-- **Related:** FU#55 (form-variance, same trigger), FU#49 stack (the prior episode of "we changed Pass 2/3/4a/4b/5 prompts and texture regressed" — same risk class), Pass 7a FINAL (the validator that surfaced these), `9480d3a` revert commit.
+- **Related:** FU#55 (form-variance, same trigger), FU#49 stack (the prior episode of "we changed Pass 2/3/4a/4b/5 prompts and texture regressed" — same risk class), Pass 7a FINAL (the validator that surfaced these), `3feb2b2` revert commit.
 
 #### FU#58 — Pass 7a prompt out of sync with Pass 2 user-prompt's 10-field emission spec ✅ LANDED 2026-04-29
 - **Origin:** 2026-04-29 Cleopatra build flagged "sensitive_topics: Required field is missing entirely" by Pass 7a FINAL. Investigation revealed:
@@ -800,10 +800,10 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
   - Drop `temperature` from API kwargs when `thinking=True`, per Anthropic docs §"Feature compatibility" ("Thinking isn't compatible with temperature or top_k modifications").
   - Capture `thinking_delta` streaming events + `block_types`. Return `thinking_trace` and `block_types` as new dict fields. Additive — existing callers ignore.
 - **Changes (voice-pipeline side, `runtime/flows/voice/{continuity,step1,step2,step3}.py`):** mirror — drop `temperature`, add `display: "summarized"`. Thinking trace already captured via `final.content` walk; `block_types` derivable from same.
-- **Cleanup commit `85f04da` 2026-04-29:** slimmed persona-side capture from manual streaming-event walk (~30 lines) to `text_stream` drain + `final.content` read (~15 lines), matching `runtime/flows/voice/_anthropic_call.py` pattern. Same data, cleaner. Both pipelines now use one idiom.
+- **Cleanup commit `4eaaa10` 2026-04-29:** slimmed persona-side capture from manual streaming-event walk (~30 lines) to `text_stream` drain + `final.content` read (~15 lines), matching `runtime/flows/voice/_anthropic_call.py` pattern. Same data, cleaner. Both pipelines now use one idiom.
 - **Empirically attested:** raw SDK test on Cleopatra Pass 2 prompt confirmed `block_types: ["thinking", "text"]` with signature_len=1032. Thinking IS firing intermittently on production prompts at default-high effort.
 - **Important reframe:** thinking has been firing all along on Opus 4.7 with `{type: adaptive}`. FU#60 didn't turn thinking on; it made the existing thinking *visible* and dropped a config combination that violated docs. The Plato thinking-on re-run (next decision) is "first time we can see what's been happening", not "first time thinking is on."
-- **Commits:** `dd64782` (persona-side), `0381278` (voice-pipeline-side), `85f04da` (alignment cleanup).
+- **Commits:** `c3d369d` (persona-side), `4d0153b` (voice-pipeline-side), `4eaaa10` (alignment cleanup).
 - **Tests:** 223/223 passing throughout.
 - **Open follow-up:** decide whether to explicit `output_config: {effort: high|xhigh}` per pass to FORCE thinking, or whether default-high engagement is sufficient. Need ≥1 full voice run with `block_types` per pass logged. Plato re-run is the natural empirical test ($5, 30 min wall).
 
@@ -924,15 +924,15 @@ Each phrase load-bearing:
 | Word count | 508 (vs original 457, vs v1 553) — tighter than v1 |
 
 **Implications:**
-1. Pass 4b prompt change is permanent (committed `91947a7`). Future voices' Pass 4b runs (Battuta, Arendt, Lovelace, Marley, Whanganui, Scheherazade) will emit audience-engagement criteria automatically in voice's grammar with field references.
-2. Cleopatra's card patched + committed to athens-2026 (`c89d186` + chat sync `54cd20a`). Quality_criteria field replaced with the new 5; criterion 6 v2 hand-patch dropped (superseded).
+1. Pass 4b prompt change is permanent (committed `6a610fc`). Future voices' Pass 4b runs (Battuta, Arendt, Lovelace, Marley, Whanganui, Scheherazade) will emit audience-engagement criteria automatically in voice's grammar with field references.
+2. Cleopatra's card patched + committed to athens-2026 (`8a16bf7` + chat sync `0913373`). Quality_criteria field replaced with the new 5; criterion 6 v2 hand-patch dropped (superseded).
 3. Plato's existing criterion #5 already satisfies this pattern; no patch needed.
 4. **Octopus**: paused at FU#53 review-gate with operator-flagged register issues. Layer-instability finding (translation-honest vs scholarly-dispatcher split) is architectural; the FU#61 prompt change won't help that. SEPARATE issue.
 5. **Dostoevsky**: shipped via path (b) with 5 evaluator-question criteria. Not retroactively re-patched — his criteria already gesture toward audience-engagement (criterion #5: "could a careful reader still feel, at the last sentence, that the question is constitutively open?"). Could be re-patched if operator wants but not critical.
 
-**Status:** ✅ LANDED. Pass 4b prompt change `91947a7`; Cleopatra card patch `c89d186` + `54cd20a` (athens-2026).
+**Status:** ✅ LANDED. Pass 4b prompt change `6a610fc`; Cleopatra card patch `8a16bf7` + `0913373` (athens-2026).
 
-**Risk profile:** the prompt change is in the same prompt-class as 9480d3a-revert. Mitigations: outcome-stated (no technique prescription); minimal +1 line; FU#49A v2's "consult as needed" discipline preserved; empirically validated end-to-end (Pass 4b → Voice Pipeline Step 2 → honest read) before landing. 223/223 tests passing throughout.
+**Risk profile:** the prompt change is in the same prompt-class as 3feb2b2-revert. Mitigations: outcome-stated (no technique prescription); minimal +1 line; FU#49A v2's "consult as needed" discipline preserved; empirically validated end-to-end (Pass 4b → Voice Pipeline Step 2 → honest read) before landing. 223/223 tests passing throughout.
 
 **Lessons captured:**
 - Outcome-question framing is the architectural unit for Pass 4b quality_criteria (vs technique mandate or layer-test categorization)
@@ -968,44 +968,44 @@ Each phrase load-bearing:
 
 | Item | Commit | Notes |
 |---|---|---|
-| ✅ FU#41 chat-ready system prompt as 4th Derive artifact | `b9c1eb2` | `flows/shared/chat_prompt_builder.py` (new, 99 lines) + `tests/test_chat_prompt_builder.py` (new, 13 tests) + orchestrator integration. Verified against operator's chat v2: 34 fields match exactly; 25/34 byte-identical. Suite 149→162. |
-| ✅ FU#38 voice-self-reference vocabulary strip (Pass 2-6 prompts) | `22a2e54` | Empirical root cause: external reviewers flagged "kenotic beauty" class leak; verified polyphonic/kenotic/chronotope/dialogic embodiment in pipeline card. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern. Per-voice test: would voice IN LIFETIME reach for this English adjective? Generalizes to all 12 voices. 6 files +120 lines. |
-| ✅ FU#2 retry-on-JSONDecodeError (1-retry with backoff) | `de623bd` | Transient JSON parse error on single batch (observed: 3 spurious UNVERIFIED items on Dostoevsky). `_verify_batch_with_retry` helper; 5s backoff; evidence preserves both error traces on fallback. |
-| ✅ FU#10-mod fix-pass test coverage (21 tests; patch_walker extract) | `3cb0a02` | `flows/shared/patch_walker.py` (new) + `tests/test_fix_pass.py` (new, 21 tests). Suite 128→149. |
-| ✅ FU#7 CARD COMPLETE operator triage summary | `87f7794` | Additive block after PIPELINE COMPLETE. Top concerns severity-ordered; recommended action synthesized; artifact paths. |
-| ✅ FU#9 merge chunk max_tokens audit + stop_reason warning | `2aee7aa` | Current 48K adequate (Dostoevsky chunks use 32-50% of ceiling). Proactive stop_reason=="max_tokens" warning added to `call_claude` — catches future voices before content loss. |
+| ✅ FU#41 chat-ready system prompt as 4th Derive artifact | `8e05e3f` | `flows/shared/chat_prompt_builder.py` (new, 99 lines) + `tests/test_chat_prompt_builder.py` (new, 13 tests) + orchestrator integration. Verified against operator's chat v2: 34 fields match exactly; 25/34 byte-identical. Suite 149→162. |
+| ✅ FU#38 voice-self-reference vocabulary strip (Pass 2-6 prompts) | `622287f` | Empirical root cause: external reviewers flagged "kenotic beauty" class leak; verified polyphonic/kenotic/chronotope/dialogic embodiment in pipeline card. Extends FU#12-A/FU#32 STRIP+DO-INSTEAD pattern. Per-voice test: would voice IN LIFETIME reach for this English adjective? Generalizes to all 12 voices. 6 files +120 lines. |
+| ✅ FU#2 retry-on-JSONDecodeError (1-retry with backoff) | `4b1da31` | Transient JSON parse error on single batch (observed: 3 spurious UNVERIFIED items on Dostoevsky). `_verify_batch_with_retry` helper; 5s backoff; evidence preserves both error traces on fallback. |
+| ✅ FU#10-mod fix-pass test coverage (21 tests; patch_walker extract) | `79175e4` | `flows/shared/patch_walker.py` (new) + `tests/test_fix_pass.py` (new, 21 tests). Suite 128→149. |
+| ✅ FU#7 CARD COMPLETE operator triage summary | `ed60e8c` | Additive block after PIPELINE COMPLETE. Top concerns severity-ordered; recommended action synthesized; artifact paths. |
+| ✅ FU#9 merge chunk max_tokens audit + stop_reason warning | `c398f5e` | Current 48K adequate (Dostoevsky chunks use 32-50% of ceiling). Proactive stop_reason=="max_tokens" warning added to `call_claude` — catches future voices before content loss. |
 | ✅ FU#8 Pass 7b bias evaluator audit | (no code) | AUDITED, KEEP AS-IS. Already well-designed + documented in LLM_CALL_INVENTORY.md §32a/32b. |
-| ✅ FU#2 chunked Pass 7-pre verification (3-stage: extract + parallel verify + boddice) | `3d09aff` | `personas/flows/shared/pass_7pre_chunked.py` + 7 new prompt files + orchestrator swap. Empirical test: ~8 min wall, 153 items verified, no ceiling hit (vs pre-FU#2 twice-ceiling-hit skip). Unblocks Plato. 675/-40 lines. |
-| ✅ FU#32 Pass 2 positive-compensation (STRIP+DO pairs + META-STRIP + banned_language STRIP+USE + character INHABIT-vs-NAME) | `b19a640` | CURATOR-SIDE block rewritten into 5 STRIP+DO-INSTEAD pairs + 6th META-STRIP against taxonomic retreat. +122/-40 lines. |
-| ✅ FU#32 Pass 3 positive-compensation (constitution/concept_lexicon/reasoning_method) | `b853972` | Meta-strip specific to principle-in-operational-voice. +70/-22 lines. |
-| ✅ FU#32 Pass 4a positive-compensation (voice-field META-STRIP + banned_language STRIP+USE pairs) | `479f5c9` | Voice-register META-STRIP + positive-seed format `avoid "X" (why); use "Y" (native)`. +52/-16 lines. |
-| ✅ FU#32 Pass 4b positive-compensation (artifact-spec META-STRIP) | `af39679` | 6 register-vulnerable artifact-spec fields protected against designer-voice retreat. +28/-9 lines. |
-| ✅ FU#32 Pass 5 positive-compensation (engagement + load-bearing-lexemes-in-use) | `7c687f8` | default_questions / bold_engagement_topics META-STRIP + 1-2 load-bearing-lexemes-in-use requirement. +27/-8 lines. |
-| ✅ FU#32 Pass 6 positive-compensation (header/why_selected INHABIT meta-rule) | `4c577c8` | Header-prose INHABIT-vs-NAME test for in-voice recall vs scholarly annotation. +20 lines. |
-| ✅ FU#1 Layer 2 synthesis audit script | `4f9e23a` | `personas/scripts/arch_03_synthesis_audit.py`. Per-pair metrics + --compare-snapshot A/B delta + frame-type survival (1-arch-06). 553 lines. Validated on FU#32 vs Phase 1 delta. |
+| ✅ FU#2 chunked Pass 7-pre verification (3-stage: extract + parallel verify + boddice) | `c330f62` | `personas/flows/shared/pass_7pre_chunked.py` + 7 new prompt files + orchestrator swap. Empirical test: ~8 min wall, 153 items verified, no ceiling hit (vs pre-FU#2 twice-ceiling-hit skip). Unblocks Plato. 675/-40 lines. |
+| ✅ FU#32 Pass 2 positive-compensation (STRIP+DO pairs + META-STRIP + banned_language STRIP+USE + character INHABIT-vs-NAME) | `8ae15b0` | CURATOR-SIDE block rewritten into 5 STRIP+DO-INSTEAD pairs + 6th META-STRIP against taxonomic retreat. +122/-40 lines. |
+| ✅ FU#32 Pass 3 positive-compensation (constitution/concept_lexicon/reasoning_method) | `ae2deda` | Meta-strip specific to principle-in-operational-voice. +70/-22 lines. |
+| ✅ FU#32 Pass 4a positive-compensation (voice-field META-STRIP + banned_language STRIP+USE pairs) | `243ad40` | Voice-register META-STRIP + positive-seed format `avoid "X" (why); use "Y" (native)`. +52/-16 lines. |
+| ✅ FU#32 Pass 4b positive-compensation (artifact-spec META-STRIP) | `378cd2c` | 6 register-vulnerable artifact-spec fields protected against designer-voice retreat. +28/-9 lines. |
+| ✅ FU#32 Pass 5 positive-compensation (engagement + load-bearing-lexemes-in-use) | `3b3f6dd` | default_questions / bold_engagement_topics META-STRIP + 1-2 load-bearing-lexemes-in-use requirement. +27/-8 lines. |
+| ✅ FU#32 Pass 6 positive-compensation (header/why_selected INHABIT meta-rule) | `ee9fe59` | Header-prose INHABIT-vs-NAME test for in-voice recall vs scholarly annotation. +20 lines. |
+| ✅ FU#1 Layer 2 synthesis audit script | `0d3a5c5` | `personas/scripts/arch_03_synthesis_audit.py`. Per-pair metrics + --compare-snapshot A/B delta + frame-type survival (1-arch-06). 553 lines. Validated on FU#32 vs Phase 1 delta. |
 | ✅ Phase 2 empirical validation — Pass 2 isolation re-run + full Dostoevsky re-run + FU#1 audit A/B | (run artifacts) | Snapshots at `_workspace/arch_03_baseline_snapshot/phase_1_complete_20260423_2251/` (pre-FU#32) + `fu32_complete_20260424_0817/` (post). 165KB card, 15 fix-pass patches, 0 register violations, Pass 4a +9.4% recall +6.2% cite. Character field reversed to incarnate gordost'-walking-through-nadryv prose. FU#37/FU#31 deferred. |
 
 ### 2026-04-23 session (Phase 1)
 
 | Item | Commit | Notes |
 |---|---|---|
-| ✅ EvidenceTag enum: add `"contested"` | `f2e30fd` | Schema gap that crashed Pass 1.2 retry loop |
-| ✅ url_extract canonicalization (Gutenberg + archive.org landing → text) | `1027ced` | Pass 1c-fetch was getting ~5K-char catalogue HTML pages instead of full texts |
-| ✅ Pass 7-anachronism + Pass 7a ladder: gpt-5.4 high primary | `7aab7d4` | Was gpt-4.1 (since-retired); validated end-to-end on live Dostoevsky run |
-| ✅ Pass 7-pre max_tokens 96K → 128K | `bcd54e8` | Fourth bump in arch-03 cycle; FU#2 is the architectural fix |
-| ✅ Pass 1d/4b/6 → Opus 4.7 + thinking | `9cf3fba` | Quality tuning; affects all voices starting Plato |
-| ✅ Derive → Opus 4.7 + thinking | `d5d8005` | High-leverage (provocateur_profile drives every runtime turn) |
-| ✅ CT compress → Sonnet 4.6 + thinking | `d2b6df4` | 25-50× compression ratios warrant deliberation budget |
-| ✅ FU#3 surgical revision loop + SKIP_REVISION_LOOPS escape hatch | `a9f5feb`, `88f0726`, `daf49f0` | Will be removed when FU#13 lands |
-| ✅ MAX_REVISION_LOOPS 2 → 1 | `cbe069a` | With surgical mode, single shot is the meaningful unit |
+| ✅ EvidenceTag enum: add `"contested"` | `8894757` | Schema gap that crashed Pass 1.2 retry loop |
+| ✅ url_extract canonicalization (Gutenberg + archive.org landing → text) | `ca98df5` | Pass 1c-fetch was getting ~5K-char catalogue HTML pages instead of full texts |
+| ✅ Pass 7-anachronism + Pass 7a ladder: gpt-5.4 high primary | `9409a1e` | Was gpt-4.1 (since-retired); validated end-to-end on live Dostoevsky run |
+| ✅ Pass 7-pre max_tokens 96K → 128K | `747ee6b` | Fourth bump in arch-03 cycle; FU#2 is the architectural fix |
+| ✅ Pass 1d/4b/6 → Opus 4.7 + thinking | `5197b7c` | Quality tuning; affects all voices starting Plato |
+| ✅ Derive → Opus 4.7 + thinking | `aed75de` | High-leverage (provocateur_profile drives every runtime turn) |
+| ✅ CT compress → Sonnet 4.6 + thinking | `78b87a1` | 25-50× compression ratios warrant deliberation budget |
+| ✅ FU#3 surgical revision loop + SKIP_REVISION_LOOPS escape hatch | `0ae8b7a`, `056f85d`, `78c20b0` | Will be removed when FU#13 lands |
+| ✅ MAX_REVISION_LOOPS 2 → 1 | `f3e0f8a` | With surgical mode, single shot is the meaningful unit |
 | ✅ Phase M Step 1: openai pip install | (env) | Verified `openai==2.31.0` installed; gpt-5.4 worked |
-| ✅ FU#12-A Pass 2-6 register hardening | `3d9eb94` `ffa0b75` `4d258e4` `f34eb30` `8378546` `92fc487` | 6 per-prompt commits |
-| ✅ FU#12-B Pass 5 audience-priming | `66017c4` | Loads conference + audience profile; primes existing fields (no new lookup) |
-| ✅ FU#13 Architecture 2 — linear Pass 7a-FIX | `a37e4fc` `b34f2cb` | Replaces revision loop entirely; ~150 lines net removed |
-| ✅ FU#5 pre-fix snapshot directory | `d4d9baa` | Snapshots 04_generation + 05_validation before fix-pass invalidates |
-| ✅ FU#13 idempotency guard | `c9f9503` | Skip fix-pass on restart if `_fix_log.json` exists |
-| ✅ FU#13 patcher Sonnet→Opus + 32K | `2e7ebce` | Sonnet adaptive thinking ate budget on 20+ issues; Opus + 32K reliable |
-| ✅ FU#13 max_tokens journey + try/except wraps | `125d2f1` `9b81ecb` `5718f18` `11350dc` | 4 ceiling-bumps + try/except wraps to ship Phase 1 baseline despite Sonnet 4.6 128K cap |
+| ✅ FU#12-A Pass 2-6 register hardening | `3f007b8` `75f82eb` `9715ec7` `1f7bd5f` `87584b0` `62c4457` | 6 per-prompt commits |
+| ✅ FU#12-B Pass 5 audience-priming | `2828afd` | Loads conference + audience profile; primes existing fields (no new lookup) |
+| ✅ FU#13 Architecture 2 — linear Pass 7a-FIX | `64b5029` `6fbb2b4` | Replaces revision loop entirely; ~150 lines net removed |
+| ✅ FU#5 pre-fix snapshot directory | `3c03cee` | Snapshots 04_generation + 05_validation before fix-pass invalidates |
+| ✅ FU#13 idempotency guard | `8d38279` | Skip fix-pass on restart if `_fix_log.json` exists |
+| ✅ FU#13 patcher Sonnet→Opus + 32K | `99f14a2` | Sonnet adaptive thinking ate budget on 20+ issues; Opus + 32K reliable |
+| ✅ FU#13 max_tokens journey + try/except wraps | `8ea77d3` `5ab8853` `52717d7` `568702e` | 4 ceiling-bumps + try/except wraps to ship Phase 1 baseline despite Sonnet 4.6 128K cap |
 | ✅ Phase 1 re-run — first card produced under FU#12+13+5 | (run-15 of 15 in this saga) | 150KB card, 44 fields, REVISION_NEEDED + human_review_pending. 33 patches applied across 2 fix-pass rounds, 0 failed. Snapshot trail preserved. |
 
 ---
@@ -1028,7 +1028,7 @@ Each phrase load-bearing:
 | ⚫ FU#6 (revision-loop convergence diagnostic) | Slimmed under FU#13 — no loops, no convergence question. Effectiveness metric becomes part of `_fix_log.json` field. | Design decision |
 | ⚫ FU#10 original (revision-loop test coverage) | Replaced by FU#10-modified (fix-pass test coverage) | Design decision |
 | ⚫ FU#14 (Pass 1a-DR §1-§5 → Opus 4.7 migration) | Operator decision 2026-04-23: stay on 4.6 | Operator call |
-| ⚫ FU#18 (Pass 0b DR template field-name reframe) | Verified 2026-04-23: no `world (...)` patterns in current pass_0b prompts. Likely fixed by Wave 1 commit `1fd43f2` (Pass 0b 23 fixes). | Code audit |
+| ⚫ FU#18 (Pass 0b DR template field-name reframe) | Verified 2026-04-23: no `world (...)` patterns in current pass_0b prompts. Likely fixed by Wave 1 commit `d538497` (Pass 0b 23 fixes). | Code audit |
 | ⚫ FU#20 (Perplexity retry x2 with backoff) | Verified 2026-04-23: `_with_retry()` in run_phase0_1_research.py:64 already retries twice (15s, 60s). Note in OPEN_ITEMS.md was stale. | Code audit |
 
 ### Closed before this session (historical reference)
@@ -1050,8 +1050,8 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 |---|---|---|---|
 | 🔴 Phase 1 (re-run blockers) | FU#12 + FU#13 + FU#5 | **10-15 hr** | Before re-run |
 | 🟡 Phase 2 (voice-tissue + Layer 2 audit) | FU#32 + FU#1 | **~6-8 hr** | 2026-04-24 session |
-| ✅ Phase 3 (Plato unblocker) | FU#2 chunked Pass 7-pre | **DONE 2026-04-24** | Landed commit `3d09aff` |
-| ✅ Phase 4 (pre-Plato hygiene) | FU#7 + FU#10-mod + FU#9 + FU#8 | **DONE 2026-04-24** | Commits `87f7794`/`3cb0a02`/`2aee7aa` + FU#8 audited-no-code-change |
+| ✅ Phase 3 (Plato unblocker) | FU#2 chunked Pass 7-pre | **DONE 2026-04-24** | Landed commit `c330f62` |
+| ✅ Phase 4 (pre-Plato hygiene) | FU#7 + FU#10-mod + FU#9 + FU#8 | **DONE 2026-04-24** | Commits `ed60e8c`/`79175e4`/`c398f5e` + FU#8 audited-no-code-change |
 | 🟢 Polish | FU#19 + FU#22 + FU#15 | 4-6 hr + 2 hr A/B | Anytime |
 | 🔵 Deferred (voice-tissue backstops — re-activate on regression) | FU#31 + FU#37 | ~9-10 hr total | ONLY if future voice regresses |
 | 🔵 Deferred (trigger-based) | FU#11 + CC#1 + FU#21 + FU#23 + FU#24 + FU#25 + FU#26 + FU#27 + FU#28 + FU#29 + FU#30 | trigger-dependent | Various |
@@ -1059,7 +1059,7 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 | **Phase 2 critical-path** | FU#32 → Pass 2 isolation → full re-run → FU#1 audit | **✅ COMPLETE 2026-04-24** | |
 | **Phase 3 critical-path** | FU#2 → Plato build | ✅ FU#2 DONE — Plato unblocked | |
 
-**FU#2 landed 2026-04-24 (commit `3d09aff`):** three-stage chunked architecture (extract → parallel verify → boddice). Pass 7-pre isolation test on Dostoevsky FU#32 card: 8 min wall, 153 items verified, 12 boddice flags caught, no ceiling hit. Pre-FU#2 behavior (twice-ceiling-hit + skip) is now gone. Plato is unblocked; all post-arch-03 voices now ship with citation verification audit.
+**FU#2 landed 2026-04-24 (commit `c330f62`):** three-stage chunked architecture (extract → parallel verify → boddice). Pass 7-pre isolation test on Dostoevsky FU#32 card: 8 min wall, 153 items verified, 12 boddice flags caught, no ceiling hit. Pre-FU#2 behavior (twice-ceiling-hit + skip) is now gone. Plato is unblocked; all post-arch-03 voices now ship with citation verification audit.
 
 ---
 
@@ -1067,35 +1067,35 @@ See `OPEN_ITEMS.md` §"Lessons learned (architectural insights)" for arch-03 des
 
 ### Phase 1 — COMPLETE 2026-04-23 ✅
 
-1. ✅ **FU#12** (Pass 2-6 register hardening + Pass 5 audience-priming) — commits `3d9eb94`/`ffa0b75`/`4d258e4`/`f34eb30`/`8378546`/`92fc487`/`66017c4`
-2. ✅ **FU#13** (Architecture 2 linear Pass 7a-FIX) — commits `a37e4fc`/`b34f2cb` + 5 live iteration fixes
-3. ✅ **FU#5** (pre-fix snapshot directory) — commit `d4d9baa`
+1. ✅ **FU#12** (Pass 2-6 register hardening + Pass 5 audience-priming) — commits `3f007b8`/`75f82eb`/`9715ec7`/`1f7bd5f`/`87584b0`/`62c4457`/`2828afd`
+2. ✅ **FU#13** (Architecture 2 linear Pass 7a-FIX) — commits `64b5029`/`6fbb2b4` + 5 live iteration fixes
+3. ✅ **FU#5** (pre-fix snapshot directory) — commit `3c03cee`
 4. ✅ **Re-run from after Pass 1.7** — completed; first card on disk under new architecture
 
 ### Phase 2 — COMPLETE 2026-04-24 ✅
 
-5. ✅ **FU#32** (positive-compensation prompt refinement) — landed 6 per-prompt commits `b19a640`/`b853972`/`479f5c9`/`af39679`/`7c687f8`/`4c577c8`. Pass 2 isolation re-run validated character field reversal; full re-run validated no preservation regression + Pass 4a substantial gain.
+5. ✅ **FU#32** (positive-compensation prompt refinement) — landed 6 per-prompt commits `8ae15b0`/`ae2deda`/`243ad40`/`378cd2c`/`3b3f6dd`/`ee9fe59`. Pass 2 isolation re-run validated character field reversal; full re-run validated no preservation regression + Pass 4a substantial gain.
 6. 🔵 **FU#37** (declarative preserve-verbatim load-bearing-sentence markers) — DEFERRED. FU#32 alone closed the gap empirically; re-activate only if a future voice shows residual regression.
-7. ✅ **FU#1** (Layer 2 audit) — landed commit `4f9e23a`. Script + A/B compare-snapshot. First result: FU#32 caused no preservation regression + Pass 4a +9.4% recall / +6.2% cite / +26.1% density vs Phase 1 baseline.
+7. ✅ **FU#1** (Layer 2 audit) — landed commit `0d3a5c5`. Script + A/B compare-snapshot. First result: FU#32 caused no preservation regression + Pass 4a +9.4% recall / +6.2% cite / +26.1% density vs Phase 1 baseline.
 
 ### Phase 3 — COMPLETE 2026-04-24 ✅
 
-8. ✅ **FU#2** (chunked Pass 7-pre verification) — landed commit `3d09aff`. Three-stage architecture (extract → parallel verify → boddice) unblocks post-arch-03 voices. Pass 7-pre isolation test on Dostoevsky: 8 min wall, 153 verified items, no ceiling hit. Plato unblocked.
+8. ✅ **FU#2** (chunked Pass 7-pre verification) — landed commit `c330f62`. Three-stage architecture (extract → parallel verify → boddice) unblocks post-arch-03 voices. Pass 7-pre isolation test on Dostoevsky: 8 min wall, 153 verified items, no ceiling hit. Plato unblocked.
 9. 🔵 **FU#31** (voice-tissue validator) — DEFERRED. FU#32 closed the voice-tissue gap; backstop not needed unless a Phase N voice regresses.
 10. **FU#33** (patcher scope extensions — INCONSISTENT flags, lint, transliteration, bracket residue) — orthogonal mechanical-defect fix. ~3-4 hr.
 
 ### Phase 4 — COMPLETE 2026-04-24 ✅
 
-11. ✅ **FU#7** (CARD COMPLETE operator summary) — landed commit `87f7794`
-12. ✅ **FU#10-modified** (fix-pass test coverage — 21 tests, suite 128→149) — landed commit `3cb0a02`
-13. ✅ **FU#9** (merge chunk max_tokens audit — adequate; proactive stop_reason warning added) — landed commit `2aee7aa`
+11. ✅ **FU#7** (CARD COMPLETE operator summary) — landed commit `ed60e8c`
+12. ✅ **FU#10-modified** (fix-pass test coverage — 21 tests, suite 128→149) — landed commit `79175e4`
+13. ✅ **FU#9** (merge chunk max_tokens audit — adequate; proactive stop_reason warning added) — landed commit `c398f5e`
 14. ✅ **FU#8** (bias evaluator audit) — AUDITED, KEEP AS-IS (already well-designed + documented)
 
 ### Phase 4.5 — COMPLETE 2026-04-24 ✅ (pre-Plato pipeline finalization after review analysis)
 
-15. ✅ **FU#2 retry-on-JSONDecodeError** (transient JSON parse failure in batch verify stage) — landed commit `de623bd`
-16. ✅ **FU#38** (voice-self-reference vocabulary strip — kenotic/polyphonic/chronotope/dialogical class across all 12 voices) — landed commit `22a2e54`
-17. ✅ **FU#41** (chat-ready system prompt as 4th Derive artifact — paste-target for Claude project custom instructions) — landed commit `b9c1eb2`
+15. ✅ **FU#2 retry-on-JSONDecodeError** (transient JSON parse failure in batch verify stage) — landed commit `4b1da31`
+16. ✅ **FU#38** (voice-self-reference vocabulary strip — kenotic/polyphonic/chronotope/dialogical class across all 12 voices) — landed commit `622287f`
+17. ✅ **FU#41** (chat-ready system prompt as 4th Derive artifact — paste-target for Claude project custom instructions) — landed commit `8e05e3f`
 
 ### Phase 5 — Next (start Plato build, then conditional fixes based on signal)
 
@@ -1140,7 +1140,7 @@ When historical context is needed, read those. For active tracking + implementat
 
 That doc retains historical/design context for the architectural follow-ups (FU#1-13 — now consolidated here as authoritative) and for the pipeline review session's wave structure.
 
-**Wave 1/2/3 SURVIVES items: APPLIED days ago** via commits `bcf77ad` (wave-1/pass-0a, 4 fixes), `abdb13b` (wave-1/pass-1b, 13 fixes), `1fd43f2` (wave-1/pass-0b, 23 fixes), `cf25a79` (wave-2/pass-1c-1d, 11 fixes; 1d-06 deferred), `5975531` (wave-3/merge-prompts, period-vocab + pre-seed verify). ~51 fixes applied total. The "PROPOSED: 99 / APPLIED: 0" status counts at the bottom of PIPELINE_REVIEW_FIXES.md (line 2015-2024) are STALE — never updated when the Wave commits landed. The body of the doc shows individual `APPLIED` markers per item.
+**Wave 1/2/3 SURVIVES items: APPLIED days ago** via commits `41f4c76` (wave-1/pass-0a, 4 fixes), `3fe5da2` (wave-1/pass-1b, 13 fixes), `d538497` (wave-1/pass-0b, 23 fixes), `c52ebc6` (wave-2/pass-1c-1d, 11 fixes; 1d-06 deferred), `eae44e1` (wave-3/merge-prompts, period-vocab + pre-seed verify). ~51 fixes applied total. The "PROPOSED: 99 / APPLIED: 0" status counts at the bottom of PIPELINE_REVIEW_FIXES.md (line 2015-2024) are STALE — never updated when the Wave commits landed. The body of the doc shows individual `APPLIED` markers per item.
 
 **Wave 4 (Pass 2/3/4a/4b/5/6 + CT threading prompt review)** was forward-referenced in PIPELINE_REVIEW_FIXES.md but never formally started. arch-03 (1-arch-04 + 1-arch-05) already modified these prompts substantially. **FU#12 (curator-metadata prompt hardening) is a SPECIFIC fix for a newly-discovered issue** (gpt-5.4's complaint about curator-metadata leakage in this session's run). It's not in Wave 4's original scope but lands on the same prompt files. If you want a "Wave 4 review" pass on these prompts in addition to FU#12, that would be a separate item — not currently tracked because the FU#12 audit is likely sufficient.
 

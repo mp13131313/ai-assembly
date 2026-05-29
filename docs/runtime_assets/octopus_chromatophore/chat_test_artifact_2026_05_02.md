@@ -2,7 +2,7 @@
 
 This is the **first verification** that the rebuilt Octopus voice produces the two-channel emission contract declared in its persona card (`07_persona_card_assembled.json`'s `medium`, `technical_capabilities`, `characteristic_output_structure`, `length_and_format_constraints`, and `quality_criteria[7]`). The voice was prompted with a question about the WBBF Athens 2026 conference invitation; it returned the JSON parameter block + tank-side prose translation in the exact pattern the card declares.
 
-**Source:** chat-test of `06_derive/03_chat_system_prompt.json` shipped via athens-2026 commit `04da2c8`.
+**Source:** chat-test of `06_derive/03_chat_system_prompt.json` shipped via athens-2026 commit `1d8605f`.
 **Date:** 2026-05-02 PM.
 **Purpose:** canonical example for runtime Voice Pipeline Step 2 JSON-extraction implementation + WebGL renderer trajectory playback (B7 sub-tasks 1+2).
 

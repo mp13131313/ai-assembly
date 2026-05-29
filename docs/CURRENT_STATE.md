@@ -354,17 +354,17 @@ Fixed seed breaks session-ordering bias without losing reproducibility.
 
 **Decision date:** 2026-04-15. Documented in `personas/flows/shared/prompts/persona_pass_7b_smoke_test.md` and `personas/HANDOFF.md`. Few-shotting from 4 test chains would collapse the voice's range, re-introduce failures Pass 7c removed, propagate stale `conference_context`, and over-constrain a prompt already strong enough.
 
-### 5.11 Pass 1a primary text URLs moved out of voice_config (b1868da → CC#1 2026-04-26)
+### 5.11 Pass 1a primary text URLs moved out of voice_config (462c52e → CC#1 2026-04-26)
 
 Pass 0a has no internet access; URLs from training data risk hallucination/staleness. Now derived deterministically at render time from `passages[].citation` + `works[]` via `flows/shared/url_extract.py` (CC#1 1-arch-07; relocated from research/ to corpus/00_primary_text_urls.json).
 
 ### 5.12 `voice_mode` strict 3-value enum
 
-{philosophical, observational, narratival}, with null permitted only for `subtype: "system"`. Enforced at `personas/flows/shared/node0_validation.py:60`. Brief relaxation to freeform in commit `b1868da` was reverted (`4c5c366`) — downstream prompt branching depends on the fixed enum; freeform broke prompt rendering.
+{philosophical, observational, narratival}, with null permitted only for `subtype: "system"`. Enforced at `personas/flows/shared/node0_validation.py:60`. Brief relaxation to freeform in commit `462c52e` was reverted (`5bb68c4`) — downstream prompt branching depends on the fixed enum; freeform broke prompt rendering.
 
 **Watch-out:** This bit during voice 3–12 buildout — Cleopatra and Bob Marley needed voice_mode fixed before Phase 0.5 launched.
 
-### 5.13 `needs_dr_supplement` hardcoded to True (b1868da)
+### 5.13 `needs_dr_supplement` hardcoded to True (462c52e)
 
 DR supplement is cheap (~$0.10) and always adds depth. No reason to skip.
 

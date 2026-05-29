@@ -600,7 +600,7 @@ REST POST to `https://api.perplexity.ai/chat/completions`. OpenAI-compatible req
 ## 7. Historical parameter discrepancies
 
 ### 7.1 Pass 0a "adaptive thinking" comment is misleading *(resolved 2026-04-18)*
-K.0 refactor (`commit 4666fa1`) renamed the `call_claude` thinking parameter to `thinking: bool`. Parameter and comment are consistent.
+K.0 refactor (`commit ae70c4e`) renamed the `call_claude` thinking parameter to `thinking: bool`. Parameter and comment are consistent.
 
 ### 7.2 Formulation `flavor` field — spec ↔ code mismatch *(resolved 2026-04-18)*
 Spec doc fixed to match code (stage-direction text, not lens value).

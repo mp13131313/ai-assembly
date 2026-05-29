@@ -48,7 +48,7 @@ runtime/flows/
 │   ├── continuity.py
 │   └── publish.py
 ├── publish_flow.py                  ✅ built — cross-pipeline aggregation
-└── editor_flow.py                   ✅ BUILT 2026-05-03 PM (commit `1437dfc`); closing-prompt v1→v2 rewrite still pending (B1 sub-task)
+└── editor_flow.py                   ✅ BUILT 2026-05-03 PM (commit `fc5c2fb`); closing-prompt v1→v2 rewrite still pending (B1 sub-task)
 ```
 
 ### Validation status
@@ -58,20 +58,20 @@ runtime/flows/
 | Voice Pipeline Steps 1+2 | ✅ Plato solo + Plato/Cleopatra dual + 4-voice (Plato/Cleopatra/Dostoevsky/Battuta) | dryruns #2, #3, #4 (2026-04-29) + Legitimacy Tests (2026-05-01) |
 | Voice Pipeline Step 3 | 💤 DORMANT for Athens (A1 RESOLVED 2026-05-01 — Option A skip; module/prompt preserved for ~2-day re-add post-editor/microsite) | dryrun #4 (2026-04-29) validated mechanics in old FU#49E correspondence-shape framing; framing dropped 2026-04-29; option A chosen 2026-05-01 |
 | Validation nodes (anachronism + constitutional) | ✅ on Plato + Cleopatra; diagnostic-only by spec (FU#62 path B 2026-05-01) | dryruns #2 + the FU#61 v3 test (2026-04-30) |
-| Continuity flow | ✅ verified end-to-end after `ccc6229` bugfix (was broken under `--skip-step3` Athens production CLI) | Legitimacy Test 1, 3-night sequence (2026-05-01) |
+| Continuity flow | ✅ verified end-to-end after `2e989b2` bugfix (was broken under `--skip-step3` Athens production CLI) | Legitimacy Test 1, 3-night sequence (2026-05-01) |
 | Multi-night sequence | ✅ exercised (Convention A run_dir-per-night, continuity overlay loads correctly) | Legitimacy Test 1 (2026-05-01) |
 | Multi-voice 4-voice engagement | ✅ all 4 shipped voices in parallel | Legitimacy Test 1 + 2 + 2 v2 (2026-05-01) |
 | Step 2 `focus_decision` synthesis branch | ✅ verified (4/4 voices weave under conceptually-converging input on Test 2 v2; under post-2026-05-02 routing+prompt refactor, Test 3 shows synthesis must now be earned with explicit weight-equal reasoning + through-line claim) | Legitimacy Test 2 + 2 v2 + Test 3 |
-| Step 2 `focus_decision` focus-on-one branch | ✅ structurally fixed 2026-05-02 (routing refactor + prompt rewrite); Test 3 shows 2/4 voices fully focused on a single response, 1/4 anchored synthesis, 1/4 earned synthesis with field-grounded weight_assessment | commits `d9ca3f9` + `dfb46f7`; OPEN_ITEMS C18 |
-| `thinking_tokens` runtime accounting | ✅ fixed (was always 0; now computed via count_tokens subtraction) | commit `8c47e1f`; verified live in Test 2 v2 |
-| Anthropic prompt caching | ✅ ENABLED 2026-05-02 — Stage 1 single-breakpoint (commit `c4804d6`); ✅ EXTENDED 2026-05-02 PM — Stage 2 prefix caching with two breakpoints + continuity opt-out (commit `d9ca3f9`). Live verified: Step 2 reads prefix Step 1 wrote (cache_read=20,086 tokens). Athens savings ~$13 across 3 nights (modest in absolute terms; see C19a for corrected pricing math). | commits `c4804d6` + `d9ca3f9` |
-| Cache token tracking persisted in artifacts | ✅ LANDED 2026-05-02 PM — step1/step2/step3/continuity all persist `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost reconciliation | commit `d9ca3f9` |
-| Voice Pipeline field routing (voice/expression in Step 1; reasoning fields in Step 2) | ✅ REFACTORED 2026-05-02 PM — closes the prompt/system mismatch where Step 2's decision_1 cited `finds_compelling`/`resists` but the fields weren't loaded | commit `d9ca3f9` |
-| Voice Pipeline closing prompts (Step 1 + Step 2) | ✅ REWRITTEN 2026-05-02 PM under Haltung lens — section-by-section word-by-word challenge; Step 2 adds `<weighing>` discrete pre-focus phase + `weight_assessment` first-class field | commit `d9ca3f9` + `dfb46f7` |
-| Editor Pipeline (Claudia Pinchbeck → dossier) | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `1437dfc`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); wiring proven via single-dossier live test 2026-05-04 (~$1.50). Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). | OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢 implementation shipped) |
-| Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `99759cb`; 15 unit tests passing |
-| publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `e0921de` |
-| Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `c0d724e`; 9 unit tests passing |
+| Step 2 `focus_decision` focus-on-one branch | ✅ structurally fixed 2026-05-02 (routing refactor + prompt rewrite); Test 3 shows 2/4 voices fully focused on a single response, 1/4 anchored synthesis, 1/4 earned synthesis with field-grounded weight_assessment | commits `ffad93f` + `9e1c987`; OPEN_ITEMS C18 |
+| `thinking_tokens` runtime accounting | ✅ fixed (was always 0; now computed via count_tokens subtraction) | commit `4333b57`; verified live in Test 2 v2 |
+| Anthropic prompt caching | ✅ ENABLED 2026-05-02 — Stage 1 single-breakpoint (commit `0a3ab9c`); ✅ EXTENDED 2026-05-02 PM — Stage 2 prefix caching with two breakpoints + continuity opt-out (commit `ffad93f`). Live verified: Step 2 reads prefix Step 1 wrote (cache_read=20,086 tokens). Athens savings ~$13 across 3 nights (modest in absolute terms; see C19a for corrected pricing math). | commits `0a3ab9c` + `ffad93f` |
+| Cache token tracking persisted in artifacts | ✅ LANDED 2026-05-02 PM — step1/step2/step3/continuity all persist `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost reconciliation | commit `ffad93f` |
+| Voice Pipeline field routing (voice/expression in Step 1; reasoning fields in Step 2) | ✅ REFACTORED 2026-05-02 PM — closes the prompt/system mismatch where Step 2's decision_1 cited `finds_compelling`/`resists` but the fields weren't loaded | commit `ffad93f` |
+| Voice Pipeline closing prompts (Step 1 + Step 2) | ✅ REWRITTEN 2026-05-02 PM under Haltung lens — section-by-section word-by-word challenge; Step 2 adds `<weighing>` discrete pre-focus phase + `weight_assessment` first-class field | commit `ffad93f` + `9e1c987` |
+| Editor Pipeline (Claudia Pinchbeck → dossier) | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `fc5c2fb`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); wiring proven via single-dossier live test 2026-05-04 (~$1.50). Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). | OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢 implementation shipped) |
+| Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `04167ef`; 15 unit tests passing |
+| publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `927a671` |
+| Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `373051e`; 9 unit tests passing |
 | Automation orchestrator | ✅ BUILT 2026-05-02 PM — full orchestrator with 22 trigger-path tests + templated systemd unit + path-prefix Caddyfile + lifecycle doc | `runtime/scripts/overnight_orchestrator.py` + `docs/AI_Assembly_Runtime_Lifecycle.md` + OPEN_ITEMS C22 |
 | publish_flow.py end-to-end exercise | ❌ never run against real Researcher/Provocateur outputs (collision bug now fixed; safe to exercise) | OPEN_ITEMS C3 |
 
@@ -79,7 +79,7 @@ runtime/flows/
 
 | Component | Status |
 |---|---|
-| Editor / Frame layer | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `1437dfc`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); 38 tests; admin drilldown live. Wiring proven via single-dossier live test 2026-05-04. Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). See OPEN_ITEMS B1. |
+| Editor / Frame layer | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `fc5c2fb`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); 38 tests; admin drilldown live. Wiring proven via single-dossier live test 2026-05-04. Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). See OPEN_ITEMS B1. |
 | Microsite | ❌ NOT BUILT — operator designing; consumes `published_artifacts/`. See OPEN_ITEMS B2 |
 | Broadsheet / Edition Pipeline | ❌ NOT BUILT — folded into Editor Pipeline (B1) |
 | Substack draft pipeline pass | ✅ DROPPED 2026-05-02 PM per Editor Pipeline spec (microsite-only) |
@@ -181,53 +181,53 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `main`. The `voice-pipeline-v2.1-align-revert` + `feature/editor-deployment-context` branches merged to `main` before Athens; all work since is on `main`. **Athens Nights 1–3 are complete + published** (code `563f3ef`, athens-2026 `3dc4e16`) — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
+**Branch:** `main`. The `voice-pipeline-v2.1-align-revert` + `feature/editor-deployment-context` branches merged to `main` before Athens; all work since is on `main`. **Athens Nights 1–3 are complete + published** (code `f64614c`, athens-2026 `394914b`) — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
 
 **Branch history (chronological — most recent first):**
 
 *2026-05-02 (afternoon — voice pipeline + editor pipeline session):*
 - *(pending commit)* docs(editor-pipeline): Editor Pipeline v1 spec + OPEN_ITEMS A2/B1 updates — full editor pipeline contract; Claudia Pinchbeck as named 13th Assembly member; dossier-by-theme architecture; marathon-distance issue numbering; ~$3-5 Athens cost. Resolves A2 fully, moves B1 from NOT BUILT to SPEC LANDED.
-- `c4d8346` docs(planning): HANDOFF 2026-05-02 + ONBOARDING + OPEN_ITEMS for voice pipeline session
-- `dfb46f7` voice(step2): restore stripped 'transform form, carry substance' guardrail
-- `d9ca3f9` voice: routing refactor + prompt rewrite + prefix caching + cost correction (10 files; +286/-182). Synthesis-bias structurally addressed. Test 3 validated.
+- `ae2ac10` docs(planning): HANDOFF 2026-05-02 + ONBOARDING + OPEN_ITEMS for voice pipeline session
+- `9e1c987` voice(step2): restore stripped 'transform form, carry substance' guardrail
+- `ffad93f` voice: routing refactor + prompt rewrite + prefix caching + cost correction (10 files; +286/-182). Synthesis-bias structurally addressed. Test 3 validated.
 
 *2026-05-02 (morning):*
-- `c0d724e` feat(runtime): defensive --night check + automation orchestrator design (C22)
-- `a6755d9` personas/Pass-0b: amend non_human_organism template to be compass-permissive (persona thread)
-- `e0921de` fix(publish_flow): per-night subdirectory for per-theme files
-- `c4804d6` feat(voice + provocateur): C19a Anthropic prompt caching enabled + latent continuity unpack-tuple bugfix
-- `99759cb` feat(provocateur): C9 cross-night (member, theme) exclusion filter ⚠️ Athens-blocking
-- `4f0b3a0` docs(planning): HANDOFF + ONBOARDING reflect Phase 2 late-session work
+- `373051e` feat(runtime): defensive --night check + automation orchestrator design (C22)
+- `2cdbcf1` personas/Pass-0b: amend non_human_organism template to be compass-permissive (persona thread)
+- `927a671` fix(publish_flow): per-night subdirectory for per-theme files
+- `0a3ab9c` feat(voice + provocateur): C19a Anthropic prompt caching enabled + latent continuity unpack-tuple bugfix
+- `04167ef` feat(provocateur): C9 cross-night (member, theme) exclusion filter ⚠️ Athens-blocking
+- `969f784` docs(planning): HANDOFF + ONBOARDING reflect Phase 2 late-session work
 
 *2026-05-01:*
-- `ee824be` docs(planning): C19 audit + C20 memo + Plato Socrates-death anachronism
-- `1a62043` docs(planning): C15 closed — misdiagnosed (lineage IS populated under .lineage.*)
-- `69372b7` docs(planning): C18 Test 2 v2 result — title-only fix insufficient
-- `366dfe2` docs(planning): external review findings on legitimacy test
-- `8c47e1f` fix(voice + personas): thinking_tokens always 0 across both pipelines (count_tokens subtraction approach)
-- `1c83034` voices/ONBOARDING: DO interrogate Pass 0a review_doc framings (persona thread)
-- `fe8159a` docs(planning): legitimacy-test verification + C15 (Step 2 metadata gap)
-- `ccc6229` fix(voice_flow): continuity must fire after Step 2 when Step 3 is skipped (A1) ⚠️ Athens-blocking
-- `80ac3f1` docs(planning): A1+A2+A3 decisions + C-section closures + Voice Pipeline spec updates
-- `242de7b` feat(runtime/scripts): speaker enrichment + ai_assembly schedule from program data
-- `d4cea03` fix(runtime): FU#60 compliance across researcher + provocateur + transcription
-- `9eb0222` docs(planning): FU#61 v3 LANDED — prompt-driven approach validated end-to-end
-- `91947a7` feat(personas/Pass-4b): FU#61 land — audience-engagement outcome question
-- `a6fa848` fix(personas/clients): retry-on-stream-drop for streaming Claude calls
-- `57cb0b5` docs(planning): correct FU#61 Option B — Pass 4b not Pass 5 (quality_criteria locus)
-- `ba2bcd8` docs(planning): FU#61 v1 empirical verdict + v2 criterion sharpening
-- `e90f1e2` fix(personas): add override=True to run_pass0a_voice_config load_dotenv
-- `8c1d5f9` docs(planning): file FU#60 + FU#61 — thinking observability landed; voice-side Layer-1 quality_criteria
-- `1aefd70` docs(planning): flag Step 3 for redesign-from-briefing tomorrow
-- `a279e3f` docs(planning): voice-pipeline dual-dryrun handoff + add Frame Concept v1
-- `e89dfc4` fix(voice-pipeline): derive responded_to_graph edges from voices_read + decision (post-dryrun #4)
-- `0381278` fix(voice-pipeline): drop temperature, add display: summarized — match Anthropic docs §"Feature compatibility" + persona-pipeline FU#60
-- `f6ee392` feat(voice-pipeline): drop title/subtitle from voice + derive themes_covered + Convention A doc
-- `f68bc3f` fix(voice-pipeline): post-dryrun tuning — soften validator (c) + extraction-ID bookkeeping + load_dotenv override
+- `4ba8ed7` docs(planning): C19 audit + C20 memo + Plato Socrates-death anachronism
+- `237775a` docs(planning): C15 closed — misdiagnosed (lineage IS populated under .lineage.*)
+- `5dcf255` docs(planning): C18 Test 2 v2 result — title-only fix insufficient
+- `4e3234b` docs(planning): external review findings on legitimacy test
+- `4333b57` fix(voice + personas): thinking_tokens always 0 across both pipelines (count_tokens subtraction approach)
+- `9ca4758` voices/ONBOARDING: DO interrogate Pass 0a review_doc framings (persona thread)
+- `d0c65bb` docs(planning): legitimacy-test verification + C15 (Step 2 metadata gap)
+- `2e989b2` fix(voice_flow): continuity must fire after Step 2 when Step 3 is skipped (A1) ⚠️ Athens-blocking
+- `447596b` docs(planning): A1+A2+A3 decisions + C-section closures + Voice Pipeline spec updates
+- `fdcf6e5` feat(runtime/scripts): speaker enrichment + ai_assembly schedule from program data
+- `47c0ad8` fix(runtime): FU#60 compliance across researcher + provocateur + transcription
+- `4652a65` docs(planning): FU#61 v3 LANDED — prompt-driven approach validated end-to-end
+- `6a610fc` feat(personas/Pass-4b): FU#61 land — audience-engagement outcome question
+- `eda57f8` fix(personas/clients): retry-on-stream-drop for streaming Claude calls
+- `c063976` docs(planning): correct FU#61 Option B — Pass 4b not Pass 5 (quality_criteria locus)
+- `b1e7d81` docs(planning): FU#61 v1 empirical verdict + v2 criterion sharpening
+- `7631409` fix(personas): add override=True to run_pass0a_voice_config load_dotenv
+- `36ebb58` docs(planning): file FU#60 + FU#61 — thinking observability landed; voice-side Layer-1 quality_criteria
+- `0066df9` docs(planning): flag Step 3 for redesign-from-briefing tomorrow
+- `1a9d75a` docs(planning): voice-pipeline dual-dryrun handoff + add Frame Concept v1
+- `360972d` fix(voice-pipeline): derive responded_to_graph edges from voices_read + decision (post-dryrun #4)
+- `4d0153b` fix(voice-pipeline): drop temperature, add display: summarized — match Anthropic docs §"Feature compatibility" + persona-pipeline FU#60
+- `626cc9b` feat(voice-pipeline): drop title/subtitle from voice + derive themes_covered + Convention A doc
+- `13db126` fix(voice-pipeline): post-dryrun tuning — soften validator (c) + extraction-ID bookkeeping + load_dotenv override
 
 Branch is shared with persona thread; both threads cohabited cleanly with zero conflicts. Eventual merge to main pending operator decision.
 
-**athens-2026 git** (separate private repo at `mp13131313/ai-assembly-athens2026-voices`): Cleopatra v3 finalized (`c89d186`), Dostoevsky v3-pattern landed (`5088d67`).
+**athens-2026 git** (separate private repo at `mp13131313/ai-assembly-athens2026-voices`): Cleopatra v3 finalized (`8a16bf7`), Dostoevsky v3-pattern landed (`b0f0b45`).
 
 ---
 
@@ -338,7 +338,7 @@ Voice Pipeline puts the persona card AS the system prompt rendered as structured
 
 ### voice_temporal_stance.default — fluid framing (2026-04-29 revert)
 
-Per the 9480d3a persona-prompt revert: `voice_temporal_stance.default` is the **fluid-across-time framing** (voice speaks from within its own world and lifetime; reader has come to consult voice). NOT cryofreeze. NOT "voice is in Athens 2026."
+Per the 3feb2b2 persona-prompt revert: `voice_temporal_stance.default` is the **fluid-across-time framing** (voice speaks from within its own world and lifetime; reader has come to consult voice). NOT cryofreeze. NOT "voice is in Athens 2026."
 
 Voice Pipeline `_unwrap_voice_temporal_stance(deployment="athens")` enforces use of `default` for Athens runs (was incorrectly preferring `anchored_override` whenever populated; fixed in `voice-pipeline-v2.1-align-revert` branch).
 
@@ -380,9 +380,9 @@ All in `<PROJECT_ROOT>/voice-pipeline-dryrun/runs/`:
 | #4 | Plato + Cleopatra dual, Step 3 enabled | ~5:47 | First successful Step 3 cross-voice amendment. Both decided amend. Plato wrote a Socratic dialogue continuation; Cleopatra issued a prostagma back. Honest disagreement at framework level. **In FU#49E correspondence shape — that framing has since been dropped.** |
 | FU#61 v1 (2026-04-30 11:09) | Cleopatra Step 2 only, --skip-validation | ~70 sec | Cold-reader hand-patch (criterion 6 v1). Mostly worked, over-corrected at salutation (lost Greek alphabet + Egyptian transliteration) |
 | FU#61 v3 (2026-04-30 23:24) | Cleopatra Step 2 only, --skip-validation | ~80 sec | 5-criteria reshape (prompt-driven Pass 4b modification). **Best version** — Greek script preserved, inline glosses, plus issue-not-argue mode + honest mark-of-limit + direct queenly speaker acknowledgment |
-| Legitimacy Test 1 (2026-05-01) | 4 voices × 3 nights × 1 formulation, --skip-step3 --skip-validation | ~11 min total | Verified continuity-after-Step-2 bugfix (`ccc6229`) end-to-end. Cross-night memory observed. All 12 artifacts in correct native register. |
+| Legitimacy Test 1 (2026-05-01) | 4 voices × 3 nights × 1 formulation, --skip-step3 --skip-validation | ~11 min total | Verified continuity-after-Step-2 bugfix (`2e989b2`) end-to-end. Cross-night memory observed. All 12 artifacts in correct native register. |
 | Legitimacy Test 2 (2026-05-01) | 4 voices × 1 night × 3 formulations, same flags | ~7 min | All 4 voices chose `focus_decision: "woven across all three"` — synthesis branch verified |
-| Legitimacy Test 2 v2 (2026-05-01) | Same as Test 2 with distinct theme_display_titles | ~7 min | Still all wove. Diagnosis: synthesis bias goes deeper than title shape. Verified `thinking_tokens` fix (`8c47e1f`) live |
+| Legitimacy Test 2 v2 (2026-05-01) | Same as Test 2 with distinct theme_display_titles | ~7 min | Still all wove. Diagnosis: synthesis bias goes deeper than title shape. Verified `thinking_tokens` fix (`4333b57`) live |
 
 Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopatra.<version>.json` for diffing. Test 2 / 2 v2 artifacts at `legitimacy_test1_night{1,2,3}/`, `legitimacy_test2_single_night/`, `legitimacy_test2_v2_divergent_titles/`. Full report: `voice-pipeline-dryrun/legitimacy_test_report.md`.
 

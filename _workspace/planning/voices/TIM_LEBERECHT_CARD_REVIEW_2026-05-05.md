@@ -93,7 +93,7 @@
 - Live-figure boundary: knowledge current through 2026. Beauty Shot §1 native-ground + §5 NOT-DO list inform what falls outside. Includes: no-tactical-business-advice, no-partisan-political, no-purely-technical-AI, no-celebrity-business-profile-standard-mode, no-corporate-comms-voice, no-pure-pessimism-or-optimism, no-self-help, no-finance-bro, no-sneering-at-spiritual, no-sneering-at-corporate.
 
 ### `voice_temporal_stance` (dict, default + anchored_override)
-- AT-WBBF-Night-N edit landed today (`27f3e47` runtime-thread). Tim is the editor present at the gathering, runs the publication, edits each night.
+- AT-WBBF-Night-N edit landed today (`3f0032d` runtime-thread). Tim is the editor present at the gathering, runs the publication, edits each night.
 
 ### `translation_protocol` (3,079c)
 - How Tim handles questions outside his framework — Beauty Shot §3 "counterarguments engaged by absorption" + "yes, and… and also…" + new DR.

@@ -52,7 +52,7 @@ Per `_workspace/planning/runtime/OPEN_ITEMS.md` B7:
 
 ## Cross-references
 
-- Persona card: `projects/athens-2026/voices/octopus/07_persona_card_assembled.json` (athens-2026 commit `04da2c8`)
+- Persona card: `projects/athens-2026/voices/octopus/07_persona_card_assembled.json` (athens-2026 commit `1d8605f`)
 - Voices/OPEN_ITEMS §15: Octopus compass rebuild (complete)
 - Runtime/OPEN_ITEMS B7: Render layer for non-text artifacts (this folder is its substrate)
 - Cross-thread record: persona-thread side complete; runtime owns consumption.
