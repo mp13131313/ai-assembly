@@ -35,12 +35,20 @@
   --track-bbs:           #260292;
   --track-community:     #128096;
 
-  /* State colours — semantic for the pipeline, distinct from track. */
-  --state-idle:        #c8c4b6;
-  --state-active:      #c9a227;
-  --state-transcribe:  var(--brand-blue);
-  --state-done:        var(--brand-green);
-  --state-error:       var(--brand-red);
+  /* State colours — semantic for the pipeline, distinct from track.
+   * Each state has its own distinct hue (no two states share a colour);
+   * sized + outlined so they read clearly against the paper background. */
+  --state-idle:        #d0d4d8;   /* cool grey — empty / not started */
+  --state-received:    #f5b400;   /* amber — audio uploaded, queued */
+  --state-normalizing: #6055DC;   /* indigo — preprocessing, pulses */
+  --state-transcribe:  #0aa39e;   /* teal — ASR running, pulses (distinct from track-ai-marathon blue) */
+  --state-done:        #00845C;   /* green — complete */
+  --state-error:       #D63C23;   /* red — error */
+  /* Legacy alias — `--state-active` was renamed into per-state vars
+   * above; some `.state-pill.state-running` / inherited rules still
+   * reference it. Point it at the indigo so "running" pills get a
+   * visible background instead of falling through to transparent. */
+  --state-active:      var(--state-normalizing);
 
   --max-width: 1180px;
   --radius: 2px;
@@ -113,6 +121,7 @@ code {
 .muted { color: var(--warm-mid); }
 .warn  { color: #8a5a00; font-weight: 500; }
 .error { color: var(--track-beauty-salon); }
+.error:empty { display: none !important; }   /* belt-and-suspenders: never show an empty .error block */
 
 .hidden { display: none !important; }
 
@@ -346,21 +355,56 @@ nav a:hover { color: var(--ink); text-decoration: none; border-bottom: 1px solid
 
 .dot {
   display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   vertical-align: middle;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);   /* subtle inner border for legibility on paper */
 }
 
 .dot-none         { background: var(--state-idle); }
-.dot-received     { background: var(--state-active); }
-.dot-normalizing  { background: var(--state-active); animation: pulse 1.2s infinite; }
+.dot-received     { background: var(--state-received); }
+.dot-normalizing  { background: var(--state-normalizing); animation: pulse 1.2s infinite; }
+.dot-normalized   { background: var(--state-received); }   /* preprocessed, awaiting ASR — same visual queue state as received */
 .dot-transcribing { background: var(--state-transcribe); animation: pulse 1.2s infinite; }
 .dot-done         { background: var(--state-done); }
-.dot-error        { background: var(--state-error); }
+.dot-error        { background: var(--state-error); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 2px rgba(214,60,35,0.20); }
 
-@keyframes pulse { 50% { opacity: 0.35; } }
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+/* --- Status legend (placed near filters on sessions page) --- */
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 12px;
+  margin: 0 0 14px 0;
+  background: var(--cream-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  font-size: 11px;
+  color: var(--warm-mid);
+}
+.status-legend .legend-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 700;
+  margin-right: 4px;
+}
+.status-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-legend .legend-item .dot {
+  /* Force consistent legend dot size even if .dot evolves */
+  width: 10px;
+  height: 10px;
+}
 
 /* --- Session detail --- */
 
@@ -521,8 +565,9 @@ progress {
   border: 1px solid var(--hairline);
 }
 
-.state-received    { background: #fff3d1 !important; border-color: var(--state-active) !important; }
-.state-normalizing { background: #fff3d1 !important; border-color: var(--state-active) !important; }
+.state-received    { background: #fff3d1 !important; border-color: var(--state-received) !important; color: var(--ink) !important; }
+.state-normalizing { background: #ece9fc !important; border-color: var(--state-normalizing) !important; color: var(--state-normalizing) !important; }
+.state-normalized  { background: #fff3d1 !important; border-color: var(--state-received) !important; color: var(--ink) !important; }   /* queued — same visual as received */
 .state-transcribing,
 .state-transcribing_asr,
 .state-transcribing_speaker_id,

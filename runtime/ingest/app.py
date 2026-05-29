@@ -1183,6 +1183,7 @@ def _resolve_under_project_root(rel_path: str) -> Path:
 @app.get("/admin/file")
 def admin_file(
     path: str,
+    request: Request,
     _: str = Depends(require_admin),
 ):
     """Read-only viewer for files under PROJECT_ROOT.
@@ -1190,9 +1191,28 @@ def admin_file(
     Used by dashboard templates to make file paths clickable. Restricted
     to JSON / log / md / txt / flag files; max 10 MiB; admin-gated;
     path-traversal-protected.
+
+    Browser navigations to .json files are redirected to /admin/render
+    so the operator sees a rendered view (schema-aware where available,
+    pretty-printed JSON otherwise) rather than raw bytes. Non-browser
+    clients (curl, fetch, modal-overlay XHR) still get raw JSON because
+    they don't send `text/html` in their Accept header.
     """
     target = _resolve_under_project_root(path)
     suffix = target.suffix.lower()
+
+    # Browser-friendly rendering for .json: redirect direct navigations to
+    # the schema-aware /admin/render view. Detected via Accept header —
+    # the modal-overlay JS fetches with default Accept (no text/html
+    # preference) so it still gets raw bytes for its overlay path.
+    if suffix == ".json":
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return RedirectResponse(
+                url=f"/admin/render?path={quote(path)}",
+                status_code=303,
+            )
+
     media_types = {
         ".json": "application/json",
         ".log":  "text/plain; charset=utf-8",

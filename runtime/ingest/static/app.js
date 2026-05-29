@@ -331,6 +331,11 @@
           poll();
         });
       } else {
+        // Defensive: clear any stale error text so a brief stale-state
+        // poll can't flash red content via .error styling, and the
+        // .error:empty CSS rule keeps the block hidden even if the
+        // hidden class is removed by a downstream tweak.
+        errorDetail.textContent = "";
         errorDetail.classList.add("hidden");
         if (state === "done") {
           actions.innerHTML =

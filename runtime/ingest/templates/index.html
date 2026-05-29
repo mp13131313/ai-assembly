@@ -13,6 +13,16 @@
 </div>
 {% else %}
 
+<div class="status-legend">
+  <span class="legend-label">Status</span>
+  <span class="legend-item"><span class="dot dot-none"></span> not started</span>
+  <span class="legend-item"><span class="dot dot-received"></span> uploaded · queued</span>
+  <span class="legend-item"><span class="dot dot-normalizing"></span> preprocessing</span>
+  <span class="legend-item"><span class="dot dot-transcribing"></span> transcribing</span>
+  <span class="legend-item"><span class="dot dot-done"></span> done</span>
+  <span class="legend-item"><span class="dot dot-error"></span> error</span>
+</div>
+
 <div class="filters">
   <div class="filter-row">
     <span class="filter-label">Day</span>
@@ -66,6 +76,4 @@
 
 {% endif %}
 {% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
-{% endblock %}
+{# app.js is loaded globally via base.html — do NOT include it again here #}

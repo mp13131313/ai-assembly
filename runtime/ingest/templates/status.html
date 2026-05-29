@@ -33,6 +33,4 @@
   <code id="crumb-done">done</code>
 </p>
 {% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', path='app.js') ~ "?v=" ~ static_version }}"></script>
-{% endblock %}
+{# app.js is loaded globally via base.html — do NOT include it again here #}
