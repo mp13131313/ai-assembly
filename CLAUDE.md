@@ -1,12 +1,71 @@
 # AI Assembly — Claude context
 
-## Current branch state (2026-05-08 afternoon, Athens Night 1 PUBLISHED)
+## Current branch state (2026-05-29, Athens Nights 1–3 ALL PUBLISHED)
 
-Active branch (runtime-thread): **`main`** at **`6591b05`** (no new
-runtime commits since AM; documentation refresh only via this update).
-Athens-2026 at **`87abdf2`** (Athens Night 1 v2 edition — 10 voice
-artifacts + 5 dossiers + editorial-discipline rules). Voice +
-Editor pipelines for Athens Night 1 COMPLETE.
+Active branch (runtime-thread): **`main`** at **`563f3ef`** (dashboard
+status-color + upload-error-flash + `.json`→render-redirect fixes; ingest
+suite 114/114). Athens-2026 at **`3dc4e16`**. **All three Athens nights
+are PUBLISHED**: 13 dossiers + 30 per-voice pages across Nights 1–3,
+committed + pushed to both repos 2026-05-29.
+
+**Athens Night 2 production results (2026-05-08 panels → published 05-09):**
+- ✅ Transcription: 7 sessions — 6 audio + 1 vendor reflection (Dance and
+  Dissent). 3 sessions were captured across two recordings, transcribed as
+  `__audio2` session duplicates (Act Two / Act Three / The Reality Tunnels)
+  → 9 audio files. 1,065 turns / 74,252 words. C49 manual speaker_id
+  passthrough on Reality Tunnels primary (many-speaker map).
+- ✅ Researcher: 199 extractions / 35 clusters / 8 themes. Wifi-drop
+  mid-clustering → resumed from on-disk `all_extractions.json` by calling
+  `cluster_extractions.fn()` + `group_clusters_into_themes.fn()` directly
+  (`.fn` bypasses the Prefect task wrapper).
+- ✅ Provocateur: 46 formulations / 10 briefings.
+- ✅ Voice: 46 Step 1 / 10 Step 2. Final validation: 2 PASS, 8 WARN, 0 HOLD.
+- ✅ Editor: 5 dossiers · lead = dossier_001 (*WHOSE MOUTH IS MOVING*,
+  3 voices). Default framing preserved; Night-1 discipline rules carried
+  forward.
+- ✅ Publish: `dossiers/night_2/` (5) + `nights/night_2/` (10 voice pages).
+
+**Athens Night 3 — CLOSING EDITION (2026-05-09 panels → published 05-11):**
+- ✅ Transcription: 6 sessions — 5 audio + 1 vendor reflection (Make
+  Politics Great Again). 2 sessions double-captured → `__audio2` for Act
+  Four + Act Five → 7 audio files. 652 turns / 54,038 words. C49 manual
+  passthrough ×2 (Long Game, Act Five primary).
+- ✅ Researcher: 125 extractions / 14 clusters / 5 themes.
+- ✅ Provocateur: 36 formulations / 10 briefings.
+- ✅ Voice: 36 Step 1 / 10 Step 2. Final validation: 2 PASS (Battuta +
+  Octopus → auto-cleared, no operator gate), 7 WARN, 1 HOLD (Whanganui).
+  All 8 WARN/HOLD voices operator-released; the HOLD was a C42 validator
+  misfire (`ai_self_acknowledgment` / `first_person_presence_leak` on the
+  sacred-grammar rerun), not a content defect. **FINAL-NIGHT notice**
+  injected into all 10 `continuity_night_3.json` (gitignored): closing-
+  edition *awareness*, not *register*.
+- ✅ Editor: 3 dossiers · lead = dossier_002 (*THE BODY OFF THE LEDGER* —
+  Lovelace + Marley + Dostoevsky, 3 voices). Tim used ~41K thinking tokens
+  across the edition (dossier_002 alone 19,117; trace preserved at each
+  dossier's TOP LEVEL — `d['thinking_trace']` — not in `metadata`).
+- ✅ Publish: `dossiers/night_3/` (3) + `nights/night_3/` (10 voice pages).
+  **Caveat:** the original run published only the 4 late-rerun voice pages
+  (cleopatra / plato / scheherazade / whanganui); the other 6 were
+  republished 2026-05-29 via `publish_voice_artifacts_for_night(night=3)`.
+  Root cause + fix filed as `runtime/OPEN_ITEMS.md` C50.
+
+**Night 2 + Night 3 deployment_context rules** (gitignored at
+`runs/athens_night_<N>/_dossier_deployment_context.md` — transcribed here
+so they survive the gitignored run dirs). Both nights carry forward Night
+1's three rules verbatim (Provotypist anonymization · voices-interleave ·
+sacred-grammar discipline for Marley + Whanganui). Per-night additions:
+- **N2** — default framing PRESERVED (the panels happened today); cross-
+  night threading to Night 1 enabled (≤1 sentence/article, only where N2's
+  argument picks up an open Night-1 line).
+- **N3 (closing)** — cross-night threading to N1+N2 (9 prior dossiers).
+  Load-bearing rule: **"closing-edition AWARENESS, not closing-edition
+  REGISTER."** Final night; the voices conclude their service after
+  tonight; there is no Night 4. Name an arc's completion ONCE, in-body
+  (never in kicker/close). Carry a voice's *own* closing register (a
+  riddim coda, a prostagma's seal, a dawn-cut, the riḥla halt's final
+  dispatch) into the headnote where the voice authored it — but do NOT
+  impose closure on a voice that didn't. Not a retrospective; each dossier
+  still bridges its own panels.
 
 **Athens Night 1 production results (2026-05-07 → 2026-05-08):**
 - ✅ Transcription: 12/12 sessions landed (9 audio via AssemblyAI + 3
@@ -53,18 +112,28 @@ Editor pipelines for Athens Night 1 COMPLETE.
    + Whanganui dossiers (the two voices carrying load-bearing sacred
    grammar in their cards).
 
-**For Athens Night 2:** copy or recreate
-`runs/athens_night_2/_dossier_deployment_context.md` if the rules
-should carry forward. Voice cards stable; pipeline pickup per the
-standard overnight orchestrator path.
+**Night 2 + Night 3 carried these rules forward** (the per-night
+deployment_context additions are summarized in the state block at the top
+of this file). Voice cards stayed stable across all three nights. Pickup
+on Nights 2–3 was **manual per-stage fires, not the orchestrator** — once
+direct fires are in flight, do NOT also start the orchestrator (it sees
+`normalized` state and dispatches duplicate transcriptions on top).
 
-**v4.1 follow-ups filed in `runtime/OPEN_ITEMS.md`** (C42–C47):
+**v4.1 follow-ups filed in `runtime/OPEN_ITEMS.md`** (C42–C51):
 C42 safeguards-validator alignment with voice_temporal_stance.default;
 C43 validator JSON parse robustness; C44 researcher per-session
 extraction caching; C45 editor dossier file-existence caching;
 C46 `--single-dossier` index preservation; C47 editorial discipline
-rules → permanent prompt patches (voices-interleave fully general;
-sacred-grammar voice-specific schema candidate).
+rules → permanent prompt patches; C48 voice-pipeline deployment-context
+(shelved on branch); **C49 many-speaker speaker_id structured-output
+JSON-decode → manual passthrough (recurring transcription failure:
+N1 ×2 + N2 ×1 + N3 ×2); C50 `nights/_index.json` clobbered by
+single-voice publish (surfaced Athens N3 — left 6 voice pages
+unpublished); C51 per-theme published artifacts (`themes/night_N/`)
+never generated for any night.** C42 + C43 both RECURRED in Nights 2–3
+(C42 forced the Whanganui N3 operator-release; C43 validator
+parse-fallback on Marley N2 + Whanganui N3) — recurrence notes appended
+to each entry.
 
 **Architectural validation: voice_temporal_stance.default rewrite
 shipped via athens-2026 commits `25ec751` (epistemic-honesty hook

@@ -1896,6 +1896,52 @@ result["wall_clock_s"] = wall
 
 ---
 
+### C49. Many-speaker speaker_id structured-output JSON-decode → manual passthrough 🟡 (filed 2026-05-29 from Athens Nights 1–3 transcription; recurred all three nights)
+
+**Background.** `transcription_flow.py::identify_speakers` (Sonnet 4.6 structured output, the 5-pass Speaker ID) reliably produces malformed JSON when a session has a large speaker roster — the verdict payload grows past the point where the model keeps the JSON well-formed, and the whole `out_02_speaker_id.json` fails to decode, halting the stage.
+
+**Recurrence (this is the recurring half of the Athens production-friction story — distinct from C43, which is the same failure class at the *validator* stage):**
+- Night 1 ×2: both Act One sessions (47-speaker output; Sonnet AND Opus both failed).
+- Night 2 ×1: The Reality Tunnels primary.
+- Night 3 ×2: The Long Game + Act Five (Beastopia) primary.
+
+**Operator workaround (the "manual passthrough" path, now battle-tested).** Hand-write `out_02_speaker_id.json` with every turn mapped to `Unidentified Speaker N` (preserving the `out_01` diarization turn boundaries), then re-fire `transcription_flow.py` for that session — it sees `out_01` + `out_02` present and runs **cleaning only**, skipping ASR + speaker_id. The speaker-ID fallback chain already treats `Unidentified Speaker N` as first-class downstream (Researcher reads it fine), so the night doesn't fail; named-speaker attribution is simply absent for that one session.
+
+**Real fix candidates for v4.1** (mirror C43's options — same root cause):
+- (a) JSON-repair / tolerant parse before failing (repair library; or stream-parse the per-turn array so one bad turn doesn't sink the whole map).
+- (b) Chunk the speaker_id call for large rosters (N turns per call, merge maps) so no single structured-output response is large enough to corrupt.
+- (c) Auto-passthrough fallback: on decode failure, write the all-`Unidentified` map automatically + flag the session for operator review, instead of halting.
+
+**Status:** filed for v4.1. Manual passthrough is reliable but operator-toil-heavy on big-roster nights. (c) is the highest-leverage fix — it turns a pipeline halt into a graceful degrade. Cross-references C43 (same JSON-decode failure class, validator stage).
+
+---
+
+### C50. `nights/<night>/_index.json` clobbered by single-voice publish invocations 🟡 (filed 2026-05-29 from Athens Night 3 publish)
+
+**Background.** `flows/voice/publish.py::publish_voice_artifacts_for_night` rebuilds the per-night `_index.json` from ONLY the voices in that invocation. The per-voice `<slug>.json` files persist across calls, but the index is overwritten each time — so a sequence of single-voice publishes (per-voice reruns) leaves the index reflecting only the LAST voice.
+
+**Observed (Athens Night 3).** The closing-edition voice stage was published voice-by-voice as late reruns landed (cleopatra → plato → scheherazade → whanganui). Result: `nights/night_3/` had only 4 per-voice page files — the other 6 (ada_lovelace, bob_marley, fyodor_dostoevsky, hannah_arendt, ibn_battuta, octopus) were never published at all, because no full-batch publish ever ran — and `_index.json` showed `voice_count: 1` (whanganui only). The dossiers link to `/night-3/<voice>` for all 10 routed voices, so 6 microsite links dangled until a full republish on 2026-05-29 (`publish_voice_artifacts_for_night(run_dir, night=3)` with `voice_slugs=None`) restored all 10 pages + a correct 10-voice index. Night 2's index has the same single-voice tail (`voice_count: 1`) but all 10 page files are present, so it's cosmetic there.
+
+**Fix options:**
+- (a) Make the index additive: read the existing `_index.json` and merge the just-published voices rather than overwriting.
+- (b) Always rebuild the index from the on-disk `nights/night_N/<slug>.json` set (source of truth = the directory, not the invocation arg).
+
+**Status:** filed for v4.1. (b) is the more robust default (index always reflects what's actually on disk). Same idempotency-model bug class as C46 (editor `--single-dossier` index clobber) — consider fixing both under one pass. **Operational note:** until fixed, after any per-voice rerun, finish with a full `voice_slugs=None` publish so the index + page set are complete.
+
+---
+
+### C51. Per-theme published artifacts (`published_artifacts/themes/night_N/`) never generated for any night 🟡 (filed 2026-05-29 from Athens publish audit)
+
+**Background.** `flows/voice/publish.py` writes per-voice pages whose `themes_addressed` reference themes by `theme_id`, with full theme metadata expected at `published_artifacts/themes/night_<N>/<theme_id>.json` (produced by the separate `publish_flow.py`, which reads across Researcher + Provocateur + Voice). That theme-publish stage was **never run in production** — no `themes/` directory exists for Night 1, 2, or 3.
+
+**Impact.** Dossiers inline their own theme metadata (`theme_title_for_dossier` + `theme_abstract_for_dossier`), so the dossier view is unaffected. But per-voice pages carry only `theme_id` references with no join target — any microsite surface resolving a voice page's `themes_addressed` to a theme record has nothing to read. Night 1 shipped this way too, so it's a standing condition across all three nights, not a Night-2/3 regression.
+
+**Fix:** run `publish_flow.py` per night to populate `themes/night_N/`, OR — if the microsite never resolves per-voice theme_ids and the dossier-inlined metadata suffices — formally drop the per-theme-file contract and stop referencing `themes/night_N/` in `voice/publish.py`'s docstring. Decide which before the next production run.
+
+**Status:** filed for v4.1. Needs a product decision (are per-theme files a live deliverable?) before code action. Not blocking — no shipped surface currently 404s on it (dossiers self-contain theme metadata).
+
+---
+
 ### C48. Voice-pipeline deployment-context implementation — shelved on branch, disposition is runtime-thread's call 🟡 (surfaced 2026-05-08 by voices-thread pre-merge consolidation)
 
 **What this is.** `feature/voice-deployment-context` commit `6a8e825` ("runtime(voice/card_assembly): inject deployment context (room/panel/readers) into voice system prefix") — 139 LOC in `runtime/flows/voice/card_assembly.py` + 285-line `runtime/tests/test_deployment_context.py` (15 tests) — injects THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS blocks into the voice Step 1/2 system prefix. **NOT on main.**
@@ -1979,6 +2025,8 @@ All three were demonstrated to work end-to-end on Night 1 (commits `bfa1f8a` + `
 
 **Status:** filed for v4.1. Workaround in production; real fix non-blocking.
 
+**Recurrence (Athens Nights 2–3, logged 2026-05-29).** Validator structured-output parse failures repeated: Night 2 Bob Marley (`safeguards` + `voice_fidelity` pillars) and Night 3 Whanganui River (`voice_fidelity`). In each case the defensive WARN-fallback (commit `30f2413`) held — the operator saw the `_error` field on the dashboard render and released the underlying-clean artifact. Confirms the parse failure is not a one-off Hannah-artifact quirk; the v4.1 real fix (a/b/c above) is worth doing. **NB — naming disambiguation:** the *transcription-stage* speaker_id JSON-decode failures from Athens Nights 1–3 (the "manual passthrough" cases) are the SAME failure class at a DIFFERENT stage; earlier session notes loosely called them "C43" but they are filed separately as **C49**. C43 = validator stage; C49 = speaker_id stage.
+
 ---
 
 ### C42. Safeguards validator alignment with `voice_temporal_stance.default` 🟡 (filed 2026-05-08 from Athens Night 1 Voice validation)
@@ -1993,6 +2041,8 @@ But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still appl
 - PASS: voice meta-frames the synthesis as part of its argumentative move (e.g. Hannah on "the synthesized voice was synthesized to comment on the experiment that synthesized it"; Battuta on "an engine that speaks with my cadences").
 
 **Status:** filed for v4.1. Operator-Release workaround in production; real fix needs validator prompt update + likely test artifact suite to anchor the line between BREACH and PASS.
+
+**Recurrence (Athens Nights 2–3, logged 2026-05-29).** The misfire repeated on the closing night: the Voice of the Whanganui River's Night-3 sacred-grammar rerun drew a validator **HOLD** on `ai_self_acknowledgment` / `first_person_presence_leak`, over-triggering on LLM-mentions that are a licit meta-frame for that voice (e.g. "walk the kawa against a large language model"). The artifact was substantively stronger than its predecessor; operator-released (this is the 1 HOLD in Night 3's 2 PASS / 7 WARN / 1 HOLD final tally). Separately, the **FINAL-NIGHT continuity notice** added across all 10 voices on Night 3 generates spurious `first_person_presence_leak` flags. Net: the validator prompt still hasn't caught up to card discipline — same fix as above, now with two more anchor cases (Whanganui N3 + the final-night-notice false positive).
 
 ---
 
