@@ -37,44 +37,24 @@ Admin console                operator infra (NOT BUILT)
 
 ---
 
-## TL;DR — runtime state, 2026-05-06 morning
+## TL;DR — runtime state, 2026-05-29 (Athens COMPLETE)
 
-**Pipeline end-to-end ready** (Provocateur → Voice → Editor → publish + edition picker):
-- Voice Pipeline Steps 1+2 + validation + continuity (Step 3 dormant for Athens)
-- Editor Pipeline ✅ SHIPPED `1437dfc` + closing prompt rebuilt `1de4081` + synthesis routing `2a80e8e` + panel-speaker attribution `419fcac` + per-voice review gate `b5b8d72` + auto-fire `b5b8d72` + edition picker (B3) `b5b8d72`
-- Provocateur deployment context `419fcac` (THE GATHERING + THE SPEAKERS injected into all three system prompts)
-- Validator field-name bug `48f4c9d` (was returning false-positive WARNs across all voices)
-- All 8 LLM-call sites consistent on FU#60 form `0e2a897`
+**Athens Nights 1–3 ran end-to-end and are PUBLISHED.** All three nights went Transcription → Researcher → Provocateur → Voice → Editor → Publish; 13 dossiers + 30 per-voice pages committed + pushed to athens-2026 (`3dc4e16`). Code repo at `563f3ef`. Per-night production detail + the deployment_context rules live in `CLAUDE.md`'s state block; the full Night-1 narrative is archived at `_workspace/archive/runtime-handoffs/HANDOFF_2026_05_08_ATHENS_DAY_1.md`.
 
-**5-voice end-to-end dryrun executed 2026-05-06 ~00:00–00:12** (separate project root `current-tests/dev_5voice_dryrun_2026_05_05/`): Provocateur → Voice (Step 1+2) → Editor produced 1 dossier across Plato + Ibn Battuta + Hannah Arendt + Bob Marley + Whanganui River for theme_002 (populism). Per-voice Provocateur reframings ("The Office and the Soul" for Plato, etc.). Validation post-fix: 2 PASS (Arendt, Marley), 3 WARN with substantive findings (Plato, Ibn Battuta, Whanganui). ~$10-15.
+**Production-friction items filed this run (all v4.1, none Athens-blocking — workarounds held):**
+- **C42 + C43 validator misfires RECURRED** — C42 forced the Whanganui N3 operator-release; C43 parse-fallback hit Marley N2 + Whanganui N3. Validator prompts still lag card discipline.
+- **C49 (NEW)** many-speaker speaker_id JSON-decode → manual passthrough (N1 ×2 + N2 ×1 + N3 ×2) — the recurring transcription halt; manual workaround reliable but toil-heavy.
+- **C50 (NEW)** `nights/_index.json` clobbered by single-voice publish — left 6 Night-3 voice pages unpublished until a full republish.
+- **C51 (NEW)** per-theme `themes/night_N/` artifacts never generated for any night (dossiers self-contain theme metadata; per-voice pages' theme_id refs dangle).
 
-**Operator workflow ready for Athens:**
-1. Voice pipeline runs → produces Step 2 artifacts + validation
-2. Operator visits `/admin/tonight/voice` → reads validation → clicks Release / Hold-for-regen on each
-3. Editor auto-fires when last voice reviewed → dossiers + edition_lead land 2-3 min later
-4. No CLI invocation needed for editor stage post-voice-completion
+**Operator workflow used all three nights:** manual per-stage fires — **NOT** the orchestrator (running both dispatches duplicate transcriptions); per-voice Release/Hold at `/admin/tonight/voice`; editor auto-fires on last review.
 
-**Athens-blocking, still external to runtime:**
-- B2 Microsite (operator designing) 🔴
-- B5 Closing-show pipelines 🔴
-- B6 Day 4 goodbye 🔴
-- B7 Render layer for non-text artifacts ⚠️ partial (Octopus JSX shipped; Marley → Suno still pending)
-- B10 VM provisioning 🟡 specified, awaiting operator input on domain + microsite hosting
-- D1 Marley appropriation paragraph (operator writing)
-- E1 Athens intro paragraph publish-or-hold decision (with Till)
+**Athens-adjacent, still external to runtime (unchanged — Athens ran without them):**
+- B2 Microsite (operator designing) · B5 Closing-show pipelines · B6 Day 4 goodbye · B7 Render layer (Octopus JSX shipped; Marley → Suno pending) · B10 VM provisioning.
 
-**Athens-blocking RESOLVED in this session:**
-- ~~B1 Editor / Frame layer~~ ✅ closing prompt v2-rebuilt + panel-speaker attribution + synthesis routing — ready for first usable output
-- ~~B3 Edition Pipeline~~ ✅ algorithmic lead-theme picker shipped
-- ~~B8 Admin console (action surface)~~ 🟡 partial: per-voice Release/Hold buttons + auto-fire complete; Fire-editor manual button still missing but auto-fire makes it less needed
-
-**Designed conceptually, not yet built:**
-- Microsite (operator designing) — drives editor output schema per A2 F
-- Closing-show pipelines, Day 4 goodbye, render layer for non-text artifacts (full)
-
-**Spec/impl divergences worth knowing:**
-- ~~Voice Pipeline validation regen-on-flag is unimplemented (FU#62)~~ ✅ RESOLVED 2026-05-01: validation is diagnostic-only; Athens policy Night 1 ON / Nights 2+3 OFF
-- ~~Validation wall-time is ~20-40 min/night actual vs spec's 3-5 min claim~~ ✅ RESOLVED 2026-05-01
+**Earlier-resolved (kept for reference):**
+- B1 Editor / Frame layer ✅ · B3 Edition Pipeline ✅ · B8 Admin console 🟡 partial (Release/Hold + auto-fire done; manual Fire-editor button still missing).
+- FU#62 validation regen-on-flag → diagnostic-only (Night 1 ON / Nights 2+3 OFF).
 
 ---
 

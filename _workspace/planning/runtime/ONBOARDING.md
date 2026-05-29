@@ -181,7 +181,7 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `voice-pipeline-v2.1-align-revert` — 38+ commits ahead of `main`. Pushed.
+**Branch:** `main`. The `voice-pipeline-v2.1-align-revert` + `feature/editor-deployment-context` branches merged to `main` before Athens; all work since is on `main`. **Athens Nights 1–3 are complete + published** (code `563f3ef`, athens-2026 `3dc4e16`) — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
 
 **Branch history (chronological — most recent first):**
 
