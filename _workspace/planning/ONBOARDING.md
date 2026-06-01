@@ -137,4 +137,4 @@ If a rule is subfolder-specific, it goes in the subfolder ONBOARDING. Only genui
 
 ---
 
-*End of planning/ONBOARDING.md (index version, 2026-05-01).*
+*End of planning/ONBOARDING.md (index version, last updated 2026-05-08 — added epistemic-hook DON'T + "universal" miscommunication calibration).*

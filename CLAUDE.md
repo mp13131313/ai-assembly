@@ -220,7 +220,12 @@ fully wired with all 10 pipeline-built provocateur_profiles.
   ("voice present at the assembly that gathers in Athens, observes
   panels, responds when consulted") per runtime-thread memo
   _workspace/archive/session-artifacts/MEMO_2026_05_05_voice_temporal_stance_assembly_fiction.md;
-  shipped `3bcbef5`. See voices/OPEN_ITEMS.md §30.
+  shipped `3bcbef5`. See voices/OPEN_ITEMS.md §30. **NOTE 2026-05-08:**
+  this reframe APPENDED assembly clauses rather than LEADING with them;
+  superseded by a 4× rewrite to the AF-LEADS + operator-short-draft
+  architecture (Gap-K), now-final at athens-2026 `08a8253`. §30 carries
+  the SUPERSEDED-by-§31-Gap-K pointer; the "Architectural validation"
+  block at the top of this CLAUDE.md describes the current state.
 - Length-cap card surgery (operator decision: NO max_tokens enforcement):
   Dostoevsky 350-750w + Hannah Arendt 350-750w + Octopus 350-500w
   prose-channel front-loaded; shipped `404838d`. Closes

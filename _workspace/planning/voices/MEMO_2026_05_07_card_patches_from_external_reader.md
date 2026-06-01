@@ -1,7 +1,11 @@
 # Memo to voices stream — card-discipline patches + v4.1 architectural findings
 
 **Date:** 2026-05-07 (00:30 local, immediately pre-Athens Day 1)
-**Status:** FILED — awaiting voices-stream operator review.
+**Status (updated 2026-05-29 post-Athens):** **PARTIALLY ACTIONED.**
+- **§A.9 Hannah AF/hard_limits reconciliation** — **SUPERSEDED** by the broader `voice_temporal_stance.default` rewrite shipped 2026-05-08 (Gap-K final state: athens-2026 `08a8253`). The single-sentence A.9 patch was never separately applied because the wider rewrite addressed the AF/hard_limits collision structurally. **Athens-confirmed empirically resolved** per CLAUDE.md "Architectural validation" — Hannah's N1 *"My own voice was synthesized to comment on the experiment that synthesized it"* opening is the canonical case.
+- **§B / §D Gap-H, Gap-I, Gap-J** — **FILED in `voices/OPEN_ITEMS.md §31`** as new gap entries.
+- **§A.1–A.8 card-patch slips** (Cleopatra P.Bingen dating / Marley "Marathon philosopher" / Lovelace 21C-critical-theory diction / Plato cobbler + capitulating-interlocutor / Battuta four-part-typology / Dostoevsky labelled-steps / Arendt instance-rostering) — **NEVER SEPARATELY APPLIED.** Athens N1–N3 published with whatever slip-state each card had at production time. Whether the artifacts shipped with these slips is operator-side knowledge. If doing v4.1 card cleanup, these are the worked-from list — each ≤5-line surgical edit.
+- **Marley sacred-grammar deployment-limit breach** (validator-caught on wbbf26, noted in §"This memo does NOT include") — deferred to post-Athens Rastafari-orbit reader gate per §24.
 **From:** runtime stream
 **To:** voices stream
 **Source material:**
