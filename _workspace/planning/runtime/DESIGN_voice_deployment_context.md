@@ -1,9 +1,14 @@
 # DESIGN — voice-runtime deployment_context block
 
-**Status:** designed pre-Athens (2026-05-05), implemented on
-`feature/voice-deployment-context`, **never merged**. Athens Nights 1–3 ran
-without it. Filed here so the Phase B persona-pipeline rebuild can decide
-whether to re-implement, re-design, or drop.
+**Status:** designed + implemented + dryrun-tested + **retired as superseded**
+(2026-05-05 design; 2026-06-01 retired). Athens Nights 1–3 ran with
+deployment_context at the **Provocateur + Editor stages** instead of the
+voice stage; the dryrun verdict was that the same priming effect lands
+one stage earlier at lower architectural cost. Filed here so the Phase B
+persona-pipeline rebuild has the full decision trail.
+
+This is not "we didn't get around to it" — it is "we tested it, found it
+works, and chose a different placement." See *Why it was retired* below.
 
 **Source of truth (read-only archive):**
 - Tag: `archive/voice-deployment-context-2026-05-05` → commit `248300c`
@@ -11,6 +16,8 @@ whether to re-implement, re-design, or drop.
   inject deployment context (room/panel/readers) into voice system prefix*
 - Original test suite: `runtime/tests/test_deployment_context.py` at the tag
   (285 lines, full coverage of the 5 rules below)
+- **Dryrun verdict doc:** `projects/current-tests/dev_msc_dryrun_v2_20260504/runs/athens_night_1/04_voice/COMPARISON_2026_05_05.md`
+  (1024 lines, full voice-output comparison WITH vs WITHOUT the block)
 
 ---
 
@@ -74,43 +81,70 @@ prompt assembles without the block — does not raise. Production paths
 (orchestrator + voice_flow CLI) always have these files; the fallback
 exists so tests + dev work don't need full deployment JSON.
 
-## Athens ran without this — what voices had instead
+## Why it was retired (the dryrun + decision)
 
-Athens voices (Nights 1–3, all 10 voices, all 13 dossiers) composed
-with:
+The original commit message ended *"Awaiting dryrun comparison before
+merge."* The comparison fired on 2026-05-05 against
+`runs/athens_night_1`, baselining the 2026-05-04 v2 dryrun against a
+re-run on this branch. The verdict was **positive but redirected**:
 
-- ✅ Full persona card (identity, register, hostile_sources, corpus)
-- ✅ Provocateur formulation (topic, fault-lines, audience-friction)
-- ✅ Continuity from prior nights (`continuity_night_<N>.json`)
+**What the dryrun found** (full table at `COMPARISON_2026_05_05.md`):
 
-But **without**:
+- **6 of 10 voices shifted theme focus** between PRE and POST runs — not
+  just different prose on the same theme, but choosing a *different
+  theme* to engage. Plato (theme_004 → theme_003), Cleopatra (single
+  → synthesis), Battuta (reordered synthesis), Scheherazade, Ada,
+  Dostoevsky, Hannah all shifted; only Marley, Whanganui, and Octopus
+  kept the same focus (the latter two having only one theme available).
+- **+348 words net** across the 10 voices — voices "engaged more
+  concretely" with room-awareness primed.
+- Effect was real and measurable. The block does what the design promised.
 
-- ❌ Explicit "what gathering / what panel / what fellow voices / what
-  readers" descriptive block in the system prompt
+**Why the runtime thread retired it anyway** (filed at the time as C39,
+now `C41`):
 
-The Provocateur formulation carried most of the *implicit* deployment
-context (panel topic name, audience tone) and the persona card carried
-the voice's identity. The 13 dossiers landed; voices spoke distinctively;
-the transmission_witness register worked for Whanganui. Whether the
-explicit deployment-context layer would have changed outputs noticeably
-is unknown — no A/B was run.
+> **"Richness lever sits at the briefing layer, not the
+> deployment-context layer."**
 
-## Phase B decision point
+The same priming effect — voices becoming room-aware, panel-aware,
+audience-aware — could be achieved one stage earlier by enriching the
+Provocateur's formulation + briefing instead of injecting a parallel
+block at the voice's system prompt. The Provocateur is already where
+themes get fault-lines and audience-friction added; making it the
+single carrier of deployment context kept the system *one stage's worth*
+simpler.
 
-When the persona-pipeline rebuild reaches the voice runtime, three
-options:
+**What shipped instead — same need, earlier stage:**
 
-1. **Re-implement as designed** — port the 5-rule contract into the new
-   architecture. The rules are tested + grounded in real JSON shapes.
-2. **Re-design** — keep the *principle* (descriptive metadata layer
-   separate from prescriptive persona card) but use a different shape
-   (e.g., a richer Provocateur formulation that subsumes deployment
-   context, eliminating the need for a separate block).
-3. **Drop** — Athens shipped without it; if Phase B's voice priming via
-   formulation + continuity is strong enough, the explicit block may be
-   redundant. Decide consciously, not by omission.
+- **Provocateur deployment_context** (`cbcdf82`, *runtime: panel-speaker
+  attribution end-to-end + Provocateur deployment context*) — landed
+  2026-05-05 evening, ran in all three Athens nights.
+- **Editor deployment_context** (`fda8091`, `7e99c63`, `0f751b7`) —
+  landed 2026-05-05 through 05-07, ran in all three Athens nights.
+- **Voice stage**: persona card + briefing-enriched formulation +
+  continuity. No explicit deployment block.
 
-The **rule worth carrying** regardless of choice: keep prescriptive and
-descriptive layers separated. The persona card is prescriptive; whatever
-carries room-awareness should stay descriptive. Don't mix imperatives
-into deployment metadata.
+The dryrun explicitly noted the placements are **additive, not
+alternative** — putting deployment_context at all three stages (Provocateur
++ Editor + voice) would compound the effect. The retirement decision was
+about scope and parsimony, not about correctness.
+
+## Phase B re-implementation note
+
+When the persona-pipeline rebuild reaches the voice runtime, the question
+to ask is *not* "should we add this block?" but **"is the Provocateur's
+formulation carrying enough deployment context for the voice's
+purposes?"** If yes, leave the voice stage descriptively minimal. If the
+rebuild ever surfaces a case where Provocateur-stage enrichment isn't
+enough (e.g. step-2 fellow-voices-awareness needs explicit listing rather
+than implicit "you're on a panel" framing), the 5-rule contract is here
+to port.
+
+The **principle worth carrying** regardless of placement: keep
+prescriptive and descriptive layers separated. The persona card is
+prescriptive; whatever carries room-awareness should stay descriptive
+("THE GATHERING is X" not "BE AWARE OF X"). Don't mix imperatives into
+deployment metadata — that's why
+`conference_facts.session_role_for_ai_assembly` was deliberately excluded
+from the voice block (Rule 5). The Provocateur formulation today honors
+the same split.

@@ -1944,17 +1944,22 @@ result["wall_clock_s"] = wall
 
 ---
 
-### C48. Voice-pipeline deployment-context implementation — shelved on branch, disposition is runtime-thread's call 🟡 (surfaced 2026-05-08 by voices-thread pre-merge consolidation)
+### C48. Voice-pipeline deployment-context implementation — ✅ RESOLVED 2026-06-01: option (b) executed, formally retired as superseded
 
-**What this is.** `feature/voice-deployment-context` commit `ec77a3c` ("runtime(voice/card_assembly): inject deployment context (room/panel/readers) into voice system prefix") — 139 LOC in `runtime/flows/voice/card_assembly.py` + 285-line `runtime/tests/test_deployment_context.py` (15 tests) — injects THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS blocks into the voice Step 1/2 system prefix. **NOT on main.**
+**What this was.** `feature/voice-deployment-context` commit `ec77a3c` ("runtime(voice/card_assembly): inject deployment context (room/panel/readers) into voice system prefix") — 139 LOC in `runtime/flows/voice/card_assembly.py` + 285-line `runtime/tests/test_deployment_context.py` (15 tests) — injected THE GATHERING / THE PANEL / YOUR FELLOW VOICES / YOUR READERS blocks into the voice Step 1/2 system prefix. Never merged to main.
 
-**Why it's shelved (full trace).** The original commit message ends "Awaiting dryrun comparison before merge." The comparison fired (`projects/current-tests/dev_msc_dryrun_v2_20260504/runs/athens_night_1/04_voice/COMPARISON_2026_05_05.md`, 1024 lines): 6/10 voices shifted theme focus, +348w net, voices "engaged more concretely" — but the conclusion (filed in the original C39, now `C41`) was "**richness lever sits at the briefing layer, not the deployment-context layer**." The runtime thread then took a DIFFERENT path: Provocateur deployment-context (`cbcdf82`) + Editor `deployment_context` override (`fda8091`/`7e99c63`) shipped to main, addressing the GATHERING/SPEAKERS context at the Provocateur + Editor stages instead of the voice stage. The voice-pipeline implementation was never merged or cherry-picked.
+**The decision trail.** The original commit message ended "Awaiting dryrun comparison before merge." The comparison fired (`projects/current-tests/dev_msc_dryrun_v2_20260504/runs/athens_night_1/04_voice/COMPARISON_2026_05_05.md`, 1024 lines): **6/10 voices shifted theme focus, +348w net, voices "engaged more concretely"** — the block did what the design promised. But the conclusion (filed in the original C39, now `C41`) was "**richness lever sits at the briefing layer, not the deployment-context layer**." The runtime thread took a different path: Provocateur deployment_context (`cbcdf82`) + Editor `deployment_context` override (`fda8091`/`7e99c63`) shipped to main, addressing the GATHERING/SPEAKERS context at the Provocateur + Editor stages — one stage earlier, one architecture simpler. Voice-stage implementation never merged or cherry-picked.
 
-**Current state.** `feature/voice-deployment-context` kept alive (operator decision 2026-05-08, option a — zero cost, preserves the implementation). Branch holds the only copy of `ec77a3c` + its tests. main does NOT have voice-stage deployment-context injection.
+**Resolution (2026-06-01).** Athens Nights 1–3 ran successfully with deployment_context at the Provocateur + Editor stages (no voice-stage block). With Athens complete and the C48 decision-deferred state stale, the post-Athens cleanup pass executed **option (b): formally retire as superseded**:
 
-**Disposition deferred to runtime/production thread** (it owns these branches + this code). Options when revisited post-Athens: (a) merge `ec77a3c` to add voice-stage deployment-context ON TOP OF the Provocateur/Editor placements (they're additive, not alternatives — dryrun showed it helps); (b) formally retire as superseded; (c) leave branch dormant. The voices-thread merely surfaced this during branch consolidation; **not the voices-thread's call to merge or delete.**
+- Branch `feature/voice-deployment-context` deleted (local + remote, commit `f4d0167` precedes the cleanup; cleanup commit `487a3d8`).
+- Tip preserved as tag `archive/voice-deployment-context-2026-05-05` → commit `248300c` (pushed to origin). Original implementation commit `ec77a3c` reachable via the tag.
+- Sibling branch `feature/editor-deployment-context` (fully-merged stub) deleted in the same pass.
+- Design contract + dryrun verdict + briefing-layer-not-deployment-layer reasoning captured at `_workspace/planning/runtime/DESIGN_voice_deployment_context.md` (the canonical Phase-B-rebuild reference).
 
-**Cross-references:** `C41` (the briefing-layer richness conclusion that redirected effort); CLAUDE.md branch-state history; original `ec77a3c` commit message (full implementation spec).
+**Why option (b) and not (a) "merge on top of":** the dryrun did show the placements are additive (voice-stage block on top of Provocateur/Editor would compound the effect), but with Phase B persona-pipeline rebuild ahead, rebasing 4-week-old voice/card_assembly.py code onto current main (51 commits divergent) carried more risk than re-implementing inside Phase B if the need ever resurfaces. The principle (descriptive deployment layer separate from prescriptive persona card) and the 5-rule contract are preserved in the DESIGN doc.
+
+**Cross-references:** `C41` (the briefing-layer richness conclusion that redirected effort); `_workspace/planning/runtime/DESIGN_voice_deployment_context.md` (full Phase-B-facing design memo); CLAUDE.md branch-state history; original `ec77a3c` commit message at the archive tag.
 
 ---
 

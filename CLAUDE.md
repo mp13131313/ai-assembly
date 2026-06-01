@@ -125,7 +125,9 @@ C43 validator JSON parse robustness; C44 researcher per-session
 extraction caching; C45 editor dossier file-existence caching;
 C46 `--single-dossier` index preservation; C47 editorial discipline
 rules → permanent prompt patches; C48 voice-pipeline deployment-context
-(shelved on branch); **C49 many-speaker speaker_id structured-output
+(✅ resolved 2026-06-01 — option-b retirement; branch deleted, design at
+`_workspace/planning/runtime/DESIGN_voice_deployment_context.md`, code
+preserved at tag `archive/voice-deployment-context-2026-05-05`); **C49 many-speaker speaker_id structured-output
 JSON-decode → manual passthrough (recurring transcription failure:
 N1 ×2 + N2 ×1 + N3 ×2); C50 `nights/_index.json` clobbered by
 single-voice publish (surfaced Athens N3 — left 6 voice pages
