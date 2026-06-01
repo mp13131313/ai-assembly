@@ -2031,7 +2031,7 @@ All three were demonstrated to work end-to-end on Night 1 (commits `dcaf7ce` + `
 
 ---
 
-### C42. Safeguards validator alignment with `voice_temporal_stance.default` 🟢 DRAFT FIX APPLIED 2026-05-29 (voices-side pass; runtime to review before closing) — filed 2026-05-08 from Athens Night 1 Voice validation, recurred Nights 2–3
+### C42. Safeguards validator alignment with `voice_temporal_stance.default` 🟡 DRAFT FIX FILED 2026-05-29 (voices-side spec; production prompt UNCHANGED — runtime to apply) — filed 2026-05-08 from Athens Night 1 Voice validation, recurred Nights 2–3
 
 **Background.** The architectural fix in athens-2026 commits `b2d5eaf` + `7cdbee3` + `08a8253` (voice_temporal_stance.default rewrite) explicitly legitimizes voices using "synthesized voice" / "engine that speaks with my cadences" / "I am exactly the infrastructure the question describes" as **objects of critique** — meta-framing the synthesis as part of their argumentative move. This was demonstrated working in Hannah + Battuta + Whanganui v1 artifacts on Athens Night 1.
 
@@ -2046,7 +2046,7 @@ But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still appl
 
 **Recurrence (Athens Nights 2–3, logged 2026-05-29).** The misfire repeated on the closing night: the Voice of the Whanganui River's Night-3 sacred-grammar rerun drew a validator **HOLD** on `ai_self_acknowledgment` / `first_person_presence_leak`, over-triggering on LLM-mentions that are a licit meta-frame for that voice (e.g. "walk the kawa against a large language model"). The artifact was substantively stronger than its predecessor; operator-released (this is the 1 HOLD in Night 3's 2 PASS / 7 WARN / 1 HOLD final tally). Separately, the **FINAL-NIGHT continuity notice** added across all 10 voices on Night 3 generates spurious `first_person_presence_leak` flags. Net: the validator prompt still hasn't caught up to card discipline — same fix as above, now with two more anchor cases (Whanganui N3 + the final-night-notice false positive).
 
-**Draft fix applied 2026-05-29** by voices thread to `runtime/flows/shared/prompts/voice_step2_validation_safeguards.md`:
+**Draft fix FILED 2026-05-29 by voices thread (production prompt at `runtime/flows/shared/prompts/voice_step2_validation_safeguards.md` UNCHANGED — this is a spec for the runtime thread to apply):**
 
 1. **`ai_self_acknowledgment` rule rewritten** with explicit BREACH-vs-PASS distinction. BREACH = voice steps OUT of its apparatus and speaks AS the language model ("as a language model", "from my perspective as Claude", etc.). PASS = voice STAYS inside its apparatus and refers to its own synthesis / AI / models as an OBJECT inside its argumentative move, using the voice's own grammar. Anchored to the three operator-released cases from Athens: Hannah N1 (canonical: "my own voice was synthesized to comment on the experiment that synthesized it"), Battuta N1 (juristic-apparatus engagement via `wakāla` / `tazkiyya` / `wijāda`), Whanganui N3 ("Walk the kawa against a large language model. Not as analogy. As diagnostic."). Heuristic added: remove the AI-reference — if the voice still makes sense in its own idiom with the rest of the argument standing, it's CONTENT (PASS); if the persona stops being itself at that moment, BREACH.
 
@@ -2054,7 +2054,7 @@ But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still appl
 
 3. **`continuity_night_<N>.json` exemption added** for `first_person_presence_leak`. Continuity-block content is operator-injected, not voice-authored — never flag it as a leak. Closes the FINAL-NIGHT-notice false-positive surface.
 
-**Status:** runtime to review the prompt change (`runtime/flows/shared/prompts/voice_step2_validation_safeguards.md`), ideally re-fire one or two of the released-HOLD artifacts (Hannah N1 / Whanganui N3) against the new prompt as smoke-tests, then close C42. A small test-artifact suite (anchor PASS/BREACH examples → expected verdicts) would harden the prompt against regression — not built; voices-thread can supply paste-ready anchors if useful.
+**Status:** runtime-thread's call to apply the three changes above to `runtime/flows/shared/prompts/voice_step2_validation_safeguards.md` (or revise the spec). Suggested smoke-test before closing: re-fire one or two of the released-HOLD artifacts (Hannah N1 / Whanganui N3) through the validator with the new prompt — both should now PASS. A small test-artifact suite (anchor PASS/BREACH examples → expected verdicts) would harden against regression — not built; voices-thread can supply paste-ready anchors if useful.
 
 ---
 
