@@ -21,7 +21,7 @@
 | code | `feature/editor-deployment-context` | `9c21ac0` (content already in `main` — redundant; runtime-thread's call to delete) | ✅ |
 | athens-2026 | `main` | `06245ad` (voices-thread: re-Derive 10× `06_derive/` against operator-short-draft cards — closes runtime/OPEN_ITEMS C3 sweep) | ✅ |
 
-**Important:** both repos were force-pushed 2026-05-29 by the runtime/production thread (re-authored ~680 commits to operator's real identity). All pre-rewrite SHAs in older docs / handoffs / commits / planning entries are DEAD; translate via `~/Desktop/AI Assembly/HASH_REMAP_{code,athens}_2026-05-29.tsv` if needed. Pre-rewrite backups at `~/Desktop/AI Assembly/BACKUP_{code,athens}_pre-rewrite.bundle`. The runtime thread's `d80a0ac` ("docs: remap commit-hash citations to post-rewrite SHAs (21 files)") swept most planning docs; if you find a dead SHA in voices-thread docs, the file may have been missed.
+**Important:** both repos were force-pushed 2026-05-29 by the runtime/production thread (re-authored ~680 commits to operator's real identity). All pre-rewrite SHAs in older docs / handoffs / commits / planning entries are DEAD; translate via `~/Desktop/AI Assembly/archive/2026-05-29-history-rewrite/HASH_REMAP_{code,athens}_2026-05-29.tsv` if needed. Pre-rewrite backups at `~/Desktop/AI Assembly/archive/2026-05-29-history-rewrite/BACKUP_{code,athens}_pre-rewrite.bundle` (see the folder's `README.md` for usage). The runtime thread's `d80a0ac` ("docs: remap commit-hash citations to post-rewrite SHAs (21 files)") swept most planning docs; if you find a dead SHA in voices-thread docs, the file may have been missed.
 
 ---
 
