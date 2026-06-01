@@ -148,7 +148,7 @@ dryrun + Whanganui kawa finding, and the 2026-05-05→06 runtime commit
 log are preserved in the archived handoffs at
 `_workspace/archive/runtime-handoffs/` + git history. External-reader
 card patches (B-list of 9) tracked in
-`_workspace/planning/voices/MEMO_2026_05_07_card_patches_from_external_reader.md`.
+`_workspace/archive/session-artifacts/MEMO_2026_05_07_card_patches_from_external_reader.md` (archived 2026-05-29 post-Athens).
 
 **Editor `deployment_context` override mechanism** (this-session new):
 `runtime/flows/editor/dossier_generation.py` reads optional
@@ -244,7 +244,7 @@ dryrun) DEPRECATED on Tim ship. See voices/OPEN_ITEMS.md §29.
 
 Pre-Athens follow-ups (operator-side):
 - D1 internal position paragraph for Marley appropriation readiness
-  (drafts in voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md)
+  (drafts in `_workspace/archive/session-artifacts/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md`, archived 2026-05-29)
 - E1 Athens intro paragraph publish-or-hold decision with Till
 - Whanganui D1+E1 parallel paragraphs (analogous to Marley)
 - Post-Athens Rastafari-orbit + iwi-orbit reader gates calendared

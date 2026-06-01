@@ -911,7 +911,7 @@ Path-(b) ship via `_operator_review_passed.flag`. Card preserved as `07_persona_
 
 ### Operator-side readiness paragraphs (D1 + E1)
 
-Drafted at `voices/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md`:
+Drafted at `_workspace/archive/session-artifacts/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (archived 2026-05-29):
 - **D1 — Internal position paragraph** (~280 words, internal-only): the rationale for shipping without Rastafari-orbit reader pre-Athens. Per reviewer: write BEFORE the v2 test (sequencing), so it articulates the position given limits accepted, not given how the artifact landed. Defensible-but-not-safe framing.
 - **E1 — Athens introduction paragraph** (long ~120 words + short ~60 words): boundary-naming, not apology, not credentialing. Reader-marked principle: "construction makes its own boundary visible." Publish-or-hold deferred to Till's read on the Athens room. Internal version still wants to exist alongside D1 as readiness package.
 
@@ -919,7 +919,7 @@ Both drafts are Claude-voice — operator should refine into team's actual voice
 
 ### Cross-card constraint sheet for video team (F1)
 
-Drafted at `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md`. Whanganui-only per operator (Marley not in video). Whanganui-card hard limits + banned visual moves (no "river weeps / yearns / cries out / breathes with suffering" Romantic-anthropomorphic imagery; no single-throat speech concealing statutory mediation; no comparative-flattening alongside Pachamama / Atrato / Ganga / Mar Menor). **Framed as binding on production decisions, not advisory** (per reviewer: "the dialogue pipeline produces constrained text; the production team's editorial pass and the video team's interpretation can re-introduce the very moves the cards spent passes banning").
+Drafted at `_workspace/archive/session-artifacts/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` (archived 2026-05-29). Whanganui-only per operator (Marley not in video). Whanganui-card hard limits + banned visual moves (no "river weeps / yearns / cries out / breathes with suffering" Romantic-anthropomorphic imagery; no single-throat speech concealing statutory mediation; no comparative-flattening alongside Pachamama / Atrato / Ganga / Mar Menor). **Framed as binding on production decisions, not advisory** (per reviewer: "the dialogue pipeline produces constrained text; the production team's editorial pass and the video team's interpretation can re-introduce the very moves the cards spent passes banning").
 
 ### Universal "Voice of X" naming sweep — applied across all 10 voices
 
@@ -1144,7 +1144,7 @@ Response (447w) emitted clean witness-stance:
 
 - `_workspace/archive/session-artifacts/WHANGANUI_V2_PLAN_2026-05-05.md` — pre-execution plan
 - `_workspace/archive/session-artifacts/WHANGANUI_V2_ROUND0_WALKTHROUGH_2026-05-05.md` — ROUND 0 12-residual analysis (used as planning input for prompt extension decision)
-- `voices/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` — v2-updated section (witness-stance visual discipline + bilingual-citation discipline + twin-failure-mode bans)
+- `_workspace/archive/session-artifacts/VIDEO_TEAM_CONSTRAINT_SHEET_2026-05-04.md` (archived 2026-05-29) — v2-updated section (witness-stance visual discipline + bilingual-citation discipline + twin-failure-mode bans)
 
 ### Operator-side parallel residuals (Marley analogues)
 
@@ -1247,6 +1247,8 @@ Empirical grounding (per memo): operator's chat-test of Plato (feeding the confe
 ---
 
 ## 31. v4.1 architectural cleanup — gaps captured this session (POST-ATHENS)
+
+**Archive pointer (2026-05-29):** Gap entries below reference `MEMO_2026_05_07_card_patches_from_external_reader.md` by bareword (e.g. "B-list MEMO_2026_05_07 §A.1") — that memo was archived post-Athens to `_workspace/archive/session-artifacts/MEMO_2026_05_07_card_patches_from_external_reader.md`. §A.1–A.8 of that memo is the per-voice card-patch worked-from list for Gap-H/I (Cleopatra dating / Marley Stagirite / Lovelace diction / Plato cobbler+capitulation / Battuta four-part-typology / Dostoevsky labelled-steps / Arendt instance-rostering); §A.9 was superseded by Gap-K (rewrite resolved the AF/hard_limits collision structurally).
 
 Six v4.1 gap items captured during Whanganui v2 + Tim builds + voice_temporal_stance reframe:
 

@@ -82,7 +82,7 @@ External work; surfacing here because it confirms voices-thread architectural ch
 ### Operator-side (post-Athens)
 
 1. **Marley + Whanganui post-Athens reader gates** — Rastafari-orbit reader (Imani Tafari-Ama / Carolyn Cooper / Bob Marley Foundation / Anthony Bogues orbit) for Marley's load-bearing I-and-I; iwi-orbit reader for Whanganui v2 witness-translator stance. Per §11 + §24 + §28.
-2. **D1/E1 paragraph use post-Athens** — `MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` drafts were written for pre-Athens; if you publish post-Athens commentary or the Rastafari reader-gate work, these are the refinement starting point. Whanganui parallel drafts not yet written.
+2. **D1/E1 paragraph use post-Athens** — drafts at `_workspace/archive/session-artifacts/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (archived 2026-05-29) were written for pre-Athens; if you publish post-Athens commentary or the Rastafari reader-gate work, these are the refinement starting point. Whanganui parallel drafts not yet written.
 3. **Branch hygiene (runtime-thread's call)** — `feature/editor-deployment-context` is fully merged + redundant; `feature/voice-deployment-context` holds shelved `6a8e825` (C48). Runtime thread owns disposition.
 
 ### v4.1 architectural cleanup (post-Athens; not pre-Athens-eligible)
@@ -104,7 +104,7 @@ Filed in `voices/OPEN_ITEMS.md §31`:
 ### Low-priority cleanup (no urgency)
 
 - **C4 from sweep:** snapshot proliferation — 6 `.pre_*.json` files per voice in athens-2026; gitignored, local-only; cleanup someday
-- **MEMO_2026_05_07 §A.1–A.8** card-patch slips (Cleopatra dating / Marley Stagirite / Lovelace diction / Plato cobbler+capitulation / Battuta four-part-typology / Dostoevsky labelled-steps / Arendt instance-rostering) — never separately applied; status post-Athens unknown to me. If you're doing v4.1 card cleanup, these are the worked-from list.
+- **MEMO_2026_05_07 §A.1–A.8** card-patch slips (Cleopatra dating / Marley Stagirite / Lovelace diction / Plato cobbler+capitulation / Battuta four-part-typology / Dostoevsky labelled-steps / Arendt instance-rostering) — never separately applied; status post-Athens unknown to me. If you're doing v4.1 card cleanup, these are the worked-from list. Memo archived 2026-05-29 → `_workspace/archive/session-artifacts/MEMO_2026_05_07_card_patches_from_external_reader.md`.
 
 ---
 
