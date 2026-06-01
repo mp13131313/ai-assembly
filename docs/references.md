@@ -21,8 +21,14 @@ wondering why the architecture looks the way it does:
   Jinja+LLM tailoring + PB#1 voice-type-specific 1a/1b prompts +
   PB#7 evidence tags) → `docs/research/baseline_research/compass_artifact_wf-1e84f45b-0c9f-497a-84bc-88b7867c9a26_text_markdown.md`
 
+## Historical planning (`_workspace/archive/`)
+
+- **Phase B persona pipeline rewrite** → archived at `_workspace/archive/planning_2026_04_consolidation/REBUILD_PLAN.md`. The 9 binding architectural decisions PB#1–9 plus the phase-by-phase task lists. **Status:** the Phase B rebuild shipped as Persona Pipeline **v4** (`docs/AI_Assembly_Persona_Pipeline_v4.md`) — REBUILD_PLAN.md is the historical design record, not active forward-looking work.
+
 ## Forward-looking planning (`_workspace/planning/`)
 
-Active design work for unbuilt features:
-
-- **Phase B persona pipeline rewrite** → `_workspace/planning/REBUILD_PLAN.md` (single source of truth; the 9 binding architectural decisions PB#1–9 plus all phase-by-phase task lists. Original `ARCHITECTURE_NEXT_PHASE_HANDOFF.md` merged into this doc 2026-04-19 and archived to `_workspace/archive/session-artifacts/ARCHITECTURE_NEXT_PHASE_HANDOFF_2026_04_18.md` for provenance.)
+Active design work for unbuilt features lives in the two-workstream tracker
+(`_workspace/planning/{runtime,voices}/OPEN_ITEMS.md`). The only forward-looking
+spec at this writing is the vatican-2026 annotated-encyclical run at
+`_workspace/planning/runtime/SPEC_2026_05_27_magnifica_humanitas_annotated_pipeline.md`
+(spec landed, not started).

@@ -120,8 +120,9 @@ venv/bin/python run_pass0a_voice_config.py "Voice Name"
 venv/bin/python run_phase0_1_research.py "Voice Name"
 
 # [Manual: 6 claude.ai sessions per voice with Extended Thinking + Deep
-#  Research. §1–§5 use Opus 4.6; §6 uses Opus 4.7. Save each as
-#  $PROJECT_ROOT/voices/<slug>/01_research/04_dr_dossier/0N_section_N.md]
+#  Research. Use Opus 4.7 across all 6 sections (the older "§1-§5 use 4.6,
+#  §6 uses 4.7" guidance is stale — see voices/ONBOARDING.md DOs). Save each
+#  as $PROJECT_ROOT/voices/<slug>/01_research/04_dr_dossier/0N_section_N.md]
 
 venv/bin/python run_persona_pipeline.py "Voice Name"
 ```
@@ -187,5 +188,5 @@ was a smoke-test.
 - `../docs/AI_Assembly_Persona_Pipeline_v4.md` — pipeline spec (current)
 - `../docs/AI_Assembly_Persona_Card_v2.md` — 35+2 field schema (with v2.1
   amendments section)
-- `../docs/CURRENT_STATE.md` — gap analysis + architectural rationale
+- `../STATE.md` + `../CLAUDE.md` — current state (post-Athens). For pre-Athens architectural rationale (§5.16–5.28 cover the v3.10 → v4 shift): `../_workspace/archive/CURRENT_STATE_2026-04-27.md`
 - `HANDOFF.md` — cross-repo runtime contract (current)

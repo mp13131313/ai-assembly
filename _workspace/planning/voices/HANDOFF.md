@@ -16,10 +16,10 @@
 
 | Repo | Branch | HEAD | Pushed |
 |---|---|---|---|
-| code | `main` | `aeca549` (voices-thread: revert C42 prompt overreach + clarify "FILED" not "applied") | ✅ |
-| code | `feature/voice-deployment-context` | `248300c` (holds shelved `6a8e825` — runtime/OPEN_ITEMS C48; runtime-thread's disposition call) | ✅ |
-| code | `feature/editor-deployment-context` | `9c21ac0` (content already in `main` — redundant; runtime-thread's call to delete) | ✅ |
-| athens-2026 | `main` | `06245ad` (voices-thread: re-Derive 10× `06_derive/` against operator-short-draft cards — closes runtime/OPEN_ITEMS C3 sweep) | ✅ |
+| code | `main` | post-Athens; runtime + voices threads pushing to `main` only | ✅ |
+| athens-2026 | `main` | `e0bb067` (DATA_INVENTORY.md + Nights 1–3 published) | ✅ |
+
+**Branches retired 2026-06-01:** both `feature/voice-deployment-context` (C48, retired as superseded — design at `runtime/DESIGN_voice_deployment_context.md`, code at tag `archive/voice-deployment-context-2026-05-05`) and `feature/editor-deployment-context` (fully merged + redundant) deleted from local + origin. See `runtime/OPEN_ITEMS.md` C48 for the disposition trail.
 
 **Important:** both repos were force-pushed 2026-05-29 by the runtime/production thread (re-authored ~680 commits to operator's real identity). All pre-rewrite SHAs in older docs / handoffs / commits / planning entries are DEAD; translate via `~/Desktop/AI Assembly/archive/2026-05-29-history-rewrite/HASH_REMAP_{code,athens}_2026-05-29.tsv` if needed. Pre-rewrite backups at `~/Desktop/AI Assembly/archive/2026-05-29-history-rewrite/BACKUP_{code,athens}_pre-rewrite.bundle` (see the folder's `README.md` for usage). The runtime thread's `d80a0ac` ("docs: remap commit-hash citations to post-rewrite SHAs (21 files)") swept most planning docs; if you find a dead SHA in voices-thread docs, the file may have been missed.
 
@@ -83,7 +83,7 @@ External work; surfacing here because it confirms voices-thread architectural ch
 
 1. **Marley + Whanganui post-Athens reader gates** — Rastafari-orbit reader (Imani Tafari-Ama / Carolyn Cooper / Bob Marley Foundation / Anthony Bogues orbit) for Marley's load-bearing I-and-I; iwi-orbit reader for Whanganui v2 witness-translator stance. Per §11 + §24 + §28.
 2. **D1/E1 paragraph use post-Athens** — drafts at `_workspace/archive/session-artifacts/MARLEY_READINESS_PARAGRAPHS_2026-05-04.md` (archived 2026-05-29) were written for pre-Athens; if you publish post-Athens commentary or the Rastafari reader-gate work, these are the refinement starting point. Whanganui parallel drafts not yet written.
-3. **Branch hygiene (runtime-thread's call)** — `feature/editor-deployment-context` is fully merged + redundant; `feature/voice-deployment-context` holds shelved `6a8e825` (C48). Runtime thread owns disposition.
+3. ~~Branch hygiene~~ ✅ **Resolved 2026-06-01:** both branches deleted; `feature/voice-deployment-context` retired as superseded (C48 option-b) with design captured at `runtime/DESIGN_voice_deployment_context.md` + code at tag `archive/voice-deployment-context-2026-05-05`.
 
 ### v4.1 architectural cleanup (post-Athens; not pre-Athens-eligible)
 

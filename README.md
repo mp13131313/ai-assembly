@@ -98,8 +98,8 @@ venv/bin/python run_pass0a_voice_config.py "Voice Name"
 venv/bin/python run_phase0_1_research.py "Voice Name"
 
 # 3. Manual: 6 claude.ai sessions per voice with Extended Thinking + Deep Research
-#    §1–§5: Opus 4.6
-#    §6:    Opus 4.7
+#    Use Opus 4.7 across all 6 sections (the older "§1-§5 use 4.6, §6 uses 4.7"
+#    guidance is stale — see _workspace/planning/voices/ONBOARDING.md DOs).
 #    Save each as $PROJECT_ROOT/voices/<slug>/01_research/04_dr_dossier/0N_section_N.md
 
 # 4. Main pipeline: chunked Pass 1.1–1.7 → Pass 2..6 → Pass 6.5 → Pass 7-pre/anachronism/7a/b/c → Derive
@@ -112,7 +112,7 @@ venv/bin/python run_persona_pipeline.py "Voice Name"
 scripts/batch_pre_dr.sh "$AI_ASSEMBLY_PROJECT_ROOT/voices_batch.txt" --parallel 3
 ```
 
-Per-voice subfolder layout under `<PROJECT_ROOT>/voices/<slug>/` is documented in [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) §0.1.
+Per-voice subfolder layout under `<PROJECT_ROOT>/voices/<slug>/` is documented in [`personas/README.md`](personas/README.md) §"Per-voice subfolder layout".
 
 **Note:** personas and runtime require separate venvs for dependency isolation.
 

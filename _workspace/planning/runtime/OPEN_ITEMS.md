@@ -2065,7 +2065,7 @@ But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still appl
 
 ### C41. Provocateur briefing layer — track context + cross-theme overview still thin 🟡 (filed 2026-05-05 on feature/voice-deployment-context as C39; renumbered + carried over 2026-05-08 during pre-merge consolidation)
 
-**Background.** Filed 2026-05-05 from chat-test diagnostic + deployment-context dryrun. Original commit `0089f10` on feature/voice-deployment-context has the full diagnostic narrative — operator chat-tested Plato by feeding the WBBF program HTML (12 tracks + 126 sessions + 202 speaker bios + curators) as system context; Plato produced rich, specific, multi-turn responses (Gorgias kolakeia move on "beautiful business," wrestling-circle dismantling of "16 philosophers + no moderator," Seventh-Letter-flavored letter to those 16). Structural diagnosis: what was fed to chat-Plato is structurally analogous to what `_render_narrative_briefing` in [provocateur_flow.py:1070](runtime/flows/provocateur_flow.py:1070) feeds runtime-voice, but runtime briefing is thinner.
+**Background.** Filed 2026-05-05 from chat-test diagnostic + deployment-context dryrun. Original commit `0089f10` (preserved at tag `archive/voice-deployment-context-2026-05-05` after branch deletion 2026-06-01) has the full diagnostic narrative — operator chat-tested Plato by feeding the WBBF program HTML (12 tracks + 126 sessions + 202 speaker bios + curators) as system context; Plato produced rich, specific, multi-turn responses (Gorgias kolakeia move on "beautiful business," wrestling-circle dismantling of "16 philosophers + no moderator," Seventh-Letter-flavored letter to those 16). Structural diagnosis: what was fed to chat-Plato is structurally analogous to what `_render_narrative_briefing` in [provocateur_flow.py:1070](runtime/flows/provocateur_flow.py:1070) feeds runtime-voice, but runtime briefing is thinner.
 
 **Caveat (preserved from original):** runtime can't fully replicate chat-test richness. Chat had open framing + whole-program scope + multi-turn refinement; runtime has sharp formulation + per-theme scope + single-shot Step 1 → Step 2. Even with much richer briefings, runtime voices produce theme-bounded reasoning by design.
 
@@ -2080,7 +2080,7 @@ But the Sonnet validator's `safeguards.ai_self_acknowledgment` pillar still appl
 **Marley × theme_001 silent-drop note (preserved from original):** root cause confirmed as Anthropic content filter (`APIStatusError: Output blocked by content filtering policy`); same theme content trips filter both runs. Not a runtime bug — card×theme content interaction worth Marley-card investigation. C38 manifest tracking (SHIPPED 2026-05-04 PM) closes the silent-drop bug class.
 
 **Cross-references:**
-- Original commit `0089f10` on feature/voice-deployment-context (full narrative).
+- Original commit `0089f10` preserved at tag `archive/voice-deployment-context-2026-05-05` (full narrative — `git show 0089f10` works after the tag is fetched).
 - C38 (manifest tracking, SHIPPED 2026-05-04) — closes silent-drop bug class.
 - `cbcdf82` (panel-speaker attribution end-to-end) — closes sub-item 2.
 

@@ -169,7 +169,7 @@ For the build-side specification (which pass produces which field, with which pr
 
 For the runtime contract (how Voice Pipeline + Provocateur Pipeline consume the card): see `personas/HANDOFF.md`.
 
-For the gap-analysis snapshot of what's built and what's not: see `docs/CURRENT_STATE.md`.
+For the current build state: `STATE.md` + `CLAUDE.md` (state block at top). For the pre-Athens gap-analysis snapshot: `_workspace/archive/CURRENT_STATE_2026-04-27.md` (2026-04-27 — Athens has shipped since; trust `STATE.md` for current).
 
 ---
 

@@ -386,7 +386,7 @@ Precedence:
    active, a silent default risks writing to the wrong one.
 
 Per-voice subfolder layout (under `<PROJECT_ROOT>/voices/<slug>/`) is
-documented in `docs/CURRENT_STATE.md` §0.1 and `personas/README.md`.
+documented in `personas/README.md` §"Per-voice subfolder layout".
 
 The athens-2026 production project has its own private backup git repo
 (`mp13131313/ai-assembly-athens2026-voices`) for backup of per-project
@@ -406,7 +406,7 @@ For a fresh Claude session that needs to understand the project:
 5. `_workspace/planning/FOLLOW_UPS.md` (frozen historical ledger of
    FU#1–62; consult only when chasing a specific FU# reference)
 6. `docs/README.md` (staleness index for canonical specs)
-7. `docs/CURRENT_STATE.md` (gap analysis snapshot)
+7. `STATE.md` (one-glance entry point) + `_workspace/planning/runtime/OPEN_ITEMS.md` (post-Athens open items). For historical gap-analysis context (pre-Athens, 2026-04-27 snapshot), see `_workspace/archive/CURRENT_STATE_2026-04-27.md` §5 architectural-decision sections.
 8. `docs/AI_Assembly_Briefing_v3_1.md` (project source of truth)
 9. `docs/AUDIENCE_BRIEF.md` (audience characterization)
 10. `docs/AI_Assembly_Persona_Pipeline_v4.md` (current persona pipeline

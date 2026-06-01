@@ -1313,7 +1313,7 @@ These are draft validation notes; refine against the first actual Athens dry run
 - `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + register rule (note: §H family-of-forms + §J voice-IN-the-present + tense discipline amendments were reverted 2026-04-28 per commit `3feb2b2`; current persona prompts are at the 418d553 baseline)
 - `docs/AI_Assembly_Persona_Pipeline_v4.md` — the persona build pipeline that produces the cards this Voice Pipeline consumes
 - `docs/AI_Assembly_Provocateur_Pipeline.md` — Stage 4 Packaging defines this Voice Pipeline's input contract (the briefings)
-- `docs/CURRENT_STATE.md` — gap analysis + critical path; Voice Pipeline is Phase D (this spec lands; build follows)
+- `_workspace/archive/CURRENT_STATE_2026-04-27.md` — gap analysis + critical path; Voice Pipeline is Phase D (this spec lands; build follows)
 - `personas/HANDOFF.md` — cross-repo runtime contract; authoritative on what to drop / keep when assembling system prompts
 - `_workspace/planning/HANDOFF_2026_04_28.md` — handoff covering the persona-prompt revert (commit `3feb2b2`); see also `_workspace/planning/HANDOFF_DRYRUN_2026_04_29.md` for the Voice Pipeline first-dry-run pickup
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker; FU#49M (`strain_markers[]` schema as Step 2 contract, post-Athens), FU#42 (split-card architecture, post-Athens), FU#49F (per-voice framework-strain log on micro-site, post-Athens)

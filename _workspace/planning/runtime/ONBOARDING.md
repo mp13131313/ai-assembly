@@ -68,7 +68,7 @@ runtime/flows/
 | Cache token tracking persisted in artifacts | ✅ LANDED 2026-05-02 PM — step1/step2/step3/continuity all persist `cache_creation_input_tokens` + `cache_read_input_tokens` for accurate post-hoc cost reconciliation | commit `ffad93f` |
 | Voice Pipeline field routing (voice/expression in Step 1; reasoning fields in Step 2) | ✅ REFACTORED 2026-05-02 PM — closes the prompt/system mismatch where Step 2's decision_1 cited `finds_compelling`/`resists` but the fields weren't loaded | commit `ffad93f` |
 | Voice Pipeline closing prompts (Step 1 + Step 2) | ✅ REWRITTEN 2026-05-02 PM under Haltung lens — section-by-section word-by-word challenge; Step 2 adds `<weighing>` discrete pre-focus phase + `weight_assessment` first-class field | commit `ffad93f` + `9e1c987` |
-| Editor Pipeline (Claudia Pinchbeck → dossier) | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `fc5c2fb`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); wiring proven via single-dossier live test 2026-05-04 (~$1.50). Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). | OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢 implementation shipped) |
+| Editor Pipeline (Tim Leberecht → dossier) | ✅ SHIPPED + RAN ATHENS NIGHTS 1–3 (13 dossiers total). Spec: `docs/AI_Assembly_Editor_Pipeline.md` v2.1 (with deployment_context override mechanism). Tim is the 13th persona (Assembly editor; not on the panel); card at `athens-2026/editor/tim_leberecht/`. Earlier Claudia Pinchbeck DRAFT card DEPRECATED 2026-05-05 on Tim ship. | OPEN_ITEMS A2 (✅ resolved) + B1 (✅ shipped) |
 | Provocateur cross-night exclusion (C9) | ✅ LANDED 2026-05-02 — content-based matching by normalized theme title (theme_ids not stable across Researcher runs); CLI `--prior-nights` arg | commit `04167ef`; 15 unit tests passing |
 | publish_flow.py per-theme cross-night collision | ✅ FIXED 2026-05-02 — per-night subdirectory `themes/night_<N>/<theme_id>.json` | commit `927a671` |
 | Defensive `--night` check on voice_flow + publish_flow | ✅ LANDED 2026-05-02 — `assert_run_dir_night_matches()` refuses to run if --night doesn't match run_dir's embedded night number; catches silent cross-night corruption | commit `373051e`; 9 unit tests passing |
@@ -79,7 +79,7 @@ runtime/flows/
 
 | Component | Status |
 |---|---|
-| Editor / Frame layer | 🟢 IMPLEMENTATION SHIPPED 2026-05-03 PM (commit `fc5c2fb`); v2 spec canonical (`docs/AI_Assembly_Editor_Pipeline.md`); 38 tests; admin drilldown live. Wiring proven via single-dossier live test 2026-05-04. Pending: Claudia full 35-field card (voices thread) + closing-prompt v1→v2 rewrite (~30-60 min). See OPEN_ITEMS B1. |
+| Editor / Frame layer | ✅ SHIPPED + RAN ATHENS NIGHTS 1–3 (13 dossiers; Tim Leberecht is the 13th persona Assembly editor; v2.1 spec with deployment_context override). 38 tests; admin drilldown live. Earlier Claudia Pinchbeck DRAFT card deprecated 2026-05-05 on Tim ship. See OPEN_ITEMS B1. |
 | Microsite | ❌ NOT BUILT — operator designing; consumes `published_artifacts/`. See OPEN_ITEMS B2 |
 | Broadsheet / Edition Pipeline | ❌ NOT BUILT — folded into Editor Pipeline (B1) |
 | Substack draft pipeline pass | ✅ DROPPED 2026-05-02 PM per Editor Pipeline spec (microsite-only) |
@@ -181,7 +181,7 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `main`. The `voice-pipeline-v2.1-align-revert` + `feature/editor-deployment-context` branches merged to `main` before Athens; all work since is on `main`. **Athens Nights 1–3 are complete + published** (code `f64614c`, athens-2026 `394914b`) — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
+**Branch:** `main`. Earlier `voice-pipeline-v2.1-align-revert`, `feature/editor-deployment-context`, and `feature/voice-deployment-context` branches all settled before Athens — editor-side work was re-implemented directly on main (commits `0f751b7` + `cbcdf82` + `fda8091` + `7e99c63`); voice-side branch was held + later retired as superseded (C48 option-b, 2026-06-01 — see `DESIGN_voice_deployment_context.md` + tag `archive/voice-deployment-context-2026-05-05`). All work since is on `main`. **Athens Nights 1–3 are complete + published** — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
 
 **Branch history (chronological — most recent first):**
 
@@ -432,7 +432,8 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 | Researcher prompts | `runtime/flows/shared/prompts/researcher_*.md` |
 | Voice Pipeline spec | `docs/AI_Assembly_Voice_Pipeline.md` |
 | Frame Concept | `docs/AI_Assembly_Frame_Concept_v1.md` |
-| Gap analysis + architectural rationale (cross-cuts persona + runtime) | `docs/CURRENT_STATE.md` (§0 quick map, §1 what exists, §5 architectural decisions) |
+| Current state (post-Athens) | `STATE.md` (top-level) + `CLAUDE.md` (state block at top) + `_workspace/planning/runtime/OPEN_ITEMS.md` |
+| Historical gap analysis + architectural rationale (pre-Athens) | `_workspace/archive/CURRENT_STATE_2026-04-27.md` §5 architectural-decision sections |
 | Briefing (project source of truth) | `docs/AI_Assembly_Briefing_v3_1.md` |
 | Persona Card schema | `docs/AI_Assembly_Persona_Card_v2.md` |
 | Provocateur spec | `docs/AI_Assembly_Provocateur_Pipeline.md` |

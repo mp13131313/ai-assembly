@@ -203,4 +203,4 @@ discipline before the voice sees them.
 - [`docs/AI_Assembly_Persona_Card_v2.md`](../../../docs/AI_Assembly_Persona_Card_v2.md) — card schema (with v2.1 amendments)
 - [`docs/AI_Assembly_Frame_Concept_v1.md`](../../../docs/AI_Assembly_Frame_Concept_v1.md) — frame layer (Edition Pipeline downstream of Step 3, not Voice Pipeline scope)
 - [`personas/HANDOFF.md`](../../../personas/HANDOFF.md) — cross-repo runtime contract
-- [`docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md) — gap analysis + critical path
+- [`STATE.md`](../../../STATE.md) + [`CLAUDE.md`](../../../CLAUDE.md) — current state (post-Athens). For pre-Athens gap analysis + critical path: [`_workspace/archive/CURRENT_STATE_2026-04-27.md`](../../../_workspace/archive/CURRENT_STATE_2026-04-27.md)
