@@ -716,8 +716,31 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .phase { background: linear-gradient(90deg, var(--accent) 0%, #7a5aaa 100%);
            color: white; padding: 0.6rem 1rem; margin: 2.5rem 0 1rem;
            font: italic 600 1.3rem var(--serif); border-radius: 4px; }
+  .phase.assembly { background: linear-gradient(90deg, #8a5a1a 0%, #a87a2a 100%); }
   .phase small { display: block; font: 0.85rem/1.4 -apple-system, sans-serif;
                  color: rgba(255,255,255,0.85); font-style: normal; margin-top: 0.2rem; }
+  .sub-nav { position: sticky; top: 48px; background: rgba(34, 34, 34, 0.96);
+             backdrop-filter: blur(6px); color: #ddd; padding: 0.5rem 1rem;
+             margin: 0 -2rem 1rem; z-index: 50; font-size: 0.82rem;
+             display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center;
+             border-bottom: 1px solid #444; }
+  .sub-nav .phase-label { font: italic 600 0.85rem var(--serif); padding: 0 0.4rem;
+                          opacity: 0.85; }
+  .sub-nav .phase-label.conf { color: #c9b8e6; }
+  .sub-nav .phase-label.assembly { color: #e6c8a0; }
+  .sub-nav .phase-label::after { content: ':'; opacity: 0.6; }
+  .sub-nav .divider { color: #666; padding: 0 0.5rem; }
+  .sub-nav a.section-link { color: #bbb; text-decoration: none;
+                            padding: 0.25rem 0.6rem; border-radius: 12px;
+                            transition: all 0.15s; font-size: 0.82rem;
+                            white-space: nowrap; }
+  .sub-nav a.section-link:hover { background: #444; color: #fff; }
+  .sub-nav a.section-link.active.conf { background: var(--accent); color: white;
+                                         box-shadow: 0 0 0 2px rgba(90, 58, 138, 0.3); }
+  .sub-nav a.section-link.active.assembly { background: #8a5a1a; color: white;
+                                              box-shadow: 0 0 0 2px rgba(138, 90, 26, 0.3); }
+  .sub-nav .you-are-here { font-size: 0.7rem; color: #999; padding: 0 0.4rem;
+                           font-family: var(--mono); }
   .backlink { font-size: 0.85rem; color: var(--accent); margin: 0.25rem 0;
               padding: 0.2rem 0.4rem; background: var(--accent-bg);
               border-radius: 3px; display: inline-block; }
@@ -875,6 +898,29 @@ for (const night of ['night_1', 'night_2', 'night_3']) {
 function renderNight(pane, night) {
   const n = DATA.nights[night] || {};
   const stats = n.statistics || {};
+
+  // Sticky sub-nav — pills for each section, highlights as you scroll
+  const subnav = el('nav', {class: 'sub-nav'});
+  subnav.innerHTML = `
+    <span class="phase-label conf">Conference Data</span>
+    <a href="#" data-target="sec-${night}-sessions" class="section-link conf">📼 Sessions</a>
+    <a href="#" data-target="sec-${night}-clusters" class="section-link conf">🔗 Clusters</a>
+    <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes</a>
+    <span class="divider">·</span>
+    <span class="phase-label assembly">Assembly Output</span>
+    <a href="#" data-target="sec-${night}-selected" class="section-link assembly">🎯 Selected themes</a>
+    <a href="#" data-target="sec-${night}-voices" class="section-link assembly">🗣 Voices</a>
+    <a href="#" data-target="sec-${night}-dossiers" class="section-link assembly">📰 Dossiers</a>
+  `;
+  subnav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const tgt = document.getElementById(a.dataset.target);
+      if (tgt) tgt.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
+  });
+  pane.appendChild(subnav);
+
   // Stats bar
   const statsBar = el('div', {class: 'stats'});
   statsBar.innerHTML = `
@@ -899,14 +945,15 @@ function renderNight(pane, night) {
     pane.appendChild(d);
   }
 
-  // ─── PHASE A: CONFERENCE TOPIC ───
+  // ─── PHASE A: CONFERENCE DATA ───
   const phaseA = el('div', {class: 'phase'});
-  phaseA.innerHTML = `PHASE A · Conference content
+  phaseA.innerHTML = `PHASE A · Conference Data
     <small>What was said in the room — sessions, extracted positions, KJ clusters, derived themes</small>`;
   pane.appendChild(phaseA);
 
   // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
-  pane.appendChild(el('div', {class: 'section-title'}, `📼 Sessions (${stats.sessions || 0})`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
+    `📼 Sessions (${stats.sessions || 0})`));
   const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
   const audioSessions = sessions.filter(s => !s.is_reflection)
     .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
@@ -961,7 +1008,8 @@ function renderNight(pane, night) {
   }
 
   // Clusters (with extraction membership + theme backlink)
-  pane.appendChild(el('div', {class: 'section-title'}, `🔗 Clusters (${stats.clusters || 0}) — KJ grouping of extractions`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-clusters`, 'data-section': `sec-${night}-clusters`},
+    `🔗 Clusters (${stats.clusters || 0}) — KJ grouping of extractions`));
   const clusters = Object.values(DATA.clusters).filter(c => c.night === night)
     .sort((a, b) => (a.cluster_id || '').localeCompare(b.cluster_id || ''));
   for (const c of clusters) {
@@ -969,28 +1017,31 @@ function renderNight(pane, night) {
   }
 
   // Themes (with cluster membership + selected/dropped marker)
-  pane.appendChild(el('div', {class: 'section-title'}, `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur)`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
+    `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur)`));
   const themes = Object.values(DATA.themes).filter(t => t.night === night)
     .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
   for (const t of themes) {
     pane.appendChild(renderThemePhaseA(t, night));
   }
 
-  // ─── PHASE B: WHAT THE ASSEMBLY DID ───
-  const phaseB = el('div', {class: 'phase'});
-  phaseB.innerHTML = `PHASE B · Assembly's response
+  // ─── PHASE B: ASSEMBLY OUTPUT ───
+  const phaseB = el('div', {class: 'phase assembly'});
+  phaseB.innerHTML = `PHASE B · Assembly Output
     <small>What the voices and the editor did with the room — formulations, voice reasoning + artifacts, Tim's dossiers</small>`;
   pane.appendChild(phaseB);
 
   // Selected themes → voice responses + dossier (the deliberation chain)
-  pane.appendChild(el('div', {class: 'section-title'}, `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
+    `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
   const selectedThemes = themes.filter(t => t.selected_for_provocateur);
   for (const t of selectedThemes) {
     pane.appendChild(renderThemePhaseB(t, night));
   }
 
   // Voices' Step 2 artifacts (per-voice synthesis)
-  pane.appendChild(el('div', {class: 'section-title'}, `🗣 Voices' Step 2 artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
+    `🗣 Voices' Step 2 artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
   const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
     .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
   for (const s of step2s) {
@@ -998,7 +1049,8 @@ function renderNight(pane, night) {
   }
 
   // Dossiers (Tim's compositions)
-  pane.appendChild(el('div', {class: 'section-title'}, `📰 Dossiers (${stats.dossiers || 0}) — Tim's editorial compositions`));
+  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
+    `📰 Dossiers (${stats.dossiers || 0}) — Tim's editorial compositions`));
   const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
     .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
   for (const d of dossiers) {
@@ -1564,6 +1616,53 @@ function buildVoicesIndex() {
   }
 }
 buildVoicesIndex();
+
+// Sticky sub-nav: highlight current section as user scrolls
+function setupSectionObserver() {
+  const sections = document.querySelectorAll('[data-section]');
+  if (!sections.length) return;
+  let lastActive = null;
+  const observer = new IntersectionObserver((entries) => {
+    // Find the topmost section currently in view
+    const inView = entries.filter(e => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (!inView.length) return;
+    const top = inView[0].target;
+    const targetId = top.id;
+    if (targetId === lastActive) return;
+    lastActive = targetId;
+    // Update all sub-navs (each night has its own); only the visible one matters
+    document.querySelectorAll('.sub-nav a').forEach(a => {
+      if (a.dataset.target === targetId) a.classList.add('active');
+      else a.classList.remove('active');
+    });
+  }, {
+    root: null,
+    rootMargin: '-120px 0px -55% 0px',  // section is "active" when between ~120px from top and ~45% down
+    threshold: 0,
+  });
+  sections.forEach(s => observer.observe(s));
+}
+setupSectionObserver();
+
+// When tab changes, scroll to top and re-highlight first section
+document.querySelectorAll('nav.tabs button').forEach(b => {
+  b.addEventListener('click', () => {
+    setTimeout(() => {
+      window.scrollTo({top: 0, behavior: 'instant'});
+      // Initial: highlight Sessions of the active night
+      const night = b.dataset.night;
+      document.querySelectorAll('.sub-nav a').forEach(a => a.classList.remove('active'));
+      const firstLink = document.querySelector(`#${night} .sub-nav a[data-target="sec-${night}-sessions"]`);
+      if (firstLink) firstLink.classList.add('active');
+    }, 50);
+  });
+});
+
+// Initial active state for night_1
+document.querySelectorAll('#night_1 .sub-nav a').forEach(a => {
+  if (a.dataset.target === 'sec-night_1-sessions') a.classList.add('active');
+});
 </script>
 </body>
 </html>
