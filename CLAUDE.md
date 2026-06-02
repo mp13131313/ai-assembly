@@ -45,11 +45,13 @@ as audio-vendor sessions; downstream Researcher reads identically. Each
 
 ## Pickup pattern
 
-Two workstreams, two subfolders:
+Two workstreams, two subfolders, plus a few cross-cutting docs:
 
 - For voice-build work: `_workspace/planning/voices/{ONBOARDING,OPEN_ITEMS,HANDOFF}.md`
 - For runtime work: `_workspace/planning/runtime/{ONBOARDING,OPEN_ITEMS,HANDOFF*}.md`
 - For cross-cutting rules + DON'Ts: `_workspace/planning/ONBOARDING.md` (thin index)
+- For naming + organization conventions: `_workspace/planning/conventions.md`
+- For deferred doc-architecture follow-ups: `_workspace/planning/doc_infrastructure_backlog.md`
 - Frozen FU# ledger: `_workspace/planning/FOLLOW_UPS.md` (no new entries)
 
 ## Filesystem layout (umbrella — Tier 3)
@@ -182,33 +184,47 @@ data; the code repo never touches per-project data.
 
 ## Orientation reading order
 
-For a fresh Claude session that needs to understand the project:
+For a fresh Claude session opening the repo cold.
 
-1. `CLAUDE.md`, `README.md` (this file + top-level — repo conventions)
-2. `_workspace/planning/ONBOARDING.md` (thin index — workstream split +
-   cross-cutting DON'Ts + calibration)
-3. **For voice-build work:** `voices/ONBOARDING.md` → `voices/OPEN_ITEMS.md`
-   → `voices/HANDOFF.md` (~25 min to working knowledge)
-4. **For runtime work:** `runtime/ONBOARDING.md` → `runtime/OPEN_ITEMS.md`
-   → latest `runtime/HANDOFF_*.md`
-5. `_workspace/planning/FOLLOW_UPS.md` (frozen historical ledger of
-   FU#1–62; consult only when chasing a specific FU# reference)
-6. `docs/README.md` (staleness index for canonical specs)
-7. `STATE.md` (one-glance entry point) + `_workspace/planning/runtime/OPEN_ITEMS.md` (post-Athens open items). For historical gap-analysis context (pre-Athens, 2026-04-27 snapshot), see `_workspace/archive/CURRENT_STATE_2026-04-27.md` §5 architectural-decision sections.
-8. `docs/AI_Assembly_Briefing_v3_1.md` (project source of truth)
-9. `docs/AUDIENCE_BRIEF.md` (audience characterization)
-10. `docs/AI_Assembly_Persona_Pipeline_v4.md` (current persona pipeline
-    spec)
-11. Other `docs/AI_Assembly_*_Pipeline.md` and `runtime/` + `personas/`
-    code by area, as the task requires
+**Priority (the first 20–30 min):**
 
-Stop after step 3 (or 4 for runtime work) unless the task demands more
-— that's ~25–30 min of working knowledge. Then ask the user for the
-specific task.
+1. **`CLAUDE.md`** — this file. Scaffolding + conventions + filesystem
+   layout. (You're here.)
+2. **`STATE.md`** — current state, single source for "what's now."
+   Per-night Athens production results, open items, voice-build state.
+3. **`_workspace/planning/ONBOARDING.md`** — thin planning index +
+   cross-cutting DON'Ts + calibration.
+4. **For the task at hand:**
+   - **Voice-build work:** `voices/ONBOARDING.md` → `voices/OPEN_ITEMS.md`
+     → `voices/HANDOFF.md`
+   - **Runtime work:** `runtime/ONBOARDING.md` → `runtime/OPEN_ITEMS.md`
+     → latest `runtime/HANDOFF_*.md`
+
+That's working knowledge for most tasks. **Stop there unless the task
+demands more.**
+
+**Consult as needed:**
+
+- `README.md` — public-facing project overview (external context only)
+- `CHANGELOG.md` — when did X happen? (time-stamped history)
+- `_workspace/planning/conventions.md` — read before editing docs or
+  reorganizing the filesystem
+- `_workspace/planning/doc_infrastructure_backlog.md` — only when doing
+  doc/filesystem architecture work
+- `docs/README.md` — staleness index for canonical specs
+- `docs/AI_Assembly_Briefing_v3_1.md` — project source of truth
+- `docs/AUDIENCE_BRIEF.md` — audience characterization
+- `docs/AI_Assembly_Persona_Pipeline_v4.md` — current persona pipeline
+  spec; other `docs/AI_Assembly_*_Pipeline.md` for specific stage specs
+- `_workspace/planning/FOLLOW_UPS.md` — only when chasing a specific
+  FU# reference (frozen historical ledger)
+- `_workspace/archive/2026-04-27_current_state_snapshot/CURRENT_STATE.md`
+  — only when a spec doc cites §5.x architectural-rationale sections
 
 If a session-artifact references a fix-plan, run artifact, or
 consolidation snapshot in `_workspace/archive/`, read it then. Otherwise
-treat `_workspace/archive/` as cold storage per the §"Repo layout" rule.
+treat `_workspace/archive/` and the umbrella `~/Desktop/AI Assembly/archive/`
+as cold storage per the §"Repo layout" rule.
 
 ## Separate venvs
 
