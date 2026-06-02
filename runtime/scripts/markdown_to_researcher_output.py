@@ -52,7 +52,9 @@ Example:
 
     python runtime/scripts/markdown_to_researcher_output.py \\
         ~/Desktop/themes_more_than_human_democracy-2.md \\
-        $AI_ASSEMBLY_PROJECT_ROOT/runs/ai_democracy_marathon_opening_2026_05_06
+        $AI_ASSEMBLY_PROJECT_ROOT/runs/<run_dir>
+    # (the original Athens-pre-conference dryrun was at
+    # runs/_archive/ai_democracy_marathon_opening_2026_05_06/ — moved 2026-06-02)
 """
 from __future__ import annotations
 
