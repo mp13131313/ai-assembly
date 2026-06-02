@@ -627,156 +627,303 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <title>Athens 2026 — Data Graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
+  /* ─── Style adapted from World Beautiful Business Forum (WBBF) ─── */
   :root {
-    --bg: #fafaf7; --fg: #1a1a1a; --muted: #6a6a6a;
-    --border: #d8d4cc; --accent: #5a3a8a; --accent-bg: #ece5f5;
-    --card: #ffffff; --highlight: #fff4d4;
-    --mono: "SF Mono", "Monaco", "Inconsolata", monospace;
-    --serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+    --ink: #0a0a0a;
+    --paper: #ffffff;
+    --cream: #f5f5f5;
+    --warm-mid: #555555;
+    --warm-light: #888888;
+    --border-soft: rgba(0,0,0,0.08);
+    --border-mid: rgba(0,0,0,0.15);
+    /* Brand palette */
+    --brand-blue: #0F49F4;
+    --brand-blue-light: #e8eeff;
+    --brand-red: #D63C23;
+    --brand-red-light: #fff0ec;
+    --brand-green: #00845C;
+    --brand-gold: #8C7203;
+    /* Phase semantics — Conference Data = blue (facts/research), Assembly Output = rust-red (voices/deliberation) */
+    --conf-accent: #0F49F4;
+    --conf-accent-bg: #e8eeff;
+    --assembly-accent: #D63C23;
+    --assembly-accent-bg: #fff0ec;
+    /* Backward-compat aliases (so existing inline references resolve) */
+    --bg: var(--paper);
+    --fg: var(--ink);
+    --muted: var(--warm-mid);
+    --border: var(--border-mid);
+    --accent: var(--conf-accent);
+    --accent-bg: var(--conf-accent-bg);
+    --card: var(--paper);
+    --highlight: #fef0c8;
+    /* Fonts */
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --serif: 'Libre Baskerville', Georgia, serif;
+    --display: 'Impact', 'Arial Black', 'Helvetica Neue Condensed', sans-serif;
+    --mono: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
-         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
-  header { background: #1a1a1a; color: #fafaf7; padding: 1rem 2rem;
-           display: flex; align-items: baseline; gap: 2rem; flex-wrap: wrap;
-           position: sticky; top: 0; z-index: 100; }
-  header h1 { margin: 0; font: italic 600 1.5rem var(--serif); }
-  header .subtitle { color: #aaa; font-size: 0.9rem; }
-  nav.tabs { background: #2a2a2a; padding: 0 2rem; display: flex; gap: 0;
-             position: sticky; top: 0; z-index: 99; }
-  nav.tabs .night-menu { position: relative; display: inline-block; }
-  nav.tabs .night-button { background: transparent; border: 0; color: #aaa;
-                           padding: 0.75rem 1.5rem; font: inherit; cursor: pointer;
-                           border-bottom: 3px solid transparent; }
-  nav.tabs .night-menu:hover .night-button { color: #fff; }
-  nav.tabs .night-menu.has-conf-active .night-button { color: #fff;
-                                                       border-bottom-color: var(--accent); }
-  nav.tabs .night-menu.has-assembly-active .night-button { color: #fff;
-                                                          border-bottom-color: #8a5a1a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: var(--ink); font: 13px/1.6 var(--sans);
+         min-height: 100vh; overflow-x: hidden; }
+
+  /* When the active page is the Assembly page, swap accent to rust-red */
+  .page-pane[id$="_assembly"] { --accent: var(--assembly-accent);
+                                --accent-bg: var(--assembly-accent-bg); }
+
+  /* ─── HERO ─── */
+  .hero { background: var(--ink); color: var(--paper); padding: 64px 40px 48px;
+          position: relative; overflow: hidden; }
+  .hero-eyebrow { font-family: var(--sans); font-size: 10px; letter-spacing: 0.25em;
+                  text-transform: uppercase; color: rgba(255,255,255,0.7);
+                  margin-bottom: 10px; font-weight: 500; }
+  .hero-title { font-family: var(--display); font-size: clamp(40px, 6vw, 72px);
+                font-weight: 400; line-height: 1.0; letter-spacing: 0.02em;
+                text-transform: uppercase; margin-bottom: 10px; }
+  .hero-title em { font-style: normal; color: var(--brand-blue); }
+  .hero-subtitle { font-family: var(--serif); font-size: clamp(15px, 1.8vw, 20px);
+                   font-weight: 400; font-style: italic; color: rgba(255,255,255,0.75);
+                   margin-bottom: 36px; max-width: 720px; line-height: 1.45; }
+  .hero-meta { display: flex; gap: 40px; flex-wrap: wrap; }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+                     color: rgba(255,255,255,0.55); font-weight: 500; }
+  .hero-meta-value { font-family: var(--serif); font-size: 18px; font-weight: 400;
+                     color: var(--paper); }
+
+  /* ─── STICKY CONTROLS (top nav with night dropdowns) ─── */
+  nav.tabs { background: var(--ink); border-bottom: 2px solid var(--brand-blue);
+             padding: 0 40px; display: flex; align-items: stretch; gap: 0;
+             position: sticky; top: 0; z-index: 99; overflow: visible; }
+  nav.tabs .night-menu { position: relative; display: inline-flex; }
+  nav.tabs .night-button { background: transparent; border: 0;
+                           color: rgba(255,255,255,0.75); font-family: var(--sans);
+                           font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+                           padding: 16px 18px; cursor: pointer; white-space: nowrap;
+                           border-bottom: 2px solid transparent; margin-bottom: -2px;
+                           transition: color 0.2s; }
+  nav.tabs .night-menu:hover .night-button { color: var(--paper); }
+  nav.tabs .night-menu.has-conf-active .night-button { color: var(--paper);
+                                                       border-bottom-color: var(--brand-blue); }
+  nav.tabs .night-menu.has-assembly-active .night-button { color: var(--paper);
+                                                          border-bottom-color: var(--brand-red); }
   nav.tabs .night-menu .dropdown { display: none; position: absolute; top: 100%; left: 0;
-                                    background: #2a2a2a; border: 1px solid #444;
-                                    min-width: 220px; padding: 0.3rem 0; z-index: 200; }
+                                    background: var(--ink); border: 1px solid rgba(255,255,255,0.2);
+                                    min-width: 240px; padding: 0; z-index: 200; }
   nav.tabs .night-menu:hover .dropdown { display: block; }
-  nav.tabs .night-menu .dropdown a { display: block; color: #ddd; padding: 0.55rem 1rem;
-                                     text-decoration: none; font-size: 0.92rem;
-                                     cursor: pointer; border-left: 3px solid transparent; }
-  nav.tabs .night-menu .dropdown a:hover { background: #444; color: #fff; }
-  nav.tabs .night-menu .dropdown a.active { background: #3a3a3a; color: #fff; }
-  nav.tabs .night-menu .dropdown a.active.conf-link { border-left-color: var(--accent); }
-  nav.tabs .night-menu .dropdown a.active.assembly-link { border-left-color: #8a5a1a; }
+  nav.tabs .night-menu .dropdown a { display: block; color: rgba(255,255,255,0.85);
+                                     padding: 12px 18px; text-decoration: none;
+                                     font-family: var(--sans); font-size: 10px;
+                                     letter-spacing: 0.12em; text-transform: uppercase;
+                                     font-weight: 500; cursor: pointer;
+                                     border-left: 3px solid transparent;
+                                     transition: all 0.15s; }
+  nav.tabs .night-menu .dropdown a:hover { background: rgba(255,255,255,0.08);
+                                           color: var(--paper); }
+  nav.tabs .night-menu .dropdown a.active.conf-link { background: var(--brand-blue);
+                                                      color: var(--paper);
+                                                      border-left-color: var(--brand-blue); }
+  nav.tabs .night-menu .dropdown a.active.assembly-link { background: var(--brand-red);
+                                                          color: var(--paper);
+                                                          border-left-color: var(--brand-red); }
   nav.tabs .spacer { flex: 1; }
-  nav.tabs .voices-index { color: #aaa; padding: 0.75rem 1rem; cursor: pointer;
-                           position: relative; }
-  nav.tabs .voices-index:hover { color: #fff; }
+  nav.tabs .voices-index { color: rgba(255,255,255,0.75); padding: 16px 18px;
+                           cursor: pointer; font-family: var(--sans); font-size: 10px;
+                           letter-spacing: 0.15em; text-transform: uppercase;
+                           position: relative; font-weight: 500; }
+  nav.tabs .voices-index:hover { color: var(--paper); }
   .voices-index .menu { display: none; position: absolute; top: 100%; right: 0;
-                        background: #2a2a2a; border: 1px solid #444; min-width: 280px;
-                        padding: 0.5rem; z-index: 200; }
+                        background: var(--ink); border: 1px solid rgba(255,255,255,0.2);
+                        min-width: 320px; padding: 12px; z-index: 200;
+                        text-transform: none; letter-spacing: normal;
+                        font-family: var(--sans); }
   .voices-index:hover .menu { display: block; }
-  .voices-index .menu a { display: block; color: #ddd; padding: 0.25rem 0.5rem;
-                          text-decoration: none; font-size: 0.85rem; }
-  .voices-index .menu a:hover { background: #444; color: #fff; }
-  main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
-  .stats { background: var(--card); border: 1px solid var(--border);
-           padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;
-           font-family: var(--mono); color: var(--muted); }
-  .stats b { color: var(--fg); }
-  .section-title { font: italic 600 1.6rem var(--serif); margin: 1.5rem 0 0.75rem;
-                   border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
-  details { background: var(--card); border: 1px solid var(--border); margin: 0.5rem 0;
-            border-radius: 4px; }
-  details > summary { cursor: pointer; padding: 0.5rem 0.75rem; font-weight: 500;
-                      user-select: none; }
-  details > summary:hover { background: #f5f1e8; }
-  details > .body { padding: 0.5rem 0.75rem 0.75rem; border-top: 1px solid var(--border); }
-  details details { margin-left: 1rem; }
-  .id { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
-  .abstract { background: #f5f1e8; padding: 0.5rem 0.75rem; margin: 0.5rem 0;
-              border-left: 3px solid var(--accent); font-size: 0.92rem; }
-  .meta { font-size: 0.82rem; color: var(--muted); margin: 0.25rem 0; }
+  .voices-index .menu a { display: inline-block; color: rgba(255,255,255,0.85);
+                          padding: 2px 4px; text-decoration: none; font-size: 11px; }
+  .voices-index .menu a:hover { color: var(--brand-blue); }
+
+  /* ─── MAIN ─── */
+  main { padding: 0 40px 80px; max-width: 1280px; margin: 0 auto; }
+
+  /* ─── STATS BAR ─── */
+  .stats { background: transparent; border: 0; border-bottom: 1px solid var(--border-soft);
+           padding: 24px 0 18px; margin: 0 0 8px; font-family: var(--sans);
+           font-size: 11px; color: var(--warm-mid); letter-spacing: 0.02em; }
+  .stats b { font-family: var(--serif); font-style: italic; font-size: 22px;
+             font-weight: 400; color: var(--ink); display: block; margin-bottom: 8px;
+             letter-spacing: -0.01em; }
+
+  /* ─── SUB-NAV (section pills, filter-chip style) ─── */
+  .sub-nav { position: sticky; top: 50px; background: var(--cream);
+             border-bottom: 1px solid var(--border-soft); padding: 12px 40px;
+             margin: 0 -40px 24px; z-index: 50; display: flex; gap: 6px;
+             flex-wrap: wrap; align-items: center; }
+  .sub-nav .phase-tag { font-family: var(--sans); font-size: 9px; letter-spacing: 0.2em;
+                        text-transform: uppercase; color: var(--warm-mid);
+                        margin-right: 10px; font-weight: 600; }
+  .sub-nav .phase-tag.conf { color: var(--brand-blue); }
+  .sub-nav .phase-tag.assembly { color: var(--brand-red); }
+  .sub-nav .phase-tag::after { content: ''; }
+  .sub-nav a.section-link { background: var(--paper); border: 1px solid var(--border-mid);
+                            color: var(--ink); font-family: var(--sans); font-size: 10px;
+                            letter-spacing: 0.05em; padding: 5px 12px;
+                            border-radius: 2px; text-decoration: none;
+                            white-space: nowrap; transition: all 0.15s; }
+  .sub-nav a.section-link:hover { background: var(--ink); border-color: var(--ink);
+                                   color: var(--paper); }
+  .sub-nav a.section-link.active.conf { background: var(--brand-blue);
+                                         border-color: var(--brand-blue); color: var(--paper); }
+  .sub-nav a.section-link.active.assembly { background: var(--brand-red);
+                                              border-color: var(--brand-red); color: var(--paper); }
+
+  /* ─── SECTION TITLES ─── */
+  .section-title { font-family: var(--serif); font-size: 24px; font-style: italic;
+                   font-weight: 400; color: var(--ink); margin: 36px 0 14px;
+                   padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+
+  /* ─── DETAILS / CARDS ─── */
+  details { background: var(--paper); border: 1px solid var(--border-mid);
+            margin: 6px 0; border-radius: 2px; }
+  details > summary { cursor: pointer; padding: 12px 16px; font-family: var(--serif);
+                      font-size: 14px; line-height: 1.4; color: var(--ink);
+                      user-select: none; transition: background 0.15s; }
+  details > summary:hover { background: var(--cream); }
+  details > .body { padding: 14px 16px 16px; border-top: 1px solid var(--border-soft); }
+  details details { margin-left: 14px; border-left: 2px solid var(--border-soft);
+                    border-top: 0; border-right: 0; border-bottom: 0; border-radius: 0; }
+  details details > summary { padding: 10px 14px; font-size: 13px; }
+
+  /* ─── IDs / META ─── */
+  .id { font-family: var(--mono); font-size: 10px; color: var(--warm-light);
+        letter-spacing: 0.02em; }
+  .abstract { background: var(--cream); padding: 12px 16px; margin: 10px 0;
+              border-left: 3px solid var(--accent); font-family: var(--serif);
+              font-size: 13px; font-style: italic; color: #2a2a2a; line-height: 1.55; }
+  .meta { font-size: 11px; color: var(--warm-mid); margin: 4px 0;
+          font-family: var(--sans); }
+  .meta b { color: var(--ink); font-weight: 600; }
   .meta-grid { display: grid; grid-template-columns: max-content 1fr;
-               gap: 0.25rem 0.75rem; font-size: 0.82rem; color: var(--muted);
-               margin: 0.5rem 0; }
-  .meta-grid b { color: var(--fg); }
-  .thinking-trace { background: #fef9e7; border: 1px solid #f0e0a0;
-                    padding: 0.5rem; font-family: var(--mono); font-size: 0.75rem;
+               gap: 4px 16px; font-size: 11px; color: var(--warm-mid);
+               margin: 8px 0; font-family: var(--sans); }
+  .meta-grid b { color: var(--ink); font-weight: 600; }
+
+  /* ─── THINKING TRACE (mono editorial muted) ─── */
+  .thinking-trace { background: var(--cream); border: 1px solid var(--border-soft);
+                    padding: 10px 14px; font-family: var(--mono); font-size: 11px;
                     white-space: pre-wrap; max-height: 400px; overflow-y: auto;
-                    color: #5a4a1a; }
+                    color: var(--warm-mid); line-height: 1.55; }
+
+  /* ─── BODY CONTENT BLOCKS (Libre Baskerville) ─── */
   .artifact-text, .response-text, .body-paragraphs, .formulation-text, .narrative-briefing,
   .deployment-context, .continuity-block, .extraction-content {
-    white-space: pre-wrap; font: 16px/1.6 var(--serif); margin: 0.5rem 0;
-    background: #fff; padding: 0.75rem; border-left: 3px solid var(--accent);
+    white-space: pre-wrap; font: 14px/1.75 var(--serif); margin: 8px 0;
+    background: var(--paper); padding: 16px 20px;
+    border-left: 3px solid var(--accent); color: #1a1a1a;
   }
-  .turn-text { font-size: 0.85rem; color: #333; padding: 0.25rem 0.5rem;
-               border-left: 2px solid #ddd; margin: 0.25rem 0; }
-  .turn-meta { font-size: 0.72rem; color: var(--muted); font-family: var(--mono); }
+
+  /* ─── TURNS (transcripts) ─── */
+  .turn-text { font-size: 13px; color: #2a2a2a; padding: 4px 10px;
+               border-left: 2px solid var(--border-soft); margin: 4px 0;
+               font-family: var(--sans); line-height: 1.6; }
+  .turn-meta { font-size: 10px; color: var(--warm-light); font-family: var(--mono);
+               letter-spacing: 0.02em; }
+
+  /* ─── LABELS (status pills) ─── */
   .label { display: inline-block; background: var(--accent-bg); color: var(--accent);
-           padding: 1px 6px; font-size: 0.7rem; font-family: var(--mono);
-           border-radius: 3px; margin-right: 0.25rem; vertical-align: middle; }
-  .label.pass { background: #d4f0d4; color: #2a6a2a; }
-  .label.warn { background: #fdebcb; color: #8a5a1a; }
-  .label.hold { background: #f9d6d6; color: #8a2a2a; }
-  .label.released { background: #d4f0d4; color: #2a6a2a; }
-  .jump-link { color: var(--accent); text-decoration: none; cursor: pointer; }
-  .jump-link:hover { text-decoration: underline; }
-  .panel { background: var(--card); border: 1px solid var(--border); padding: 1rem;
-           margin: 1rem 0; }
-  pre.json { font-size: 0.72rem; max-height: 300px; overflow: auto;
-             background: #f5f1e8; padding: 0.5rem; }
+           padding: 2px 7px; font-size: 9px; font-family: var(--sans);
+           font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+           border-radius: 2px; margin-right: 4px; vertical-align: middle;
+           line-height: 1.5; }
+  .label.pass { background: #d8f0e2; color: #00563c; }
+  .label.warn { background: #fef0c8; color: #6b5300; }
+  .label.hold { background: #fee0d0; color: #893309; }
+  .label.released { background: #d8f0e2; color: #00563c; }
+
+  /* ─── JUMP LINKS ─── */
+  .jump-link { color: var(--accent); text-decoration: none; cursor: pointer;
+               border-bottom: 1px solid currentColor; }
+  .jump-link:hover { background: var(--accent-bg); }
+
+  /* ─── PANELS ─── */
+  .panel { background: var(--paper); border: 1px solid var(--border-mid);
+           padding: 16px 18px; margin: 14px 0; border-radius: 2px; }
+  pre.json { font-family: var(--mono); font-size: 10px; max-height: 300px;
+             overflow: auto; background: var(--cream); padding: 10px;
+             border-radius: 2px; line-height: 1.5; }
+
+  /* ─── PAGE PANES ─── */
   .page-pane { display: none; }
   .page-pane.active { display: block; }
-  .deployment-context-pane { background: #f0e8dc; padding: 0.75rem;
-                              border-left: 3px solid #8a5a1a; font-size: 0.9rem;
-                              white-space: pre-wrap; }
-  .sub-nav { position: sticky; top: 48px; background: rgba(34, 34, 34, 0.96);
-             backdrop-filter: blur(6px); color: #ddd; padding: 0.5rem 1rem;
-             margin: 0 -2rem 1rem; z-index: 50; font-size: 0.82rem;
-             display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center;
-             border-bottom: 1px solid #444; }
-  .sub-nav .phase-tag { font: italic 600 0.85rem var(--serif); padding: 0 0.4rem;
-                        opacity: 0.85; margin-right: 0.5rem; }
-  .sub-nav .phase-tag.conf { color: #c9b8e6; }
-  .sub-nav .phase-tag.assembly { color: #e6c8a0; }
-  .sub-nav .phase-tag::after { content: ':'; opacity: 0.6; }
-  .sub-nav a.section-link { color: #bbb; text-decoration: none;
-                            padding: 0.25rem 0.6rem; border-radius: 12px;
-                            transition: all 0.15s; font-size: 0.82rem;
-                            white-space: nowrap; }
-  .sub-nav a.section-link:hover { background: #444; color: #fff; }
-  .sub-nav a.section-link.active.conf { background: var(--accent); color: white;
-                                         box-shadow: 0 0 0 2px rgba(90, 58, 138, 0.3); }
-  .sub-nav a.section-link.active.assembly { background: #8a5a1a; color: white;
-                                              box-shadow: 0 0 0 2px rgba(138, 90, 26, 0.3); }
-  .sub-nav .you-are-here { font-size: 0.7rem; color: #999; padding: 0 0.4rem;
-                           font-family: var(--mono); }
-  .backlink { font-size: 0.85rem; color: var(--accent); margin: 0.25rem 0;
-              padding: 0.2rem 0.4rem; background: var(--accent-bg);
-              border-radius: 3px; display: inline-block; }
-  .extraction-summary { font-size: 0.9rem; }
-  .extraction-summary .speaker { font-weight: 600; color: #555; }
-  .extraction-summary .lens { color: var(--accent); font-family: var(--mono);
-                              font-size: 0.75rem; }
-  details.extraction > summary { font: 16px/1.5 var(--serif); padding: 0.6rem 0.75rem;
-                                  color: #2a2a2a; }
-  details.extraction > summary b.speaker { font-weight: 700; color: var(--accent);
-                                            font-size: 0.85rem;
-                                            font-family: -apple-system, sans-serif; }
-  details.extraction > summary i.lens { font-style: normal; font-size: 0.7rem;
-                                         color: var(--muted); font-family: var(--mono);
-                                         background: var(--accent-bg); padding: 1px 5px;
-                                         border-radius: 3px; margin-right: 0.4rem; }
-  .track-header { background: #efe9dc; color: #5a4a1a; padding: 0.4rem 0.75rem;
-                  font: 600 0.9rem -apple-system, sans-serif; margin: 1rem 0 0.3rem;
-                  border-radius: 3px; letter-spacing: 0.02em; }
-  .capture-group-header { background: #2a2a2a; color: #fafaf7; padding: 0.5rem 0.75rem;
-                          font: italic 600 1rem var(--serif); margin: 1rem 0 0.5rem;
-                          border-radius: 4px; }
+
+  /* ─── DEPLOYMENT CONTEXT (special pane) ─── */
+  .deployment-context-pane { background: var(--cream); padding: 14px 18px;
+                              border-left: 3px solid var(--brand-gold);
+                              font-family: var(--sans); font-size: 13px;
+                              white-space: pre-wrap; line-height: 1.6;
+                              color: var(--ink); }
+
+  /* ─── BACKLINK PILLS ─── */
+  .backlink { font-family: var(--sans); font-size: 10px; letter-spacing: 0.05em;
+              color: var(--accent); margin: 4px 4px 4px 0; padding: 3px 8px;
+              background: var(--accent-bg); border-radius: 2px;
+              display: inline-block; text-transform: none; }
+
+  /* ─── EXTRACTION SUMMARIES ─── */
+  .extraction-summary { font-size: 13px; }
+  .extraction-summary .speaker { font-weight: 600; color: var(--warm-mid);
+                                 font-family: var(--sans); }
+  .extraction-summary .lens { color: var(--accent); font-family: var(--sans);
+                              font-size: 10px; letter-spacing: 0.08em;
+                              text-transform: uppercase; }
+  details.extraction > summary { font: 14px/1.5 var(--serif); padding: 12px 16px;
+                                  color: var(--ink); }
+  details.extraction > summary b.speaker { font-family: var(--sans); font-weight: 700;
+                                            color: var(--accent); font-size: 10px;
+                                            letter-spacing: 0.1em; text-transform: uppercase; }
+  details.extraction > summary i.lens { font-style: normal; font-family: var(--sans);
+                                         font-size: 9px; letter-spacing: 0.1em;
+                                         text-transform: uppercase; color: var(--warm-mid);
+                                         background: var(--cream); padding: 2px 7px;
+                                         border-radius: 2px; margin-right: 8px; }
+
+  /* ─── TRACK / CAPTURE-GROUP HEADERS ─── */
+  .capture-group-header { background: var(--ink); color: var(--paper);
+                          padding: 12px 18px; font-family: var(--display);
+                          font-size: 14px; font-weight: 400; letter-spacing: 0.08em;
+                          text-transform: uppercase; margin: 28px 0 8px;
+                          border-radius: 0; }
+  .track-header { background: transparent; color: var(--ink);
+                  padding: 6px 0; font-family: var(--serif); font-style: italic;
+                  font-size: 16px; font-weight: 400; margin: 18px 0 6px;
+                  border-bottom: 1px solid var(--border-soft); border-radius: 0;
+                  letter-spacing: 0; }
+
+  /* ─── FOOTER ─── */
+  footer.footer { background: var(--ink); color: var(--paper); padding: 32px 40px;
+                  text-align: center; font-family: var(--sans); font-size: 10px;
+                  letter-spacing: 0.15em; text-transform: uppercase; margin-top: 40px; }
+  footer.footer a { color: inherit; text-decoration: underline; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 768px) {
+    .hero { padding: 40px 20px 32px; }
+    nav.tabs { padding: 0 16px; }
+    main { padding: 0 16px 60px; }
+    .sub-nav { padding: 10px 16px; margin: 0 -16px 16px; }
+    .hero-meta { gap: 24px; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>Athens 2026 — Data Graph</h1>
-  <span class="subtitle">__SUMMARY__</span>
+<header class="hero">
+  <p class="hero-eyebrow">House of Beautiful Business · AI Assembly · Athens 2026</p>
+  <h1 class="hero-title">Athens <em>Data Graph</em></h1>
+  <p class="hero-subtitle">The pipeline behind three nights of deliberation — sessions, extractions, clusters, themes, voices, dossiers — every field preserved.</p>
+  <div class="hero-meta" id="heroMeta"></div>
 </header>
 <nav class="tabs">
   <span class="night-menu has-conf-active" data-night="night_1">
@@ -813,9 +960,40 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div id="night_3_conf" class="page-pane"></div>
   <div id="night_3_assembly" class="page-pane"></div>
 </main>
+<footer class="footer">
+  <p>Athens 2026 · House of Beautiful Business · AI Assembly</p>
+  <p style="margin-top:8px;letter-spacing:0.1em;">Self-contained viewer · regenerate with <code style="background:rgba(255,255,255,0.1);padding:1px 6px;">build_athens_data_graph.py</code></p>
+</footer>
 <script id="data" type="application/json">__JSON_DATA__</script>
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
+
+// Populate hero meta from DATA — emits 4 label/value cards
+(function populateHeroMeta() {
+  const heroMeta = document.getElementById('heroMeta');
+  if (!heroMeta) return;
+  const md = DATA.metadata || {};
+  const nodes = md.nodes_per_kind || {};
+  const items = [
+    ['Dates', 'May 7–9, 2026'],
+    ['Nights', '3'],
+    ['Sessions', String(nodes.sessions || 0)],
+    ['Artifacts', String(nodes.voice_step2 || 0)],
+  ];
+  for (const [label, value] of items) {
+    const item = document.createElement('div');
+    item.className = 'hero-meta-item';
+    const lbl = document.createElement('span');
+    lbl.className = 'hero-meta-label';
+    lbl.textContent = label;
+    const val = document.createElement('span');
+    val.className = 'hero-meta-value';
+    val.textContent = value;
+    item.appendChild(lbl);
+    item.appendChild(val);
+    heroMeta.appendChild(item);
+  }
+})();
 
 // Format voice slug for display. tim_leberecht → "the editor"; ada_lovelace → "Ada Lovelace"
 function formatVoiceName(slug) {
