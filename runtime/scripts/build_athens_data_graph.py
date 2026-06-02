@@ -645,11 +645,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   header .subtitle { color: #aaa; font-size: 0.9rem; }
   nav.tabs { background: #2a2a2a; padding: 0 2rem; display: flex; gap: 0;
              position: sticky; top: 0; z-index: 99; }
-  nav.tabs button { background: transparent; border: 0; color: #aaa;
-                    padding: 0.75rem 1.5rem; font: inherit; cursor: pointer;
-                    border-bottom: 3px solid transparent; }
-  nav.tabs button:hover { color: #fff; }
-  nav.tabs button.active { color: #fff; border-bottom-color: var(--accent); }
+  nav.tabs .night-menu { position: relative; display: inline-block; }
+  nav.tabs .night-button { background: transparent; border: 0; color: #aaa;
+                           padding: 0.75rem 1.5rem; font: inherit; cursor: pointer;
+                           border-bottom: 3px solid transparent; }
+  nav.tabs .night-menu:hover .night-button { color: #fff; }
+  nav.tabs .night-menu.has-conf-active .night-button { color: #fff;
+                                                       border-bottom-color: var(--accent); }
+  nav.tabs .night-menu.has-assembly-active .night-button { color: #fff;
+                                                          border-bottom-color: #8a5a1a; }
+  nav.tabs .night-menu .dropdown { display: none; position: absolute; top: 100%; left: 0;
+                                    background: #2a2a2a; border: 1px solid #444;
+                                    min-width: 220px; padding: 0.3rem 0; z-index: 200; }
+  nav.tabs .night-menu:hover .dropdown { display: block; }
+  nav.tabs .night-menu .dropdown a { display: block; color: #ddd; padding: 0.55rem 1rem;
+                                     text-decoration: none; font-size: 0.92rem;
+                                     cursor: pointer; border-left: 3px solid transparent; }
+  nav.tabs .night-menu .dropdown a:hover { background: #444; color: #fff; }
+  nav.tabs .night-menu .dropdown a.active { background: #3a3a3a; color: #fff; }
+  nav.tabs .night-menu .dropdown a.active.conf-link { border-left-color: var(--accent); }
+  nav.tabs .night-menu .dropdown a.active.assembly-link { border-left-color: #8a5a1a; }
   nav.tabs .spacer { flex: 1; }
   nav.tabs .voices-index { color: #aaa; padding: 0.75rem 1rem; cursor: pointer;
                            position: relative; }
@@ -708,50 +723,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
            margin: 1rem 0; }
   pre.json { font-size: 0.72rem; max-height: 300px; overflow: auto;
              background: #f5f1e8; padding: 0.5rem; }
-  .night-pane { display: none; }
-  .night-pane.active { display: block; }
+  .page-pane { display: none; }
+  .page-pane.active { display: block; }
   .deployment-context-pane { background: #f0e8dc; padding: 0.75rem;
                               border-left: 3px solid #8a5a1a; font-size: 0.9rem;
                               white-space: pre-wrap; }
-  .phase { background: linear-gradient(90deg, var(--accent) 0%, #7a5aaa 100%);
-           color: white; padding: 0.6rem 1rem; margin: 0 0 1rem;
-           font: italic 600 1.3rem var(--serif); border-radius: 4px; }
-  .phase.assembly { background: linear-gradient(90deg, #8a5a1a 0%, #a87a2a 100%); }
-  .phase small { display: block; font: 0.85rem/1.4 -apple-system, sans-serif;
-                 color: rgba(255,255,255,0.85); font-style: normal; margin-top: 0.2rem; }
-  /* Phase switcher — page-level tabs splitting Conference Data and Assembly Output */
-  .phase-switch { display: flex; gap: 0; margin: 1.5rem -2rem 0; padding: 0 2rem;
-                  border-bottom: 2px solid var(--border); background: var(--bg);
-                  position: sticky; top: 0; z-index: 60; }
-  .phase-switch button { flex: 1; background: transparent; color: var(--muted);
-                         border: 0; padding: 1rem 1.5rem; font: italic 600 1.1rem var(--serif);
-                         cursor: pointer; transition: all 0.15s;
-                         border-bottom: 4px solid transparent; margin-bottom: -2px; }
-  .phase-switch button:hover { color: var(--fg); }
-  .phase-switch button.active[data-phase="conf"] { color: var(--accent);
-                                                    border-bottom-color: var(--accent); }
-  .phase-switch button.active[data-phase="assembly"] { color: #8a5a1a;
-                                                       border-bottom-color: #8a5a1a; }
-  .phase-pane { display: none; }
-  .phase-pane.active { display: block; }
-  /* Hide section pills not belonging to the active phase */
-  .night-pane[data-active-phase="conf"] .sub-nav .assembly,
-  .night-pane[data-active-phase="conf"] .sub-nav .section-link.assembly { display: none; }
-  .night-pane[data-active-phase="assembly"] .sub-nav .conf,
-  .night-pane[data-active-phase="assembly"] .sub-nav .section-link.conf { display: none; }
-  .night-pane[data-active-phase="assembly"] .sub-nav .divider { display: none; }
-  .night-pane[data-active-phase="conf"] .sub-nav .divider { display: none; }
   .sub-nav { position: sticky; top: 48px; background: rgba(34, 34, 34, 0.96);
              backdrop-filter: blur(6px); color: #ddd; padding: 0.5rem 1rem;
              margin: 0 -2rem 1rem; z-index: 50; font-size: 0.82rem;
              display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center;
              border-bottom: 1px solid #444; }
-  .sub-nav .phase-label { font: italic 600 0.85rem var(--serif); padding: 0 0.4rem;
-                          opacity: 0.85; }
-  .sub-nav .phase-label.conf { color: #c9b8e6; }
-  .sub-nav .phase-label.assembly { color: #e6c8a0; }
-  .sub-nav .phase-label::after { content: ':'; opacity: 0.6; }
-  .sub-nav .divider { color: #666; padding: 0 0.5rem; }
+  .sub-nav .phase-tag { font: italic 600 0.85rem var(--serif); padding: 0 0.4rem;
+                        opacity: 0.85; margin-right: 0.5rem; }
+  .sub-nav .phase-tag.conf { color: #c9b8e6; }
+  .sub-nav .phase-tag.assembly { color: #e6c8a0; }
+  .sub-nav .phase-tag::after { content: ':'; opacity: 0.6; }
   .sub-nav a.section-link { color: #bbb; text-decoration: none;
                             padding: 0.25rem 0.6rem; border-radius: 12px;
                             transition: all 0.15s; font-size: 0.82rem;
@@ -793,18 +779,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <span class="subtitle">__SUMMARY__</span>
 </header>
 <nav class="tabs">
-  <button data-night="night_1" class="active">Night 1</button>
-  <button data-night="night_2">Night 2</button>
-  <button data-night="night_3">Night 3 closing</button>
+  <span class="night-menu has-conf-active" data-night="night_1">
+    <button class="night-button">Night 1 ▾</button>
+    <div class="dropdown">
+      <a class="dropdown-link conf-link active" data-page="night_1_conf">📊 Conference Data</a>
+      <a class="dropdown-link assembly-link" data-page="night_1_assembly">🎭 Assembly Output</a>
+    </div>
+  </span>
+  <span class="night-menu" data-night="night_2">
+    <button class="night-button">Night 2 ▾</button>
+    <div class="dropdown">
+      <a class="dropdown-link conf-link" data-page="night_2_conf">📊 Conference Data</a>
+      <a class="dropdown-link assembly-link" data-page="night_2_assembly">🎭 Assembly Output</a>
+    </div>
+  </span>
+  <span class="night-menu" data-night="night_3">
+    <button class="night-button">Night 3 closing ▾</button>
+    <div class="dropdown">
+      <a class="dropdown-link conf-link" data-page="night_3_conf">📊 Conference Data</a>
+      <a class="dropdown-link assembly-link" data-page="night_3_assembly">🎭 Assembly Output</a>
+    </div>
+  </span>
   <span class="spacer"></span>
   <span class="voices-index">Voices index ▾
     <div class="menu" id="voices-menu"></div>
   </span>
 </nav>
 <main>
-  <div id="night_1" class="night-pane active"></div>
-  <div id="night_2" class="night-pane"></div>
-  <div id="night_3" class="night-pane"></div>
+  <div id="night_1_conf" class="page-pane active"></div>
+  <div id="night_1_assembly" class="page-pane"></div>
+  <div id="night_2_conf" class="page-pane"></div>
+  <div id="night_2_assembly" class="page-pane"></div>
+  <div id="night_3_conf" class="page-pane"></div>
+  <div id="night_3_assembly" class="page-pane"></div>
 </main>
 <script id="data" type="application/json">__JSON_DATA__</script>
 <script>
@@ -890,22 +897,8 @@ function jumpLink(text, target) {
     e.preventDefault();
     const targetEl = document.querySelector('[data-anchor="' + target + '"]');
     if (targetEl) {
-      const nightPane = targetEl.closest('.night-pane');
-      if (nightPane) showNight(nightPane.id);
-      // Switch sub-phase if target is in a different phase
-      const phasePane = targetEl.closest('.phase-pane');
-      if (phasePane && nightPane) {
-        const targetPhase = phasePane.classList.contains('conf-pane') ? 'conf' : 'assembly';
-        if (nightPane.dataset.activePhase !== targetPhase) {
-          nightPane.dataset.activePhase = targetPhase;
-          nightPane.querySelectorAll('.phase-pane').forEach(p => p.classList.remove('active'));
-          phasePane.classList.add('active');
-          nightPane.querySelectorAll('.phase-switch button').forEach(b => {
-            if (b.dataset.phase === targetPhase) b.classList.add('active');
-            else b.classList.remove('active');
-          });
-        }
-      }
+      const pagePane = targetEl.closest('.page-pane');
+      if (pagePane && pagePane.id) showPage(pagePane.id);
       // Open all <details> ancestors so the target is visible
       let cur = targetEl;
       while (cur && cur !== document.body) {
@@ -930,33 +923,55 @@ function anchor(id, ...children) {
   return a;
 }
 
-function showNight(nightId) {
-  document.querySelectorAll('.night-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
-  document.getElementById(nightId).classList.add('active');
-  document.querySelector(`nav.tabs button[data-night="${nightId}"]`).classList.add('active');
+function showPage(pageId) {
+  document.querySelectorAll('.page-pane').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if (!target) return;
+  target.classList.add('active');
+  // Highlight active dropdown link
+  document.querySelectorAll('.dropdown-link').forEach(a => a.classList.remove('active'));
+  const link = document.querySelector(`.dropdown-link[data-page="${pageId}"]`);
+  if (link) link.classList.add('active');
+  // Highlight night menu (which night + which phase is current)
+  const night = pageId.replace(/_conf$|_assembly$/, '');
+  const phase = pageId.endsWith('_assembly') ? 'assembly' : 'conf';
+  document.querySelectorAll('.night-menu').forEach(m => {
+    m.classList.remove('has-conf-active', 'has-assembly-active');
+  });
+  const menu = document.querySelector(`.night-menu[data-night="${night}"]`);
+  if (menu) menu.classList.add(phase === 'conf' ? 'has-conf-active' : 'has-assembly-active');
+  // Reset section-link highlighting; the IntersectionObserver will re-activate as user scrolls
+  document.querySelectorAll('.sub-nav a.section-link').forEach(a => a.classList.remove('active'));
+  const firstLink = target.querySelector('.sub-nav a.section-link');
+  if (firstLink) firstLink.classList.add('active');
 }
 
-document.querySelectorAll('nav.tabs button').forEach(b => {
-  b.addEventListener('click', () => showNight(b.dataset.night));
+document.querySelectorAll('.dropdown-link').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    showPage(a.dataset.page);
+    window.scrollTo({top: 0, behavior: 'instant'});
+  });
 });
 
-// Render each night
+// Render each of the 6 pages (3 nights × 2 phases)
 for (const night of ['night_1', 'night_2', 'night_3']) {
-  const pane = document.getElementById(night);
-  renderNight(pane, night);
+  for (const phase of ['conf', 'assembly']) {
+    const pane = document.getElementById(`${night}_${phase}`);
+    renderPage(pane, night, phase);
+  }
 }
 
-function renderNight(pane, night) {
+function renderPage(pane, night, phase) {
   const n = DATA.nights[night] || {};
   const stats = n.statistics || {};
-  // Default active phase
-  pane.dataset.activePhase = 'conf';
+  const nightLabel = night.replace('_', ' ').replace(/^./, c => c.toUpperCase());
+  const phaseLabel = phase === 'conf' ? '📊 Conference Data' : '🎭 Assembly Output';
 
-  // Stats bar
+  // Stats bar — same stats both pages; header distinguishes which page you're on
   const statsBar = el('div', {class: 'stats'});
   statsBar.innerHTML = `
-    <b>${night.replace('_', ' ').replace(/^./, c => c.toUpperCase())}</b> —
+    <b>${nightLabel} — ${phaseLabel}</b> —
     ${stats.sessions || 0} sessions ·
     ${(stats.turns || 0).toLocaleString()} turns ·
     ${(stats.words || 0).toLocaleString()} words ·
@@ -970,43 +985,29 @@ function renderNight(pane, night) {
   `;
   pane.appendChild(statsBar);
 
-  // Deployment context discipline rules
-  if (n.deployment_context_rules) {
+  // Deployment context discipline rules (Conference Data page only — it's about how researcher/provocateur read the content)
+  if (phase === 'conf' && n.deployment_context_rules) {
     const [d, body] = det('📋 Deployment context discipline rules (this night)');
     body.appendChild(el('div', {class: 'deployment-context-pane'}, n.deployment_context_rules));
     pane.appendChild(d);
   }
 
-  // Phase switcher — page-level tabs between Conference Data and Assembly Output
-  const phaseSwitch = el('nav', {class: 'phase-switch'});
-  phaseSwitch.innerHTML = `
-    <button data-phase="conf" class="active">📊 Conference Data</button>
-    <button data-phase="assembly">🎭 Assembly Output</button>
-  `;
-  phaseSwitch.querySelectorAll('button').forEach(b => {
-    b.addEventListener('click', () => {
-      const phase = b.dataset.phase;
-      pane.dataset.activePhase = phase;
-      phaseSwitch.querySelectorAll('button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      pane.querySelectorAll('.phase-pane').forEach(p => p.classList.remove('active'));
-      pane.querySelector(`.${phase}-pane`).classList.add('active');
-      window.scrollTo({top: phaseSwitch.offsetTop, behavior: 'instant'});
-    });
-  });
-  pane.appendChild(phaseSwitch);
-
-  // Sub-nav — section pills for both phases; CSS hides the ones not in the active phase
+  // Sub-nav — section pills for this page's phase only
   const subnav = el('nav', {class: 'sub-nav'});
-  subnav.innerHTML = `
-    <span class="phase-label conf">Conference Data</span>
-    <a href="#" data-target="sec-${night}-sessions" class="section-link conf">📼 Sessions</a>
-    <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes (with clusters inside)</a>
-    <span class="phase-label assembly">Assembly Output</span>
-    <a href="#" data-target="sec-${night}-selected" class="section-link assembly">🎯 Selected themes</a>
-    <a href="#" data-target="sec-${night}-voices" class="section-link assembly">🗣 Voices</a>
-    <a href="#" data-target="sec-${night}-dossiers" class="section-link assembly">📰 Dossiers</a>
-  `;
+  if (phase === 'conf') {
+    subnav.innerHTML = `
+      <span class="phase-tag conf">Conference Data</span>
+      <a href="#" data-target="sec-${night}-sessions" class="section-link conf">📼 Sessions</a>
+      <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes (with clusters inside)</a>
+    `;
+  } else {
+    subnav.innerHTML = `
+      <span class="phase-tag assembly">Assembly Output</span>
+      <a href="#" data-target="sec-${night}-selected" class="section-link assembly">🎯 Selected themes</a>
+      <a href="#" data-target="sec-${night}-voices" class="section-link assembly">🗣 Voices</a>
+      <a href="#" data-target="sec-${night}-dossiers" class="section-link assembly">📰 Dossiers</a>
+    `;
+  }
   subnav.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -1016,115 +1017,113 @@ function renderNight(pane, night) {
   });
   pane.appendChild(subnav);
 
-  // CONFERENCE DATA pane
-  const confPane = el('div', {class: 'phase-pane conf-pane active'});
-  pane.appendChild(confPane);
+  if (phase === 'conf') {
+    // ===== CONFERENCE DATA =====
 
-  // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
-  confPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
-    `📼 Sessions (${stats.sessions || 0})`));
-  const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
-  const audioSessions = sessions.filter(s => !s.is_reflection)
-    .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
-  const reflectionSessions = sessions.filter(s => s.is_reflection)
-    .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
+    // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
+    pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
+      `📼 Sessions (${stats.sessions || 0})`));
+    const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
+    const audioSessions = sessions.filter(s => !s.is_reflection)
+      .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
+    const reflectionSessions = sessions.filter(s => s.is_reflection)
+      .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
 
-  function groupByTrack(arr) {
-    const groups = {};
-    for (const s of arr) {
-      const track = s.track || 'Other';
-      if (!groups[track]) groups[track] = [];
-      groups[track].push(s);
+    function groupByTrack(arr) {
+      const groups = {};
+      for (const s of arr) {
+        const track = s.track || 'Other';
+        if (!groups[track]) groups[track] = [];
+        groups[track].push(s);
+      }
+      return groups;
     }
-    return groups;
-  }
-  function formatTrack(t) {
-    if (!t) return 'Other';
-    return t.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
-  }
-  // Canonical track ordering (matches DATA_INVENTORY); anything else falls to the end alphabetically
-  const trackOrder = ['MAIN STAGE', 'AI DEMOCRACY MARATHON', 'DEPARTMENT OF DEPTH',
-                      'AGENTIC AGORA', 'COMMUNITY'];
-  function trackSort(a, b) {
-    const ia = trackOrder.indexOf(a), ib = trackOrder.indexOf(b);
-    if (ia >= 0 && ib >= 0) return ia - ib;
-    if (ia >= 0) return -1;
-    if (ib >= 0) return 1;
-    return a.localeCompare(b);
-  }
+    function formatTrack(t) {
+      if (!t) return 'Other';
+      return t.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
+    }
+    const trackOrder = ['MAIN STAGE', 'AI DEMOCRACY MARATHON', 'DEPARTMENT OF DEPTH',
+                        'AGENTIC AGORA', 'COMMUNITY'];
+    function trackSort(a, b) {
+      const ia = trackOrder.indexOf(a), ib = trackOrder.indexOf(b);
+      if (ia >= 0 && ib >= 0) return ia - ib;
+      if (ia >= 0) return -1;
+      if (ib >= 0) return 1;
+      return a.localeCompare(b);
+    }
 
-  if (audioSessions.length) {
-    confPane.appendChild(el('div', {class: 'capture-group-header'},
-      `🎙 Audio (${audioSessions.length} captures) — panel transcriptions, by track`));
-    const byTrack = groupByTrack(audioSessions);
-    for (const track of Object.keys(byTrack).sort(trackSort)) {
-      confPane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
-      for (const s of byTrack[track]) {
-        confPane.appendChild(renderSession(s, night));
+    if (audioSessions.length) {
+      pane.appendChild(el('div', {class: 'capture-group-header'},
+        `🎙 Audio (${audioSessions.length} captures) — panel transcriptions, by track`));
+      const byTrack = groupByTrack(audioSessions);
+      for (const track of Object.keys(byTrack).sort(trackSort)) {
+        pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+        for (const s of byTrack[track]) {
+          pane.appendChild(renderSession(s, night));
+        }
       }
     }
-  }
-  if (reflectionSessions.length) {
-    confPane.appendChild(el('div', {class: 'capture-group-header'},
-      `💬 Audience reflections (${reflectionSessions.length}) — spoken contributions submitted via the audience tool, by track`));
-    const byTrack = groupByTrack(reflectionSessions);
-    for (const track of Object.keys(byTrack).sort(trackSort)) {
-      confPane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
-      for (const s of byTrack[track]) {
-        confPane.appendChild(renderSession(s, night));
+    if (reflectionSessions.length) {
+      pane.appendChild(el('div', {class: 'capture-group-header'},
+        `💬 Audience reflections (${reflectionSessions.length}) — spoken contributions submitted via the audience tool, by track`));
+      const byTrack = groupByTrack(reflectionSessions);
+      for (const track of Object.keys(byTrack).sort(trackSort)) {
+        pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+        for (const s of byTrack[track]) {
+          pane.appendChild(renderSession(s, night));
+        }
       }
     }
-  }
 
-  // Themes (with clusters nested inside; ungrouped clusters listed at end if any)
-  confPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
-    `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur) — clusters nested inside`));
-  const themes = Object.values(DATA.themes).filter(t => t.night === night)
-    .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
-  for (const t of themes) {
-    confPane.appendChild(renderThemePhaseA(t, night));
-  }
-  // Orphan clusters (no theme) — surface at the end so they're not invisible
-  const allClusters = Object.values(DATA.clusters).filter(c => c.night === night);
-  const orphans = allClusters.filter(c => !c.theme_id);
-  if (orphans.length) {
-    confPane.appendChild(el('div', {class: 'section-title', style: 'color: var(--muted);'},
-      `🔗 Orphan clusters (${orphans.length}) — not grouped into any theme`));
-    for (const c of orphans) {
-      confPane.appendChild(renderCluster(c, night, 'standalone'));
+    // Themes (with clusters nested inside; ungrouped clusters listed at end if any)
+    pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
+      `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur) — clusters nested inside`));
+    const themes = Object.values(DATA.themes).filter(t => t.night === night)
+      .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
+    for (const t of themes) {
+      pane.appendChild(renderThemePhaseA(t, night));
     }
-  }
+    // Orphan clusters (no theme) — surface at the end so they're not invisible
+    const allClusters = Object.values(DATA.clusters).filter(c => c.night === night);
+    const orphans = allClusters.filter(c => !c.theme_id);
+    if (orphans.length) {
+      pane.appendChild(el('div', {class: 'section-title', style: 'color: var(--muted);'},
+        `🔗 Orphan clusters (${orphans.length}) — not grouped into any theme`));
+      for (const c of orphans) {
+        pane.appendChild(renderCluster(c, night, 'standalone'));
+      }
+    }
+  } else {
+    // ===== ASSEMBLY OUTPUT =====
 
+    const themes = Object.values(DATA.themes).filter(t => t.night === night)
+      .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
 
-  // ASSEMBLY OUTPUT pane
-  const assemblyPane = el('div', {class: 'phase-pane assembly-pane'});
-  pane.appendChild(assemblyPane);
+    // Selected themes → voice responses + dossier (the deliberation chain)
+    pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
+      `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
+    const selectedThemes = themes.filter(t => t.selected_for_provocateur);
+    for (const t of selectedThemes) {
+      pane.appendChild(renderThemePhaseB(t, night));
+    }
 
+    // Voices' Artifacts (per-voice synthesis)
+    pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
+      `🗣 Voices' Artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
+    const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
+      .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
+    for (const s of step2s) {
+      pane.appendChild(renderStep2(s, night));
+    }
 
-  // Selected themes → voice responses + dossier (the deliberation chain)
-  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
-    `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
-  const selectedThemes = themes.filter(t => t.selected_for_provocateur);
-  for (const t of selectedThemes) {
-    assemblyPane.appendChild(renderThemePhaseB(t, night));
-  }
-
-  // Voices' Artifacts (per-voice synthesis)
-  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
-    `🗣 Voices' Artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
-  const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
-    .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
-  for (const s of step2s) {
-    assemblyPane.appendChild(renderStep2(s, night));
-  }
-
-  // Dossiers (the editor's compositions)
-  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
-    `📰 Dossiers (${stats.dossiers || 0}) — the editor's compositions`));
-  const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
-    .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
-  for (const d of dossiers) {
-    assemblyPane.appendChild(renderDossier(d, night));
+    // Dossiers (the editor's compositions)
+    pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
+      `📰 Dossiers (${stats.dossiers || 0}) — the editor's compositions`));
+    const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
+      .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
+    for (const d of dossiers) {
+      pane.appendChild(renderDossier(d, night));
+    }
   }
 }
 
@@ -1894,7 +1893,7 @@ function buildVoicesIndex() {
       if (exists) {
         link.addEventListener('click', e => {
           e.preventDefault();
-          showNight(n);
+          showPage(`${n}_assembly`);
           setTimeout(() => {
             const target = document.querySelector(`[data-anchor="${s2id}"]`);
             if (target) {
@@ -1943,24 +1942,9 @@ function setupSectionObserver() {
 }
 setupSectionObserver();
 
-// When tab changes, scroll to top and re-highlight first section
-document.querySelectorAll('nav.tabs button').forEach(b => {
-  b.addEventListener('click', () => {
-    setTimeout(() => {
-      window.scrollTo({top: 0, behavior: 'instant'});
-      // Initial: highlight Sessions of the active night
-      const night = b.dataset.night;
-      document.querySelectorAll('.sub-nav a').forEach(a => a.classList.remove('active'));
-      const firstLink = document.querySelector(`#${night} .sub-nav a[data-target="sec-${night}-sessions"]`);
-      if (firstLink) firstLink.classList.add('active');
-    }, 50);
-  });
-});
-
-// Initial active state for night_1
-document.querySelectorAll('#night_1 .sub-nav a').forEach(a => {
-  if (a.dataset.target === 'sec-night_1-sessions') a.classList.add('active');
-});
+// Initial active state for night_1 Conference Data (the first sub-nav link)
+const initialFirstLink = document.querySelector('#night_1_conf .sub-nav a.section-link');
+if (initialFirstLink) initialFirstLink.classList.add('active');
 </script>
 </body>
 </html>
