@@ -1464,13 +1464,24 @@ function renderStep2Body(s, night) {
     ob.appendChild(el('pre', {class: 'json'}, JSON.stringify(s.operator_decision, null, 2)));
     wrap.appendChild(od);
   }
-  // Source step1s
+  // Source step1s — items may be strings (legacy) or objects {theme_id, formulation_id, path}
   const lineage = s.lineage || {};
-  if (lineage.consumed_detailed_responses) {
-    const [ld, lb] = det('Source Step 1 responses (consumed)');
-    for (const sid of lineage.consumed_detailed_responses) {
-      const step1Id = `${night}/${sid.replace('.json','')}`;
-      lb.appendChild(el('div', {}, jumpLink('→ ' + sid, step1Id)));
+  if (lineage.consumed_detailed_responses && lineage.consumed_detailed_responses.length) {
+    const [ld, lb] = det(`Source Step 1 responses consumed (${lineage.consumed_detailed_responses.length})`);
+    for (const item of lineage.consumed_detailed_responses) {
+      let path, themeId;
+      if (typeof item === 'string') {
+        path = item;
+      } else if (item && typeof item === 'object') {
+        path = item.path || '';
+        themeId = item.theme_id;
+      } else {
+        continue;
+      }
+      const filename = (path || '').split('/').pop().replace('.json', '') || '(unknown)';
+      const step1Id = `${night}/${filename}`;
+      const labelTxt = themeId ? `→ ${filename} (theme: ${themeId})` : `→ ${filename}`;
+      lb.appendChild(el('div', {style: 'margin: 0.2rem 0;'}, jumpLink(labelTxt, step1Id)));
     }
     wrap.appendChild(ld);
   }
