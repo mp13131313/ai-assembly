@@ -1076,16 +1076,19 @@ function renderThemePhaseA(t, night) {
       const sa = DATA.sessions[a], sb = DATA.sessions[b];
       return ((sa && sa.date_time) || '').localeCompare((sb && sb.date_time) || '');
     });
-    const sList = el('div', {style: 'margin: 0.5rem 0;'},
-      el('b', {}, `Sessions contributing to this theme (${sessionIds.length}): `));
-    for (let i = 0; i < sessionIds.length; i++) {
-      const s = DATA.sessions[sessionIds[i]];
+    const sWrap = el('div', {style: 'margin: 0.5rem 0;'},
+      el('b', {}, `Sessions contributing to this theme (${sessionIds.length}):`));
+    const ul = el('ul', {style: 'margin: 0.3rem 0; padding-left: 1.5rem;'});
+    for (const sid of sessionIds) {
+      const s = DATA.sessions[sid];
       if (s) {
-        sList.appendChild(jumpLink(`"${s.session_title}" (${s.venue || ''})`, sessionIds[i]));
-        if (i < sessionIds.length - 1) sList.appendChild(document.createTextNode(' · '));
+        const li = el('li', {style: 'margin: 0.15rem 0;'});
+        li.appendChild(jumpLink(`"${s.session_title}" (${s.venue || ''})`, sid));
+        ul.appendChild(li);
       }
     }
-    body.appendChild(sList);
+    sWrap.appendChild(ul);
+    body.appendChild(sWrap);
   }
   // Clusters nested inside the theme — full cluster view (extractions grouped by session)
   if (clusters.length) {
