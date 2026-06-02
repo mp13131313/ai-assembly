@@ -713,6 +713,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .deployment-context-pane { background: #f0e8dc; padding: 0.75rem;
                               border-left: 3px solid #8a5a1a; font-size: 0.9rem;
                               white-space: pre-wrap; }
+  .phase { background: linear-gradient(90deg, var(--accent) 0%, #7a5aaa 100%);
+           color: white; padding: 0.6rem 1rem; margin: 2.5rem 0 1rem;
+           font: italic 600 1.3rem var(--serif); border-radius: 4px; }
+  .phase small { display: block; font: 0.85rem/1.4 -apple-system, sans-serif;
+                 color: rgba(255,255,255,0.85); font-style: normal; margin-top: 0.2rem; }
+  .backlink { font-size: 0.85rem; color: var(--accent); margin: 0.25rem 0;
+              padding: 0.2rem 0.4rem; background: var(--accent-bg);
+              border-radius: 3px; display: inline-block; }
+  .extraction-summary { font-size: 0.9rem; }
+  .extraction-summary .speaker { font-weight: 600; color: #555; }
+  .extraction-summary .lens { color: var(--accent); font-family: var(--mono);
+                              font-size: 0.75rem; }
 </style>
 </head>
 <body>
@@ -872,80 +884,119 @@ function renderNight(pane, night) {
     pane.appendChild(d);
   }
 
-  // Themes section
-  pane.appendChild(el('div', {class: 'section-title'}, `Themes (${stats.themes_total || 0} total, ${stats.themes_selected || 0} selected)`));
+  // ─── PHASE A: CONFERENCE TOPIC ───
+  const phaseA = el('div', {class: 'phase'});
+  phaseA.innerHTML = `PHASE A · Conference content
+    <small>What was said in the room — sessions, extracted positions, KJ clusters, derived themes</small>`;
+  pane.appendChild(phaseA);
+
+  // Sessions (with extractions inline)
+  pane.appendChild(el('div', {class: 'section-title'}, `📼 Sessions (${stats.sessions || 0})`));
+  const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
+  for (const s of sessions) {
+    pane.appendChild(renderSession(s, night));
+  }
+
+  // Clusters (with extraction membership + theme backlink)
+  pane.appendChild(el('div', {class: 'section-title'}, `🔗 Clusters (${stats.clusters || 0}) — KJ grouping of extractions`));
+  const clusters = Object.values(DATA.clusters).filter(c => c.night === night)
+    .sort((a, b) => (a.cluster_id || '').localeCompare(b.cluster_id || ''));
+  for (const c of clusters) {
+    pane.appendChild(renderCluster(c, night));
+  }
+
+  // Themes (with cluster membership + selected/dropped marker)
+  pane.appendChild(el('div', {class: 'section-title'}, `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur)`));
   const themes = Object.values(DATA.themes).filter(t => t.night === night)
     .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
   for (const t of themes) {
-    pane.appendChild(renderTheme(t, night));
+    pane.appendChild(renderThemePhaseA(t, night));
   }
 
-  // Voices section
-  pane.appendChild(el('div', {class: 'section-title'}, `Voices on ${night.replace('_', ' ')}`));
+  // ─── PHASE B: WHAT THE ASSEMBLY DID ───
+  const phaseB = el('div', {class: 'phase'});
+  phaseB.innerHTML = `PHASE B · Assembly's response
+    <small>What the voices and the editor did with the room — formulations, voice reasoning + artifacts, Tim's dossiers</small>`;
+  pane.appendChild(phaseB);
+
+  // Selected themes → voice responses + dossier (the deliberation chain)
+  pane.appendChild(el('div', {class: 'section-title'}, `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
+  const selectedThemes = themes.filter(t => t.selected_for_provocateur);
+  for (const t of selectedThemes) {
+    pane.appendChild(renderThemePhaseB(t, night));
+  }
+
+  // Voices' Step 2 artifacts (per-voice synthesis)
+  pane.appendChild(el('div', {class: 'section-title'}, `🗣 Voices' Step 2 artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
   const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
     .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
   for (const s of step2s) {
     pane.appendChild(renderStep2(s, night));
   }
 
-  // Dossiers section
-  pane.appendChild(el('div', {class: 'section-title'}, `Dossiers (${stats.dossiers || 0})`));
+  // Dossiers (Tim's compositions)
+  pane.appendChild(el('div', {class: 'section-title'}, `📰 Dossiers (${stats.dossiers || 0}) — Tim's editorial compositions`));
   const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
     .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
   for (const d of dossiers) {
     pane.appendChild(renderDossier(d, night));
   }
-
-  // Sessions section (collapsed at top level)
-  const [sessSec, sessBody] = det(`📼 Sessions (${stats.sessions || 0} — transcripts + speakers)`);
-  pane.appendChild(sessSec);
-  const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
-  for (const s of sessions) {
-    sessBody.appendChild(renderSession(s, night));
-  }
 }
 
-function renderTheme(t, night) {
-  const sel = t.selected_for_provocateur ? label('SELECTED', 'pass') : label('dropped', 'warn');
-  const [d, body] = det(
-    `▼ ${t.theme_id_raw || t.theme_id} — "${t.title}"  ` + (t.selected_for_provocateur ? '⭐' : '')
-  );
-  // Tag with anchor
+function renderThemePhaseA(t, night) {
+  // Phase A: theme as terminal-grouping of clusters; selected/dropped marker
+  const status = t.selected_for_provocateur ? '⭐ SELECTED' : '✗ dropped';
+  const [d, body] = det(`${t.theme_id_raw || t.theme_id} — "${t.title}"  · ${status}`);
   d.setAttribute('data-anchor', t.prefixed_id);
-  body.appendChild(el('div', {class: 'id'}, t.prefixed_id, ' — ',
-    t.selected_for_provocateur ? '✓ selected' : '✗ dropped'));
+  body.appendChild(el('div', {class: 'id'}, t.prefixed_id));
   if (t.abstract) body.appendChild(abstract(t.abstract));
-
-  // Clusters
+  // Cluster list (jump links — cluster details live in clusters section above)
   const clusterIds = t.cluster_ids || [];
-  const [cSec, cBody] = det(`Clusters (${clusterIds.length})`);
-  body.appendChild(cSec);
-  for (const cid of clusterIds) {
-    const c = DATA.clusters[cid];
-    if (c) cBody.appendChild(renderCluster(c, night));
-  }
-
-  // Formulations + Step 1 + Step 2 chain (if theme was selected)
-  if (t.selected_for_provocateur) {
-    const formsForTheme = Object.values(DATA.formulations)
-      .filter(f => f.theme_id === t.prefixed_id)
-      .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
-    const [fSec, fBody] = det(`Formulations (${formsForTheme.length}) — per voice`);
-    body.appendChild(fSec);
-    for (const f of formsForTheme) {
-      fBody.appendChild(renderFormulation(f, night));
+  if (clusterIds.length) {
+    const cList = el('div', {style: 'margin: 0.5rem 0;'}, el('b', {}, `Clusters in this theme (${clusterIds.length}): `));
+    for (let i = 0; i < clusterIds.length; i++) {
+      const c = DATA.clusters[clusterIds[i]];
+      if (c) {
+        cList.appendChild(jumpLink(c.cluster_id + ' (' + (c.cluster_title || '') + ')', c.prefixed_id));
+        if (i < clusterIds.length - 1) cList.appendChild(document.createTextNode(' · '));
+      }
     }
+    body.appendChild(cList);
   }
+  // Triage flags (audience friction, fault lines added by Provocateur)
+  if (t.triage_flags) {
+    const [tfd, tfb] = det('Triage flags (Provocateur annotations)');
+    tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
+    body.appendChild(tfd);
+  }
+  return d;
+}
 
-  // Dossier for this theme
+function renderThemePhaseB(t, night) {
+  // Phase B: selected theme as starting point of deliberation chain
+  const [d, body] = det(`⭐ ${t.theme_id_raw || t.theme_id} — "${t.title}"`);
+  d.setAttribute('data-anchor', 'phase-b-' + t.prefixed_id);
+  if (t.abstract) body.appendChild(abstract(t.abstract));
+  // Formulations (per voice on this theme)
+  const formsForTheme = Object.values(DATA.formulations)
+    .filter(f => f.theme_id === t.prefixed_id)
+    .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
+  const [fSec, fBody] = det(`Formulations (${formsForTheme.length}) — one per voice that engaged this theme`);
+  body.appendChild(fSec);
+  for (const f of formsForTheme) {
+    fBody.appendChild(renderFormulation(f, night));
+  }
+  // Dossier (if Tim composed one around this theme)
   const dossierForTheme = Object.values(DATA.dossiers).find(d => d.theme_id === t.prefixed_id);
   if (dossierForTheme) {
-    const [doSec, doBody] = det(`📰 Dossier organized around this theme: ${dossierForTheme.dossier_num} — "${dossierForTheme.kicker || dossierForTheme.headline}"`);
-    body.appendChild(doSec);
-    const link = jumpLink('Open dossier ↓', dossierForTheme.dossier_id);
-    doBody.appendChild(el('div', {}, link));
+    body.appendChild(el('div', {class: 'panel', style: 'margin: 0.5rem 0;'},
+      el('b', {}, '📰 Tim composed a dossier around this theme: '),
+      jumpLink(dossierForTheme.dossier_num + ' — "' + (dossierForTheme.kicker || dossierForTheme.headline) + '" ↓',
+               dossierForTheme.dossier_id)));
+  } else {
+    body.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'},
+      'No dossier composed around this theme (Tim picked other selected themes for the 5/5/3 published).'));
   }
-
   return d;
 }
 
@@ -954,7 +1005,16 @@ function renderCluster(c, night) {
   d.setAttribute('data-anchor', c.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, c.prefixed_id));
   if (c.cluster_abstract) body.appendChild(abstract(c.cluster_abstract));
-  const [eSec, eBody] = det(`Extractions (${(c.extraction_ids||[]).length})`);
+  // Theme backlink
+  if (c.theme_id) {
+    const t = DATA.themes[c.theme_id];
+    body.appendChild(el('div', {},
+      el('span', {class: 'backlink'},
+        '↑ Belongs to: ',
+        jumpLink(`${(t && t.theme_id_raw) || c.theme_id} — "${(t && t.title) || ''}"${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
+                 c.theme_id))));
+  }
+  const [eSec, eBody] = det(`Extractions in this cluster (${(c.extraction_ids||[]).length})`);
   body.appendChild(eSec);
   for (const eid of c.extraction_ids || []) {
     const e = DATA.extractions[eid];
@@ -964,10 +1024,27 @@ function renderCluster(c, night) {
 }
 
 function renderExtraction(e, night) {
+  const cluster = e.cluster_id ? DATA.clusters[e.cluster_id] : null;
+  const theme = cluster && cluster.theme_id ? DATA.themes[cluster.theme_id] : null;
   const [d, body] = det(
-    `${e.extraction_id} — ${(e.extraction || '').slice(0, 100)}…`
+    `${e.extraction_id} · ${e.speaker || '?'}  —  ${(e.extraction || '').slice(0, 110)}…`
   );
   d.setAttribute('data-anchor', e.extraction_id);
+  // Forward links: this extraction → cluster → theme
+  const links = el('div', {class: 'extraction-summary', style: 'margin: 0.4rem 0;'});
+  if (cluster) {
+    links.appendChild(el('span', {class: 'backlink'},
+      '→ Part of cluster: ',
+      jumpLink(`${cluster.cluster_id} ("${cluster.cluster_title}")`, cluster.prefixed_id)));
+  }
+  if (theme) {
+    links.appendChild(document.createTextNode(' '));
+    links.appendChild(el('span', {class: 'backlink'},
+      '→ In theme: ',
+      jumpLink(`${theme.theme_id_raw} ("${theme.title}")${theme.selected_for_provocateur ? ' ⭐' : ''}`,
+               theme.prefixed_id)));
+  }
+  body.appendChild(links);
   body.appendChild(metaGrid([
     ['Session', e.session_title],
     ['Speaker', e.speaker],
@@ -981,11 +1058,6 @@ function renderExtraction(e, night) {
     const [cd, cb] = det('Context (surrounding turn text)');
     cb.appendChild(el('div', {class: 'turn-text'}, e.context));
     body.appendChild(cd);
-  }
-  // Session jump
-  if (e.session_id) {
-    body.appendChild(el('div', {},
-      jumpLink('→ Jump to session: ' + e.session_title, e.session_id)));
   }
   return d;
 }
@@ -1228,31 +1300,48 @@ function renderDossier(d, night) {
 }
 
 function renderSession(s, night) {
-  const [d, body] = det(`${s.session_title || s.session_id} (${s.turn_count || 0} turns, ${(s.word_count||0).toLocaleString()} words)`);
+  // Count extractions from this session
+  const sessionExtractions = Object.values(DATA.extractions)
+    .filter(e => e.session_id === s.session_id || e.session_title === s.session_title);
+  const summary = `${s.session_title || s.session_id} · ${(s.venue || '')} · ${s.turn_count || 0} turns · ${sessionExtractions.length} extractions`;
+  const [d, body] = det(summary);
   d.setAttribute('data-anchor', s.session_id);
   body.appendChild(metaGrid([
     ['Track', s.track],
     ['Venue', s.venue],
     ['Date/time', s.date_time],
     ['Format', s.session_format],
-    ['Source', s.source],
+    ['Source', s.source || (s.is_reflection ? 'vendor' : 'audio')],
     ['Reflection?', s.is_reflection ? 'Yes' : 'No'],
+    ['Turn count', s.turn_count],
+    ['Word count', (s.word_count || 0).toLocaleString()],
   ]));
   if (s.session_description) {
     body.appendChild(el('div', {class: 'meta'}, el('b', {}, 'Description: '), s.session_description));
   }
+  // Roster (speakers + bios)
   if (s.roster && s.roster.length) {
-    const [rd, rb] = det(`Roster (${s.roster.length} speakers)`);
+    const [rd, rb] = det(`Roster (${s.roster.length} speakers + bios)`);
     for (const sp of s.roster) {
-      rb.appendChild(el('div', {class: 'meta'},
+      rb.appendChild(el('div', {class: 'meta', style: 'margin: 0.5rem 0;'},
         el('b', {}, sp.name || ''),
         sp.title ? ' — ' + sp.title : '',
-        sp.affiliation ? ' (' + sp.affiliation + ')' : ''));
+        sp.affiliation ? ' (' + sp.affiliation + ')' : '',
+        sp.bio ? el('div', {class: 'meta', style: 'margin-top: 0.2rem; color: #888;'}, sp.bio) : null));
     }
     body.appendChild(rd);
   }
+  // Extractions from THIS session — the main click-into-clusters path
+  if (sessionExtractions.length) {
+    const [ed, eb] = det(`▼ Extractions from this session (${sessionExtractions.length}) — click each to see which cluster + theme it led to`);
+    for (const ext of sessionExtractions) {
+      eb.appendChild(renderExtraction(ext, night));
+    }
+    body.appendChild(ed);
+  }
+  // Full transcript (collapsed deeper)
   if (s.turns && s.turns.length) {
-    const [td, tb] = det(`Transcript (${s.turns.length} turns)`);
+    const [td, tb] = det(`Full transcript (${s.turns.length} turns)`);
     for (const turn of s.turns) {
       const tw = el('div', {});
       tw.appendChild(el('div', {class: 'turn-meta'},
