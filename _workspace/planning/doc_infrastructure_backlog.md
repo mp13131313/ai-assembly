@@ -166,6 +166,69 @@ trimming but lower priority than top-level READMEs.
 mostly-stale relative to the code, or if voice/ gets restructured (per
 the persona-rebuild forcing function in §I.1).
 
+### III.6 — athens-2026: 301 tracked `voices/<slug>/_snapshots/` files with dead-SHA names
+
+**Status:** ambiguous intent (deliberate audit trail vs accidental tracking)
+**Effort to address:** depends on disposition — 0 hr if "leave as audit
+trail"; 1–2 hr if "untrack + gitignore"; 2–3 hr if "rename to remove dead
+SHAs"
+
+**The setup:** In the **athens-2026** repo, 10 voices each have a
+`voices/<slug>/_snapshots/` directory containing dated pre/post snapshot
+subdirs from the late-April persona-pipeline build phase. These ARE
+tracked in athens-2026 git (`_snapshots/` is **not** in athens-2026's
+`.gitignore`). 301 tracked files across the 10 voices.
+
+**The problem:** several snapshot directory names embed pre-rewrite SHAs
+that died in the 2026-05-29 history rewrite:
+- `voices/plato/_snapshots/PRE_582af96_REVERT_20260428_231725/`
+- `voices/plato/_snapshots/POST_582af96_BASELINE_RUN_20260429_001715/`
+- (and others — same SHA pattern as the umbrella archive's old
+  `personas_prompts_PRE_582af96_REVERT_20260428_231640/` which we renamed)
+
+Verified: `git log --all --oneline | grep 582af96` in athens-2026
+returns nothing. The directory names preserve historical references that
+no longer resolve.
+
+**Three possible dispositions:**
+
+- **(a) Leave** — accept the snapshots are tracked audit trail; the dead
+  SHA in the dir name is a historical breadcrumb that doesn't need to
+  resolve to a live commit. Cheapest. **Default if undecided.**
+- **(b) Untrack + gitignore** — add `voices/*/_snapshots/` to
+  `.gitignore`, `git rm --cached` the 301 tracked entries. Keeps files
+  on disk for operator audit but removes from git. Cost: ~1-2 hr +
+  large diff on athens-2026 main.
+- **(c) Rename** — rename the dead-SHA subdirs to use the post-rewrite
+  SHA equivalents (via the hash-remap TSVs we have) or drop the SHA
+  entirely. Preserves audit trail in git + fixes the dead-ref names.
+  Cost: ~2-3 hr; touches ~50+ rename operations.
+
+**Why deferred:** no current consumer reads these snapshot directory
+names. The dead SHAs are cosmetically wrong but don't break anything.
+Operator decision required for which disposition fits.
+
+**Trigger:** operator decision, or next time someone tries to follow a
+snapshot SHA back to a commit and finds it dead.
+
+### III.7 — athens-2026: 54 per-voice `.pre_*.json` operator snapshots on disk
+
+**Status:** working as intended (per operator convention)
+**Effort:** zero (no action needed)
+
+For completeness: athens-2026 has 54 `.pre_*.json` operator-snapshot
+files on disk inside `voices/<slug>/` subdirs. All correctly gitignored
+per the `*.pre_*.json` rule in athens-2026's `.gitignore`. They're
+filesystem clutter visible to anyone browsing the directory, but the
+operator's stated convention (per `code/_workspace/planning/voices/ONBOARDING.md`)
+preserves them locally as audit trail.
+
+**Listed here for discoverability, not as work-to-do.** If a future
+disposition decides to relocate them (e.g. into a per-voice
+`_snapshots/` subdir matching the existing pattern, or a top-level
+`_archive/operator_snapshots/`), that's filesystem hygiene; no git
+impact.
+
 ---
 
 ## IV. Doc consolidation
