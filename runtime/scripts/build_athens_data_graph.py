@@ -1009,7 +1009,7 @@ function renderNight(pane, night) {
 function renderThemePhaseA(t, night) {
   // Phase A: theme as terminal-grouping of clusters; selected/dropped marker
   const status = t.selected_for_provocateur ? '⭐ SELECTED' : '✗ dropped';
-  const [d, body] = det(`${t.theme_id_raw || t.theme_id} — "${t.title}"  · ${status}`);
+  const [d, body] = det(`"${t.title}" (${t.theme_id}) · ${status}`);
   d.setAttribute('data-anchor', t.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, t.prefixed_id));
   if (t.abstract) body.appendChild(abstract(t.abstract));
@@ -1020,7 +1020,7 @@ function renderThemePhaseA(t, night) {
     for (let i = 0; i < clusterIds.length; i++) {
       const c = DATA.clusters[clusterIds[i]];
       if (c) {
-        cList.appendChild(jumpLink(c.cluster_id + ' (' + (c.cluster_title || '') + ')', c.prefixed_id));
+        cList.appendChild(jumpLink('"' + (c.cluster_title || '') + '" (' + c.cluster_id + ')', c.prefixed_id));
         if (i < clusterIds.length - 1) cList.appendChild(document.createTextNode(' · '));
       }
     }
@@ -1037,7 +1037,7 @@ function renderThemePhaseA(t, night) {
 
 function renderThemePhaseB(t, night) {
   // Phase B: selected theme as starting point of deliberation chain
-  const [d, body] = det(`⭐ ${t.theme_id_raw || t.theme_id} — "${t.title}"`);
+  const [d, body] = det(`⭐ "${t.title}" (${t.theme_id})`);
   d.setAttribute('data-anchor', 'phase-b-' + t.prefixed_id);
   if (t.abstract) body.appendChild(abstract(t.abstract));
   // Formulations (per voice on this theme)
@@ -1054,7 +1054,7 @@ function renderThemePhaseB(t, night) {
   if (dossierForTheme) {
     body.appendChild(el('div', {class: 'panel', style: 'margin: 0.5rem 0;'},
       el('b', {}, '📰 Tim composed a dossier around this theme: '),
-      jumpLink(dossierForTheme.dossier_num + ' — "' + (dossierForTheme.kicker || dossierForTheme.headline) + '" ↓',
+      jumpLink('"' + (dossierForTheme.kicker || dossierForTheme.headline) + '" (' + dossierForTheme.dossier_num + ') ↓',
                dossierForTheme.dossier_id)));
   } else {
     body.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'},
@@ -1064,7 +1064,7 @@ function renderThemePhaseB(t, night) {
 }
 
 function renderCluster(c, night) {
-  const [d, body] = det(`${c.cluster_id} — "${c.cluster_title}" (${(c.extraction_ids||[]).length} extractions)`);
+  const [d, body] = det(`"${c.cluster_title}" (${c.cluster_id}) — ${(c.extraction_ids||[]).length} extractions`);
   d.setAttribute('data-anchor', c.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, c.prefixed_id));
   if (c.cluster_abstract) body.appendChild(abstract(c.cluster_abstract));
@@ -1073,8 +1073,8 @@ function renderCluster(c, night) {
     const t = DATA.themes[c.theme_id];
     body.appendChild(el('div', {},
       el('span', {class: 'backlink'},
-        '↑ Belongs to: ',
-        jumpLink(`${(t && t.theme_id) || c.theme_id} — "${(t && t.title) || ''}"${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
+        '↑ Belongs to theme: ',
+        jumpLink(`"${(t && t.title) || ''}" (${(t && t.theme_id) || c.theme_id})${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
                  c.theme_id))));
   }
   const [eSec, eBody] = det(`Extractions in this cluster (${(c.extraction_ids||[]).length})`);
@@ -1108,13 +1108,13 @@ function renderExtraction(e, night) {
   if (cluster) {
     links.appendChild(el('span', {class: 'backlink'},
       '→ Part of cluster: ',
-      jumpLink(`${cluster.cluster_id} ("${cluster.cluster_title}")`, cluster.prefixed_id)));
+      jumpLink(`"${cluster.cluster_title}" (${cluster.cluster_id})`, cluster.prefixed_id)));
   }
   if (theme) {
     links.appendChild(document.createTextNode(' '));
     links.appendChild(el('span', {class: 'backlink'},
       '→ In theme: ',
-      jumpLink(`${theme.theme_id} ("${theme.title}")${theme.selected_for_provocateur ? ' ⭐' : ''}`,
+      jumpLink(`"${theme.title}" (${theme.theme_id})${theme.selected_for_provocateur ? ' ⭐' : ''}`,
                theme.prefixed_id)));
   }
   body.appendChild(links);
@@ -1137,7 +1137,7 @@ function renderExtraction(e, night) {
 }
 
 function renderFormulation(f, night) {
-  const [d, body] = det(`${f.voice_slug} × ${f.theme_id_raw} — "${f.theme_display_title || ''}"`);
+  const [d, body] = det(`${f.voice_slug} × "${f.theme_display_title || ''}" (${f.theme_id_raw})`);
   d.setAttribute('data-anchor', f.formulation_id);
   body.appendChild(el('div', {class: 'id'}, f.formulation_id));
   if (f.formulation_text) {
@@ -1294,7 +1294,7 @@ function renderStep2Body(s, night) {
 }
 
 function renderDossier(d, night) {
-  const [dEl, body] = det(`▼ ${d.dossier_num} — ${d.kicker || ''} · ${d.headline || ''}`);
+  const [dEl, body] = det(`"${d.kicker || ''}" (${d.dossier_num}) — ${d.headline || ''}`);
   dEl.setAttribute('data-anchor', d.dossier_id);
   body.appendChild(el('div', {class: 'id'}, d.dossier_id + ' · theme: ' + (d.theme_id_raw || '—')));
 
