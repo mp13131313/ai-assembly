@@ -714,11 +714,33 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                               border-left: 3px solid #8a5a1a; font-size: 0.9rem;
                               white-space: pre-wrap; }
   .phase { background: linear-gradient(90deg, var(--accent) 0%, #7a5aaa 100%);
-           color: white; padding: 0.6rem 1rem; margin: 2.5rem 0 1rem;
+           color: white; padding: 0.6rem 1rem; margin: 0 0 1rem;
            font: italic 600 1.3rem var(--serif); border-radius: 4px; }
   .phase.assembly { background: linear-gradient(90deg, #8a5a1a 0%, #a87a2a 100%); }
   .phase small { display: block; font: 0.85rem/1.4 -apple-system, sans-serif;
                  color: rgba(255,255,255,0.85); font-style: normal; margin-top: 0.2rem; }
+  /* Phase switcher — page-level tabs splitting Conference Data and Assembly Output */
+  .phase-switch { display: flex; gap: 0; margin: 1.5rem -2rem 0; padding: 0 2rem;
+                  border-bottom: 2px solid var(--border); background: var(--bg);
+                  position: sticky; top: 0; z-index: 60; }
+  .phase-switch button { flex: 1; background: transparent; color: var(--muted);
+                         border: 0; padding: 1rem 1.5rem; font: italic 600 1.1rem var(--serif);
+                         cursor: pointer; transition: all 0.15s;
+                         border-bottom: 4px solid transparent; margin-bottom: -2px; }
+  .phase-switch button:hover { color: var(--fg); }
+  .phase-switch button.active[data-phase="conf"] { color: var(--accent);
+                                                    border-bottom-color: var(--accent); }
+  .phase-switch button.active[data-phase="assembly"] { color: #8a5a1a;
+                                                       border-bottom-color: #8a5a1a; }
+  .phase-pane { display: none; }
+  .phase-pane.active { display: block; }
+  /* Hide section pills not belonging to the active phase */
+  .night-pane[data-active-phase="conf"] .sub-nav .assembly,
+  .night-pane[data-active-phase="conf"] .sub-nav .section-link.assembly { display: none; }
+  .night-pane[data-active-phase="assembly"] .sub-nav .conf,
+  .night-pane[data-active-phase="assembly"] .sub-nav .section-link.conf { display: none; }
+  .night-pane[data-active-phase="assembly"] .sub-nav .divider { display: none; }
+  .night-pane[data-active-phase="conf"] .sub-nav .divider { display: none; }
   .sub-nav { position: sticky; top: 48px; background: rgba(34, 34, 34, 0.96);
              backdrop-filter: blur(6px); color: #ddd; padding: 0.5rem 1rem;
              margin: 0 -2rem 1rem; z-index: 50; font-size: 0.82rem;
@@ -788,6 +810,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
 
+// Format voice slug for display. tim_leberecht → "the editor"; ada_lovelace → "Ada Lovelace"
+function formatVoiceName(slug) {
+  if (!slug) return '';
+  if (slug === 'tim_leberecht' || slug === 'the_editor' || slug === 'editor') return 'the editor';
+  return slug.split('_').map(w => w ? w[0].toUpperCase() + w.slice(1) : '').join(' ');
+}
+
+// Format an artifact summary. Falls back to "artifact" when no real title (avoids dumping verbose selected_form).
+function formatArtifactSummary(s) {
+  const voice = formatVoiceName(s.voice_slug);
+  const title = (s.artifact_title || '').trim();
+  const wc = s.word_count || 0;
+  if (title) return `${voice}: "${title}" (${wc} words)`;
+  return `${voice}: artifact (${wc} words)`;
+}
+
 function el(tag, attrs={}, ...children) {
   const e = document.createElement(tag);
   for (const k in attrs) {
@@ -852,8 +890,22 @@ function jumpLink(text, target) {
     e.preventDefault();
     const targetEl = document.querySelector('[data-anchor="' + target + '"]');
     if (targetEl) {
-      const pane = targetEl.closest('.night-pane');
-      if (pane) showNight(pane.id);
+      const nightPane = targetEl.closest('.night-pane');
+      if (nightPane) showNight(nightPane.id);
+      // Switch sub-phase if target is in a different phase
+      const phasePane = targetEl.closest('.phase-pane');
+      if (phasePane && nightPane) {
+        const targetPhase = phasePane.classList.contains('conf-pane') ? 'conf' : 'assembly';
+        if (nightPane.dataset.activePhase !== targetPhase) {
+          nightPane.dataset.activePhase = targetPhase;
+          nightPane.querySelectorAll('.phase-pane').forEach(p => p.classList.remove('active'));
+          phasePane.classList.add('active');
+          nightPane.querySelectorAll('.phase-switch button').forEach(b => {
+            if (b.dataset.phase === targetPhase) b.classList.add('active');
+            else b.classList.remove('active');
+          });
+        }
+      }
       // Open all <details> ancestors so the target is visible
       let cur = targetEl;
       while (cur && cur !== document.body) {
@@ -898,14 +950,58 @@ for (const night of ['night_1', 'night_2', 'night_3']) {
 function renderNight(pane, night) {
   const n = DATA.nights[night] || {};
   const stats = n.statistics || {};
+  // Default active phase
+  pane.dataset.activePhase = 'conf';
 
-  // Sticky sub-nav — pills for each section, highlights as you scroll
+  // Stats bar
+  const statsBar = el('div', {class: 'stats'});
+  statsBar.innerHTML = `
+    <b>${night.replace('_', ' ').replace(/^./, c => c.toUpperCase())}</b> —
+    ${stats.sessions || 0} sessions ·
+    ${(stats.turns || 0).toLocaleString()} turns ·
+    ${(stats.words || 0).toLocaleString()} words ·
+    ${stats.extractions || 0} extractions ·
+    ${stats.clusters || 0} clusters ·
+    ${stats.themes_selected || 0}/${stats.themes_total || 0} themes selected ·
+    ${stats.formulations || 0} formulations ·
+    ${stats.voice_step1 || 0} private-thinking responses ·
+    ${stats.voice_step2 || 0} artifacts ·
+    ${stats.dossiers || 0} dossiers
+  `;
+  pane.appendChild(statsBar);
+
+  // Deployment context discipline rules
+  if (n.deployment_context_rules) {
+    const [d, body] = det('📋 Deployment context discipline rules (this night)');
+    body.appendChild(el('div', {class: 'deployment-context-pane'}, n.deployment_context_rules));
+    pane.appendChild(d);
+  }
+
+  // Phase switcher — page-level tabs between Conference Data and Assembly Output
+  const phaseSwitch = el('nav', {class: 'phase-switch'});
+  phaseSwitch.innerHTML = `
+    <button data-phase="conf" class="active">📊 Conference Data</button>
+    <button data-phase="assembly">🎭 Assembly Output</button>
+  `;
+  phaseSwitch.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      const phase = b.dataset.phase;
+      pane.dataset.activePhase = phase;
+      phaseSwitch.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      pane.querySelectorAll('.phase-pane').forEach(p => p.classList.remove('active'));
+      pane.querySelector(`.${phase}-pane`).classList.add('active');
+      window.scrollTo({top: phaseSwitch.offsetTop, behavior: 'instant'});
+    });
+  });
+  pane.appendChild(phaseSwitch);
+
+  // Sub-nav — section pills for both phases; CSS hides the ones not in the active phase
   const subnav = el('nav', {class: 'sub-nav'});
   subnav.innerHTML = `
     <span class="phase-label conf">Conference Data</span>
     <a href="#" data-target="sec-${night}-sessions" class="section-link conf">📼 Sessions</a>
     <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes (with clusters inside)</a>
-    <span class="divider">·</span>
     <span class="phase-label assembly">Assembly Output</span>
     <a href="#" data-target="sec-${night}-selected" class="section-link assembly">🎯 Selected themes</a>
     <a href="#" data-target="sec-${night}-voices" class="section-link assembly">🗣 Voices</a>
@@ -920,38 +1016,12 @@ function renderNight(pane, night) {
   });
   pane.appendChild(subnav);
 
-  // Stats bar
-  const statsBar = el('div', {class: 'stats'});
-  statsBar.innerHTML = `
-    <b>${night.replace('_', ' ').replace(/^./, c => c.toUpperCase())}</b> —
-    ${stats.sessions || 0} sessions ·
-    ${(stats.turns || 0).toLocaleString()} turns ·
-    ${(stats.words || 0).toLocaleString()} words ·
-    ${stats.extractions || 0} extractions ·
-    ${stats.clusters || 0} clusters ·
-    ${stats.themes_selected || 0}/${stats.themes_total || 0} themes selected ·
-    ${stats.formulations || 0} formulations ·
-    ${stats.voice_step1 || 0} step1 ·
-    ${stats.voice_step2 || 0} step2 ·
-    ${stats.dossiers || 0} dossiers
-  `;
-  pane.appendChild(statsBar);
-
-  // Deployment context discipline rules
-  if (n.deployment_context_rules) {
-    const [d, body] = det('📋 Deployment context discipline rules (this night)');
-    body.appendChild(el('div', {class: 'deployment-context-pane'}, n.deployment_context_rules));
-    pane.appendChild(d);
-  }
-
-  // ─── PHASE A: CONFERENCE DATA ───
-  const phaseA = el('div', {class: 'phase'});
-  phaseA.innerHTML = `PHASE A · Conference Data
-    <small>What was said in the room — sessions, extracted positions, KJ clusters, derived themes</small>`;
-  pane.appendChild(phaseA);
+  // CONFERENCE DATA pane
+  const confPane = el('div', {class: 'phase-pane conf-pane active'});
+  pane.appendChild(confPane);
 
   // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
+  confPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
     `📼 Sessions (${stats.sessions || 0})`));
   const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
   const audioSessions = sessions.filter(s => !s.is_reflection)
@@ -984,77 +1054,77 @@ function renderNight(pane, night) {
   }
 
   if (audioSessions.length) {
-    pane.appendChild(el('div', {class: 'capture-group-header'},
+    confPane.appendChild(el('div', {class: 'capture-group-header'},
       `🎙 Audio (${audioSessions.length} captures) — panel transcriptions, by track`));
     const byTrack = groupByTrack(audioSessions);
     for (const track of Object.keys(byTrack).sort(trackSort)) {
-      pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+      confPane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
       for (const s of byTrack[track]) {
-        pane.appendChild(renderSession(s, night));
+        confPane.appendChild(renderSession(s, night));
       }
     }
   }
   if (reflectionSessions.length) {
-    pane.appendChild(el('div', {class: 'capture-group-header'},
+    confPane.appendChild(el('div', {class: 'capture-group-header'},
       `💬 Audience reflections (${reflectionSessions.length}) — spoken contributions submitted via the audience tool, by track`));
     const byTrack = groupByTrack(reflectionSessions);
     for (const track of Object.keys(byTrack).sort(trackSort)) {
-      pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+      confPane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
       for (const s of byTrack[track]) {
-        pane.appendChild(renderSession(s, night));
+        confPane.appendChild(renderSession(s, night));
       }
     }
   }
 
   // Themes (with clusters nested inside; ungrouped clusters listed at end if any)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
+  confPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
     `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur) — clusters nested inside`));
   const themes = Object.values(DATA.themes).filter(t => t.night === night)
     .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
   for (const t of themes) {
-    pane.appendChild(renderThemePhaseA(t, night));
+    confPane.appendChild(renderThemePhaseA(t, night));
   }
   // Orphan clusters (no theme) — surface at the end so they're not invisible
   const allClusters = Object.values(DATA.clusters).filter(c => c.night === night);
   const orphans = allClusters.filter(c => !c.theme_id);
   if (orphans.length) {
-    pane.appendChild(el('div', {class: 'section-title', style: 'color: var(--muted);'},
+    confPane.appendChild(el('div', {class: 'section-title', style: 'color: var(--muted);'},
       `🔗 Orphan clusters (${orphans.length}) — not grouped into any theme`));
     for (const c of orphans) {
-      pane.appendChild(renderCluster(c, night, 'standalone'));
+      confPane.appendChild(renderCluster(c, night, 'standalone'));
     }
   }
 
-  // ─── PHASE B: ASSEMBLY OUTPUT ───
-  const phaseB = el('div', {class: 'phase assembly'});
-  phaseB.innerHTML = `PHASE B · Assembly Output
-    <small>What the voices and the editor did with the room — formulations, voice reasoning + artifacts, Tim's dossiers</small>`;
-  pane.appendChild(phaseB);
+
+  // ASSEMBLY OUTPUT pane
+  const assemblyPane = el('div', {class: 'phase-pane assembly-pane'});
+  pane.appendChild(assemblyPane);
+
 
   // Selected themes → voice responses + dossier (the deliberation chain)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
+  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
     `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
   const selectedThemes = themes.filter(t => t.selected_for_provocateur);
   for (const t of selectedThemes) {
-    pane.appendChild(renderThemePhaseB(t, night));
+    assemblyPane.appendChild(renderThemePhaseB(t, night));
   }
 
-  // Voices' Step 2 artifacts (per-voice synthesis)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
-    `🗣 Voices' Step 2 artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
+  // Voices' Artifacts (per-voice synthesis)
+  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
+    `🗣 Voices' Artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
   const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
     .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
   for (const s of step2s) {
-    pane.appendChild(renderStep2(s, night));
+    assemblyPane.appendChild(renderStep2(s, night));
   }
 
-  // Dossiers (Tim's compositions)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
-    `📰 Dossiers (${stats.dossiers || 0}) — Tim's editorial compositions`));
+  // Dossiers (the editor's compositions)
+  assemblyPane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
+    `📰 Dossiers (${stats.dossiers || 0}) — the editor's compositions`));
   const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
     .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
   for (const d of dossiers) {
-    pane.appendChild(renderDossier(d, night));
+    assemblyPane.appendChild(renderDossier(d, night));
   }
 }
 
@@ -1144,12 +1214,12 @@ function renderThemePhaseB(t, night) {
   const dossierForTheme = Object.values(DATA.dossiers).find(d => d.theme_id === t.prefixed_id);
   if (dossierForTheme) {
     body.appendChild(el('div', {class: 'panel', style: 'margin: 0.5rem 0;'},
-      el('b', {}, '📰 Tim composed a dossier around this theme: '),
+      el('b', {}, '📰 The editor composed a dossier around this theme: '),
       jumpLink('"' + (dossierForTheme.kicker || dossierForTheme.headline) + '" (' + dossierForTheme.dossier_num + ') ↓',
                dossierForTheme.dossier_id)));
   } else {
     body.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'},
-      'No dossier composed around this theme (Tim picked other selected themes for the 5/5/3 published).'));
+      'No dossier composed around this theme (the editor picked other selected themes for the 5/5/3 published).'));
   }
   return d;
 }
@@ -1304,7 +1374,7 @@ function renderExtraction(e, night, hide) {
 }
 
 function renderFormulation(f, night) {
-  const [d, body] = det(`${f.voice_slug} × "${f.theme_display_title || ''}" (${f.theme_id_raw})`);
+  const [d, body] = det(`${formatVoiceName(f.voice_slug)} × "${f.theme_display_title || ''}" (${f.theme_id_raw})`);
   d.setAttribute('data-anchor', f.formulation_id);
   body.appendChild(el('div', {class: 'id'}, f.formulation_id));
   if (f.formulation_text) {
@@ -1325,7 +1395,7 @@ function renderFormulation(f, night) {
   const step1Id = `${night}/${f.voice_slug}__${f.theme_id_raw}`;
   const s1 = DATA.voice_step1[step1Id];
   if (s1) {
-    const [s1d, s1b] = det(`Voice Step 1 response (${(s1.detailed_response || '').length.toLocaleString()} chars private reasoning)`);
+    const [s1d, s1b] = det(`Private thinking (${(s1.detailed_response || '').length.toLocaleString()} chars)`);
     body.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
@@ -1337,7 +1407,7 @@ function renderFormulation(f, night) {
     const primaryTheme = (s2.lineage || {}).primary_theme_id;
     const isPrimary = primaryTheme === f.theme_id_raw;
     if (isPrimary) {
-      const sumTxt = `★ ${s2.voice_slug} chose this theme — Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`;
+      const sumTxt = `★ ${formatVoiceName(s2.voice_slug)} chose this theme — ${formatArtifactSummary(s2)}`;
       const s2d = document.createElement('details');
       const s2sum = document.createElement('summary');
       s2sum.textContent = sumTxt;
@@ -1358,7 +1428,7 @@ function renderFormulation(f, night) {
     } else if (primaryTheme) {
       // Voice didn't pick this theme — small breadcrumb to where they went
       body.appendChild(el('div', {class: 'meta', style: 'margin-top: 0.5rem; font-style: italic; color: var(--muted);'},
-        `(${s2.voice_slug}'s Step 2 went to ${primaryTheme} — see Voices section)`));
+        `(${formatVoiceName(s2.voice_slug)}'s artifact went to ${primaryTheme} — see Voices' Artifacts section)`));
     }
   }
   return d;
@@ -1391,11 +1461,7 @@ function renderStep1Body(s1) {
 }
 
 function renderStep2(s, night) {
-  const validation = s.validation || {};
-  const verdict = (validation.overall_verdict || '').toLowerCase();
-  const verdictClass = verdict === 'pass' ? 'pass' : verdict === 'hold' ? 'hold' : 'warn';
-  const decision = (s.operator_decision || {}).decision || '';
-  const sumTxt = `${s.voice_slug} Step 2 — "${s.artifact_title || s.selected_form || ''}" (${(s.word_count || 0)} words)`;
+  const sumTxt = formatArtifactSummary(s);
   const [d, body] = det(sumTxt);
   d.setAttribute('data-anchor', s.step2_id);
   body.appendChild(renderStep2Body(s, night));
@@ -1642,7 +1708,7 @@ function renderStep2Body(s, night) {
   // Source step1s — items may be strings (legacy) or objects {theme_id, formulation_id, path}
   const lineage = s.lineage || {};
   if (lineage.consumed_detailed_responses && lineage.consumed_detailed_responses.length) {
-    const [ld, lb] = det(`Source Step 1 responses consumed (${lineage.consumed_detailed_responses.length})`);
+    const [ld, lb] = det(`Source private-thinking responses consumed (${lineage.consumed_detailed_responses.length})`);
     for (const item of lineage.consumed_detailed_responses) {
       let path, themeId;
       if (typeof item === 'string') {
@@ -1820,7 +1886,7 @@ function buildVoicesIndex() {
   }
   for (const slug of [...voiceSlugs].sort()) {
     const row = el('div', {style: 'padding: 0.25rem 0.5rem; color: #ddd; font-size: 0.85rem;'});
-    row.appendChild(el('b', {}, slug));
+    row.appendChild(el('b', {}, formatVoiceName(slug)));
     for (const n of ['night_1', 'night_2', 'night_3']) {
       const s2id = `${n}/${slug}`;
       const exists = DATA.voice_step2[s2id];
