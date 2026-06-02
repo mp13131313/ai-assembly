@@ -904,8 +904,7 @@ function renderNight(pane, night) {
   subnav.innerHTML = `
     <span class="phase-label conf">Conference Data</span>
     <a href="#" data-target="sec-${night}-sessions" class="section-link conf">📼 Sessions</a>
-    <a href="#" data-target="sec-${night}-clusters" class="section-link conf">🔗 Clusters</a>
-    <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes</a>
+    <a href="#" data-target="sec-${night}-themes" class="section-link conf">🏷 Themes (with clusters inside)</a>
     <span class="divider">·</span>
     <span class="phase-label assembly">Assembly Output</span>
     <a href="#" data-target="sec-${night}-selected" class="section-link assembly">🎯 Selected themes</a>
@@ -1007,22 +1006,23 @@ function renderNight(pane, night) {
     }
   }
 
-  // Clusters (with extraction membership + theme backlink)
-  pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-clusters`, 'data-section': `sec-${night}-clusters`},
-    `🔗 Clusters (${stats.clusters || 0}) — KJ grouping of extractions`));
-  const clusters = Object.values(DATA.clusters).filter(c => c.night === night)
-    .sort((a, b) => (a.cluster_id || '').localeCompare(b.cluster_id || ''));
-  for (const c of clusters) {
-    pane.appendChild(renderCluster(c, night));
-  }
-
-  // Themes (with cluster membership + selected/dropped marker)
+  // Themes (with clusters nested inside; ungrouped clusters listed at end if any)
   pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
-    `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur)`));
+    `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur) — clusters nested inside`));
   const themes = Object.values(DATA.themes).filter(t => t.night === night)
     .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
   for (const t of themes) {
     pane.appendChild(renderThemePhaseA(t, night));
+  }
+  // Orphan clusters (no theme) — surface at the end so they're not invisible
+  const allClusters = Object.values(DATA.clusters).filter(c => c.night === night);
+  const orphans = allClusters.filter(c => !c.theme_id);
+  if (orphans.length) {
+    pane.appendChild(el('div', {class: 'section-title', style: 'color: var(--muted);'},
+      `🔗 Orphan clusters (${orphans.length}) — not grouped into any theme`));
+    for (const c of orphans) {
+      pane.appendChild(renderCluster(c, night, 'standalone'));
+    }
   }
 
   // ─── PHASE B: ASSEMBLY OUTPUT ───
@@ -1069,37 +1069,18 @@ function renderThemePhaseA(t, night) {
   d.setAttribute('data-anchor', t.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, t.prefixed_id));
   if (t.abstract) body.appendChild(abstract(t.abstract));
-  // Cluster quick-jump list
-  if (clusters.length) {
-    const cList = el('div', {style: 'margin: 0.5rem 0;'}, el('b', {}, `Clusters in this theme (${clusters.length}): `));
-    for (let i = 0; i < clusters.length; i++) {
-      const c = clusters[i];
-      cList.appendChild(jumpLink('"' + (c.cluster_title || '') + '" (' + c.cluster_id + ')', c.prefixed_id));
-      if (i < clusters.length - 1) cList.appendChild(document.createTextNode(' · '));
-    }
-    body.appendChild(cList);
-  }
   // Triage flags (audience friction, fault lines added by Provocateur)
   if (t.triage_flags) {
     const [tfd, tfb] = det('Triage flags (Provocateur annotations)');
     tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
     body.appendChild(tfd);
   }
-  // Extractions, grouped by cluster (theme's natural sub-structure)
+  // Clusters nested inside the theme — full cluster view (extractions grouped by session)
   if (clusters.length) {
-    const [eSec, eBody] = det(`Extractions, grouped by cluster (${totalExtractions} total across ${clusters.length} cluster${clusters.length === 1 ? '' : 's'})`);
-    body.appendChild(eSec);
+    body.appendChild(el('div', {class: 'meta', style: 'margin: 0.5rem 0; font-style: italic;'},
+      `${clusters.length} cluster${clusters.length === 1 ? '' : 's'} below — each grouped by source session`));
     for (const c of clusters) {
-      const exts = (c.extraction_ids || []).map(eid => DATA.extractions[eid]).filter(Boolean);
-      const sessHere = clusterSessionCount(c);
-      const [cd, cb] = det(`Cluster: "${c.cluster_title}" (${c.cluster_id}) — ${exts.length} extraction${exts.length === 1 ? '' : 's'} from ${sessHere} session${sessHere === 1 ? '' : 's'}`);
-      if (c.cluster_abstract) cb.appendChild(abstract(c.cluster_abstract));
-      cb.appendChild(el('div', {class: 'meta'},
-        '↗ ', jumpLink('Open full cluster view (with session grouping) ↑', c.prefixed_id)));
-      for (const e of exts) {
-        cb.appendChild(renderExtraction(e, night, 'theme'));
-      }
-      eBody.appendChild(cd);
+      body.appendChild(renderCluster(c, night, 'theme'));
     }
   }
   return d;
@@ -1133,15 +1114,17 @@ function renderThemePhaseB(t, night) {
   return d;
 }
 
-function renderCluster(c, night) {
+function renderCluster(c, night, context) {
+  // context: 'standalone' (default) | 'theme' (nested inside theme — skip theme backlink)
+  context = context || 'standalone';
   const extCount = (c.extraction_ids || []).length;
   const sessCount = clusterSessionCount(c);
   const [d, body] = det(`"${c.cluster_title}" (${c.cluster_id}) — ${extCount} extractions from ${sessCount} session${sessCount === 1 ? '' : 's'}`);
   d.setAttribute('data-anchor', c.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, c.prefixed_id));
   if (c.cluster_abstract) body.appendChild(abstract(c.cluster_abstract));
-  // Theme backlink
-  if (c.theme_id) {
+  // Theme backlink — only when standalone (e.g. orphan cluster); skip when nested inside theme view
+  if (c.theme_id && context !== 'theme') {
     const t = DATA.themes[c.theme_id];
     body.appendChild(el('div', {},
       el('span', {class: 'backlink'},
@@ -1166,8 +1149,10 @@ function renderCluster(c, night) {
     const [sd, sb] = det(`From session: ${sessionTitle} — ${exts.length} extraction${exts.length === 1 ? '' : 's'}`);
     sb.appendChild(el('div', {class: 'meta'},
       '↗ ', jumpLink('Open this session in Sessions section ↑', sid)));
+    // Hide cluster link always (we're in the cluster); also hide theme if cluster is nested in theme
+    const hide = context === 'theme' ? ['cluster', 'theme'] : 'cluster';
     for (const e of exts) {
-      sb.appendChild(renderExtraction(e, night, 'cluster'));
+      sb.appendChild(renderExtraction(e, night, hide));
     }
     eBody.appendChild(sd);
   }
@@ -1215,9 +1200,10 @@ function groupExtractionsBy(extractions, keyFn) {
   return groups;
 }
 
-// context: 'session' | 'cluster' | 'theme' — controls which links are hidden (the parent context)
-function renderExtraction(e, night, context) {
-  context = context || 'session';
+// hide: which parent-context links to hide. String ('session', 'cluster', 'theme')
+// or array (['cluster', 'theme'] for cluster-nested-in-theme).
+function renderExtraction(e, night, hide) {
+  if (!Array.isArray(hide)) hide = [hide || 'session'];
   const cluster = e.cluster_id ? DATA.clusters[e.cluster_id] : null;
   const theme = cluster && cluster.theme_id ? DATA.themes[cluster.theme_id] : null;
   const session = e.session_id ? DATA.sessions[e.session_id] : null;
@@ -1235,22 +1221,22 @@ function renderExtraction(e, night, context) {
   const body = el('div', {class: 'body'});
   d.appendChild(body);
   d.setAttribute('data-anchor', e.extraction_id);
-  // Forward links — hide the link pointing back to the parent context
+  // Forward links — hide the link(s) pointing back to current parent context(s)
   const links = el('div', {style: 'margin: 0.4rem 0;'});
-  if (cluster && context !== 'cluster') {
+  if (cluster && !hide.includes('cluster')) {
     links.appendChild(el('span', {class: 'backlink'},
       '→ Part of cluster: ',
       jumpLink(`"${cluster.cluster_title}" (${cluster.cluster_id})`, cluster.prefixed_id)));
     links.appendChild(document.createTextNode(' '));
   }
-  if (theme && context !== 'theme') {
+  if (theme && !hide.includes('theme')) {
     links.appendChild(el('span', {class: 'backlink'},
       '→ In theme: ',
       jumpLink(`"${theme.title}" (${theme.theme_id})${theme.selected_for_provocateur ? ' ⭐' : ''}`,
                theme.prefixed_id)));
     links.appendChild(document.createTextNode(' '));
   }
-  if (session && context !== 'session') {
+  if (session && !hide.includes('session')) {
     links.appendChild(el('span', {class: 'backlink'},
       '→ From session: ',
       jumpLink(`"${session.session_title}" (${session.venue || ''})`, session.session_id)));
