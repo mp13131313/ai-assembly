@@ -1286,33 +1286,37 @@ function renderFormulation(f, night) {
     body.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
-  // Step 2 — the voice's full synthesis, inline (lazy-rendered on expand)
+  // Step 2 — only show inline when THIS formulation's theme was the voice's primary focus;
+  // otherwise the chain stops at Step 1 (Step 2 is reachable via Voices section).
   const step2Id = `${night}/${f.voice_slug}`;
   const s2 = DATA.voice_step2[step2Id];
   if (s2) {
     const primaryTheme = (s2.lineage || {}).primary_theme_id;
     const isPrimary = primaryTheme === f.theme_id_raw;
-    const primaryNote = isPrimary
-      ? ' ★ primary focus'
-      : (primaryTheme ? ` (primary focus was ${primaryTheme})` : '');
-    const sumTxt = `▼ ${s2.voice_slug} Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)${primaryNote}`;
-    const s2d = document.createElement('details');
-    const s2sum = document.createElement('summary');
-    s2sum.textContent = sumTxt;
-    s2d.appendChild(s2sum);
-    const s2b = el('div', {class: 'body'});
-    s2d.appendChild(s2b);
-    // Lazy-render the heavy body on first expand
-    let rendered = false;
-    s2d.addEventListener('toggle', () => {
-      if (s2d.open && !rendered) {
-        s2b.appendChild(el('div', {class: 'meta', style: 'margin-bottom: 0.5rem;'},
-          '↗ ', jumpLink('Open in Voices section ↓', step2Id)));
-        s2b.appendChild(renderStep2Body(s2, night));
-        rendered = true;
-      }
-    });
-    body.appendChild(s2d);
+    if (isPrimary) {
+      const sumTxt = `▼ ★ ${s2.voice_slug} chose this theme — Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`;
+      const s2d = document.createElement('details');
+      const s2sum = document.createElement('summary');
+      s2sum.textContent = sumTxt;
+      s2d.appendChild(s2sum);
+      const s2b = el('div', {class: 'body'});
+      s2d.appendChild(s2b);
+      // Lazy-render on first expand
+      let rendered = false;
+      s2d.addEventListener('toggle', () => {
+        if (s2d.open && !rendered) {
+          s2b.appendChild(el('div', {class: 'meta', style: 'margin-bottom: 0.5rem;'},
+            '↗ ', jumpLink('Open in Voices section ↓', step2Id)));
+          s2b.appendChild(renderStep2Body(s2, night));
+          rendered = true;
+        }
+      });
+      body.appendChild(s2d);
+    } else if (primaryTheme) {
+      // Voice didn't pick this theme — small breadcrumb to where they went
+      body.appendChild(el('div', {class: 'meta', style: 'margin-top: 0.5rem; font-style: italic; color: var(--muted);'},
+        `(${s2.voice_slug}'s Step 2 went to ${primaryTheme} — see Voices section)`));
+    }
   }
   return d;
 }
