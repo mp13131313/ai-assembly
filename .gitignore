@@ -44,3 +44,8 @@ _workspace/sentinel_baselines/
 # artifacts kept for backward comparison, not tracked in git per FU#11
 # post-Phase-L cleanup 2026-04-27)
 _workspace/arch_03_baseline_snapshot/
+
+
+# pytest cache (per-sub-tree caches at runtime/.pytest_cache + personas/.pytest_cache
+# are tolerated; root-level one is dev artifact from running pytest at repo root)
+.pytest_cache/

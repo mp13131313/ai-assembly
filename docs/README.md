@@ -33,7 +33,7 @@
 
 | File | Where it went |
 |------|--------------|
-| `CURRENT_STATE.md` | **Archived** to `_workspace/archive/CURRENT_STATE_2026-04-27.md`. Its function — current-state snapshot + gap analysis + architectural rationale — is now split across `CLAUDE.md` (state block at top), `STATE.md` (one-glance entry), `_workspace/planning/runtime/OPEN_ITEMS.md` (open items + TL;DR), and the per-spec changelog sections. The 2026-04-27 snapshot was pre-Athens and ~60% wrong post-Athens; better to remove than to chase. |
+| `CURRENT_STATE.md` | **Archived** to `_workspace/archive/2026-04-27_current_state_snapshot/CURRENT_STATE.md`. Its function — current-state snapshot + gap analysis + architectural rationale — is now split across `STATE.md` (canonical current-state source), `CLAUDE.md` (scaffolding + Athens status pointer), `_workspace/planning/runtime/OPEN_ITEMS.md` (open items + TL;DR), and the per-spec changelog sections. The 2026-04-27 snapshot was pre-Athens and ~60% wrong post-Athens; better to remove than to chase. |
 
 When archived/stale docs conflict with `AI_Assembly_Briefing_v3_1.md`, `CLAUDE.md`, or the code in `runtime/`+`personas/`, trust the current docs and the code.
 
@@ -48,6 +48,6 @@ When archived/stale docs conflict with `AI_Assembly_Briefing_v3_1.md`, `CLAUDE.m
 
 ## What's NOT in `docs/`
 
-- **Current-state snapshot** — see `CLAUDE.md` (state block at top) + `STATE.md` (one-glance entry) at the repo root.
+- **Current-state snapshot** — see `STATE.md` at the repo root (canonical current-state source) + `CLAUDE.md` (scaffolding).
 - **`_workspace/planning/`** — forward-looking design + active workstream trackers. Two-workstream structure (`runtime/` + `voices/` subfolders) + thin root index + frozen historical FU# ledger. See `CLAUDE.md` §"Planning / tracking conventions" for the full workflow.
 - **`_workspace/archive/`** — historical record (executed fix plans, stale specs, session artifacts, archived CURRENT_STATE). Out of scope for code reviews by default.

@@ -2,7 +2,7 @@
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
 **Status:** v4.0 — current 2026-04-27. Production for athens-2026.
-**Purpose:** Specifies the automated pipeline that produces completed Persona Cards — one per voice. Implemented as a Python script (`run_persona_pipeline.py`), parallel across all voices, calling four model APIs in sequence. **This document describes how the pipeline is actually built; for *why* particular architectural decisions were taken, see `_workspace/archive/CURRENT_STATE_2026-04-27.md` §5.16–5.28.**
+**Purpose:** Specifies the automated pipeline that produces completed Persona Cards — one per voice. Implemented as a Python script (`run_persona_pipeline.py`), parallel across all voices, calling four model APIs in sequence. **This document describes how the pipeline is actually built; for *why* particular architectural decisions were taken, see `_workspace/archive/2026-04-27_current_state_snapshot/CURRENT_STATE.md` §5.16–5.28.**
 
 **Predecessor:** v3.10 (2026-04-17) at `docs/_archive/AI_Assembly_Persona_Pipeline_v3_10.md`. The v3.10 changelog history (v2.0 → v3.10) is preserved there. v4 is a fresh-write reflecting the current implementation.
 
@@ -631,7 +631,7 @@ For 10 athens-2026 voices: **~$180–220 in API + ~$0 in claude.ai overhead**. P
 ## See also
 
 - `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + per-field "Therefore" + register rule, with v2.1 amendments section (2026-04-27).
-- `_workspace/archive/CURRENT_STATE_2026-04-27.md` — gap analysis + architectural rationale (§5.16–5.28 cover what changed since v3.10).
+- `_workspace/archive/2026-04-27_current_state_snapshot/CURRENT_STATE.md` — gap analysis + architectural rationale (§5.16–5.28 cover what changed since v3.10).
 - `personas/CROSS_REPO_CONTRACT.md` — cross-repo runtime contract.
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker.
 - `_workspace/planning/HANDOFF_2026_04_27.md` — current session pickup.

@@ -123,7 +123,7 @@ Filed in `voices/OPEN_ITEMS.md §31`:
 1. `voices/ONBOARDING.md` (durable how-to)
 2. `voices/HANDOFF.md` — this doc
 3. `voices/OPEN_ITEMS.md` — §31 (v4.1 gaps + Gap-K post-Athens state) + §28 + §29 + §11 (reader gates)
-4. **For runtime-side context:** `code/STATE.md` + `code/CLAUDE.md` state block at top + `_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md`
+4. **For runtime-side context:** `code/STATE.md` (canonical current state) + `code/CLAUDE.md` (scaffolding) + `_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md`
 5. **For C42 work specifically:** `runtime/OPEN_ITEMS.md C42` (voices-side spec; production prompt UNCHANGED)
 
 That's ~25 min to working knowledge for voice-build cold-start.

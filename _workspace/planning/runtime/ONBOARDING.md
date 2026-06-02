@@ -432,8 +432,8 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 | Researcher prompts | `runtime/flows/shared/prompts/researcher_*.md` |
 | Voice Pipeline spec | `docs/AI_Assembly_Voice_Pipeline.md` |
 | Frame Concept | `docs/AI_Assembly_Frame_Concept_v1.md` |
-| Current state (post-Athens) | `STATE.md` (top-level) + `CLAUDE.md` (state block at top) + `_workspace/planning/runtime/OPEN_ITEMS.md` |
-| Historical gap analysis + architectural rationale (pre-Athens) | `_workspace/archive/CURRENT_STATE_2026-04-27.md` §5 architectural-decision sections |
+| Current state (post-Athens) | `STATE.md` (top-level, canonical current state) + `_workspace/planning/runtime/OPEN_ITEMS.md` (runtime open items). `CLAUDE.md` provides scaffolding (filesystem, conventions, reading order). |
+| Historical gap analysis + architectural rationale (pre-Athens) | `_workspace/archive/2026-04-27_current_state_snapshot/CURRENT_STATE.md` §5 architectural-decision sections |
 | Briefing (project source of truth) | `docs/AI_Assembly_Briefing_v3_1.md` |
 | Persona Card schema | `docs/AI_Assembly_Persona_Card_v2.md` |
 | Provocateur spec | `docs/AI_Assembly_Provocateur_Pipeline.md` |
