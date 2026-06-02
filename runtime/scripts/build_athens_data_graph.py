@@ -1402,6 +1402,181 @@ function renderStep2(s, night) {
   return d;
 }
 
+// Readable validation + operator-decision renderers
+function verdictLabel(v) {
+  if (!v) return el('span', {class: 'meta'}, '—');
+  const lower = String(v).toLowerCase();
+  const cls = lower === 'pass' ? 'pass' : lower === 'hold' ? 'hold' : 'warn';
+  return label(v, cls);
+}
+function renderFlagsList(flags, labelName) {
+  if (!flags || !Array.isArray(flags) || !flags.length) return null;
+  const [d, b] = det(`${labelName} — ${flags.length} flagged`);
+  for (const f of flags) {
+    const item = el('div', {style: 'margin: 0.5rem 0; padding: 0.5rem 0.75rem; background: #fdeeee; border-left: 3px solid #c44;'});
+    if (f.text) {
+      item.appendChild(el('div', {}, el('b', {}, 'Flagged text: '), '"', f.text, '"'));
+    }
+    if (f.rule_cited) {
+      item.appendChild(el('div', {class: 'meta', style: 'margin-top: 0.3rem;'},
+        el('b', {}, 'Rule cited: '), f.rule_cited));
+    }
+    // catch any other fields
+    for (const [k, v] of Object.entries(f)) {
+      if (k !== 'text' && k !== 'rule_cited') {
+        item.appendChild(el('div', {class: 'meta', style: 'margin-top: 0.2rem;'},
+          el('b', {}, k + ': '), typeof v === 'string' ? v : JSON.stringify(v)));
+      }
+    }
+    b.appendChild(item);
+  }
+  return d;
+}
+function renderCallMeta(call) {
+  if (!call) return null;
+  return el('div', {class: 'meta', style: 'margin-top: 0.5rem; color: var(--muted);'},
+    `Validator call: ${call.model || ''} · ${call.input_tokens || 0}→${call.output_tokens || 0} tokens · ${call.wall_clock_s || 0}s`);
+}
+function renderValidation(v) {
+  if (!v) return null;
+  const wrap = el('div');
+  // Top-level summary
+  const top = el('div', {style: 'margin: 0.3rem 0 0.75rem;'});
+  if (v.overall_verdict) {
+    top.appendChild(el('b', {}, 'Overall verdict: '));
+    top.appendChild(verdictLabel(v.overall_verdict));
+  }
+  if (v.operator_recommendation) {
+    top.appendChild(document.createTextNode('  '));
+    top.appendChild(el('b', {}, 'Recommendation: '));
+    top.appendChild(el('span', {style: 'font-family: var(--mono);'}, v.operator_recommendation));
+  }
+  wrap.appendChild(top);
+  // Safeguards
+  if (v.safeguards) {
+    const sg = v.safeguards;
+    const [sd, sb] = det('Safeguards check');
+    sb.appendChild(el('div', {}, el('b', {}, 'Verdict: '), verdictLabel(sg.verdict)));
+    const flagCategories = [
+      ['hard_limits_breach', 'Hard limits breach'],
+      ['banned_modes_slip', 'Banned modes slip'],
+      ['banned_language_ai_slop', 'Banned language / AI slop'],
+      ['first_person_presence_leak', 'First-person presence leak'],
+      ['ai_self_acknowledgment', 'AI self-acknowledgment'],
+      ['defamation_risk', 'Defamation risk'],
+      ['topics_requiring_care_breach', 'Topics-requiring-care breach'],
+    ];
+    for (const [key, lbl] of flagCategories) {
+      const fl = sg[key];
+      if (Array.isArray(fl) && fl.length) {
+        const r = renderFlagsList(fl, lbl);
+        if (r) sb.appendChild(r);
+      } else if (fl == null || (Array.isArray(fl) && fl.length === 0)) {
+        sb.appendChild(el('div', {class: 'meta'}, `✓ ${lbl}: clean`));
+      } else {
+        // Unexpected shape — show inline
+        sb.appendChild(el('div', {class: 'meta'}, `${lbl}: `, JSON.stringify(fl)));
+      }
+    }
+    const cm = renderCallMeta(sg._call);
+    if (cm) sb.appendChild(cm);
+    wrap.appendChild(sd);
+  }
+  // Engagement
+  if (v.engagement) {
+    const eg = v.engagement;
+    const [ed, eb] = det('Engagement check');
+    eb.appendChild(el('div', {}, el('b', {}, 'Verdict: '), verdictLabel(eg.verdict)));
+    const checks = ['form_fidelity', 'grounding_fidelity', 'length_compliance'];
+    for (const key of checks) {
+      const c = eg[key];
+      if (c == null) {
+        eb.appendChild(el('div', {class: 'meta'}, `✓ ${key}: clean`));
+      } else if (typeof c === 'object') {
+        const [cd, cb] = det(key);
+        for (const [k, val] of Object.entries(c)) {
+          cb.appendChild(el('div', {class: 'meta', style: 'margin: 0.3rem 0;'},
+            el('b', {}, k + ': '),
+            typeof val === 'string' ? val : JSON.stringify(val)));
+        }
+        eb.appendChild(cd);
+      } else {
+        eb.appendChild(el('div', {class: 'meta'}, `${key}: `, String(c)));
+      }
+    }
+    const cm = renderCallMeta(eg._call);
+    if (cm) eb.appendChild(cm);
+    wrap.appendChild(ed);
+  }
+  // Voice fidelity
+  if (v.voice_fidelity) {
+    const vf = v.voice_fidelity;
+    const [vfd, vfb] = det('Voice fidelity check');
+    vfb.appendChild(el('div', {}, el('b', {}, 'Verdict: '), verdictLabel(vf.verdict)));
+    if (Array.isArray(vf.characteristic_moves_performed) && vf.characteristic_moves_performed.length) {
+      const [md, mb] = det(`Characteristic moves performed (${vf.characteristic_moves_performed.length})`);
+      const ul = el('ul', {style: 'margin: 0.3rem 0; padding-left: 1.5rem;'});
+      for (const m of vf.characteristic_moves_performed) {
+        ul.appendChild(el('li', {style: 'margin: 0.15rem 0;'}, typeof m === 'string' ? m : JSON.stringify(m)));
+      }
+      mb.appendChild(ul);
+      vfb.appendChild(md);
+    }
+    if (Array.isArray(vf.quality_criteria_results) && vf.quality_criteria_results.length) {
+      const [qd, qb] = det(`Quality criteria results (${vf.quality_criteria_results.length})`);
+      for (const q of vf.quality_criteria_results) {
+        if (q && typeof q === 'object') {
+          const item = el('div', {style: 'margin: 0.5rem 0; padding: 0.5rem 0.75rem; background: #f5f1e8; border-left: 3px solid var(--accent);'});
+          for (const [k, val] of Object.entries(q)) {
+            item.appendChild(el('div', {class: 'meta', style: 'margin: 0.2rem 0;'},
+              el('b', {}, k + ': '),
+              typeof val === 'string' ? val : JSON.stringify(val)));
+          }
+          qb.appendChild(item);
+        } else {
+          qb.appendChild(el('div', {}, String(q)));
+        }
+      }
+      vfb.appendChild(qd);
+    }
+    const cm = renderCallMeta(vf._call);
+    if (cm) vfb.appendChild(cm);
+    wrap.appendChild(vfd);
+  }
+  // Cross-night echo
+  if (v.cross_night_echo) {
+    wrap.appendChild(el('div', {class: 'meta', style: 'margin: 0.5rem 0;'},
+      el('b', {}, 'Cross-night echo: '),
+      typeof v.cross_night_echo === 'string' ? v.cross_night_echo : JSON.stringify(v.cross_night_echo)));
+  }
+  if (v.wall_clock_s) {
+    wrap.appendChild(el('div', {class: 'meta', style: 'color: var(--muted);'},
+      `Total validation wall clock: ${v.wall_clock_s}s`));
+  }
+  return wrap;
+}
+function renderOperatorDecision(od) {
+  if (!od) return null;
+  const wrap = el('div');
+  const decision = od.decision || '';
+  const cls = decision === 'release' ? 'released' : decision === 'hold' ? 'hold' : '';
+  wrap.appendChild(el('div', {style: 'margin: 0.3rem 0 0.5rem;'},
+    el('b', {}, 'Decision: '),
+    label(decision || '—', cls)));
+  wrap.appendChild(metaGrid([
+    ['Decided at', od.decided_at],
+    ['Decided by', od.decided_by],
+  ]));
+  // any other fields
+  const known = new Set(['voice_slug', 'night', 'decision', 'decided_at', 'decided_by']);
+  const extras = Object.entries(od).filter(([k]) => !known.has(k));
+  for (const [k, v] of extras) {
+    wrap.appendChild(el('div', {class: 'meta'}, el('b', {}, k + ': '),
+      typeof v === 'string' ? v : JSON.stringify(v)));
+  }
+  return wrap;
+}
+
 function renderStep2Body(s, night) {
   const wrap = el('div');
   const validation = s.validation || {};
@@ -1455,13 +1630,13 @@ function renderStep2Body(s, night) {
   if (tt) wrap.appendChild(tt);
 
   if (s.validation) {
-    const [vd, vb] = det('Full validation verdict (all flags)');
-    vb.appendChild(el('pre', {class: 'json'}, JSON.stringify(s.validation, null, 2)));
+    const [vd, vb] = det('Validation — full flag detail (Safeguards / Engagement / Voice fidelity)');
+    vb.appendChild(renderValidation(s.validation));
     wrap.appendChild(vd);
   }
   if (s.operator_decision) {
     const [od, ob] = det('Operator decision');
-    ob.appendChild(el('pre', {class: 'json'}, JSON.stringify(s.operator_decision, null, 2)));
+    ob.appendChild(renderOperatorDecision(s.operator_decision));
     wrap.appendChild(od);
   }
   // Source step1s — items may be strings (legacy) or objects {theme_id, formulation_id, path}
