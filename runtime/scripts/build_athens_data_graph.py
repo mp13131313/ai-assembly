@@ -725,6 +725,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .extraction-summary .speaker { font-weight: 600; color: #555; }
   .extraction-summary .lens { color: var(--accent); font-family: var(--mono);
                               font-size: 0.75rem; }
+  details.extraction > summary { font: 16px/1.5 var(--serif); padding: 0.6rem 0.75rem;
+                                  color: #2a2a2a; }
+  details.extraction > summary b.speaker { font-weight: 700; color: var(--accent);
+                                            font-size: 0.85rem;
+                                            font-family: -apple-system, sans-serif; }
+  details.extraction > summary i.lens { font-style: normal; font-size: 0.7rem;
+                                         color: var(--muted); font-family: var(--mono);
+                                         background: var(--accent-bg); padding: 1px 5px;
+                                         border-radius: 3px; margin-right: 0.4rem; }
 </style>
 </head>
 <body>
@@ -1026,12 +1035,22 @@ function renderCluster(c, night) {
 function renderExtraction(e, night) {
   const cluster = e.cluster_id ? DATA.clusters[e.cluster_id] : null;
   const theme = cluster && cluster.theme_id ? DATA.themes[cluster.theme_id] : null;
-  const [d, body] = det(
-    `${e.extraction_id} · ${e.speaker || '?'}  —  ${(e.extraction || '').slice(0, 110)}…`
-  );
+  // Summary: lens tag + speaker + the extraction itself (the actual position)
+  const d = document.createElement('details');
+  d.className = 'extraction';
+  const summary = document.createElement('summary');
+  if (e.lens) summary.appendChild(el('i', {class: 'lens'}, e.lens));
+  if (e.speaker) {
+    summary.appendChild(el('b', {class: 'speaker'}, e.speaker));
+    summary.appendChild(document.createTextNode(' · '));
+  }
+  summary.appendChild(document.createTextNode(e.extraction || '(no extraction text)'));
+  d.appendChild(summary);
+  const body = el('div', {class: 'body'});
+  d.appendChild(body);
   d.setAttribute('data-anchor', e.extraction_id);
-  // Forward links: this extraction → cluster → theme
-  const links = el('div', {class: 'extraction-summary', style: 'margin: 0.4rem 0;'});
+  // Forward links: this extraction → cluster → theme (the main click-through)
+  const links = el('div', {style: 'margin: 0.4rem 0;'});
   if (cluster) {
     links.appendChild(el('span', {class: 'backlink'},
       '→ Part of cluster: ',
@@ -1045,7 +1064,9 @@ function renderExtraction(e, night) {
                theme.prefixed_id)));
   }
   body.appendChild(links);
+  // Metadata (now properly tucked away inside expand)
   body.appendChild(metaGrid([
+    ['Extraction ID', e.extraction_id],
     ['Session', e.session_title],
     ['Speaker', e.speaker],
     ['Lens', e.lens],
@@ -1053,7 +1074,6 @@ function renderExtraction(e, night) {
     ['Engagement', e.engagement || '—'],
     ['Responds to', e.responds_to || '—'],
   ]));
-  if (e.extraction) body.appendChild(el('div', {class: 'extraction-content'}, e.extraction));
   if (e.context) {
     const [cd, cb] = det('Context (surrounding turn text)');
     cb.appendChild(el('div', {class: 'turn-text'}, e.context));
