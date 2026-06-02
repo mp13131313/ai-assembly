@@ -132,6 +132,11 @@ See `personas/CROSS_REPO_CONTRACT.md` for the full cross-repo runtime contract.
 
 ## Docs
 
+**Quick links:**
+- [`STATE.md`](STATE.md) — current state (Athens 2026 complete; what's open)
+- [`CHANGELOG.md`](CHANGELOG.md) — time-stamped history
+- [`CLAUDE.md`](CLAUDE.md) — scaffolding for Claude Code sessions
+
 Start with [`docs/README.md`](docs/README.md) — staleness index for canonical specs.
 
 **Pipeline specs** (one per stage):
