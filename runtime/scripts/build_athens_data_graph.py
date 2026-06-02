@@ -1007,6 +1007,21 @@ function renderFormulation(f, night) {
     body.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
+  // Step 2 link — the voice synthesizes across ALL themes into one Step 2 artifact
+  const step2Id = `${night}/${f.voice_slug}`;
+  const s2 = DATA.voice_step2[step2Id];
+  if (s2) {
+    const primaryTheme = (s2.lineage || {}).primary_theme_id;
+    const isPrimary = primaryTheme === f.theme_id_raw;
+    const note = isPrimary
+      ? `★ This voice's Step 2 focused on THIS theme (primary: ${primaryTheme})`
+      : `This voice's Step 2 focused on ${primaryTheme || 'a different theme'} — synthesized across all their formulations`;
+    const [s2d, s2b] = det(`▶ ${s2.voice_slug} Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`);
+    body.appendChild(s2d);
+    s2b.appendChild(el('div', {class: 'meta'}, note));
+    s2b.appendChild(el('div', {}, jumpLink('Open full Step 2 in Voices section ↓', step2Id)));
+    s2b.appendChild(renderStep2Body(s2, night));
+  }
   return d;
 }
 
@@ -1044,20 +1059,30 @@ function renderStep2(s, night) {
   const sumTxt = `▼ ${s.voice_slug} Step 2 — "${s.artifact_title || s.selected_form || ''}" (${(s.word_count || 0)} words)`;
   const [d, body] = det(sumTxt);
   d.setAttribute('data-anchor', s.step2_id);
+  body.appendChild(renderStep2Body(s, night));
+  return d;
+}
+
+function renderStep2Body(s, night) {
+  const wrap = el('div');
+  const validation = s.validation || {};
+  const verdict = (validation.overall_verdict || '').toLowerCase();
+  const verdictClass = verdict === 'pass' ? 'pass' : verdict === 'hold' ? 'hold' : 'warn';
+  const decision = (s.operator_decision || {}).decision || '';
   const labels = el('div', {});
   if (validation.overall_verdict) labels.appendChild(label(validation.overall_verdict, verdictClass));
   if (decision) labels.appendChild(label(decision, decision === 'release' ? 'released' : ''));
   if (s.focus_decision) labels.appendChild(label(s.focus_decision));
-  body.appendChild(labels);
+  wrap.appendChild(labels);
 
   // Continuity from prior night
   if (s.continuity_from_prior_night) {
     const [cd, cb] = det('↰ Continuity from prior night (voice memory consumed at start of this night)');
     cb.appendChild(el('div', {class: 'continuity-block'}, typeof s.continuity_from_prior_night === 'string' ? s.continuity_from_prior_night : JSON.stringify(s.continuity_from_prior_night, null, 2)));
-    body.appendChild(cd);
+    wrap.appendChild(cd);
   }
 
-  body.appendChild(metaGrid([
+  wrap.appendChild(metaGrid([
     ['Focus decision', s.focus_decision],
     ['Selected form', s.selected_form],
     ['Stance', s.stance],
@@ -1070,35 +1095,35 @@ function renderStep2(s, night) {
   ]));
 
   if (s.focus_rationale) {
-    body.appendChild(el('div', {}, el('b', {}, 'Focus rationale: '), s.focus_rationale));
+    wrap.appendChild(el('div', {}, el('b', {}, 'Focus rationale: '), s.focus_rationale));
   }
   if (s.stance_rationale) {
-    body.appendChild(el('div', {}, el('b', {}, 'Stance rationale: '), s.stance_rationale));
+    wrap.appendChild(el('div', {}, el('b', {}, 'Stance rationale: '), s.stance_rationale));
   }
   if (s.form_rationale) {
-    body.appendChild(el('div', {}, el('b', {}, 'Form rationale: '), s.form_rationale));
+    wrap.appendChild(el('div', {}, el('b', {}, 'Form rationale: '), s.form_rationale));
   }
   if (s.weight_assessment) {
     const [wd, wb] = det('Weight assessment');
     wb.appendChild(el('div', {class: 'response-text'}, s.weight_assessment));
-    body.appendChild(wd);
+    wrap.appendChild(wd);
   }
   if (s.artifact_text) {
-    body.appendChild(el('div', {}, el('b', {}, 'Artifact text:')));
-    body.appendChild(el('div', {class: 'artifact-text'}, s.artifact_text));
+    wrap.appendChild(el('div', {}, el('b', {}, 'Artifact text:')));
+    wrap.appendChild(el('div', {class: 'artifact-text'}, s.artifact_text));
   }
   const tt = thinkingTrace(s.thinking_trace);
-  if (tt) body.appendChild(tt);
+  if (tt) wrap.appendChild(tt);
 
   if (s.validation) {
     const [vd, vb] = det('Full validation verdict (all flags)');
     vb.appendChild(el('pre', {class: 'json'}, JSON.stringify(s.validation, null, 2)));
-    body.appendChild(vd);
+    wrap.appendChild(vd);
   }
   if (s.operator_decision) {
     const [od, ob] = det('Operator decision');
     ob.appendChild(el('pre', {class: 'json'}, JSON.stringify(s.operator_decision, null, 2)));
-    body.appendChild(od);
+    wrap.appendChild(od);
   }
   // Source step1s
   const lineage = s.lineage || {};
@@ -1108,9 +1133,9 @@ function renderStep2(s, night) {
       const step1Id = `${night}/${sid.replace('.json','')}`;
       lb.appendChild(el('div', {}, jumpLink('→ ' + sid, step1Id)));
     }
-    body.appendChild(ld);
+    wrap.appendChild(ld);
   }
-  return d;
+  return wrap;
 }
 
 function renderDossier(d, night) {
