@@ -17,7 +17,8 @@ land in these patterns. **Document the convention BEFORE breaking it.**
   - example: `2026-04-22_arch_03_baseline_snapshot/` ✓
   - **bad:** `arch_03_baseline_snapshot/` (no date — when was this?)
   - **bad:** `personas_prompts_PRE_582af96_REVERT_20260428_231640/`
-    (SHA prefix, glued date) — and SHAs become dead after history rewrites
+    (SHA prefix, glued date) — and SHAs become dead after history
+    rewrites. Renamed 2026-06-01 to `2026-04-28_personas_prompts_pre_revert/`
 
 ## File naming
 

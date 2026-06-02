@@ -80,7 +80,9 @@ Everything lives under `~/Desktop/AI Assembly/`:
     ├── runs/{personas,runtime}/  # v3.10 baseline + historical runs
     ├── phase-l-plato/      # dormant: Plato shipped to athens-2026 2026-04-26
     ├── phase-l-dostoevsky/ # dormant: Dostoevsky shipped to athens-2026 2026-04-30
-    ├── arch_03_baseline_snapshot/, sentinel_baselines/, personas_prompts_PRE_418d553_REVERT_*/  # dev artifacts
+    ├── arch_03_baseline_snapshot/, sentinel_baselines/, 2026-04-28_personas_prompts_pre_revert/  # dev artifacts
+    ├── 2026-04-27_athens-2026_first_run_pre_v4/  # frozen first-run snapshot (NOT the live project — that's at projects/athens-2026/)
+    └── 2026-05-29-history-rewrite/  # backups + hash-remap TSVs from the 2026-05-29 history rewrite
 ```
 
 Project-level files at `<PROJECT_ROOT>/` root (NOT under `inputs/`):

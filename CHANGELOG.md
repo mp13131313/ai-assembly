@@ -36,6 +36,25 @@ history lives in `git log`.
 - **History-rewrite artifacts moved to `~/Desktop/AI Assembly/archive/2026-05-29-history-rewrite/`**
   with a README explaining what each file is, when to consult, and when
   (late 2026) to revisit deletion. Was cluttering the umbrella root.
+- **Tier-2 mislocations fixed:** `docs/runtime_assets/octopus_chromatophore/`
+  → `runtime/assets/octopus_chromatophore/` (was docs but is runtime
+  asset code); `personas/HANDOFF.md` → `personas/CROSS_REPO_CONTRACT.md`
+  (overloaded with session-handoff term); `docs/design/` surfaced in
+  `docs/README.md`; `_workspace/archive/designer_package_2026-05-04.zip`
+  removed (duplicate of unpacked dir, accidentally tracked in `4f9f87f`).
+- **Tier-4 archive cleanup:**
+  - `_workspace/archive/` loose files wrapped in dated subdirs:
+    `CURRENT_STATE_2026-04-27.md` → `2026-04-27_current_state_snapshot/`;
+    `DESIGNER_BRIEFING_2026-05-04.md` deleted (identical to copy inside
+    `designer_package_2026-05-04/`); `MEMO_2026_05_03_editor_flow_*.md`
+    → `2026-05-03_editor_flow_memo/`.
+  - Umbrella archive `athens-2026/` renamed to
+    `2026-04-27_athens-2026_first_run_pre_v4/` (was clashing with live
+    project name).
+  - Umbrella archive `personas_prompts_PRE_582af96_REVERT_20260428_231640/`
+    renamed to `2026-04-28_personas_prompts_pre_revert/` (was using dead
+    SHA + glued date).
+  - Umbrella archive gained a `README.md` cataloging every subdir.
 - **`feature/voice-deployment-context` retired as superseded** (C48
   option-b). Branch deleted; design captured at
   `_workspace/planning/runtime/DESIGN_voice_deployment_context.md`; code
