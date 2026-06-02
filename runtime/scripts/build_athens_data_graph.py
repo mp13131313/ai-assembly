@@ -1106,10 +1106,29 @@ function renderThemePhaseB(t, night) {
   const [d, body] = det(`⭐ "${t.title}" (${t.theme_id})`);
   d.setAttribute('data-anchor', 'phase-b-' + t.prefixed_id);
   if (t.abstract) body.appendChild(abstract(t.abstract));
-  // Provocateur annotations (audience friction, fault lines, etc.) — Provocateur is Phase B
+  // Provocateur annotations — rendered as readable content (not JSON)
   if (t.triage_flags) {
-    const [tfd, tfb] = det('Provocateur triage flags (audience friction + fault lines)');
-    tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
+    const tf = t.triage_flags;
+    const [tfd, tfb] = det('Provocateur triage flags');
+    const yesNo = v => v === true ? 'Yes' : v === false ? 'No' : '—';
+    tfb.appendChild(metaGrid([
+      ['Worth surfacing', yesNo(tf.worth_surfacing)],
+      ['Audience friction', tf.audience_friction || '—'],
+      ['Fault line present', yesNo(tf.fault_line_present)],
+    ]));
+    if (tf.fault_line_description) {
+      tfb.appendChild(el('div', {style: 'margin: 0.5rem 0; padding: 0.5rem 0.75rem; background: #f5f1e8; border-left: 3px solid var(--accent);'},
+        el('b', {}, 'Fault line: '),
+        tf.fault_line_description));
+    }
+    // Surface any fields not in the known set so nothing's lost silently
+    const knownKeys = new Set(['theme_id', 'worth_surfacing', 'audience_friction', 'fault_line_present', 'fault_line_description']);
+    const extras = Object.entries(tf).filter(([k]) => !knownKeys.has(k));
+    if (extras.length) {
+      const [ed, eb] = det('Other fields');
+      eb.appendChild(el('pre', {class: 'json'}, JSON.stringify(Object.fromEntries(extras), null, 2)));
+      tfb.appendChild(ed);
+    }
     body.appendChild(tfd);
   }
   // Formulations (per voice on this theme)
