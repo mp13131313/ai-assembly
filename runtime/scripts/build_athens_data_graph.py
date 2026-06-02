@@ -1074,7 +1074,7 @@ function renderCluster(c, night) {
     body.appendChild(el('div', {},
       el('span', {class: 'backlink'},
         '↑ Belongs to: ',
-        jumpLink(`${(t && t.theme_id_raw) || c.theme_id} — "${(t && t.title) || ''}"${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
+        jumpLink(`${(t && t.theme_id) || c.theme_id} — "${(t && t.title) || ''}"${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
                  c.theme_id))));
   }
   const [eSec, eBody] = det(`Extractions in this cluster (${(c.extraction_ids||[]).length})`);
@@ -1114,7 +1114,7 @@ function renderExtraction(e, night) {
     links.appendChild(document.createTextNode(' '));
     links.appendChild(el('span', {class: 'backlink'},
       '→ In theme: ',
-      jumpLink(`${theme.theme_id_raw} ("${theme.title}")${theme.selected_for_provocateur ? ' ⭐' : ''}`,
+      jumpLink(`${theme.theme_id} ("${theme.title}")${theme.selected_for_provocateur ? ' ⭐' : ''}`,
                theme.prefixed_id)));
   }
   body.appendChild(links);
