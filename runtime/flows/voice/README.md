@@ -146,7 +146,7 @@ This is enforced architecturally — `card_assembly.assemble_system_prompt`
 strips `smoke_test_chains` along with `metadata` before rendering. It's
 one of the four load-bearing strip rules.
 
-Failure modes if you ignore this (per `personas/HANDOFF.md`):
+Failure modes if you ignore this (per `personas/CROSS_REPO_CONTRACT.md`):
 - Voice's range collapses toward whatever 4 patterns happened to be in
   the test set
 - Failure patterns Pass 7c worked to remove get re-introduced
@@ -158,7 +158,7 @@ load them into a prompt.
 
 ### `reference_only_passages` is Step 1 only
 
-Per the cross-repo runtime contract (`personas/HANDOFF.md` §"CRITICAL:
+Per the cross-repo runtime contract (`personas/CROSS_REPO_CONTRACT.md` §"CRITICAL:
 `reference_only_passages` is Step 1 only — NEVER Step 2 or Step 3"):
 
 - **Step 1** loads the field for grounding (voice reasons from its actual
@@ -202,5 +202,5 @@ discipline before the voice sees them.
 - [`docs/AI_Assembly_Briefing_v3_1.md`](../../../docs/AI_Assembly_Briefing_v3_1.md) — project source of truth
 - [`docs/AI_Assembly_Persona_Card_v2.md`](../../../docs/AI_Assembly_Persona_Card_v2.md) — card schema (with v2.1 amendments)
 - [`docs/AI_Assembly_Frame_Concept_v1.md`](../../../docs/AI_Assembly_Frame_Concept_v1.md) — frame layer (Edition Pipeline downstream of Step 3, not Voice Pipeline scope)
-- [`personas/HANDOFF.md`](../../../personas/HANDOFF.md) — cross-repo runtime contract
+- [`personas/CROSS_REPO_CONTRACT.md`](../../../personas/CROSS_REPO_CONTRACT.md) — cross-repo runtime contract
 - [`STATE.md`](../../../STATE.md) + [`CLAUDE.md`](../../../CLAUDE.md) — current state (post-Athens). For pre-Athens gap analysis + critical path: [`_workspace/archive/CURRENT_STATE_2026-04-27.md`](../../../_workspace/archive/CURRENT_STATE_2026-04-27.md)

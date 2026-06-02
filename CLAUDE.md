@@ -248,7 +248,7 @@ Per voice, the persona pipeline produces three runtime-relevant artifacts:
   → operator paste-target for Claude project custom instructions; not
   consumed by runtime pipelines.
 
-See `personas/HANDOFF.md` for the full contract.
+See `personas/CROSS_REPO_CONTRACT.md` for the full contract.
 
 ## Where specs live
 

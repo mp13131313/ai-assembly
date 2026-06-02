@@ -179,7 +179,7 @@ def load_persona_card(
         raise FileNotFoundError(
             f"Persona card not found: {card_path}. "
             f"Expected the Persona Pipeline v4 output at this path "
-            f"(see personas/HANDOFF.md)."
+            f"(see personas/CROSS_REPO_CONTRACT.md)."
         )
     with open(card_path, encoding="utf-8") as f:
         card = json.load(f)

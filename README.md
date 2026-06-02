@@ -128,7 +128,7 @@ The personas pipeline produces three runtime-relevant artifacts per voice:
 
 The athens-2026 production project has its own private git repo (`mp13131313/ai-assembly-athens2026-voices`) for backup of the per-project data. The code repo never touches per-project data.
 
-See `personas/HANDOFF.md` for the full cross-repo runtime contract.
+See `personas/CROSS_REPO_CONTRACT.md` for the full cross-repo runtime contract.
 
 ## Docs
 

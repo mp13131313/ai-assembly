@@ -405,7 +405,7 @@ Opus 4.7 + thinking, `max_tokens=24000`, `temperature=1.0`. System: `persona_pas
 
 Output: `04_pass_7b_smoke_test.json` (`smoke_test_chains` field — 3–5 provocation→response chains).
 
-**`smoke_test_chains` is build-time diagnostic, NOT runtime few-shot.** See `personas/HANDOFF.md` §"CRITICAL: do NOT few-shot from `smoke_test_chains`" for the load-bearing rule. The chains exist as evidence the card was working at build time + as input to Pass 7c. Loading them as Step 1 few-shots collapses voice range and re-introduces failures Pass 7c removes.
+**`smoke_test_chains` is build-time diagnostic, NOT runtime few-shot.** See `personas/CROSS_REPO_CONTRACT.md` §"CRITICAL: do NOT few-shot from `smoke_test_chains`" for the load-bearing rule. The chains exist as evidence the card was working at build time + as input to Pass 7c. Loading them as Step 1 few-shots collapses voice range and re-introduces failures Pass 7c removes.
 
 ### Pass 7c — Negative Constraints
 
@@ -554,7 +554,7 @@ The non-human branches (`type=non_human`, `subtype ∈ {organism, system}`) modi
 
 ## Cross-Repo Handoff
 
-The pipeline's runtime contract to the Voice Pipeline + Provocateur Pipeline is documented in **`personas/HANDOFF.md`**. Summary:
+The pipeline's runtime contract to the Voice Pipeline + Provocateur Pipeline is documented in **`personas/CROSS_REPO_CONTRACT.md`**. Summary:
 
 - **Provocateur Profile** (8 fields) → `runtime/flows/shared/council/council_config.json` `members[]`. Currently dev_stub_v3_audience_sharpened; replaced as athens-2026 cards complete.
 - **Persona Card** (35 fields + 2 continuity nulls + metadata) → loaded as Voice Pipeline system prompt. Runtime MUST drop `metadata` and `smoke_test_chains` before assembly.
@@ -632,7 +632,7 @@ For 10 athens-2026 voices: **~$180–220 in API + ~$0 in claude.ai overhead**. P
 
 - `docs/AI_Assembly_Persona_Card_v2.md` — 35-field schema + per-field "Therefore" + register rule, with v2.1 amendments section (2026-04-27).
 - `_workspace/archive/CURRENT_STATE_2026-04-27.md` — gap analysis + architectural rationale (§5.16–5.28 cover what changed since v3.10).
-- `personas/HANDOFF.md` — cross-repo runtime contract.
+- `personas/CROSS_REPO_CONTRACT.md` — cross-repo runtime contract.
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker.
 - `_workspace/planning/HANDOFF_2026_04_27.md` — current session pickup.
 - `docs/_archive/AI_Assembly_Persona_Pipeline_v3_10.md` — preceding spec (historical).

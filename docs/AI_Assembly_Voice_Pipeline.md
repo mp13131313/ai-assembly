@@ -60,7 +60,7 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | **`medium` field** | v1 assumed one rigid form per voice ("dialogue for Plato", "song for Marley") | **Voice's `medium` is honored as written** — single-form OR multi-form depending on what the card describes for the voice. Where multi-form, Step 2 selects per matter; where single-form, Step 2 just uses it. Step 3 may select a different form if `medium` admits it | Pass 4b (418d553 baseline) |
 | **Anti-generic-register hard constraint** | — | Voice's `banned_modes` enumerates the per-voice register failures it must avoid (its corpus does not produce these). Step 2 + Step 3 prompts honor `banned_modes` as written; no universal entry is presupposed | Pass 4a `banned_modes` |
 | **Panel size** | "12 voices × ~3 formulations = ~36 detailed responses" | **10 voices × ~3 formulations = ~30 detailed responses** (Tang + Thiel removed 2026-04-28 — living humans don't fit the deathbed-across-time framing) | HANDOFF_2026_04_28 §1 |
-| **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/HANDOFF.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
+| **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/CROSS_REPO_CONTRACT.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
 | **Briefing input contract** | Sketched | **Byte-accurate** to Provocateur Stage 4 output: per-voice file at `runs/<run>/03_provocateur/briefings/<voice_slug>.json`, two views per formulation (`narrative_briefing` markdown + `full_theme_record` JSON) | runtime/flows/provocateur_flow.py:835–1041 |
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
 | **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop) | §"Validation Nodes" below |
@@ -298,7 +298,7 @@ The persona card has a `smoke_test_chains` field with 3-5 example provocation→
 - The provocations are stale (built against an old `conference_context` at card-build time, not the actual morning's session content)
 - Examples constrain a system prompt that is already strong enough to not need them
 
-Leave the field in the JSON for inspection. Do not load it into any prompt. See `personas/HANDOFF.md` §"CRITICAL: do NOT few-shot from `smoke_test_chains`" for the full reasoning.
+Leave the field in the JSON for inspection. Do not load it into any prompt. See `personas/CROSS_REPO_CONTRACT.md` §"CRITICAL: do NOT few-shot from `smoke_test_chains`" for the full reasoning.
 
 ### CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2 or Step 3
 
@@ -1314,7 +1314,7 @@ These are draft validation notes; refine against the first actual Athens dry run
 - `docs/AI_Assembly_Persona_Pipeline_v4.md` — the persona build pipeline that produces the cards this Voice Pipeline consumes
 - `docs/AI_Assembly_Provocateur_Pipeline.md` — Stage 4 Packaging defines this Voice Pipeline's input contract (the briefings)
 - `_workspace/archive/CURRENT_STATE_2026-04-27.md` — gap analysis + critical path; Voice Pipeline is Phase D (this spec lands; build follows)
-- `personas/HANDOFF.md` — cross-repo runtime contract; authoritative on what to drop / keep when assembling system prompts
+- `personas/CROSS_REPO_CONTRACT.md` — cross-repo runtime contract; authoritative on what to drop / keep when assembling system prompts
 - `_workspace/planning/HANDOFF_2026_04_28.md` — handoff covering the persona-prompt revert (commit `3feb2b2`); see also `_workspace/planning/HANDOFF_DRYRUN_2026_04_29.md` for the Voice Pipeline first-dry-run pickup
 - `_workspace/planning/FOLLOW_UPS.md` — active follow-up tracker; FU#49M (`strain_markers[]` schema as Step 2 contract, post-Athens), FU#42 (split-card architecture, post-Athens), FU#49F (per-voice framework-strain log on micro-site, post-Athens)
 - `docs/_archive/AI_Assembly_Voice_Pipeline_v1_partial.md` — preceding partial draft (historical)

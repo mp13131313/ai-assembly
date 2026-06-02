@@ -37,9 +37,13 @@
 
 When archived/stale docs conflict with `AI_Assembly_Briefing_v3_1.md`, `CLAUDE.md`, or the code in `runtime/`+`personas/`, trust the current docs and the code.
 
-## Also in `docs/` (preserved grounding)
+## Also in `docs/` (preserved grounding + design)
 
 - **`docs/research/`** — preserved grounding material (5 Deep Research compass artifacts). Not deletable. When you want to know *why* the pipeline is designed the way it is, look here. (Relocated from top-level `research/` to `docs/research/` 2026-05-01 to consolidate documentation under one tree.)
+- **`docs/design/`** — conceptual design documents that ground the architecture, distinct from pipeline specs:
+  - `AI_Assembly_DesignPrinciples.md` — project-wide design principles
+  - `Nine_Modes_of_Implication.md` — typology of voice→audience implication modes
+  These predate Athens and inform the Briefing + pipeline specs; consult when auditing methodology.
 - **`docs/references.md`** — pointers from production specs into `docs/research/` and into archived planning docs.
 
 ## What's NOT in `docs/`

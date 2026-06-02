@@ -225,7 +225,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 #### FU#21 — Runtime enforcement of `reference_only_passages` Step 1/Step 2 contract ✅ LANDED 2026-04-28
 - **Origin:** OPEN_ITEMS.md "Smaller improvements", deferred from prior session.
-- **Problem:** Two-tier corpus design (Marley lyrics in private reasoning only) is documented in `personas/HANDOFF.md`. Runtime Voice Pipeline Step 2 assembly code MUST drop the field before rendering.
+- **Problem:** Two-tier corpus design (Marley lyrics in private reasoning only) is documented in `personas/CROSS_REPO_CONTRACT.md`. Runtime Voice Pipeline Step 2 assembly code MUST drop the field before rendering.
 - **Resolution:** Voice Pipeline v2 implemented as commit `5f17bf5` includes the strip rule in `runtime/flows/voice/card_assembly.py`:
   - Line 315-317: `if step in (2, 3): filtered.pop("reference_only_passages", None)` — Step 2/3 drop
   - Line 364-369: `if step == 1 and "reference_only_passages" in filtered:` then render under its own section — Step 1 keeps
@@ -233,7 +233,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 
 #### FU#23 — Cross-repo handoff timing (rebuild → runtime integration)
 - **Origin:** REBUILD_PLAN.md "Open questions to defer".
-- **Problem:** When/how does the rebuild get integrated with the runtime side? Cross-repo handoff (`personas/HANDOFF.md`) and `runtime/flows/shared/council/council_config.json` consumers need to keep working through the transition.
+- **Problem:** When/how does the rebuild get integrated with the runtime side? Cross-repo handoff (`personas/CROSS_REPO_CONTRACT.md`) and `runtime/flows/shared/council/council_config.json` consumers need to keep working through the transition.
 - **Trigger:** gated behind shipping the first rebuilt voice card end-to-end (Phase L).
 - **Decision needed:** integration model (continuous merge, batch handoff, parallel-systems window).
 
@@ -384,7 +384,7 @@ Pass 5 already on Opus + thinking + 16K tokens — perfect fit, no model upgrade
 - **Does NOT attempt:** editorial polish (operator's territory), factual correction (operator's territory; future FU candidate for fact-check-against-dossier pass), content expansion (operator's territory).
 - **Validation (2026-04-24):** unit tests cover 13 scenarios (pass-through field preservation, drop-field correctness, marker stamping, idempotency, empty-card edge case, atomic-write survival). Test-validated against operator's chat v2: 34 fields match exactly; 25/34 byte-identical.
 - **Operator workflow:** pipeline run → `voices/<slug>/06_derive/03_chat_system_prompt.json` is written → paste JSON into Claude project custom instructions → ask probing question → assess voice quality. Bypasses Voice Pipeline Step 1/Step 2 protocol entirely.
-- **Cross-repo contract:** documented in `personas/HANDOFF.md` §"Derive artifacts per voice" as 4th artifact alongside `provocateur_profile` + `evaluation_rubric`. Chat artifact is operator-paste-target; provocateur_profile feeds runtime `council_config.json` `members[]`; both coexist without conflict.
+- **Cross-repo contract:** documented in `personas/CROSS_REPO_CONTRACT.md` §"Derive artifacts per voice" as 4th artifact alongside `provocateur_profile` + `evaluation_rubric`. Chat artifact is operator-paste-target; provocateur_profile feeds runtime `council_config.json` `members[]`; both coexist without conflict.
 - **Future FU candidates (not currently active):**
   - Explicit `chat_deployment_mode: "anchored" | "default"` marker for programmatic voice_temporal_stance disambiguation (currently the chat artifact preserves the full `voice_temporal_stance: {default, anchored_override}` dict and leaves the Claude-project author to decide which sub-field to foreground)
   - Fact-check pass against merged_dossier before writing chat artifact (e.g., the Freud 25→24 operator correction on Dostoevsky's death date would land here if automated)

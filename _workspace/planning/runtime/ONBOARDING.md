@@ -439,7 +439,7 @@ Backup files preserved at `<run_dir>/04_voice/step2_first_draft_artifacts/cleopa
 | Provocateur spec | `docs/AI_Assembly_Provocateur_Pipeline.md` |
 | Researcher spec | `docs/AI_Assembly_Researcher_Pipeline.md` |
 | Transcription spec | `docs/AI_Assembly_Transcription_Pipeline.md` |
-| Cross-repo handoff (persona ↔ runtime contract) | `personas/HANDOFF.md` |
+| Cross-repo handoff (persona ↔ runtime contract) | `personas/CROSS_REPO_CONTRACT.md` |
 | Runtime open items (this folder) | `_workspace/planning/runtime/OPEN_ITEMS.md` |
 | Runtime onboarding (this doc) | `_workspace/planning/runtime/ONBOARDING.md` |
 | Project-wide onboarding | `_workspace/planning/ONBOARDING.md` |

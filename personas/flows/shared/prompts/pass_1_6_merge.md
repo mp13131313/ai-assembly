@@ -23,7 +23,7 @@ digitised-full-text URL list for Pass 1c fetch, and optional private-tier
   on SPEAKING voice (interviews/speeches). PRIVATE
   `reference_only_passages` tier: 3-8 direct lyric quotations with full
   copyright attribution, loaded into Voice Pipeline Step 1 ONLY, runtime
-  drops before Step 2. Cross-repo contract to `personas/HANDOFF.md`.
+  drops before Step 2. Cross-repo contract to `personas/CROSS_REPO_CONTRACT.md`.
 - **Hostile-source voices:** Tier 1 (primary-in-voice) vs Tier 2 (hostile-
   source). Tier 2 passages include bias flag in `contextual_header`.
 - **Non-human systems:** corpus is law + ecological assessment + indigenous
@@ -207,7 +207,7 @@ Plus speech-passage:
       "purpose": "voice_exemplar"
     }
   ],
-  "runtime_contract_note": "RUNTIME CONTRACT: These passages are loaded into Voice Pipeline Step 1 (Private Reasoning) ONLY. They are NEVER loaded into Step 2 (Public Expression), and no direct quotation of them is permitted in the artifact the audience reads. Enforcement: the runtime's Voice Pipeline Step 2 system-prompt assembly code MUST drop this field before rendering. See personas/HANDOFF.md for the runtime contract."
+  "runtime_contract_note": "RUNTIME CONTRACT: These passages are loaded into Voice Pipeline Step 1 (Private Reasoning) ONLY. They are NEVER loaded into Step 2 (Public Expression), and no direct quotation of them is permitted in the artifact the audience reads. Enforcement: the runtime's Voice Pipeline Step 2 system-prompt assembly code MUST drop this field before rendering. See personas/CROSS_REPO_CONTRACT.md for the runtime contract."
 }
 ```
 

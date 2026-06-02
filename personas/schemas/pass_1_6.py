@@ -198,7 +198,7 @@ class ReferenceOnlyPassages(BaseModel):
             "Step 2 (Public Expression), and no direct quotation of them is "
             "permitted in the artifact the audience reads. Enforcement: the "
             "runtime's Voice Pipeline Step 2 system-prompt assembly code "
-            "MUST drop this field before rendering. See personas/HANDOFF.md "
+            "MUST drop this field before rendering. See personas/CROSS_REPO_CONTRACT.md "
             "for the runtime contract."
         ),
         description="Inline reminder the runtime reads.",

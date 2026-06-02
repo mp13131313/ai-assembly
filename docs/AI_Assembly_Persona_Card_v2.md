@@ -38,7 +38,7 @@ Field present on every assembled card; usually `{"passages": []}` for public-dom
 - IS loaded into Voice Pipeline **Step 1** (Private Reasoning) — voice reasons from its actual words
 - MUST be DROPPED before Voice Pipeline **Step 2** (Public Expression) assembles its system prompt — copyright exposure if direct quotation appears in the artifact 750 people read
 
-Carries `runtime_contract_note` inline so any consumer reading the JSON sees the warning without external doc reference. See `personas/HANDOFF.md` §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2".
+Carries `runtime_contract_note` inline so any consumer reading the JSON sees the warning without external doc reference. See `personas/CROSS_REPO_CONTRACT.md` §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2".
 
 ### C. FU#41 chat artifact (4th Derive output, 2026-04-24, amended 2x)
 
@@ -167,7 +167,7 @@ explicit instruction).
 
 For the build-side specification (which pass produces which field, with which prompt + model + max_tokens): see `docs/AI_Assembly_Persona_Pipeline_v4.md`.
 
-For the runtime contract (how Voice Pipeline + Provocateur Pipeline consume the card): see `personas/HANDOFF.md`.
+For the runtime contract (how Voice Pipeline + Provocateur Pipeline consume the card): see `personas/CROSS_REPO_CONTRACT.md`.
 
 For the current build state: `STATE.md` + `CLAUDE.md` (state block at top). For the pre-Athens gap-analysis snapshot: `_workspace/archive/CURRENT_STATE_2026-04-27.md` (2026-04-27 — Athens has shipped since; trust `STATE.md` for current).
 
@@ -585,7 +585,7 @@ Organisational categories by voice type:
 **DO NOT load into Voice Pipeline Step 1 system prompt at runtime** —
 this is a diagnostic / human-review artifact, not a few-shot exemplar.
 Loading it collapses the voice's range and re-introduces failures
-Pass 7c removes. See `personas/HANDOFF.md` §"CRITICAL: do NOT few-shot
+Pass 7c removes. See `personas/CROSS_REPO_CONTRACT.md` §"CRITICAL: do NOT few-shot
 from smoke_test_chains" and the `persona_pass_7b_smoke_test.md`
 prompt header's ROLE CLARIFICATION (2026-04-15) for the full
 reasoning.

@@ -46,7 +46,7 @@ land in these patterns. **Document the convention BEFORE breaking it.**
 | `_workspace/planning/conventions.md` (this file) | naming + organization rules | examples (those are tests) |
 | Sub-tree `README.md` (runtime/, personas/) | pointer-density nav for that sub-tree | duplicated content |
 | `docs/AI_Assembly_*_Pipeline.md` | spec for that pipeline component | state, history |
-| `personas/HANDOFF.md` (→ `CROSS_REPO_CONTRACT.md`) | cross-repo contract between personas + runtime | session handoffs |
+| `personas/CROSS_REPO_CONTRACT.md` | cross-repo contract between personas + runtime (was `personas/HANDOFF.md` pre-2026-06-01 rename — overloaded with session-handoff term) | session handoffs |
 
 ## When to add an entry to CHANGELOG
 

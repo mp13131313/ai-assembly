@@ -1551,7 +1551,7 @@ stamp(f"PASS 7a (per-pass): {pass7a['result'].get('overall', '?')} — "
 # provocations are a build-time smoke test + Pass 7c diagnostic
 # surface + human-review artifact. They are NOT runtime few-shot
 # exemplars (see metadata.smoke_test_chains_role below, and
-# personas/HANDOFF.md). High stakes because Pass 7c reads them.
+# personas/CROSS_REPO_CONTRACT.md). High stakes because Pass 7c reads them.
 def _pass_7b():
     full_card_for_provoke = {**combined_2_3_4, **pass5["fields"]}
     if pass6.get("fields"):
@@ -1875,7 +1875,7 @@ def _build_assembled_card_dict(*, pass_7a_final_result=None, derive_completed=Fa
         **full_card,
         # Two-tier corpus (Phase B): reference_only_passages is loaded into
         # Voice Pipeline Step 1 ONLY; Step 2 drops it before assembling its
-        # system prompt. See personas/HANDOFF.md §"reference_only_passages is
+        # system prompt. See personas/CROSS_REPO_CONTRACT.md §"reference_only_passages is
         # Step 1 only" for the enforcement contract.
         "reference_only_passages": merged_dossier_dict.get("reference_only_passages", {"passages": []}),
         # Runtime continuity fields (populated by Voice Pipeline at deployment, not
