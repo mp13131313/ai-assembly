@@ -279,6 +279,8 @@ run (`_workspace/planning/runtime/SPEC_2026_05_27_magnifica_humanitas_annotated_
 | Athens-complete operator workflow handoff | [`_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md`](_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md) |
 | Runtime open items + per-item detail | [`_workspace/planning/runtime/OPEN_ITEMS.md`](_workspace/planning/runtime/OPEN_ITEMS.md) |
 | Voices-thread open items | [`_workspace/planning/voices/OPEN_ITEMS.md`](_workspace/planning/voices/OPEN_ITEMS.md) |
+| Doc-infrastructure backlog (deferred reshapes, hygiene, operator decisions) | [`_workspace/planning/doc_infrastructure_backlog.md`](_workspace/planning/doc_infrastructure_backlog.md) |
+| Naming + organization conventions | [`_workspace/planning/conventions.md`](_workspace/planning/conventions.md) |
 | Editorial quality read of the dossiers | `athens-2026/published_artifacts/EDITORIAL_ASSESSMENT.md` (other repo) |
 | Co-collaborator-facing tour of what was collected | `athens-2026/published_artifacts/DATA_INVENTORY.md` (other repo) |
 | Runtime end-to-end operations | [`docs/AI_Assembly_Runtime_Lifecycle.md`](docs/AI_Assembly_Runtime_Lifecycle.md) |
