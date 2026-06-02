@@ -1282,7 +1282,7 @@ function renderFormulation(f, night) {
   const step1Id = `${night}/${f.voice_slug}__${f.theme_id_raw}`;
   const s1 = DATA.voice_step1[step1Id];
   if (s1) {
-    const [s1d, s1b] = det(`▶ Voice Step 1 response (${(s1.detailed_response || '').length.toLocaleString()} chars private reasoning)`);
+    const [s1d, s1b] = det(`Voice Step 1 response (${(s1.detailed_response || '').length.toLocaleString()} chars private reasoning)`);
     body.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
@@ -1294,7 +1294,7 @@ function renderFormulation(f, night) {
     const primaryTheme = (s2.lineage || {}).primary_theme_id;
     const isPrimary = primaryTheme === f.theme_id_raw;
     if (isPrimary) {
-      const sumTxt = `▼ ★ ${s2.voice_slug} chose this theme — Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`;
+      const sumTxt = `★ ${s2.voice_slug} chose this theme — Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`;
       const s2d = document.createElement('details');
       const s2sum = document.createElement('summary');
       s2sum.textContent = sumTxt;
@@ -1352,7 +1352,7 @@ function renderStep2(s, night) {
   const verdict = (validation.overall_verdict || '').toLowerCase();
   const verdictClass = verdict === 'pass' ? 'pass' : verdict === 'hold' ? 'hold' : 'warn';
   const decision = (s.operator_decision || {}).decision || '';
-  const sumTxt = `▼ ${s.voice_slug} Step 2 — "${s.artifact_title || s.selected_form || ''}" (${(s.word_count || 0)} words)`;
+  const sumTxt = `${s.voice_slug} Step 2 — "${s.artifact_title || s.selected_form || ''}" (${(s.word_count || 0)} words)`;
   const [d, body] = det(sumTxt);
   d.setAttribute('data-anchor', s.step2_id);
   body.appendChild(renderStep2Body(s, night));
@@ -1561,7 +1561,7 @@ function renderSession(s, night) {
   }
   // Extractions from THIS session — the main click-into-clusters path
   if (sessionExtractions.length) {
-    const [ed, eb] = det(`▼ Extractions from this session (${sessionExtractions.length}) — click each to see which cluster + theme it led to`);
+    const [ed, eb] = det(`Extractions from this session (${sessionExtractions.length}) — click each to see which cluster + theme it led to`);
     for (const ext of sessionExtractions) {
       eb.appendChild(renderExtraction(ext, night));
     }
