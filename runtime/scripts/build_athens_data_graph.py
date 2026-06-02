@@ -1007,22 +1007,23 @@ function renderNight(pane, night) {
 }
 
 function renderThemePhaseA(t, night) {
-  // Phase A: theme as terminal-grouping of clusters; selected/dropped marker
+  // Phase A: theme grouping clusters; selected/dropped marker
   const status = t.selected_for_provocateur ? '⭐ SELECTED' : '✗ dropped';
-  const [d, body] = det(`"${t.title}" (${t.theme_id}) · ${status}`);
+  const clusterIds = t.cluster_ids || [];
+  const clusters = clusterIds.map(cid => DATA.clusters[cid]).filter(Boolean);
+  const totalExtractions = clusters.reduce((sum, c) => sum + (c.extraction_ids || []).length, 0);
+  const sessCount = themeSessionCount(t);
+  const [d, body] = det(`"${t.title}" (${t.theme_id}) · ${clusters.length} cluster${clusters.length === 1 ? '' : 's'} · ${totalExtractions} extraction${totalExtractions === 1 ? '' : 's'} from ${sessCount} session${sessCount === 1 ? '' : 's'} · ${status}`);
   d.setAttribute('data-anchor', t.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, t.prefixed_id));
   if (t.abstract) body.appendChild(abstract(t.abstract));
-  // Cluster list (jump links — cluster details live in clusters section above)
-  const clusterIds = t.cluster_ids || [];
-  if (clusterIds.length) {
-    const cList = el('div', {style: 'margin: 0.5rem 0;'}, el('b', {}, `Clusters in this theme (${clusterIds.length}): `));
-    for (let i = 0; i < clusterIds.length; i++) {
-      const c = DATA.clusters[clusterIds[i]];
-      if (c) {
-        cList.appendChild(jumpLink('"' + (c.cluster_title || '') + '" (' + c.cluster_id + ')', c.prefixed_id));
-        if (i < clusterIds.length - 1) cList.appendChild(document.createTextNode(' · '));
-      }
+  // Cluster quick-jump list
+  if (clusters.length) {
+    const cList = el('div', {style: 'margin: 0.5rem 0;'}, el('b', {}, `Clusters in this theme (${clusters.length}): `));
+    for (let i = 0; i < clusters.length; i++) {
+      const c = clusters[i];
+      cList.appendChild(jumpLink('"' + (c.cluster_title || '') + '" (' + c.cluster_id + ')', c.prefixed_id));
+      if (i < clusters.length - 1) cList.appendChild(document.createTextNode(' · '));
     }
     body.appendChild(cList);
   }
@@ -1031,6 +1032,23 @@ function renderThemePhaseA(t, night) {
     const [tfd, tfb] = det('Triage flags (Provocateur annotations)');
     tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
     body.appendChild(tfd);
+  }
+  // Extractions, grouped by cluster (theme's natural sub-structure)
+  if (clusters.length) {
+    const [eSec, eBody] = det(`Extractions, grouped by cluster (${totalExtractions} total across ${clusters.length} cluster${clusters.length === 1 ? '' : 's'})`);
+    body.appendChild(eSec);
+    for (const c of clusters) {
+      const exts = (c.extraction_ids || []).map(eid => DATA.extractions[eid]).filter(Boolean);
+      const sessHere = clusterSessionCount(c);
+      const [cd, cb] = det(`Cluster: "${c.cluster_title}" (${c.cluster_id}) — ${exts.length} extraction${exts.length === 1 ? '' : 's'} from ${sessHere} session${sessHere === 1 ? '' : 's'}`);
+      if (c.cluster_abstract) cb.appendChild(abstract(c.cluster_abstract));
+      cb.appendChild(el('div', {class: 'meta'},
+        '↗ ', jumpLink('Open full cluster view (with session grouping) ↑', c.prefixed_id)));
+      for (const e of exts) {
+        cb.appendChild(renderExtraction(e, night, 'theme'));
+      }
+      eBody.appendChild(cd);
+    }
   }
   return d;
 }
@@ -1064,7 +1082,9 @@ function renderThemePhaseB(t, night) {
 }
 
 function renderCluster(c, night) {
-  const [d, body] = det(`"${c.cluster_title}" (${c.cluster_id}) — ${(c.extraction_ids||[]).length} extractions`);
+  const extCount = (c.extraction_ids || []).length;
+  const sessCount = clusterSessionCount(c);
+  const [d, body] = det(`"${c.cluster_title}" (${c.cluster_id}) — ${extCount} extractions from ${sessCount} session${sessCount === 1 ? '' : 's'}`);
   d.setAttribute('data-anchor', c.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, c.prefixed_id));
   if (c.cluster_abstract) body.appendChild(abstract(c.cluster_abstract));
@@ -1077,19 +1097,79 @@ function renderCluster(c, night) {
         jumpLink(`"${(t && t.title) || ''}" (${(t && t.theme_id) || c.theme_id})${t && t.selected_for_provocateur ? ' ⭐' : ''}`,
                  c.theme_id))));
   }
-  const [eSec, eBody] = det(`Extractions in this cluster (${(c.extraction_ids||[]).length})`);
+  // Extractions grouped by session
+  const allExt = (c.extraction_ids || []).map(eid => DATA.extractions[eid]).filter(Boolean);
+  const bySession = groupExtractionsBy(allExt, e => e.session_id || '_no_session');
+  const [eSec, eBody] = det(`Extractions, grouped by session (${extCount} total across ${bySession.size} session${bySession.size === 1 ? '' : 's'})`);
   body.appendChild(eSec);
-  for (const eid of c.extraction_ids || []) {
-    const e = DATA.extractions[eid];
-    if (e) eBody.appendChild(renderExtraction(e, night));
+  // Sort sessions by date_time
+  const sortedSessionIds = [...bySession.keys()].sort((a, b) => {
+    const sa = DATA.sessions[a], sb = DATA.sessions[b];
+    return ((sa && sa.date_time) || '').localeCompare((sb && sb.date_time) || '');
+  });
+  for (const sid of sortedSessionIds) {
+    const s = DATA.sessions[sid];
+    const exts = bySession.get(sid);
+    const sessionTitle = s ? `"${s.session_title}" (${s.venue || ''})` : sid;
+    const [sd, sb] = det(`From session: ${sessionTitle} — ${exts.length} extraction${exts.length === 1 ? '' : 's'}`);
+    sb.appendChild(el('div', {class: 'meta'},
+      '↗ ', jumpLink('Open this session in Sessions section ↑', sid)));
+    for (const e of exts) {
+      sb.appendChild(renderExtraction(e, night, 'cluster'));
+    }
+    eBody.appendChild(sd);
   }
   return d;
 }
 
-function renderExtraction(e, night) {
+// Count how many distinct sessions contributed extractions to a cluster
+function clusterSessionCount(c) {
+  const sids = new Set();
+  for (const eid of c.extraction_ids || []) {
+    const e = DATA.extractions[eid];
+    if (e && e.session_id) sids.add(e.session_id);
+  }
+  return sids.size;
+}
+function clusterSessionIds(c) {
+  const sids = new Set();
+  for (const eid of c.extraction_ids || []) {
+    const e = DATA.extractions[eid];
+    if (e && e.session_id) sids.add(e.session_id);
+  }
+  return [...sids];
+}
+function themeSessionCount(t) {
+  const sids = new Set();
+  for (const cid of t.cluster_ids || []) {
+    const c = DATA.clusters[cid];
+    if (!c) continue;
+    for (const eid of c.extraction_ids || []) {
+      const e = DATA.extractions[eid];
+      if (e && e.session_id) sids.add(e.session_id);
+    }
+  }
+  return sids.size;
+}
+
+// Group extractions by a key extractor
+function groupExtractionsBy(extractions, keyFn) {
+  const groups = new Map();
+  for (const e of extractions) {
+    const k = keyFn(e);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(e);
+  }
+  return groups;
+}
+
+// context: 'session' | 'cluster' | 'theme' — controls which links are hidden (the parent context)
+function renderExtraction(e, night, context) {
+  context = context || 'session';
   const cluster = e.cluster_id ? DATA.clusters[e.cluster_id] : null;
   const theme = cluster && cluster.theme_id ? DATA.themes[cluster.theme_id] : null;
-  // Summary: lens tag + speaker + the extraction itself (the actual position)
+  const session = e.session_id ? DATA.sessions[e.session_id] : null;
+  // Summary: lens tag + speaker + the extraction itself
   const d = document.createElement('details');
   d.className = 'extraction';
   const summary = document.createElement('summary');
@@ -1103,22 +1183,28 @@ function renderExtraction(e, night) {
   const body = el('div', {class: 'body'});
   d.appendChild(body);
   d.setAttribute('data-anchor', e.extraction_id);
-  // Forward links: this extraction → cluster → theme (the main click-through)
+  // Forward links — hide the link pointing back to the parent context
   const links = el('div', {style: 'margin: 0.4rem 0;'});
-  if (cluster) {
+  if (cluster && context !== 'cluster') {
     links.appendChild(el('span', {class: 'backlink'},
       '→ Part of cluster: ',
       jumpLink(`"${cluster.cluster_title}" (${cluster.cluster_id})`, cluster.prefixed_id)));
-  }
-  if (theme) {
     links.appendChild(document.createTextNode(' '));
+  }
+  if (theme && context !== 'theme') {
     links.appendChild(el('span', {class: 'backlink'},
       '→ In theme: ',
       jumpLink(`"${theme.title}" (${theme.theme_id})${theme.selected_for_provocateur ? ' ⭐' : ''}`,
                theme.prefixed_id)));
+    links.appendChild(document.createTextNode(' '));
+  }
+  if (session && context !== 'session') {
+    links.appendChild(el('span', {class: 'backlink'},
+      '→ From session: ',
+      jumpLink(`"${session.session_title}" (${session.venue || ''})`, session.session_id)));
   }
   body.appendChild(links);
-  // Metadata (now properly tucked away inside expand)
+  // Metadata
   body.appendChild(metaGrid([
     ['Extraction ID', e.extraction_id],
     ['Session', e.session_title],
