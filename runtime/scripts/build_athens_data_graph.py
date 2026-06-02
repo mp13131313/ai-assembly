@@ -734,6 +734,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                                          color: var(--muted); font-family: var(--mono);
                                          background: var(--accent-bg); padding: 1px 5px;
                                          border-radius: 3px; margin-right: 0.4rem; }
+  .track-header { background: #efe9dc; color: #5a4a1a; padding: 0.4rem 0.75rem;
+                  font: 600 0.9rem -apple-system, sans-serif; margin: 1rem 0 0.3rem;
+                  border-radius: 3px; letter-spacing: 0.02em; }
+  .capture-group-header { background: #2a2a2a; color: #fafaf7; padding: 0.5rem 0.75rem;
+                          font: italic 600 1rem var(--serif); margin: 1rem 0 0.5rem;
+                          border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -899,11 +905,59 @@ function renderNight(pane, night) {
     <small>What was said in the room — sessions, extracted positions, KJ clusters, derived themes</small>`;
   pane.appendChild(phaseA);
 
-  // Sessions (with extractions inline)
+  // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
   pane.appendChild(el('div', {class: 'section-title'}, `📼 Sessions (${stats.sessions || 0})`));
   const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
-  for (const s of sessions) {
-    pane.appendChild(renderSession(s, night));
+  const audioSessions = sessions.filter(s => !s.is_reflection)
+    .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
+  const reflectionSessions = sessions.filter(s => s.is_reflection)
+    .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
+
+  function groupByTrack(arr) {
+    const groups = {};
+    for (const s of arr) {
+      const track = s.track || 'Other';
+      if (!groups[track]) groups[track] = [];
+      groups[track].push(s);
+    }
+    return groups;
+  }
+  function formatTrack(t) {
+    if (!t) return 'Other';
+    return t.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
+  }
+  // Canonical track ordering (matches DATA_INVENTORY); anything else falls to the end alphabetically
+  const trackOrder = ['MAIN STAGE', 'AI DEMOCRACY MARATHON', 'DEPARTMENT OF DEPTH',
+                      'AGENTIC AGORA', 'COMMUNITY'];
+  function trackSort(a, b) {
+    const ia = trackOrder.indexOf(a), ib = trackOrder.indexOf(b);
+    if (ia >= 0 && ib >= 0) return ia - ib;
+    if (ia >= 0) return -1;
+    if (ib >= 0) return 1;
+    return a.localeCompare(b);
+  }
+
+  if (audioSessions.length) {
+    pane.appendChild(el('div', {class: 'capture-group-header'},
+      `🎙 Audio (${audioSessions.length} captures) — panel transcriptions, by track`));
+    const byTrack = groupByTrack(audioSessions);
+    for (const track of Object.keys(byTrack).sort(trackSort)) {
+      pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+      for (const s of byTrack[track]) {
+        pane.appendChild(renderSession(s, night));
+      }
+    }
+  }
+  if (reflectionSessions.length) {
+    pane.appendChild(el('div', {class: 'capture-group-header'},
+      `💬 Audience reflections (${reflectionSessions.length}) — spoken contributions submitted via the audience tool, by track`));
+    const byTrack = groupByTrack(reflectionSessions);
+    for (const track of Object.keys(byTrack).sort(trackSort)) {
+      pane.appendChild(el('div', {class: 'track-header'}, formatTrack(track)));
+      for (const s of byTrack[track]) {
+        pane.appendChild(renderSession(s, night));
+      }
+    }
   }
 
   // Clusters (with extraction membership + theme backlink)
@@ -1322,8 +1376,21 @@ function renderDossier(d, night) {
 function renderSession(s, night) {
   // Count extractions from this session
   const sessionExtractions = Object.values(DATA.extractions)
-    .filter(e => e.session_id === s.session_id || e.session_title === s.session_title);
-  const summary = `${s.session_title || s.session_id} · ${(s.venue || '')} · ${s.turn_count || 0} turns · ${sessionExtractions.length} extractions`;
+    .filter(e => e.session_id === s.session_id);
+  // Time portion of date_time (HH:MM)
+  let timeStr = '';
+  if (s.date_time) {
+    const m = s.date_time.match(/T(\d{2}:\d{2})/);
+    if (m) timeStr = m[1];
+  }
+  // Detect split-audio captures
+  const sid = s.session_id || '';
+  const splitNote = sid.endsWith('__audio2') ? ' (capture 2 — split-audio companion)'
+                  : sid.endsWith('__audio') ? ' (capture 1 of split-audio pair)' : '';
+  const titlePart = s.session_title || sid;
+  const venuePart = s.venue ? ` — ${s.venue}${timeStr ? ', ' + timeStr : ''}` : '';
+  const statsPart = ` · ${s.turn_count || 0} turns · ${sessionExtractions.length} extractions`;
+  const summary = `${titlePart}${venuePart}${splitNote}${statsPart}`;
   const [d, body] = det(summary);
   d.setAttribute('data-anchor', s.session_id);
   body.appendChild(metaGrid([
