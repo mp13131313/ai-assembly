@@ -800,14 +800,23 @@ function jumpLink(text, target) {
   const a = el('a', {class: 'jump-link', href: '#' + CSS.escape(target)}, text);
   a.addEventListener('click', e => {
     e.preventDefault();
-    // Find target across all nights, switch tab if needed
     const targetEl = document.querySelector('[data-anchor="' + target + '"]');
     if (targetEl) {
       const pane = targetEl.closest('.night-pane');
       if (pane) showNight(pane.id);
-      targetEl.scrollIntoView({behavior: 'smooth', block: 'center'});
-      targetEl.style.background = 'var(--highlight)';
-      setTimeout(() => targetEl.style.background = '', 2000);
+      // Open all <details> ancestors so the target is visible
+      let cur = targetEl;
+      while (cur && cur !== document.body) {
+        if (cur.tagName === 'DETAILS') cur.setAttribute('open', '');
+        cur = cur.parentElement;
+      }
+      // Also open the target itself if it's a <details>
+      if (targetEl.tagName === 'DETAILS') targetEl.setAttribute('open', '');
+      setTimeout(() => {
+        targetEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+        targetEl.style.background = 'var(--highlight)';
+        setTimeout(() => targetEl.style.background = '', 2500);
+      }, 50);
     }
   });
   return a;
@@ -1007,20 +1016,20 @@ function renderFormulation(f, night) {
     body.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
-  // Step 2 link — the voice synthesizes across ALL themes into one Step 2 artifact
+  // Step 2 jump link — voice synthesizes across themes; full artifact lives in Voices section
   const step2Id = `${night}/${f.voice_slug}`;
   const s2 = DATA.voice_step2[step2Id];
   if (s2) {
     const primaryTheme = (s2.lineage || {}).primary_theme_id;
     const isPrimary = primaryTheme === f.theme_id_raw;
     const note = isPrimary
-      ? `★ This voice's Step 2 focused on THIS theme (primary: ${primaryTheme})`
-      : `This voice's Step 2 focused on ${primaryTheme || 'a different theme'} — synthesized across all their formulations`;
-    const [s2d, s2b] = det(`▶ ${s2.voice_slug} Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words)`);
-    body.appendChild(s2d);
-    s2b.appendChild(el('div', {class: 'meta'}, note));
-    s2b.appendChild(el('div', {}, jumpLink('Open full Step 2 in Voices section ↓', step2Id)));
-    s2b.appendChild(renderStep2Body(s2, night));
+      ? `★ This voice's Step 2 focused on THIS theme (${primaryTheme})`
+      : `This voice's Step 2 focused on ${primaryTheme || 'another theme'} — see Voices section for full synthesis`;
+    const wrap = el('div', {class: 'panel', style: 'margin-top: 0.5rem;'});
+    wrap.appendChild(el('div', {class: 'meta'}, note));
+    wrap.appendChild(el('div', {}, '▶ ',
+      jumpLink(`${s2.voice_slug} Step 2 artifact: "${s2.artifact_title || s2.selected_form || ''}" (${s2.word_count || 0} words) ↓`, step2Id)));
+    body.appendChild(wrap);
   }
   return d;
 }
