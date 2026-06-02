@@ -1069,11 +1069,23 @@ function renderThemePhaseA(t, night) {
   d.setAttribute('data-anchor', t.prefixed_id);
   body.appendChild(el('div', {class: 'id'}, t.prefixed_id));
   if (t.abstract) body.appendChild(abstract(t.abstract));
-  // Triage flags (audience friction, fault lines added by Provocateur)
-  if (t.triage_flags) {
-    const [tfd, tfb] = det('Triage flags (Provocateur annotations)');
-    tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
-    body.appendChild(tfd);
+  // Sessions contributing to this theme — sorted by date_time so they appear in conference order
+  const sessionIds = themeSessionIds(t);
+  if (sessionIds.length) {
+    sessionIds.sort((a, b) => {
+      const sa = DATA.sessions[a], sb = DATA.sessions[b];
+      return ((sa && sa.date_time) || '').localeCompare((sb && sb.date_time) || '');
+    });
+    const sList = el('div', {style: 'margin: 0.5rem 0;'},
+      el('b', {}, `Sessions contributing to this theme (${sessionIds.length}): `));
+    for (let i = 0; i < sessionIds.length; i++) {
+      const s = DATA.sessions[sessionIds[i]];
+      if (s) {
+        sList.appendChild(jumpLink(`"${s.session_title}" (${s.venue || ''})`, sessionIds[i]));
+        if (i < sessionIds.length - 1) sList.appendChild(document.createTextNode(' · '));
+      }
+    }
+    body.appendChild(sList);
   }
   // Clusters nested inside the theme — full cluster view (extractions grouped by session)
   if (clusters.length) {
@@ -1091,6 +1103,12 @@ function renderThemePhaseB(t, night) {
   const [d, body] = det(`⭐ "${t.title}" (${t.theme_id})`);
   d.setAttribute('data-anchor', 'phase-b-' + t.prefixed_id);
   if (t.abstract) body.appendChild(abstract(t.abstract));
+  // Provocateur annotations (audience friction, fault lines, etc.) — Provocateur is Phase B
+  if (t.triage_flags) {
+    const [tfd, tfb] = det('Provocateur triage flags (audience friction + fault lines)');
+    tfb.appendChild(el('pre', {class: 'json'}, JSON.stringify(t.triage_flags, null, 2)));
+    body.appendChild(tfd);
+  }
   // Formulations (per voice on this theme)
   const formsForTheme = Object.values(DATA.formulations)
     .filter(f => f.theme_id === t.prefixed_id)
@@ -1177,6 +1195,9 @@ function clusterSessionIds(c) {
   return [...sids];
 }
 function themeSessionCount(t) {
+  return themeSessionIds(t).length;
+}
+function themeSessionIds(t) {
   const sids = new Set();
   for (const cid of t.cluster_ids || []) {
     const c = DATA.clusters[cid];
@@ -1186,7 +1207,7 @@ function themeSessionCount(t) {
       if (e && e.session_id) sids.add(e.session_id);
     }
   }
-  return sids.size;
+  return [...sids];
 }
 
 // Group extractions by a key extractor
