@@ -619,6 +619,14 @@ def build_graph() -> dict:
         "voice_step2": len(graph["voice_step2"]),
         "dossiers": len(graph["dossiers"]),
     }
+    # Pre-conference setup data (PROJECT_ROOT level): the conference, the audience, the
+    # panel/casting, and the ten voices' profiles. Frames everything downstream.
+    graph["setup"] = {
+        "conference_facts": load_json(PROJECT_ROOT / "conference_facts.json") or {},
+        "audience_profile": load_json(PROJECT_ROOT / "audience_profile.json") or {},
+        "panel_roster": load_json(PROJECT_ROOT / "panel_roster.json") or {},
+        "council": load_json(PROJECT_ROOT / "council_config.json") or {},
+    }
     return graph
 
 
@@ -627,8 +635,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <title>Athens 2026 — Data Graph</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   /* ─── Style adapted from World Beautiful Business Forum (WBBF) ─── */
   :root {
@@ -662,7 +668,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     --highlight: #fef0c8;
     /* Fonts */
     --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --serif: 'Libre Baskerville', Georgia, serif;
+    --serif: var(--sans);  /* serif retired per operator — aliased to sans so any stray reference stays non-serif */
     --display: 'Impact', 'Arial Black', 'Helvetica Neue Condensed', sans-serif;
     --mono: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   }
@@ -685,14 +691,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 font-weight: 400; line-height: 1.0; letter-spacing: 0.02em;
                 text-transform: uppercase; margin-bottom: 10px; }
   .hero-title em { font-style: normal; color: var(--brand-blue); }
-  .hero-subtitle { font-family: var(--serif); font-size: clamp(15px, 1.8vw, 20px);
+  .hero-subtitle { font-family: var(--sans); font-size: clamp(15px, 1.8vw, 20px);
                    font-weight: 400; font-style: italic; color: rgba(255,255,255,0.75);
                    margin-bottom: 36px; max-width: 720px; line-height: 1.45; }
   .hero-meta { display: flex; gap: 40px; flex-wrap: wrap; }
   .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
   .hero-meta-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
                      color: rgba(255,255,255,0.55); font-weight: 500; }
-  .hero-meta-value { font-family: var(--serif); font-size: 18px; font-weight: 400;
+  .hero-meta-value { font-family: var(--sans); font-size: 18px; font-weight: 400;
                      color: var(--paper); }
 
   /* ─── STICKY CONTROLS (top nav with night dropdowns) ─── */
@@ -753,7 +759,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .stats { background: transparent; border: 0; border-bottom: 1px solid var(--border-soft);
            padding: 24px 0 18px; margin: 0 0 8px; font-family: var(--sans);
            font-size: 11px; color: var(--warm-mid); letter-spacing: 0.02em; }
-  .stats b { font-family: var(--serif); font-style: italic; font-size: 22px;
+  .stats b { font-family: var(--sans); font-style: italic; font-size: 22px;
              font-weight: 400; color: var(--ink); display: block; margin-bottom: 8px;
              letter-spacing: -0.01em; }
 
@@ -781,14 +787,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                                               border-color: var(--brand-red); color: var(--paper); }
 
   /* ─── SECTION TITLES ─── */
-  .section-title { font-family: var(--serif); font-size: 24px; font-style: italic;
+  .section-title { font-family: var(--sans); font-size: 24px; font-style: italic;
                    font-weight: 400; color: var(--ink); margin: 36px 0 14px;
                    padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
 
   /* ─── DETAILS / CARDS ─── */
   details { background: var(--paper); border: 1px solid var(--border-mid);
             margin: 6px 0; border-radius: 2px; }
-  details > summary { cursor: pointer; padding: 12px 16px; font-family: var(--serif);
+  details > summary { cursor: pointer; padding: 12px 16px; font-family: var(--sans);
                       font-size: 14px; line-height: 1.4; color: var(--ink);
                       user-select: none; transition: background 0.15s; }
   details > summary:hover { background: var(--cream); }
@@ -801,8 +807,50 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .id { font-family: var(--mono); font-size: 10px; color: var(--warm-light);
         letter-spacing: 0.02em; }
   .abstract { background: var(--cream); padding: 12px 16px; margin: 10px 0;
-              border-left: 3px solid var(--accent); font-family: var(--serif);
+              border-left: 3px solid var(--accent); font-family: var(--sans);
               font-size: 13px; font-style: italic; color: #2a2a2a; line-height: 1.55; }
+  .field-label { font-family: var(--sans); font-size: 9px; font-weight: 700;
+                 letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);
+                 margin: 0 0 6px; font-style: normal; }
+  .group-label { font-family: var(--sans); font-size: 11px; font-weight: 700;
+                 letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+                 margin: 18px 0 8px; padding-bottom: 4px;
+                 border-bottom: 1px solid var(--border-mid); }
+  /* decision + rationale pairing (voice craft decisions) */
+  .decision { margin: 8px 0 12px; padding-left: 12px; border-left: 2px solid var(--border-mid); }
+  .decision-label { font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+                    text-transform: uppercase; color: var(--accent); margin-right: 8px; }
+  .decision-value { font-size: 14px; color: var(--ink); }
+  .decision-why { font-size: 12px; color: var(--warm-mid); margin-top: 4px; line-height: 1.55; }
+  /* flattened telemetry footer */
+  .production-footer { font-family: var(--mono); font-size: 10px; color: var(--warm-light);
+                       margin-top: 14px; padding-top: 8px; border-top: 1px dotted var(--border-mid); }
+  /* dossier masthead */
+  .dossier-head { margin: 4px 0 16px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+  .dossier-kicker { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+                    text-transform: uppercase; color: var(--brand-red); margin-bottom: 6px; }
+  .dossier-headline { font-family: var(--display); font-size: 30px; line-height: 1.05; color: var(--ink);
+                      text-transform: uppercase; margin-bottom: 8px; }
+  .dossier-subline { font-family: var(--sans); font-size: 15px; color: var(--warm-mid);
+                     line-height: 1.4; margin-bottom: 10px; }
+  .dossier-pullquote { font-family: var(--sans); font-size: 16px; font-weight: 600; font-style: italic;
+                       color: var(--ink); border-left: 3px solid var(--brand-red);
+                       padding: 4px 0 4px 14px; margin: 10px 0; }
+  .dossier-abstract { font-family: var(--sans); font-size: 13px; color: #2a2a2a; line-height: 1.6; }
+  .headnote { border-left: 3px solid var(--accent); padding: 8px 12px; margin: 8px 0; background: var(--cream); }
+  .headnote-voice { font-family: var(--sans); font-weight: 700; font-size: 13px; color: var(--ink); }
+  /* explanatory scaffolding */
+  .how-body { font-family: var(--sans); font-size: 13px; line-height: 1.6; color: var(--warm-mid); max-width: 80ch; }
+  .how-body b { color: var(--ink); }
+  .how-body p { margin: 6px 0; }
+  .how-body ul { margin: 4px 0 10px; padding-left: 20px; }
+  .how-body li { margin: 3px 0; }
+  .how-foot { font-family: var(--mono); font-size: 10px; color: var(--warm-light); margin-top: 8px; }
+  .section-note { font-family: var(--sans); font-size: 12px; color: var(--warm-mid);
+                  margin: -6px 0 16px; line-height: 1.5; max-width: 78ch; }
+  .provenance { margin: 6px 0 12px; padding: 8px 12px; background: var(--cream);
+                border-left: 3px solid var(--accent); }
+  .prov-row { font-size: 13px; margin: 3px 0; color: var(--ink); }
   .meta { font-size: 11px; color: var(--warm-mid); margin: 4px 0;
           font-family: var(--sans); }
   .meta b { color: var(--ink); font-weight: 600; }
@@ -817,10 +865,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     white-space: pre-wrap; max-height: 400px; overflow-y: auto;
                     color: var(--warm-mid); line-height: 1.55; }
 
-  /* ─── BODY CONTENT BLOCKS (Libre Baskerville) ─── */
+  /* ─── BODY CONTENT BLOCKS ─── */
   .artifact-text, .response-text, .body-paragraphs, .formulation-text, .narrative-briefing,
   .deployment-context, .continuity-block, .extraction-content {
-    white-space: pre-wrap; font: 14px/1.75 var(--serif); margin: 8px 0;
+    white-space: pre-wrap; font: 14px/1.75 var(--sans); margin: 8px 0;
     background: var(--paper); padding: 16px 20px;
     border-left: 3px solid var(--accent); color: #1a1a1a;
   }
@@ -879,7 +927,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .extraction-summary .lens { color: var(--accent); font-family: var(--sans);
                               font-size: 10px; letter-spacing: 0.08em;
                               text-transform: uppercase; }
-  details.extraction > summary { font: 14px/1.5 var(--serif); padding: 12px 16px;
+  details.extraction > summary { font: 14px/1.5 var(--sans); padding: 12px 16px;
                                   color: var(--ink); }
   details.extraction > summary b.speaker { font-family: var(--sans); font-weight: 700;
                                             color: var(--accent); font-size: 10px;
@@ -897,7 +945,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                           text-transform: uppercase; margin: 28px 0 8px;
                           border-radius: 0; }
   .track-header { background: transparent; color: var(--ink);
-                  padding: 6px 0; font-family: var(--serif); font-style: italic;
+                  padding: 6px 0; font-family: var(--sans); font-style: italic;
                   font-size: 16px; font-weight: 400; margin: 18px 0 6px;
                   border-bottom: 1px solid var(--border-soft); border-radius: 0;
                   letter-spacing: 0; }
@@ -926,6 +974,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="hero-meta" id="heroMeta"></div>
 </header>
 <nav class="tabs">
+  <span class="night-menu" data-night="setup">
+    <button class="night-button" data-page="setup">The Conference</button>
+  </span>
   <span class="night-menu has-conf-active" data-night="night_1">
     <button class="night-button">Night 1 ▾</button>
     <div class="dropdown">
@@ -941,7 +992,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
   </span>
   <span class="night-menu" data-night="night_3">
-    <button class="night-button">Night 3 closing ▾</button>
+    <button class="night-button">Night 3 ▾</button>
     <div class="dropdown">
       <a class="dropdown-link conf-link" data-page="night_3_conf">📊 Conference Data</a>
       <a class="dropdown-link assembly-link" data-page="night_3_assembly">🎭 Assembly Output</a>
@@ -953,6 +1004,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </span>
 </nav>
 <main>
+  <details class="how-to-read">
+    <summary>How to read this — the five-stage pipeline →</summary>
+    <div class="how-body">
+      <p>Every night runs through five stages. The viewer splits each night into two pages:</p>
+      <p><b>📊 Conference Data</b> — a general-purpose record of what was said on stage, before the AI Assembly is involved:</p>
+      <ul>
+        <li><b>Stage 1 · Transcription</b> — audio (or vendor JSON for audience reflections) → diarized, named-speaker turns.</li>
+        <li><b>Stage 2 · Researcher</b> — turns → atomic positions (extractions) → clusters → themes.</li>
+      </ul>
+      <p><b>🎭 Assembly Output</b> — the ten voices, then the editor, take the themes over:</p>
+      <ul>
+        <li><b>Stage 3 · Provocateur</b> — each surviving theme is reframed per voice it activates (a formulation); a theme needs ≥3 voices to survive.</li>
+        <li><b>Stage 4 · Voice</b> — each voice reasons per-theme privately (Step 1), then writes one response (Step 2) in its own form, focused on one theme.</li>
+        <li><b>Stage 5 · Editor</b> — a 13th persona weaves the responses into published dossiers.</li>
+      </ul>
+      <p class="how-foot">Across 3 nights: ~3,170 turns / 208k words → 529 positions → 86 clusters → 24 themes → 128 formulations → 30 responses → 13 dossiers. Prose companion: DATA_INVENTORY.md.</p>
+    </div>
+  </details>
+  <div id="setup" class="page-pane"></div>
   <div id="night_1_conf" class="page-pane active"></div>
   <div id="night_1_assembly" class="page-pane"></div>
   <div id="night_2_conf" class="page-pane"></div>
@@ -1053,9 +1123,12 @@ function metaGrid(pairs) {
   return g;
 }
 
-function abstract(text) {
+function abstract(text, labelText='Abstract') {
   if (!text) return null;
-  return el('div', {class: 'abstract'}, text);
+  const wrap = el('div', {class: 'abstract'});
+  wrap.appendChild(el('div', {class: 'field-label'}, labelText));
+  wrap.appendChild(el('div', {}, text));
+  return wrap;
 }
 
 function thinkingTrace(text) {
@@ -1131,12 +1204,101 @@ document.querySelectorAll('.dropdown-link').forEach(a => {
     window.scrollTo({top: 0, behavior: 'instant'});
   });
 });
+// Top-level single-page nav buttons (e.g. "The Conference" → setup)
+document.querySelectorAll('.night-button[data-page]').forEach(b => {
+  b.addEventListener('click', e => {
+    e.preventDefault();
+    showPage(b.dataset.page);
+    window.scrollTo({top: 0, behavior: 'instant'});
+  });
+});
 
-// Render each of the 6 pages (3 nights × 2 phases)
+// Render the pre-conference setup page + the 6 night pages (3 nights × 2 phases)
+renderSetup(document.getElementById('setup'));
 for (const night of ['night_1', 'night_2', 'night_3']) {
   for (const phase of ['conf', 'assembly']) {
     const pane = document.getElementById(`${night}_${phase}`);
     renderPage(pane, night, phase);
+  }
+}
+
+// Pre-conference context: the conference, the audience, the panel/casting, the ten voices.
+function renderSetup(pane) {
+  if (!pane) return;
+  const setup = DATA.setup || {};
+  const cf = setup.conference_facts || {};
+  const ap = setup.audience_profile || {};
+  const pr = setup.panel_roster || {};
+  const council = setup.council || {};
+
+  const stats = el('div', {class: 'stats'});
+  stats.innerHTML = '<b>Before the nights — the conference &amp; the Assembly.</b> The context that frames everything else: what the event was, who was in the room, and who the ten voices are.';
+  pane.appendChild(stats);
+
+  // 1. The conference
+  pane.appendChild(el('div', {class: 'section-title'}, '🏛 The conference'));
+  if (cf.conference_name) {
+    const facts = el('div', {class: 'dossier-head'});
+    if (cf.host_organization) facts.appendChild(el('div', {class: 'dossier-kicker'}, cf.host_organization));
+    facts.appendChild(el('div', {class: 'dossier-headline'}, cf.conference_name));
+    if (cf.conference_subtitle) facts.appendChild(el('div', {class: 'dossier-subline'}, cf.conference_subtitle));
+    facts.appendChild(metaGrid([
+      ['Dates', cf.dates],
+      ['Location', cf.location],
+      ['Attendance', cf.approximate_attendance],
+      ['Anniversary', cf.anniversary],
+    ]));
+    if (cf.venues_summary) facts.appendChild(el('div', {class: 'meta', style: 'margin-top: 8px;'}, el('b', {}, 'Venues: '), cf.venues_summary));
+    pane.appendChild(facts);
+  }
+  if (cf.conference_context_paragraph) {
+    const [cd, cb] = det('What the conference was', true);
+    cb.appendChild(el('div', {class: 'body-paragraphs'}, cf.conference_context_paragraph));
+    pane.appendChild(cd);
+  }
+  if (cf.session_role_for_ai_assembly) {
+    const [rd, rb] = det("The Assembly's role in it");
+    rb.appendChild(el('div', {class: 'body-paragraphs'}, cf.session_role_for_ai_assembly));
+    pane.appendChild(rd);
+  }
+
+  // 2. The audience
+  if (ap.participant_profile) {
+    pane.appendChild(el('div', {class: 'section-title'}, '👥 The audience'));
+    pane.appendChild(el('div', {class: 'section-note'}, `The ~${ap.participants_count_approx || ''} attendees the artifacts were written for — who they are, what activates them, how they fail.`));
+    const [ad, ab] = det('Who was in the room', true);
+    ab.appendChild(el('div', {class: 'body-paragraphs'}, ap.participant_profile));
+    pane.appendChild(ad);
+  }
+
+  // 3. The panel & casting + the ten voices
+  pane.appendChild(el('div', {class: 'section-title'}, '🎭 The panel & casting'));
+  pane.appendChild(el('div', {class: 'section-note'}, 'How the ten voices were chosen — the question behind every seat was "what perspective would be missing without you?"'));
+  if (pr.casting_summary) pane.appendChild(abstract(pr.casting_summary, 'Casting logic'));
+  const members = council.members || [];
+  if (members.length) {
+    const [vd, vb] = det(`The ten voices (${members.length}) — who they are and what activates them`, true);
+    for (const m of members) {
+      const [md, mb] = det(m.name || '');
+      const rows = [
+        ['Speaks from', m.speaks_from],
+        ['Core commitment', m.core_commitment],
+        ['Activates on', m.activates_on],
+        ['Goes flat on', m.goes_flat_on],
+        ['Stretch', m.stretch],
+        ['Medium', m.medium],
+        ['Stance', m.stance_tendency],
+      ];
+      for (const [k, v] of rows) {
+        if (v) mb.appendChild(el('div', {class: 'meta', style: 'margin: 3px 0;'}, el('b', {}, k + ': '), v));
+      }
+      vb.appendChild(md);
+    }
+    pane.appendChild(vd);
+  } else if (pr.panel_members_final && pr.panel_members_final.length) {
+    const ul = el('ul', {style: 'padding-left: 20px;'});
+    for (const n of pr.panel_members_final) ul.appendChild(el('li', {style: 'margin: 3px 0;'}, n));
+    pane.appendChild(ul);
   }
 }
 
@@ -1201,6 +1363,7 @@ function renderPage(pane, night, phase) {
     // Sessions — grouped by capture type, then by track (matching DATA_INVENTORY)
     pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-sessions`, 'data-section': `sec-${night}-sessions`},
       `📼 Sessions (${stats.sessions || 0})`));
+    pane.appendChild(el('div', {class: 'section-note'}, "Stage 1 · Transcription — each session's audio (or vendor JSON for audience reflections) becomes diarized, named-speaker turns. A turn is one speaker's continuous utterance."));
     const sessions = Object.values(DATA.sessions).filter(s => s.night === night);
     const audioSessions = sessions.filter(s => !s.is_reflection)
       .sort((a, b) => (a.date_time || '').localeCompare(b.date_time || ''));
@@ -1256,6 +1419,7 @@ function renderPage(pane, night, phase) {
     // Themes (with clusters nested inside; ungrouped clusters listed at end if any)
     pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-themes`, 'data-section': `sec-${night}-themes`},
       `🏷 Themes (${stats.themes_total || 0} total · ${stats.themes_selected || 0} selected by Provocateur) — clusters nested inside`));
+    pane.appendChild(el('div', {class: 'section-note'}, "Stage 2 · Researcher — turns become atomic positions (extractions), grouped into clusters, then into themes around a larger question. The general-purpose conference record ends here."));
     const themes = Object.values(DATA.themes).filter(t => t.night === night)
       .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
     for (const t of themes) {
@@ -1280,6 +1444,7 @@ function renderPage(pane, night, phase) {
     // Selected themes → voice responses + dossier (the deliberation chain)
     pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-selected`, 'data-section': `sec-${night}-selected`},
       `🎯 Selected themes → voice responses → dossier (${stats.themes_selected || 0} themes)`));
+    pane.appendChild(el('div', {class: 'section-note'}, "Stage 3 · Provocateur — model-judged per voice: each surviving theme is reframed into a per-voice formulation. A theme needs ≥3 voices activated to survive selection."));
     const selectedThemes = themes.filter(t => t.selected_for_provocateur);
     for (const t of selectedThemes) {
       pane.appendChild(renderThemePhaseB(t, night));
@@ -1288,6 +1453,7 @@ function renderPage(pane, night, phase) {
     // Voices' Artifacts (per-voice synthesis)
     pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-voices`, 'data-section': `sec-${night}-voices`},
       `🗣 Voices' Artifacts (${stats.voice_step2 || 0}) — per-voice synthesis across themes`));
+    pane.appendChild(el('div', {class: 'section-note'}, "Stage 4 · Voice — each voice reasons through its formulations privately (Step 1), then composes one written response (Step 2) in its own form, focused on a single theme. Each artifact links back to the themes it engaged."));
     const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
       .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
     for (const s of step2s) {
@@ -1297,6 +1463,7 @@ function renderPage(pane, night, phase) {
     // Dossiers (the editor's compositions)
     pane.appendChild(el('div', {class: 'section-title', id: `sec-${night}-dossiers`, 'data-section': `sec-${night}-dossiers`},
       `📰 Dossiers (${stats.dossiers || 0}) — the editor's compositions`));
+    pane.appendChild(el('div', {class: 'section-note'}, "Stage 5 · Editor — the Assembly's 13th persona weaves the voices' responses into composed dossiers: kicker, headline, body of argumentative paragraphs (voices cited as evidence), pull-quote, and a per-voice headnote."));
     const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
       .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
     for (const d of dossiers) {
@@ -1511,6 +1678,12 @@ function renderExtraction(e, night, hide) {
   const body = el('div', {class: 'body'});
   d.appendChild(body);
   d.setAttribute('data-anchor', e.extraction_id);
+  // Context (surrounding turn text) — surfaced inline at the top of the body so it
+  // reads directly under the extraction title, no further expand needed.
+  if (e.context) {
+    body.appendChild(el('div', {class: 'field-label'}, 'Context (surrounding turn text)'));
+    body.appendChild(el('div', {class: 'turn-text'}, e.context));
+  }
   // Forward links — hide the link(s) pointing back to current parent context(s)
   const links = el('div', {style: 'margin: 0.4rem 0;'});
   if (cluster && !hide.includes('cluster')) {
@@ -1542,98 +1715,248 @@ function renderExtraction(e, night, hide) {
     ['Engagement', e.engagement || '—'],
     ['Responds to', e.responds_to || '—'],
   ]));
-  if (e.context) {
-    const [cd, cb] = det('Context (surrounding turn text)');
-    cb.appendChild(el('div', {class: 'turn-text'}, e.context));
-    body.appendChild(cd);
-  }
   return d;
 }
 
 function renderFormulation(f, night) {
-  const [d, body] = det(`${formatVoiceName(f.voice_slug)} × "${f.theme_display_title || ''}" (${f.theme_id_raw})`);
+  // A voice produces exactly one Step 2 artifact per night, synthesised across the
+  // themes it engaged but *focused* on a single primary theme. Surface that focus in
+  // the title (★) the way the Provocateur's theme selection surfaces as ⭐ — two
+  // actors, two stars: ⭐ = Provocateur selected the theme; ★ = this voice focused
+  // its artifact on this theme.
+  const step2Id = `${night}/${f.voice_slug}`;
+  const s2 = DATA.voice_step2[step2Id];
+  const primaryTheme = s2 ? (s2.lineage || {}).primary_theme_id : null;
+  const isPrimary = !!s2 && primaryTheme === f.theme_id_raw;
+  const ptObj = primaryTheme ? DATA.themes[`${night}/${primaryTheme}`] : null;
+  const ptLabel = ptObj ? `"${ptObj.title}" (${primaryTheme})` : primaryTheme;
+
+  let suffix;
+  if (!s2) suffix = ' — no artifact this night';
+  else if (isPrimary) suffix = ' — ★ focused their artifact here';
+  else suffix = ` — artifact focused elsewhere (${primaryTheme})`;
+  const titleMark = isPrimary ? '★ ' : '';
+  const [d, body] = det(`${titleMark}${formatVoiceName(f.voice_slug)} × "${f.theme_display_title || ''}" (${f.theme_id_raw})${suffix}`);
   d.setAttribute('data-anchor', f.formulation_id);
   body.appendChild(el('div', {class: 'id'}, f.formulation_id));
+
+  // ── INPUT: what the Provocateur passed to the voice (collapsible) ──
+  const [inD, inBody] = det('What was passed to the voice');
+  body.appendChild(inD);
   if (f.formulation_text) {
-    body.appendChild(el('div', {}, el('b', {}, 'Formulation:')));
-    body.appendChild(el('div', {class: 'formulation-text'}, f.formulation_text));
+    inBody.appendChild(el('div', {}, el('b', {}, 'Formulation:')));
+    inBody.appendChild(el('div', {class: 'formulation-text'}, f.formulation_text));
   }
   if (f.context_narrative) {
     const [cd, cb] = det('Context narrative');
     cb.appendChild(el('div', {class: 'narrative-briefing'}, f.context_narrative));
-    body.appendChild(cd);
+    inBody.appendChild(cd);
   }
   if (f.narrative_briefing) {
     const [nd, nb] = det('Full narrative briefing (passed to voice)');
     nb.appendChild(el('div', {class: 'narrative-briefing'}, f.narrative_briefing));
-    body.appendChild(nd);
+    inBody.appendChild(nd);
   }
-  // Step 1 response for this formulation
+  // The narrative_briefing above ends with a pointer to a `full_theme_record`. That
+  // record IS appended to the prompt — step1_private_reasoning.build_step1_user_prompt
+  // tacks it on after the briefing under "WIDER RECORD OF TODAY'S CONVERSATION ON THIS
+  // THEME", first running filter_theme_record_for_step1 (which drops theme_flags +
+  // co_assigned_voices). We render that filtered view (= what the voice actually saw),
+  // then surface the stripped pipeline-meta separately. Lazy-rendered on first expand.
+  const ftr = f.full_theme_record || {};
+  if (Object.keys(ftr).length) {
+    const wd = document.createElement('details');
+    const wsum = document.createElement('summary');
+    wsum.textContent = "WIDER RECORD of today's conversation on this theme — the structured material the prompt appended after the briefing";
+    wd.appendChild(wsum);
+    const wb = el('div', {class: 'body'});
+    wd.appendChild(wb);
+    let wrendered = false;
+    wd.addEventListener('toggle', () => {
+      if (!wd.open || wrendered) return;
+      wrendered = true;
+      if (f.theme_id) {
+        wb.appendChild(el('div', {class: 'meta'}, '↗ ',
+          jumpLink('Full theme record (with cross-links) in Conference Data →', f.theme_id)));
+      }
+      if (ftr.theme_abstract_from_researcher) {
+        wb.appendChild(abstract(ftr.theme_abstract_from_researcher, 'Theme abstract (shown to voice)'));
+      }
+      const ftrClusters = ftr.clusters || [];
+      if (ftrClusters.length) {
+        wb.appendChild(el('div', {class: 'group-label'}, `Clusters in the record (${ftrClusters.length})`));
+        for (const c of ftrClusters) {
+          const exts = c.extractions || [];
+          const [cd, cb] = det(`"${c.cluster_title || ''}" (${c.cluster_id || ''}) — ${exts.length} extraction${exts.length === 1 ? '' : 's'}`);
+          if (c.cluster_abstract) cb.appendChild(abstract(c.cluster_abstract, 'Cluster abstract'));
+          for (const ex of exts) {
+            const exd = el('div', {style: 'margin: 6px 0; padding-left: 10px; border-left: 2px solid var(--border-soft);'});
+            exd.appendChild(el('div', {class: 'meta'},
+              ex.lens ? el('i', {class: 'lens'}, ex.lens) : null,
+              ex.speaker ? el('b', {}, `${ex.lens ? ' · ' : ''}${ex.speaker}`) : null));
+            exd.appendChild(el('div', {class: 'turn-text'}, ex.extraction || ''));
+            cb.appendChild(exd);
+          }
+          wb.appendChild(cd);
+        }
+      }
+      const gids = ftr.grounding_extraction_ids || [];
+      if (gids.length) {
+        const [gd, gb] = det(`Grounding extraction ids (${gids.length})`);
+        gb.appendChild(el('div', {class: 'id', style: 'word-break: break-all; line-height: 1.6;'}, gids.join(', ')));
+        wb.appendChild(gd);
+      }
+      // Pipeline-meta present in the briefing but stripped before the voice saw it.
+      if (ftr.theme_flags || (ftr.co_assigned_voices && ftr.co_assigned_voices.length)) {
+        const withheld = el('div', {style: 'margin-top: 12px; padding: 8px 12px; background: #fdeeee; border-left: 3px solid #c44;'});
+        withheld.appendChild(el('div', {class: 'field-label', style: 'color: #893309;'},
+          'In the briefing — withheld from the voice (pipeline-meta, stripped by filter_theme_record_for_step1)'));
+        if (ftr.theme_flags) {
+          const tf = ftr.theme_flags;
+          const fl = (tf.fault_line_present === true) ? 'yes' : (tf.fault_line_present === false) ? 'no' : '—';
+          withheld.appendChild(el('div', {class: 'meta'}, el('b', {}, 'theme_flags: '),
+            `audience_friction = ${tf.audience_friction != null ? tf.audience_friction : '—'} · fault_line_present = ${fl} · theme_quality = ${tf.theme_quality != null ? tf.theme_quality : '—'}`));
+        }
+        if (ftr.co_assigned_voices && ftr.co_assigned_voices.length) {
+          withheld.appendChild(el('div', {class: 'meta'}, el('b', {}, 'co_assigned_voices: '),
+            ftr.co_assigned_voices.join(', ')));
+        }
+        wb.appendChild(withheld);
+      }
+    });
+    inBody.appendChild(wd);
+  }
+
+  // ── OUTPUT: what the voice did with it (collapsible) ──
+  const [outD, outBody] = det('What the voice did with it');
+  body.appendChild(outD);
   const step1Id = `${night}/${f.voice_slug}__${f.theme_id_raw}`;
   const s1 = DATA.voice_step1[step1Id];
   if (s1) {
-    const [s1d, s1b] = det(`Private thinking (${(s1.detailed_response || '').length.toLocaleString()} chars)`);
-    body.appendChild(s1d);
+    const [s1d, s1b] = det('Step 1 · private reasoning');
+    s1d.setAttribute('data-anchor', step1Id);  // so artifact lineage "source responses consumed" links resolve here
+    outBody.appendChild(s1d);
     s1b.appendChild(renderStep1Body(s1));
   }
-  // Step 2 — only show inline when THIS formulation's theme was the voice's primary focus;
-  // otherwise the chain stops at Step 1 (Step 2 is reachable via Voices section).
-  const step2Id = `${night}/${f.voice_slug}`;
-  const s2 = DATA.voice_step2[step2Id];
-  if (s2) {
-    const primaryTheme = (s2.lineage || {}).primary_theme_id;
-    const isPrimary = primaryTheme === f.theme_id_raw;
-    if (isPrimary) {
-      const sumTxt = `★ ${formatVoiceName(s2.voice_slug)} chose this theme — ${formatArtifactSummary(s2)}`;
-      const s2d = document.createElement('details');
-      const s2sum = document.createElement('summary');
-      s2sum.textContent = sumTxt;
-      s2d.appendChild(s2sum);
-      const s2b = el('div', {class: 'body'});
-      s2d.appendChild(s2b);
-      // Lazy-render on first expand
-      let rendered = false;
-      s2d.addEventListener('toggle', () => {
-        if (s2d.open && !rendered) {
-          s2b.appendChild(el('div', {class: 'meta', style: 'margin-bottom: 0.5rem;'},
-            '↗ ', jumpLink('Open in Voices section ↓', step2Id)));
-          s2b.appendChild(renderStep2Body(s2, night));
-          rendered = true;
-        }
-      });
-      body.appendChild(s2d);
-    } else if (primaryTheme) {
-      // Voice didn't pick this theme — small breadcrumb to where they went
-      body.appendChild(el('div', {class: 'meta', style: 'margin-top: 0.5rem; font-style: italic; color: var(--muted);'},
-        `(${formatVoiceName(s2.voice_slug)}'s artifact went to ${primaryTheme} — see Voices' Artifacts section)`));
-    }
+  if (s2 && isPrimary) {
+    // Voice focused its artifact on THIS theme — show it inline (lazy-rendered on expand).
+    const sumTxt = `★ ${formatVoiceName(s2.voice_slug)} chose this theme — ${formatArtifactSummary(s2)}`;
+    const s2d = document.createElement('details');
+    const s2sum = document.createElement('summary');
+    s2sum.textContent = sumTxt;
+    s2d.appendChild(s2sum);
+    const s2b = el('div', {class: 'body'});
+    s2d.appendChild(s2b);
+    let rendered = false;
+    s2d.addEventListener('toggle', () => {
+      if (s2d.open && !rendered) {
+        s2b.appendChild(el('div', {class: 'meta', style: 'margin-bottom: 0.5rem;'},
+          '↗ ', jumpLink('Open in Voices section ↓', step2Id)));
+        s2b.appendChild(renderStep2Body(s2, night));
+        rendered = true;
+      }
+    });
+    outBody.appendChild(s2d);
+  } else if (s2 && primaryTheme) {
+    // Voice synthesised its artifact around a different theme — link straight to it.
+    outBody.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'},
+      `${formatVoiceName(s2.voice_slug)} folded this into an artifact focused on `,
+      jumpLink(`${ptLabel} →`, step2Id),
+      ' — see the Voices section.'));
+  } else if (!s2) {
+    outBody.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'},
+      'This voice produced no Step 2 artifact this night.'));
   }
   return d;
 }
 
+// ── Shared helpers for the content-first layout ──
+function num(n) {
+  if (n == null || n === '') return null;
+  return typeof n === 'number' ? n.toLocaleString() : String(n);
+}
+function tokensStr(o) {
+  const i = num(o.input_tokens), out = num(o.output_tokens);
+  if (i == null && out == null) return null;
+  return `${i || '?'} → ${out || '?'} tokens`;
+}
+// Flatten telemetry into one muted footer line (de-emphasised, always last).
+function productionFooter(parts) {
+  const clean = parts.filter(Boolean);
+  if (!clean.length) return null;
+  return el('div', {class: 'production-footer'}, clean.join('  ·  '));
+}
+// Pair a decision with its rationale, so the two stop living in separate places.
+function decisionBlock(labelText, value, rationale) {
+  if (!value && !rationale) return null;
+  const wrap = el('div', {class: 'decision'});
+  const head = el('div', {});
+  head.appendChild(el('span', {class: 'decision-label'}, labelText));
+  if (value) head.appendChild(el('span', {class: 'decision-value'}, value));
+  wrap.appendChild(head);
+  if (rationale) wrap.appendChild(el('div', {class: 'decision-why'}, rationale));
+  return wrap;
+}
+// The continuity_from_prior_night dict, rendered readably (was a raw JSON dump).
+function renderContinuity(c, night) {
+  const wrap = el('div');
+  if (c.from_night != null && c.for_night != null) {
+    wrap.appendChild(el('div', {class: 'meta'}, `Carried from Night ${c.from_night} into Night ${c.for_night}.`));
+  }
+  // Two narrative blocks with night-stamped keys (continuity_block_if_night_N +
+  // continuity_block_artifact_if_night_N) — found dynamically, in dict order.
+  for (const [k, v] of Object.entries(c)) {
+    if (typeof v !== 'string' || !v.trim()) continue;
+    if (/^continuity_block_artifact_if_night_/.test(k)) {
+      wrap.appendChild(el('div', {class: 'group-label'}, 'What I chose to write (artifact memory)'));
+      wrap.appendChild(el('div', {class: 'continuity-block'}, v));
+    } else if (/^continuity_block_if_night_/.test(k)) {
+      wrap.appendChild(el('div', {class: 'group-label'}, 'Positions I took (reasoning memory)'));
+      wrap.appendChild(el('div', {class: 'continuity-block'}, v));
+    }
+  }
+  if (Array.isArray(c.signature_moves_deployed) && c.signature_moves_deployed.length) {
+    const [sd, sb] = det(`Signature moves deployed (${c.signature_moves_deployed.length})`);
+    const ul = el('ul', {style: 'margin: 4px 0; padding-left: 20px;'});
+    for (const m of c.signature_moves_deployed) {
+      ul.appendChild(el('li', {style: 'margin: 3px 0;'}, typeof m === 'string' ? m : JSON.stringify(m)));
+    }
+    sb.appendChild(ul);
+    wrap.appendChild(sd);
+  }
+  const pf = productionFooter([
+    c.model, tokensStr(c),
+    c.wall_clock_s != null ? `${c.wall_clock_s}s` : null,
+    c.generated_date ? `generated ${c.generated_date}` : null,
+  ]);
+  if (pf) wrap.appendChild(pf);
+  return wrap;
+}
+
 function renderStep1Body(s1) {
   const wrap = el('div');
-  wrap.appendChild(metaGrid([
-    ['Model', s1.model],
-    ['Thinking enabled', s1.thinking_enabled],
-    ['Input tokens', s1.input_tokens],
-    ['Output tokens', s1.output_tokens],
-    ['Thinking tokens', s1.thinking_tokens],
-    ['Cache creation', s1.cache_creation_input_tokens],
-    ['Cache read', s1.cache_read_input_tokens],
-    ['Wall clock', s1.wall_clock_s + 's'],
-  ]));
+  // 1. The private reasoning itself — content first, expandable, open by default.
   if (s1.detailed_response) {
-    wrap.appendChild(el('div', {}, el('b', {}, 'Detailed response:')));
-    wrap.appendChild(el('div', {class: 'response-text'}, s1.detailed_response));
+    const [pd, pb] = det(`Private thinking (${(s1.detailed_response || '').length.toLocaleString()} chars)`, true);
+    pb.appendChild(el('div', {class: 'response-text'}, s1.detailed_response));
+    wrap.appendChild(pd);
   }
+  // 2. Thinking trace — expandable.
   const tt = thinkingTrace(s1.thinking_trace);
   if (tt) wrap.appendChild(tt);
+  // 3. Step 1 validation (rare).
   if (s1.step1_validation) {
     const [vd, vb] = det('Step 1 validation');
     vb.appendChild(el('pre', {class: 'json'}, JSON.stringify(s1.step1_validation, null, 2)));
     wrap.appendChild(vd);
   }
+  // 4. Production details — flattened, last.
+  const pf = productionFooter([
+    s1.model, tokensStr(s1),
+    s1.thinking_tokens != null ? `${num(s1.thinking_tokens)} thinking` : null,
+    s1.wall_clock_s != null ? `${s1.wall_clock_s}s` : null,
+  ]);
+  if (pf) wrap.appendChild(pf);
   return wrap;
 }
 
@@ -1760,7 +2083,23 @@ function renderValidation(v) {
       const [md, mb] = det(`Characteristic moves performed (${vf.characteristic_moves_performed.length})`);
       const ul = el('ul', {style: 'margin: 0.3rem 0; padding-left: 1.5rem;'});
       for (const m of vf.characteristic_moves_performed) {
-        ul.appendChild(el('li', {style: 'margin: 0.15rem 0;'}, typeof m === 'string' ? m : JSON.stringify(m)));
+        if (m && typeof m === 'object') {
+          // Shape: {move, performed, where} — render readably rather than dumping JSON.
+          const mark = m.performed === true ? '✓' : m.performed === false ? '✗' : '·';
+          const li = el('li', {style: 'margin: 0.15rem 0;'},
+            el('b', {style: m.performed === false ? 'color: var(--muted);' : ''}, mark + ' '),
+            m.move || m.name || '(unnamed move)');
+          if (m.where) li.appendChild(el('span', {class: 'meta'}, ' — ', m.where));
+          // Preserve any other fields so nothing is silently dropped.
+          for (const [k, val] of Object.entries(m)) {
+            if (!['move', 'name', 'performed', 'where'].includes(k)) {
+              li.appendChild(el('span', {class: 'meta'}, ` · ${k}: ${typeof val === 'string' ? val : JSON.stringify(val)}`));
+            }
+          }
+          ul.appendChild(li);
+        } else {
+          ul.appendChild(el('li', {style: 'margin: 0.15rem 0;'}, String(m)));
+        }
       }
       mb.appendChild(ul);
       vfb.appendChild(md);
@@ -1826,52 +2165,71 @@ function renderStep2Body(s, night) {
   const verdict = (validation.overall_verdict || '').toLowerCase();
   const verdictClass = verdict === 'pass' ? 'pass' : verdict === 'hold' ? 'hold' : 'warn';
   const decision = (s.operator_decision || {}).decision || '';
+  // Status badges only (focus/stance/form move into the craft-decisions block below).
   const labels = el('div', {});
   if (validation.overall_verdict) labels.appendChild(label(validation.overall_verdict, verdictClass));
   if (decision) labels.appendChild(label(decision, decision === 'release' ? 'released' : ''));
-  if (s.focus_decision) labels.appendChild(label(s.focus_decision));
   wrap.appendChild(labels);
 
-  // Continuity from prior night
-  if (s.continuity_from_prior_night) {
-    const [cd, cb] = det('↰ Continuity from prior night (voice memory consumed at start of this night)');
-    cb.appendChild(el('div', {class: 'continuity-block'}, typeof s.continuity_from_prior_night === 'string' ? s.continuity_from_prior_night : JSON.stringify(s.continuity_from_prior_night, null, 2)));
-    wrap.appendChild(cd);
+  // Provenance — which theme(s) produced this artifact. An artifact synthesises across
+  // ALL the themes the voice engaged tonight, focused on one (★). Surfaced up top so it
+  // is clear, when reading an artifact, how it came about. Links to each theme's
+  // deliberation block (Phase B) on this page.
+  {
+    const primaryThemeId = (s.lineage || {}).primary_theme_id;
+    const engaged = Object.values(DATA.formulations)
+      .filter(f => f.voice_slug === s.voice_slug && f.night === night)
+      .sort((a, b) => (a.theme_id_raw || '').localeCompare(b.theme_id_raw || ''));
+    if (engaged.length) {
+      const prov = el('div', {class: 'provenance'});
+      prov.appendChild(el('div', {class: 'field-label'}, `Engaged ${engaged.length} theme${engaged.length === 1 ? '' : 's'} tonight — synthesised into this single response`));
+      for (const f of engaged) {
+        const isPrim = f.theme_id_raw === primaryThemeId;
+        const txt = `${isPrim ? '★ ' : ''}"${f.theme_display_title || ''}" (${f.theme_id_raw})${isPrim ? ' — focused here' : ''}`;
+        prov.appendChild(el('div', {class: 'prov-row'}, isPrim ? '→ ' : '· ', jumpLink(txt, 'phase-b-' + f.theme_id)));
+      }
+      wrap.appendChild(prov);
+    }
   }
 
-  wrap.appendChild(metaGrid([
-    ['Focus decision', s.focus_decision],
-    ['Selected form', s.selected_form],
-    ['Stance', s.stance],
-    ['Word count', s.word_count],
-    ['Model', s.model],
-    ['Input tokens', s.input_tokens],
-    ['Output tokens', s.output_tokens],
-    ['Thinking tokens', s.thinking_tokens],
-    ['Wall clock', s.wall_clock_s + 's'],
-  ]));
-
-  if (s.focus_rationale) {
-    wrap.appendChild(el('div', {}, el('b', {}, 'Focus rationale: '), s.focus_rationale));
-  }
-  if (s.stance_rationale) {
-    wrap.appendChild(el('div', {}, el('b', {}, 'Stance rationale: '), s.stance_rationale));
-  }
-  if (s.form_rationale) {
-    wrap.appendChild(el('div', {}, el('b', {}, 'Form rationale: '), s.form_rationale));
-  }
-  if (s.weight_assessment) {
-    const [wd, wb] = det('Weight assessment');
-    wb.appendChild(el('div', {class: 'response-text'}, s.weight_assessment));
-    wrap.appendChild(wd);
-  }
+  // 1. The artifact — content first, expandable, open by default.
   if (s.artifact_text) {
-    wrap.appendChild(el('div', {}, el('b', {}, 'Artifact text:')));
-    wrap.appendChild(el('div', {class: 'artifact-text'}, s.artifact_text));
+    const titleBits = [s.artifact_title, s.word_count != null ? `${num(s.word_count)} words` : null].filter(Boolean).join(' · ');
+    const [ad, ab] = det(`Artifact${titleBits ? ' — ' + titleBits : ''}`, true);
+    if (s.artifact_subtitle) ab.appendChild(el('div', {class: 'meta', style: 'margin-bottom: 6px;'}, s.artifact_subtitle));
+    ab.appendChild(el('div', {class: 'artifact-text'}, s.artifact_text));
+    wrap.appendChild(ad);
   }
+  // 2. Thinking trace — expandable.
   const tt = thinkingTrace(s.thinking_trace);
   if (tt) wrap.appendChild(tt);
 
+  // 3. The voice's craft decisions — each decision paired with its rationale.
+  if (s.focus_decision || s.stance || s.selected_form || s.weight_assessment) {
+    const [chd, chb] = det("The voice's craft decisions (focus · stance · form)");
+    const fd = decisionBlock('Focus', s.focus_decision, s.focus_rationale);
+    if (fd) chb.appendChild(fd);
+    const st = decisionBlock('Stance', s.stance, s.stance_rationale);
+    if (st) chb.appendChild(st);
+    const fm = decisionBlock('Form', s.selected_form, s.form_rationale);
+    if (fm) chb.appendChild(fm);
+    if (s.weight_assessment) {
+      const w = el('div', {class: 'decision'});
+      w.appendChild(el('div', {}, el('span', {class: 'decision-label'}, 'Why this focus carried the most weight')));
+      w.appendChild(el('div', {class: 'decision-why'}, s.weight_assessment));
+      chb.appendChild(w);
+    }
+    wrap.appendChild(chd);
+  }
+
+  // 4. Continuity carried in from the prior night (rendered readably).
+  if (s.continuity_from_prior_night && typeof s.continuity_from_prior_night === 'object') {
+    const [cd, cb] = det('↰ Continuity carried in from the prior night (voice memory)');
+    cb.appendChild(renderContinuity(s.continuity_from_prior_night, night));
+    wrap.appendChild(cd);
+  }
+
+  // 5. Validation, operator decision, lineage.
   if (s.validation) {
     const [vd, vb] = det('Validation — full flag detail (Safeguards / Engagement / Voice fidelity)');
     vb.appendChild(renderValidation(s.validation));
@@ -1882,7 +2240,6 @@ function renderStep2Body(s, night) {
     ob.appendChild(renderOperatorDecision(s.operator_decision));
     wrap.appendChild(od);
   }
-  // Source step1s — items may be strings (legacy) or objects {theme_id, formulation_id, path}
   const lineage = s.lineage || {};
   if (lineage.consumed_detailed_responses && lineage.consumed_detailed_responses.length) {
     const [ld, lb] = det(`Source private-thinking responses consumed (${lineage.consumed_detailed_responses.length})`);
@@ -1903,86 +2260,100 @@ function renderStep2Body(s, night) {
     }
     wrap.appendChild(ld);
   }
+
+  // 6. Production details — flattened, last.
+  const pf = productionFooter([
+    s.model, tokensStr(s),
+    s.thinking_tokens != null ? `${num(s.thinking_tokens)} thinking` : null,
+    s.wall_clock_s != null ? `${s.wall_clock_s}s` : null,
+    s.word_count != null ? `${num(s.word_count)} words` : null,
+  ]);
+  if (pf) wrap.appendChild(pf);
   return wrap;
 }
 
 function renderDossier(d, night) {
-  const [dEl, body] = det(`"${d.kicker || ''}" (${d.dossier_num}) — ${d.headline || ''}`);
+  const [dEl, body] = det(`📰 "${d.kicker || ''}" — ${d.headline || ''} (${d.dossier_num})`);
   dEl.setAttribute('data-anchor', d.dossier_id);
-  body.appendChild(el('div', {class: 'id'}, d.dossier_id + ' · theme: ' + (d.theme_id_raw || '—')));
 
-  if (d.theme_id) {
-    body.appendChild(el('div', {}, '⬆ ', jumpLink('Back to theme: ' + d.theme_display_title, d.theme_id)));
-  }
-  if (d.front_abstract) {
-    body.appendChild(el('div', {}, el('b', {}, 'Abstract: '), d.front_abstract));
-  }
-  if (d.subline) {
-    body.appendChild(el('div', {}, el('b', {}, 'Subline: '), d.subline));
-  }
-  if (d.pull_quote) {
-    body.appendChild(el('div', {class: 'abstract'}, '“', d.pull_quote, '”'));
-  }
-  if (d.theme_title_for_dossier || d.theme_abstract_for_dossier) {
-    body.appendChild(metaGrid([
-      ['Theme title (for dossier)', d.theme_title_for_dossier],
-      ['Theme abstract (for dossier)', d.theme_abstract_for_dossier],
-    ]));
-  }
-  // Voices featured (from headnotes)
-  if (d.headnotes && d.headnotes.length) {
-    const [hd, hb] = det(`Headnotes (${d.headnotes.length} voices featured)`);
-    for (const hn of d.headnotes) {
-      const hnD = el('div', {style: 'border-left: 3px solid var(--accent); padding: 0.5rem; margin: 0.5rem 0; background: #fff;'});
-      const slug = (hn.voice_slug || hn.voice || '').toLowerCase();
-      hnD.appendChild(el('b', {}, hn.voice || hn.voice_slug || ''));
-      if (slug) {
-        hnD.appendChild(document.createTextNode(' — '));
-        hnD.appendChild(jumpLink('see Step 2', `${night}/${slug}`));
-      }
-      const fields = ['headnote_text', 'pull_quote', 'gloss', 'note'];
-      for (const f of fields) {
-        if (hn[f]) {
-          hnD.appendChild(el('div', {class: 'meta'}, el('b', {}, f + ': '), String(hn[f])));
-        }
-      }
-      hb.appendChild(hnD);
-    }
-    body.appendChild(hd);
-  }
-  // Body paragraphs (the actual dossier text)
+  // ── Masthead / front matter (the article head) ──
+  const head = el('div', {class: 'dossier-head'});
+  if (d.kicker) head.appendChild(el('div', {class: 'dossier-kicker'}, d.kicker));
+  if (d.headline) head.appendChild(el('div', {class: 'dossier-headline'}, d.headline));
+  if (d.subline) head.appendChild(el('div', {class: 'dossier-subline'}, d.subline));
+  if (d.pull_quote) head.appendChild(el('div', {class: 'dossier-pullquote'}, '“' + d.pull_quote + '”'));
+  if (d.front_abstract) head.appendChild(el('div', {class: 'dossier-abstract'}, d.front_abstract));
+  body.appendChild(head);
+
+  // ── The article (body paragraphs) — open by default ──
   if (d.body_paragraphs && d.body_paragraphs.length) {
-    const [bd, bb] = det(`Body paragraphs (${d.body_paragraphs.length})`, true);
+    const [bd, bb] = det(`The article — ${d.body_paragraphs.length} paragraphs`, true);
     for (const para of d.body_paragraphs) {
       const text = typeof para === 'string' ? para : (para.text || JSON.stringify(para));
       bb.appendChild(el('div', {class: 'body-paragraphs'}, text));
     }
     body.appendChild(bd);
   }
-  // Panel speakers
+
+  // ── Voices featured (headnotes, rendered from their real fields) ──
+  if (d.headnotes && d.headnotes.length) {
+    const [hd, hb] = det(`Voices featured (${d.headnotes.length})`);
+    for (const hn of d.headnotes) {
+      const card = el('div', {class: 'headnote'});
+      const top = el('div', {});
+      top.appendChild(el('span', {class: 'headnote-voice'}, hn.voice_name || hn.voice || hn.voice_slug || ''));
+      const slug = (hn.voice_slug || '').toLowerCase();
+      if (slug) {
+        top.appendChild(document.createTextNode('  '));
+        top.appendChild(jumpLink('→ their artifact', `${night}/${slug}`));
+      }
+      card.appendChild(top);
+      if (hn.artifact_title) card.appendChild(el('div', {class: 'meta', style: 'font-weight: 600; color: var(--ink);'}, hn.artifact_title));
+      if (hn.artifact_form) card.appendChild(el('div', {class: 'meta', style: 'font-style: italic;'}, hn.artifact_form));
+      if (hn.framing_text) card.appendChild(el('div', {class: 'meta'}, hn.framing_text));
+      if (hn.artifact_text) {
+        const [atd, atb] = det('Artifact text (as featured)');
+        atb.appendChild(el('div', {class: 'artifact-text'}, hn.artifact_text));
+        card.appendChild(atd);
+      }
+      hb.appendChild(card);
+    }
+    body.appendChild(hd);
+  }
+
+  // ── Theme context ──
+  const ctxParts = [];
+  if (d.theme_id) ctxParts.push(el('div', {}, '⬆ ', jumpLink('Source theme: ' + (d.theme_display_title || d.theme_id_raw || ''), d.theme_id)));
+  if (d.theme_title_for_dossier) ctxParts.push(el('div', {class: 'meta'}, el('b', {}, 'Theme title (for dossier): '), d.theme_title_for_dossier));
+  if (d.theme_abstract_for_dossier) ctxParts.push(el('div', {class: 'meta'}, el('b', {}, 'Theme abstract (for dossier): '), d.theme_abstract_for_dossier));
+  if (ctxParts.length) {
+    const [ctxd, ctxb] = det('Theme context');
+    ctxParts.forEach(x => ctxb.appendChild(x));
+    body.appendChild(ctxd);
+  }
+
+  // ── Panel speakers cited (readable list, not a JSON dump) ──
   if (d.panel_speakers && d.panel_speakers.length) {
-    const [pd, pb] = det(`Panel speakers (${d.panel_speakers.length})`);
-    pb.appendChild(el('pre', {class: 'json'}, JSON.stringify(d.panel_speakers, null, 2)));
+    const [pd, pb] = det(`Panel speakers cited (${d.panel_speakers.length})`);
+    for (const sp of d.panel_speakers) {
+      const name = (sp && typeof sp === 'object') ? (sp.name || '') : String(sp);
+      const detail = (sp && typeof sp === 'object') ? [sp.title, sp.affiliation].filter(Boolean).join(', ') : '';
+      pb.appendChild(el('div', {class: 'meta'}, el('b', {}, name), detail ? ' — ' + detail : ''));
+    }
     body.appendChild(pd);
   }
-  // Metadata
-  if (d.metadata) {
-    body.appendChild(metaGrid([
-      ['Theme', d.metadata.theme_display_title],
-      ['Generated by', d.metadata.generated_by],
-      ['Model', d.metadata.model],
-      ['Thinking tokens', d.metadata.thinking_tokens],
-      ['Input tokens', d.metadata.input_tokens],
-      ['Output tokens', d.metadata.output_tokens],
-      ['Wall clock', d.metadata.wall_clock_s + 's'],
-    ]));
-  }
-  // Tim's thinking trace
+
+  // ── Provenance ──
   const tt = thinkingTrace(d.thinking_trace);
   if (tt) body.appendChild(tt);
-  if (d.colophon) {
-    body.appendChild(el('div', {class: 'meta'}, '— ', d.colophon));
-  }
+  if (d.colophon) body.appendChild(el('div', {class: 'meta', style: 'font-style: italic; margin-top: 8px;'}, '— ', d.colophon));
+  const md = d.metadata || {};
+  const pf = productionFooter([
+    md.generated_by, md.model, tokensStr(md),
+    md.thinking_tokens != null ? `${num(md.thinking_tokens)} thinking` : null,
+    md.wall_clock_s != null ? `${md.wall_clock_s}s` : null,
+  ]);
+  if (pf) body.appendChild(pf);
   return dEl;
 }
 
@@ -2042,13 +2413,16 @@ function renderSession(s, night) {
   // Full transcript (collapsed deeper)
   if (s.turns && s.turns.length) {
     const [td, tb] = det(`Full transcript (${s.turns.length} turns)`);
-    for (const turn of s.turns) {
+    s.turns.forEach((turn, i) => {
       const tw = el('div', {});
+      // Audio turns carry turn_index; vendor-reflection turns don't — fall back
+      // to the turn's position so we never render "#undefined".
+      const ti = (turn.turn_index !== undefined && turn.turn_index !== null) ? turn.turn_index : i;
       tw.appendChild(el('div', {class: 'turn-meta'},
-        `#${turn.turn_index} — ${turn.speaker} (${turn.role || ''}) [${turn.confidence || ''}]`));
+        `#${ti} — ${turn.speaker} (${turn.role || ''}) [${turn.confidence || ''}]`));
       tw.appendChild(el('div', {class: 'turn-text'}, turn.text || ''));
       tb.appendChild(tw);
-    }
+    });
     body.appendChild(td);
   }
   return d;
@@ -2150,12 +2524,13 @@ def write_readme() -> None:
     readme = OUTPUT_DIR / "README.md"
     readme.write_text("""# data_views — Athens 2026 data graph
 
-Two files generated by `code/runtime/scripts/build_athens_data_graph.py`:
+Generated by `code/runtime/scripts/build_athens_data_graph.py` (this README
+included). Two data artifacts:
 
 | File | What it is |
 |---|---|
 | `athens_data_graph.json` | The full pipeline data as one normalized JSON. Every entity (sessions, extractions, clusters, themes, formulations, voice Step 1/2, dossiers) with every field preserved (including thinking traces, token counts, validation flag detail, operator decisions, voice continuity blocks across nights, deployment_context discipline rules per night, all_extras catchalls so nothing is silently dropped). |
-| `view_by_theme.html` | Self-contained interactive browser viewer. Open in any modern browser; no install, no server, no dependencies. Three tabs (Night 1 / 2 / 3 closing). Theme-tree drill-down + voices section + dossiers section + transcripts at the bottom. Native `<details>` collapsibles; cross-night threading via jump links; voices index in the top-right shows each voice's per-night status. |
+| `view_by_theme.html` | Self-contained interactive browser viewer. Open in any modern browser; no install, no server, no dependencies. Top nav with a hover-dropdown per night, each exposing two pages — **📊 Conference Data** (sessions grouped by capture type & track; themes with clusters and extractions nested inside) and **🎭 Assembly Output** (selected themes → per-voice formulations & artifacts → the editor's dossiers). Six pages total (3 nights × 2 phases), switched client-side. Native `<details>` collapsibles throughout; cross-entity and cross-night jump links (extraction↔cluster↔theme↔session, voice↔dossier); a Voices Index dropdown (top-right) links each voice's per-night artifact. |
 
 ## Rebuilding
 
