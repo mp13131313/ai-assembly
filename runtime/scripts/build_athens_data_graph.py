@@ -436,9 +436,11 @@ def extract_voice_manifest(run_dir: Path, night: str, graph: dict) -> None:
         graph["nights"][night]["themes_to_voices"] = themes_to_voices
 
 
-def extract_dossiers(night: str, graph: dict) -> None:
-    """Walk published_artifacts/dossiers/night_N/dossier_NNN.json."""
-    d_dir = PROJECT_ROOT / "published_artifacts" / "dossiers" / night
+def extract_dossiers(night: str, graph: dict, dossiers_dir=None) -> None:
+    """Walk published_artifacts/dossiers/night_N/dossier_NNN.json — or an explicit
+    dossiers_dir (e.g. a run dir's 05_editor/dossiers for the pre-conference edition,
+    whose dossiers were never published)."""
+    d_dir = dossiers_dir if dossiers_dir is not None else (PROJECT_ROOT / "published_artifacts" / "dossiers" / night)
     if not d_dir.exists():
         return
     index = load_json(d_dir / "_index.json")
@@ -602,6 +604,24 @@ def build_graph() -> dict:
         extract_continuity(night, graph)
         extract_dossiers(night, graph)
         extract_published_voice_pages(night, graph)
+    # Pre-conference edition — the Assembly's reading of the WBBF programme, filed before
+    # the conference opened. No transcription/sessions (the source is programme text, not
+    # panel speech); its dossiers live in the run dir (never "published"), so pass the dir
+    # explicitly. No continuity / published voice pages (this precedes Night 1).
+    preconf_dir = PROJECT_ROOT / "runs" / "_archive" / "preconference_wbbf_programme_2026_05_06"
+    if preconf_dir.exists():
+        night = "preconference"
+        graph["nights"][night] = {}
+        print(f"  {night} ...")
+        extract_deployment_context(preconf_dir, night, graph)
+        extract_sessions(preconf_dir, night, graph)
+        extract_researcher(preconf_dir, night, graph)
+        extract_provocateur(preconf_dir, night, graph)
+        extract_voice_step1(preconf_dir, night, graph)
+        extract_voice_step1_validation(preconf_dir, night, graph)
+        extract_voice_step2(preconf_dir, night, graph)
+        extract_voice_manifest(preconf_dir, night, graph)
+        extract_dossiers(night, graph, dossiers_dir=preconf_dir / "05_editor" / "dossiers")
     compute_statistics(graph)
     # Totals
     graph["metadata"]["total_nodes"] = (
@@ -977,6 +997,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <span class="night-menu" data-night="setup">
     <button class="night-button" data-page="setup">The Conference</button>
   </span>
+  <span class="night-menu" data-night="preconference">
+    <button class="night-button" data-page="preconference">Pre-conference</button>
+  </span>
   <span class="night-menu has-conf-active" data-night="night_1">
     <button class="night-button">Night 1 ▾</button>
     <div class="dropdown">
@@ -1019,10 +1042,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <li><b>Stage 4 · Voice</b> — each voice reasons per-theme privately (Step 1), then writes one response (Step 2) in its own form, focused on one theme.</li>
         <li><b>Stage 5 · Editor</b> — a 13th persona weaves the responses into published dossiers.</li>
       </ul>
-      <p class="how-foot">Across 3 nights: ~3,170 turns / 208k words → 529 positions → 86 clusters → 24 themes → 128 formulations → 30 responses → 13 dossiers. Prose companion: DATA_INVENTORY.md.</p>
+      <p>A <b>Pre-conference</b> edition sits before Night 1 — the Assembly's reading of the published programme, filed before any panel ran (no transcripts; the source is programme text).</p>
+      <p class="how-foot">Across 3 nights: ~3,170 turns / 208k words → 529 positions → 86 clusters → 24 themes → 128 formulations → 30 responses → 13 dossiers (+ a pre-conference edition: 10 artifacts, 4 dossiers). Prose companion: DATA_INVENTORY.md.</p>
     </div>
   </details>
   <div id="setup" class="page-pane"></div>
+  <div id="preconference" class="page-pane"></div>
   <div id="night_1_conf" class="page-pane active"></div>
   <div id="night_1_assembly" class="page-pane"></div>
   <div id="night_2_conf" class="page-pane"></div>
@@ -1048,7 +1073,7 @@ const DATA = JSON.parse(document.getElementById('data').textContent);
     ['Dates', 'May 7–9, 2026'],
     ['Nights', '3'],
     ['Sessions', String(nodes.sessions || 0)],
-    ['Artifacts', String(nodes.voice_step2 || 0)],
+    ['Artifacts', String(Object.values(DATA.voice_step2 || {}).filter(s => s.night !== 'preconference').length)],
   ];
   for (const [label, value] of items) {
     const item = document.createElement('div');
@@ -1215,11 +1240,50 @@ document.querySelectorAll('.night-button[data-page]').forEach(b => {
 
 // Render the pre-conference setup page + the 6 night pages (3 nights × 2 phases)
 renderSetup(document.getElementById('setup'));
+renderPreconference(document.getElementById('preconference'));
 for (const night of ['night_1', 'night_2', 'night_3']) {
   for (const phase of ['conf', 'assembly']) {
     const pane = document.getElementById(`${night}_${phase}`);
     renderPage(pane, night, phase);
   }
+}
+
+// Pre-conference edition — the Assembly read the WBBF programme before any panel ran.
+// Reuses the night renderers (themes → formulations/voices → dossiers), but as one page:
+// there are no sessions (the source is programme text, not panel speech).
+function renderPreconference(pane) {
+  if (!pane) return;
+  const night = 'preconference';
+  const n = DATA.nights[night] || {};
+  const themes = Object.values(DATA.themes).filter(t => t.night === night)
+    .sort((a, b) => (a.theme_id || '').localeCompare(b.theme_id || ''));
+  const step2s = Object.values(DATA.voice_step2).filter(s => s.night === night)
+    .sort((a, b) => (a.voice_slug || '').localeCompare(b.voice_slug || ''));
+  const dossiers = Object.values(DATA.dossiers).filter(d => d.night === night)
+    .sort((a, b) => (a.dossier_num || '').localeCompare(b.dossier_num || ''));
+  const forms = Object.values(DATA.formulations).filter(f => f.night === night);
+  if (!themes.length && !step2s.length && !dossiers.length) return;
+
+  const stats = el('div', {class: 'stats'});
+  stats.innerHTML = `<b>Pre-conference edition — the Assembly reads the programme.</b> Filed before WBBF opened: the ten voices read the published programme — session abstracts, contributor blurbs, host pitches, <i>not</i> panel speech — and responded before a word was said aloud. ${themes.length} themes · ${forms.length} formulations · ${step2s.length} artifacts · ${dossiers.length} dossiers · no transcripts (no panels had happened yet).`;
+  pane.appendChild(stats);
+
+  if (n.deployment_context_rules) {
+    const [dd, db] = det('📋 How to read this edition — the Assembly had not yet attended any panel');
+    db.appendChild(el('div', {class: 'deployment-context-pane'}, n.deployment_context_rules));
+    pane.appendChild(dd);
+  }
+
+  pane.appendChild(el('div', {class: 'section-title'}, '🏷 The programme → voice responses'));
+  pane.appendChild(el('div', {class: 'section-note'}, "Extractions here are pulled from the programme text itself (session abstracts, contributor blurbs, host pitches) — not from anything said on a panel; no panels had happened yet."));
+  const selThemes = themes.filter(t => t.selected_for_provocateur);
+  for (const t of (selThemes.length ? selThemes : themes)) pane.appendChild(renderThemePhaseB(t, night));
+
+  pane.appendChild(el('div', {class: 'section-title'}, `🗣 Voices' artifacts (${step2s.length}) — read against the programme`));
+  for (const s of step2s) pane.appendChild(renderStep2(s, night));
+
+  pane.appendChild(el('div', {class: 'section-title'}, `📰 Pre-conference dossiers (${dossiers.length})`));
+  for (const d of dossiers) pane.appendChild(renderDossier(d, night));
 }
 
 // Pre-conference context: the conference, the audience, the panel/casting, the ten voices.
