@@ -1876,7 +1876,9 @@ result["wall_clock_s"] = wall
 
 ---
 
-### C49. Many-speaker speaker_id structured-output JSON-decode → manual passthrough 🟡 (filed 2026-05-29 from Athens Nights 1–3 transcription; recurred all three nights)
+### C49. Many-speaker speaker_id structured-output JSON-decode → manual passthrough ✅ FIXED 2026-09-27 (option c) — was 🟡 (filed 2026-05-29 from Athens Nights 1–3 transcription; recurred all three nights)
+
+**Resolution (2026-09-27, branch `phase0-fixes`, commit `b51ede7`):** option (c) auto-passthrough. After `identify_speakers`' task retries, a JSON-decode failure now writes an all-`Unidentified Speaker N` map (one number per diarization label, preserving turn boundaries — same as the manual workaround) and continues to cleaning; flagged `speaker_id_auto_passthrough` in `review_queue.diarization_flags` (→ review.md "## Flags"). Non-decode errors still raise. Tests: `test_transcription_speaker_id_fallback.py`. Options (a)/(b) not done — the session still loses named attribution; (b) chunking remains the path to *keeping* names on big rosters.
 
 **Background.** `transcription_flow.py::identify_speakers` (Sonnet 4.6 structured output, the 5-pass Speaker ID) reliably produces malformed JSON when a session has a large speaker roster — the verdict payload grows past the point where the model keeps the JSON well-formed, and the whole `out_02_speaker_id.json` fails to decode, halting the stage.
 
@@ -1896,7 +1898,8 @@ result["wall_clock_s"] = wall
 
 ---
 
-### C50. `nights/<night>/_index.json` clobbered by single-voice publish invocations 🟡 (filed 2026-05-29 from Athens Night 3 publish)
+### C50. `nights/<night>/_index.json` clobbered by single-voice publish invocations ✅ FIXED 2026-09-27 (option b, `e01eb84`) — was 🟡 (filed 2026-05-29 from Athens Night 3 publish)
+**Resolution:** `_rebuild_index_from_disk` — the index always reflects every `<slug>.json` on disk. Known edge (documented in the docstring): a voice published earlier and later held (`hold_for_regen`) keeps its old file on disk, so it stays in the index. The "finish with a full publish" operational note below is no longer needed.
 
 **Background.** `flows/voice/publish.py::publish_voice_artifacts_for_night` rebuilds the per-night `_index.json` from ONLY the voices in that invocation. The per-voice `<slug>.json` files persist across calls, but the index is overwritten each time — so a sequence of single-voice publishes (per-voice reruns) leaves the index reflecting only the LAST voice.
 
@@ -2927,22 +2930,27 @@ Triggers on A2 decision.
 
 Surfaced by the line-by-line read of `runtime/flows/*` + ingest. New C-numbers continue the C-series. The post-Athens roadmap references these by C#.
 
-### C53. Headnote `voice_name` corruption — TWO published surfaces 🔴 (published-record bug)
+### C53. Headnote `voice_name` corruption — TWO published surfaces 🟢 CODE FIXED 2026-09-27 (`e01eb84`) · ⏸ athens-2026 republish + push awaits operator OK — was 🔴 (published-record bug)
+**Resolution:** new `flows/shared/io.voice_display_name` resolves the name by slug from `<PROJECT_ROOT>/council_config.json` (project ROOT, not `reference/`), verbatim "Voice of X" / "Voice of the X"; headnote = "the " + name. Fallback "Voice of <Title Slug>", never `council_member`. Dashboard's inline copy of the lookup replaced (its old slugging never matched "Voice of" names → the admin voice view now shows "Voice of X"). **Data check (read-only, 2026-09-27):** 8/10 voices corrupted on both surfaces, all three nights (clean: fyodor_dostoevsky, hannah_arendt). **Still open:** (1) republish Nights 1–3 per-voice pages + dossiers from the fixed code, then push athens-2026 — operator gate; (2) nested Step-3 `deliberation.voices_read[].voice_name` / `amendments[].cited_voice_name` still derive from other voices' `council_member` (dormant — Step 3 skipped at Athens; being fixed alongside C46).
 `runtime/flows/editor/dossier_generation.py:192` builds `"the Voice of " + council_member`, but production `council_member` is the long card identity-prefix ("I am Augusta Ada King, Countess of Lovelace…") → dossier headnote `voice_name` = "the Voice of I am Augusta Ada King…". **Verified in published athens-2026 dossiers N1 + N3.** SECOND surface: `runtime/flows/voice/publish.py::_to_publish_per_voice_from_step2` sets the per-voice page `voice_name` straight from `council_member` too → `published_artifacts/nights/night_N/<slug>.json` likely carries the same corruption (verify via grep of published `nights/*/*.json voice_name`). Both masked by clean test fixtures (test_editor_dossier_generation + test_voice_publish pass clean `council_member`). **Fix:** resolve clean display name via slug→`council_config` lookup (pattern already in `dashboard.py:665-671` `council_name_by_slug`) + `member_slug` (C34 prefix-strip) — both exist. Add a regression test with a realistic long-identity-prefix `council_member`. The editor PROMPT is correct ("the Voice of X" prose); the bug is pure runtime stamping.
 
-### C54. Orchestrator dispatches transcription on raw `status.json`, not `infer_state` 🟡 (the "never run both" root)
+### C54. Orchestrator dispatches transcription on raw `status.json`, not `infer_state` ✅ FIXED 2026-09-27 (commit `b51ede7`) — was 🟡 (the "never run both" root)
+**Resolution:** both `transcription_state` and `fire_pending_transcriptions` route through `infer_state`; new tests seed session_package-present + status=normalized. Side effect (existing infer_state behavior the UI already had): a `transcribing` session whose PID died without output → `error` → orchestrator halts promptly rather than waiting to the deadline. Both `transcribing` writers in `ingest/pipeline.py` record a pid, so live sessions are unaffected.
 `overnight_orchestrator.transcription_state` + `fire_pending_transcriptions` read `status.get("state")` raw (lines 163/219); the web UI uses `pipeline.infer_state` (flips to `done` when `session_package.json` exists). So a manually-completed **audio** transcription (operator runs `process_session` by hand; session_package.json present, status.json not flipped) can be re-dispatched / mis-gated — the divergence behind the TL;DR "running both dispatches duplicate transcriptions." NARROW: vendor sessions explicitly write `state=done` (test_vendor_intake), so this is manual-audio-passthrough only. **Fix:** route orchestrator dispatch through `infer_state`; add a test seeding `session_package.json`-present + `status=normalized` (test_orchestrator_dispatch has no such case).
 
-### C55. Three Step-2 validators name the WRONG event 🟡 (arguably Phase-0 correctness)
+### C55. Three Step-2 validators name the WRONG event ✅ STOPGAP 2026-09-27 (commit `fdd5f83`) — was 🟡 (arguably Phase-0 correctness)
+**Resolution:** "Munich-Security-Conference-style panels" → event-neutral "conference panels" in all three prompts. The real fix (event frame as an `event_config` template variable) still belongs to C52.
 `voice_step2_validation_{safeguards,voice_fidelity,engagement}.md` all open "Munich-Security-Conference-style panels" — a dev_msc-era leftover; the production validators judged all three Athens nights against a Munich frame. Checks are mostly card-relative so impact is limited, but it's wrong-as-written. Make the event frame a template variable fed from `event_config` (folds into C52); bundle with the C42 validator-prompt update.
 
-### C56. Editor `_strip_nested_corpus_metadata` expects LIST, field is DICT 🟡
+### C56. Editor `_strip_nested_corpus_metadata` expects LIST, field is DICT ✅ FIXED 2026-09-27 (commit `fdd5f83`)
+**Resolution:** dict handling mirrored from the voice `card_assembly.py` twin; stale "Claudia" docstrings genericized; regression tests incl. end-to-end prompt assembly (`test_editor_card_assembly_strip.py`).
 `runtime/flows/editor/card_assembly.py:150` — the FU#41 `corpus_metadata` strip silently no-ops in the editor path (field is a dict; the function checks for a list); docstrings still reference "Claudia." Correct dict-handling exists at `personas/flows/shared/chat_prompt_builder.py:158` as the reference twin. Low impact (corpus_metadata is benign if it rides along) but the strip isn't doing its job.
 
 ### C57. Editor closing prompt hardcoded to Tim Leberecht 🟡 (editor-as-variable; relates FU#42 + C47 + C52)
 `editor_dossier.md` bakes Tim's persona specifics into the prompt (Stuttgart/Lüneburg, Sehnsucht/Wirtschaftsromantik, the four-beat Beauty-Shot structure), partially duplicating his card. A swappable/different editor (Claudia, a vatican editor) needs this PROMPT rewritten, not just a card swap. For "editor as a variable," make the closing prompt card-driven (read the editor card's voice fields).
 
-### C58. `app.py` editor auto-fire hardcodes `python3.12` 🟢-minor
+### C58. `app.py` editor auto-fire hardcodes `python3.12` ✅ FIXED 2026-09-27 (commit `fdd5f83`)
+**Resolution:** uses `sys.executable`; the `build_athens_data_graph.py` dead `__SUMMARY__` replace noted below was also removed (commit `a10e08a`).
 `runtime/ingest/app.py:918` `_maybe_auto_fire_editor` spawns `venv/bin/python3.12` vs the orchestrator's machine-agnostic `sys.executable`; breaks if the venv's python minor version changes. One-line fix. (Also noted for completeness: `build_athens_data_graph.py:2581` has a dead no-op `.replace("__SUMMARY__", …)` — placeholder no longer in the template.)
 
 ### E3. `docs/LLM_CALL_INVENTORY.md` 🔵
@@ -2974,6 +2982,18 @@ When B1 (editor) lands, these mini-concepts should be drafted:
 - `docs/AI_Assembly_Day4_Goodbye_Concept.md` — brief spec, can be written closer to date
 
 ---
+
+### C62. Model generation moved on — migration audit (4.7 / Sonnet 4.6 → 5.x) 🔵 OPERATOR DECISION (filed 2026-09-27)
+**Status check (live Models API, 2026-09-27):** the pinned IDs still resolve — `claude-opus-4-7` (12 call sites) and `claude-sonnet-4-6` (10) are AVAILABLE, as are `claude-opus-5-5` and `claude-sonnet-5`. **Nothing is forcing a migration; the pipelines run as-is.** Migration is a quality/cost choice, gated like §32.4 (voice output changes → sentinel-regen + re-validation per voice).
+
+**Known breaking points if migrating (from the Claude API migration reference):**
+- **Sampling params removed** on Opus 4.7+/5.x and Sonnet 5 (`temperature`/`top_p` → 400). `personas/flows/shared/clients.py::call_claude` passes `temperature` through whenever `thinking=False` (default 0.2; Pass 7-pre verifiers pass 0.0). Fine on Sonnet 4.6 today; **breaks on Sonnet 5**. Fix before migrating: drop temperature for Anthropic calls on those models. Also verify no current `thinking=False` call targets Opus 4.7 with a temperature set.
+- **Thinking can't be disabled on Opus 5.5** (400 at every effort). Transcription speaker_id + cleaning run thinking-off by design → they can move to Sonnet 5 (disable allowed), not Opus 5.5 as-is.
+- **Opus 5.5 default effort is `medium`** (not `high`) → set `output_config.effort` explicitly on every call that relied on the default.
+- **Prefill / forced `tool_choice`** — grep found no forced tool_choice in runtime/personas flows; no action.
+- **Per-voice temperature as a diversity defense is not available on Anthropic models** — corrected in the vatican SPEC §5 + PLAN 2.2 (2026-09-27).
+
+Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $5/$25; Sonnet 5 $2/$10 vs Sonnet 4.6 $3/$15 per MTok. Extends §32.4 (voices) — re-validate the §6 corpus-gateway behavior on whichever model is chosen.
 
 ## Section F — Recently landed (for context)
 

@@ -136,6 +136,8 @@ Three factors weigh on each assignment:
 
 ### Per-voice temperature variation (new)
 
+> **⚠ Correction 2026-09-27.** Current Anthropic models (Opus 4.7/4.8, Opus 5.x, Sonnet 5) **reject `temperature`/`top_p`/`top_k` with a 400** — sampling parameters were removed. So this table only applies to voices placed on **non-Anthropic** vendors (OpenAI / Gemini / open-weights). For Anthropic-hosted voices there is no temperature knob; the available per-voice levers (`output_config.effort`, model choice) change thinking depth and cost, *not* sampling diversity, so they are not a substitute. The diversity defense for Anthropic voices has to come from heterogeneous models/vendors (§5 mapping), not temperature. Verified against the Claude API model reference + live Models API, 2026-09-27.
+
 Currently all voices use adaptive thinking with the same effective sampling temperature. For diversity-defense:
 
 | Voice register | Temperature |

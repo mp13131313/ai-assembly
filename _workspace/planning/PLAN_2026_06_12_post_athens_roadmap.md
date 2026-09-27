@@ -166,7 +166,7 @@ The shipped cards embody ~100 operator interventions the pipeline can't reproduc
 
 ### 2.2 Vendor abstraction (~3–4 days, scoped)
 
-`flows/shared/vendor_clients.py` per vatican §5: uniform call interface; per-vendor structured-output + thinking config + rate limits; cost tracking in manifests. v1 scope: Anthropic + ONE other vendor (recommend per vatican §16.4); expand after regression. Per-voice temperature tiers from deployment-card. Note: re-do cost models with caching per vendor (vatican estimates assume none).
+`flows/shared/vendor_clients.py` per vatican §5: uniform call interface; per-vendor structured-output + thinking config + rate limits; cost tracking in manifests. v1 scope: Anthropic + ONE other vendor (recommend per vatican §16.4); expand after regression. Per-voice temperature tiers from deployment-card — **⚠ correction 2026-09-27: current Anthropic models (Opus 4.7+, Opus 5.x, Sonnet 5) reject `temperature` (400), so temperature tiers only work for voices on non-Anthropic vendors; effort/model choice are not a sampling-diversity substitute (see vatican spec §5 correction).** Note: re-do cost models with caching per vendor (vatican estimates assume none).
 
 ### 2.3 Deployment profiles (built on 2.1 + 2.2)
 
@@ -177,12 +177,14 @@ The shipped cards embody ~100 operator interventions the pipeline can't reproduc
 
 ### 2.4 Cross-cutting
 
-- Diversity defenses as standing architecture (vatican §8 table): multi-vendor, per-voice temperature, selection-over-synthesis preference per output mode, calibrated confidence where mode supports it.
+- Diversity defenses as standing architecture (vatican §8 table): multi-vendor, per-voice temperature (non-Anthropic vendors only — see 2.2 correction), selection-over-synthesis preference per output mode, calibrated confidence where mode supports it.
 - Validation/gating per profile: batch operator gate (conference), pre-publication agentic triage (vatican phase 7), inline guard (chat/voice). One validation core, three harnesses.
 
 ### Sequencing & dependencies — execution order, grouped by model/effort (2026-06-13)
 
 **Lean-quality principle.** Sonnet is the default. Opus only where it earns its keep — (a) voice-quality-sensitive prompt design, (b) genuine architecture. Effort: **low** = string/config/delete; **medium** = logic + tests; **high** reserved for the two design builds. Every voice-prompt change lands one-at-a-time with **sentinel-regen + thinking-on** as the empirical quality gate — so even Sonnet-written prompt edits are checked against the shipped-card baseline.
+
+**Progress 2026-09-27 (branch `phase0-fixes`, not merged/pushed):** Stage 1 done (C55 stopgap, C56, C58, §32.3, §32.5) except §32.4-text (superseded by runtime C62 model decision) and the optional plan-body strip. Stage 2 done (C49, C50, C53 code, C54, §32.1, §32.2). Tests: runtime 266 / ingest 114 / personas 223 green. Still open from Phases 0–1: C53 republish+push and C51 (operator), C62 model decision, everything from Stage 4 on.
 
 **Hard dependency:** only one — Stage 4 (1.1 prompts stable) must precede Stage 5 (1.2 + 2.1). Stage 3 (operator) runs in parallel throughout. Within Stage 1 everything is parallel-safe.
 
