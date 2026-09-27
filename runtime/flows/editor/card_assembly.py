@@ -1,4 +1,4 @@
-"""Editor Pipeline — Claudia card loading + system prompt assembly.
+"""Editor Pipeline — editor card loading + system prompt assembly.
 
 Mirrors `runtime/flows/voice/card_assembly.py` with editor-specific routing
 per docs/AI_Assembly_Editor_Pipeline.md §"Editor card → System Prompt
@@ -6,10 +6,10 @@ Assembly". The differences:
 
   - Card lives at <PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json
     (not under voices/)
-  - Engagement section has 2 fields, not 3 (no unique_contribution — Claudia
-    is structurally distinct from panel voices)
-  - reference_only_passages is N/A for Claudia (no copyrighted corpus to
-    ground in)
+  - Engagement section has 2 fields, not 3 (no unique_contribution — the
+    editor is structurally distinct from panel voices)
+  - reference_only_passages is N/A for the editor (no copyrighted corpus
+    to ground in)
   - No continuity blocks (Editor is per-night fresh; no cross-night carryover)
   - Single step (dossier-generation), not Steps 1/2/3
 
@@ -17,7 +17,7 @@ The four load-bearing strip rules from voice card assembly carry over:
   - Drop `metadata` (build-time provenance)
   - Drop `smoke_test_chains` (NEVER few-shot)
   - Drop `curated_corpus_passages.corpus_metadata` (FU#41 nested-strip)
-  - reference_only_passages: dropped if present (Claudia has none, but
+  - reference_only_passages: dropped if present (the editor has none, but
     defensively strip)
 
 Returns a (prefix, tail) tuple with prefix-cache breakpoint after BOUNDARIES,
@@ -71,8 +71,8 @@ _REASONING_METHOD = (
     "resists",
 )
 
-# Engagement — TWO fields (no unique_contribution; Claudia is the editor,
-# not a contributing voice — she has no "what only she could add" claim
+# Engagement — TWO fields (no unique_contribution; the editor is not a
+# contributing voice — the editor has no "what only they could add" claim
 # in the same sense).
 _ENGAGEMENT = (
     "default_questions",
@@ -114,7 +114,7 @@ EDITOR_CARD_SUBPATH = Path("editor") / "tim_leberecht" / "07_persona_card_assemb
 
 
 def load_editor_card(project_root: Path | None = None) -> dict[str, Any]:
-    """Load Claudia's assembled persona card from PROJECT_ROOT/editor/...
+    """Load the editor's assembled persona card from PROJECT_ROOT/editor/...
 
     Raises FileNotFoundError with a clear message if absent — the editor
     pipeline cannot run without the card. Per the spec's defensive checks,
@@ -125,9 +125,9 @@ def load_editor_card(project_root: Path | None = None) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(
             f"Editor card not found at {path}.\n"
-            f"Claudia's hand-authored card must exist before the editor "
-            f"pipeline runs. See docs/AI_Assembly_Editor_Pipeline.md "
-            f"§'The Editor — Claudia Pinchbeck'."
+            f"The editor's hand-authored card must exist before the "
+            f"editor pipeline runs. See docs/AI_Assembly_Editor_Pipeline.md "
+            f"§'The Editor'."
         )
     with path.open(encoding="utf-8") as f:
         return json.load(f)
@@ -148,17 +148,17 @@ def _render_value(value: Any) -> str:
 
 
 def _strip_nested_corpus_metadata(curated: Any) -> Any:
-    """Drop curated_corpus_passages[*].corpus_metadata (FU#41 strip)."""
-    if not isinstance(curated, list):
+    """Drop curated_corpus_passages.corpus_metadata (FU#41 strip).
+
+    curated_corpus_passages is a dict shaped {corpus_metadata, passages}
+    (see docs/AI_Assembly_Persona_Card_v2.md), not a list — mirrors the
+    dict-handling twin at
+    personas/flows/shared/chat_prompt_builder.py::_strip_nested. Tolerant
+    of non-dict input and of an absent corpus_metadata key.
+    """
+    if not isinstance(curated, dict):
         return curated
-    out = []
-    for item in curated:
-        if not isinstance(item, dict):
-            out.append(item)
-            continue
-        cleaned = {k: v for k, v in item.items() if k != "corpus_metadata"}
-        out.append(cleaned)
-    return out
+    return {k: v for k, v in curated.items() if k != "corpus_metadata"}
 
 
 def _render_section(

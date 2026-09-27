@@ -915,7 +915,7 @@ def _maybe_auto_fire_editor(night: int) -> dict:
     )
     log_path = run_dir / "05_editor" / "auto_fire.log"
     cmd = [
-        str(runtime_root / "venv" / "bin" / "python3.12"),
+        _sys.executable,
         str(runtime_root / "flows" / "editor_flow.py"),
         str(run_dir),
         "--night", str(night),
