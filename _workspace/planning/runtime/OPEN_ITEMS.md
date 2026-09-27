@@ -2995,6 +2995,8 @@ When B1 (editor) lands, these mini-concepts should be drafted:
 - **Prefill / forced `tool_choice`** — grep found no forced tool_choice in runtime/personas flows; no action.
 - **Per-voice temperature as a diversity defense is not available on Anthropic models** — corrected in the vatican SPEC §5 + PLAN 2.2 (2026-09-27).
 
+**Precise break list (from the regenerated `docs/LLM_CALL_INVENTORY.md` §10, 2026-09-27; spot-checked at source):** no current call sends temperature/budget_tokens to Opus 4.7 — **no live bug today**. (a) **Sonnet 4.6 → 5:** 4 default-path calls 400 — `personas/flows/shared/pass_7pre_chunked.py:88,133,273` (all three Pass 7-pre stages, every voice build) + `personas/run_persona_pipeline.py:1618` (Pass 7c Sonnet fallback), all `temperature=0.0, thinking=False`. (b) **Opus 4.7 → 5.5:** no default-path 400s, but **every adaptive-thinking Opus call (~20+) silently drops from effort `high` to `medium`** because none sets `effort` — a quality regression unless effort is set explicitly; thinking-off paths (transcription speaker_id/cleaning, step2 validation, synthesis router) 400 only if pointed at Opus 5.5 via override. Also: personas mostly hardcode `"claude-opus-4-7"` literals, so `CLAUDE_MODEL` doesn't switch them.
+
 Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $5/$25; Sonnet 5 $2/$10 vs Sonnet 4.6 $3/$15 per MTok. Extends §32.4 (voices) — re-validate the §6 corpus-gateway behavior on whichever model is chosen.
 
 ## Section F — Recently landed (for context)

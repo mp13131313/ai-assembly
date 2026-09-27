@@ -14,10 +14,11 @@ Per docs/AI_Assembly_Voice_Pipeline.md §"Validation Nodes":
               validation misses. Voice's Step 1 was Opus; checking
               with another Anthropic model risks the same family blind
               spots.
-  Default policy: Athens Night 1 ON; Night 2/3 ON for voices flagged
-                  on prior nights.
-  Regeneration: 1 retry on failure with critique appended; second
-                failure ships output + flags in manifest.
+  Default policy: OFF (C28, 2026-05-04 — `voice_flow` skip_validation=True;
+                  opt in with --enable-step1-validation for diagnostics).
+                  The C28b Step 2 validator replaced it as the operator gate.
+  Regeneration: none — diagnostic only (FU#62 path B). Flags are recorded
+                in the manifest; no retry with critique is performed.
 
 Implements its own thin OpenAI client (no shared runtime client module
 exists; mirrors the personas/flows/shared/clients.py:call_openai
