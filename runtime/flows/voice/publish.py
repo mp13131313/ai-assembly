@@ -46,13 +46,14 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import get_logger, write_json_atomic
+from flows.shared.io import get_logger, voice_display_name, write_json_atomic
 from flows.shared.project_root import resolve_project_root
 
 
 def _to_publish_per_voice(
     step3_output: dict[str, Any],
     night: int,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Re-shape one Step 3 output into a publish-ready file.
 
@@ -67,9 +68,21 @@ def _to_publish_per_voice(
       - amended_artifact_title → artifact.title
       - amended_artifact_subtitle → artifact.subtitle
       - amended_artifact_text → artifact.text
-      - council_member → voice_name
 
     Added:
+      - voice_name — C53: resolved from council_config.json via the
+        voice's slug (see `flows.shared.io.voice_display_name`), NOT
+        from `council_member`. That field on Step 3 artifacts is the
+        long card identity-prefix opening line ("I am Augusta Ada
+        King, Countess of Lovelace…"), not a clean display name — it
+        was previously stamped straight onto this published surface.
+        The resolved value is council_config's `name` VERBATIM, e.g.
+        "Voice of Ada Lovelace" / "Voice of the Octopus" (2026-05-02
+        "Voice of X" standardization — the construction stays visible).
+        `project_root` is optional (defaults to a slug-derived
+        fallback in the same convention, e.g. "ada_lovelace" ->
+        "Voice of Ada Lovelace") so this function stays usable
+        standalone/in tests without a real council_config.json on disk.
       - url_path (derived from voice_slug + night)
       - generated_at (ISO timestamp)
 
@@ -81,7 +94,7 @@ def _to_publish_per_voice(
     runs).
     """
     voice_slug = step3_output["lineage"]["voice_slug"]
-    voice_name = step3_output.get("council_member") or voice_slug
+    voice_name = voice_display_name(voice_slug, project_root)
     url_path = f"/night-{night}/{voice_slug}"
 
     # themes_addressed comes from Step 2's themes_covered, propagated via
@@ -146,6 +159,7 @@ def _to_publish_per_voice(
 def _to_publish_per_voice_from_step2(
     step2_output: dict[str, Any],
     night: int,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Re-shape one Step 2 output into a publish-ready file (Step 3 absent).
 
@@ -159,12 +173,21 @@ def _to_publish_per_voice_from_step2(
         reads only its own Step 1 outputs)
       - `deliberation.amendments` = []   (Step 3 produces these)
 
+    `voice_name` — C53: resolved from council_config.json via the voice's
+    slug (`flows.shared.io.voice_display_name`), NOT from `council_member`
+    (the long card identity-prefix opening line, unsuitable as a display
+    name). The resolved value is council_config's `name` VERBATIM, e.g.
+    "Voice of Ada Lovelace" / "Voice of the Octopus" (2026-05-02 "Voice
+    of X" standardization). `project_root` is optional (defaults to a
+    slug-derived fallback in the same convention) so this stays usable
+    standalone/in tests.
+
     `themes_addressed` comes from Step 2's `lineage.themes_covered`
     (Step 3 propagates this verbatim; Step 2 derives it deterministically
     from focus_decision + the voice's Step 1 theme_ids).
     """
     voice_slug = step2_output["lineage"]["voice_slug"]
-    voice_name = step2_output.get("council_member") or voice_slug
+    voice_name = voice_display_name(voice_slug, project_root)
     url_path = f"/night-{night}/{voice_slug}"
     themes_addressed = step2_output["lineage"].get("themes_covered", [])
 
@@ -250,6 +273,58 @@ def _load_held_voices(run_dir: Path) -> set[str]:
     return held
 
 
+def _rebuild_index_from_disk(publish_dir: Path, night: int) -> dict[str, Any]:
+    """Rebuild the per-night `_index.json` from every `<slug>.json` file
+    actually on disk under `publish_dir` — NOT from whatever subset of
+    voices this particular publish call happened to touch.
+
+    C50 fix: the index used to be built from only `voices_published`
+    (this invocation's voices), so a sequence of single-voice publish
+    reruns left `_index.json` reflecting only the last voice published,
+    even though every voice's per-voice file was still sitting on disk
+    from earlier calls. Source of truth is now the directory listing —
+    every publish call (full batch or single-voice rerun) ends with an
+    index that lists every voice file currently present for that night.
+
+    Per-voice files that fail to parse are skipped (defensive; should
+    not happen for files this module itself wrote via
+    `write_json_atomic`). Sorted by voice_slug for a deterministic
+    index across repeated rebuilds.
+    """
+    voices: list[dict[str, Any]] = []
+    for p in sorted(publish_dir.glob("*.json")):
+        if p.name == "_index.json":
+            continue
+        try:
+            with p.open(encoding="utf-8") as f:
+                entry = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        artifact = entry.get("artifact", {}) or {}
+        deliberation = entry.get("deliberation", {}) or {}
+        voices.append({
+            "voice_slug": entry.get("voice_slug", p.stem),
+            "voice_name": entry.get("voice_name", p.stem),
+            "url_path": entry.get("url_path", f"/night-{night}/{p.stem}"),
+            "title": artifact.get("title", ""),
+            "subtitle": artifact.get("subtitle", ""),
+            "selected_form": artifact.get("selected_form", ""),
+            "stance": artifact.get("stance", ""),
+            "themes_addressed": entry.get("themes_addressed", []),
+            "decision": deliberation.get("decision", ""),
+            "amendment_count": len(deliberation.get("amendments", []) or []),
+            "word_count": artifact.get("word_count", 0),
+            "was_step3": entry.get("was_step3", False),
+        })
+    return {
+        "night": night,
+        "url_path": f"/night-{night}",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "voices": voices,
+        "voice_count": len(voices),
+    }
+
+
 def publish_voice_artifacts_for_night(
     run_dir: Path,
     night: int,
@@ -263,11 +338,19 @@ def publish_voice_artifacts_for_night(
 
     Returns: summary dict {voices_published, index_path, output_dir}.
 
-    Per-night `_index.json` lists every voice that published a file
-    that night, with summary metadata for index-page rendering.
+    Per-night `_index.json` lists every voice that has a published
+    `<slug>.json` file on disk for that night — rebuilt from the
+    directory on every call (C50), not just the voices this particular
+    call published. This means a single-voice rerun still leaves the
+    index listing every previously-published voice, and `voice_count`
+    always reflects what's actually publishable on disk.
 
     Voices marked hold_for_regen via `04_voice/operator_decisions/<voice>.json`
-    are EXCLUDED (C28b operator gate).
+    are EXCLUDED from THIS call's publish (C28b operator gate) — but a
+    file already on disk from an earlier, pre-hold publish of that voice
+    is not deleted, so it still appears in the rebuilt index. (No prior
+    behavior guaranteed otherwise; flagging this in case a future
+    operator workflow wants held voices actively pulled from the index.)
     """
     logger = get_logger("voice_publish")
     if project_root is None:
@@ -312,10 +395,10 @@ def publish_voice_artifacts_for_night(
         step3 = _load_step3(run_dir, slug)
         step2 = _load_step2(run_dir, slug)
         if step3 is not None:
-            publish_entry = _to_publish_per_voice(step3, night)
+            publish_entry = _to_publish_per_voice(step3, night, project_root)
             publish_entry = _enrich_with_step2_metadata(publish_entry, step2)
         elif step2 is not None:
-            publish_entry = _to_publish_per_voice_from_step2(step2, night)
+            publish_entry = _to_publish_per_voice_from_step2(step2, night, project_root)
             step2_only_count += 1
         else:
             logger.warning(
@@ -341,14 +424,10 @@ def publish_voice_artifacts_for_night(
         })
 
     # Per-night _index.json — surface for the micro-site index pages
-    # ("Tonight's Edition", "Voice Index" per Frame Concept v1).
-    index = {
-        "night": night,
-        "url_path": f"/night-{night}",
-        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "voices": voices_published,
-        "voice_count": len(voices_published),
-    }
+    # ("Tonight's Edition", "Voice Index" per Frame Concept v1). C50:
+    # rebuilt from the on-disk <slug>.json set, not from `voices_published`
+    # (this call's voices only) — see `_rebuild_index_from_disk`.
+    index = _rebuild_index_from_disk(publish_dir, night)
     index_path = publish_dir / "_index.json"
     write_json_atomic(index_path, index)
 

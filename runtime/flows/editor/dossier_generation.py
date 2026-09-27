@@ -41,7 +41,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import write_json_atomic  # noqa: E402
+from flows.shared.io import voice_display_name, write_json_atomic  # noqa: E402
 from flows.voice._anthropic_call import stream_voice_call  # noqa: E402
 
 
@@ -172,6 +172,14 @@ def build_dossier_briefing(
             f"No voices routed to theme_id={theme_id}; can't build briefing"
         )
 
+    # PROJECT_ROOT is run_dir.parent.parent (run_dir is
+    # `<PROJECT_ROOT>/runs/athens_night_N/`) — same derivation as
+    # _load_speakers_index below. Used to resolve each voice's clean
+    # display name from council_config.json (C53) instead of the
+    # artifact's `council_member` field, which carries the long card
+    # identity-prefix opening line, not a display name.
+    project_root = run_dir.parent.parent
+
     briefings = [_read_briefing_formulation(slug, theme_id, run_dir) for slug in voice_slugs]
     artifacts = [_read_artifact(slug, run_dir) for slug in voice_slugs]
 
@@ -189,7 +197,19 @@ def build_dossier_briefing(
     engaged_voices = [
         {
             "voice_slug":         slug,
-            "voice_name":         "the Voice of " + artifact.get("council_member", slug),
+            # C53: resolved from council_config via the voice's slug, NOT
+            # artifact["council_member"] — that field on Step 1/2/3
+            # artifacts is the long card identity-prefix opening line
+            # ("I am Augusta Ada King, Countess of Lovelace…"), not a
+            # clean display name. voice_display_name() returns the
+            # council_config `name` VERBATIM ("Voice of Plato" / "Voice
+            # of the Octopus" — the article matters for members whose
+            # name takes one), falling back to "Voice of " + a
+            # title-cased slug when council_config is missing/
+            # unreadable/lacks this voice. Prepending "the " here (not
+            # "the Voice of ") avoids doubling that prefix and correctly
+            # yields "the Voice of the Octopus" for article-bearing names.
+            "voice_name":         "the " + voice_display_name(slug, project_root),
             "mode":               briefing.get("mode", "question"),
             "narrative_briefing": briefing.get("narrative_briefing", ""),
             "artifact_text":      artifact.get("artifact_text", ""),

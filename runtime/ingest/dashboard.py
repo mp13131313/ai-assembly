@@ -657,18 +657,24 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
     voice_display: dict[str, str] = {}
     theme_titles: dict[str, str] = {}
 
-    # Build a slug → council display name lookup from PROJECT_ROOT
-    # council_config.json. The council uses display names ("Ada Lovelace");
-    # voice slugs are folder names ("ada_lovelace"). Match by lowercased
-    # name with underscores → spaces.
+    # Slug → council display name lookup from PROJECT_ROOT
+    # council_config.json (moved to flows/shared/io.py — C53 — so the
+    # editor + publish pipelines can share the same resolution instead
+    # of re-deriving it). `voice_display_name` keys the lookup via
+    # `member_slug`, which correctly strips the "Voice of [the] "
+    # prefix to MATCH the slug — but returns the config `name` value
+    # itself VERBATIM (still "Voice of X" / "Voice of the X"), per the
+    # 2026-05-02 standardization. The naive `nm.lower().replace(" ",
+    # "_")` this used to use for the key never matched a real voice
+    # slug once council_config adopted "Voice of X" names, so this
+    # lookup was silently a no-op in production — always falling
+    # through to a bare title-cased-slug fallback. Fixed matching means
+    # this view now actually shows "Voice of Ada Lovelace" etc. instead
+    # of the previously-always-used bare "Ada Lovelace" fallback — a
+    # visible (and, per the standardization decision, correct) change
+    # to this admin page.
     from .config import PROJECT_ROOT
-    council = _read_json_or_none(PROJECT_ROOT / "council_config.json") or {}
-    council_name_by_slug: dict[str, str] = {}
-    for m in council.get("members", []) or []:
-        nm = m.get("name") or ""
-        slug = nm.lower().replace(" ", "_").replace("'", "")
-        if slug and nm:
-            council_name_by_slug[slug] = nm
+    from flows.shared.io import voice_display_name  # noqa: E402 — sys.path set in config
 
     # Seed voices from briefings/ directory + collect EXPECTED (voice, theme)
     # pairs (the ones the Provocateur selected for formulation). The Voice
@@ -681,10 +687,7 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         for bp in sorted(briefings_dir.glob("*.json")):
             slug = bp.stem
             voices_set.add(slug)
-            voice_display[slug] = (
-                council_name_by_slug.get(slug)
-                or slug.replace("_", " ").title()
-            )
+            voice_display[slug] = voice_display_name(slug, PROJECT_ROOT)
             data = _read_json_or_none(bp) or {}
             for f in data.get("formulations", []) or []:
                 tid = f.get("theme_id")
@@ -708,15 +711,13 @@ def collect_voice_detail(night: int) -> dict[str, Any]:
         voices_set.add(c["voice_slug"])
         themes_set.add(c["theme_id"])
         voice_display.setdefault(
-            c["voice_slug"],
-            council_name_by_slug.get(c["voice_slug"], c["voice_slug"].replace("_", " ").title()),
+            c["voice_slug"], voice_display_name(c["voice_slug"], PROJECT_ROOT)
         )
         theme_titles.setdefault(c["theme_id"], c["theme_display_title"])
     for v in s2_voices:
         voices_set.add(v["voice_slug"])
         voice_display.setdefault(
-            v["voice_slug"],
-            council_name_by_slug.get(v["voice_slug"], v["voice_slug"].replace("_", " ").title()),
+            v["voice_slug"], voice_display_name(v["voice_slug"], PROJECT_ROOT)
         )
         for tid in v["themes_covered"]:
             themes_set.add(tid)

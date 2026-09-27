@@ -132,6 +132,94 @@ class TestBuildDossierBriefing:
         assert briefing["prior_editions"] == prior
 
 
+class TestBuildDossierBriefingVoiceNameC53:
+    """C53 regression: production `council_member` on Step 2 artifacts is
+    the voice's long card identity-prefix opening line, not a clean
+    name — a plain fixture like council_member="Plato" (used throughout
+    the rest of this file) can't catch that bug. These tests use a
+    realistic long-identity-prefix value and check the resolved
+    voice_name never contains it, on both the council_config-present
+    and council_config-absent (fallback) paths.
+
+    Per the 2026-05-02 "Voice of X" standardization, council_config's
+    `name` is used VERBATIM (not stripped) — headnote voice_name is
+    `"the " + name`, e.g. "the Voice of Plato" / "the Voice of the
+    Octopus". `test_voice_name_resolves_article_bearing_name` locks in
+    that the article for members like the Octopus survives.
+
+    project_root is `run_dir.parent.parent` (per
+    `build_dossier_briefing`'s convention, matching the real
+    `<PROJECT_ROOT>/runs/athens_night_N/` layout) — built explicitly
+    here rather than via the shared `run_dir` fixture, so writing
+    council_config.json can't leak into pytest's shared tmp_path parent
+    across other tests.
+    """
+
+    _CORRUPTED_COUNCIL_MEMBER = (
+        "I am Augusta Ada King, Countess of Lovelace, daughter of the "
+        "poet and the mathematician, and I set down here what I have "
+        "found in the Analytical Engine."
+    )
+
+    def _make_run_dir(self, tmp_path: Path) -> Path:
+        project_root = tmp_path / "project"
+        run_dir = project_root / "runs" / "athens_night_1"
+        run_dir.mkdir(parents=True)
+        return run_dir
+
+    def test_voice_name_resolves_via_council_config(self, tmp_path):
+        run_dir = self._make_run_dir(tmp_path)
+        project_root = run_dir.parent.parent
+        (project_root / "council_config.json").write_text(json.dumps(
+            {"members": [{"name": "Voice of Ada Lovelace"}]}
+        ))
+        _write_briefing(run_dir, "ada_lovelace", "theme_001")
+        _write_artifact(
+            run_dir, "ada_lovelace",
+            council_member=self._CORRUPTED_COUNCIL_MEMBER,
+        )
+        briefing = dg.build_dossier_briefing(
+            "theme_001", ["ada_lovelace"], run_dir, night=1,
+        )
+        voice_name = briefing["engaged_voices"][0]["voice_name"]
+        assert voice_name == "the Voice of Ada Lovelace"
+        assert "Countess of Lovelace" not in voice_name
+        assert "Analytical Engine" not in voice_name
+
+    def test_voice_name_falls_back_when_council_config_missing(self, tmp_path):
+        run_dir = self._make_run_dir(tmp_path)
+        # No council_config.json written under project_root.
+        _write_briefing(run_dir, "ada_lovelace", "theme_001")
+        _write_artifact(
+            run_dir, "ada_lovelace",
+            council_member=self._CORRUPTED_COUNCIL_MEMBER,
+        )
+        briefing = dg.build_dossier_briefing(
+            "theme_001", ["ada_lovelace"], run_dir, night=1,
+        )
+        voice_name = briefing["engaged_voices"][0]["voice_name"]
+        assert voice_name == "the Voice of Ada Lovelace"
+        assert "Countess of Lovelace" not in voice_name
+
+    def test_voice_name_resolves_article_bearing_name(self, tmp_path):
+        """Regression for the article-drop bug: council_config members
+        whose name takes 'the' ("Voice of the Octopus") must keep the
+        article — the headnote should read "the Voice of the Octopus",
+        not "the Voice of Octopus"."""
+        run_dir = self._make_run_dir(tmp_path)
+        project_root = run_dir.parent.parent
+        (project_root / "council_config.json").write_text(json.dumps(
+            {"members": [{"name": "Voice of the Octopus"}]}
+        ))
+        _write_briefing(run_dir, "octopus", "theme_001")
+        _write_artifact(run_dir, "octopus", council_member="Octopus")
+        briefing = dg.build_dossier_briefing(
+            "theme_001", ["octopus"], run_dir, night=1,
+        )
+        voice_name = briefing["engaged_voices"][0]["voice_name"]
+        assert voice_name == "the Voice of the Octopus"
+
+
 # --- parse_dossier_output ----------------------------------------------
 
 

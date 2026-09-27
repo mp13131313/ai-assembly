@@ -132,6 +132,83 @@ def member_slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
 
+def load_council_name_by_slug(project_root: Path | str) -> dict[str, str]:
+    """Map each council member's filesystem slug to its raw config `name`.
+
+    Reads `<project_root>/council_config.json` (Tier 3 project data —
+    NOT the code repo) and keys each member's `name` field (the
+    canonical "Voice of X" display string) by `member_slug(name)` — the
+    same slug used for the voice's on-disk folder (`voices/<slug>/`)
+    and run-dir artifact filenames
+    (`04_voice/step2_first_draft_artifacts/<slug>.json`).
+
+    C53 rationale: production `council_member` on Step 1/2/3 artifacts
+    is the voice's long card identity-prefix opening line ("I am
+    Augusta Ada King, Countess of Lovelace…"), not a clean display
+    name — using it directly on a published surface (editor headnote,
+    per-voice publish page) corrupts the display. council_config.json's
+    `name` field is the clean source of truth; this is the slug-keyed
+    lookup into it. See `voice_display_name` below for the
+    single-slug convenience wrapper (with fallback) most callers want.
+
+    Returns `{}` if the file is missing, unreadable, or malformed —
+    callers degrade to a slug-derived fallback name rather than
+    crashing. Mirrors the lookup originally inlined in
+    `runtime/ingest/dashboard.py::collect_voice_detail` (which now
+    imports this instead of duplicating it) — see the rationale
+    comment there (~line 704) for the sibling "don't use council_member
+    as a display name" note.
+    """
+    path = Path(project_root) / "council_config.json"
+    if not path.exists():
+        return {}
+    try:
+        with path.open(encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out: dict[str, str] = {}
+    for m in data.get("members", []) or []:
+        nm = m.get("name") or ""
+        if nm:
+            out[member_slug(nm)] = nm
+    return out
+
+
+def voice_display_name(voice_slug: str, project_root: Path | str | None) -> str:
+    """Resolve one voice's council_config display name from its slug,
+    VERBATIM — including its "Voice of X" / "Voice of the X" framing.
+
+    Looks up `<project_root>/council_config.json` via
+    `load_council_name_by_slug` and returns the member's `name` field
+    exactly as written — do NOT strip the "Voice of " prefix. Per the
+    2026-05-02 "Voice of X" standardization (voices/OPEN_ITEMS.md
+    ~line 643), every council member's `name` is uniformly "Voice of
+    X", with "the" for members whose name takes an article ("Voice of
+    the Whanganui River", "Voice of the Octopus") — so the construction
+    stays visible everywhere the name is used. Stripping it would
+    silently drop the article for those members (e.g. produce "the
+    Voice of Octopus" instead of the correct "the Voice of the
+    Octopus"). Callers compose further framing on top of this as
+    needed — e.g. `"the " + voice_display_name(...)` for editor prose
+    ("the Voice of Plato", "the Voice of the Octopus"); the per-voice
+    publish page uses the return value as-is ("Voice of Ada Lovelace").
+
+    Fallback (project_root is None, or council_config is missing,
+    unreadable, or has no entry for this slug): `"Voice of " +
+    title-cased slug` (e.g. "ada_lovelace" -> "Voice of Ada Lovelace") —
+    matches the same convention, though it can't know which slugs take
+    an article without council_config. This function NEVER falls back
+    to a raw `council_member` artifact field — that field is the
+    corrupted long identity-prefix this function exists to route
+    around (C53).
+    """
+    raw = load_council_name_by_slug(project_root).get(voice_slug) if project_root is not None else None
+    if raw:
+        return raw
+    return "Voice of " + voice_slug.replace("_", " ").title()
+
+
 # Prompts live as standalone .md files under flows/shared/prompts/ so they
 # can be reviewed in git without wading through Python string literals,
 # edited at 2am without touching code, and compared directly against the
