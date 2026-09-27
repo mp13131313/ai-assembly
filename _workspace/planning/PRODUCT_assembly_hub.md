@@ -118,7 +118,7 @@ Several have existing seeds:
    | real-identifiable / estate-sensitive | partial | rights note + disclaimer + takedown path |
    | validation: passed blind-A/B | n/a (test result) | badge only — not a gate |
 
-2. **The §33 validation bar.** If voices carry a validation badge, define what "validated" means (the recommended floor: a domain expert can't reliably distinguish the configured voice from a competent generalist on the same brief). Currently undefined even for the project's own voices.
+2. **The §33 validation bar.** If voices carry a validation badge, define what "validated" means (the recommended floor, per voices §33: a domain expert **can** reliably tell the configured voice apart from a competent generalist given the same brief — if they can't, the apparatus isn't adding what it claims. *Corrected 2026-09-27: v1 of this note had the direction inverted.*). Currently undefined even for the project's own voices. Draft proposal: §11.3.
 3. **How productized is voice authoring?** Fully self-serve persona pipeline (hard — automate DR + validation) vs guided wizard with internal-grade review vs builders submit cards built elsewhere. Affects how much of the artisanal pipeline must become product.
 4. **Moderation ownership + liability terms** for user-built flagged content (takedown, builder-responsibility, provenance display).
 
@@ -141,4 +141,55 @@ The hub is **built on Phase 2, not instead of it**:
 
 ## 10. Bottom line
 
-The hub is the most ambitious fork and re-imports a contained slice of the complexity the studio shed (UGC accounts + moderation/takedown). But the **flag taxonomy + build/publish split + attestation-registry** is the right governance design, and it's the truest expression of the project's own subject: the construction of more-than-human representatives, made visible, kept human, and opened to others under conditions. Recommended sequencing: **studio console + vertical deployment first → library/contribution layer second.** The decision that now gates everything: **the publish tiers and per-flag clearance (§8.1).**
+The hub is the most ambitious fork and re-imports a contained slice of the complexity the studio shed (UGC accounts + moderation/takedown). But the **flag taxonomy + build/publish split + attestation-registry** is the right governance design, and it's the truest expression of the project's own subject: the construction of more-than-human representatives, made visible, kept human, and opened to others under conditions. Recommended sequencing: **studio console + vertical deployment first → library/contribution layer second.** The decision that now gates everything: **the publish tiers and per-flag clearance (§8.1)** — draft answers in §11.
+
+---
+
+## 11. DRAFT — governance spec + the two open vision decisions (proposal 2026-09-27 — NOT decided)
+
+Drafted overnight 2026-09-27 as "Move 0" (the first step toward the hub, per the 2026-06-14 sequencing). Every item is a **proposal with a recommendation**; nothing here is decided until the operator marks it. Suggested order to decide: **11.6** (quick yes/no) → **11.5** (shapes all of Phase 2) → **11.1–11.4** (only needed once the hub moves ahead of the vertical vatican deployment).
+
+### 11.1 Publish tiers (answers §8.1, part 1)
+
+| Tier | Who can deploy the voice | Entry requirements | Voice card shows | Revocation |
+|---|---|---|---|---|
+| **T0 Private** (default) | builder only | none beyond an account; flags auto-attach; any ethics flag stamps every output "unreviewed construction — ⟨flag⟩" | flags, provenance (builder, corpus list, pipeline version), "Private — not reviewed" | builder deletes |
+| **T1 Org-shared** | builder's org | builder self-attests each flag (statement per flag); corpus license/permission declared; no *blocked* flag (11.2) | + attestations, marked "self-attested" | builder or org admin |
+| **T2 Public library** | anyone | every ethics flag cleared per 11.2 (named-reviewer attestation where required, displayed); validation badge computed (disclosure, not a gate); provenance complete; platform checks attestation *presence and form* (not truth) | + reviewer attestations (name, relationship to the tradition, scope, date), validation badge, license | platform takedown (11.4) or builder unpublishes |
+
+Promotion is explicit and one tier at a time; demotion is instant.
+
+### 11.2 Per-flag clearance (refines the §8.1 starter table)
+
+| Flag | Detection | T1 (org) | T2 (public) | Hard block? |
+|---|---|---|---|---|
+| sacred-grammar / living-tradition first person | corpus signal (devotional / liturgical first person, living religious tradition) + builder declaration | self-attest | **named in-tradition reader attestation** — name, stated relationship to the tradition, what was reviewed (card *and* sample outputs), date — shown on the card | no; but no attestation ⇒ cannot reach T2 |
+| indigenous collective (speaks-AS) | `subtype` system/collective + corpus signal | self-attest + declared mediation structure | **community attestation** from a named body or role (not a self-appointed individual) + mediation structure shown on the card | no; same rule |
+| living person | birth/death dates in voice_config (auto) | **blocked** unless consent on file | consent on file (documented, revocable) | **yes** without consent |
+| real identifiable person (deceased) / estate-sensitive | named historical person; known rights holder | self-attest + rights note | rights note + disclaimer + takedown path; an estate objection demotes to T0 immediately pending review | no |
+| validation (§33) | test result | shown | shown | no — disclosure only |
+
+**Re-review triggers:** a card rebuild that changes any flagged field; a reviewer withdraws their attestation; an upheld takedown.
+
+### 11.3 Validation badge (answers §8 decision #2 + voices §33)
+Three levels, **disclosed, not gated**:
+- **Unvalidated** — default.
+- **Reader-reviewed** — a named domain/tradition reader reviewed *outputs* (not only the card); their verdict is attached. This is §33 point 1: the reader-gate reframed as a validation instrument.
+- **Blind-tested** — on ≥10 paired briefs, a domain expert **identifies** the configured voice vs a competent generalist given the same brief in ≥80% of pairs **and** rates it more faithful in the majority. Both halves matter: distinct-but-wrong (caricature) is also distinguishable, so identification alone is not enough. *(Thresholds are a starting proposal, to calibrate on the project's own ten voices first.)*
+
+### 11.4 Takedown + provenance
+- Every T1/T2 card shows builder, build date, pipeline version, corpus sources with licenses, flags, attestations, badge.
+- Anyone (estate, community, rights holder) can file a takedown. Credible estate/community objections demote to T0 immediately pending review; the builder is notified; restoration requires the objection resolved.
+- Builder terms: the builder attests truthfully; the platform verifies presence and form of attestations, not their truth (the §5 registry-not-adjudicator model).
+
+### 11.5 Vision decision A — the Assembly's invariant (PLAN operator decision #10)
+**Proposal:** a deployment is "the Assembly" iff all four hold —
+1. **A council, not a voice** — ≥3 voices with distinct epistemic frames on the same material.
+2. **Construction visible** — each voice appears as "Voice of X", with provenance reachable from the output.
+3. **Disagreement preserved** — the headline output is selection/juxtaposition, never a synthesized consensus.
+4. **A collective moment** — the voices meet on the same material in one visible surface. *Minimum:* juxtaposition. *Stronger form:* inter-voice response (Step 3 / visible deliberation, runtime C61).
+
+Consequences: the vatican annotation profile **qualifies** (juxtaposition on the same paragraphs); a single-voice chat **doesn't** — name it as a different product ("a Voice from the Assembly"). A strict variant (require inter-voice response) would disqualify vatican until C61 exists. **Recommendation: the loose invariant, and label deployments that have the stronger form.**
+
+### 11.6 Vision decision B — family-of-forms vs the net-complexity gate
+**Proposal: exempt, with the reason on record.** The gate targets deployment surface; family-of-forms is voice-fidelity capability inside the card. Per the 2026-06-13 code read (PLAN Appendix B), runtime Steps 2+3 already support multiple forms (`selected_form`, `form_changed_from_first_draft`; the Step-3 prompt already licenses a form change). The missing link is one upstream Pass 4b edit populating the form menu, i.e. roughly one prompt edit plus a sentinel regen, and no new layer. **Condition:** if the build grows beyond that upstream edit (e.g. new runtime selection logic), it re-enters the gate.
