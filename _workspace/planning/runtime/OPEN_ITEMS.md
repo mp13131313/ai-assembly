@@ -2921,6 +2921,30 @@ See A4 above. Needs:
 
 Triggers on A2 decision.
 
+---
+
+## Section F — Net-new findings (literal-100% source read, 2026-06-13)
+
+Surfaced by the line-by-line read of `runtime/flows/*` + ingest. New C-numbers continue the C-series. The post-Athens roadmap references these by C#.
+
+### C53. Headnote `voice_name` corruption — TWO published surfaces 🔴 (published-record bug)
+`runtime/flows/editor/dossier_generation.py:192` builds `"the Voice of " + council_member`, but production `council_member` is the long card identity-prefix ("I am Augusta Ada King, Countess of Lovelace…") → dossier headnote `voice_name` = "the Voice of I am Augusta Ada King…". **Verified in published athens-2026 dossiers N1 + N3.** SECOND surface: `runtime/flows/voice/publish.py::_to_publish_per_voice_from_step2` sets the per-voice page `voice_name` straight from `council_member` too → `published_artifacts/nights/night_N/<slug>.json` likely carries the same corruption (verify via grep of published `nights/*/*.json voice_name`). Both masked by clean test fixtures (test_editor_dossier_generation + test_voice_publish pass clean `council_member`). **Fix:** resolve clean display name via slug→`council_config` lookup (pattern already in `dashboard.py:665-671` `council_name_by_slug`) + `member_slug` (C34 prefix-strip) — both exist. Add a regression test with a realistic long-identity-prefix `council_member`. The editor PROMPT is correct ("the Voice of X" prose); the bug is pure runtime stamping.
+
+### C54. Orchestrator dispatches transcription on raw `status.json`, not `infer_state` 🟡 (the "never run both" root)
+`overnight_orchestrator.transcription_state` + `fire_pending_transcriptions` read `status.get("state")` raw (lines 163/219); the web UI uses `pipeline.infer_state` (flips to `done` when `session_package.json` exists). So a manually-completed **audio** transcription (operator runs `process_session` by hand; session_package.json present, status.json not flipped) can be re-dispatched / mis-gated — the divergence behind the TL;DR "running both dispatches duplicate transcriptions." NARROW: vendor sessions explicitly write `state=done` (test_vendor_intake), so this is manual-audio-passthrough only. **Fix:** route orchestrator dispatch through `infer_state`; add a test seeding `session_package.json`-present + `status=normalized` (test_orchestrator_dispatch has no such case).
+
+### C55. Three Step-2 validators name the WRONG event 🟡 (arguably Phase-0 correctness)
+`voice_step2_validation_{safeguards,voice_fidelity,engagement}.md` all open "Munich-Security-Conference-style panels" — a dev_msc-era leftover; the production validators judged all three Athens nights against a Munich frame. Checks are mostly card-relative so impact is limited, but it's wrong-as-written. Make the event frame a template variable fed from `event_config` (folds into C52); bundle with the C42 validator-prompt update.
+
+### C56. Editor `_strip_nested_corpus_metadata` expects LIST, field is DICT 🟡
+`runtime/flows/editor/card_assembly.py:150` — the FU#41 `corpus_metadata` strip silently no-ops in the editor path (field is a dict; the function checks for a list); docstrings still reference "Claudia." Correct dict-handling exists at `personas/flows/shared/chat_prompt_builder.py:158` as the reference twin. Low impact (corpus_metadata is benign if it rides along) but the strip isn't doing its job.
+
+### C57. Editor closing prompt hardcoded to Tim Leberecht 🟡 (editor-as-variable; relates FU#42 + C47 + C52)
+`editor_dossier.md` bakes Tim's persona specifics into the prompt (Stuttgart/Lüneburg, Sehnsucht/Wirtschaftsromantik, the four-beat Beauty-Shot structure), partially duplicating his card. A swappable/different editor (Claudia, a vatican editor) needs this PROMPT rewritten, not just a card swap. For "editor as a variable," make the closing prompt card-driven (read the editor card's voice fields).
+
+### C58. `app.py` editor auto-fire hardcodes `python3.12` 🟢-minor
+`runtime/ingest/app.py:918` `_maybe_auto_fire_editor` spawns `venv/bin/python3.12` vs the orchestrator's machine-agnostic `sys.executable`; breaks if the venv's python minor version changes. One-line fix. (Also noted for completeness: `build_athens_data_graph.py:2581` has a dead no-op `.replace("__SUMMARY__", …)` — placeholder no longer in the template.)
+
 ### E3. `docs/LLM_CALL_INVENTORY.md` 🔵
 
 **State:** stale since 2026-04-27.
@@ -3045,6 +3069,57 @@ Working back from May 7 2026 (Athens Day 1 evening; Night 1 runs overnight).
 
 **Post-Athens deferred:**
 - FU#42, FU#47, FU#49M, FU#54
+
+---
+
+## Section H — Agentic architecture (deferred design backlog)
+
+**Provenance.** Folded in 2026-06-14 from the multi-turn agentic-vs-automation analysis (per-stage 5-marker walk → orchestrator review → visible-deliberation design → encyclical re-ranking → verified-corrections pass). That work was conversation-only; this is its durable home. One slice already shipped to a spec: the vatican annotated-pipeline `SPEC_2026_05_27_magnifica_humanitas_annotated_pipeline.md` phase 7 = the agentic validation triage (C60), in annotation mode.
+
+**Framing — read before treating any of this as roadmap.** By the canonical workflow-vs-agent definition the Assembly is a **workflow, not an agent** (every LLM call single-shot structured-output; no tool loops; filesystem-sentinel orchestration; the operator's Claude Code session is the only real agent). This is *by design* — the Provocateur Selection v1→v3 de-agentification and the orchestrator's halt-don't-retry were deliberate reproducibility/legibility choices. Every move below is **additive** (adds permanent surface, trades away reproducibility), so it sits under the plan's **net-complexity gate**: default **design-and-shelve; build only behind a committed forcing function** (e.g. a greenlit vatican/pope run), and only when it nets out subtractive. **Nothing here is on the Athens execution path or in the plan's execution stages.** Two moves (C60, C61) are not merely deferred — they carry genuine forks against *active* plan items and are flagged ⚖ as operator decisions.
+
+**Verified-correction load-bearing facts (carry forward — they re-ground the validator + Night-3 reading):**
+- **The Step-2 validator is ~pure noise on Athens data.** Night 1: 7/10 voices flagged → 100% operator-released. Night 3: 9/10 flagged → 100% released (~80% flag rate, ~100% false-positive). Strongest single evidence for *either* the agentic-triage move (C60) *or* the plan's "prune the validator" line (PLAN 1.3 validator-economy) — see the ⚖ fork in C60. Cross-ref C42.
+- **Night 3 was NOT Provocateur thin-coverage.** An earlier-recalled "only fired on 4 voices" was wrong: `selection.json` shows every voice got formulations (3 voices×3 themes, 7×4); `prior_exclusions_applied: 0`. The real "4" was the **publish-count** bug already filed at C-hygiene (`night_3/` shipped 4 of 10 page files until the 2026-05-29 republish — see §"Observed (Athens Night 3)"). **Do not file a quorum-relief item; the premise is false.**
+- **Persona cards are 38–44K tokens, not ~12K** — so the card-unload tool-use move (C59 Voice row) has a much bigger prompt-cache payoff than first scoped.
+
+### C59. Per-stage agentic upgrade map (catalog — design-and-shelve)
+
+The full 5-marker walk, compressed to the moves worth remembering. ✅ = flagged ship-worthy in the analysis; ⚖ = has its own forked item below; ✖ = explicitly NOT worth building.
+
+- **Transcription:** ✅ C43 self-detect-and-chunk (speaker_id reads its own confidence/flag distribution, decides escalate-to-Opus / chunk / stop). ✖ multimodal audio-clip disambiguation; ✖ Pass-5 as a second call; ✖ second `[verify]` cleaning pass. *Net: only the C43 self-recovery loop earns it.*
+- **Researcher:** ✅ cross-session **continuity tool-use** (`search_prior_extractions` → write continuity into the data, closing the Provocateur's blind spot); ✅ **density-adaptive extraction** (classify chapters/sections, extract at depth — encyclical-shaped input). Lower-value: dynamic extraction-depth planning, iterative cluster→split→re-cluster, re-read-surrounding-turns.
+- **Provocateur:** **optional agentic Selection** — run the deterministic algorithm; *only if* it trips a thin-coverage threshold, hand the same data + knob set to an LLM to re-tune (preserves reproducibility on normal nights). Plus: `read_full_persona_card` on hard triage cases; cross-voice triage rounds; per-voice formulation de-duplication.
+- **Voice:** ✅ **`read_persona_card_section()` tool-use** (unloads the 38–44K card from the system prompt → big cache win + voices can range); ✅ **Step-1 self-critique vs `hard_limits`** (could retire the validator stage entirely); Step-1 sequencing planning; **agentic Step-3 deliberation → C61**.
+- **Editor:** ✅ **dynamic dossier-composition planning** (Tim reads all artifacts, then decides count/interleave/lead — extends the `synthesis_router` precedent, the one existing LLM-routing point); `read_provocateur_briefing()` tool-use (Tim sees what was *asked*, not just answered).
+- **Orchestrator:** **agentic validation triage → C60**; plus dup-dispatch guard (detect an in-flight transcription outside its own dispatch and refuse), C43-passthrough automation, checkpoint-resume after a drop.
+
+**Final ranking from the verified-corrections pass (if a committed run greenlights a build set):** 1) agentic validation triage (C60); 2) voice card tool-use; 3) voice self-critique; 4) editor dynamic planning; 5) Researcher density-adaptive. Agentic Step-3 (C61) = **most claim-completing long-term** but was *dropped* from the encyclical-run top-5 (weaker evidence for that specific run, higher cost).
+
+### C60. Agentic validation triage at the C28b gate ⚖ — highest-evidence move AND a fork vs validator-economy
+
+**The move:** insert a pre-C28b step — read each WARN/HOLD verdict + the rule that fired + the artifact + the card `hard_limits`; classify `misfire / real_violation / ambiguous`; auto-release misfires (with recorded rationale), auto-hold clear violations, escalate only ambiguous to the operator. Single Sonnet call/voice; tool surface = `read_file` + `write_decision_file`; decisions auditable (each writes `decided_by: "agent"` + rationale).
+
+**⚖ Operator fork — two opposite answers to the same problem (the validator-noise data above):**
+- **(A) Prune/fix the validator** — PLAN 1.3 validator-economy + the drafted C42 BREACH-vs-PASS spec. Cheaper, subtractive, aligns with the net-complexity gate. *The 100%-release data argues for this: if the operator releases everything, fix the noisy validator, don't wrap it in an agent.*
+- **(B) Build the agentic triage** — only justified for an **unattended** deployment (no operator at the morning gate). This is the same need as FU#62 path-A autonomous regen, generalized. Already specced for one deployment (vatican phase 7, annotation mode); the **C28b-gate generalization for the conference pipeline is the net-new part.**
+
+**Recommendation:** do (A) first (it's in the plan already); reserve (B) for a deployment that genuinely runs unattended. Cross-ref C42, FU#62, vatican SPEC phase 7, PLAN 1.3 validator-economy.
+
+### C61. Agentic / visible Step-3 deliberation ⚖ — fork vs the filed A1 re-add and vs vatican=annotation
+
+**The move:** make Step 3 genuinely deliberative and *visible* — voices choose whom to read, address each other by name in their own register, record refusals as moves, mark calibrated confidence per move. Three shapes from the analysis: **A** (bounded multi-turn tool loop, most agentic, ~3 weeks, reproducibility down), **B** *(recommended)* (single-pass structured trace: `reads[]/declines[]/addresses[]/decision/amended_artifact/calibrated_confidence`), **C** (two-pass: read-pass then respond-pass).
+
+**⚖ Three states already exist and must be reconciled before any build:**
+- voices **FU#49E** — "spec closed; Voice Pipeline v2 covers Step 3 end-to-end, 351 LOC implemented";
+- runtime **A1** — Step 3 *skipped* for Athens; dormant; the filed re-add is the cheap **deterministic forced-read B+ shape** (~2 days);
+- vatican **SPEC** — chose **annotation, not deliberation** (voices address the document, not each other), so the pope run as specced does **not** deliver visible deliberation.
+
+So the transcript's agentic Step-3 **supersedes the A1 re-add in ambition** (weeks vs 2 days) and is **not** what the current vatican path builds. **Operator decision:** (a) re-enable the cheap deterministic B+ Step-3 as-filed; (b) build agentic Step-3 (Shape B) as design-and-shelve behind a committed run; or (c) accept vatican annotation as the deliberation substitute. Needs per-voice card work → **voices §34**. This is also the move that most directly closes the briefing's "constitute the collective at Step 3" principle (briefing line 91), which Athens (Step-3-skipped) and vatican (annotation) both leave unmet. Cross-ref A1, voices FU#49E, voices §33 (validation track) + §34, vatican SPEC, briefing line 91.
+
+### C-non-agentic. What to KEEP non-agentic (guards the through-line)
+
+Recording these so the backlog can't quietly erode the project's deliberate choices: **halt-don't-retry** on stage failure stays (an agent would retry; the architecture escalates — correct); **deterministic Selection** stays the default (agentic only on a thin-coverage trip); **single-shot structured-output** stays the per-call default. The de-agentification of Provocateur Selection (v1→v3) is the canonical precedent — additions above are the *if-models-improve* path, not corrections of a wrong call.
 
 ---
 

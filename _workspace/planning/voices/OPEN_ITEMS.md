@@ -105,7 +105,12 @@ Build sequence per voice:
 
 ### Active / conditional
 
-**FU#55 — Form-variance test, rolling per-voice (Pass 4b fork-test pattern)** 🟡 IN PROGRESS
+**FU#55 — Family of forms: 🟢 OPERATOR DECISION 2026-06-13 — BUILD (fork-test gate overridden)**
+- **Decision (operator, 2026-06-13):** family of forms is a **committed build** — the centerpiece of the post-Athens roadmap §1.2. Voices get a menu of corpus-attested native forms and choose per matter, instead of a single locked form. The per-voice fork-test gate (original framing below) is **OVERRIDDEN**: build the capability rather than wait on per-voice opt-in.
+- **Recorded against the gate's own evidence (faithful note):** only 2 voices were ever fork-tested (Plato + Cleopatra) and **both declined** (0/2 opt-in). The original resolution rule below would have read 0/2 as "close §H aspirational / opt-in only." The operator chose to build regardless; this line preserves that the override was made *knowing* the early fork-test signal leaned the other way. Form menus are populated from each voice's corpus-attested forms (roadmap §1.2 Stage 1), not gated on voice opt-in.
+- **Build design:** post-Athens roadmap §1.2 — `medium` → `{default_form, forms[]}` schema; shipped-voice surgical patches (§27 second-medium table = seed content); runtime Step-2 form-selection pressure; Pass 4b plumbing of `genre_specific_register` (the §23 "collected-but-not-piped-to-4b" gap, confirmed at source 2026-06-13: 4b is CT-only / chunk-less, so the menu must be routed in explicitly).
+
+*Original fork-test framing (now OVERRIDDEN, preserved for context):*
 - 7 of 10 voices shipped (Plato/Cleo/Dosto/Battuta/Octopus/Hannah/Ada). Plato + Cleopatra explicitly populated (both declined permission); other shipped voices haven't been individually fork-tested.
 - 3 voices remaining (Marley in flight, Whanganui + Scheherazade pending DR)
 - Resolution criteria: 0/10 → close §H aspirational; 1-2/10 → opt-in flag; 3+/10 → re-evaluate landing
@@ -1300,3 +1305,49 @@ Content-migration pre-verified across all four commits — all dropped material 
 3. Add output sample render to the smoke-test process
 4. Audit Pass 1 chunked merge for whether it pre-processes content that bypasses Pass 2+ witness-conditional override
 5. Extend Pass 4b te reo discipline (gap G) to require explicit speaker-frame for cited-te reo first-person — generalize to any cited sacred-grammar first-person carrying appropriation risk if the construction's "I" could be read into it
+
+---
+
+## 32. Persona-pipeline CODE findings (literal-100% source read, 2026-06-13)
+
+Code/prompt-file defects from the line-by-line read of the persona pipeline (not card-content items). Filed here because this is the persona-pipeline tracker and none had a prior home. All POST-ATHENS (shipped cards already baked; these affect the next build/rebuild). The post-Athens roadmap references these by `§32.N`.
+
+1. **[bug] bracket-strip stale-state in `run_persona_pipeline.py`** — the bracket-strip reload (~L840-852) reloads only some pass vars; the 7a-FIX fix-pass (L1370/L1435) can write stale pre-strip content back on a rebuild.
+2. **[self-inflicted false-positive] 7a-FINAL strips `council_member_name` (L1909-1918) while the validator prompt declares it required** → the recurring "council_member_name missing" flag (§7 known-false-positives). The CODE cause is here — fixable, not just skippable.
+3. **[dead files] `persona_pass_7pre_citation.md` + `_user` are orphaned** — superseded by the chunked extract→verify_batch→boddice trio (FU#2). No code renders/loads them (live "7pre_citation" refs are the pass-label + output-filename only). Safe to delete the two `.md` files.
+4. **[doc-drift, version-stale] Opus 4.6/4.7 manual-DR model guidance, 4 locations** — propagation source `pass_0a_voice_config.md:123` (bakes "§1-§5 Opus 4.6 / §6 4.7" into every review_doc) + the operator-facing `pass_0b_header.md` claude.ai preamble. Empirically grounded (Phase B/L) but both versions predate current Opus 4.8. §3 flags the contradiction; this adds the version-staleness + exact source locations. Re-validate §6 corpus-gateway behaviour on 4.8 + update refs at next build (`test_header_footer_modes` does NOT pin the model strings → test-safe).
+5. **[cosmetic count-drifts]** chat_prompt_builder docstring "11 items" (code is 12 incl. nested, after FU#57 added bold_engagement_topics); `pass_1_6_merge.md` step-7 "four top-level keys" (schema block correctly says three; urls removed 1-arch-07); `persona_pass_1d_excerpt_selection.md` header "~30K" (body is 60K; restated stale in `pass_4a_user:55` + `pass_6_user:9`); `populate_speakers_from_program_html.py:88` annotation 2-tuple vs 3-tuple return. Authoritative-path-correct; only the stray restatement is stale.
+6. **[no-action contract note] dossier-section splitter** — `perplexity_split.py` heading-splits ONLY the Perplexity dossier; Claude DR is filename/whole, Gemini is whole. So the §4 heading drift across templates (organism Perplexity "SCIENTIFIC LITERATURE" vs DR "VOICE AND SCIENTIFIC REGISTER" vs human/fictional "VOICE AND STYLE") is cosmetic. Do NOT "fix" split_dossier to demand cross-template heading parity or add "VOICE AND SCIENTIFIC REGISTER" (DR never reaches it).
+7. **[positive / roadmap §2.1-ready]** `chat_prompt_builder.py` is a production-ready chat-deployment artifact builder; its docstring sketches the exact FU#42 split-card direction (per-tag strip, multiple deployment contexts per voice). `pass_0b_non_human_system.md` is production-ready for future rights-of-nature voices (CARE/IPAI, named-community specificity, FU#19 de-anchoring). Both strengthen the FU#42 keystone.
+
+*(The editor-side `card_assembly.py:150` corpus_metadata list-vs-dict bug is runtime code → filed at `runtime/OPEN_ITEMS.md` §F C56, cross-ref here because chat_prompt_builder.py:158 is its correct-handling twin.)*
+
+---
+
+## 33. Validation track — genuine perspective vs elaborate ventriloquism? 🔵 OPERATOR DECISION OPEN (raised 2026-06-13 candid review)
+
+The deepest open question the project's own notes already acknowledge (cf. the Marley methodology-diagnostic: "contested-decision-not-validated"; the I-and-I load-bearing critique). The build apparatus — 20+ passes, the swap-test, corpus-grounding, the validator stack — establishes **process rigor** but NOT **authenticity of voice**: rigor-of-process does not establish that a voice produces a genuine novel perspective rather than competent pastiche. The system's gravity pulls toward the comfortable inference ("we did 20 passes + 8 validators, therefore the voice is authentic") — which is exactly the move that doesn't hold.
+
+**The gap:** the post-Athens roadmap *scales* the conceit (family of forms, more councils, vatican, chat, voice) but nothing in it *tests the core claim.* The pieces that look like validation aren't:
+- reader-gates (§24/§28) are **ethics/permission** gates ("are we allowed to deploy"), not "does it work";
+- the 9-test evaluation rubrics are a **regression** harness ("did it stay the same"), not validation;
+- FU#30 is one narrow empirical question (card-richness vs runtime-quality).
+
+**Decision for operator:** add a validation track, or proceed treating the core as sound? Cheapest honest version (recommended floor) — a falsification probe *before* Phase 2 scales:
+1. **Reframe the Rastafari/iwi reader-gate as the *validation instrument* it already is**, not just permission — the domain reader is the one mechanism that can actually adjudicate whether the voice does something the corpus supports but doesn't contain.
+2. **Blind A/B:** can a domain expert reliably distinguish the configured voice from a competent generalist handed the same brief? If not, the apparatus isn't doing what it claims — worth knowing before building four deployment profiles on it.
+
+**Placement:** gating Phase 2, or a parallel workstream — operator's call (roadmap Stage 3 / Operator decision points lists "validation-track decision"). **Status:** raised in the 2026-06-13 review; NOT decided. Filed here because it was conversation-only and would otherwise be lost; this is its durable home.
+
+---
+
+## 34. Agentic Step-3 deliberation — per-voice card requirements (deferred; gated) 🔵 voice-side of runtime C61
+
+The voice-build half of the agentic / visible Step-3 deliberation move (runtime `OPEN_ITEMS.md` C61 is the authoritative item + the operator fork). Filed 2026-06-14 from the agentic-architecture analysis. **Deferred design-and-shelve** under the plan's net-complexity gate — build only behind a committed deployment and only if the C61 fork lands on "build agentic Step-3" (Shape A/B), not the cheap deterministic B+ re-add or the vatican annotation substitute.
+
+If built, each voice card needs three new fields (the runtime can't fake these — they're voice-fidelity work):
+- **address rhetoric** — how this voice addresses a *peer* in its own register (Cleopatra's prostagma-grammar; Battuta's *yā akhī* / "my brother in the law"; Whanganui's whakataukī). The Octopus may have **no natural rhetoric of address at all** — that is itself a finding worth recording, not a gap to paper over.
+- **refusal vocabulary** — how this voice *declines to engage* a peer's move, voice-specific and distinct from `hard_limits` (which constrains what a voice won't *say*, not how it withholds from an *exchange*). A recorded Whanganui withdrawal ("the kawa does not translate the prostagma") is the artifact, not an absence.
+- **calibrated confidence per move** — the anti-collapse signal (Zhu et al.): voices mark amendments with confidence so a downstream selector (Tim) has the diversity-preserving signal. Pairs with the selection-over-synthesis editor preference.
+
+Each lands one-at-a-time with the sentinel-regen + thinking-on gate, like all Phase-1.1 card work. Relates: [[runtime C61]], §33 (validation track — the deliberation is also where genuine-perspective-vs-ventriloquism becomes *visible*), §30 (voice_temporal_stance — address rhetoric must respect the assembly-fiction frame), briefing line 91 (the collective-constitution principle this move closes).
