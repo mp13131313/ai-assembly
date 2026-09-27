@@ -848,6 +848,22 @@ if _clean_summary['files_touched'] > 0:
                        **_re_pass3.get("fields", {}),
                        **_re_pass4a.get("fields", {}),
                        **_re_pass4b.get("fields", {})}
+    # §32.1 fix: pass2/pass3/pass4a/pass4b themselves must also be reloaded,
+    # not just folded into combined_2_3_4. The 7a-FIX fix-pass (_pass_7a_fix,
+    # ~L1274-1452) reads these exact globals via `globals()[_PASS_VAR_LOOKUP[...]]`
+    # to (a) build the patcher's pass_outputs context and (b) apply + persist
+    # patches with `write_json_atomic(cache_path, pass_var)` — which writes the
+    # WHOLE pass_var back to disk, not just the patched field. Before this fix,
+    # only pass5/pass6 were reassigned here, so a subsequent fix-pass patching a
+    # field in pass 2/3/4a/4b would apply the patch to the stale pre-strip
+    # object and overwrite the freshly-stripped cache file with pre-strip
+    # (bracket-tagged) content for every other field in that pass — silently
+    # reintroducing residue into the shipped card (empirically: 42 residues
+    # post-Pass-7a-FIX on the Plato 2026-04-25 run, per bracket_strip.py docstring).
+    pass2 = _re_pass2
+    pass3 = _re_pass3
+    pass4a = _re_pass4a
+    pass4b = _re_pass4b
     pass5 = _re_pass5
     pass6 = _re_pass6
 
@@ -1906,11 +1922,30 @@ def _pass_7a_final():
     assembled = json.loads(_paths.assembled_card(SLUG, PROJECT_ROOT).read_text())
     # Strip Voice-Pipeline-only / non-validatable fields (matches the
     # standalone /tmp/plato_pass7a_full_validation.py exclusion set).
+    #
+    # §32.2 fix (2026-06-13 code read): `council_member_name` was REMOVED
+    # from this EXCLUDE set. It had been lumped in with the pure-scaffolding
+    # meta fields (voice_name/voice_slug/pipeline_version/generated_date —
+    # boilerplate identical across all cards, e.g. "Voice of X") under the
+    # "# informational" label, but council_member_name is substantive
+    # voice-authored content (e.g. Cleopatra's full Ptolemaic titulature,
+    # Battuta's Arabic-Berber name chain, Whanganui's witness-stance self-
+    # identification) — the same category of field as epistemic_frame_
+    # statement/world/character, which ARE validated. The per-pass Pass 7a
+    # (_pass_7a, above) already sends council_member_name to this identical
+    # validator prompt with no history of false positives. Excluding it only
+    # here (post-assembly) created a self-inflicted mismatch against this
+    # prompt's own field map (persona_pass_7a_cross_model.md: "pass_2 emits
+    # exactly 10 fields" incl. council_member_name) — the validator, told to
+    # expect the field, correctly reported it absent from the payload it was
+    # actually given. Recurring "council_member_name missing" flag per
+    # voices/OPEN_ITEMS.md §7 known-false-positives / ONBOARDING.md:172.
+    # Un-excluding it (rather than teaching the prompt to expect its absence)
+    # keeps both validator call-sites consistent with the one shared prompt.
     EXCLUDE = {
         "metadata",
         "smoke_test_chains",       # build-time only (Pass 7b)
         "reference_only_passages", # Step 1 only
-        "council_member_name",     # informational
         "voice_name", "voice_slug", "voice_mode", "voice_subtype", "voice_type",
         "negative_constraints_additions",  # Pass 7c metadata
         "pipeline_version", "generated_date",

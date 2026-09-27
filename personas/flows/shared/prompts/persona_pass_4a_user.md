@@ -52,7 +52,7 @@ on stammering-as-crip-performance; translator-tradition debates):
 
 {{ cross_disciplinary_frames }}
 
-Primary Text Passages (curated ~30K by Pass 1d — the voice's actual writing,
+Primary Text Passages (curated ~60K by Pass 1d — the voice's actual writing,
 grounding your voice-characterization):
 
 {{ primary_texts }}

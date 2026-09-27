@@ -324,4 +324,4 @@ worked examples. Additive merge per Block 2.
 5. Respect voice-type variants (musical two-tier / hostile-source Tier 2 bias
    flags / non-human scientific-literature / fictional multi-translator).
 6. Tag everything; cite everything; invent nothing.
-7. Return JSON only — four top-level keys.
+7. Return JSON only — three top-level keys.

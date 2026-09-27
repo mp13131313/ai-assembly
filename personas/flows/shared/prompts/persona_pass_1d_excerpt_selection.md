@@ -1,5 +1,5 @@
 {# Pass 1d — Excerpt Selection (Claude Sonnet).
-   Selects ~30K chars of representative excerpts from the fetched primary
+   Selects ~60K chars of representative excerpts from the fetched primary
    texts, using the dossier's identification of important works/passages
    as the guide. Produces a list of {url, char_start, char_end, label, why}. #}
 You are curating an excerpt set from {{ name }}'s primary texts that will be

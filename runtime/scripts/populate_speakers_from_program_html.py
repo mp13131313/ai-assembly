@@ -86,10 +86,11 @@ def extract_speakers_from_html(html_path: Path) -> dict[str, dict]:
 def populate(
     speakers: list[dict],
     html_speakers: dict[str, dict],
-) -> tuple[list[dict], dict[str, int]]:
+) -> tuple[list[dict], dict[str, int], list[str]]:
     """Merge HTML data into speakers list, preserving curated values.
 
-    Returns the new list + a stats dict for summary reporting.
+    Returns the new list + a stats dict for summary reporting + the list of
+    speaker names not found in the HTML.
     """
     stats = {
         "total": len(speakers),

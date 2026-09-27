@@ -2569,16 +2569,9 @@ if (initialFirstLink) initialFirstLink.classList.add('active');
 
 def write_html_viewer(graph: dict) -> None:
     out_html = OUTPUT_DIR / "view_by_theme.html"
-    # Summary line for header
-    total = graph["metadata"]["total_nodes"]
-    nodes = graph["metadata"]["nodes_per_kind"]
-    summary = (f"{nodes['sessions']} sessions · {nodes['extractions']} extractions · "
-               f"{nodes['clusters']} clusters · {nodes['themes']} themes · "
-               f"{nodes['formulations']} formulations · {nodes['voice_step1']} step1 · "
-               f"{nodes['voice_step2']} step2 · {nodes['dossiers']} dossiers")
     # Embed JSON safely: escape </script>
     json_text = json.dumps(graph, ensure_ascii=False, separators=(',', ':')).replace("</", "<\\/")
-    html = HTML_TEMPLATE.replace("__SUMMARY__", summary).replace("__JSON_DATA__", json_text)
+    html = HTML_TEMPLATE.replace("__JSON_DATA__", json_text)
     out_html.write_text(html, encoding="utf-8")
     size_mb = out_html.stat().st_size / (1024 * 1024)
     print(f"✅ Wrote {out_html}  ({size_mb:.1f} MB)")

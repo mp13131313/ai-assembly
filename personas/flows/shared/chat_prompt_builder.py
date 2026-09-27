@@ -26,14 +26,16 @@ Architectural framing (amendments A + B):
   voice exercise rather than something problematic"). These spec-shell
   meta-fields are stripped to reduce that meta-reasoning mode.
 
-Strip set (11 items total):
+Strip set (12 items total, incl. nested):
 
-A — Chat-structurally-incompatible (5):
+A — Chat-structurally-incompatible (6):
   - metadata (pipeline-internal validation/audit)
   - smoke_test_chains (Pass 7b QC; misread as exemplars-to-follow)
   - reference_only_passages (Step-1-only constraint chat can't enforce)
   - continuity_block_if_night_2 (multi-prompt context absent in single chat)
   - continuity_block_artifact_if_night_2 (same)
+  - bold_engagement_topics (FU#57 2026-04-29; pre-loaded courage menu pulls
+    reasoning toward predetermined topics — see strip-set A tuple below)
 
 B — Spec-shell meta (5 top-level + 1 nested):
   - voice_name (third-person identity scaffold; identity should live in
@@ -135,7 +137,7 @@ _SPEC_SHELL_META_FIELDS = (
     "council_member_name",
 )
 
-# Combined top-level strip set (10 items; nested production metadata
+# Combined top-level strip set (11 items; nested production metadata
 # stripped separately — see _strip_nested below).
 _VOICE_PIPELINE_ONLY_FIELDS = _CHAT_INCOMPATIBLE_FIELDS + _SPEC_SHELL_META_FIELDS
 

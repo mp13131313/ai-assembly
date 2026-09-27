@@ -6,7 +6,7 @@ card-field references from prior passes (constitution, concept_lexicon,
 reasoning_method, rhetorical_mode, characteristic_moves, register_and_tone
 — for selection criteria). #}
 
-Primary Text Passages (curated ~30K by Pass 1d — the corpus source you
+Primary Text Passages (curated ~60K by Pass 1d — the corpus source you
 select FROM for card embedding):
 
 {{ primary_texts }}
