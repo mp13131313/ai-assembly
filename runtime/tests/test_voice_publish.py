@@ -90,6 +90,60 @@ def _step3_output_with_corrupted_council_member(
     return out
 
 
+_CORRUPTED_ADA_IDENTITY = (
+    "I am Augusta Ada King, Countess of Lovelace, daughter of the "
+    "poet and the mathematician, and I set down here what I have "
+    "found in the Analytical Engine."
+)
+
+
+def _step3_output_with_corrupted_nested_names(
+    voice_slug: str, theme_id: str = "theme_001"
+) -> dict:
+    """C53 residual fixture: the NESTED `voices_read[].council_member`
+    and `amendments[].cited_voice` fields carry the long card
+    identity-prefix opening line — the same corruption already fixed at
+    the top-level `voice_name` in e01eb84, but this time on the OTHER
+    voice's fields (the ones a voice cites/reads at Step 3). The
+    existing `_step3_output` fixture uses a short "Other Voice" name for
+    these fields, which is exactly why the nested corruption slipped
+    through — it never looked like the real production shape.
+
+    Second amendment has NO `cited_voice_slug` at all: `run_step3_for_
+    voice`'s resolver only `setdefault`s that field on a successful
+    lookup match against the model's free-text `cited_voice`; when the
+    model cites something unresolvable, the slug key is genuinely
+    absent (not empty) on the real artifact.
+    """
+    out = _step3_output(voice_slug, theme_id)
+    out["lineage"]["voices_read"] = [
+        {
+            "voice_slug": "ada_lovelace",
+            "council_member": _CORRUPTED_ADA_IDENTITY,
+            "shared_themes": [theme_id],
+        },
+    ]
+    out["amendments"] = [
+        {
+            "cited_voice": _CORRUPTED_ADA_IDENTITY,
+            "cited_voice_slug": "ada_lovelace",
+            "cited_passage": "passage cited",
+            "amendment_type": "agreement",
+            "rationale": "I concur",
+            "cited_theme_id": theme_id,
+        },
+        {
+            # Unresolved citation — no cited_voice_slug key at all.
+            "cited_voice": "an unnamed interlocutor",
+            "cited_passage": "passage cited 2",
+            "amendment_type": "disagreement",
+            "rationale": "I push back",
+            "cited_theme_id": theme_id,
+        },
+    ]
+    return out
+
+
 def _write_council_config(project_root: Path, members: list[dict]) -> None:
     """Minimal council_config.json at <project_root>/council_config.json
     (project ROOT, not reference/ — matches the real athens-2026 layout
@@ -314,6 +368,79 @@ class TestVoiceNameResolutionC53:
             (project_root / "published_artifacts" / "nights" / "night_1" / "ibn_battuta.json").read_text()
         )
         assert published["voice_name"] == "Voice of Ibn Battuta"
+
+
+class TestNestedVoiceNameResolutionC53:
+    """C53 residual: `deliberation.voices_read[].voice_name` and
+    `deliberation.amendments[].cited_voice_name` carried the SAME
+    council_member / cited_voice corruption as the top-level
+    `voice_name` (fixed in e01eb84) — the Step-3 path is dormant
+    (Step 3 was skipped at Athens) but must not corrupt names if it
+    ever runs. Locks in resolution via `voice_display_name` off the
+    slug fields already present on these nested entries.
+    """
+
+    def test_voices_read_voice_name_resolves_via_council_config(self, tmp_path):
+        project_root = tmp_path / "project"
+        _write_council_config(
+            project_root, [{"name": "Voice of Ada Lovelace"}]
+        )
+        out = _to_publish_per_voice(
+            _step3_output_with_corrupted_nested_names("plato"),
+            night=1,
+            project_root=project_root,
+        )
+        read = out["deliberation"]["voices_read"][0]
+        assert read["voice_name"] == "Voice of Ada Lovelace"
+        assert "Countess of Lovelace" not in read["voice_name"]
+        assert "Analytical Engine" not in read["voice_name"]
+
+    def test_voices_read_voice_name_falls_back_when_council_config_missing(self, tmp_path):
+        """No council_config at all — degrade to the slug-derived
+        "Voice of X" convention, never leak the corrupted council_member
+        text onto the published surface."""
+        project_root = tmp_path / "project"  # does not exist on disk
+        out = _to_publish_per_voice(
+            _step3_output_with_corrupted_nested_names("plato"),
+            night=1,
+            project_root=project_root,
+        )
+        read = out["deliberation"]["voices_read"][0]
+        assert read["voice_name"] == "Voice of Ada Lovelace"
+        assert "Countess of Lovelace" not in read["voice_name"]
+
+    def test_amendment_cited_voice_name_resolves_via_council_config(self, tmp_path):
+        project_root = tmp_path / "project"
+        _write_council_config(
+            project_root, [{"name": "Voice of Ada Lovelace"}]
+        )
+        out = _to_publish_per_voice(
+            _step3_output_with_corrupted_nested_names("plato"),
+            night=1,
+            project_root=project_root,
+        )
+        amendment = out["deliberation"]["amendments"][0]
+        assert amendment["cited_voice_name"] == "Voice of Ada Lovelace"
+        assert "Countess of Lovelace" not in amendment["cited_voice_name"]
+
+    def test_amendment_without_cited_voice_slug_falls_back_to_raw_citation(self, tmp_path):
+        """When Step 3's own resolver couldn't match the model's
+        free-text citation to a known voice, `cited_voice_slug` is
+        genuinely absent (not just empty) — there's no slug to resolve
+        against council_config, so `cited_voice_name` falls back to the
+        model's raw `cited_voice` text rather than fabricating one."""
+        project_root = tmp_path / "project"
+        _write_council_config(
+            project_root, [{"name": "Voice of Ada Lovelace"}]
+        )
+        out = _to_publish_per_voice(
+            _step3_output_with_corrupted_nested_names("plato"),
+            night=1,
+            project_root=project_root,
+        )
+        amendment = out["deliberation"]["amendments"][1]
+        assert amendment["cited_voice_slug"] == ""
+        assert amendment["cited_voice_name"] == "an unnamed interlocutor"
 
 
 class TestProductionCouncilNamesC53:

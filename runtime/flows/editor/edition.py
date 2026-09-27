@@ -241,6 +241,59 @@ def update_root_index(project_root: Path) -> dict[str, Any]:
     return payload
 
 
+def _rebuild_dossiers_from_disk(
+    project_root: Path, night: int
+) -> list[dict[str, Any]]:
+    """Read every dossier actually on disk for this night, not just the
+    one(s) the current Editor Pipeline call regenerated.
+
+    C46 fix — same bug class as C50 (`voice/publish.py::
+    _rebuild_index_from_disk`): mirror its approach. An `--single-dossier`
+    rerun only passes this call's freshly-generated dossier(s) via
+    `finalize_edition`'s `dossiers_by_theme`, but every dossier previously
+    published for the night is still sitting at
+    `published_artifacts/dossiers/night_<N>/dossier_<NNN>.json`
+    (`write_dossier` in `flows/editor/publish.py` writes there
+    unconditionally, and has already run for THIS call's dossier(s) by
+    the time Stage 3 fires — see `editor_flow.py`). Source of truth for
+    the night index is therefore the directory listing, so a
+    single-dossier rerun still leaves every other dossier indexed.
+
+    `dossier_no` is parsed from the filename (`dossier_NNN.json`) rather
+    than trusted from the dossier's own `metadata` — reliable regardless
+    of what a given dossier's metadata carries, and matches the filename
+    convention `_dossier_filename()` writes in `flows/editor/publish.py`.
+
+    Files that fail to parse are skipped (defensive; should not happen
+    for files this pipeline itself wrote via `write_json_atomic`).
+    Returns `[]` if the night's published dossiers directory doesn't
+    exist yet (nothing to index).
+    """
+    dossiers_dir = (
+        project_root / "published_artifacts" / "dossiers" / f"night_{night}"
+    )
+    if not dossiers_dir.exists():
+        return []
+    out: list[dict[str, Any]] = []
+    for path in sorted(dossiers_dir.glob("dossier_*.json")):
+        try:
+            dossier_no = int(path.stem.removeprefix("dossier_"))
+        except ValueError:
+            continue
+        try:
+            with path.open(encoding="utf-8") as f:
+                dossier = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        # shallow copy with dossier_no injected (don't mutate the parsed dict
+        # in place — harmless here, but matches the no-mutation convention
+        # the old in-memory enrichment used).
+        d = dict(dossier)
+        d["dossier_no"] = dossier_no
+        out.append(d)
+    return out
+
+
 def finalize_edition(
     *,
     run_dir: Path,
@@ -252,24 +305,30 @@ def finalize_edition(
 ) -> dict[str, Any]:
     """Stage 3: lead-pick + index writes. Returns the audit payload.
 
-    `dossiers_by_theme` maps theme_id → full dossier dict (already
-    written to disk). We also need each dossier's `dossier_no`, which
-    we get from the routing manifest's `themes_to_dossiers`.
+    `dossiers_by_theme` maps theme_id → full dossier dict for the
+    dossier(s) THIS call regenerated (already written to disk by the
+    caller before Stage 3 runs). It is used here only as a sanity check
+    that those writes actually landed — the night index itself is
+    rebuilt from every dossier file on disk (C46; see
+    `_rebuild_dossiers_from_disk`), NOT from this dict, so a
+    `--single-dossier` rerun doesn't drop the dossiers it didn't touch.
+
+    The lead-pick (`pick_lead_dossier`) was already immune to the C46
+    bug: it scores off `routing["themes_to_dossiers"]` and
+    `_load_theme_flags(run_dir)`, both of which are read fresh from the
+    FULL night's Stage 1 routing manifest and Provocateur briefings on
+    disk. Neither is filtered by `--single-dossier` — that flag only
+    narrows which dossier(s) Stage 2 regenerates (see `editor_flow.py`'s
+    `dossier_specs` filtering vs. the unfiltered `routing` it passes
+    through here). So the lead is always picked across every dossier
+    routed for the night, never just the one(s) reprocessed in this
+    call — no recovery-from-disk was needed for the lead-pick itself.
     """
     log = logger or logging.getLogger("editor_edition")
 
     themes_to_dossiers = routing.get("themes_to_dossiers", []) or []
     voices_routing = routing.get("voices_routing", []) or []
     theme_flags = _load_theme_flags(run_dir)
-
-    # Inject dossier_no into each dossier dict's metadata-shim for index building.
-    dno_by_theme = {d["theme_id"]: d["dossier_no"] for d in themes_to_dossiers}
-    enriched_dossiers = []
-    for tid, dossier in dossiers_by_theme.items():
-        # shallow copy with dossier_no injected (don't mutate caller's dict).
-        d = dict(dossier)
-        d["dossier_no"] = dno_by_theme.get(tid, 0)
-        enriched_dossiers.append(d)
 
     lead_no, audit = pick_lead_dossier(themes_to_dossiers, theme_flags)
     log.info(
@@ -278,16 +337,38 @@ def finalize_edition(
         f"score={audit['audit'][0]['score'] if audit['audit'] else 0})"
     )
 
-    # Per-night index (only if there are dossiers)
-    if enriched_dossiers:
-        night_idx = build_night_index(night, enriched_dossiers, lead_no, voices_routing)
+    # Per-night index — rebuilt from every dossier on disk (C46), so a
+    # `--single-dossier` rerun still leaves the full night indexed.
+    all_dossiers = _rebuild_dossiers_from_disk(project_root, night)
+
+    # Defensive: confirm this call's own dossier(s) actually made it to
+    # disk before we index off the directory listing. Should never fire
+    # (write_dossier already ran and raises on failure) — a warning here
+    # would mean the index is missing something the caller thinks it wrote.
+    processed_theme_ids = set(dossiers_by_theme.keys())
+    on_disk_theme_ids = {
+        d.get("metadata", {}).get("theme_id") for d in all_dossiers
+    }
+    missing = processed_theme_ids - on_disk_theme_ids
+    if missing:
+        log.warning(
+            f"  dossier(s) processed this call not found on disk under "
+            f"published_artifacts/dossiers/night_{night}/: {sorted(missing)} "
+            f"— index will be missing them too"
+        )
+
+    if all_dossiers:
+        night_idx = build_night_index(night, all_dossiers, lead_no, voices_routing)
         idx_path = (
             project_root / "published_artifacts" / "dossiers"
             / f"night_{night}" / "_index.json"
         )
         idx_path.parent.mkdir(parents=True, exist_ok=True)
         write_json_atomic(idx_path, night_idx)
-        log.info(f"  wrote {idx_path.name}")
+        log.info(
+            f"  wrote {idx_path.name} ({len(all_dossiers)} dossier(s) on disk; "
+            f"{len(processed_theme_ids)} regenerated this call)"
+        )
 
     # Aggregate root index across all nights present
     update_root_index(project_root)

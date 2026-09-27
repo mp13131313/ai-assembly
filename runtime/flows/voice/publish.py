@@ -104,12 +104,31 @@ def _to_publish_per_voice(
     )
 
     # Build deliberation block — strip pipeline-internal join fields.
+    #
+    # C53 residual (nested names): `voices_read[].voice_name` and
+    # `amendments[].cited_voice_name` had the SAME corruption as the
+    # top-level `voice_name` fixed in e01eb84 — they were being stamped
+    # from the OTHER voice's `council_member` / `cited_voice` field,
+    # which on Step 1/2/3 artifacts is the long card identity-prefix
+    # opening line ("I am Augusta Ada King, Countess of Lovelace…"), not
+    # a clean display name. Resolved the same way as the top-level fix:
+    # `voice_display_name(slug, project_root)` off the slug fields
+    # already present on these entries.
+    #   - `voices_read[].voice_slug` is always present — stamped by
+    #     `step3_amended_artifact.build_step3_user_prompt` from the other
+    #     voice's own `lineage.voice_slug` — so no fallback is needed.
+    #   - `amendments[].cited_voice_slug` is only present when
+    #     `run_step3_for_voice` could resolve the model's free-text
+    #     `cited_voice` citation to a known voice (it `setdefault`s the
+    #     slug only on a successful lookup match). When it's absent, there
+    #     is no slug to resolve — fall back to the raw `cited_voice` text
+    #     rather than fabricate one.
     deliberation = {
         "decision": step3_output.get("decision", "amend"),
         "decision_rationale": step3_output.get("decision_rationale", ""),
         "voices_read": [
             {
-                "voice_name": v.get("council_member") or v.get("voice_slug"),
+                "voice_name": voice_display_name(v["voice_slug"], project_root),
                 "voice_slug": v["voice_slug"],
                 "url_path": f"/night-{night}/{v['voice_slug']}",
                 "shared_themes": v.get("shared_themes", []),
@@ -118,8 +137,11 @@ def _to_publish_per_voice(
         ],
         "amendments": [
             {
-                "cited_voice_name": a.get("cited_voice")
-                or a.get("cited_voice_slug", ""),
+                "cited_voice_name": (
+                    voice_display_name(a["cited_voice_slug"], project_root)
+                    if a.get("cited_voice_slug")
+                    else a.get("cited_voice", "")
+                ),
                 "cited_voice_slug": a.get("cited_voice_slug", ""),
                 "cited_url_path": (
                     f"/night-{night}/{a['cited_voice_slug']}"
