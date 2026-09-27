@@ -171,6 +171,21 @@ class TestPerNightDossierIndex:
         assert "edition_lead" in index
         assert index["edition_lead"] is None
 
+    def test_preserves_existing_edition_lead(self, tmp_path):
+        """PLAN 0.1.2: the editor writes this same _index.json with the real
+        lead; publish must not null it (last-writer-wins clobber)."""
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        night_dir = _seed_dossiers_for_night(
+            project_root, 1, [(1, "theme_001", "First"), (2, "theme_002", "Second")]
+        )
+        lead = {"lead_dossier_no": 2, "score": 31.5}
+        write_json_atomic(night_dir / "_index.json", {"edition_lead": lead, "dossiers": []})
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert index["edition_lead"] == lead
+        assert index["dossier_count"] == 2
+
     def test_voices_in_night_block(self, tmp_path):
         """Per-night index carries a voices_in_night dict keyed by voice_slug,
         so the microsite can render per-voice navigation from one file (no

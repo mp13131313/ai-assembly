@@ -922,22 +922,27 @@ def _build_per_night_dossier_index(
                 "artifact_form": h.get("artifact_form", ""),
             }
 
-    # `edition_lead` reserved for a forthcoming per-night LLM edition step
-    # (B3 minimal — Claudia or a sibling editor synthesises the night's
-    # dossiers into a single front-page lead: kicker / headline / editor's
-    # note / lead_dossier_no). Until that step ships, the field stays null
-    # and microsites/designers can plan around its presence; populated
-    # later with no schema break for downstream consumers.
+    # `edition_lead` is computed by the editor (editor/edition.py
+    # finalize_edition → pick_lead_dossier), which writes this same
+    # _index.json. PLAN 0.1.2: preserve whatever lead is already on disk
+    # instead of nulling it — otherwise running publish after the editor
+    # erases the lead (last writer wins). Stays null if no lead exists yet.
+    index_path = out_dir / "_index.json"
+    edition_lead = None
+    if index_path.exists():
+        try:
+            edition_lead = json.loads(index_path.read_text(encoding="utf-8")).get("edition_lead")
+        except (OSError, json.JSONDecodeError):
+            pass
     index = {
         "night": night,
         "url_path": f"/dossiers/night-{night}",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "dossier_count": len(dossiers_summary),
         "dossiers": dossiers_summary,
-        "edition_lead": None,
+        "edition_lead": edition_lead,
         "voices_in_night": voices_in_night,
     }
-    index_path = out_dir / "_index.json"
     write_json_atomic(index_path, index)
     logger.info(
         f"  Dossier index (night {night}): {len(dossiers_summary)} dossiers → "
