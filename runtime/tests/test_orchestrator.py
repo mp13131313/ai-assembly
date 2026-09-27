@@ -11,6 +11,7 @@ the orchestrator hands to downstream flows.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -43,10 +44,23 @@ def project_root(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def _set_state(run_dir: Path, session_id: str, state: str) -> None:
+def _set_state(run_dir: Path, session_id: str, state: str, *, pid: int | None = None) -> None:
+    """Seed a session's status.json.
+
+    C54: transcription_state now routes through infer_state, which — for
+    the exact state "transcribing" (not a substate like "transcribing_asr")
+    — checks whether the recorded `pid` is still alive and reclassifies to
+    `error` if not. Absent `pid` reads as dead. Tests that want to model a
+    still-running transcription must pass a live pid (e.g. os.getpid(),
+    the test process itself); tests of "done"/"error"/"normalized"/
+    substates are unaffected (infer_state doesn't liveness-check those).
+    """
     d = run_dir / "01_transcription" / session_id
     d.mkdir(parents=True, exist_ok=True)
-    (d / "status.json").write_text(json.dumps({"state": state}))
+    payload = {"state": state}
+    if pid is not None:
+        payload["pid"] = pid
+    (d / "status.json").write_text(json.dumps(payload))
 
 
 def _make_sentinel(run_dir: Path, subdir: str, fname: str) -> None:
@@ -117,7 +131,7 @@ class TestTranscriptionState:
         run_dir = project_root / "runs" / "athens_night_1"
         run_dir.mkdir()
         _set_state(run_dir, "s1", "done")
-        _set_state(run_dir, "s2", "transcribing")
+        _set_state(run_dir, "s2", "transcribing", pid=os.getpid())
         ts = orch.transcription_state(run_dir, ["s1", "s2"])
         assert ts["done_count"] == 1
         assert ts["all_done"] is False
@@ -171,7 +185,7 @@ class TestPollOnce:
         run_dir = project_root / "runs" / "athens_night_1"
         run_dir.mkdir()
         _set_state(run_dir, "s1", "done")
-        _set_state(run_dir, "s2", "transcribing")
+        _set_state(run_dir, "s2", "transcribing", pid=os.getpid())
         status = orch.poll_once(project_root, 1)
         assert status["state"] == "idle"
         assert status["transcription"]["done_count"] == 1

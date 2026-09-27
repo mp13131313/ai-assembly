@@ -125,10 +125,11 @@ def fire_pending_transcriptions(
 ) -> dict:
     """C26: scan for `normalized` sessions and spawn transcription up to cap.
 
-    Reads each required session's status.json. Counts in-flight
-    transcriptions (any status startswith 'transcribing'); fires
-    spawn_transcription against the next `normalized` sessions until the
-    in-flight count reaches `max_concurrent`.
+    Reads each required session's state via `infer_state` (C54 — not the
+    raw status.json state; see `transcription_state` below for why).
+    Counts in-flight transcriptions (any status startswith 'transcribing');
+    fires spawn_transcription against the next `normalized` sessions until
+    the in-flight count reaches `max_concurrent`.
 
     `spawn_transcription` is the orchestrator-facing entrypoint added in
     pipeline.py (C26): it spawns the subprocess against the already-
@@ -144,7 +145,7 @@ def fire_pending_transcriptions(
     """
     # Local import to avoid top-of-file ingest dep on path setup; the
     # orchestrator already added _RUNTIME_DIR to sys.path.
-    from ingest.pipeline import fire_transcription
+    from ingest.pipeline import fire_transcription, infer_state
 
     fired: list[str] = []
     skipped: list[str] = []
@@ -153,14 +154,17 @@ def fire_pending_transcriptions(
 
     for sid in session_ids:
         sdir = run_dir / "01_transcription" / sid
-        sp = sdir / "status.json"
-        if not sp.exists():
+        if not (sdir / "status.json").exists():
             continue
-        try:
-            status = json.loads(sp.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        state = (status or {}).get("state", "")
+        # C54: infer_state — not the raw status.json state — is the
+        # source of truth here, same as the web UI (runtime/ingest/app.py).
+        # It flips a non-terminal status to `done` when session_package.json
+        # is already present on disk, which is exactly the manual-audio-
+        # passthrough case (operator ran process_session by hand;
+        # status.json was left at e.g. `normalized`). Without this, such a
+        # session gets re-dispatched here even though it already finished.
+        status = infer_state(sdir)
+        state = status.get("state") or ""
         if isinstance(state, str) and state.startswith("transcribing"):
             inflight += 1
         elif state == TRANSCRIPTION_STATE_NORMALIZED:
@@ -200,22 +204,35 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
       - transcribing_sessions: list[str]  (C26: subset of pending currently in-flight)
       - done_count: int
       - total_count: int
+
+    C54: classification is driven by `infer_state` (runtime/ingest/pipeline.py)
+    rather than the raw on-disk status.json state — the same source of
+    truth the web dashboard uses. infer_state treats a session as `done`
+    once session_package.json exists on disk even if status.json was never
+    flipped (the manual-audio-passthrough path: an operator ran
+    process_session by hand). Reading raw status.json here previously let
+    such a session sit at e.g. `normalized` forever from the orchestrator's
+    point of view — blocking `all_done` and, worse, making it look
+    dispatchable to fire_pending_transcriptions (re-running a finished
+    session). infer_state also self-heals status.json when it detects the
+    session_package.json-present case, and detects a `transcribing` status
+    whose PID has died and reclassifies it as `error` — both are read-only
+    from this function's perspective on every call after the first.
     """
+    # Local import — see fire_pending_transcriptions() above for rationale.
+    from ingest.pipeline import infer_state
+
     error_sessions: list[str] = []
     pending_sessions: list[str] = []
     normalized_sessions: list[str] = []
     transcribing_sessions: list[str] = []
     done_count = 0
     for sid in session_ids:
-        status_path = run_dir / "01_transcription" / sid / "status.json"
-        if not status_path.exists():
+        session_dir = run_dir / "01_transcription" / sid
+        if not (session_dir / "status.json").exists():
             pending_sessions.append(sid)
             continue
-        try:
-            status = json.loads(status_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            pending_sessions.append(sid)
-            continue
+        status = infer_state(session_dir)
         state = status.get("state")
         if state == TRANSCRIPTION_STATE_DONE:
             done_count += 1

@@ -8,6 +8,7 @@ spawn during tests.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -55,8 +56,12 @@ class TestTranscriptionStateBuckets:
         assert ts["transcribing_sessions"] == []
 
     def test_transcribing_session_is_pending(self, tmp_path):
+        # C54: transcription_state now routes through infer_state, which
+        # reclassifies a `transcribing` status with a dead PID as `error`.
+        # Use the test process's own (live) pid to model a still-running
+        # transcription.
         run = tmp_path / "athens_night_1"
-        _seed_session(run, "s1", state="transcribing", pid=12345)
+        _seed_session(run, "s1", state="transcribing", pid=os.getpid())
         ts = transcription_state(run, ["s1"])
         assert ts["pending_sessions"] == ["s1"]
         assert ts["normalized_sessions"] == []
@@ -76,6 +81,29 @@ class TestTranscriptionStateBuckets:
         assert ts["done_count"] == 1
         assert ts["normalized_sessions"] == []
         assert ts["transcribing_sessions"] == []
+
+    def test_session_package_present_overrides_stale_normalized_state(self, tmp_path):
+        """C54: manual-audio-passthrough case.
+
+        An operator ran process_session by hand against already-normalized
+        audio; session_package.json landed on disk but status.json was
+        never flipped past `normalized`. transcription_state must route
+        through infer_state (which checks for session_package.json) and
+        classify the session as done, not pending/normalized — otherwise
+        the orchestrator waits forever (or worse, re-dispatches it; see
+        TestFirePendingTranscriptions below).
+        """
+        run = tmp_path / "athens_night_1"
+        sdir = _seed_session(run, "s1", state="normalized")
+        (sdir / "session_package.json").write_text(json.dumps({"transcript": {"turns": []}}))
+        ts = transcription_state(run, ["s1"])
+        assert ts["all_done"] is True
+        assert ts["done_count"] == 1
+        assert ts["pending_sessions"] == []
+        assert ts["normalized_sessions"] == []
+        # infer_state self-heals status.json on disk too.
+        status = json.loads((sdir / "status.json").read_text())
+        assert status["state"] == "done"
 
 
 # --- fire_pending_transcriptions dispatch logic -----------------------
@@ -114,7 +142,8 @@ class TestFirePendingTranscriptions:
     def test_inflight_counted_against_cap(self, tmp_path):
         run = tmp_path / "athens_night_1"
         # One already in-flight + two normalized + cap = 2 → fire 1 only.
-        _seed_session(run, "s1", state="transcribing", pid=12345)
+        # C54: live pid required — see test_transcribing_session_is_pending.
+        _seed_session(run, "s1", state="transcribing", pid=os.getpid())
         _seed_session(run, "s2", state="normalized")
         _seed_session(run, "s3", state="normalized")
         with patch("ingest.pipeline.fire_transcription") as mock_fire:
@@ -163,6 +192,21 @@ class TestFirePendingTranscriptions:
         # Session listed in session_ids but no status.json yet.
         with patch("ingest.pipeline.fire_transcription") as mock_fire:
             result = fire_pending_transcriptions(run, ["nonexistent"])
+        mock_fire.assert_not_called()
+        assert result["fired"] == []
+        assert result["normalized_pending"] == 0
+
+    def test_manually_completed_session_not_redispatched(self, tmp_path):
+        """C54: session_package.json present + status.json stuck at
+        `normalized` (manual-audio-passthrough) must NOT be re-fired —
+        fire_pending_transcriptions has to see it as done via infer_state,
+        not as a normalized session still awaiting dispatch.
+        """
+        run = tmp_path / "athens_night_1"
+        sdir = _seed_session(run, "s1", state="normalized")
+        (sdir / "session_package.json").write_text(json.dumps({"transcript": {"turns": []}}))
+        with patch("ingest.pipeline.fire_transcription") as mock_fire:
+            result = fire_pending_transcriptions(run, ["s1"])
         mock_fire.assert_not_called()
         assert result["fired"] == []
         assert result["normalized_pending"] == 0

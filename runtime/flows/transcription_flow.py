@@ -250,6 +250,82 @@ def merge_speaker_ids(turns, mapping_output):
     return named
 
 
+def build_speaker_id_fallback(turns, error):
+    """C49: auto-passthrough fallback for a Speaker ID JSON-decode failure.
+
+    Called from `process_session` only after `identify_speakers`' own task
+    retries are exhausted and the final failure is a JSON decode error
+    (large speaker rosters occasionally push the structured output past
+    the point where the model keeps it well-formed — see OPEN_ITEMS C49).
+
+    Mirrors the operator's battle-tested manual workaround from Athens
+    Nights 1-3: map every distinct diarization label to
+    "Unidentified Speaker N", numbered in order of first appearance so
+    each anonymous_label keeps one stable, distinct identity across the
+    whole session (one number per LABEL, not per turn — that's what
+    preserves the out_01 diarization turn boundaries; merge_speaker_ids'
+    own no-match fallback numbers per turn instead, which would collapse
+    a speaker's repeated turns into different "Unidentified" identities).
+
+    Returns the same {"mappings": [...], "flags": [...]} shape
+    `identify_speakers` normally returns, so merge_speaker_ids() and
+    assemble_session_package() consume it identically either way.
+
+    The degraded state is flagged via `flags` (type
+    "speaker_id_auto_passthrough"). assemble_session_package() copies
+    `flags` verbatim into session_package.json's
+    `review_queue.diarization_flags` — already the most visible surface
+    for this: it's rendered under review.md's "## Flags" heading, and
+    review.md is the first file process_session tells the operator to
+    open ("Start with review.md..."). status.json is owned by the ingest
+    layer (runtime/ingest/pipeline.py) and isn't touched by this flow at
+    all, even on success, so writing there would be new coupling for a
+    weaker payoff than the review.md path this already has for free.
+    """
+    labels_in_order = []
+    seen = set()
+    for t in turns:
+        label = t.get("anonymous_label")
+        if label and label not in seen:
+            seen.add(label)
+            labels_in_order.append(label)
+
+    mappings = [
+        {
+            "anonymous_label": label,
+            "identified_name": f"Unidentified Speaker {i}",
+            "confidence": "low",
+            "role": "unknown",
+            "evidence": (
+                "C49 auto-passthrough fallback: Speaker ID's structured "
+                "output failed to parse as JSON after retries; no "
+                "attribution was attempted for this label."
+            ),
+        }
+        for i, label in enumerate(labels_in_order, start=1)
+    ]
+
+    flags = [
+        {
+            "type": "speaker_id_auto_passthrough",
+            "labels": labels_in_order,
+            "note": (
+                f"Speaker ID failed after retries with a JSON decode error "
+                f"({error}) — likely a large speaker roster pushing the "
+                f"structured output past the point where the model keeps "
+                f"it well-formed (OPEN_ITEMS C49). All "
+                f"{len(labels_in_order)} diarization labels were "
+                f"auto-mapped to 'Unidentified Speaker N' (preserving "
+                f"turn boundaries) so the session could continue to "
+                f"cleaning instead of halting. NAMED ATTRIBUTION IS "
+                f"ABSENT FOR THIS SESSION — operator review recommended."
+            ),
+        }
+    ]
+
+    return {"mappings": mappings, "flags": flags}
+
+
 def build_review_md(session, id_output, cleaned_turns):
     md = [f"# Review — {session['session_title']}\n"]
 
@@ -640,7 +716,24 @@ def process_session(audio_path, session_path):
         id_output = json.loads(p2.read_text(encoding="utf-8"))
         logger.info(f"Resuming: loaded {p2.name} from disk (skipping Speaker ID)")
     else:
-        id_output = identify_speakers(turns, session)
+        try:
+            id_output = identify_speakers(turns, session)
+        except json.JSONDecodeError as e:
+            # C49: identify_speakers' own task retries (see its @task
+            # decorator) are already exhausted by the time this fires —
+            # this only degrades the specific failure mode where the
+            # model's structured output never becomes valid JSON (large
+            # rosters). Any other failure (auth, network, etc.) raises a
+            # different exception type and is NOT caught here — it still
+            # halts the session as before.
+            logger.warning(
+                f"Speaker ID failed after retries with a JSON decode "
+                f"error ({e}). C49 auto-passthrough: writing an "
+                f"all-Unidentified speaker mapping and continuing to "
+                f"cleaning instead of halting; flagged in "
+                f"review_queue.diarization_flags for operator review."
+            )
+            id_output = build_speaker_id_fallback(turns, e)
         p2.write_text(json.dumps(id_output, indent=2, ensure_ascii=False))
     named_turns = merge_speaker_ids(turns, id_output)
 
