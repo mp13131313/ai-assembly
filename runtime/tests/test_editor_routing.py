@@ -284,3 +284,36 @@ def test_write_routing_manifest_writes(run_dir):
     on_disk = json.loads(out_path.read_text())
     assert on_disk == manifest
     assert on_disk["schema_version"] == "1.0"
+
+
+# --- C53: voice_name resolved from council_config, not council_member ----
+
+
+def test_voice_name_from_council_config_not_council_member(tmp_path):
+    """Routing stamps each voice's display name into theme_routing.json,
+    which publish_flow copies into the dossier index `voices_routed`.
+    Production `council_member` is the long card identity opening, so the
+    name must come from <PROJECT_ROOT>/council_config.json by slug — and
+    verbatim, keeping the article in "Voice of the Octopus"."""
+    project_root = tmp_path
+    run_dir = project_root / "runs" / "athens_night_1"
+    run_dir.mkdir(parents=True)
+    (project_root / "council_config.json").write_text(json.dumps({"members": [
+        {"name": "Voice of Ada Lovelace"},
+        {"name": "Voice of the Octopus"},
+    ]}))
+    _write_step2_artifact(run_dir, "ada_lovelace",
+                          focus_decision="Focus on Response 1.",
+                          themes_covered=["theme_001"],
+                          council_member="I am Augusta Ada King, Countess of Lovelace — Byron's daughter")
+    _write_briefing(run_dir, "ada_lovelace", ["theme_001"])
+    _write_step2_artifact(run_dir, "octopus",
+                          focus_decision="I decline to answer; the question does not reach me.",
+                          themes_covered=[],
+                          council_member="I am octopus. The name is yours, not mine")
+    manifest = routing.route_themes(run_dir, night=1)
+
+    ada = next(v for v in manifest["voices_routing"] if v["voice_slug"] == "ada_lovelace")
+    assert ada["voice_name"] == "Voice of Ada Lovelace"
+    octopus = next(r for r in manifest["refusals"] if r["voice_slug"] == "octopus")
+    assert octopus["voice_name"] == "Voice of the Octopus"

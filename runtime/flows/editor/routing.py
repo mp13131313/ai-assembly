@@ -51,7 +51,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import write_json_atomic  # noqa: E402
+from flows.shared.io import voice_display_name, write_json_atomic  # noqa: E402
 
 
 REFUSAL_MARKERS = (
@@ -393,14 +393,21 @@ def _theme_titles_from_briefings(
     return out
 
 
-def _voice_name_lookup(artifacts: list[dict[str, Any]]) -> dict[str, str]:
-    """voice_slug → council_member_name from Step 2 artifacts."""
+def _voice_name_lookup(
+    artifacts: list[dict[str, Any]], project_root: Path
+) -> dict[str, str]:
+    """voice_slug → display name ("Voice of X") for every Step 2 artifact.
+
+    C53: resolved from council_config via the slug, not the artifact's
+    `council_member` (the long card identity opening line). This name
+    flows into theme_routing.json and from there into publish_flow's
+    dossier-index `voices_routed`.
+    """
     out = {}
     for a in artifacts:
         slug = a.get("lineage", {}).get("voice_slug")
-        name = a.get("council_member") or slug
         if slug:
-            out[slug] = name
+            out[slug] = voice_display_name(slug, project_root)
     return out
 
 
@@ -430,7 +437,7 @@ def route_themes(
 
     artifacts = _load_step2_artifacts(run_dir)
     briefings_by_voice = _load_briefings(run_dir)
-    voice_names = _voice_name_lookup(artifacts)
+    voice_names = _voice_name_lookup(artifacts, run_dir.parent.parent)
     theme_titles = _theme_titles_from_briefings(briefings_by_voice)
 
     voices_routing: list[dict[str, Any]] = []
