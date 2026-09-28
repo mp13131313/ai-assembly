@@ -1388,3 +1388,17 @@ Every persona pass (0a → Derive, incl. the three cross-vendor validator ladder
 
 **Either way,** the DR model choice moves into `model_routing.json`. If automated, it becomes real steps. If it stays manual, the Pass 0a/0b prompts render the model name from the file. This resolves backlog §II.1 / audit row #10.
 
+## 37. Untouched-code review, persona findings 🟡 (filed 2026-09-28; report `runtime/REVIEW_2026_09_28_untouched_code.md`)
+
+The Fable 5.1 review of the code the `phase0-fixes` branch leaves unchanged. All of it predates the branch; none blocks the merge. Runtime findings: runtime OPEN_ITEMS C68.
+
+| # | Sev. | Finding | Status |
+|---|---|---|---|
+| A5 | MAJOR | **`personas/scripts/sentinel_regen.py`, the Stage-4 quality gate, can't run.** Its default sentinels point at `projects/phase-l-*` (archived 2026-05-01), it accepts only those two slugs, it has no `--project`, and its docstring usage is stale. The ONBOARDING `regen --voices` recipe fails too | open. **Blocks Stage 4.** Point it at a sandbox copy, never athens-2026 |
+| A3 | MAJOR | **Wikisource fetches are truncated at the first nested `</div>`** (`node1c_fetch.py:39-42`). Lovelace's *Sketch of the Analytical Engine* is stored as 697 chars of CSS (`athens-2026/voices/ada_lovelace/03_corpus/01_primary_texts.json`), and §25 counted it a success | open. **Operator:** after the fix, re-fetch and judge whether Lovelace's card needs a patch |
+| A12 | MINOR | `patch_walker` silently creates a new key when the final path segment is misspelled; 7a-FIX logs "APPLIED" while the real field stays unfixed | open |
+| A13 | MINOR | The fetch SSRF guard doesn't re-check redirects and misses some private ranges. New evidence on the filed TOCTOU item (roadmap 0.3b) | open |
+| A16 | NIT | The persona cost ledger (`clients._record` → `manifest.record`) is never written: no caller passes `slug` | open: wire it (with a lock) or delete it |
+| A17 | NIT | `research_validation.py:98-102` section coverage matches bare words, so it can't fail | open |
+| A6 | MINOR | Four shipped cards hold a first-person sentence in `council_member_name` ("I am …"), so the runtime says "You are I am …". Runtime side: C68 A6 | open; decide with Stage 4 (voice input changes) |
+

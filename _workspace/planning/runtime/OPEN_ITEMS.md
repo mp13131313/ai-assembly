@@ -3067,6 +3067,45 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 **Fixed 2026-09-28 (`d07e5cf`):** cause confirmed by reading the code: `editor_flow.py` submitted every dossier call to the `ThreadPoolExecutor` at once. Stage 2 now runs the first dossier that makes a call alone, then the rest in parallel. A mocked test shows the first call finishes before any other starts; it fails on the old scheduling. Cost: one dossier's wall time (~1.5–5 min at Athens) added per night. Waiting for the first streamed token instead of the whole call would save most of that, but needs a hook inside `stream_voice_call`. *Inference, not filed.* **⏸ Live check:** on the next real multi-dossier run, the first dossier's `metadata.cache_creation_input_tokens` should be about 52K and the others' `cache_read_input_tokens` about 52K. Waits on the next real editor run; none is scheduled.
 
+### C67. Branch-review findings (`phase0-fixes` → `main`) 🟡 fix before the merge (filed 2026-09-28)
+**Why:** the Fable 5.1 review of the branch diff (code-review skill; report `REVIEW_2026_09_28_phase0_fixes.md` in this folder) found no BLOCKER or MAJOR issues: 5 MINOR, 5 NIT. The branch itself introduced these, so they are fixed on it before it merges. R1 comes from the untouched-code review, and the last row is the main session's own finding.
+
+| # | Sev. | Finding (report §1) | Status |
+|---|---|---|---|
+| 1 | MINOR | `TRANSCRIPTION_CLAUDE_MODEL` no longer reaches Speaker ID (env chain lost a rung; regression vs `main`) | open |
+| 2 | MINOR | C49 fallback is saved as a real Speaker ID result, so a retry never re-runs Speaker ID | open |
+| 3 | MINOR | C49 degrade invisible outside `review.md`: the dashboard shows "done" (= untouched-review R2) | open |
+| 4 | MINOR | A held voice can't be dropped from the night index any more (C50 rebuild-from-disk; behavior change vs `main`) | open |
+| 5 | MINOR | `"manual": true` on an API step bypasses the loader's refusals; call sites don't check `cfg.manual` | open |
+| 6 | NIT | Restamp script skips nested `cited_voice_name` (Athens unaffected) | open |
+| 7 | NIT | `VOICE_VALIDATION_MODELS=","` raises IndexError, not ModelRoutingError | open |
+| 8 | NIT | `PROVOCATEUR_THINKING` accepts more "on" values than on `main` (document it) | open |
+| 9 | NIT | C66 test depends on thread timing (use a Barrier) | open |
+| 10 | NIT | Editor finds `council_config.json` via `run_dir.parent.parent`, not `project_root` | open |
+| R1 | MINOR | Dormant Step-3 prompt still names peers by the long `council_member` line (`card_assembly.py:547-565`, `step3_amended_artifact.py:76`) | open |
+| — | doc | `CLAUDE.md` §"Where specs live": its Voice-spec summary still states the pre-C28 validation policy and CLI | open |
+
+**Done =** each row fixed with a test where it's code; the suites green; the rows marked with commits.
+
+### C68. Untouched-code review, runtime findings 🟡 (filed 2026-09-28; pre-existing, none blocks the merge)
+**Why:** the Fable 5.1 review of the code the branch does not change (report `REVIEW_2026_09_28_untouched_code.md`). Its ripple zone was **clear** for the merge. The audit found defects that predate the branch. Runtime findings are below; the persona findings are in voices OPEN_ITEMS §37.
+
+| # | Sev. | Finding (report §2) | Status |
+|---|---|---|---|
+| A1 | BLOCKER | `reflections_to_session_package.py` writes `title`, but the Researcher reads `session_title`/`session_description`/`session_format`. All 5 Athens reflection sessions (103 extractions) reached the Researcher with a blank title and description and format "panel" | open. **Operator:** fix forward; the published Athens record stays as it is? |
+| A2 | MAJOR | `reset_run.py` leaves the next night's `continuity_night_<N+1>.json`, and continuity reuses it. After a reset, the voices remember deleted pieces | open |
+| A4 | MAJOR | The systemd sandboxes (`ingest.service`, `orchestrator@.service`) allow pre-Tier-3 paths, so uploads and continuity writes would fail on a VM. The VM was never provisioned (B10) | open; only matters when a VM is set up |
+| A6 | MINOR | Four voices' system prompts open "You are I am …" (`card_assembly.py:421-422` + the cards' `council_member_name`), on every call, all three nights. Third surface of the C53 root cause | open. Changes voice input, so re-validate. Cross-ref voices §37 |
+| A7 | MINOR | `vendor_intake.land()` overwrites the valid package before validating the new one; a non-string `speaker` crashes | open |
+| A8 | MINOR | A per-night `reset_run` deletes all nights' published extractions and voice pages plus the cross-night index; `run_dir` isn't checked to be inside the project | open |
+| A9 | MINOR | `generate_sessions_json.py` / `apply_ai_assembly_flags_from_csv.py` silently drop or unflag the 7 hand-added `__audio*` sessions | open |
+| A10 | MINOR | Night-3 continuity summarises Night 2 only; the spec says it merges Nights 1+2 | open. **Operator:** fix the code or the spec? |
+| A11 | MINOR | A session stuck in `normalizing` after a restart is never flagged; `/retry` refuses | open |
+| A14 | NIT | Provocateur prompts say "12 voices" and use Peter Thiel (removed) as the worked example | open |
+| A15 | NIT | The voice prompt headers read literally "FROM NIGHT N-1" | open |
+| R3 | risk | Published fields the external microsite may read changed shape (names, index fields, theme files, no leading `**`) | **Operator:** check the microsite before its next build |
+
+
 ## Section F — Recently landed (for context)
 
 These items closed within the last 2 weeks. Listed here so the runtime onboarding has context for the current state.
