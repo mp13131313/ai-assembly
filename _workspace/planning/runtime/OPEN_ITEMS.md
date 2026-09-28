@@ -2008,7 +2008,7 @@ All three were demonstrated to work end-to-end on Night 1 (commits `dcaf7ce` + `
 
 **Background.** `editor_flow.py` regenerates every dossier on every fire — there's no `out_path.exists() → return cached` short-circuit at the per-dossier level (which `voice/step1_private_reasoning.py:run_step1_for_pair` does have, line 168). On Athens Night 1 a full editor re-fire to rebuild the index after a single-dossier fire produced 5 fresh Opus calls for all 5 dossiers (~$5-7 + ~3-4 min wall time) when only the index needed rebuilding.
 
-**Fix:** add file-existence cache to `run_dossier_for_theme` in `flows/editor/dossier_generation.py` matching the voice-step1 pattern. With `--no-cache` flag to force regeneration.
+**Fix:** add file-existence cache to `run_dossier_for_theme` in `flows/editor/dossier_generation.py` matching the voice-step1 pattern. With a `--regenerate` flag to force regeneration *(named 2026-09-28 with C65, operator's choice; `--no-cache` is gone, and `--no-prompt-cache` means something else)*.
 
 **Status:** filed for v4.1. Cross-references C46 (single-dossier index issue) — both touch editor_flow's idempotency model.
 
@@ -3047,12 +3047,14 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 **Residual — ⏸ waits on the operator scheduling it:** one-off repair of the published Athens record, in the pattern of the C53 restamp (dry run by default; operator reviews the diff and pushes in athens-2026): strip the leading `"**\n"` from `body_paragraphs[0]` in the 13 files under `published_artifacts/dossiers/night_{1,2,3}/`, then regenerate `data_views/` with `runtime/scripts/build_athens_data_graph.py` (both `athens_data_graph.json` and `view_by_theme.html` embed the bodies).
 
-### C65. Editor `--no-cache` flag does nothing 🟡 (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` Changelog → v3.1; cross-ref C45)
+### C65. Editor `--no-cache` flag does nothing ✅ FIXED 2026-09-28 (`09a2e4c`, branch `fix/c65-editor-no-cache`) · (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` Changelog → v3.1; cross-ref C45)
 **Why:** the spec and the CLI help promise that `--no-cache` disables prompt caching ("useful when iterating on Tim's card"). It doesn't. `editor_flow.py` takes the flag (`:94`), records it in the manifest (`:292`) and passes it to `run_editor_pipeline` (`:335`), but never on to the call: `generate_dossier` calls `stream_voice_call` without `cache_system` (`runtime/flows/editor/dossier_generation.py:583` at `9f415dd`), and `cache_system` defaults to `True` (`runtime/flows/voice/_anthropic_call.py:74`). So every dossier call caches its system prompt whatever the flag says. Checked 2026-09-28 by reading the code; not run.
 
 **Decide first:** C45 proposes a `--no-cache` flag with a different meaning (skip the per-dossier file cache and regenerate). Pick the names for both behaviours together.
 
 **Done =** either the flag reaches `stream_voice_call(cache_system=False)` with a test that the request carries no `cache_control`, or the flag and its mentions (CLI help, spec §"Implementation" → CLI) are removed.
+
+**Operator decision 2026-09-28** (naming, with C45): *"--no-prompt-cache + --regenerate"*. The prompt-cache switch is `--no-prompt-cache`; C45's future "redo already-written dossiers" flag will be `--regenerate`. **Fixed (`09a2e4c`):** the flag now reaches `stream_voice_call(cache_system=False)` via `generate_dossier(cache_system=...)`, and the manifest records `config.no_prompt_cache`. Tests: the flag reaches the call, and an uncached request has no `cache_control`. The Editor spec's CLI section is updated. Side note: its old purpose ("useful when iterating on Tim's card") was moot, since the cache only matches an identical prompt. The flag's use is saving the cache-write cost on one-off runs.
 
 ### C66. Editor dossier calls never read the prompt cache on multi-dossier nights 🟡 (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` §"Stage 2" → "Per-call inputs"; cross-ref C19a)
 **Why:** the system prompt (Tim's card + deployment block + closing prompt) is identical for every dossier call of a night and carries a 1h cache breakpoint, so the plan (C19a) was one cache write, then reads. The published Athens dossiers show otherwise (`metadata.cache_*`, read-only, 2026-09-28): on Nights 2 and 3 all 8 calls *wrote* the 52,641-token cache and none read it; on Night 1 all 5 read it and none wrote.
