@@ -42,8 +42,7 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `01df63a`; the 2026-09-28 C63 commits
-  after it are local until pushed.
+  `phase0-fixes` is pushed through `aeaa63a` (2026-09-28).
 
 ---
 
