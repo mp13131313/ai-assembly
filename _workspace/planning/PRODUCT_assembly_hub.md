@@ -183,6 +183,8 @@ Three levels, **disclosed, not gated**:
 - Builder terms: the builder attests truthfully; the platform verifies presence and form of attestations, not their truth (the §5 registry-not-adjudicator model).
 
 ### 11.5 Vision decision A — the Assembly's invariant (PLAN operator decision #10)
+**✅ DECIDED 2026-09-28: the loose four-part invariant, as proposed below** (juxtaposition on the same material is the minimum collective moment; inter-voice response is the labelled stronger form). The strict variant was considered and declined.
+
 **Proposal:** a deployment is "the Assembly" iff all four hold —
 1. **A council, not a voice** — ≥3 voices with distinct epistemic frames on the same material.
 2. **Construction visible** — each voice appears as "Voice of X", with provenance reachable from the output.

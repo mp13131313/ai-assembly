@@ -242,7 +242,7 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 - **C51 per-theme files** — approved: generate for Athens.
 - **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
-- **Invariant (#10)** — open; operator asked where the proposal comes from (answered 2026-09-28).
+- **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.
 
 ---
 
