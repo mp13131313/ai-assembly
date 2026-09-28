@@ -10,7 +10,7 @@
 |------|--------|---------------------|-------|
 | `AI_Assembly_Briefing_v3_1.md` | **Current** | 2026-09-28 | Project source of truth (target state). |
 | `AI_Assembly_Persona_Card_v2.md` | **Current** | 2026-09-28 | v2 schema + v2.1 amendments. 36 generated + 2 continuity + metadata (see `personas/CROSS_REPO_CONTRACT.md`). §H family of forms: BUILD decided, not built yet (FU#55). |
-| `AI_Assembly_Persona_Pipeline_v4.md` | **Current** with caveat | 2026-09-28 | Persona build pipeline v4. **Caveat:** the manual Deep Research step's model guidance (Opus 4.6 for §1–§5) is under review; see voices OPEN_ITEMS §36. |
+| `AI_Assembly_Persona_Pipeline_v4.md` | **Current** | 2026-09-28 | Persona build pipeline v4. The manual Deep Research step's model is set in `model_routing.json` (voices OPEN_ITEMS §36). |
 | `AI_Assembly_Researcher_Pipeline.md` | **Current** | 2026-09-28 | Extraction and grouping (v3); ran all three Athens nights. |
 | `AI_Assembly_Provocateur_Pipeline.md` | **Current** | 2026-09-28 | Triage, selection, formulation, packaging (v2); ran all three Athens nights. |
 | `AI_Assembly_Transcription_Pipeline.md` | **Current** with caveat | 2026-09-28 | v2.1, audio flow, including the C49 speaker-ID auto-passthrough. **Caveat:** the reflection-handling §7 is stale. Reflections arrive as vendor JSON; use `runtime/scripts/reflections_to_session_package.py`. |

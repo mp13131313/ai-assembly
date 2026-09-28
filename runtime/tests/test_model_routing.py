@@ -38,6 +38,8 @@ GOLDEN = {
     "runtime.editor.dossier": (OPUS, "adaptive"),
     "personas.pass_0a_voice_config": (OPUS, "adaptive"),
     "personas.pass_0b_tailor": (OPUS, "adaptive"),
+    "personas.dr_sections_1_5": (OPUS, None),   # manual (claude.ai Deep Research)
+    "personas.dr_section_6": (OPUS, None),      # manual
     "personas.pass_1a_perplexity": ("sonar-deep-research", None),
     "personas.pass_1b_gemini": ("gemini-2.5-pro", None),
     "personas.pass_1_merge": (OPUS, "adaptive"),
@@ -159,6 +161,21 @@ def test_ladder_rung_must_be_openai_or_google(tmp_path, monkeypatch):
     monkeypatch.setenv("VOICE_VALIDATION_MODELS", f"gpt-4o,{OPUS}")  # env path too
     with pytest.raises(mr.ModelRoutingError, match="cross-model"):
         mr.step_config("runtime.voice.step1_validation")
+
+
+def test_manual_steps_skip_api_rules(tmp_path):
+    # A manual step is instructions for a person: Opus 5.5 without an explicit
+    # effort would be refused for an API step, but is fine here.
+    p = _config(tmp_path, {"dr": {"model": "claude-opus-5-5", "manual": True}})
+    cfg = mr.step_config("dr", path=p)
+    assert cfg.manual and cfg.thinking is None
+    assert mr.step_config("personas.dr_section_6").manual
+    assert not mr.step_config("personas.pass_2").manual
+
+
+def test_model_display_name():
+    assert mr.model_display_name(OPUS) == "Claude Opus 4.7"
+    assert mr.model_display_name("gpt-5.4") == "gpt-5.4"   # no display_name → id
 
 
 def test_env_to_unknown_model_raises(monkeypatch):

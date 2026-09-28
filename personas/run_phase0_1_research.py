@@ -44,7 +44,7 @@ from flows.shared.model_routing import step_config
 from flows.shared.node0_validation import validate_input
 from flows.shared.perplexity_split import split_dossier
 from flows.shared.project_root import add_project_arg, resolve_project_root
-from flows.shared.prompt_render import render
+from flows.shared.prompt_render import TEMPLATE_GLOBALS, render
 from flows.shared.research_validation import (
     print_warnings,
     validate_gemini_scan,
@@ -237,6 +237,7 @@ def main(voice_name: str, project: str | None = None) -> None:
         trim_blocks=True,
         lstrip_blocks=True,
     )
+    env.globals.update(TEMPLATE_GLOBALS)  # model_name(): DR model from model_routing.json
     template = env.get_template(TEMPLATE_PATH.name)
 
     # Position C: the base render uses classification vars only. Perplexity +

@@ -78,6 +78,8 @@ ROI at solo-operator scale.
 
 ### II.1 — Opus 4.6 vs 4.7 for DR sections
 
+**✅ Resolved 2026-09-28 (voices OPEN_ITEMS §36):** the DR model is now set in `model_routing.json` (manual steps, default Opus 4.7 for all six, per voices ONBOARDING's DO) and rendered into the prompts. Neither the spec nor the prompts name a model any more. The text below is history.
+
 **Status:** half the project says one thing, half says the other
 **Effort to resolve:** 10 min decision + 15-30 min execution
 
@@ -347,7 +349,7 @@ First run of the WAYS_OF_WORKING §8 sweep, after the Phase 0 work landed withou
 | 7 ✅ 2026-09-28 (with C63) | `docs/AI_Assembly_Researcher_Pipeline.md` L624, 636 | Default model "claude-sonnet-4-6"; `CLUSTERING_MAX_TOKENS=40000` | Opus 4.7 default (now: `model_routing.json`); 64000 since 2026-05-08 | WRONG |
 | 8 ✅ 2026-09-28 | `docs/AI_Assembly_Provocateur_Pipeline.md` L53, 156 | "12 parallel calls, one per council member" | 10 (dev_msc_test mentions of 12 are historical — keep) | WRONG |
 | 9 ✅ 2026-09-28 | `README.md` (root) L127 | "both repos clean + pushed" | Point at STATE.md's branch section | WRONG |
-| 10 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L20, 195 | Opus 4.6 for DR §1–§5 (banned per ONBOARDING DON'T) — already tracked §II.1 above | Resolve §II.1 → **folded into voices OPEN_ITEMS §36** (2026-09-28: automate the DR step; model choice moves into `model_routing.json`) | WRONG (known) |
+| 10 ✅ 2026-09-28 (voices §36) | `docs/AI_Assembly_Persona_Pipeline_v4.md` L20, 195 | Opus 4.6 for DR §1–§5 (banned per ONBOARDING DON'T) — already tracked §II.1 above | Resolve §II.1 → **folded into voices OPEN_ITEMS §36** (2026-09-28: automate the DR step; model choice moves into `model_routing.json`) | WRONG (known) |
 | 11 ✅ 2026-09-28 | `docs/AI_Assembly_Transcription_Pipeline.md` Step 3 | C49 decode-failure auto-passthrough + `speaker_id_auto_passthrough` flag not documented | Add a failure-mode subsection | STALE (gap) |
 | 12 ✅ 2026-09-28 | `docs/README.md` L5 + table | "authoritative as of 2026-06-01", Editor/Lifecycle/etc. rated "Current" | Re-rate per this table; add a "last verified" column (WAYS_OF_WORKING §3.3) | STALE |
 | 13 ✅ 2026-09-28 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L356 | 7pre_citation prompts "eligible for deletion" | Deleted 2026-09-27 (`a10e08a`) | STALE |

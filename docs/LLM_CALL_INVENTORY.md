@@ -359,6 +359,8 @@ Carrying forward only the still-relevant items from the prior edition's §7, plu
 
 ## 8. What is NOT an LLM call
 
+**Manual model choices (no API call):** the six claude.ai Deep Research sessions per voice are done by the operator. Their model is still set in `model_routing.json` (steps `personas.dr_sections_1_5`, `personas.dr_section_6`, `"manual": true`) and rendered into the section-prompt preambles by `prompt_render.model_name()` (voices OPEN_ITEMS §36).
+
 Runtime: `python_select`/Provocateur Stage 2 selection, `package_voice_briefings`/Stage 4 packaging, Researcher's `merge_clusters_and_themes`, FFmpeg normalize/ffprobe (Ingest), Voice `card_assembly.py`, Voice `publish.py`, Editor `card_assembly.py`, Editor `edition.py`, Editor `publish.py`, `runtime/scripts/**`, Voice Step 2 Validation's mechanical length check (`_check_length_compliance`).
 
 Personas: Pass 0b base render (Jinja2), split tailored prompt, Pass 1c-extract + fetch, Pass 6.5-clean, FU#33 P2 INCONSISTENT merge, path-to-pass mapping, card assembly, CARD COMPLETE summary, chat artifact, Wikipedia REST, `dr_validation.py`/`research_validation.py`/`node0_validation.py`/`node1d_excerpt_selection.py`/`node1c_fetch.py` (all confirmed import-clean this pass).

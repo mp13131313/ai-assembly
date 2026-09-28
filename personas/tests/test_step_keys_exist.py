@@ -27,6 +27,10 @@ _EXCLUDED_DIR_PARTS = {"tests", "venv", "__pycache__"}
 # matched — its origin step_config(...) call is matched separately.
 _STEP_CONFIG_CALL_RE = re.compile(r'step_config\(\s*["\'](personas\.[\w.]+)["\']')
 _STEP_KWARG_RE = re.compile(r'\bstep\s*=\s*["\'](personas\.[\w.]+)["\']')
+# Prompt templates name manual steps' models (the claude.ai Deep Research
+# preambles) through the model_name("personas.foo") template function.
+_TEMPLATE_CALL_RE = re.compile(r'model_name\(\s*["\'](personas\.[\w.]+)["\']')
+_PROMPTS_DIR = _PERSONAS_ROOT / "flows" / "shared" / "prompts"
 
 
 def _source_files():
@@ -45,6 +49,8 @@ def _used_step_keys() -> set[str]:
         text = path.read_text(encoding="utf-8")
         used.update(_STEP_CONFIG_CALL_RE.findall(text))
         used.update(_STEP_KWARG_RE.findall(text))
+    for path in sorted(_PROMPTS_DIR.rglob("*.md")):
+        used.update(_TEMPLATE_CALL_RE.findall(path.read_text(encoding="utf-8")))
     return used
 
 

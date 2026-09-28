@@ -120,7 +120,7 @@ Then edit `voices/<slug>/00_intake/02_voice_config.json` and replace `"editorial
 1. Read this doc.
 2. Fill in `editorial_rationale` in `voices/<slug>/00_intake/02_voice_config.json`.
 3. Run Phase 0.5 research + tailor: `python3 run_phase0_1_research.py "<Display Name>"`.
-4. Paste each of the 6 section prompts into claude.ai with Deep Research enabled: §1–§5 use Claude Opus 4.6 + Extended Thinking; §6 uses Claude Opus 4.7 (Phase L empirical finding: 4.6 produced reader's-intro output on §6; 4.7 required).
+4. Paste each of the 6 section prompts into claude.ai as its preamble says (model, Extended Thinking, Deep Research).
 5. Save each section result as `voices/<slug>/01_research/04_dr_dossier/0N_section_N.md`.
 6. Run full persona pipeline: `python3 run_persona_pipeline.py "<Display Name>"`.
 ```

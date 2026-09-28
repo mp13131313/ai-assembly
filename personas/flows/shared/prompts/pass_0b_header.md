@@ -4,18 +4,25 @@
 {# display_name_with_hint defaults to name when disambiguation hint absent — keeps
    direct renderers (tests, callers that only pass `name`) working under StrictUndefined. #}
 {% set display_name_with_hint = display_name_with_hint | default(name) %}
+{# The Deep Research models come from model_routing.json (manual steps; voices OPEN_ITEMS §36) — never write a model name here. #}
+{% set dr_model = model_name("personas.dr_sections_1_5") %}
+{% set dr_model_s6 = model_name("personas.dr_section_6") %}
 {% if section_mode %}
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI (Section {{ section_index }} of 6)
 
 {% if section_index == 1 %}
-1. Open claude.ai and select **Claude Opus 4.6** (Phase B empirically validated for §1–§5).
+1. Open claude.ai and select **{{ dr_model }}**.
 2. Enable **Extended Thinking** and **Deep Research** (both must be on).
 3. Paste everything below the dashed line as your user message. Subsequent sections can be pasted in the same thread or in fresh threads — operator's choice.
 {% elif section_index == 6 %}
-1. **Switch to Claude Opus 4.7 for §6** (Phase L empirical finding: Opus 4.6 produced reader's-intro rather than corpus-gateway output on §6; Opus 4.7 required). Extended Thinking and Deep Research remain on.
+{% if dr_model_s6 == dr_model %}
+1. Model and toggles stay as Section 1 ({{ dr_model }}, Extended Thinking + Deep Research on).
+{% else %}
+1. **Switch to {{ dr_model_s6 }} for §6** — §6 must produce corpus-gateway output, not a reader's introduction. Extended Thinking and Deep Research remain on.
+{% endif %}
 2. Paste everything below the dashed line as your user message.
 {% else %}
-1. Continue in the thread of your choice (same thread as prior sections for cross-section coherence, or fresh thread for independent sampling). Model and toggles stay as Section 1 (Opus 4.6).
+1. Continue in the thread of your choice (same thread as prior sections for cross-section coherence, or fresh thread for independent sampling). Model and toggles stay as Section 1 ({{ dr_model }}).
 2. Paste everything below the dashed line as your user message.
 {% endif %}
 
@@ -53,7 +60,7 @@ Research {{ display_name_with_hint }} comprehensively for an AI persona specific
 {% else %}
 PREAMBLE — BEFORE PASTING INTO CLAUDE.AI
 
-1. Open claude.ai and select **Claude Opus 4.6** (monolithic mode produces one full-voice dossier; Opus 4.6 empirically validated for §1–§5 material; Opus 4.7 acceptable if 4.6 unavailable).
+1. Open claude.ai and select **{{ dr_model }}** (monolithic mode produces one full-voice dossier).
 2. Enable **Extended Thinking** and **Deep Research** (both must be on).
 3. Paste everything below the dashed line as your user message.
 4. Expected runtime: **20–90 minutes**. Successful comparable runs have ranged 538–1046 sources across that window. **If past 2 hours without draft streaming visible, cancel** — that's the convergence-trap signature (DR kept researching, never transitioned to synthesis).

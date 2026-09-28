@@ -17,6 +17,10 @@ or a validator ladder rung that isn't an OpenAI or Google model (ladders are
 cross-model checks of Claude output — a Claude rung would be same-family).
 Ladder call sites route each rung by `model_vendor(model)`, not by position.
 
+Steps marked `"manual": true` (the claude.ai Deep Research sections) are done
+by the operator, not by code: the persona prompts render their model with
+`model_display_name()`, and the API rules above don't apply to them.
+
 This file is duplicated byte-for-byte at personas/flows/shared/model_routing.py
 — the two pipelines have separate venvs and don't import each other (same
 pattern as project_root.py). A test in each suite checks the copies match.
@@ -83,6 +87,7 @@ class StepConfig:
     sampling_params: bool         # False = model rejects temperature/top_p/top_k
     ladder: tuple[str, ...] = ()  # cross-vendor fallback order (validators)
     fallback: StepConfig | None = None
+    manual: bool = False          # done by the operator in claude.ai, not an API call
 
     @property
     def thinking_on(self) -> bool:
@@ -133,7 +138,10 @@ def _build(step: str, raw: dict[str, Any], models: dict[str, Any],
                 f"ladders take only {sorted(_LADDER_VENDORS)} models (cross-model check).")
     spec = models[model]
     effort = raw.get("effort")
-    if spec["vendor"] == "anthropic":
+    manual = bool(raw.get("manual"))
+    if manual:  # instructions for a person, not an API request: no request-shape rules
+        thinking = None
+    elif spec["vendor"] == "anthropic":
         thinking = thinking or raw.get("thinking") or "adaptive"
         if thinking not in ("adaptive", "off"):
             raise ModelRoutingError(f"{step}: thinking must be 'adaptive' or 'off', got {thinking!r}.")
@@ -159,6 +167,7 @@ def _build(step: str, raw: dict[str, Any], models: dict[str, Any],
         sampling_params=spec.get("sampling_params", True),
         ladder=ladder,
         fallback=_build(f"{step}.fallback", fallback, models) if fallback else None,
+        manual=manual,
     )
 
 
@@ -190,6 +199,14 @@ def model_vendor(model: str, *, path: Path | None = None) -> str:
     if model not in models:
         raise ModelRoutingError(f"model {model!r} is not listed under 'models' in model_routing.json.")
     return models[model]["vendor"]
+
+
+def model_display_name(model: str, *, path: Path | None = None) -> str:
+    """The name a person sees in a model picker ("Claude Opus 4.7"); the id if none is set."""
+    models = _load(path or CONFIG_PATH)["models"]
+    if model not in models:
+        raise ModelRoutingError(f"model {model!r} is not listed under 'models' in model_routing.json.")
+    return models[model].get("display_name", model)
 
 
 def all_steps(*, path: Path | None = None) -> dict[str, StepConfig]:

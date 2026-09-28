@@ -17,7 +17,7 @@ The v3.10 spec describes a monolithic Pass 1-merge plus six generation passes pl
 | **Pass 1 merge** | Monolithic 3-way contradiction check (single Opus call) | **Chunked Pass 1.1–1.7** — 6 Pydantic-validated chunk merges in parallel + narrow Pass 1.7 coherence audit | CURRENT_STATE §5.18 (arch-03), schemas/pass_1_*.py |
 | **Per-voice on disk** | flat `inputs/voices/<slug>.json` + `runs/<slug>/` | `voices/<slug>/{00_intake … 06_derive, 07_persona_card_assembled.json}` | CURRENT_STATE §5.16 (Phase B) |
 | **Code/project separation** | code + project data co-mingled in repo | Tier 3: project data outside code repo at `PROJECT_ROOT`, resolved via `--project` > env > hard fail | CURRENT_STATE §5.17 |
-| **Manual DR step** | One monolithic claude.ai session per voice | **6 per-section claude.ai sessions** per voice; §1–§5 use Opus 4.6, §6 uses Opus 4.7 | Phase 0.5 below |
+| **Manual DR step** | One monolithic claude.ai session per voice | **6 per-section claude.ai sessions** per voice; model set in `model_routing.json` (manual steps `personas.dr_sections_1_5` / `personas.dr_section_6`) | Phase 0.5 below |
 | **Pass 0b** | Single Jinja render | **Two-stage**: Pass 0b base render (Jinja, no LLM) + Pass 0b tailor (LLM, structured injections only) + 6-section split | Phase 0.5 below |
 | **Primary text URLs** | In voice_config, supplied by operator or Pass 0a | Derived deterministically at render time from `passages[].citation` + `works[]` (1-arch-07; CC#1) | flows/shared/url_extract.py |
 | **Pass 6.5-clean** | — | **NEW**: deterministic regex bracket-strip after Pass 6 (FU#33 P1); preserves Boddice biocultural tags | flows/shared/bracket_strip.py |
@@ -190,12 +190,10 @@ Pass 1a + Pass 1b run in parallel via `ThreadPoolExecutor`.
 **Pass 0b — DR prompt assembly.** Two-stage:
 
 1. **Base render** (`pass_0b_header.md` + type-specific body `pass_0b_{human, fictional, non_human_organism, non_human_system}.md` + `pass_0b_footer.md` + research-discipline include `_pass_0b_research_discipline.md`). Pure Jinja, no LLM. Conditional blocks: hostile-source appendix, `lyrics_patterns_only` constraint, system-entity grounding.
-2. **Tailor** (`run_pass0b_dr_prompt.py`, prompt `pass_0b_tailor.md`). Model set in `model_routing.json` (step `personas.pass_0b_tailor`); current default Opus 4.7 + thinking. **Structured injections only** — splices voice-specific guidance into the monolithic prompt at marked sections (PB#2 base preservation enforced architecturally per `pass_0b_tailor.py`); does NOT full-rewrite. Outputs tailored monolithic + `02_tailoring_notes.json`.
+2. **Tailor** (`run_pass_0b_tailor.py`, prompt `pass_0b_tailor.md`). Model set in `model_routing.json` (step `personas.pass_0b_tailor`); current default Opus 4.7 + thinking. **Structured injections only** — splices voice-specific guidance into the monolithic prompt at marked sections (PB#2 base preservation enforced architecturally per `pass_0b_tailor.py`); does NOT full-rewrite. Outputs tailored monolithic + `02_tailoring_notes.json`.
 3. **Split** (`scripts/split_tailored_prompt.py`). Splits the tailored monolithic into 6 per-section prompts. `02_tailoring_notes.json` + 6 section files in `03_dr_prompts/`.
 
-**Operator gate (manual claude.ai DR).** 6 sessions per voice on claude.ai with Extended Thinking + Deep Research:
-- §1–§5: **Opus 4.6**
-- §6: **Opus 4.7** (Phase L empirical: 4.6 produces reader's-intro on §6; 4.7 required)
+**Operator gate (manual claude.ai DR).** 6 sessions per voice on claude.ai with Extended Thinking + Deep Research. Each section prompt's preamble names the model to pick. The model is set in `model_routing.json`: step `personas.dr_sections_1_5` for §1–§5 and `personas.dr_section_6` for §6, both Opus 4.7 by default. §6 has its own step because of Phase L: Opus 4.6 produced a reader's intro on §6 instead of corpus-gateway output. The step stays manual because the API has no equivalent of claude.ai's Research feature (voices OPEN_ITEMS §36).
 
 Per-section runtime: 20–60 min wall. If past 60 min without draft streaming, cancel + retry. Save each as `01_research/04_dr_dossier/0N_section_N.md`.
 

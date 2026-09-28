@@ -108,8 +108,8 @@ Tim Leberecht is the **Assembly editor** (real living person; co-founder House o
    → 6 tailored DR section prompts ready for manual paste
 
 3. Manual DR sessions — operator wall                                  ~3-4 hr operator time
-   → Open claude.ai with Opus 4.7 + Extended Thinking + Deep Research enabled
-     [NOTE: older spec said "§1-§5 use 4.6, §6 uses 4.7" — STALE. Current operator pattern: 4.7 across §1-§6]
+   → Open claude.ai with the model each section's preamble names + Extended Thinking + Deep Research enabled
+     [The model is set in model_routing.json (personas.dr_sections_1_5 / personas.dr_section_6; default Opus 4.7 for all six, voices OPEN_ITEMS §36)]
    → For each section: paste prompt, wait ~30 min, save .md output
    → Save each as voices/<slug>/01_research/04_dr_dossier/0N_section_N.md
 
@@ -245,7 +245,7 @@ Empirically:
 ### DO (current patterns)
 
 - **DO interrogate Pass 0a's `review_doc.md` framings, especially "Confidence: high" lines, before downstream commits.** Pass 0a's review_doc is partly LLM run-variance (temperature=1.0 + adaptive thinking) — same prompt + Wikipedia URL + project context can produce meaningfully different framings on different runs. The model's confidence-language reads as earned-by-reasoning but isn't necessarily; treat it as a *starting proposal to question*, not a binding commitment. Re-run if the framing seems narrow or pre-tilted toward one philosophical positioning. **Empirically attested 2026-05-01:** Octopus April 27 review_doc said *"the voice should mark the gap — refuse to invent an experience the body has not had... Confidence high"* (precautionary-leaning); May 1 re-run from identical inputs produced *"anthropomorphism risk vs excessive-alienness... 'clever-pet octopus' vs 'unreachable Other'"* (balanced twin-risks). The April 27 framing pre-tilted the build's §5 DR toward precautionary content, which propagated through merge into the shipped Octopus voice. The compass rebuild traced this back to that single "Confidence high" line.
-- **DO use Opus 4.7 across all 6 DR sections.** The older "§1-§5 use 4.6" spec is stale.
+- **DO pick the model each DR section's preamble names.** It comes from `model_routing.json` (default Opus 4.7 for all six); change the model there, not in the prompts.
 - **DO patch round 1 + round 2, then ship via path (b).** Match the 4-voice pattern.
 - **DO leave `editorial_rationale` null** unless operator explicitly wants to fill it. Pipeline runs fine with null.
 - **DO read voice's full Pass 7a FINAL output before patching.** The `field_issues` list is what matters; the rubric pass/fail status alone doesn't tell you what's actionable.

@@ -9,7 +9,24 @@ from __future__ import annotations
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
+from flows.shared.model_routing import model_display_name, step_config
+
 _PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
+
+
+def model_name(step: str) -> str:
+    """Display name of a step's model ("Claude Opus 4.7") from model_routing.json.
+
+    For prompts a person follows — the claude.ai Deep Research preambles
+    (`{{ model_name("personas.dr_sections_1_5") }}`) — so the model they are
+    told to pick is set in the one config file, not written into the prompt.
+    """
+    return model_display_name(step_config(step).model)
+
+
+# Functions every prompt template can call. Other Jinja environments that
+# render these prompts (run_phase0_1_research.py) install the same globals.
+TEMPLATE_GLOBALS = {"model_name": model_name}
 
 _env = Environment(
     loader=FileSystemLoader(str(_PROMPTS_DIR)),
@@ -18,6 +35,7 @@ _env = Environment(
     lstrip_blocks=True,
     keep_trailing_newline=True,
 )
+_env.globals.update(TEMPLATE_GLOBALS)
 
 
 def render(template_name: str, **context) -> str:

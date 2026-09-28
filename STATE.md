@@ -245,8 +245,7 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
-Next: DR model into `model_routing.json` (voices §36, in progress) →
-the remaining doc-audit rows #19–#23 (`doc_infrastructure_backlog.md`)
+Next: the remaining doc-audit rows #19–#23 (`doc_infrastructure_backlog.md`)
 → Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
@@ -255,7 +254,7 @@ deployment profiles) → the hub.
 **Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
 C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
 C63 (model config) · dossier-index dual writers (PLAN 0.1.2) · voices
-§32.1 / .2 / .3 / .5 · §35.
+§32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config).
 
 **Runtime still open (`runtime/OPEN_ITEMS.md`):**
 

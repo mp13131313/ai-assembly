@@ -5,14 +5,15 @@
     "steps.*: model (must be listed under models), thinking ('adaptive' | 'off', Anthropic only), effort (null = don't send; model default).",
     "The loader refuses unsafe combinations: thinking 'off' on a model that can't disable it, or effort null on a model whose default isn't 'high' (a silent quality drop).",
     "Legacy per-step env vars (docs/LLM_CALL_INVENTORY.md §5) still override this file so existing run commands keep working; prefer editing here.",
-    "Switching a voice-writing step's model changes how the voices write: re-validate the voices (sentinel regen) before relying on it. See runtime/OPEN_ITEMS.md C62."
+    "Switching a voice-writing step's model changes how the voices write: re-validate the voices (sentinel regen) before relying on it. See runtime/OPEN_ITEMS.md C62.",
+    "steps with \"manual\": true are done by the operator in claude.ai (no API call): the model is rendered into the instructions they paste, by its display_name; the API safety rules don't apply to them. See voices/OPEN_ITEMS.md §36."
   ],
 
   "models": {
-    "claude-opus-4-7":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
-    "claude-sonnet-4-6":   {"vendor": "anthropic", "sampling_params": true,  "thinking_can_disable": true,  "default_effort": "high"},
-    "claude-opus-5-5":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": false, "default_effort": "medium"},
-    "claude-sonnet-5":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
+    "claude-opus-4-7":     {"vendor": "anthropic", "display_name": "Claude Opus 4.7",   "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
+    "claude-sonnet-4-6":   {"vendor": "anthropic", "display_name": "Claude Sonnet 4.6", "sampling_params": true,  "thinking_can_disable": true,  "default_effort": "high"},
+    "claude-opus-5-5":     {"vendor": "anthropic", "display_name": "Claude Opus 5.5",   "sampling_params": false, "thinking_can_disable": false, "default_effort": "medium"},
+    "claude-sonnet-5":     {"vendor": "anthropic", "display_name": "Claude Sonnet 5",   "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
     "gpt-5.4":             {"vendor": "openai"},
     "gpt-4.1":             {"vendor": "openai"},
     "o3":                  {"vendor": "openai"},
@@ -46,6 +47,8 @@
 
     "personas.pass_0a_voice_config":     {"label": "Persona · 0a voice config", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
     "personas.pass_0b_tailor":           {"label": "Persona · 0b research-prompt tailoring", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.dr_sections_1_5":          {"label": "Persona · Deep Research §1–§5 (manual, claude.ai Research)", "model": "claude-opus-4-7", "manual": true},
+    "personas.dr_section_6":             {"label": "Persona · Deep Research §6 (manual, claude.ai Research)", "model": "claude-opus-4-7", "manual": true},
     "personas.pass_1a_perplexity":       {"label": "Persona · 1a Perplexity deep research", "model": "sonar-deep-research"},
     "personas.pass_1b_gemini":           {"label": "Persona · 1b Gemini broad scan", "model": "gemini-2.5-pro"},
     "personas.pass_1_merge":             {"label": "Persona · 1.1–1.6 chunked research merge", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
