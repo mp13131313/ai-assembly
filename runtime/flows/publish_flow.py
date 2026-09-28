@@ -85,6 +85,7 @@ try:
     load_dotenv(_REPO_ROOT.parent / ".env")
     from flows.shared.io import get_logger, write_json_atomic
     from flows.shared.project_root import add_project_arg, resolve_project_root
+    from flows.editor.edition import merge_night_index
 except ImportError as e:
     sys.stderr.write(
         f"publish_flow.py import failed: {e}\n"
@@ -809,6 +810,22 @@ def _build_per_voice_multi_night_index(
 
 # --- Dossier index builders (C33) --------------------------------------
 
+# `published_artifacts/dossiers/night_<N>/_index.json` is also written by
+# `flows/editor/edition.py::finalize_edition` (different schema — adds
+# `edition_lead`, drops `issue_no`/`vol`/`voices_in_night`). These are the
+# keys THIS writer produces; everything else already on disk is preserved
+# by `merge_night_index` (see that function's docstring for the full
+# rule). Note `edition_lead` is deliberately absent here — publish never
+# computes it, it only ever forwards whatever the editor last wrote.
+_DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS = {
+    "night", "url_path", "generated_at", "dossier_count", "dossiers", "voices_in_night",
+}
+_DOSSIER_INDEX_OWNED_DOSSIER_KEYS = {
+    "dossier_no", "filename", "url_path", "kicker", "headline", "subline",
+    "theme_id", "theme_display_title", "issue_no", "vol", "voice_count", "voices_routed",
+}
+
+
 def _load_theme_routing(run_dir: Path) -> dict[str, Any] | None:
     """Load editor's theme_routing.json if present (Stage 1 output).
 
@@ -924,25 +941,36 @@ def _build_per_night_dossier_index(
 
     # `edition_lead` is computed by the editor (editor/edition.py
     # finalize_edition → pick_lead_dossier), which writes this same
-    # _index.json. PLAN 0.1.2: preserve whatever lead is already on disk
-    # instead of nulling it — otherwise running publish after the editor
-    # erases the lead (last writer wins). Stays null if no lead exists yet.
+    # _index.json — publish never produces it (not in
+    # _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS), so `merge_night_index` below
+    # carries forward whatever's already on disk. The `None` here is only
+    # the placeholder used when no index exists yet to merge onto.
     index_path = out_dir / "_index.json"
-    edition_lead = None
+    existing_index: dict[str, Any] | None = None
     if index_path.exists():
         try:
-            edition_lead = json.loads(index_path.read_text(encoding="utf-8")).get("edition_lead")
+            existing_index = json.loads(index_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
-            pass
-    index = {
+            existing_index = None  # unreadable — write fresh, no merge
+    new_index = {
         "night": night,
         "url_path": f"/dossiers/night-{night}",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "dossier_count": len(dossiers_summary),
         "dossiers": dossiers_summary,
-        "edition_lead": edition_lead,
+        "edition_lead": None,
         "voices_in_night": voices_in_night,
     }
+    # Two writers (this function and editor/edition.py::finalize_edition)
+    # share this file with different schemas — merge onto the existing
+    # index so this write doesn't clobber the other writer's fields
+    # (e.g. the editor's `edition_lead`). See `merge_night_index`'s
+    # docstring for the full rule and why ownership is passed explicitly.
+    index = merge_night_index(
+        existing_index, new_index,
+        owned_top_level_keys=_DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS,
+        owned_dossier_keys=_DOSSIER_INDEX_OWNED_DOSSIER_KEYS,
+    )
     write_json_atomic(index_path, index)
     logger.info(
         f"  Dossier index (night {night}): {len(dossiers_summary)} dossiers → "

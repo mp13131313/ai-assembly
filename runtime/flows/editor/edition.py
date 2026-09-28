@@ -175,6 +175,117 @@ def build_night_index(
     }
 
 
+# --- Two-writer merge for published_artifacts/dossiers/night_<N>/_index.json --
+#
+# This file is written by two independent code paths with different
+# schemas: this module's `build_night_index` (via `finalize_edition`) and
+# `publish_flow.py::_build_per_night_dossier_index`. Each writer only
+# knows its own fields; naively overwriting the file (as both used to do)
+# means whichever writer runs second erases the other's exclusive fields
+# (`issue_no`/`vol`/`voices_in_night` on the publish side; `edition_lead`
+# on the editor side). Fixed 2026-09 per operator direction ("each writer
+# keeps the fields it doesn't own") with `merge_night_index` below — one
+# shared helper, imported by `publish_flow.py` rather than duplicated.
+#
+# Placed here (not in `publish_flow.py`) because this module already owns
+# the night-index *schema* (`build_night_index` originates it), and
+# `publish_flow.py` already runs downstream of the editor stage in the
+# pipeline (it reads the editor's `theme_routing.json`) — so
+# `publish_flow` importing from `flows.editor.edition` follows the
+# existing dependency direction. Nothing in `flows/editor/` imports
+# `publish_flow.py` (checked: only a docstring/comment mentions the name),
+# so this direction introduces no circular import; the reverse direction
+# (this module importing from `publish_flow.py`) would risk one, since
+# `editor_flow.py` already lazily imports `finalize_edition` from this
+# module and could plausibly grow a `publish_flow` import of its own.
+#
+# Ownership is passed in explicitly by each caller (not inferred from
+# which keys happen to be in its payload dict) because `publish_flow`'s
+# payload includes a placeholder `"edition_lead": None` for the
+# no-existing-file case, even though publish does not *own* that field —
+# inferring ownership from key presence would make publish's placeholder
+# clobber the editor's real value on every publish rerun, resurrecting
+# the exact bug this helper fixes.
+
+NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS = {
+    "night", "url_path", "generated_at", "dossier_count", "edition_lead", "dossiers",
+}
+NIGHT_INDEX_OWNED_DOSSIER_KEYS = {
+    "dossier_no", "filename", "url_path", "kicker", "headline", "subline",
+    "theme_id", "theme_display_title", "voice_count", "voices_routed",
+}
+
+
+def merge_night_index(
+    existing: dict[str, Any] | None,
+    new: dict[str, Any],
+    *,
+    owned_top_level_keys: set[str],
+    owned_dossier_keys: set[str],
+    list_key: str = "dossiers",
+    match_key: str = "dossier_no",
+) -> dict[str, Any]:
+    """Merge a freshly-built per-night dossier index with whatever index
+    already exists on disk, so two writers with different schemas don't
+    clobber each other's fields (see module comment above).
+
+    Rule (operator-approved): each writer keeps the fields it doesn't
+    produce.
+
+    - Top level: any key in `existing` that is NOT in
+      `owned_top_level_keys` is carried into the result untouched (e.g.
+      publish's `voices_in_night` survives an editor rewrite; editor's
+      `edition_lead` survives a publish rewrite). Keys in
+      `owned_top_level_keys` always come from `new` — a writer's own
+      fields always win for its own data, whether or not they also
+      appear in `existing`.
+    - `list_key` entries (default `"dossiers"`) are matched between
+      `existing` and `new` by `match_key` (default `"dossier_no"`). For
+      each matched pair, keys on the existing entry that are NOT in
+      `owned_dossier_keys` are copied onto the new entry (e.g. publish's
+      `issue_no`/`vol` survive an editor rewrite). Entries only in
+      `existing` (no match in `new`) are dropped — the new writer's own
+      dossier list is authoritative for which dossiers currently exist,
+      so a dossier removed from disk is not resurrected in the index.
+    - `existing=None` (no file yet, or the caller found it unreadable/
+      malformed) short-circuits to returning `new` unchanged — nothing
+      to merge against, so just write fresh.
+    """
+    if not existing:
+        return new
+
+    merged: dict[str, Any] = dict(new)
+    for k, v in existing.items():
+        if k == list_key:
+            continue  # merged below, entry by entry
+        if k not in owned_top_level_keys:
+            merged[k] = v
+
+    new_items = new.get(list_key) or []
+    existing_by_match: dict[Any, dict[str, Any]] = {
+        item.get(match_key): item
+        for item in (existing.get(list_key) or [])
+        if isinstance(item, dict)
+    }
+    merged_items = []
+    for item in new_items:
+        if not isinstance(item, dict):
+            merged_items.append(item)
+            continue
+        old_item = existing_by_match.get(item.get(match_key))
+        if old_item:
+            merged_entry = dict(item)
+            for k, v in old_item.items():
+                if k not in owned_dossier_keys:
+                    merged_entry[k] = v
+            merged_items.append(merged_entry)
+        else:
+            merged_items.append(item)
+    merged[list_key] = merged_items
+
+    return merged
+
+
 def _dossier_no_from_metadata(meta: dict, dossier: dict) -> int:
     """The dossier_no isn't on the dossier dict directly; we derive it
     from the filename when called from finalize_edition. Caller passes
@@ -362,6 +473,23 @@ def finalize_edition(
         idx_path = (
             project_root / "published_artifacts" / "dossiers"
             / f"night_{night}" / "_index.json"
+        )
+        # Merge onto whatever's already on disk (e.g. publish_flow.py's
+        # `issue_no`/`vol`/`voices_routed`/`voices_in_night`) so this
+        # write doesn't clobber the other writer's fields — see
+        # `merge_night_index` above. Unreadable/malformed existing file
+        # is treated the same as no file: just write fresh.
+        existing_idx: dict[str, Any] | None = None
+        if idx_path.exists():
+            try:
+                with idx_path.open(encoding="utf-8") as f:
+                    existing_idx = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                existing_idx = None
+        night_idx = merge_night_index(
+            existing_idx, night_idx,
+            owned_top_level_keys=NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS,
+            owned_dossier_keys=NIGHT_INDEX_OWNED_DOSSIER_KEYS,
         )
         idx_path.parent.mkdir(parents=True, exist_ok=True)
         write_json_atomic(idx_path, night_idx)

@@ -31,8 +31,11 @@ sys.path.insert(0, str(_RUNTIME))
 
 from flows.shared.io import write_json_atomic  # noqa: E402
 from flows.editor.edition import (  # noqa: E402
+    NIGHT_INDEX_OWNED_DOSSIER_KEYS,
+    NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS,
     _rebuild_dossiers_from_disk,
     finalize_edition,
+    merge_night_index,
 )
 
 
@@ -242,3 +245,285 @@ class TestSingleDossierRerunPreservesIndex:
         # Lead-pick is unaffected by the missing file — still scored off
         # routing, not off what actually landed on disk.
         assert audit["lead_dossier_no"] == 1
+
+
+# --- merge_night_index (pure function) -------------------------------------
+#
+# Two writers (this module's `finalize_edition` and
+# `publish_flow.py::_build_per_night_dossier_index`) share
+# `published_artifacts/dossiers/night_<N>/_index.json` with different
+# schemas. `merge_night_index` is the shared helper that stops either one
+# from clobbering the other's fields on a rewrite. These tests exercise
+# it directly (no disk I/O, no finalize_edition) using stand-in owned-key
+# sets so the merge *mechanism* is tested independently of the editor's
+# actual schema.
+
+
+class TestMergeNightIndexPure:
+    OWNED_TOP = {"night", "dossiers", "editor_only_field"}
+    OWNED_DOSSIER = {"dossier_no", "kicker", "editor_only_dossier_field"}
+
+    def test_no_existing_returns_new_unchanged(self):
+        new = {"night": 1, "dossiers": [{"dossier_no": 1, "kicker": "K"}]}
+        assert merge_night_index(
+            None, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        ) == new
+
+    def test_unreadable_existing_passed_as_none_returns_new_unchanged(self):
+        # Callers pass `existing=None` for an unreadable/malformed file —
+        # same code path as "no file yet".
+        new = {"night": 1, "dossiers": []}
+        assert merge_night_index(
+            {}, new,  # empty dict is falsy — same short-circuit as None
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        ) == new
+
+    def test_preserves_unowned_top_level_keys(self):
+        existing = {"night": 1, "dossiers": [], "publish_only_field": "keep-me"}
+        new = {"night": 1, "dossiers": []}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        assert merged["publish_only_field"] == "keep-me"
+
+    def test_owned_top_level_key_always_takes_new_value(self):
+        existing = {"night": 1, "editor_only_field": "stale", "dossiers": []}
+        new = {"night": 2, "editor_only_field": "fresh", "dossiers": []}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        assert merged["night"] == 2
+        assert merged["editor_only_field"] == "fresh"
+
+    def test_owned_top_level_key_wins_even_when_absent_from_existing(self):
+        """A key this writer owns always reflects `new`, even if the
+        existing file never had it at all (e.g. first time this field
+        was introduced)."""
+        existing = {"night": 1, "dossiers": []}
+        new = {"night": 1, "editor_only_field": "fresh", "dossiers": []}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        assert merged["editor_only_field"] == "fresh"
+
+    def test_preserves_unowned_dossier_keys_matched_by_dossier_no(self):
+        existing = {
+            "dossiers": [
+                {"dossier_no": 1, "kicker": "OLD", "issue_no": 42193, "vol": "CXVI"},
+            ],
+        }
+        new = {
+            "dossiers": [
+                {"dossier_no": 1, "kicker": "NEW"},
+            ],
+        }
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        entry = merged["dossiers"][0]
+        # Own field (kicker) takes the new value...
+        assert entry["kicker"] == "NEW"
+        # ...but the fields this writer doesn't produce survive.
+        assert entry["issue_no"] == 42193
+        assert entry["vol"] == "CXVI"
+
+    def test_owned_dossier_key_always_takes_new_value(self):
+        existing = {"dossiers": [{"dossier_no": 1, "editor_only_dossier_field": "stale"}]}
+        new = {"dossiers": [{"dossier_no": 1, "editor_only_dossier_field": "fresh"}]}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        assert merged["dossiers"][0]["editor_only_dossier_field"] == "fresh"
+
+    def test_dossier_removed_from_new_list_is_dropped(self):
+        """The writer's own dossier list is authoritative for WHICH
+        dossiers exist — an entry only in `existing` (dossier removed
+        from disk) is not resurrected, even though it carried unowned
+        fields worth keeping in principle."""
+        existing = {
+            "dossiers": [
+                {"dossier_no": 1, "kicker": "K1", "issue_no": 1},
+                {"dossier_no": 2, "kicker": "K2", "issue_no": 2},
+            ],
+        }
+        new = {"dossiers": [{"dossier_no": 1, "kicker": "K1"}]}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        assert [d["dossier_no"] for d in merged["dossiers"]] == [1]
+
+    def test_no_match_in_existing_leaves_new_entry_untouched(self):
+        """A brand-new dossier_no with no existing counterpart passes
+        through unchanged — nothing to merge in."""
+        existing = {"dossiers": [{"dossier_no": 1, "kicker": "K1", "issue_no": 1}]}
+        new = {"dossiers": [{"dossier_no": 1, "kicker": "K1"}, {"dossier_no": 2, "kicker": "K2"}]}
+        merged = merge_night_index(
+            existing, new,
+            owned_top_level_keys=self.OWNED_TOP,
+            owned_dossier_keys=self.OWNED_DOSSIER,
+        )
+        by_no = {d["dossier_no"]: d for d in merged["dossiers"]}
+        assert by_no[2] == {"dossier_no": 2, "kicker": "K2"}
+
+
+# --- Two-writer integration: finalize_edition merges onto publish's shape --
+
+
+def _publish_shaped_index(night: int, dossiers: list[dict]) -> dict:
+    """Build an `_index.json` payload shaped like
+    `publish_flow.py::_build_per_night_dossier_index`'s output — used to
+    seed disk state simulating "publish already ran" before
+    finalize_edition (the editor) writes."""
+    return {
+        "night": night,
+        "url_path": f"/dossiers/night-{night}",
+        "generated_at": "2026-05-08T09:00:00+00:00",
+        "dossier_count": len(dossiers),
+        "dossiers": dossiers,
+        "edition_lead": None,
+        "voices_in_night": {"plato": {"voice_slug": "plato", "primary_dossier_no": 1}},
+    }
+
+
+class TestFinalizeEditionMergesOntoPublish:
+    """`_workspace/planning/runtime/OPEN_ITEMS.md` — publish and the editor
+    write the same `_index.json` with different schemas; the editor must
+    not clobber publish's `issue_no`/`vol`/`voices_routed`/
+    `voices_in_night` when it rewrites the file after publish already ran.
+    """
+
+    THEMES_TO_DOSSIERS = [
+        {"theme_id": "theme_001", "dossier_no": 1, "theme_title": "T1", "n_engaged_voices": 5},
+        {"theme_id": "theme_002", "dossier_no": 2, "theme_title": "T2", "n_engaged_voices": 1},
+    ]
+    VOICES_ROUTING = [
+        {"voice_slug": "plato", "voice_name": "Voice of Plato",
+         "primary_theme": "theme_001", "primary_dossier": 1},
+        {"voice_slug": "cleopatra", "voice_name": "Voice of Cleopatra",
+         "primary_theme": "theme_002", "primary_dossier": 2},
+    ]
+
+    def _routing(self) -> dict:
+        return _routing(self.THEMES_TO_DOSSIERS, self.VOICES_ROUTING)
+
+    def test_editor_rewrite_keeps_publish_only_fields(self, tmp_path):
+        run_dir = tmp_path / "athens_night_1"
+        project_root = tmp_path / "project"
+        routing = self._routing()
+
+        d1 = _dossier("theme_001", 1, kicker="K1")
+        d2 = _dossier("theme_002", 2, kicker="K2")
+        _write_published_dossier(project_root, 1, 1, d1)
+        _write_published_dossier(project_root, 1, 2, d2)
+
+        idx_path = (
+            project_root / "published_artifacts" / "dossiers" / "night_1" / "_index.json"
+        )
+        # Simulate publish_flow.py having already written the index for
+        # this night, with fields the editor's own build_night_index
+        # never produces (issue_no, vol, voices_in_night).
+        write_json_atomic(idx_path, _publish_shaped_index(1, [
+            {"dossier_no": 1, "filename": "dossier_001.json",
+             "url_path": "/dossiers/night-1/dossier_001", "kicker": "STALE",
+             "headline": "", "subline": "", "theme_id": "theme_001",
+             "theme_display_title": "", "issue_no": 42193, "vol": "CXVI",
+             "voice_count": 0, "voices_routed": []},
+            {"dossier_no": 2, "filename": "dossier_002.json",
+             "url_path": "/dossiers/night-1/dossier_002", "kicker": "STALE",
+             "headline": "", "subline": "", "theme_id": "theme_002",
+             "theme_display_title": "", "issue_no": 42194, "vol": "CXVI",
+             "voice_count": 0, "voices_routed": []},
+        ]))
+
+        finalize_edition(
+            run_dir=run_dir, project_root=project_root, night=1,
+            routing=routing,
+            dossiers_by_theme={"theme_001": d1, "theme_002": d2},
+        )
+
+        idx = json.loads(idx_path.read_text())
+
+        # Editor's own fields win for its own data (not left as "STALE").
+        by_no = {d["dossier_no"]: d for d in idx["dossiers"]}
+        assert by_no[1]["kicker"] == "K1"
+        assert by_no[2]["kicker"] == "K2"
+        # Editor now owns and has set a real edition_lead (was None).
+        assert idx["edition_lead"]["lead_dossier_no"] == 1
+
+        # Publish-only fields the editor doesn't produce survive the
+        # editor's rewrite, per-dossier...
+        assert by_no[1]["issue_no"] == 42193
+        assert by_no[1]["vol"] == "CXVI"
+        assert by_no[2]["issue_no"] == 42194
+        # ...and top-level.
+        assert idx["voices_in_night"] == {"plato": {"voice_slug": "plato", "primary_dossier_no": 1}}
+
+    def test_editor_rewrite_drops_dossier_removed_from_disk(self, tmp_path):
+        """publish's stale index carries a 3rd dossier that's no longer on
+        disk; the editor's rewrite (sourced from disk, per C46) must not
+        resurrect it, even though it carried issue_no/vol worth keeping
+        in principle for dossiers that DO still exist."""
+        run_dir = tmp_path / "athens_night_1"
+        project_root = tmp_path / "project"
+        routing = self._routing()
+
+        d1 = _dossier("theme_001", 1)
+        d2 = _dossier("theme_002", 2)
+        _write_published_dossier(project_root, 1, 1, d1)
+        _write_published_dossier(project_root, 1, 2, d2)
+        # dossier_003 intentionally NOT written to disk.
+
+        idx_path = (
+            project_root / "published_artifacts" / "dossiers" / "night_1" / "_index.json"
+        )
+        write_json_atomic(idx_path, _publish_shaped_index(1, [
+            {"dossier_no": 1, "filename": "dossier_001.json", "kicker": "K1", "issue_no": 1},
+            {"dossier_no": 2, "filename": "dossier_002.json", "kicker": "K2", "issue_no": 2},
+            {"dossier_no": 3, "filename": "dossier_003.json", "kicker": "K3", "issue_no": 3},
+        ]))
+
+        finalize_edition(
+            run_dir=run_dir, project_root=project_root, night=1,
+            routing=routing,
+            dossiers_by_theme={"theme_001": d1, "theme_002": d2},
+        )
+
+        idx = json.loads(idx_path.read_text())
+        assert idx["dossier_count"] == 2
+        assert {d["dossier_no"] for d in idx["dossiers"]} == {1, 2}
+        # Survivors still carry publish's issue_no.
+        by_no = {d["dossier_no"]: d for d in idx["dossiers"]}
+        assert by_no[1]["issue_no"] == 1
+        assert by_no[2]["issue_no"] == 2
+
+    def test_owned_key_sets_do_not_overlap_on_edition_lead(self):
+        """Sanity check on the schema contract itself: `edition_lead` is
+        the one top-level field the editor owns that publish's own
+        `_DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS` (imported here to avoid
+        drift) must NOT claim — that's what lets it survive a publish
+        rewrite."""
+        from flows.publish_flow import (
+            _DOSSIER_INDEX_OWNED_DOSSIER_KEYS,
+            _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS,
+        )
+        assert "edition_lead" in NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS
+        assert "edition_lead" not in _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS
+        # No per-dossier key is editor-only — publish's per-dossier schema
+        # is a strict superset (it adds issue_no/vol on top of every
+        # field the editor also produces).
+        assert NIGHT_INDEX_OWNED_DOSSIER_KEYS <= _DOSSIER_INDEX_OWNED_DOSSIER_KEYS

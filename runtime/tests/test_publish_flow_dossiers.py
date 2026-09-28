@@ -16,7 +16,13 @@ _RUNTIME = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_RUNTIME))
 
 from flows.shared.io import write_json_atomic  # noqa: E402
+from flows.editor.edition import (  # noqa: E402
+    NIGHT_INDEX_OWNED_DOSSIER_KEYS,
+    NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS,
+)
 from flows.publish_flow import (  # noqa: E402
+    _DOSSIER_INDEX_OWNED_DOSSIER_KEYS,
+    _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS,
     _build_cross_night_dossier_index,
     _build_lineage_graph,
     _build_per_night_dossier_index,
@@ -299,6 +305,137 @@ class TestPerNightDossierIndex:
         index = json.loads(Path(result["index_path"]).read_text())
         assert index["dossiers"][0]["voice_count"] == 5
         assert index["dossiers"][0]["voices_routed"] == []
+
+
+# --- Two-writer merge: publish rewrite must not clobber the editor -----
+#
+# `published_artifacts/dossiers/night_<N>/_index.json` is also written by
+# `flows/editor/edition.py::finalize_edition` (`build_night_index`),
+# which has a different schema — it produces `edition_lead` (which
+# publish never computes) and omits `issue_no`/`vol` (which publish
+# adds). `merge_night_index` (defined in `flows.editor.edition`, imported
+# here) is the shared helper both writers route their write through so
+# neither clobbers the other. See `test_editor_edition.py`'s
+# `TestMergeNightIndexPure` for direct tests of the merge mechanism;
+# these test the integration through `_build_per_night_dossier_index`.
+
+def _editor_shaped_index(night: int, dossiers: list[dict], lead_dossier_no: int) -> dict:
+    """Build an `_index.json` payload shaped like
+    `edition.py::build_night_index`'s output — used to seed disk state
+    simulating "the editor already ran" before publish writes."""
+    return {
+        "night": night,
+        "url_path": f"/dossiers/night-{night}",
+        "generated_at": "2026-05-08T09:00:00+00:00",
+        "dossier_count": len(dossiers),
+        "edition_lead": {"lead_dossier_no": lead_dossier_no},
+        "dossiers": dossiers,
+    }
+
+
+class TestPerNightDossierIndexMergeWithEditor:
+    def test_publish_rewrite_keeps_editor_only_edition_lead(self, tmp_path):
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        out_dir = _seed_dossiers_for_night(
+            project_root, 1, [(1, "theme_001", "First"), (2, "theme_002", "Second")]
+        )
+        write_json_atomic(out_dir / "_index.json", _editor_shaped_index(
+            1,
+            [
+                {"dossier_no": 1, "filename": "dossier_001.json",
+                 "url_path": "/dossiers/night-1/dossier_001", "kicker": "Kicker for theme_001",
+                 "headline": "First", "subline": "subline goes here", "theme_id": "theme_001",
+                 "theme_display_title": "First", "voice_count": 2, "voices_routed": []},
+                {"dossier_no": 2, "filename": "dossier_002.json",
+                 "url_path": "/dossiers/night-1/dossier_002", "kicker": "Kicker for theme_002",
+                 "headline": "Second", "subline": "subline goes here", "theme_id": "theme_002",
+                 "theme_display_title": "Second", "voice_count": 1, "voices_routed": []},
+            ],
+            lead_dossier_no=2,
+        ))
+
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+
+        # publish doesn't produce edition_lead (see
+        # _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS) — the editor's value
+        # survives the rewrite untouched.
+        assert index["edition_lead"] == {"lead_dossier_no": 2}
+        # Sanity-check the contract this relies on.
+        assert "edition_lead" not in _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS
+        assert "edition_lead" in NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS
+
+    def test_publish_rewrite_overwrites_its_own_fields_with_fresh_values(self, tmp_path):
+        """The editor's stale voice_count/voices_routed/kicker for a
+        dossier that publish also produces must NOT survive — publish's
+        own fields always take the new value, computed fresh from
+        theme_routing.json + the dossier file on disk."""
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        out_dir = _seed_dossiers_for_night(
+            project_root, 1, [(1, "theme_001", "First"), (2, "theme_002", "Second")]
+        )
+        write_json_atomic(out_dir / "_index.json", _editor_shaped_index(
+            1,
+            [
+                {"dossier_no": 1, "filename": "dossier_001.json", "kicker": "STALE KICKER",
+                 "theme_id": "theme_001", "voice_count": 999, "voices_routed": []},
+                {"dossier_no": 2, "filename": "dossier_002.json", "kicker": "STALE KICKER 2",
+                 "theme_id": "theme_002", "voice_count": 999, "voices_routed": []},
+            ],
+            lead_dossier_no=1,
+        ))
+
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        by_no = {d["dossier_no"]: d for d in index["dossiers"]}
+
+        # Fresh values from this run's dossier files + theme_routing.json,
+        # not the stale editor-written ones.
+        assert by_no[1]["kicker"] == "Kicker for theme_001"
+        assert by_no[1]["voice_count"] == 2
+        assert sorted(v["voice_slug"] for v in by_no[1]["voices_routed"]) == ["cleopatra", "plato"]
+        assert by_no[2]["kicker"] == "Kicker for theme_002"
+        assert by_no[2]["voice_count"] == 1
+        # And publish's own-only fields are present as usual.
+        assert by_no[1]["issue_no"] is not None
+        assert by_no[1]["vol"] == "CXVI"
+
+    def test_dossier_removed_from_disk_disappears_from_publish_index(self, tmp_path):
+        """A dossier the editor indexed previously, that's no longer on
+        disk for this publish run, is not resurrected — publish's own
+        directory listing (`out_dir.glob('dossier_*.json')`) is
+        authoritative for which dossiers currently exist."""
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        # Only dossier_001 actually on disk...
+        out_dir = _seed_dossiers_for_night(project_root, 1, [(1, "theme_001", "First")])
+        # ...but the existing index (written by a prior editor run) still
+        # lists dossier_002, which has since been removed from disk.
+        write_json_atomic(out_dir / "_index.json", _editor_shaped_index(
+            1,
+            [
+                {"dossier_no": 1, "filename": "dossier_001.json", "kicker": "K1",
+                 "theme_id": "theme_001", "voice_count": 2, "voices_routed": []},
+                {"dossier_no": 2, "filename": "dossier_002.json", "kicker": "K2",
+                 "theme_id": "theme_002", "voice_count": 1, "voices_routed": []},
+            ],
+            lead_dossier_no=1,
+        ))
+
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert index["dossier_count"] == 1
+        assert [d["dossier_no"] for d in index["dossiers"]] == [1]
+
+    def test_no_editor_dossier_only_keys_at_dossier_level(self):
+        """Documents the schema contract: publish's per-dossier owned-key
+        set is a strict superset of the editor's (it adds issue_no/vol on
+        top of everything the editor also produces), so there is no
+        editor-only per-dossier field for publish to worry about
+        preserving — only the top-level `edition_lead`."""
+        assert NIGHT_INDEX_OWNED_DOSSIER_KEYS <= _DOSSIER_INDEX_OWNED_DOSSIER_KEYS
 
 
 # --- Cross-night dossier index ----------------------------------------
