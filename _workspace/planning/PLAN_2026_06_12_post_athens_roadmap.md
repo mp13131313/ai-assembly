@@ -197,7 +197,7 @@ C53 (headnote corruption, both surfaces — port `dashboard.py` slug→council_c
 **Stage 3 — operator gates · (parallel; not model work)** — = the Operator decision points below.
 C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32.4 re-validate §6 on Opus 4.8 · reader-gate scheduling · validation-track decision · vatican §16 · chat product shape.
 
-**Stage 4 — Phase 1.1 backport · mostly `Sonnet / medium`, `Opus / medium` for subtle · one-at-a-time, sentinel-regen gate. MUST precede Stage 5.**
+**Stage 4 — Phase 1.1 backport** *(operator 2026-09-28: approved, run after the remaining Phase 0 work; spend cap to be set before the first sentinel regen)* · mostly `Sonnet / medium`, `Opus / medium` for subtle · one-at-a-time, sentinel-regen gate. MUST precede Stage 5.**
 `Sonnet`: Voice-of-X native emission (§18) · `manual_grounding`/`editorial_rationale`→Pass 4a/4b (§23) · §31 mechanical gaps (D/E/G/H/I).
 `Opus`: mediated-voice clarification across Pass 2/3/4a (§9 universal-pattern + per-voice worked examples — voice-fidelity-critical). *Target is set (cards are canon) → most is execution; Opus only for the cross-cutting voice design.*
 
@@ -232,6 +232,17 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 8. **Validator: prune vs agentic-triage (runtime C60 ⚖).** Apply the C42 prune/fix (recommended), or build agentic validation triage — the latter only if a deployment runs unattended (relates FU#62 path-A). The ~100%-release Athens data favors prune.
 9. **Step-3: which shape (runtime C61 ⚖).** Re-enable the cheap deterministic B+ Step-3 as-filed (A1, ~2 days), build agentic visible Step-3 (Shape B, design-and-shelve behind a committed run), or accept vatican annotation as the deliberation substitute. Needs per-voice card work (voices §34).
 10. **Versatile-assembly invariant (coherence hole).** Phase 2 parameterizes council/input/output/cadence but never states what must remain for a deployment to still be "the Assembly" — vatican annotation already drops the briefing's defining Step-3 collective-constitution move (briefing line 91). Define the invariant set before building a second deployment profile. **Draft proposal 2026-09-27: `PRODUCT_assembly_hub.md` §11.5** (loose four-part invariant; vatican annotation qualifies).
+
+**Operator decisions recorded 2026-09-28:**
+- **No forcing function.** No next event or client. The operator intends to *write about* the project and keep the code in its best shape. ⇒ Phase 2 builds (2.1 split-card/event-config, 2.2 vendor layer, 2.3 profiles) and the hub stay **designed-and-shelved**; the working agenda is Phase 0/1 quality + documentation.
+- **#1 push `phase0-fixes`** — done (pushed 2026-09-28).
+- **#2 published-record repair (C53/C50)** — approved; applied locally in athens-2026 2026-09-28 (99 name fields, Night 1/2 indexes rebuilt, data_views regenerated). athens-2026 push awaits a final confirmation.
+- **Family-of-forms vs the gate (PRODUCT §11.6)** — **exempt, conditionally** (only the one upstream Pass 4b edit; re-enters the gate if it grows).
+- **Dossier-index writers (#5)** — approved: each writer preserves the fields it doesn't own.
+- **C51 per-theme files** — approved: generate for Athens.
+- **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
+- **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
+- **Invariant (#10)** — open; operator asked where the proposal comes from (answered 2026-09-28).
 
 ---
 

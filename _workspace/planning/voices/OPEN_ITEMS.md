@@ -105,7 +105,7 @@ Build sequence per voice:
 
 ### Active / conditional
 
-**FU#55 — Family of forms: 🟢 OPERATOR DECISION 2026-06-13 — BUILD (fork-test gate overridden)**
+**FU#55 — Family of forms: 🟢 OPERATOR DECISION 2026-06-13 — BUILD (fork-test gate overridden)** · *2026-09-28: confirmed exempt from the net-complexity gate as long as it stays the single upstream Pass 4b edit (PRODUCT §11.6); sequenced after Stage 4.*
 - **Decision (operator, 2026-06-13):** family of forms is a **committed build** — the centerpiece of the post-Athens roadmap §1.2. Voices get a menu of corpus-attested native forms and choose per matter, instead of a single locked form. The per-voice fork-test gate (original framing below) is **OVERRIDDEN**: build the capability rather than wait on per-voice opt-in.
 - **Recorded against the gate's own evidence (faithful note):** only 2 voices were ever fork-tested (Plato + Cleopatra) and **both declined** (0/2 opt-in). The original resolution rule below would have read 0/2 as "close §H aspirational / opt-in only." The operator chose to build regardless; this line preserves that the override was made *knowing* the early fork-test signal leaned the other way. Form menus are populated from each voice's corpus-attested forms (roadmap §1.2 Stage 1), not gated on voice opt-in.
 - **Build design:** post-Athens roadmap §1.2 — `medium` → `{default_form, forms[]}` schema; shipped-voice surgical patches (§27 second-medium table = seed content); runtime Step-2 form-selection pressure; Pass 4b plumbing of `genre_specific_register` (the §23 "collected-but-not-piped-to-4b" gap, confirmed at source 2026-06-13: 4b is CT-only / chunk-less, so the menu must be routed in explicitly).

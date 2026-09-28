@@ -192,4 +192,6 @@ Three levels, **disclosed, not gated**:
 Consequences: the vatican annotation profile **qualifies** (juxtaposition on the same paragraphs); a single-voice chat **doesn't** — name it as a different product ("a Voice from the Assembly"). A strict variant (require inter-voice response) would disqualify vatican until C61 exists. **Recommendation: the loose invariant, and label deployments that have the stronger form.**
 
 ### 11.6 Vision decision B — family-of-forms vs the net-complexity gate
+**✅ DECIDED 2026-09-28: exempt, conditionally (as proposed below).**
+
 **Proposal: exempt, with the reason on record.** The gate targets deployment surface; family-of-forms is voice-fidelity capability inside the card. Per the 2026-06-13 code read (PLAN Appendix B), runtime Steps 2+3 already support multiple forms (`selected_form`, `form_changed_from_first_draft`; the Step-3 prompt already licenses a form change). The missing link is one upstream Pass 4b edit populating the form menu, i.e. roughly one prompt edit plus a sentinel regen, and no new layer. **Condition:** if the build grows beyond that upstream edit (e.g. new runtime selection logic), it re-enters the gate.
