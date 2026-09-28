@@ -16,6 +16,8 @@ The post-Athens "what is this as a product" question was worked through three sh
 
 **Operator decision (2026-06-14):** the voice library is **extendable, with flags; other users can build voices.** → Shape 3.
 
+**Status 2026-09-28: active direction.** The operator will build it on their own intent — no external event or client is needed (PLAN gate amendment 2026-09-28).
+
 ---
 
 ## 2. What the product is
