@@ -42,9 +42,9 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `40c4d56` (2026-09-28); everything
-  after it is local only — C64 (`9f415dd`, `e806dd4`), the Editor-spec
-  docs (`6bbb6f5`, `b1e4387`) and this STATE update.
+  `phase0-fixes` is pushed through `fa98ee4` (2026-09-28), including
+  C64 (`9f415dd`, `e806dd4`) and the Editor-spec docs (`6bbb6f5`,
+  `b1e4387`, `fa98ee4`).
 
 ---
 
