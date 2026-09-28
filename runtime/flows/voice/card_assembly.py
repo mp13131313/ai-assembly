@@ -73,7 +73,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from flows.shared.io import load_prompt
+from flows.shared.io import load_prompt, voice_display_name
 from flows.shared.project_root import resolve_project_root
 
 
@@ -534,7 +534,9 @@ def filter_theme_record_for_step1(full_theme_record: dict[str, Any]) -> dict[str
     return out
 
 
-def filter_first_draft_for_step3(first_draft: dict[str, Any]) -> dict[str, Any]:
+def filter_first_draft_for_step3(
+    first_draft: dict[str, Any], project_root: Path | None = None
+) -> dict[str, Any]:
     """Strip pipeline-meta from a Step 2 first-draft artifact before
     showing it to a different voice in Step 3.
 
@@ -544,9 +546,19 @@ def filter_first_draft_for_step3(first_draft: dict[str, Any]) -> dict[str, Any]:
       Keep:   voice_name (renamed from council_member),
               focus/stance/form decisions + rationales,
               themes_covered, artifact title/subtitle/text
+
+    R1 (untouched-code review, 2026-09-28): `voice_name` used to be
+    `council_member` renamed verbatim — but on Step 1/2/3 artifacts that
+    field is the long card identity-prefix opening line ("I am Augusta
+    Ada King, Countess of Lovelace…"), the same C53 root cause fixed for
+    the *published* record. Step 3 is dormant (Athens skipped it per A1),
+    so this never shipped, but re-enabling it (C61) would have every
+    voice reading its peers under those names. Resolved the same way as
+    C53: `voice_display_name(slug, project_root)` off `lineage.voice_slug`,
+    which is still present on `first_draft` at this point (the lineage
+    block itself is dropped below, after the slug is read from it).
     """
     keep_fields = (
-        "council_member",  # → renamed below
         "focus_decision",
         "focus_rationale",
         "stance",
@@ -559,10 +571,12 @@ def filter_first_draft_for_step3(first_draft: dict[str, Any]) -> dict[str, Any]:
         "artifact_text",
     )
     out: dict[str, Any] = {}
+    slug = (first_draft.get("lineage") or {}).get("voice_slug")
+    if slug:
+        out["voice_name"] = voice_display_name(slug, project_root)
+    elif "council_member" in first_draft:
+        out["voice_name"] = first_draft["council_member"]  # no slug — nothing to resolve
     for k in keep_fields:
         if k in first_draft:
-            if k == "council_member":
-                out["voice_name"] = first_draft[k]
-            else:
-                out[k] = first_draft[k]
+            out[k] = first_draft[k]
     return out

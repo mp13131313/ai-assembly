@@ -31,7 +31,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from anthropic import Anthropic
 
-from flows.shared.io import get_logger, write_json_atomic
+from flows.shared.io import get_logger, voice_display_name, write_json_atomic
 from flows.shared.model_routing import step_config
 from flows.voice.card_assembly import (
     assemble_system_prompt,
@@ -57,6 +57,7 @@ def build_step3_user_prompt(
     own_first_draft: dict[str, Any],
     other_first_drafts: list[dict[str, Any]],
     theme_display_titles: dict[str, str] | None = None,
+    project_root: Path | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Render Step 3 user prompt + return the list of voices_read.
 
@@ -64,6 +65,13 @@ def build_step3_user_prompt(
     framing uses theme_display_title (human-readable) rather than
     pipeline IDs, and other voices' first-drafts are filtered (drops
     lineage / paths / telemetry / thinking_trace).
+
+    R1 (2026-09-28): peers are named with `voice_display_name(slug,
+    project_root)` — council_config's clean display name — not the
+    other voice's `council_member` field, which on Step 1/2/3 artifacts
+    is the long card identity-prefix opening line. Same root cause as
+    C53's published-surface fix; this is the live prompt text a peer
+    voice reads, so it needed the same resolution.
     """
     theme_display_titles = theme_display_titles or {}
     voices_read: list[dict[str, Any]] = []
@@ -73,10 +81,8 @@ def build_step3_user_prompt(
         shared = _find_shared_themes(own_first_draft, other)
         if not shared:
             continue
-        other_voice_name = other.get("council_member") or other["lineage"].get(
-            "voice_slug", "another voice"
-        )
         other_slug = other["lineage"]["voice_slug"]
+        other_voice_name = voice_display_name(other_slug, project_root)
         voices_read.append({
             "voice_slug": other_slug,
             "council_member": other_voice_name,
@@ -110,7 +116,7 @@ def build_step3_user_prompt(
     parts.append("\n---\n\n")
     parts.append("FULL RECORD of pieces by other voices you may reference:\n\n")
     filtered_record = [
-        filter_first_draft_for_step3(o) for o in other_first_drafts
+        filter_first_draft_for_step3(o, project_root) for o in other_first_drafts
     ]
     parts.append(json.dumps(filtered_record, indent=2, ensure_ascii=False))
     parts.append("\n")
@@ -232,7 +238,8 @@ def run_step3_for_voice(
     cfg = step_config("runtime.voice.step3")
     system = assemble_system_prompt(card, step=3, night=night)
     user, voices_read = build_step3_user_prompt(
-        own_first_draft, other_first_drafts, theme_display_titles
+        own_first_draft, other_first_drafts, theme_display_titles,
+        project_root=project_root,
     )
 
     logger.info(

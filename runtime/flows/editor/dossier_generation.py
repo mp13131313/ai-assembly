@@ -137,6 +137,7 @@ def build_dossier_briefing(
     *,
     night: int,
     prior_editions: list[dict[str, Any]] | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Combine K voice briefings + K Step 2 artifacts into ONE deduplicated
     dossier briefing per spec v2 §"Stage 2 — Per-call inputs".
@@ -159,13 +160,17 @@ def build_dossier_briefing(
             f"No voices routed to theme_id={theme_id}; can't build briefing"
         )
 
-    # PROJECT_ROOT is run_dir.parent.parent (run_dir is
+    # PROJECT_ROOT defaults to run_dir.parent.parent (run_dir is
     # `<PROJECT_ROOT>/runs/athens_night_N/`) — same derivation as
     # _load_speakers_index below. Used to resolve each voice's clean
     # display name from council_config.json (C53) instead of the
     # artifact's `council_member` field, which carries the long card
-    # identity-prefix opening line, not a display name.
-    project_root = run_dir.parent.parent
+    # identity-prefix opening line, not a display name. C67 #10: that
+    # default only holds for a run_dir under `<project_root>/runs/` —
+    # a caller with the real project_root (e.g. `run_editor_pipeline`)
+    # should pass it explicitly.
+    if project_root is None:
+        project_root = run_dir.parent.parent
 
     briefings = [_read_briefing_formulation(slug, theme_id, run_dir) for slug in voice_slugs]
     artifacts = [_read_artifact(slug, run_dir) for slug in voice_slugs]
@@ -554,11 +559,15 @@ def generate_dossier(
     prior_editions: list[dict[str, Any]] | None = None,
     logger: logging.Logger | None = None,
     cache_system: bool = True,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Run one dossier-generation call. Returns the full v2 dossier dict.
 
     `cache_system=False` (editor_flow `--no-prompt-cache`, C65) sends the
     system prompt without cache breakpoints.
+
+    `project_root`: pass-through to `build_dossier_briefing`; see its
+    docstring (C67 #10).
 
     Caller is responsible for: (a) building system_prompt via
     `card_assembly.assemble_system_prompt`; (b) constructing `client`
@@ -569,7 +578,7 @@ def generate_dossier(
 
     briefing = build_dossier_briefing(
         theme_id, voice_slugs, run_dir,
-        night=night, prior_editions=prior_editions,
+        night=night, prior_editions=prior_editions, project_root=project_root,
     )
     user_prompt = build_user_prompt(briefing)
 

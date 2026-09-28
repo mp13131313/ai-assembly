@@ -242,6 +242,55 @@ def merge_speaker_ids(turns, mapping_output):
     return named
 
 
+# C49: the flag `type` written by build_speaker_id_fallback(), read back by
+# _is_speaker_id_auto_passthrough() (retry) and _set_speaker_id_fallback_warning()
+# (dashboard visibility) below.
+SPEAKER_ID_AUTO_PASSTHROUGH = "speaker_id_auto_passthrough"
+
+
+def _is_speaker_id_auto_passthrough(id_output) -> bool:
+    """True if a Speaker ID result (loaded from out_02_speaker_id.json, or
+    freshly returned) is the C49 auto-passthrough fallback rather than a
+    real Speaker ID pass."""
+    if not isinstance(id_output, dict):
+        return False
+    return any(
+        isinstance(f, dict) and f.get("type") == SPEAKER_ID_AUTO_PASSTHROUGH
+        for f in id_output.get("flags", [])
+    )
+
+
+def _set_speaker_id_fallback_warning(out, logger, present: bool) -> None:
+    """C49 visibility: keep the session's status.json `warnings` in step with
+    the Speaker ID result, so the ingest dashboard shows a warning badge on
+    the session row without an operator having to open review.md. Added when
+    the auto-passthrough fallback fires; removed again when a retry gets a
+    real Speaker ID result. Writes only when the list actually changes.
+
+    status.json is normally owned by the ingest layer
+    (runtime/ingest/pipeline.py's update_status()) — this mirrors that
+    function's read-merge-write-atomic pattern (preserving every existing
+    key) rather than importing it, since transcription_flow.py also runs
+    standalone (CLI / dryrun) with no ingest process involved.
+    """
+    status_path = out / "status.json"
+    try:
+        status = json.loads(status_path.read_text(encoding="utf-8")) if status_path.exists() else {}
+    except (json.JSONDecodeError, OSError):
+        status = {}
+    warnings = list(status.get("warnings") or [])
+    if present == (SPEAKER_ID_AUTO_PASSTHROUGH in warnings):
+        return
+    if present:
+        warnings.append(SPEAKER_ID_AUTO_PASSTHROUGH)
+    else:
+        warnings.remove(SPEAKER_ID_AUTO_PASSTHROUGH)
+    status["warnings"] = warnings
+    write_json_atomic(status_path, status)
+    logger.info(f"{'Recorded' if present else 'Cleared'} '{SPEAKER_ID_AUTO_PASSTHROUGH}' "
+                f"in {status_path.name} warnings")
+
+
 def build_speaker_id_fallback(turns, error):
     """C49: auto-passthrough fallback for a Speaker ID JSON-decode failure.
 
@@ -299,7 +348,7 @@ def build_speaker_id_fallback(turns, error):
 
     flags = [
         {
-            "type": "speaker_id_auto_passthrough",
+            "type": SPEAKER_ID_AUTO_PASSTHROUGH,
             "labels": labels_in_order,
             "note": (
                 f"Speaker ID failed after retries with a JSON decode error "
@@ -719,12 +768,25 @@ def process_session(audio_path, session_path):
 
     # Step 3: Speaker ID
     p2 = out / "out_02_speaker_id.json"
-    if p2.exists():
-        id_output = json.loads(p2.read_text(encoding="utf-8"))
+    p2_on_disk = json.loads(p2.read_text(encoding="utf-8")) if p2.exists() else None
+    if p2_on_disk is not None and _is_speaker_id_auto_passthrough(p2_on_disk):
+        # C49 retry: a prior run degraded instead of halting. That result is
+        # not a real Speaker ID pass — treat it as absent so a retry actually
+        # retries Speaker ID, instead of loading the fallback back off disk
+        # and reporting the same "Unidentified Speaker N" mapping forever.
+        logger.info(
+            f"{p2.name} on disk is a C49 auto-passthrough fallback "
+            f"(flags contain speaker_id_auto_passthrough) — treating it as "
+            f"absent so Speaker ID re-runs on retry."
+        )
+        p2_on_disk = None
+    if p2_on_disk is not None:
+        id_output = p2_on_disk
         logger.info(f"Resuming: loaded {p2.name} from disk (skipping Speaker ID)")
     else:
         try:
             id_output = identify_speakers(turns, session)
+            _set_speaker_id_fallback_warning(out, logger, present=False)  # a retry that worked
         except json.JSONDecodeError as e:
             # C49: identify_speakers' own task retries (see its @task
             # decorator) are already exhausted by the time this fires —
@@ -741,6 +803,7 @@ def process_session(audio_path, session_path):
                 f"review_queue.diarization_flags for operator review."
             )
             id_output = build_speaker_id_fallback(turns, e)
+            _set_speaker_id_fallback_warning(out, logger, present=True)
         p2.write_text(json.dumps(id_output, indent=2, ensure_ascii=False))
     named_turns = merge_speaker_ids(turns, id_output)
 

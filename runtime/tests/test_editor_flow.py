@@ -229,6 +229,60 @@ framing_text: F-cleopatra
     assert manifest["schema_version"] == "2.0"
 
 
+def test_project_root_threaded_to_routing_and_dossier_briefing(tmp_path, monkeypatch):
+    """C67 #10: route_themes() and build_dossier_briefing() derived
+    PROJECT_ROOT as run_dir.parent.parent, which only holds when run_dir
+    is <project_root>/runs/<run>/. A run_dir elsewhere (e.g. `editor_flow.py
+    <run_dir> --project P` with a run_dir outside P/runs/) found no
+    council_config.json there and fell back to a title-cased slug guess,
+    dropping the article ("the Voice of Octopus" instead of the correct
+    "the Voice of the Octopus"). run_editor_pipeline must thread the
+    project_root it was given all the way down instead."""
+    project_root = tmp_path / "project"
+    project_root.mkdir()
+    editor_dir = project_root / "editor" / "tim_leberecht"
+    editor_dir.mkdir(parents=True)
+    (editor_dir / "07_persona_card_assembled.json").write_text(STUB_CARD_PATH.read_text())
+    (project_root / "council_config.json").write_text(json.dumps({
+        "members": [{"name": "Voice of the Octopus"}],
+    }))
+
+    # run_dir deliberately OUTSIDE <project_root>/runs/ — a sibling tree,
+    # so run_dir.parent.parent (tmp_path) has no council_config.json.
+    run_dir = _setup_run_dir(tmp_path / "elsewhere", ["octopus"], theme_id="theme_001")
+    assert not (run_dir.parent.parent / "council_config.json").exists()
+
+    mock_response = """**kicker:** K
+**headline:** H
+**body_paragraphs:**
+Body.
+
+**headnotes:**
+voice_slug: octopus
+artifact_title: T
+framing_text: F
+
+**front_abstract:** Abstract.
+"""
+    mock_usage = MagicMock(input_tokens=1, output_tokens=1,
+                           cache_creation_input_tokens=0, cache_read_input_tokens=0)
+    mock_final = MagicMock(usage=mock_usage)
+    monkeypatch.setattr(dossier_generation, "stream_voice_call",
+                        lambda *a, **kw: (mock_response, "", mock_final, 0))
+    monkeypatch.setattr("anthropic.Anthropic", lambda *a, **kw: MagicMock())
+
+    from flows.editor_flow import run_editor_pipeline
+    run_editor_pipeline(run_dir, night=1, project_root=project_root, bypass_gating=True)
+
+    routing_data = json.loads((run_dir / "05_editor" / "theme_routing.json").read_text())
+    assert routing_data["voices_routing"][0]["voice_name"] == "Voice of the Octopus"
+
+    dossier = json.loads(
+        (run_dir / "05_editor" / "dossiers" / "dossier_001.json").read_text()
+    )
+    assert dossier["headnotes"][0]["voice_name"] == "the Voice of the Octopus"
+
+
 def test_editor_flow_handles_failed_dossier(tmp_path, monkeypatch):
     """If one dossier fails (e.g. Anthropic error), other dossiers proceed,
     manifest records the failure."""
@@ -288,9 +342,19 @@ def test_editor_flow_handles_failed_dossier(tmp_path, monkeypatch):
 
 def test_first_dossier_call_runs_alone_then_rest_in_parallel(tmp_path, monkeypatch):
     """C66: the first dossier call must finish (writing the night's
-    system-prompt cache) before any other starts; the rest still overlap."""
+    system-prompt cache) before any other starts; the rest still overlap.
+
+    C67 #9: the overlap check used to rely on both remaining calls being
+    scheduled within one 50ms sleep — on a loaded box, call 2 could finish
+    before call 3 was even scheduled, and `rest[1]` would read `("end", 1)`
+    instead of a second `("start", ...)`. A `threading.Barrier(2)` makes
+    the overlap a hard requirement instead of a timing gamble: both
+    parallel calls must reach it before either can proceed to its "end"
+    event, so the test can only pass if they were genuinely in flight at
+    the same time (or fail deterministically via a Barrier timeout if the
+    implementation regresses to fully serial dossier calls).
+    """
     import threading
-    import time
 
     project_root = tmp_path / "project"
     editor_dir = project_root / "editor" / "tim_leberecht"
@@ -320,13 +384,17 @@ def test_first_dossier_call_runs_alone_then_rest_in_parallel(tmp_path, monkeypat
     events: list[tuple[str, int]] = []
     lock = threading.Lock()
     counter = {"n": 0}
+    # Only the two parallel calls (index 1 and 2) rendezvous here — the
+    # first call (index 0) must already be done by the time either starts.
+    parallel_barrier = threading.Barrier(2, timeout=5)
 
     def fake_call(*args, **kwargs):
         with lock:
             i = counter["n"]
             counter["n"] += 1
             events.append(("start", i))
-        time.sleep(0.05)
+        if i >= 1:
+            parallel_barrier.wait()  # blocks until both parallel calls have started
         with lock:
             events.append(("end", i))
         usage = MagicMock(input_tokens=1, output_tokens=1,

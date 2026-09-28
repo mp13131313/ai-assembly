@@ -418,6 +418,7 @@ def route_themes(
     dossier_lead_order: list[str] | None = None,
     synthesis_client: Any | None = None,
     logger: logging.Logger | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Build the theme_routing.json payload for one night.
 
@@ -431,13 +432,21 @@ def route_themes(
     lowest-numbered tiebreaker — kept that way so unit tests don't need
     a mocked client.
 
+    `project_root`: where council_config.json lives, for voice display-name
+    resolution (C53). C67 #10: defaults to `run_dir.parent.parent`, which
+    only holds when `run_dir` is `<project_root>/runs/<run>/` — not true for
+    a run_dir passed via `--project` pointing somewhere else. Callers that
+    know the real project_root (e.g. `run_editor_pipeline`) should pass it.
+
     Returns the routing manifest dict.
     """
     log = logger or logging.getLogger("editor_routing")
+    if project_root is None:
+        project_root = run_dir.parent.parent
 
     artifacts = _load_step2_artifacts(run_dir)
     briefings_by_voice = _load_briefings(run_dir)
-    voice_names = _voice_name_lookup(artifacts, run_dir.parent.parent)
+    voice_names = _voice_name_lookup(artifacts, project_root)
     theme_titles = _theme_titles_from_briefings(briefings_by_voice)
 
     voices_routing: list[dict[str, Any]] = []
@@ -558,17 +567,19 @@ def write_routing_manifest(
     dossier_lead_order: list[str] | None = None,
     synthesis_client: Any | None = None,
     logger: logging.Logger | None = None,
+    project_root: Path | None = None,
 ) -> dict[str, Any]:
     """Compute + write theme_routing.json. Returns the manifest dict.
 
     `synthesis_client`: optional Anthropic client for synthesis routing.
-    Pass-through to route_themes; see its docstring.
+    `project_root`: pass-through to route_themes; see its docstring.
     """
     manifest = route_themes(
         run_dir, night,
         dossier_lead_order=dossier_lead_order,
         synthesis_client=synthesis_client,
         logger=logger,
+        project_root=project_root,
     )
     out_dir = run_dir / "05_editor"
     out_dir.mkdir(parents=True, exist_ok=True)

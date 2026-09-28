@@ -458,7 +458,12 @@ def overview_json(_: str = Depends(require_admin)):
         if not sdir:
             continue
         st = pipeline.infer_state(sdir) if sdir.exists() else {"state": None}
-        result.append({"session_id": s.session_id, "state": st.get("state"), "substate": st.get("substate")})
+        result.append({
+            "session_id": s.session_id,
+            "state": st.get("state"),
+            "substate": st.get("substate"),
+            "warnings": st.get("warnings") or [],
+        })
     return JSONResponse(result)
 
 

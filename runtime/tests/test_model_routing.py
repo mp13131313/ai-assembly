@@ -129,6 +129,18 @@ def test_claude_model_applies_only_where_it_did(monkeypatch):
     assert mr.step_config("personas.pass_2").model == OPUS          # never honored it
 
 
+def test_speaker_id_falls_through_transcription_claude_model(monkeypatch):
+    # C67 #1: on main, Speaker ID fell back to TRANSCRIPTION_CLAUDE_MODEL (via
+    # the module's shared CLAUDE_MODEL) before CLAUDE_MODEL itself. The branch
+    # chain dropped that middle rung — restore it.
+    monkeypatch.setenv("TRANSCRIPTION_CLAUDE_MODEL", OPUS)
+    assert mr.step_config("runtime.transcription.speaker_id").model == OPUS
+    assert mr.step_config("runtime.transcription.cleaning").model == OPUS
+    monkeypatch.setenv("TRANSCRIPTION_SPEAKER_ID_MODEL", SONNET)
+    assert mr.step_config("runtime.transcription.speaker_id").model == SONNET   # most specific wins
+    assert mr.step_config("runtime.transcription.cleaning").model == OPUS       # unaffected
+
+
 def test_empty_env_counts_as_unset(monkeypatch):
     monkeypatch.setenv("VOICE_MODEL", "")
     assert mr.step_config("runtime.voice.step2").model == OPUS
@@ -145,6 +157,12 @@ def test_ladder_env(monkeypatch):
     monkeypatch.setenv("VOICE_VALIDATION_MODELS", "gpt-4o, gemini-2.5-pro")
     cfg = mr.step_config("runtime.voice.step1_validation")
     assert cfg.ladder == ("gpt-4o", "gemini-2.5-pro") and cfg.model == "gpt-4o"
+
+
+def test_empty_ladder_env_raises(monkeypatch):
+    monkeypatch.setenv("VOICE_VALIDATION_MODELS", ",")
+    with pytest.raises(mr.ModelRoutingError, match="empty model list"):
+        mr.step_config("runtime.voice.step1_validation")
 
 
 def test_model_vendor():
@@ -166,11 +184,19 @@ def test_ladder_rung_must_be_openai_or_google(tmp_path, monkeypatch):
 def test_manual_steps_skip_api_rules(tmp_path):
     # A manual step is instructions for a person: Opus 5.5 without an explicit
     # effort would be refused for an API step, but is fine here.
-    p = _config(tmp_path, {"dr": {"model": "claude-opus-5-5", "manual": True}})
-    cfg = mr.step_config("dr", path=p)
+    p = _config(tmp_path, {"personas.dr_extra": {"model": "claude-opus-5-5", "manual": True}})
+    cfg = mr.step_config("personas.dr_extra", path=p)
     assert cfg.manual and cfg.thinking is None
     assert mr.step_config("personas.dr_section_6").manual
     assert not mr.step_config("personas.pass_2").manual
+
+
+def test_manual_refused_outside_dr_steps(tmp_path):
+    # "manual": true skips the thinking/effort safety rules below — only
+    # personas.dr_* (claude.ai Deep Research, done by the operator) may use it.
+    p = _config(tmp_path, {"runtime.voice.step1": {"model": OPUS, "manual": True}})
+    with pytest.raises(mr.ModelRoutingError, match="personas.dr_"):
+        mr.step_config("runtime.voice.step1", path=p)
 
 
 def test_model_display_name():

@@ -36,6 +36,8 @@
       <td>
         <span class="dot dot-{{ st or 'none' }}"></span>
         <span class="state-label">{{ (sub or st) | state_label }}</span>
+        <span class="warn warn-badge{{ '' if r.status.get('warnings') else ' hidden' }}"
+              title="{{ r.status.get('warnings', []) | join(', ') }}">⚠</span>
       </td>
       <td>{{ r.session.day }}</td>
       <td>{{ r.session.start_time }}</td>

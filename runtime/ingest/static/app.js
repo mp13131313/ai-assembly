@@ -171,14 +171,20 @@
         const r = await fetch("/status.json");
         const rows = await r.json();
         let anyActive = false;
-        rows.forEach(({ session_id, state, substate }) => {
+        rows.forEach(({ session_id, state, substate, warnings }) => {
           const tr = overviewTable.querySelector(`tr[data-session-id="${session_id}"]`);
           if (!tr) return;
           const display = (state === "transcribing" && substate) ? substate : state;
           const dot = tr.querySelector(".dot");
           const label = tr.querySelector(".state-label");
+          const warnBadge = tr.querySelector(".warn-badge");
           if (dot) dot.className = "dot dot-" + (state || "none");
           if (label) label.textContent = STATE_LABEL_MAP[display] || display || "not started";
+          if (warnBadge) {
+            const hasWarnings = !!(warnings && warnings.length);
+            warnBadge.classList.toggle("hidden", !hasWarnings);
+            warnBadge.title = hasWarnings ? warnings.join(", ") : "";
+          }
           if (state && !["done","error"].includes(state)) anyActive = true;
         });
         if (!anyActive && overviewTimer) {

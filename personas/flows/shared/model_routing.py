@@ -42,7 +42,8 @@ _LADDER_VENDORS = {"openai", "google"}  # what the validator ladder call sites c
 
 # step (or step prefix ending in ".") -> legacy model env vars, first set wins.
 _MODEL_ENV: dict[str, tuple[str, ...]] = {
-    "runtime.transcription.speaker_id": ("TRANSCRIPTION_SPEAKER_ID_MODEL", "CLAUDE_MODEL"),
+    "runtime.transcription.speaker_id": (
+        "TRANSCRIPTION_SPEAKER_ID_MODEL", "TRANSCRIPTION_CLAUDE_MODEL", "CLAUDE_MODEL"),
     "runtime.transcription.cleaning": ("TRANSCRIPTION_CLAUDE_MODEL", "CLAUDE_MODEL"),
     "runtime.researcher.": ("RESEARCHER_CLAUDE_MODEL", "CLAUDE_MODEL"),
     "runtime.provocateur.": ("PROVOCATEUR_CLAUDE_MODEL", "CLAUDE_MODEL"),
@@ -139,6 +140,11 @@ def _build(step: str, raw: dict[str, Any], models: dict[str, Any],
     spec = models[model]
     effort = raw.get("effort")
     manual = bool(raw.get("manual"))
+    if manual and not step.startswith("personas.dr_"):
+        raise ModelRoutingError(
+            f"{step}: \"manual\": true is only for personas.dr_* steps (claude.ai Deep "
+            f"Research, done by the operator) — an API call site would silently skip the "
+            f"thinking/effort safety rules below.")
     if manual:  # instructions for a person, not an API request: no request-shape rules
         thinking = None
     elif spec["vendor"] == "anthropic":
@@ -189,6 +195,9 @@ def step_config(step: str, *, path: Path | None = None) -> StepConfig:
     ladder_env = _lookup(_LADDER_ENV, step)
     if ladder_env and _env(ladder_env) is not None:
         ladder = tuple(m.strip() for m in _env(ladder_env).split(",") if m.strip())
+        if not ladder:
+            raise ModelRoutingError(
+                f"{step}: {ladder_env} is set but parses to an empty model list.")
         model = model or ladder[0]
     return _build(step, data["steps"][step], data["models"], model, thinking, ladder)
 

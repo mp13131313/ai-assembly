@@ -569,6 +569,42 @@ class TestPublishHoldFilter:
             project_root / "published_artifacts" / "nights" / "night_1" / "cleopatra.json"
         ).exists()
 
+    def test_held_voice_dropped_from_index_but_page_file_stays(self, tmp_path):
+        """C67 #4 report scenario: voice_flow publishes all voices right
+        after Step 2 (before the operator gate), the operator then holds
+        one, and a full republish must drop it from `_index.json` again —
+        `_rebuild_index_from_disk` (C50) was reading every <slug>.json on
+        disk, including a held voice's file from the earlier pre-hold
+        publish, undoing what `main` did for free. The page file itself is
+        not deleted (index ['octopus', 'plato'] -> ['plato'] after hold)."""
+        run_dir = _seed_run_dir(tmp_path, step2_voices=["octopus", "plato"])
+        project_root = tmp_path / "project"
+        night_dir = project_root / "published_artifacts" / "nights" / "night_1"
+
+        publish_voice_artifacts_for_night(
+            run_dir=run_dir, night=1, project_root=project_root
+        )
+        index = json.loads((night_dir / "_index.json").read_text())
+        assert index["voice_count"] == 2
+        assert {v["voice_slug"] for v in index["voices"]} == {"octopus", "plato"}
+
+        dec_dir = run_dir / "04_voice" / "operator_decisions"
+        dec_dir.mkdir(parents=True)
+        write_json_atomic(
+            dec_dir / "octopus.json",
+            {"voice_slug": "octopus", "decision": "hold_for_regen"},
+        )
+
+        result = publish_voice_artifacts_for_night(
+            run_dir=run_dir, night=1, project_root=project_root
+        )
+        assert result["voices_published"] == ["plato"]
+        index_after_hold = json.loads((night_dir / "_index.json").read_text())
+        assert index_after_hold["voice_count"] == 1
+        assert [v["voice_slug"] for v in index_after_hold["voices"]] == ["plato"]
+        # Not deleted — only excluded from the index.
+        assert (night_dir / "octopus.json").exists()
+
 
 class TestPublishEmpty:
     def test_no_step3_or_step2_returns_empty(self, tmp_path):

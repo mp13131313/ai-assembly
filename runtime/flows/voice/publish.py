@@ -295,7 +295,9 @@ def _load_held_voices(run_dir: Path) -> set[str]:
     return held
 
 
-def _rebuild_index_from_disk(publish_dir: Path, night: int) -> dict[str, Any]:
+def _rebuild_index_from_disk(
+    publish_dir: Path, night: int, held: set[str] | None = None
+) -> dict[str, Any]:
     """Rebuild the per-night `_index.json` from every `<slug>.json` file
     actually on disk under `publish_dir` — NOT from whatever subset of
     voices this particular publish call happened to touch.
@@ -308,14 +310,30 @@ def _rebuild_index_from_disk(publish_dir: Path, night: int) -> dict[str, Any]:
     every publish call (full batch or single-voice rerun) ends with an
     index that lists every voice file currently present for that night.
 
+    C67 #4 fix: on `main`, held voices (C28b `hold_for_regen`) were
+    excluded from the index for free because it was built from
+    `voices_published`, which the hold filter already ran on. This
+    rebuild-from-disk approach re-introduced them (the per-voice file
+    from an earlier, pre-hold publish is still on disk). `held` — the
+    same set `publish_voice_artifacts_for_night` filters `voice_slugs`
+    with — is skipped here too, by slug, so a held voice drops out of
+    the index while its page file stays on disk (not deleted; an
+    operator decision can be reversed, and a direct link should still
+    resolve). Callers with no `run_dir` context (e.g. the restamp
+    script, which only ever touches published data) pass nothing and
+    get the old disk-only behavior.
+
     Per-voice files that fail to parse are skipped (defensive; should
     not happen for files this module itself wrote via
     `write_json_atomic`). Sorted by voice_slug for a deterministic
     index across repeated rebuilds.
     """
+    held = held or set()
     voices: list[dict[str, Any]] = []
     for p in sorted(publish_dir.glob("*.json")):
         if p.name == "_index.json":
+            continue
+        if p.stem in held:
             continue
         try:
             with p.open(encoding="utf-8") as f:
@@ -368,11 +386,12 @@ def publish_voice_artifacts_for_night(
     always reflects what's actually publishable on disk.
 
     Voices marked hold_for_regen via `04_voice/operator_decisions/<voice>.json`
-    are EXCLUDED from THIS call's publish (C28b operator gate) — but a
-    file already on disk from an earlier, pre-hold publish of that voice
-    is not deleted, so it still appears in the rebuilt index. (No prior
-    behavior guaranteed otherwise; flagging this in case a future
-    operator workflow wants held voices actively pulled from the index.)
+    are EXCLUDED from THIS call's publish (C28b operator gate) AND from the
+    rebuilt index (C67 #4) — matching `main`'s behavior, where a full
+    republish naturally dropped a held voice because the index was built
+    from this call's already-filtered `voices_published`. A file already on
+    disk from an earlier, pre-hold publish of that voice is not deleted —
+    only excluded from the index — so a direct link to it still resolves.
     """
     logger = get_logger("voice_publish")
     if project_root is None:
@@ -448,8 +467,10 @@ def publish_voice_artifacts_for_night(
     # Per-night _index.json — surface for the micro-site index pages
     # ("Tonight's Edition", "Voice Index" per Frame Concept v1). C50:
     # rebuilt from the on-disk <slug>.json set, not from `voices_published`
-    # (this call's voices only) — see `_rebuild_index_from_disk`.
-    index = _rebuild_index_from_disk(publish_dir, night)
+    # (this call's voices only) — see `_rebuild_index_from_disk`. C67 #4:
+    # `held` is passed through so a held voice's page can stay on disk
+    # while dropping out of the index, same as `voices_published` above.
+    index = _rebuild_index_from_disk(publish_dir, night, held)
     index_path = publish_dir / "_index.json"
     write_json_atomic(index_path, index)
 

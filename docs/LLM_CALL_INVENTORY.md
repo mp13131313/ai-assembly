@@ -230,7 +230,7 @@ These still work (call sites don't need to change to pick up an override) becaus
 
 | Legacy env var | Step(s) it overrides (model, unless noted) | Notes |
 |---|---|---|
-| `TRANSCRIPTION_SPEAKER_ID_MODEL` → `CLAUDE_MODEL` | `runtime.transcription.speaker_id` | |
+| `TRANSCRIPTION_SPEAKER_ID_MODEL` → `TRANSCRIPTION_CLAUDE_MODEL` → `CLAUDE_MODEL` | `runtime.transcription.speaker_id` | C67 #1: the middle rung (`TRANSCRIPTION_CLAUDE_MODEL`) was dropped by the `model_routing.py` migration and restored here — on `main`, Speaker ID and Cleaning shared `TRANSCRIPTION_CLAUDE_MODEL` as their common fallback |
 | `TRANSCRIPTION_CLAUDE_MODEL` → `CLAUDE_MODEL` | `runtime.transcription.cleaning` | |
 | `RESEARCHER_CLAUDE_MODEL` → `CLAUDE_MODEL` | `runtime.researcher.*` (all three: extraction, clustering, theming — prefix match) | |
 | `PROVOCATEUR_CLAUDE_MODEL` → `CLAUDE_MODEL` | `runtime.provocateur.*` (all three) | |
@@ -239,8 +239,8 @@ These still work (call sites don't need to change to pick up an override) becaus
 | `VOICE_STEP2_VALIDATION_MODEL` | `runtime.voice.step2_validation` | no `CLAUDE_MODEL` fallback |
 | `SYNTHESIS_ROUTER_MODEL` | `runtime.synthesis_router` | no `CLAUDE_MODEL` fallback; shared by V2b and E1 |
 | `EDITOR_MODEL` → `CLAUDE_MODEL` | `runtime.editor.dossier` | |
-| `RESEARCHER_THINKING` | `runtime.researcher.*` (thinking on/off) | `"0"`/`"false"`/`"off"`/`"no"` (case-insensitive) = off, anything else set = adaptive |
-| `PROVOCATEUR_THINKING` | `runtime.provocateur.*` (thinking) | same |
+| `RESEARCHER_THINKING` | `runtime.researcher.*` (thinking on/off) | `"0"`/`"false"`/`"off"`/`"no"` (case-insensitive) = off, anything else non-empty = adaptive, empty = unset (falls through to the file) |
+| `PROVOCATEUR_THINKING` | `runtime.provocateur.*` (thinking) | same uniform rule as every other `*_THINKING` var above — **behavior change vs `main`** (C67 #8): on `main`, thinking was on only when the value was exactly `"1"`; any other non-empty value (e.g. `"true"`) was treated as off. It is unset in `code/.env` today, so this has no production effect. |
 | `VOICE_THINKING` | `runtime.voice.step1`/`.step2`/`.step3` (thinking) | same |
 | `VOICE_CONTINUITY_THINKING` | `runtime.voice.continuity` (thinking) | same |
 | `EDITOR_THINKING` | `runtime.editor.dossier` (thinking) | same |
@@ -261,6 +261,8 @@ These still work (call sites don't need to change to pick up an override) becaus
 - **Thinking off on a model that can't disable it.** `claude-opus-5-5` has `thinking_can_disable: false` in the `models` block; any step (or env override) that sets `thinking: "off"` while resolving to that model is refused outright.
 - **No explicit effort on a model whose default effort isn't `"high"`.** `claude-opus-5-5`'s `default_effort` is `"medium"`; any step that leaves `effort: null` while resolving to that model is refused — this is a deliberate guard against the exact silent-quality-drop scenario the 2026-09-27 edition's migration notes flagged as the highest-impact risk of an Opus 4.7 → 5.5 swap (§10 below).
 - **A validator-ladder rung that isn't an OpenAI or Google model.** `_LADDER_VENDORS = {"openai", "google"}`; a ladder is a cross-model check of Claude's own output, so a Claude rung would be same-family and defeat the point — the loader rejects it.
+- **`"manual": true` on any step outside `personas.dr_*`** (C67 #5). A manual step skips every thinking/effort rule above, because it's instructions for the operator to run in claude.ai, not an API call. The loader now refuses `manual: true` on any other step key, so a config slip can't silently turn off those safety rules for a real API call site.
+- **A ladder env override that parses to an empty list** (C67 #7), e.g. `VOICE_VALIDATION_MODELS=","` — raises `ModelRoutingError` instead of an `IndexError` from indexing an empty ladder.
 
 ### 5.3 Other env vars (call parameters unrelated to model choice)
 

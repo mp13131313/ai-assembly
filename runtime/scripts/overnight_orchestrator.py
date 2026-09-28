@@ -202,6 +202,8 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
       - pending_sessions: list[str]  (received | normalizing | normalized | transcribing | absent)
       - normalized_sessions: list[str]  (C26: subset of pending awaiting orchestrator dispatch)
       - transcribing_sessions: list[str]  (C26: subset of pending currently in-flight)
+      - warning_sessions: list[str]  (C67 #3: status.json "warnings" non-empty, e.g. a
+        degraded Speaker ID auto-passthrough — done sessions can still carry these)
       - done_count: int
       - total_count: int
 
@@ -226,6 +228,7 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
     pending_sessions: list[str] = []
     normalized_sessions: list[str] = []
     transcribing_sessions: list[str] = []
+    warning_sessions: list[str] = []
     done_count = 0
     for sid in session_ids:
         session_dir = run_dir / "01_transcription" / sid
@@ -244,6 +247,8 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
                 normalized_sessions.append(sid)
             elif isinstance(state, str) and state.startswith(TRANSCRIPTION_STATE_TRANSCRIBING):
                 transcribing_sessions.append(sid)
+        if status.get("warnings"):
+            warning_sessions.append(sid)
     return {
         "all_done": done_count == len(session_ids) and len(session_ids) > 0,
         "any_error": bool(error_sessions),
@@ -251,6 +256,7 @@ def transcription_state(run_dir: Path, session_ids: list[str]) -> dict:
         "pending_sessions": pending_sessions,
         "normalized_sessions": normalized_sessions,
         "transcribing_sessions": transcribing_sessions,
+        "warning_sessions": warning_sessions,
         "done_count": done_count,
         "total_count": len(session_ids),
     }
@@ -432,9 +438,19 @@ def poll_once(
             "researcher",
             log_dir,
         )
+        detail = f"log at {log_path}"
+        if ts.get("warning_sessions"):
+            # C67 #3: at least one session reached `done` in a degraded state
+            # (e.g. Speaker ID auto-passthrough) — the dashboard shows a
+            # warning badge, but flag it here too since this is the moment
+            # the Researcher (and everything downstream) starts reading it.
+            detail += (
+                f" · WARNING: {len(ts['warning_sessions'])} session(s) with "
+                f"warnings feeding the Researcher: {ts['warning_sessions']}"
+            )
         return {
             "state": "fired:researcher" if ok else "failed:researcher",
-            "detail": f"log at {log_path}",
+            "detail": detail,
             "transcription": ts,
             "ts": _now_iso(),
         }

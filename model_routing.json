@@ -6,7 +6,8 @@
     "The loader refuses unsafe combinations: thinking 'off' on a model that can't disable it, or effort null on a model whose default isn't 'high' (a silent quality drop).",
     "Legacy per-step env vars (docs/LLM_CALL_INVENTORY.md §5) still override this file so existing run commands keep working; prefer editing here.",
     "Switching a voice-writing step's model changes how the voices write: re-validate the voices (sentinel regen) before relying on it. See runtime/OPEN_ITEMS.md C62.",
-    "steps with \"manual\": true are done by the operator in claude.ai (no API call): the model is rendered into the instructions they paste, by its display_name; the API safety rules don't apply to them. See voices/OPEN_ITEMS.md §36."
+    "steps with \"manual\": true are done by the operator in claude.ai (no API call): the model is rendered into the instructions they paste, by its display_name; the API safety rules don't apply to them. See voices/OPEN_ITEMS.md §36.",
+    "\"manual\": true is refused on any step key that doesn't start with \"personas.dr_\" — that's the only family of steps done by the operator instead of an API call; a config slip marking a real call site manual would otherwise skip the safety rules above (runtime/OPEN_ITEMS.md C67 #5)."
   ],
 
   "models": {

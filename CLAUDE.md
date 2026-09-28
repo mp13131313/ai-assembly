@@ -295,13 +295,14 @@ All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Voice_Pipeline.md` — Voice Pipeline Steps 1+2+3 (v2.1,
   updated 2026-05-01; cost figures corrected 2026-05-02 with Opus 4.7
   $5/$25 pricing). **Step 3 SKIPPED for Athens** per OPEN_ITEMS A1
-  decision 2026-05-01 (Option A). Validation diagnostic-only (FU#62
-  path B); Athens policy Night 1 ON / Nights 2+3 OFF. Athens production
-  CLI: `voice_flow.py <run_dir> --night N --skip-step3 [--skip-validation
-  if Night 2/3]`. Routing refactor + prompt rewrites + prefix caching +
-  cache token tracking landed 2026-05-02 PM (commits `ffad93f` + `9e1c987`);
-  synthesis-bias structurally addressed; Test 3 validated. Athens 3-night
-  cost ~$60-80 (was claimed $540-700 under deprecated $15/$75 pricing).
+  decision 2026-05-01 (Option A). Step 1 validation has been **off by
+  default since C28** (opt-in via `--enable-step1-validation`); the C28b
+  Step 2 validator is the real operator gate (see `docs/README.md` for
+  current trust status). Routing refactor + prompt rewrites + prefix
+  caching + cache token tracking landed 2026-05-02 PM (commits `ffad93f`
+  + `9e1c987`); synthesis-bias structurally addressed; Test 3 validated.
+  Athens 3-night cost ~$60-80 (was claimed $540-700 under deprecated
+  $15/$75 pricing).
 - `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline: Tim Leberecht, as
   editor with his own persona card, turns each night's Voice Step 2
   artifacts + Provocateur briefings into one dossier per theme (Stage 1

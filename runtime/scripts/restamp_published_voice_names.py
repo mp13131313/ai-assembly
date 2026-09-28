@@ -12,8 +12,9 @@ without re-running any LLM stage:
   where name = the council_config `name` for the slug, verbatim
   ("Voice of X" / "Voice of the X").
 
-Only dicts carrying both `voice_slug` and `voice_name` are touched; every
-other byte of content is unchanged.
+Only dicts carrying both `voice_slug` and `voice_name`, or both
+`cited_voice_slug` and `cited_voice_name` (deliberation.amendments[]),
+are touched; every other byte of content is unchanged.
 
 Also repairs the C50 symptom still in the record: a per-night voice index
 (`nights/night_N/_index.json`) that lists fewer voices than the page files
@@ -48,15 +49,27 @@ from flows.voice.publish import _rebuild_index_from_disk  # noqa: E402
 SKIP_DIRS = {"_archive", "data_views"}
 
 
+_NAME_FIELD_PAIRS = (
+    ("voice_slug", "voice_name"),
+    # C67 #6: deliberation.amendments[].cited_voice_name (keyed
+    # cited_voice_slug) had the same council_member/cited_voice corruption
+    # as the top-level voice_name field, but this script only ever checked
+    # the voice_slug/voice_name pair — so a Step 3 night published before
+    # C53 kept "I am Augusta Ada King…" here even after a restamp.
+    ("cited_voice_slug", "cited_voice_name"),
+)
+
+
 def _restamp(node, project_root: Path, changes: list, path: str = "$") -> None:
     if isinstance(node, dict):
-        slug, old = node.get("voice_slug"), node.get("voice_name")
-        if isinstance(slug, str) and slug and isinstance(old, str):
-            name = voice_display_name(slug, project_root)
-            new = "the " + name if old.startswith("the Voice of ") else name
-            if new != old:
-                changes.append((path, slug, old, new))
-                node["voice_name"] = new
+        for slug_key, name_key in _NAME_FIELD_PAIRS:
+            slug, old = node.get(slug_key), node.get(name_key)
+            if isinstance(slug, str) and slug and isinstance(old, str):
+                name = voice_display_name(slug, project_root)
+                new = "the " + name if old.startswith("the Voice of ") else name
+                if new != old:
+                    changes.append((path, slug, old, new))
+                    node[name_key] = new
         for k, v in node.items():
             _restamp(v, project_root, changes, f"{path}.{k}")
     elif isinstance(node, list):

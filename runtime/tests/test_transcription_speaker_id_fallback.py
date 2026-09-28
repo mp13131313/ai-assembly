@@ -176,6 +176,75 @@ class TestProcessSessionSpeakerIdFallback:
             "Unidentified Speaker 2",  # speaker_a (turn 4) — same as turn 1
         ]
 
+    def test_status_json_gets_warning(self, tmp_path, monkeypatch):
+        """C67 #3: the fallback firing records a warning in status.json
+        (keeping any keys already there), for the ingest dashboard badge."""
+        audio_path, session_path, turns = _seed_session_dir(tmp_path)
+        (tmp_path / "status.json").write_text(json.dumps({
+            "state": "transcribing", "session_id": "s1", "pid": 4242,
+        }))
+
+        fake_client = MagicMock()
+        fake_client.messages.create.side_effect = lambda **kw: _malformed_response()
+        monkeypatch.setattr(tf, "Anthropic", lambda *a, **kw: fake_client)
+        monkeypatch.setattr(
+            tf, "identify_speakers",
+            tf.identify_speakers.with_options(retry_delay_seconds=0),
+        )
+        monkeypatch.setattr(
+            tf, "clean_transcript",
+            lambda named_turns, session, vocab: named_turns,
+        )
+
+        tf.process_session(str(audio_path), str(session_path))
+
+        status = json.loads((tmp_path / "status.json").read_text())
+        assert status["warnings"] == ["speaker_id_auto_passthrough"]
+        # Existing keys survive the merge.
+        assert status["session_id"] == "s1"
+        assert status["pid"] == 4242
+
+    def test_resume_retries_speaker_id_after_auto_passthrough(self, tmp_path, monkeypatch):
+        """C67 #2: a retry must not treat a previously-written C49 fallback
+        as a real Speaker ID result — it should re-run Speaker ID."""
+        audio_path, session_path, turns = _seed_session_dir(tmp_path)
+        fallback = tf.build_speaker_id_fallback(turns, ValueError("boom"))
+        (tmp_path / "out_02_speaker_id.json").write_text(json.dumps(fallback))
+        (tmp_path / "status.json").write_text(json.dumps({
+            "state": "transcribing", "warnings": ["speaker_id_auto_passthrough"],
+        }))
+
+        # This time Speaker ID succeeds — proves it actually re-ran rather
+        # than loading the fallback back off disk.
+        real_mappings = {
+            "mappings": [
+                {"anonymous_label": label, "identified_name": name,
+                 "confidence": "high", "role": "panelist", "evidence": "e"}
+                for label, name in [
+                    ("speaker_b", "Ada Lovelace"),
+                    ("speaker_a", "Someone Else"),
+                    ("speaker_c", "A Third Person"),
+                ]
+            ],
+            "flags": [],
+        }
+        monkeypatch.setattr(
+            tf, "identify_speakers", lambda turns, session: real_mappings,
+        )
+        monkeypatch.setattr(
+            tf, "clean_transcript",
+            lambda named_turns, session, vocab: named_turns,
+        )
+
+        tf.process_session(str(audio_path), str(session_path))
+
+        out02 = json.loads((tmp_path / "out_02_speaker_id.json").read_text())
+        assert out02 == real_mappings
+        assert not tf._is_speaker_id_auto_passthrough(out02)
+        # The dashboard warning from the failed run is cleared again.
+        status = json.loads((tmp_path / "status.json").read_text())
+        assert status["warnings"] == [] and status["state"] == "transcribing"
+
     def test_non_decode_error_still_raises(self, tmp_path, monkeypatch):
         audio_path, session_path, turns = _seed_session_dir(tmp_path)
 

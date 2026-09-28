@@ -95,6 +95,28 @@ def test_refuses_to_write_unresolved_slug(project):
     assert _r(project / "published_artifacts/nights/night_1/ada_lovelace.json")["voice_name"] == ADA_BAD
 
 
+def test_restamps_nested_cited_voice_name(project):
+    """C67 #6: deliberation.amendments[].cited_voice_name (keyed
+    cited_voice_slug) is restamped too — not just the top-level
+    voice_slug/voice_name pair the script originally only checked. The
+    "the " prefix rule (for a headnote-style value) applies here too."""
+    pa = project / "published_artifacts"
+    _w(pa / "nights/night_1/extra_citation.json", {"deliberation": {"amendments": [
+        {"cited_voice_slug": "octopus", "cited_voice_name": OCTO_BAD},
+        {"cited_voice_slug": "hannah_arendt", "cited_voice_name": "Voice of Hannah Arendt"},
+        {"cited_voice_slug": "octopus", "cited_voice_name": "the Voice of " + OCTO_BAD},
+        {"cited_voice_slug": "", "cited_voice_name": "raw free-text citation"},
+    ]}})
+
+    rs.restamp(project, apply=True)
+
+    amendments = _r(pa / "nights/night_1/extra_citation.json")["deliberation"]["amendments"]
+    assert amendments[0]["cited_voice_name"] == "Voice of the Octopus"
+    assert amendments[1]["cited_voice_name"] == "Voice of Hannah Arendt"  # already correct, unchanged
+    assert amendments[2]["cited_voice_name"] == "the Voice of the Octopus"  # "the " prefix kept
+    assert amendments[3]["cited_voice_name"] == "raw free-text citation"  # no slug — untouched
+
+
 def test_incomplete_night_index_rebuilt_from_disk(project):
     """C50 symptom still in the published record: the Night 1/2 voice indexes
     list 3/10 and 1/10 voices. The repair rebuilds an incomplete index from

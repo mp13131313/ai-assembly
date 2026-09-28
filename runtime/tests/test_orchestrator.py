@@ -211,6 +211,24 @@ class TestPollOnce:
         assert stub_fire[-1]["cmd"][1].endswith("researcher_flow.py")
         assert stub_fire[-1]["cmd"][2] == str(run_dir)
 
+    def test_researcher_dispatch_flags_sessions_with_warnings(self, project_root, stub_fire):
+        # C67 #3: a session can reach `done` carrying a degraded-state
+        # warning (e.g. Speaker ID auto-passthrough). The orchestrator
+        # should still fire the Researcher, but log that it's dispatching
+        # on top of a warning so it isn't purely invisible outside review.md.
+        run_dir = project_root / "runs" / "athens_night_1"
+        run_dir.mkdir()
+        _set_state(run_dir, "s1", "done")
+        d2 = run_dir / "01_transcription" / "s2"
+        d2.mkdir(parents=True, exist_ok=True)
+        (d2 / "status.json").write_text(json.dumps({
+            "state": "done", "warnings": ["speaker_id_auto_passthrough"],
+        }))
+        status = orch.poll_once(project_root, 1)
+        assert status["state"] == "fired:researcher"
+        assert status["transcription"]["warning_sessions"] == ["s2"]
+        assert "s2" in status["detail"] and "warning" in status["detail"].lower()
+
     def test_researcher_done_fires_provocateur_no_prior_for_night_1(
         self, project_root, stub_fire
     ):

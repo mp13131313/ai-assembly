@@ -165,6 +165,7 @@ def run_editor_pipeline(
         logger.info("Stage 1: theme routing")
         routing = write_routing_manifest(
             run_dir, night, synthesis_client=client, logger=logger,
+            project_root=project_root,
         )
         logger.info(
             f"  routed {len(routing['voices_routing'])} voices into "
@@ -219,6 +220,7 @@ def run_editor_pipeline(
                 prior_editions=prior_editions,
                 logger=logger,
                 cache_system=not no_prompt_cache,
+                project_root=project_root,
             )
             return (theme_id, dossier, None)
         except Exception as e:  # noqa: BLE001 — orchestrator must not crash on one dossier's failure
