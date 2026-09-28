@@ -189,7 +189,7 @@ The shipped cards embody ~100 operator interventions the pipeline can't reproduc
 
 **Progress 2026-09-27 (branch `phase0-fixes`, not merged/pushed):** Stage 1 done (C55 stopgap, C56, C58, §32.3, §32.5) except §32.4-text (superseded by runtime C62 model decision) and the optional plan-body strip. Stage 2 done (C49, C50, C53 code, C54, §32.1, §32.2). Tests: runtime 266 / ingest 114 / personas 223 green. Still open from Phases 0–1: C53 republish+push and C51 (operator), C62 model decision, everything from Stage 4 on.
 
-**Progress 2026-09-28 (branch `phase0-fixes`, not merged into `main`; push status in `STATE.md`):** C53 republish and C51 done and pushed (athens-2026 `0b2af19`); dossier-index writers merge; model config (C63 / §35) done. Tests: runtime 355 / ingest 114 / personas 239. Next: the doc-audit fixes (operator picks), then Stage 4 (needs a spend cap).
+**Progress 2026-09-28 (branch `phase0-fixes`, not merged into `main`; push status in `STATE.md`):** C53 republish and C51 done and pushed (athens-2026 `0b2af19`); dossier-index writers merge; model config (C63 / §35) done. Tests: runtime 355 / ingest 114 / personas 239. *Later the same day:* DR model into the config (voices §36); doc-audit rows #1–#26 done (Editor spec v3.2); editor fixes C64, C65, C66 (merged `0fc94e0`). Tests then: runtime 368 / personas 242. **Next: Stage 4** (needs a spend cap).
 
 **Hard dependency:** only one — Stage 4 (1.1 prompts stable) must precede Stage 5 (1.2 + 2.1). Stage 3 (operator) runs in parallel throughout. Within Stage 1 everything is parallel-safe.
 
