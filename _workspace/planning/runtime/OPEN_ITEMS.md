@@ -3067,25 +3067,27 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 **Fixed 2026-09-28 (`d07e5cf`):** cause confirmed by reading the code: `editor_flow.py` submitted every dossier call to the `ThreadPoolExecutor` at once. Stage 2 now runs the first dossier that makes a call alone, then the rest in parallel. A mocked test shows the first call finishes before any other starts; it fails on the old scheduling. Cost: one dossier's wall time (~1.5–5 min at Athens) added per night. Waiting for the first streamed token instead of the whole call would save most of that, but needs a hook inside `stream_voice_call`. *Inference, not filed.* **⏸ Live check:** on the next real multi-dossier run, the first dossier's `metadata.cache_creation_input_tokens` should be about 52K and the others' `cache_read_input_tokens` about 52K. Waits on the next real editor run; none is scheduled.
 
-### C67. Branch-review findings (`phase0-fixes` → `main`) 🟡 fix before the merge (filed 2026-09-28)
+### C67. Branch-review findings (`phase0-fixes` → `main`) ✅ FIXED 2026-09-28 (`02006f5`) (filed 2026-09-28)
 **Why:** the Fable 5.1 review of the branch diff (code-review skill; report `REVIEW_2026_09_28_phase0_fixes.md` in this folder) found no BLOCKER or MAJOR issues: 5 MINOR, 5 NIT. The branch itself introduced these, so they are fixed on it before it merges. R1 comes from the untouched-code review, and the last row is the main session's own finding.
 
 | # | Sev. | Finding (report §1) | Status |
 |---|---|---|---|
-| 1 | MINOR | `TRANSCRIPTION_CLAUDE_MODEL` no longer reaches Speaker ID (env chain lost a rung; regression vs `main`) | open |
-| 2 | MINOR | C49 fallback is saved as a real Speaker ID result, so a retry never re-runs Speaker ID | open |
-| 3 | MINOR | C49 degrade invisible outside `review.md`: the dashboard shows "done" (= untouched-review R2) | open |
-| 4 | MINOR | A held voice can't be dropped from the night index any more (C50 rebuild-from-disk; behavior change vs `main`) | open |
-| 5 | MINOR | `"manual": true` on an API step bypasses the loader's refusals; call sites don't check `cfg.manual` | open |
-| 6 | NIT | Restamp script skips nested `cited_voice_name` (Athens unaffected) | open |
-| 7 | NIT | `VOICE_VALIDATION_MODELS=","` raises IndexError, not ModelRoutingError | open |
-| 8 | NIT | `PROVOCATEUR_THINKING` accepts more "on" values than on `main` (document it) | open |
-| 9 | NIT | C66 test depends on thread timing (use a Barrier) | open |
-| 10 | NIT | Editor finds `council_config.json` via `run_dir.parent.parent`, not `project_root` | open |
-| R1 | MINOR | Dormant Step-3 prompt still names peers by the long `council_member` line (`card_assembly.py:547-565`, `step3_amended_artifact.py:76`) | open |
-| — | doc | `CLAUDE.md` §"Where specs live": its Voice-spec summary still states the pre-C28 validation policy and CLI | open |
+| 1 | MINOR | `TRANSCRIPTION_CLAUDE_MODEL` no longer reaches Speaker ID (env chain lost a rung; regression vs `main`) | ✅ `02006f5` |
+| 2 | MINOR | C49 fallback is saved as a real Speaker ID result, so a retry never re-runs Speaker ID | ✅ `02006f5` |
+| 3 | MINOR | C49 degrade invisible outside `review.md`: the dashboard shows "done" (= untouched-review R2) | ✅ `02006f5` |
+| 4 | MINOR | A held voice can't be dropped from the night index any more (C50 rebuild-from-disk; behavior change vs `main`) | ✅ `02006f5` |
+| 5 | MINOR | `"manual": true` on an API step bypasses the loader's refusals; call sites don't check `cfg.manual` | ✅ `02006f5` |
+| 6 | NIT | Restamp script skips nested `cited_voice_name` (Athens unaffected) | ✅ `02006f5` |
+| 7 | NIT | `VOICE_VALIDATION_MODELS=","` raises IndexError, not ModelRoutingError | ✅ `02006f5` |
+| 8 | NIT | `PROVOCATEUR_THINKING` accepts more "on" values than on `main` (document it) | ✅ `02006f5` |
+| 9 | NIT | C66 test depends on thread timing (use a Barrier) | ✅ `02006f5` |
+| 10 | NIT | Editor finds `council_config.json` via `run_dir.parent.parent`, not `project_root` | ✅ `02006f5` |
+| R1 | MINOR | Dormant Step-3 prompt still names peers by the long `council_member` line (`card_assembly.py:547-565`, `step3_amended_artifact.py:76`) | ✅ `02006f5` |
+| — | doc | `CLAUDE.md` §"Where specs live": its Voice-spec summary still states the pre-C28 validation policy and CLI | ✅ `02006f5` |
 
 **Done =** each row fixed with a test where it's code; the suites green; the rows marked with commits.
+
+**Fixed 2026-09-28 (`02006f5`):** all twelve, each code fix with a test. Runtime 382, ingest 114, personas 242. Beyond the report: #3's warning is also cleared when a retry succeeds.
 
 ### C68. Untouched-code review, runtime findings 🟡 (filed 2026-09-28; pre-existing, none blocks the merge)
 **Why:** the Fable 5.1 review of the code the branch does not change (report `REVIEW_2026_09_28_untouched_code.md`). Its ripple zone was **clear** for the merge. The audit found defects that predate the branch. Runtime findings are below; the persona findings are in voices OPEN_ITEMS §37.
