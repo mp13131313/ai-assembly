@@ -479,11 +479,10 @@ def run_pass_1_7(*, name: str, project_root: Path | None = None,
     # full dossier re-emit. 24K gives ample headroom for flag-heavy voices
     # while keeping streaming time modest.
     call_kwargs = dict(
+        step="personas.pass_1_7_coherence",
         system=system,
-        model="claude-opus-4-7",
         max_tokens=24000,
         temperature=1.0,
-        thinking=True,
         response_format_json=True,
     )
 

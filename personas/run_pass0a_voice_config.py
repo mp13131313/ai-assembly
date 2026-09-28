@@ -223,10 +223,9 @@ def main(
 
     _call_kwargs = dict(
         system=system,
-        model="claude-opus-4-7",
+        step="personas.pass_0a_voice_config",
         max_tokens=24000,
         temperature=1.0,
-        thinking=True,
         response_format_json=True,
     )
 

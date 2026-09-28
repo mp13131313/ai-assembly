@@ -303,11 +303,10 @@ def run_chunk(
     )
 
     call_kwargs = dict(
+        step="personas.pass_1_merge",
         system=system,
-        model="claude-opus-4-7",
         max_tokens=max_tokens,
         temperature=1.0,
-        thinking=True,
         response_format_json=True,
     )
 

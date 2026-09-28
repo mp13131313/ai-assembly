@@ -39,6 +39,7 @@ from flows.shared.node0_validation import validate_input
 from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
 from flows.shared.clients import call_claude, call_gemini, call_openai
+from flows.shared.model_routing import step_config
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
 from flows.shared.pass_7pre_chunked import run_chunked_pass_7pre
@@ -434,11 +435,10 @@ stamp("PASS 1c gate: review flag present — continuing to Pass 1d")
 # vs pre-arch-03 162K) and produce richer card fields. Phase L Dostoevsky
 # fit ~12-14K output; 32K gives comfortable headroom for 1-arch-03's
 # richer synthesis. Individual passes may override via kwargs if warranted.
-def _claude_pass(*, system, user, model, max_tokens=32000, thinking=True, temperature=1.0):
+def _claude_pass(*, system, user, step, max_tokens=32000, temperature=1.0):
     return call_claude(
-        system=system, user=user, model=model,
+        step=step, system=system, user=user,
         max_tokens=max_tokens, temperature=temperature,
-        thinking=thinking,
         response_format_json=True,
     )
 
@@ -472,9 +472,9 @@ def _ct_compress(prior_pass_output: dict, label: str) -> str:
     # framing where source-faithful selection is wanted. temperature
     # 0.0 → 1.0 (required for thinking). max_tokens 2048 → 16000 (thinking
     # shares budget with output; ~14K thinking + ~2K narrative summary).
-    r = call_claude(system="You compress persona fields into a tight summary.",
-                    user=user, model="claude-sonnet-4-6", max_tokens=16000,
-                    temperature=1.0, thinking=True)
+    r = call_claude(step="personas.ct_compress",
+                    system="You compress persona fields into a tight summary.",
+                    user=user, max_tokens=16000, temperature=1.0)
     write_json_atomic(ct_path, {"label": label, "model": r["model"], "usage": r["usage"],
                                 "summary_text": r["text"]})
     return r["text"]
@@ -498,7 +498,7 @@ def _pass_2():
         hard_limits_chunk=chunk_vars["hard_limits_chunk"],
         voice_level_debate_frames=chunk_vars["voice_level_debate_frames"],
     )
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_2")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "2_identity_boundaries",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -527,7 +527,7 @@ def _pass_3():
         analytical_context_reasoning=chunk_vars["analytical_context_reasoning"],
         pass_2_summary=pass_2_summary,
     )
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7")
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_3")
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "3_intellectual_core",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -587,10 +587,10 @@ def _pass_1d():
     # rather than greedy-picking. Latency cost ~30s; quality upside flows
     # downstream into Pass 4a voice modeling + Pass 6 corpus curation.
     # max_tokens 8192 → 16000 — thinking budget shares the output ceiling.
-    r = call_claude(system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
-                    user=user_prompt,
-                    model="claude-opus-4-7", max_tokens=16000,
-                    temperature=None, thinking=True,
+    r = call_claude(step="personas.pass_1d_excerpts",
+                    system="You are a textual scholar curating excerpt selections for an AI persona's primary-text grounding.",
+                    user=user_prompt, max_tokens=16000,
+                    temperature=None,
                     response_format_json=True)
     selections = r["json"].get("selections", [])
     selected_text = apply_selections(pass1c["passages"], selections)
@@ -689,8 +689,8 @@ def _pass_4a():
     )
     # Opus + adaptive thinking: long-context pattern recognition across primary
     # texts. Especially load-bearing for hard voice types (musical, system, etc.)
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
-                     max_tokens=24000, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_4a",
+                     max_tokens=24000, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4a_voice",
             "model": r["model"], "usage": r["usage"], "fields": r["json"],
             "voice_basis": "corpus-based" if pass1c.get("passages") else "training-data"}
@@ -719,8 +719,8 @@ def _pass_4b():
     # nuanced first-/second-person register discipline that artifact
     # generation requires. max_tokens 6144 → 24000 (thinking-budget +
     # richer output headroom).
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
-                     max_tokens=24000, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_4b",
+                     max_tokens=24000, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "4b_artifact",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -752,8 +752,8 @@ def _pass_5():
         audience_profile=deployment["audience_profile"],
         programming_tracks=deployment["programming_tracks"],
     )
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
-                     max_tokens=16000, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_5",
+                     max_tokens=16000, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "5_engagement",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -799,8 +799,8 @@ def _pass_6():
     # polyphony? which monologue exemplifies sobornost? Sonnet can rubric-
     # follow but Opus + thinking deliberates the tradeoffs. max_tokens
     # 8000 → 24000 (thinking-budget + 1+1 fields can include long passages).
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
-                     max_tokens=24000, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_6",
+                     max_tokens=24000, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "6_corpus_curation",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -923,8 +923,8 @@ if SKIP_TO_DERIVE:
         userp = render("persona_derive_user",
                        persona_card_json=json.dumps(full_card_for_derive,
                                                     ensure_ascii=False, indent=2))
-        r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                        max_tokens=24000, temperature=1.0, thinking=True,
+        r = call_claude(step="personas.derive", system=sysp, user=userp,
+                        max_tokens=24000, temperature=1.0,
                         response_format_json=True)
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
                 "model": r["model"], "usage": r["usage"], "result": r["json"]}
@@ -997,7 +997,8 @@ def _pass_7pre():
         hostile_sources=vi["hostile_sources"],
     )
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7pre_citation_verification",
-            "model": "claude-sonnet-4-6-chunked", "usage": {}, "result": result}
+            "model": f"{step_config('personas.pass_7pre_extract').model}-chunked",
+            "usage": {}, "result": result}
 
 stamp("PASS 7-pre: Citation Verification (Sonnet, FU#2 chunked)")
 try:
@@ -1058,9 +1059,12 @@ def _pass_7_anachronism():
     # anachronism evaluation. Gemini 2.5 Pro last resort.
     # max_tokens bumped 8192→16384 because reasoning tokens count against
     # max_completion_tokens budget for gpt-5.x high-effort calls.
-    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
+    # Ladder (model names + order) comes from model_routing.json; the last
+    # rung is always the Gemini fallback, the rest are tried via OpenAI.
+    _ladder = step_config("personas.pass_7_anachronism").ladder
+    for openai_model in _ladder[:-1]:
         try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None
+            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
             r = call_openai(system=sysp, user=userp, model=openai_model,
                             temperature=0.0, max_tokens=16384,
                             reasoning_effort=_effort,
@@ -1071,15 +1075,16 @@ def _pass_7_anachronism():
                     "usage": r["usage"], "result": r["json"]}
         except Exception as e:
             stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    _gemini_model = _ladder[-1]
     try:
         r = call_gemini(user=sysp + "\n\n" + userp, temperature=0.0,
-                        max_output_tokens=16384)
+                        max_output_tokens=16384, model=_gemini_model)
         cleaned = r["text"].strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
         return {"voice_name": vi["name"], "voice_slug": SLUG,
                 "pass": "7_anachronism_check",
-                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "validator": f"google:{_gemini_model}", "model": r["model"],
                 "usage": r["usage"], "result": json.loads(cleaned)}
     except Exception as e:
         stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
@@ -1113,9 +1118,12 @@ def _pass_7a():
     # rubric evaluation Pass 7a performs. Gemini 2.5 Pro last resort.
     # max_tokens bumped 8192→16384 because reasoning tokens count against
     # max_completion_tokens budget for gpt-5.x high-effort calls.
-    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
+    # Ladder (model names + order) comes from model_routing.json; the last
+    # rung is always the Gemini fallback, the rest are tried via OpenAI.
+    _ladder = step_config("personas.pass_7a").ladder
+    for openai_model in _ladder[:-1]:
         try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None
+            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
             r = call_openai(system=sysp, user=userp, model=openai_model,
                             temperature=0.0, max_tokens=16384,
                             reasoning_effort=_effort,
@@ -1126,15 +1134,17 @@ def _pass_7a():
         except Exception as e:
             stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
     # Fall back to Gemini
+    _gemini_model = _ladder[-1]
     try:
         full_prompt = sysp + "\n\n" + userp
-        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384,
+                        model=_gemini_model)
         # Parse JSON out of Gemini text
         cleaned = r["text"].strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
-                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "validator": f"google:{_gemini_model}", "model": r["model"],
                 "usage": r["usage"], "result": json.loads(cleaned)}
     except Exception as e:
         stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
@@ -1421,8 +1431,8 @@ def _pass_7a_fix(pass7a_result: dict, pass7_anach_result: dict) -> dict:
     # about writer re-invocation with critique; the patcher prompt's
     # "trim don't expand" + "modify ONLY flagged fields" + "schema-preserving"
     # guardrails counter the Opus expansion tendency.
-    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=32000, temperature=1.0, thinking=True,
+    r = call_claude(step="personas.pass_7a_fix", system=sysp, user=userp,
+                    max_tokens=32000, temperature=1.0,
                     response_format_json=True)
 
     patches = r["json"].get("patches", []) or []
@@ -1577,8 +1587,8 @@ def _pass_7b():
                   voice_mode=vi["voice_mode"], subtype=vi.get("subtype"))
     userp = render("persona_pass_7b_smoke_test_user",
                    persona_card_json=json.dumps(full_card_for_provoke, ensure_ascii=False, indent=2))
-    r = _claude_pass(system=sysp, user=userp, model="claude-opus-4-7",
-                     max_tokens=24000, thinking=True, temperature=1.0)
+    r = _claude_pass(system=sysp, user=userp, step="personas.pass_7b",
+                     max_tokens=24000, temperature=1.0)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7b_smoke_test_chains",
             "model": r["model"], "usage": r["usage"], "fields": r["json"]}
 
@@ -1600,26 +1610,31 @@ def _pass_7c():
                    banned_language=json.dumps(voice_fields.get("banned_language", []), ensure_ascii=False, indent=2),
                    banned_modes=json.dumps(voice_fields.get("banned_modes", []), ensure_ascii=False, indent=2),
                    smoke_test_chains=json.dumps(pass7b["fields"].get("smoke_test_chains", []), ensure_ascii=False, indent=2))
+    cfg = step_config("personas.pass_7c")
     # Try Gemini first (preferred per spec)
     sysp_gemini = render("persona_pass_7c_negative", claude_fallback=False)
     try:
         full_prompt = sysp_gemini + "\n\n" + userp
-        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384,
+                        model=cfg.model)
         cleaned = r["text"].strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7c_negative_constraints",
-                "evaluator": "google:gemini-2.5-pro", "model": r["model"],
+                "evaluator": f"google:{cfg.model}", "model": r["model"],
                 "usage": r["usage"], "result": json.loads(cleaned)}
     except Exception as e:
         stamp(f"  WARN: Gemini failed ({type(e).__name__}: {str(e)[:120]}); falling back to Sonnet w/ bias-awareness")
-    # Sonnet fallback with bias-awareness
+    # Sonnet fallback with bias-awareness — model/thinking from cfg.fallback
+    # (model_routing.json's personas.pass_7c.fallback; not a top-level step
+    # key, so resolved here rather than via step_config() directly).
     sysp_claude = render("persona_pass_7c_negative", claude_fallback=True)
-    r = call_claude(system=sysp_claude, user=userp, model="claude-sonnet-4-6",
-                    max_tokens=8192, temperature=0.0, thinking=False,
+    fb = cfg.fallback
+    r = call_claude(step=fb, system=sysp_claude, user=userp,
+                    max_tokens=8192, temperature=0.0,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7c_negative_constraints",
-            "evaluator": "anthropic:claude-sonnet-4-6 (bias-aware fallback)",
+            "evaluator": f"anthropic:{fb.model} (bias-aware fallback)",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}
 
 stamp("PASS 7c: Negative Constraints (Gemini -> Sonnet fallback)")
@@ -1956,10 +1971,12 @@ def _pass_7a_final():
     userp = render("persona_pass_7a_cross_model_user",
                    persona_card_json=json.dumps(full_card_for_validate,
                                                  ensure_ascii=False, indent=2))
-    # Same model ladder as per-pass 7a
-    for openai_model in ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o"):
+    # Same model ladder as per-pass 7a (model_routing.json:
+    # personas.pass_7a_final; last rung is always the Gemini fallback).
+    _ladder = step_config("personas.pass_7a_final").ladder
+    for openai_model in _ladder[:-1]:
         try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None
+            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
             r = call_openai(system=sysp, user=userp, model=openai_model,
                             temperature=0.0, max_tokens=16384,
                             reasoning_effort=_effort,
@@ -1970,15 +1987,17 @@ def _pass_7a_final():
                     "usage": r["usage"], "result": r["json"]}
         except Exception as e:
             stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    _gemini_model = _ladder[-1]
     try:
         full_prompt = sysp + "\n\n" + userp
-        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384)
+        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384,
+                        model=_gemini_model)
         cleaned = r["text"].strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
         return {"voice_name": vi["name"], "voice_slug": SLUG,
                 "pass": "7a_final_post_assembly",
-                "validator": "google:gemini-2.5-pro", "model": r["model"],
+                "validator": f"google:{_gemini_model}", "model": r["model"],
                 "usage": r["usage"], "result": json.loads(cleaned)}
     except Exception as e:
         stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
@@ -2067,8 +2086,8 @@ def _derive():
     # Cost: ~$0.10-0.30 extra per voice (runs once). Quality: meaningful at
     # every runtime turn. max_tokens 8192 → 24000 (thinking + ~10K output).
     # temperature 0.1 → 1.0 (required for thinking).
-    r = call_claude(system=sysp, user=userp, model="claude-opus-4-7",
-                    max_tokens=24000, temperature=1.0, thinking=True,
+    r = call_claude(step="personas.derive", system=sysp, user=userp,
+                    max_tokens=24000, temperature=1.0,
                     response_format_json=True)
     return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "derive",
             "model": r["model"], "usage": r["usage"], "result": r["json"]}

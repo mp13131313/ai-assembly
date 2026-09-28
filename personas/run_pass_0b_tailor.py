@@ -234,8 +234,9 @@ def run_pass_0b_tailor(name: str, project_root: Path | None = None,
     stamp("  calling Opus 4.7 + adaptive thinking…")
     t0 = time.time()
     r = call_claude(
-        system=system, user=user, model="claude-opus-4-7",
-        max_tokens=16000, temperature=1.0, thinking=True,
+        step="personas.pass_0b_tailor",
+        system=system, user=user,
+        max_tokens=16000, temperature=1.0,
         response_format_json=True,
     )
     wall = time.time() - t0

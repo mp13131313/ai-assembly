@@ -40,6 +40,7 @@ import requests
 from flows.shared import paths
 from flows.shared.clients import call_perplexity, call_gemini
 from flows.shared.io import voice_slug, write_json_atomic, load_voice_input
+from flows.shared.model_routing import step_config
 from flows.shared.node0_validation import validate_input
 from flows.shared.perplexity_split import split_dossier
 from flows.shared.project_root import add_project_arg, resolve_project_root
@@ -128,7 +129,10 @@ def main(voice_name: str, project: str | None = None) -> None:
         prompt = render(_pick_template("persona_pass_1a"),
                         name=vi["name"], hostile_sources=vi["hostile_sources"])
         r = _with_retry(
-            lambda: call_perplexity(user=prompt, temperature=0.0),
+            lambda: call_perplexity(
+                user=prompt, temperature=0.0,
+                model=step_config("personas.pass_1a_perplexity").model,
+            ),
             label="Pass 1a (Perplexity)",
         )
         return {
@@ -144,7 +148,10 @@ def main(voice_name: str, project: str | None = None) -> None:
         prompt = render(_pick_template("persona_pass_1b"),
                         name=vi["name"], hostile_sources=vi["hostile_sources"])
         r = _with_retry(
-            lambda: call_gemini(user=prompt, temperature=0.2, max_output_tokens=16384),
+            lambda: call_gemini(
+                user=prompt, temperature=0.2, max_output_tokens=16384,
+                model=step_config("personas.pass_1b_gemini").model,
+            ),
             label="Pass 1b (Gemini)",
         )
         return {

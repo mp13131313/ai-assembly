@@ -18,6 +18,8 @@ from typing import Any
 
 from dotenv import load_dotenv
 
+from flows.shared.model_routing import StepConfig, step_config
+
 load_dotenv()
 
 
@@ -79,10 +81,12 @@ def call_claude(
     *,
     system: str,
     user: str,
+    step: str | StepConfig | None = None,
     model: str | None = None,
     max_tokens: int = 8192,
     temperature: float | None = 0.2,
-    thinking: bool = False,
+    thinking: bool | None = None,
+    effort: str | None = None,
     response_format_json: bool = False,
     slug: str | None = None,
     pass_name: str | None = None,
@@ -90,15 +94,44 @@ def call_claude(
 ) -> dict[str, Any]:
     """One Claude call. Returns dict with `text` (str) and `usage` (dict).
 
-    `thinking=True` enables Anthropic's adaptive thinking mode (the model
-    decides how much to think; no budget parameter is passed). Adaptive
-    thinking requires `temperature=1.0` per the SDK.
+    `step`: a model_routing.json step name (e.g. `"personas.pass_2"`) or an
+    already-resolved `StepConfig` (e.g. `step_config("personas.pass_7c").fallback`,
+    for a step whose fallback model isn't itself a top-level step key).
+    Supplies `model`/`thinking`/`effort` and the sampling_params flag used
+    below; an explicit `model=`/`thinking=`/`effort=` argument, when also
+    given, overrides the step's resolved value for that one field. Passing
+    neither `step` nor `model` raises — there is no more silent CLAUDE_MODEL
+    env-var fallback; route through `flows.shared.model_routing.step_config`.
+
+    `thinking=True` (or a step whose config has `thinking: "adaptive"`)
+    enables Anthropic's adaptive thinking mode (the model decides how much to
+    think; no budget parameter is passed). Adaptive thinking requires
+    `temperature=1.0` per the SDK.
+
+    `effort` (from the step's config, or passed explicitly) is forwarded as
+    `output_config={"effort": ...}`; omitted entirely when falsy (None ⇒ the
+    model's own default effort applies).
 
     If `response_format_json` is True, also returns parsed `json` field.
     """
     import anthropic  # lazy import so missing keys don\'t break import
 
-    model = model or os.environ.get("CLAUDE_MODEL", "claude-opus-4-7")
+    cfg = step_config(step) if isinstance(step, str) else step
+    if cfg is not None:
+        model = model if model is not None else cfg.model
+        thinking = thinking if thinking is not None else cfg.thinking_on
+        effort = effort if effort is not None else cfg.effort
+    if model is None:
+        raise ValueError("call_claude: pass step= or model= (no more implicit CLAUDE_MODEL fallback)")
+    if thinking is None:
+        thinking = False
+    # Routing refactor: a model whose model_routing.json entry marks
+    # sampling_params=false rejects temperature/top_p/top_k outright (the
+    # Opus-5 family today). Every current thinking=False caller (Pass 7-pre
+    # x3, Pass 7c's Sonnet fallback) is on Sonnet 4.6, sampling_params=true,
+    # so this changes nothing now — it's what makes a future Sonnet-5 swap
+    # safe without also having to touch this function again.
+    sampling_params_ok = cfg.sampling_params if cfg is not None else True
     client = anthropic.Anthropic()
 
     kwargs: dict[str, Any] = {
@@ -107,6 +140,8 @@ def call_claude(
         "system": system,
         "messages": [{"role": "user", "content": user}],
     }
+    if effort:
+        kwargs["output_config"] = {"effort": effort}
     # FU#60 2026-04-29 — temperature/thinking compatibility.
     # Anthropic's extended-thinking docs (platform.claude.com §"Feature
     # compatibility") state: "Thinking isn't compatible with temperature
@@ -118,8 +153,9 @@ def call_claude(
     # match Anthropic's example code (which omits temperature entirely
     # in adaptive-thinking samples) and future-proof against API tightening.
     # When thinking=False (e.g. Pass 7-pre Sonnet verifiers, Pass 7c
-    # bias-aware fallback), pass temperature through as caller specified.
-    if temperature is not None and not thinking:
+    # bias-aware fallback), pass temperature through as caller specified —
+    # unless the model's config says it can't take sampling params at all.
+    if temperature is not None and not thinking and sampling_params_ok:
         kwargs["temperature"] = temperature
     if thinking:
         # Anthropic recommends thinking.type="adaptive" over the deprecated
@@ -289,7 +325,6 @@ def call_perplexity(
     import requests
     import re
 
-    model = model or os.environ.get("PERPLEXITY_MODEL", "sonar-deep-research")
     api_key = os.environ["PERPLEXITY_API_KEY"]
 
     _t0_perp = time.time()
@@ -364,7 +399,12 @@ def call_gemini(
     from google.genai import types
 
     client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
-    model_name = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")
+    # Kept for phase_5_cross_persona_qc.py's cross-family evaluator fallback,
+    # which calls call_gemini() without model= (dev-only QC tool — not part
+    # of the automated build, left unchanged per instructions). Every
+    # production call site now passes model= explicitly, resolved via
+    # flows.shared.model_routing.step_config(...).
+    model_name = model or os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")  # MODEL-LITERAL-OK: dev-script fallback default, not a routed call site
 
     config_kwargs: dict[str, Any] = {
         "temperature": temperature,
@@ -422,14 +462,16 @@ def call_openai(
     from openai import OpenAI
 
     client = OpenAI()
-    model = model or os.environ.get("OPENAI_MODEL", "gpt-5.4")
 
     # Reasoning path applies when:
     #   - model is an o-series reasoning model (o1/o3/o4), OR
     #   - caller explicitly requested reasoning_effort (e.g. gpt-5.4 high)
     # Both require max_completion_tokens instead of max_tokens and drop
     # temperature (reasoning models reject non-default temperature).
-    is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))
+    # Not a model-selection literal — call sites choose the model via
+    # flows.shared.model_routing.step_config(...); this only decides whether
+    # the already-chosen model needs the reasoning-API request shape.
+    is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))  # MODEL-LITERAL-OK: vendor-family request-shape gate
     use_reasoning_path = is_o_series or reasoning_effort is not None
 
     kwargs: dict[str, Any] = {

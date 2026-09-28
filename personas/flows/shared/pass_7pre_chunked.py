@@ -42,16 +42,15 @@ from flows.shared.clients import call_claude
 from flows.shared.prompt_render import render
 
 # ── configuration ────────────────────────────────────────────────────────────
+# Models come from model_routing.json (personas.pass_7pre_extract/_verify/
+# _boddice) via call_claude(step=...) below — no per-stage model constants here.
 
-_EXTRACT_MODEL = "claude-sonnet-4-6"
 _EXTRACT_MAX_TOKENS = 32000  # Card-only input, claim-list output; plenty of headroom.
 
-_VERIFY_MODEL = "claude-sonnet-4-6"
 _VERIFY_MAX_TOKENS = 16000  # Per-batch verification; ~20-25 items in, same items + status + evidence out.
 _VERIFY_BATCH_SIZE = 25     # Empirical sweet spot: balance between output size + batch count.
 _VERIFY_MAX_WORKERS = 4     # Parallelism cap to respect rate limits.
 
-_BODDICE_MODEL = "claude-sonnet-4-6"
 _BODDICE_MAX_TOKENS = 8000  # Small output (flag list only).
 
 
@@ -83,12 +82,11 @@ def extract_claims(
         persona_card_json=json.dumps(persona_card, ensure_ascii=False, indent=2),
     )
     r = call_claude(
+        step="personas.pass_7pre_extract",
         system=sysp,
         user=userp,
-        model=_EXTRACT_MODEL,
         max_tokens=_EXTRACT_MAX_TOKENS,
         temperature=0.0,
-        thinking=False,
         response_format_json=True,
     )
     result = r["json"]
@@ -128,12 +126,11 @@ def verify_batch(
         merged_dossier=merged_dossier,
     )
     r = call_claude(
+        step="personas.pass_7pre_verify",
         system=sysp,
         user=userp,
-        model=_VERIFY_MODEL,
         max_tokens=_VERIFY_MAX_TOKENS,
         temperature=0.0,
-        thinking=False,
         response_format_json=True,
     )
     batch_result = r["json"]
@@ -268,12 +265,11 @@ def check_boddice_tags(persona_card: dict[str, Any]) -> list[dict[str, Any]]:
         persona_card_json=json.dumps(persona_card, ensure_ascii=False, indent=2),
     )
     r = call_claude(
+        step="personas.pass_7pre_boddice",
         system=sysp,
         user=userp,
-        model=_BODDICE_MODEL,
         max_tokens=_BODDICE_MAX_TOKENS,
         temperature=0.0,
-        thinking=False,
         response_format_json=True,
     )
     flags = r["json"].get("boddice_tag_flags", [])
