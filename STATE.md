@@ -1,16 +1,26 @@
 # Project state
 
 **Single source of truth for "what's now."** When this doc disagrees with
-another, this doc is right (or fix this doc). Snapshot **2026-06-01**.
+another, this doc is right (or fix this doc). Snapshot **2026-09-28**.
 
 ---
 
 ## Status: Athens 2026 COMPLETE
 
 All three Athens nights ran end-to-end and are **published** — 13 dossiers
-+ 30 per-voice pages across Nights 1–3. Both repos clean + pushed; runtime
-tests green (358 pass, 1 env-only artifact). Pre-Athens voice-build work
-is COMPLETE. No work is in flight.
++ 30 per-voice pages across Nights 1–3. Pre-Athens voice-build work is
+COMPLETE.
+
+**Post-Athens (2026-06 → now).** The June planning set (roadmap, both
+trackers, product direction — see *Where the detail lives*) drives the
+work. Phase 0 code-quality fixes landed on branch `phase0-fixes`
+(2026-09-27/28). The **published record was repaired and pushed
+2026-09-28**: voice names (C53), the Night 1/2 voice indexes (C50), and
+per-theme files (C51). A central per-step model config
+(`model_routing.json`, C63) is being wired into both pipelines.
+**Direction:** the governed voice hub (`PRODUCT_assembly_hub.md`), built on
+the operator's own intent — no external event needed. Test suites
+(runtime, ingest, personas) green on `phase0-fixes`.
 
 | Night | Lead dossier | Dossiers | Voices |
 |---|---|---|---|
@@ -26,7 +36,12 @@ is COMPLETE. No work is in flight.
   production instance: 10 voice cards + config, `published_artifacts/` (the
   3 editions + editorial assessment + data inventory), and `runs/` (the
   full JSON "making-of" record: transcripts → voice reasoning → validation
-  → dossiers; **audio excluded for size**).
+  → dossiers; **audio excluded for size**). `main` carries the 2026-09-28
+  published-record repair.
+- **Branches (this repo):** `main` = the Athens-complete code (2026-06-04).
+  `post-athens-planning` = the June planning docs. `phase0-fixes`
+  (branched from it) = all post-Athens code fixes + tracker updates.
+  **Neither branch is merged into `main` yet.**
 
 ---
 
@@ -226,47 +241,44 @@ fields).
 
 ---
 
-## Open items (v4.1 — none Athens-blocking)
+## Open items
 
-**`runtime/OPEN_ITEMS.md`** (C42–C52):
+**Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
+Next: finish C63 (model config) → Stage 4 (persona-pipeline catch-up on the
+Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
+event config) → Stage 6 (validator prune, editor prompt, vendor layer,
+deployment profiles) → the hub.
 
-- **C42** safeguards-validator alignment with `voice_temporal_stance.default`
+**Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
+C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
+dossier-index dual writers (PLAN 0.1.2) · voices §32.1 / .2 / .3 / .5.
+
+**Runtime still open (`runtime/OPEN_ITEMS.md`):**
+
+- **C42** safeguards validator — Athens data: ~100% of flags were
+  operator-released; fix/prune (PLAN 1.3)
 - **C43** validator JSON parse robustness
-- **C44** researcher per-session extraction caching
-- **C45** editor dossier file-existence caching
-- **C46** `--single-dossier` index preservation
+- **C44 / C45** researcher + editor caching
 - **C47** editorial discipline rules → permanent prompt patches
-- **C48** voice-pipeline deployment-context ✅ **RESOLVED 2026-06-01** —
-  option-b retirement; branch deleted, design at
-  `_workspace/planning/runtime/DESIGN_voice_deployment_context.md`, code
-  preserved at tag `archive/voice-deployment-context-2026-05-05`
-- **C49** many-speaker speaker_id structured-output JSON-decode → manual
-  passthrough (recurring transcription failure: N1 ×2 + N2 ×1 + N3 ×2)
-- **C50** `nights/_index.json` clobbered by single-voice publish (surfaced
-  Athens N3 — left 6 voice pages unpublished)
-- **C51** per-theme published artifacts (`themes/night_N/`) never generated
-  for any night
-- **C52** event-agnostic config externalization (Athens-isms hardcoded in
-  `code` — not a zero-edit redeploy)
+- **C52** event-agnostic config (PLAN 2.1)
+- **C57** editor closing prompt hardcoded to Tim
+- **C62** model generation — pinned models still live; after C63 a
+  migration is a config edit plus voice re-validation
+- **C63** central model config — in progress
+- **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks
 
-C42 + C43 both RECURRED in Nights 2–3 (C42 forced the Whanganui N3
-operator-release; C43 validator parse-fallback on Marley N2 + Whanganui
-N3) — recurrence notes appended to each entry.
+**Voices-thread (`voices/OPEN_ITEMS.md`):** §16.1 Plato anachronism · §31
+Gap-J coherence audit · §11 reader gates · §33 validation track (decision
+open) · §34 agentic Step-3 card fields · §35 model config (persona side) ·
+FU#55 family of forms (BUILD, gate-exempt, after Stage 4).
 
-**External, not built:** B2 microsite · B5 closing-show pipelines · B6
-Day-4 goodbye · B7 full non-text render layer (Octopus shipped; Marley →
-Suno pending) · B10 VM provisioning.
+**External, not built:** B2 microsite (redeploy needed to show the
+2026-09-28 record repair, if it is a static build) · B5 closing-show
+pipelines · B6 Day-4 goodbye · B7 non-text render (Marley → Suno) · B10 VM.
 
-**Voices-thread (`voices/OPEN_ITEMS.md`):**
-
-- §16.1 Plato anachronism patch
-- §31 Gap-J per-voice coherence audit
-- §11 post-Athens Rastafari-orbit + iwi-orbit reader gates
-- Pre-Athens operator-side: D1/E1 paragraph use, Marley + Whanganui reader-
-  gate work
-
-**Future build (specified, not started):** vatican-2026 annotated-encyclical
-run (`_workspace/planning/runtime/SPEC_2026_05_27_magnifica_humanitas_annotated_pipeline.md`).
+**Specified, not started:** vatican annotated-encyclical run
+(`_workspace/planning/runtime/SPEC_2026_05_27_magnifica_humanitas_annotated_pipeline.md`)
+— the first deployment profile; the governed hub (`PRODUCT_assembly_hub.md`).
 
 ---
 
@@ -277,6 +289,10 @@ run (`_workspace/planning/runtime/SPEC_2026_05_27_magnifica_humanitas_annotated_
 | Scaffolding for Claude sessions (filesystem layout, conventions, reading order) | [`CLAUDE.md`](CLAUDE.md) |
 | Time-stamped events history | [`CHANGELOG.md`](CHANGELOG.md) |
 | Athens-complete operator workflow handoff | [`_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md`](_workspace/planning/runtime/HANDOFF_2026_05_29_ATHENS_COMPLETE.md) |
+| Post-Athens roadmap (order of work + operator decisions) | [`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`](_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md) |
+| Product direction (governed voice hub) | [`_workspace/planning/PRODUCT_assembly_hub.md`](_workspace/planning/PRODUCT_assembly_hub.md) |
+| Which model runs each LLM step | [`model_routing.json`](model_routing.json) |
+| Every LLM call site, both pipelines | [`docs/LLM_CALL_INVENTORY.md`](docs/LLM_CALL_INVENTORY.md) |
 | Runtime open items + per-item detail | [`_workspace/planning/runtime/OPEN_ITEMS.md`](_workspace/planning/runtime/OPEN_ITEMS.md) |
 | Voices-thread open items | [`_workspace/planning/voices/OPEN_ITEMS.md`](_workspace/planning/voices/OPEN_ITEMS.md) |
 | Doc-infrastructure backlog (deferred reshapes, hygiene, operator decisions) | [`_workspace/planning/doc_infrastructure_backlog.md`](_workspace/planning/doc_infrastructure_backlog.md) |

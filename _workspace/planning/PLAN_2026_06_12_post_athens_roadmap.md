@@ -239,10 +239,10 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 **Operator decisions recorded 2026-09-28:**
 - **No external event needed (corrected same day).** There is no next event or client, and none is required: the operator builds on their own intent — *"building is putting it in its best shape."* Phase 2 and the governed hub remain the **active direction**, not shelved. Sequence continues: finish Phase 0/1 work → Stage 4 → Stage 5 (family of forms, split-card + event config) → Stage 6 (vendor layer, profiles) → hub/studio UI. The operator also plans to write about the project. *(An earlier same-day note here said "shelved" — an inference from "no event", withdrawn.)*
 - **#1 push `phase0-fixes`** — done (pushed 2026-09-28).
-- **#2 published-record repair (C53/C50)** — approved; applied locally in athens-2026 2026-09-28 (99 name fields, Night 1/2 indexes rebuilt, data_views regenerated). athens-2026 push awaits a final confirmation.
+- **#2 published-record repair (C53/C50)** — approved; applied and **pushed** 2026-09-28 (athens-2026 `0b2af19`: 99 name fields, Night 1/2 indexes rebuilt, data_views regenerated).
 - **Family-of-forms vs the gate (PRODUCT §11.6)** — **exempt, conditionally** (only the one upstream Pass 4b edit; re-enters the gate if it grows).
-- **Dossier-index writers (#5)** — approved: each writer preserves the fields it doesn't own.
-- **C51 per-theme files** — approved: generate for Athens.
+- **Dossier-index writers (#5)** — done (`3871e11`): each writer preserves the fields it doesn't own.
+- **C51 per-theme files** — done: builder bug fixed (`4b7ac0d`), 24 files generated and pushed with the record repair.
 - **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
 - **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.

@@ -9,6 +9,58 @@ history lives in `git log`.
 
 ---
 
+## 2026-09-28
+
+### Published record repaired; central model config
+
+- **athens-2026 published record repaired and pushed** (`0b2af19`):
+  - **Voice names (C53):** 99 fields in 49 files carried each voice card's long identity opening ("I am Augusta Ada King…") as the display name. Restamped to "Voice of X" (headnotes: "the Voice of X") with `runtime/scripts/restamp_published_voice_names.py`. Prose untouched; no model calls.
+  - **Voice indexes (C50):** Night 1's listed 3 of 10 voices, Night 2's 1 of 10. Both rebuilt from disk.
+  - **Per-theme files (C51):** 24 generated after fixing the builder, which had never worked (`4b7ac0d`).
+  - **data_views** regenerated.
+- **Dossier-index writers** (editor + publish_flow) now merge instead of clobbering each other (PLAN 0.1.2, `3871e11`).
+- **`model_routing.json`** (C63): one per-step model config for both pipelines. It refuses unsafe setups and keeps the legacy env overrides working. Call-site conversion in progress.
+- **Operator decisions:**
+  - Family of forms is exempt from the net-complexity gate (conditional).
+  - The Assembly invariant is the loose four-part version (PRODUCT §11.5).
+  - The hub is the active direction, built on the operator's own intent; the gate is amended so the operator's decision to build counts.
+  - Stage 4 approved, deferred until the current work is done.
+
+## 2026-09-27
+
+### Phase 0 fixes (branch `phase0-fixes`)
+
+- **Runtime:**
+  - C49: speaker-ID decode failure now degrades to an auto-passthrough.
+  - C50: night index rebuilt from disk.
+  - C53: voice-name corruption fixed at three code surfaces.
+  - C54: orchestrator dispatch goes through `infer_state`.
+  - C55: event-neutral validator prompts.
+  - C56: editor `corpus_metadata` strip.
+  - C58: `sys.executable`.
+  - C46: editor dossier index rebuilt from disk.
+- **Persona pipeline:**
+  - §32.1: bracket-strip reload.
+  - §32.2: 7a-FINAL field.
+  - §32.3: dead prompts deleted.
+  - §32.5: count drifts.
+- **`docs/LLM_CALL_INVENTORY.md`** regenerated from code. It adds the Voice and Editor pipelines and a migration section.
+- **C62 model audit:** the pinned models are still live. Sonnet 5 would break Pass 7-pre; Opus 5.5 would lower the default effort.
+- **Planning corrections:**
+  - Per-voice temperature isn't available on current Anthropic models (vatican spec §5, PLAN 2.2).
+  - The direction of the validation test in PRODUCT §8 is fixed.
+- **Governance draft** added (PRODUCT §11).
+
+## 2026-06-12 → 2026-06-14
+
+### Post-Athens planning
+
+- **Roadmap** `_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`: a sequencing layer over the two trackers.
+- **Line-by-line code read** filed as runtime C53–C58 and voices §32–§33.
+- **FU#55 family of forms:** BUILD.
+- **Agentic-architecture backlog:** runtime Section H, voices §34.
+- **Product direction:** the governed voice hub (`_workspace/planning/PRODUCT_assembly_hub.md`).
+
 ## 2026-06-01
 
 ### Doc-architecture sweep
