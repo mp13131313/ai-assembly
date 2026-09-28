@@ -391,6 +391,16 @@ Opus 4.7's extra reasoning capacity helps on these edge cases. It does NOT help 
 
 A mapping table merged into the transcript: each turn now carries a named speaker (or `Unidentified Speaker N` or `Audience Member N`), a confidence level (high / medium / low), an evidence note for the attribution, and a role tag (moderator / panelist / audience). A `diarization_flags` list records any merges, splits, missing introductions, or per-turn re-attributions for downstream auditing.
 
+### Failure mode — Speaker ID JSON-decode → auto-passthrough (C49)
+
+Large speaker rosters occasionally push the Speaker ID call's structured-output reply past the point where the model keeps the JSON well-formed. When that happens and the reply still can't be decoded after `identify_speakers`'s own task retries are exhausted, the flow no longer halts the session. `transcription_flow.py::process_session` catches that specific `json.JSONDecodeError` (~L728) and falls back to `build_speaker_id_fallback()` (~L245); any other exception type (auth, network, etc.) is not caught here and still halts the session as before.
+
+The fallback produces an all-`Unidentified Speaker N` mapping: one number per distinct diarization label (not per turn), assigned in order of first appearance, so each label keeps one stable identity and the original diarization turn boundaries are preserved — the same shape as the operator's manual workaround. Named speaker attribution is simply absent for that session; the anonymized turns proceed to Cleaning.
+
+**How an operator sees it.** The fallback records a `speaker_id_auto_passthrough` flag (~L267, ~L302) in `review_queue.diarization_flags`, which `assemble_session_package()` copies into `session_package.json` verbatim. It renders under review.md's "## Flags" heading — the first file the operator is told to open.
+
+**Why:** at Athens this JSON-decode failure halted transcription five times across the three nights (Night 1 ×2, Night 2 ×1, Night 3 ×2), each requiring a hand-written passthrough and a re-run. See `_workspace/planning/runtime/OPEN_ITEMS.md` C49 (✅ FIXED 2026-09-27, option c) for the incident history and the deferred options ((a) tolerant parse, (b) chunked calls) that would keep named attribution on large rosters instead of only degrading gracefully.
+
 ---
 
 ## Step 4: Cleaning

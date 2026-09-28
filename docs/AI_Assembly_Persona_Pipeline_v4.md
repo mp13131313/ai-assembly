@@ -355,7 +355,7 @@ If files touched: reloads pass2–pass6 from disk into in-memory vars. Placement
 
 **Aggregate** (Python): unions Stage 2 + Stage 3 results into final report. Output: `05_validation/01_pass_7_pre_citation.json`. **On any-stage failure:** writes `VERIFICATION_SKIPPED` sentinel.
 
-**Orphaned files:** `persona_pass_7pre_citation.md` and `persona_pass_7pre_citation_user.md` are the legacy single-shot prompts — superseded by FU#2 3-stage architecture, kept on disk but not called anywhere. Eligible for deletion.
+**Deleted (2026-09-27, commit `a10e08a`):** `persona_pass_7pre_citation.md` and `persona_pass_7pre_citation_user.md` were the legacy single-shot prompts, superseded by the FU#2 3-stage architecture above and unloaded by any code. They are no longer on disk.
 
 ### Pass 7-anachronism — TimeChara temporal check
 

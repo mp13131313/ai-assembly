@@ -40,7 +40,7 @@
 
 **End state:** `<PROJECT_ROOT>/published_artifacts/nights/night_<N>/_index.json` exists. The microsite render reads from `published_artifacts/`; once `_index.json` is present, the night is publishable.
 
-**Time budget per night:** transcription parallel with ingest (~5-15 min after panel ends, depending on session count). Then orchestrator: Researcher (~30-60 min), Provocateur (~30-60 min), Voice (~2-4 hr), Editor (~30 min when built), Publish (~5 min). Total: ~4-8 hours. Designed to complete overnight without operator attention.
+**Time budget per night:** transcription parallel with ingest (~5-15 min after panel ends, depending on session count). Then orchestrator: Researcher (~30-60 min), Provocateur (~30-60 min), Voice (~2-4 hr), Editor (~30 min), Publish (~5 min). Total: ~4-8 hours. Designed to complete overnight without operator attention.
 
 **Operator's role during the night:** none, by design. Orchestrator runs unattended; halts cleanly on stage failure with logs at `<run_dir>/_orchestrator_logs/`. Operator wakes up to either ✅ complete or ❌ a failure that needs investigation before the day's panel.
 
@@ -131,22 +131,25 @@ Each stage section describes:
 - **Done detection:** `04_voice/manifest.json` exists.
 - **Cost:** ~$15-30 (the largest stage).
 
-### Stage 6 — Editor (fires when Voice done; SKIP if not built)
+### Stage 6 — Editor (fires when Voice done)
 
-- **Trigger:** `04_voice/manifest.json` exists AND `runtime/flows/editor_flow.py` exists.
-- **If editor_flow.py does NOT exist:** orchestrator skips this stage cleanly and proceeds to Publish.
+- **Trigger:** `04_voice/manifest.json` exists AND `runtime/flows/editor_flow.py` exists (the orchestrator retains this as a defensive file-existence check; the file has existed since `fc5c2fb`, 2026-05-03, so in practice this stage always fires).
 - **Reads:**
-  - `04_voice/step2_first_draft_artifacts/<voice_slug>.json` (all voices) — voice artifacts
-  - `04_voice/manifest.json` — to count + identify what shipped
-  - `02_researcher/grouping.json` — themes (for dossier organization)
-  - `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json` — Claudia's persona card
+  - `04_voice/step2_first_draft_artifacts/<voice_slug>.json` (all voices) — voice artifacts; Stage 1 routing reads `focus_decision` + `lineage.themes_covered`
+  - `03_provocateur/briefings/<voice_slug>.json` (all voices) — per-voice formulations; each carries the Researcher's full theme record (`full_theme_record`), so the editor does not read `02_researcher/grouping.json` directly
+  - `<PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json` — Tim Leberecht's persona card
+  - For Night 2/3: `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N-1>/*.json` — prior nights' published dossiers (`prior_editions` input)
+- **Per-voice review gate:** before Stage 1 routing fires, the editor refuses to run if any voice with a Step 2 artifact has neither a PASS validation verdict nor an explicit operator decision (release / hold_for_regen) — writes `<run_dir>/05_editor/gating_blocked.json` and exits with a distinct code (3) rather than producing dossiers. Bypass with `--bypass-gating` (tests / one-off forces only).
 - **Writes:**
-  - `<run_dir>/05_editor/dossiers/dossier_<NN>.json` — per-dossier (one per theme) with editor's article + theme page + headnotes
+  - `<run_dir>/05_editor/theme_routing.json` — Stage 1 routing decisions (voice → dossier)
+  - `<run_dir>/05_editor/dossiers/dossier_<NNN>.json` — per-dossier (one per theme) with editor's article + headnotes
   - `<run_dir>/05_editor/manifest.json` ★ — stage sentinel
+  - `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/dossier_<NNN>.json` — published copy of each dossier
+  - `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/_index.json` + `<PROJECT_ROOT>/published_artifacts/dossiers/_index.json` — per-night + cross-night dossier indexes (two-writer merge contract shared with Publish; see [Editor Pipeline](AI_Assembly_Editor_Pipeline.md) §"Outputs" → "Dossier index")
 - **Fired by:** orchestrator runs `python runtime/flows/editor_flow.py <run_dir> --night N`.
 - **Done detection:** `05_editor/manifest.json` exists.
-- **Cost:** ~$1-2 across one night (~10 dossiers × Opus 4.7).
-- **Status (2026-05-02):** specified, not built. See [Editor Pipeline](AI_Assembly_Editor_Pipeline.md).
+- **Cost:** ~$1-2 across one night (~3-5 dossiers × Opus 4.7).
+- **Status:** built and shipped (`fc5c2fb`, 2026-05-03). The editor is Tim Leberecht (`editor/tim_leberecht/`); switched from a draft placeholder persona, Claudia Pinchbeck, by operator decision 2026-05-05 (`b266f51`). Composed all 13 dossiers published across Athens Nights 1-3 (5 + 5 + 3 — see `STATE.md`). See [Editor Pipeline](AI_Assembly_Editor_Pipeline.md).
 
 ### Stage 7 — Publish (fires when Editor done, OR Voice done if no editor)
 
@@ -242,8 +245,8 @@ The whole runtime contract lives under `<PROJECT_ROOT>` (set via `AI_ASSEMBLY_PR
 │       └── continuity_night_3.json            # written by Voice after Night 3
 │
 ├── editor/
-│   └── claudia_pinchbeck/
-│       └── 07_persona_card_assembled.json     # input — Claudia's card (when authored)
+│   └── tim_leberecht/
+│       └── 07_persona_card_assembled.json     # input — Tim Leberecht's persona card
 │
 ├── runs/
 │   ├── athens_night_1/                        # ★ ONE DIRECTORY PER NIGHT ★
@@ -252,7 +255,7 @@ The whole runtime contract lives under `<PROJECT_ROOT>` (set via `AI_ASSEMBLY_PR
 │   │   │   ├── researcher.<unix-ts>.log
 │   │   │   ├── provocateur.<unix-ts>.log
 │   │   │   ├── voice.<unix-ts>.log
-│   │   │   ├── editor.<unix-ts>.log           # (when editor is built)
+│   │   │   ├── editor.<unix-ts>.log
 │   │   │   └── publish.<unix-ts>.log
 │   │   │
 │   │   ├── 01_transcription/                  # ingest writes here, per-session
@@ -287,7 +290,7 @@ The whole runtime contract lives under `<PROJECT_ROOT>` (set via `AI_ASSEMBLY_PR
 │   │   │   ├── step3_complete.flag             # continuity-write sentinel
 │   │   │   └── manifest.json                   # SENTINEL
 │   │   │
-│   │   └── 05_editor/                          # editor_flow writes here (when built)
+│   │   └── 05_editor/                          # editor_flow writes here
 │   │       ├── dossiers/dossier_<NN>.json
 │   │       └── manifest.json                   # SENTINEL
 │   │
@@ -372,7 +375,7 @@ python runtime/flows/voice_flow.py <PROJECT_ROOT>/runs/athens_night_<N> \
     --night <N> --skip-step3 [--skip-validation]   # --skip-validation for Night 2/3
 
 python runtime/flows/editor_flow.py <PROJECT_ROOT>/runs/athens_night_<N> \
-    --night <N>     # when editor is built
+    --night <N>
 
 python runtime/flows/publish_flow.py <PROJECT_ROOT>/runs/athens_night_<N> \
     --night <N>
@@ -429,7 +432,7 @@ sudo systemctl start orchestrator@3.service
 | Researcher | 30-60 min |
 | Provocateur | 30-60 min |
 | Voice | 2-4 hr |
-| Editor (when built) | 30 min |
+| Editor | 30 min |
 | Publish | 5 min |
 | **Total: panel end → publish complete** | **4-8 hours** |
 
@@ -451,7 +454,7 @@ sudo systemctl start orchestrator@3.service
 ## 9. Cross-references
 
 - [Voice Pipeline](AI_Assembly_Voice_Pipeline.md) — Stage 5 internals
-- [Editor Pipeline](AI_Assembly_Editor_Pipeline.md) — Stage 6 internals (specified, not built)
+- [Editor Pipeline](AI_Assembly_Editor_Pipeline.md) — Stage 6 internals
 - [Researcher Pipeline](AI_Assembly_Researcher_Pipeline.md) — Stage 3 internals
 - [Provocateur Pipeline](AI_Assembly_Provocateur_Pipeline.md) — Stage 4 internals
 - [Transcription Pipeline](AI_Assembly_Transcription_Pipeline.md) — Stage 2 internals

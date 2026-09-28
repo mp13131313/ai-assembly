@@ -63,10 +63,10 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | **`reference_only_passages` Step 1-only** | Mentioned in passing | **Made explicit + load-bearing** in field-routing table; Step 2 + Step 3 both drop (copyright exposure) | personas/CROSS_REPO_CONTRACT.md §"CRITICAL: `reference_only_passages` is Step 1 only — NEVER Step 2" |
 | **Briefing input contract** | Sketched | **Byte-accurate** to Provocateur Stage 4 output: per-voice file at `runs/<run>/03_provocateur/briefings/<voice_slug>.json`, two views per formulation (`narrative_briefing` markdown + `full_theme_record` JSON) | runtime/flows/provocateur_flow.py:835–1041 |
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
-| **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop) | §"Validation Nodes" below |
+| **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop). **Superseded 2026-05-04 (C28):** Step 1 validation defaulted OFF for all nights (no actionable consumer); opt-in via `--enable-step1-validation`. C28b's Step 2 validator (default ON) is now the operator gate — see §"Validation Nodes" → "Default policy for Athens" below | §"Validation Nodes" below |
 | **Continuity block generation** | Sketched in Step 2 system prompt | **Separate flow** with defined runtime trigger (after Night N Step 3 artifacts written, before Night N+1 Provocateur reads them); per-voice override file | §"Continuity Block Generation" below |
 | **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). **Night 1: ~$20-40, ~45-75 min wall** (validation ON); **Nights 2+3: ~$15-30, ~25-40 min wall** (validation OFF, +continuity). 3-night total ~$60-80. Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25 not deprecated $15/$75) + Test 3 empirical anchor + prefix caching | §"Cost & Envelope" below |
-| **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]`. **Athens production:** always pass `--skip-step3` (A1 decision 2026-05-01); add `--skip-validation` on Nights 2/3 (FU#62 path B). | §"Implementation" below |
+| **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-step3] [--enable-step1-validation]`. **Athens production:** always pass `--skip-step3` (A1 decision 2026-05-01). **Current (since C28, 2026-05-04):** Step 1 validation is OFF by default on all nights; `--skip-validation` is a no-op kept for back-compat; pass `--enable-step1-validation` to opt back in for diagnostics. | §"Implementation" below |
 
 **Stable from v1:**
 - Two-step logic (private reasoning → public expression) preserved as Step 1 → Step 2
@@ -86,7 +86,7 @@ The Voice Pipeline is the third agent in the overnight pipeline. It receives the
 
 Plus two supporting flows:
 
-- **Validation nodes** (optional, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). Default ON for Athens Night 1.
+- **Step 1 validation nodes** (opt-in, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). **Default OFF for all nights since C28 (2026-05-04)** — opt in with `--enable-step1-validation` for diagnostics. Superseded as the operator gate by the Step 2 validator (C28b, default ON, three pillars — safeguards / engagement / voice fidelity — halt-on-any-flag; `runtime/flows/voice/step2_validation.py`).
 - **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Model and thinking mode are set in `model_routing.json` (step `runtime.voice.continuity`) — that file is the source of truth for which model runs every step in this pipeline, not this spec; current default is Sonnet 4.6 + adaptive thinking. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
 
 **Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$20-40 / ~45-75 min wall (validation ON); Nights 2+3 ~$15-30 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$60-80. *Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25, not deprecated $15/$75 used previously) + prefix caching landed.* See §"Cost & Envelope" for breakdown.
@@ -323,8 +323,8 @@ Which model (and, for validation, which cross-vendor ladder) runs each row below
 | Stage | Step | Tool (current default; `model_routing.json` step) | Script | Output |
 |---|---|---|---|---|
 | **Step 1** | Private Reasoning per formulation | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step1`) | `step1_private_reasoning.py` | `04_voice/step1_detailed_responses/<voice_slug>__<theme_id>.json` |
-| **Validation A** (optional, Night 1 only) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K (`runtime.voice.step1_validation`) | `step1_validation.py:check_anachronism` | diagnostic flag → manifest.validation_failures[] for operator review |
-| **Validation B** (optional, Night 1 only) | Constitutional self-reflection | **OpenAI ladder** (same step + ladder as A) | `step1_validation.py:check_constitution` | diagnostic flag → manifest.validation_failures[] for operator review |
+| **Validation A** (opt-in via `--enable-step1-validation`; OFF by default since C28) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K (`runtime.voice.step1_validation`) | `step1_validation.py:check_anachronism` | diagnostic flag → manifest.validation_failures[] for operator review |
+| **Validation B** (opt-in via `--enable-step1-validation`; OFF by default since C28) | Constitutional self-reflection | **OpenAI ladder** (same step + ladder as A) | `step1_validation.py:check_constitution` | diagnostic flag → manifest.validation_failures[] for operator review |
 | **Step 2** | First-Draft Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step2`) | `step2_first_draft_artifact.py` | `04_voice/step2_first_draft_artifacts/<voice_slug>.json` |
 | **Step 3** | Amended Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step3`) | `step3_amended_artifact.py` | `04_voice/step3_amended_artifacts/<voice_slug>.json` |
 | **Continuity** (Night 2+3) | Per-voice summary of prior night | Sonnet 4.6 + adaptive thinking, max 8K (`runtime.voice.continuity`) | `continuity.py` | `<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json` |
@@ -570,21 +570,23 @@ System prompt:
 **Why diagnostic-only** (decided 2026-05-01, FU#62 path B):
 - Operator presence at Athens makes morning-review the natural correction loop; autonomous regen has limited additional value before Athens.
 - A regen path is a new code path introduced under production pressure; diagnostic-only is the boring, working path.
-- Pairs with the Night 1-only validation policy below — running validation on Nights 2/3 without regen is pure cost without remediation.
+- Running validation without regen is pure cost without remediation unless an operator is actually reviewing the flags.
 
 If autonomous regen is wanted post-Athens for future deployments, file as a new item in `_workspace/planning/runtime/OPEN_ITEMS.md` and implement against this contract.
 
 ### Default policy for Athens
 
+**Superseded 2026-05-04 (`runtime/OPEN_ITEMS.md` C28, commit `b723745`).** Step 1 validation had no actionable downstream consumer (diagnostic-only, no regen-on-flag) and is now **OFF by default for all three nights** — not just Nights 2/3 as originally specified:
+
 | Night | Anachronism | Constitutional |
 |---|---|---|
-| Night 1 | ON for all 10 voices | ON for all 10 voices |
+| Night 1 | OFF by default — opt in with `--enable-step1-validation` | OFF by default — opt in with `--enable-step1-validation` |
 | Night 2 | OFF | OFF |
 | Night 3 | OFF | OFF |
 
-Rationale: validation is diagnostic-only (no regen-on-flag). Night 1 catches drift in fresh card deployment — operator reviews flags morning of Day 2 and intervenes voice-side if material. Nights 2 + 3 with no regen mechanism = wall-time + API cost without remediation; operator morning-review handles correction.
+Rationale (C28): validation was diagnostic-only with zero downstream loss from skipping it — Athens savings ~$9-15 + ~30 min/night. `--skip-validation` still exists on the CLI but is a **no-op kept for back-compat** (validation is already off without it); `--enable-step1-validation` re-enables both nodes for diagnostic dryruns.
 
-CLI flag `--skip-validation` disables both nodes. Always use it for dryrun work — Step 1 outputs are checkpoint-cached, so re-running validation against unchanged outputs reproduces the same flags and burns ~20-40 min/voice for nothing.
+**The operator gate for Athens is now the Step 2 validator** (`runtime/OPEN_ITEMS.md` C28b, shipped 2026-05-04, `runtime/flows/voice/step2_validation.py`): three pillars (safeguards / engagement / voice fidelity) plus cross-night echo on Nights 2+3, one call per pillar (model: `model_routing.json` step `runtime.voice.step2_validation`), halt-on-any-flag, operator clears WARN/HOLD per-voice via the dashboard before the pipeline proceeds to Editor. Default ON; disable only for unattended dryruns with `--skip-step2-validation`. This is the real gate described conceptually (without the Step 1/Step 2 distinction) by the "Regeneration policy" section above — treat this section as current, the paragraphs above as the superseded Step-1-only design.
 
 **Validation outputs** are written to `04_voice/validation/<voice_slug>__<theme_id>.json` with `{anachronism: PASS|<issues>, constitution: PASS|<issues>, regen_count: 0, final_status: clean|flagged}`. `regen_count` is hardcoded `0` (no regen); `final_status: flagged` means the operator should review the file.
 
@@ -1182,16 +1184,16 @@ Per Anthropic Opus 4.7 / Sonnet 4.6 rate limits, default batch size 4 with 20-se
 ### CLI
 
 ```bash
-python flows/voice_flow.py <run_dir> --night N [--skip-validation] [--skip-step3]
-# Athens production — Night 1 (validation ON, Step 3 skipped per A1 decision 2026-05-01):
+python flows/voice_flow.py <run_dir> --night N [--skip-step3] [--enable-step1-validation] [--skip-step2-validation]
+# Athens production — all nights (Step 1 validation OFF by default since C28, 2026-05-04; Step 3 skipped per A1 decision 2026-05-01):
 python flows/voice_flow.py runs/athens_2026_2026_05_07_night1 --night 1 --skip-step3
-# Athens production — Nights 2 and 3 (validation OFF per FU#62 path B; Step 3 skipped):
-python flows/voice_flow.py runs/athens_2026_2026_05_08_night2 --night 2 --skip-step3 --skip-validation
+python flows/voice_flow.py runs/athens_2026_2026_05_08_night2 --night 2 --skip-step3
 ```
 
 Required arg `--night N` ∈ {1, 2, 3} — controls continuity override loading.
 
-- `--skip-validation` disables both validation nodes. Required on Athens Nights 2/3 per FU#62 path B (validation is diagnostic-only, no regen; running on Nights 2/3 is pure cost without remediation). Always use for dryrun work (Step 1 outputs are cached → validation re-runs against unchanged outputs → ~20-40 min wasted).
+- `--skip-validation` is a **no-op kept for back-compat** — Step 1 validation is already OFF by default on every night since C28 (2026-05-04; `runtime/OPEN_ITEMS.md` C28). Pass `--enable-step1-validation` to opt back in for diagnostics (e.g. dryrun investigation) — Step 1 outputs are cached, so re-running validation against unchanged outputs reproduces the same flags and burns ~20-40 min/voice for nothing.
+- `--skip-step2-validation` disables the Step 2 validator (C28b's operator gate, default ON — see §"Default policy for Athens" above). Do not use in Athens production; only for unattended dryruns with no operator on the dashboard to clear flags.
 - `--skip-step3` runs Steps 1+2 only. **Required on all Athens production runs** per A1 decision 2026-05-01 (Option A). Cross-voice visibility moves to editor layer + Substack. Step 3 module + prompt remain in codebase, dormant; re-add path is ~2 days against B+ shape, documented in `_workspace/planning/runtime/OPEN_ITEMS.md` A1.
 
 `<run_dir>` must contain `03_provocateur/briefings/*.json` (Provocateur output). Otherwise the flow exits with a clear message.

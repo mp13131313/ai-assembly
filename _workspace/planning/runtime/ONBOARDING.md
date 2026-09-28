@@ -181,7 +181,7 @@ Spec (`docs/AI_Assembly_Voice_Pipeline.md` §"Regeneration policy" + §"Default 
 
 ## Active branch + recent history
 
-**Branch:** `main`. Earlier `voice-pipeline-v2.1-align-revert`, `feature/editor-deployment-context`, and `feature/voice-deployment-context` branches all settled before Athens — editor-side work was re-implemented directly on main (commits `0f751b7` + `cbcdf82` + `fda8091` + `7e99c63`); voice-side branch was held + later retired as superseded (C48 option-b, 2026-06-01 — see `DESIGN_voice_deployment_context.md` + tag `archive/voice-deployment-context-2026-05-05`). All work since is on `main`. **Athens Nights 1–3 are complete + published** — current state lives in `CLAUDE.md` + `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
+**Branch (historical, through 2026-06-01):** `main`. Earlier `voice-pipeline-v2.1-align-revert`, `feature/editor-deployment-context`, and `feature/voice-deployment-context` branches all settled before Athens — editor-side work was re-implemented directly on main (commits `0f751b7` + `cbcdf82` + `fda8091` + `7e99c63`); voice-side branch was held + later retired as superseded (C48 option-b, 2026-06-01 — see `DESIGN_voice_deployment_context.md` + tag `archive/voice-deployment-context-2026-05-05`). All work through Athens was on `main`. **This is no longer the current branch picture** — post-Athens work moved onto other branches; see `STATE.md` ("The two repos") for the current branch state. **Athens Nights 1–3 are complete + published** — current state lives in `STATE.md`, open items in `OPEN_ITEMS.md`; the dated list below is **pre-Athens history**, preserved for provenance.
 
 **Branch history (chronological — most recent first):**
 

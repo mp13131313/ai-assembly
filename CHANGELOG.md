@@ -22,6 +22,8 @@ history lives in `git log`.
 - **`model_routing.json`** (C63, done): every LLM step in both pipelines (41) now reads its model, thinking mode and effort from this one file. It refuses unsafe setups and keeps the legacy env overrides working.
   - Validator ladders route each rung by vendor rather than position. The runtime Step-1 ladder's gpt-4.x fallback rungs, which could only fail, now work.
   - `docs/LLM_CALL_INVENTORY.md` regenerated; the specs point at the file. Two specs had stated wrong model defaults (Voice, Researcher) and were corrected.
+- **Documentation staleness sweep fixed** (16 of the 18 findings; `doc_infrastructure_backlog.md`). The Editor spec and Lifecycle now describe the built editor (Tim Leberecht) and the shared dossier index. The Voice spec states the real Step-1 validation default (off since C28). Also fixed: the Provocateur panel size, the C49 fallback documentation, the field counts, and `docs/README.md` re-rated with a last-checked column. Five new findings were filed (#19–#23).
+- **Deep Research stays manual** (claude.ai Research feature); its model moves into `model_routing.json` (voices §36).
 - **Operator decisions:**
   - Family of forms is exempt from the net-complexity gate (conditional).
   - The Assembly invariant is the loose four-part version (PRODUCT §11.5).

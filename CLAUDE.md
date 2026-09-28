@@ -9,9 +9,9 @@ scaffolding.
 
 ## Status (one line)
 
-**Athens 2026 COMPLETE** — all three nights published, no work in flight.
-For per-night production detail, deployment_context discipline rules,
-open items, and follow-ups: see [`STATE.md`](STATE.md).
+**Athens 2026 complete; post-Athens work ongoing.** Current state, active
+branches, and open items are never restated here — see
+[`STATE.md`](STATE.md).
 
 ## Important operational notes for future Claude sessions
 
@@ -266,7 +266,7 @@ Per voice, the persona pipeline produces three runtime-relevant artifacts:
 - **Provocateur Profile** (8 fields) at
   `voices/<slug>/06_derive/01_provocateur_profile.json` → wires into
   `runtime/flows/shared/council/council_config.json` `members[]`.
-- **Persona Card** (35 generated + 2 continuity null + metadata) at
+- **Persona Card** (36 generated + 2 continuity null + metadata) at
   `voices/<slug>/07_persona_card_assembled.json` → loaded as Voice
   Pipeline system prompt (when built). Runtime MUST drop `metadata`,
   `smoke_test_chains`, and (for Step 2 only) `reference_only_passages`.
@@ -305,7 +305,7 @@ All canonical pipeline specs are in `docs/`:
 - `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline **v2** (refinements
   landed 2026-05-03 PM; v1 was 2026-05-02). Implements Frame Concept v1's
   broadsheet surface as a runtime contract. **Editor as 13th Assembly
-  member** (Claudia Pinchbeck) with full persona card; system prompt
+  member** (Tim Leberecht) with full persona card; system prompt
   assembled same way as panel voices. **Unit of publication is the dossier**,
   organized by theme. **Substack bridge dropped**, micro-site only.
   **Self-reportage recursion** — *The Assembly* (panel) ≡ *The Assembly*
@@ -320,9 +320,10 @@ All canonical pipeline specs are in `docs/`:
   is **archived** (folded into v2 spec). **Implementation shipped
   2026-05-03 PM** (commit `fc5c2fb`): `runtime/flows/editor_flow.py` +
   `runtime/flows/editor/*.py` (routing/card_assembly/dossier_generation/
-  publish) + `/admin/tonight/editor` drilldown + 38 tests. Pending:
-  Claudia's full 35-field card (voices thread), closing prompt rewrite
-  to v2 contract. See OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢
+  publish) + `/admin/tonight/editor` drilldown + 38 tests. Tim's card
+  is at `editor/tim_leberecht/` (shipped 2026-05-05, see `STATE.md`);
+  closing prompt rewrite to v2 contract still open (runtime
+  `OPEN_ITEMS.md` C57). See OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢
   implementation shipped).
 - `AI_Assembly_Runtime_Lifecycle.md` — what happens during an Athens
   night, end to end (v1, 2026-05-02). Stage-by-stage anatomy (trigger,

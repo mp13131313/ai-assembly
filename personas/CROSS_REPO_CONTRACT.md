@@ -141,7 +141,7 @@ If the Voice Pipeline few-shots from `smoke_test_chains`:
   the deployment context as it stood at build time, not the actual
   morning's session content
 
-The persona card is the contract. Trust it. The 35 fields — constitution,
+The persona card is the contract. Trust it. The 36 fields — constitution,
 reasoning_method, characteristic_moves, concept_lexicon, banned_language,
 banned_modes, etc. — are what tells the model how to behave. Few-shot
 examples are a hack used when system prompts aren't strong enough; a

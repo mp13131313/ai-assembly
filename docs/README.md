@@ -2,23 +2,25 @@
 
 > **Read this first.** Not all files here are current. This index tells you which to trust.
 
-## Current (authoritative as of 2026-06-01, post-Athens)
+## Current specs — which to trust
 
-| File | Status | Notes |
-|------|--------|-------|
-| `AI_Assembly_Briefing_v3_1.md` | **Current** | Project source of truth. Supersedes Briefing v2 (deleted). Adds prosumer/infrastructure second-order provotype condition. |
-| `AI_Assembly_Persona_Card_v2.md` | **Current** (v2 schema; v2.1 amendments 2026-04-27) | 35-generated + 2-continuity-null + metadata-block schema. v2.1 amendments section near top covers FU#41 chat artifact, FU#49 universal patterns, Boddice tag preservation, Position B vs C, updated `metadata` block. |
-| `AI_Assembly_Persona_Pipeline_v4.md` | **Current** (2026-04-27) | Persona build pipeline v4 — what shipped. Replaces v3.10. Reflects arch-03 chunked merge (Pass 1.1–1.7), Phase B per-voice layout, Tier 3 separation, Pass 6.5-clean (FU#33 P1), FU#2 chunked Pass 7-pre, FU#13 linear patcher, FU#41 chat artifact, FU#49 universal patterns. v4 prompt-architecture extensions (2026-05-04 sacred-grammar-deployment-limit + 2026-05-05 transmission-witness register-overrides) tracked in `_workspace/planning/voices/OPEN_ITEMS.md` §24 + §28. |
-| `AI_Assembly_Researcher_Pipeline.md` | **Current** | Researcher extraction and grouping (v3). Validated on dev_msc_test + ran in all three Athens nights. |
-| `AI_Assembly_Provocateur_Pipeline.md` | **Current** | Triage, selection, formulation, packaging (v2). Validated on dev_msc_test + ran in all three Athens nights. Deployment-context block (`cbcdf82`) landed pre-Athens. |
-| `AI_Assembly_Transcription_Pipeline.md` | **Current** with caveat | v2.1. Audio flow current. The reflection-handling §7 is **stale** — reflections come in as vendor JSON, not audio; use `runtime/scripts/reflections_to_session_package.py` (v2.2 changelog notes this). |
-| `AI_Assembly_Voice_Pipeline.md` | **Current** (v2.1 2026-05-01) | Steps 1+2+3 + validation + continuity end-to-end. Field-routing matrix for all 36 generated card fields. Step 3 SKIPPED for Athens per OPEN_ITEMS A1 (Option A); module preserved for post-Athens re-add. **Voice-stage deployment_context retired as superseded 2026-06-01** — see `_workspace/planning/runtime/DESIGN_voice_deployment_context.md`. **Ran in all three Athens nights.** |
-| `AI_Assembly_Editor_Pipeline.md` | **Current** (v2.1 with deployment_context override) | Tim Leberecht as 13th Assembly member. Dossier-by-theme architecture. Marathon-distance issue numbering. Shipped 2026-05-03 PM (commit `fc5c2fb`); deployment_context override mechanism added 2026-05-07. **Composed 13 dossiers across Athens Nights 1–3.** |
-| `AI_Assembly_Runtime_Lifecycle.md` | **Current** (v1 2026-05-02) | What happens during an Athens night, end to end. Stage-by-stage anatomy (trigger, reads, writes, sentinel), full filesystem layout, cross-night threading, failure modes, manual intervention. Authoritative operational picture. |
-| `AI_Assembly_Infrastructure.md` | **Current** (v1 draft 2026-05-02) | Athens 2026 deployment spec. Three reasons for VM (ingest + safety + operator-detachment); three systemd units; Hetzner CX22 + Ubuntu 24.04; PROJECT_ROOT = clone of athens-2026 private repo. Supersedes archived `Infrastructure_Setup.md`. **VM not actually provisioned for Athens 2026 — operator ran from laptop.** |
-| `AI_Assembly_Frame_Concept_v1.md` | **Current** (with caveat) | Frame layer (broadsheet / microsite / Substack / closing show). Voice Pipeline produces artifacts that the frame layer wraps. Strip rule needs to be voice-register-conditional per FU#61 finding — see `_workspace/planning/runtime/OPEN_ITEMS.md`. |
-| `AUDIENCE_BRIEF.md` | **Current** (refreshed 2026-04-26 for athens-2026 deployment) | Audience characterization + contributors-vs-audience distinction. |
-| `LLM_CALL_INVENTORY.md` | **Current** (generated from code 2026-09-28) | Every LLM call site in both pipelines with its parameters and its `model_routing.json` step key. Which model runs which step lives in `../model_routing.json`, not here. Generated doc: regenerate when calls change (`_workspace/planning/WAYS_OF_WORKING.md` §6). |
+**Last full check against code: 2026-09-28** (staleness sweep, `_workspace/planning/doc_infrastructure_backlog.md`). Re-check monthly or after any large batch of changes (`_workspace/planning/WAYS_OF_WORKING.md` §8). **Which model runs which step is never a spec's job:** it lives in `../model_routing.json`.
+
+| File | Status | Last checked vs code | Notes |
+|------|--------|---------------------|-------|
+| `AI_Assembly_Briefing_v3_1.md` | **Current** | 2026-09-28 | Project source of truth (target state). |
+| `AI_Assembly_Persona_Card_v2.md` | **Current** | 2026-09-28 | v2 schema + v2.1 amendments. 36 generated + 2 continuity + metadata (see `personas/CROSS_REPO_CONTRACT.md`). §H family of forms: BUILD decided, not built yet (FU#55). |
+| `AI_Assembly_Persona_Pipeline_v4.md` | **Current** with caveat | 2026-09-28 | Persona build pipeline v4. **Caveat:** the manual Deep Research step's model guidance (Opus 4.6 for §1–§5) is under review; see voices OPEN_ITEMS §36. |
+| `AI_Assembly_Researcher_Pipeline.md` | **Current** | 2026-09-28 | Extraction and grouping (v3); ran all three Athens nights. |
+| `AI_Assembly_Provocateur_Pipeline.md` | **Current** | 2026-09-28 | Triage, selection, formulation, packaging (v2); ran all three Athens nights. |
+| `AI_Assembly_Transcription_Pipeline.md` | **Current** with caveat | 2026-09-28 | v2.1, audio flow, including the C49 speaker-ID auto-passthrough. **Caveat:** the reflection-handling §7 is stale. Reflections arrive as vendor JSON; use `runtime/scripts/reflections_to_session_package.py`. |
+| `AI_Assembly_Voice_Pipeline.md` | **Current** with caveat | 2026-09-28 | Steps 1–3, validation, continuity; Step-1 validation off by default (C28), Step-2 validator is the operator gate. **Caveats:** the cost and wall-time tables still assume Step-1 validation on, and the Step-2 validator has no section of its own (backlog rows #19–#20). |
+| `AI_Assembly_Editor_Pipeline.md` | **Current** with caveat | 2026-09-28 | Tim Leberecht as editor; dossier-by-theme; the shared dossier index and its merge rule. **Caveat:** later sections (dossier shape, output schema, constraints) still name Claudia Pinchbeck, and one word count contradicts itself (backlog rows #21–#22). |
+| `AI_Assembly_Runtime_Lifecycle.md` | **Current** | 2026-09-28 | What happens during a night, end to end. |
+| `AI_Assembly_Infrastructure.md` | **Current** (v1 draft) | 2026-09-28 | Deployment spec. The VM was never provisioned for Athens; the operator ran from a laptop. |
+| `AI_Assembly_Frame_Concept_v1.md` | Not re-checked | 2026-06-01 | Frame layer (broadsheet / microsite / Substack / closing show). The strip rule needs to be voice-register-conditional (FU#61). |
+| `AUDIENCE_BRIEF.md` | **Current** | 2026-09-28 | Audience characterization. |
+| `LLM_CALL_INVENTORY.md` | **Current** (generated from code 2026-09-28) | 2026-09-28 | Every LLM call site in both pipelines with its parameters and its `model_routing.json` step key. Generated doc: regenerate when calls change (`WAYS_OF_WORKING.md` §6). |
 
 ## Archived / stale
 

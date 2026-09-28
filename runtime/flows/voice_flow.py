@@ -713,7 +713,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument(
         "--skip-step3",
         action="store_true",
-        help="Run Steps 1+2 only. DEV USE ONLY — Step 3 is load-bearing for Athens.",
+        help="Run Steps 1+2 only (how Athens production ran — A1 decision 2026-05-01).",
     )
     p.add_argument("--skip-continuity", action="store_true")
     p.add_argument(

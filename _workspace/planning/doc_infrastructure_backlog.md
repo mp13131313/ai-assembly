@@ -338,24 +338,29 @@ First run of the WAYS_OF_WORKING §8 sweep, after the Phase 0 work landed withou
 
 | # | Doc · where | Problem | Fix | Sev. |
 |---|---|---|---|---|
-| 1 | `docs/AI_Assembly_Editor_Pipeline.md` L65, 90, 201, 243–301, 526, 547, 896 | Editor described as Claudia Pinchbeck, card path `editor/claudia_pinchbeck/` — it is Tim Leberecht (`tim_leberecht/`, `b266f51`) | Rewrite identity section + paths; Claudia only as a historical note | WRONG |
-| 2 | same, L617–618 | Code sample `"the voice of " + council_member` — the exact C53 bug | Show the council_config lookup ("the " + "Voice of X") | WRONG |
-| 3 | same, L135, 931–933 | "No editor pipeline-side index file is maintained" | Document the shared dossier index + the merge rule (C46, PLAN 0.1.2) | WRONG |
-| 4 | `CLAUDE.md` L12 (+ L301, 317) | "no work in flight"; editor = Claudia; "Claudia's card pending" | Status one-liner → point at STATE.md; Tim | WRONG |
-| 5 | `docs/AI_Assembly_Voice_Pipeline.md` L69, 575–585, 1183–1192 | Step-1 validation "Night 1 ON", opt-out `--skip-validation` — code is default OFF, opt-in `--enable-step1-validation` (C28) | Rewrite policy + CLI subsection | WRONG |
-| 6 | `docs/AI_Assembly_Runtime_Lifecycle.md` L134–149, 142, 245–246 | Stage 6 editor "specified, not built"; Claudia card path | Editor built + ran all 3 nights; Tim path | WRONG |
+| 1 ✅ 2026-09-28 | `docs/AI_Assembly_Editor_Pipeline.md` L65, 90, 201, 243–301, 526, 547, 896 | Editor described as Claudia Pinchbeck, card path `editor/claudia_pinchbeck/` — it is Tim Leberecht (`tim_leberecht/`, `b266f51`) | Rewrite identity section + paths; Claudia only as a historical note | WRONG |
+| 2 ✅ 2026-09-28 | same, L617–618 | Code sample `"the voice of " + council_member` — the exact C53 bug | Show the council_config lookup ("the " + "Voice of X") | WRONG |
+| 3 ✅ 2026-09-28 | same, L135, 931–933 | "No editor pipeline-side index file is maintained" | Document the shared dossier index + the merge rule (C46, PLAN 0.1.2) | WRONG |
+| 4 ✅ 2026-09-28 | `CLAUDE.md` L12 (+ L301, 317) | "no work in flight"; editor = Claudia; "Claudia's card pending" | Status one-liner → point at STATE.md; Tim | WRONG |
+| 5 ✅ 2026-09-28 | `docs/AI_Assembly_Voice_Pipeline.md` L69, 575–585, 1183–1192 | Step-1 validation "Night 1 ON", opt-out `--skip-validation` — code is default OFF, opt-in `--enable-step1-validation` (C28) | Rewrite policy + CLI subsection | WRONG |
+| 6 ✅ 2026-09-28 | `docs/AI_Assembly_Runtime_Lifecycle.md` L134–149, 142, 245–246 | Stage 6 editor "specified, not built"; Claudia card path | Editor built + ran all 3 nights; Tim path | WRONG |
 | 7 ✅ 2026-09-28 (with C63) | `docs/AI_Assembly_Researcher_Pipeline.md` L624, 636 | Default model "claude-sonnet-4-6"; `CLUSTERING_MAX_TOKENS=40000` | Opus 4.7 default (now: `model_routing.json`); 64000 since 2026-05-08 | WRONG |
-| 8 | `docs/AI_Assembly_Provocateur_Pipeline.md` L53, 156 | "12 parallel calls, one per council member" | 10 (dev_msc_test mentions of 12 are historical — keep) | WRONG |
-| 9 | `README.md` (root) L127 | "both repos clean + pushed" | Point at STATE.md's branch section | WRONG |
-| 10 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L20, 195 | Opus 4.6 for DR §1–§5 (banned per ONBOARDING DON'T) — already tracked §II.1 above | Resolve §II.1 | WRONG (known) |
-| 11 | `docs/AI_Assembly_Transcription_Pipeline.md` Step 3 | C49 decode-failure auto-passthrough + `speaker_id_auto_passthrough` flag not documented | Add a failure-mode subsection | STALE (gap) |
-| 12 | `docs/README.md` L5 + table | "authoritative as of 2026-06-01", Editor/Lifecycle/etc. rated "Current" | Re-rate per this table; add a "last verified" column (WAYS_OF_WORKING §3.3) | STALE |
-| 13 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L356 | 7pre_citation prompts "eligible for deletion" | Deleted 2026-09-27 (`a10e08a`) | STALE |
-| 14 | `docs/AI_Assembly_Persona_Card_v2.md` §H L106–120 | Family of forms "aspirational" | BUILD (FU#55) + gate-exempt (2026-09-28) | STALE |
-| 15 | `CLAUDE.md` cross-repo handoff | "35 generated + 2 continuity" | 36 per CROSS_REPO_CONTRACT (+ `voice_temporal_stance`) | STALE |
-| 16 | `_workspace/planning/runtime/ONBOARDING.md` branch section | "all work on main" | Label historical / point at STATE.md | STALE |
-| 17 | vatican SPEC §8 table row | "✅ 3-tier per-voice temperature" | Mark infeasible on Anthropic models (§5 already corrected) | STALE |
-| 18 | Editor Pipeline §card assembly L874–883 | Doesn't mention the corpus_metadata strip (C56) | One line | STALE |
+| 8 ✅ 2026-09-28 | `docs/AI_Assembly_Provocateur_Pipeline.md` L53, 156 | "12 parallel calls, one per council member" | 10 (dev_msc_test mentions of 12 are historical — keep) | WRONG |
+| 9 ✅ 2026-09-28 | `README.md` (root) L127 | "both repos clean + pushed" | Point at STATE.md's branch section | WRONG |
+| 10 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L20, 195 | Opus 4.6 for DR §1–§5 (banned per ONBOARDING DON'T) — already tracked §II.1 above | Resolve §II.1 → **folded into voices OPEN_ITEMS §36** (2026-09-28: automate the DR step; model choice moves into `model_routing.json`) | WRONG (known) |
+| 11 ✅ 2026-09-28 | `docs/AI_Assembly_Transcription_Pipeline.md` Step 3 | C49 decode-failure auto-passthrough + `speaker_id_auto_passthrough` flag not documented | Add a failure-mode subsection | STALE (gap) |
+| 12 ✅ 2026-09-28 | `docs/README.md` L5 + table | "authoritative as of 2026-06-01", Editor/Lifecycle/etc. rated "Current" | Re-rate per this table; add a "last verified" column (WAYS_OF_WORKING §3.3) | STALE |
+| 13 ✅ 2026-09-28 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L356 | 7pre_citation prompts "eligible for deletion" | Deleted 2026-09-27 (`a10e08a`) | STALE |
+| 14 ✅ 2026-09-28 | `docs/AI_Assembly_Persona_Card_v2.md` §H L106–120 | Family of forms "aspirational" | BUILD (FU#55) + gate-exempt (2026-09-28) | STALE |
+| 15 ✅ 2026-09-28 | `CLAUDE.md` cross-repo handoff | "35 generated + 2 continuity" | 36 per CROSS_REPO_CONTRACT (+ `voice_temporal_stance`) | STALE |
+| 16 ✅ 2026-09-28 | `_workspace/planning/runtime/ONBOARDING.md` branch section | "all work on main" | Label historical / point at STATE.md | STALE |
+| 17 ✅ 2026-09-28 | vatican SPEC §8 table row | "✅ 3-tier per-voice temperature" | Mark infeasible on Anthropic models (§5 already corrected) | STALE |
+| 18 ✅ 2026-09-28 | Editor Pipeline §card assembly L874–883 | Doesn't mention the corpus_metadata strip (C56) | One line | STALE |
 | — ✅ 2026-09-28 | model config (C63) | Not mentioned in CLAUDE.md, README, runtime/README, docs/README, LLM_CALL_INVENTORY | Pointers added in CLAUDE.md, README, docs/README; inventory regenerated; specs point at the file (runtime/README had no model statements) | gap |
+| 19 | `docs/AI_Assembly_Voice_Pipeline.md` cost + wall-time tables (~L68, 92, 342, 1256–1280) | Figures assume Step-1 validation ON (e.g. "Night 1 ~$20-40 (validation ON)"); it has been OFF since C28 | Recompute from the Athens run manifests | STALE |
+| 20 | same | No section of its own for the Step-2 validator (C28b), which is the operator gate | Add a subsection (pillars, halt-on-flag, clearing, `--skip-step2-validation`) from `voice/step2_validation.py` | gap |
+| 21 | `docs/AI_Assembly_Editor_Pipeline.md` Dossier Shape, Output Schema, Constraints #5–7, Validation Notes, Open Questions, See Also | ~38 mentions still name Claudia as current (byline "By Claudia Pinchbeck", "— C.P.", "Claudia emits…", dead link to `CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md`). Some describe voice character that must be checked against Tim's card (athens-2026) | Check against Tim's card + published dossiers; rename or mark historical | WRONG |
+| 22 | same, Page 2 table | "~750-word piece" contradicts the spec's own 350–500 / 500–700 word constraint | Check `editor_dossier.md` + published dossiers; fix | STALE |
+| 23 | `docs/AI_Assembly_Runtime_Lifecycle.md` §1 + §8 | Editor wall time "~30 min" vs the Editor spec's "~5–10 min per night" | Check the Athens run manifests | STALE? |
 
 HISTORICAL (leave): athens-2026 `EDITORIAL_ASSESSMENT.md` (self-dated 2026-05-29); runtime ONBOARDING pre-Athens dryrun history. Checked current: Briefing v3.1, Infrastructure, AUDIENCE_BRIEF, runtime/ + personas/ READMEs, CROSS_REPO_CONTRACT, planning + voices ONBOARDING, conventions. Possibly no doc action: C54 (internal dispatch logic).

@@ -1359,3 +1359,21 @@ Each lands one-at-a-time with the sentinel-regen + thinking-on gate, like all Ph
 Every persona pass (0a → Derive, incl. the three cross-vendor validator ladders and the 7c fallback) is an entry in `code/model_routing.json`; `personas/flows/shared/model_routing.py` is the byte-identical twin of the runtime loader. Voice-side consequence: switching a voice-writing pass's model changes the cards it generates, so any switch goes through the sentinel-regen gate (same discipline as Stage 4 / §32.4). Also makes `call_claude` model-aware about `temperature`, so a later move to Sonnet 5 can't break Pass 7-pre (C62).
 
 **Done 2026-09-28:** persona call sites converted (`f818767`). The validator ladders (7-anachronism, 7a, 7a FINAL) now route each rung by vendor through one `clients.call_validator_ladder` (`f5de9db`); the loader refuses a Claude rung. `docs/AI_Assembly_Persona_Pipeline_v4.md` points at `model_routing.json` per pass. No voice was regenerated and no model changed. The sentinel-regen discipline above applies to the first real model switch.
+
+## 36. Deep Research step: model into the chooser now; automation later 🟢 IN PROGRESS (raised + decided 2026-09-28)
+
+**Operator decision 2026-09-28:** keep claude.ai Deep Research (*"i definitely want the dr feature"*). The API has web search and fetch tools but not claude.ai's Research feature itself, so the step stays manual for now. Automation is filed for later exploration (options below, unchanged). **Now:** the DR model goes into `model_routing.json` as manual steps (`personas.dr_sections_1_5`, `personas.dr_section_6`). The DR prompt preambles render the model name from the file, and the Pass 0a review doc points at those preambles instead of naming models. Defaults keep what the prompts said (Opus 4.6 for §1–§5, Opus 4.7 for §6); changing them is a one-line edit.
+
+**Why.** It is the last manual step in a voice build: six claude.ai Research sessions per voice (20–40 min each), pasting prompts and saving files by hand. It is also the only model choice that lives outside `model_routing.json`. Doc-audit row #10 / backlog §II.1 is the symptom: the prompts say Opus 4.6 for §1–§5 and 4.7 for §6, while voices ONBOARDING says 4.7 for all six. The operator asked (2026-09-28) whether it belongs in the model chooser, and how much of it can be automated now.
+
+**Interface.** The pipeline needs only six files, `voices/<slug>/01_research/04_dr_dossier/0N_section_N.md`, each passing `personas/scripts/validate_dr_dossier.py` (`chunk_runner.detect_dr_mode`). Whatever writes those files, the rest of the build is unchanged.
+
+**Options:**
+- **(a) API research step.** Messages API with the web search and web fetch server tools (`web_search_20260209` / `web_fetch_20260209`, dynamic filtering) on Opus with adaptive thinking. A new pass writes the six files. It becomes routed steps in `model_routing.json`, so the Models page shows it, and it runs unattended, logged and costed. Unknown: quality against claude.ai Research, which ran 538–1046 sources per voice. The Phase B/L model findings were made on claude.ai.
+- **(b) Managed Agents.** A hosted agent loop plus sandbox; an outcomes grader could use the DR validator as its rubric. More platform than a first trial needs.
+- **(c) Claude in Chrome driving claude.ai.** Keeps the exact validated surface. But it needs the operator's logged-in browser open for about 2–4 hours per voice, breaks when the UI changes, can't run unattended overnight, and leaves no manifest record. claude.ai's terms on automated use would need checking first.
+
+**Recommendation** *(inference; the operator decides)*: trial (a) on one section of one already-built voice, and compare it with that voice's existing claude.ai dossier and the validator. Keep the manual path as fallback; the pipeline already accepts files from either. The trial needs a spend cap.
+
+**Either way,** the DR model choice moves into `model_routing.json`. If automated, it becomes real steps. If it stays manual, the Pass 0a/0b prompts render the model name from the file. This resolves backlog §II.1 / audit row #10.
+

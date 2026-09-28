@@ -205,7 +205,7 @@ This satisfies Maryanskyy's diversity-preservation prescription end-to-end.
 | 1. Heterogeneous base models | ✅ 5 vendors |
 | 2. Parametric persona injection | ⚠️ Prompt-based only — not addressing this in v1 (deferred) |
 | 3. Different lenses/mental models per persona | ✅ 10 voices' existing card differentiation |
-| 4. Different temperatures per persona | ✅ 3-tier per-voice temperature variation |
+| 4. Different temperatures per persona | ✗ infeasible on current Anthropic models — Opus 4.7+, Opus 5.x, and Sonnet 5 reject `temperature` outright, so the 3-tier table only ever applies to the non-Anthropic half of the roster (see §5 correction, 2026-09-27) |
 | 5. Different information feeders per persona | ✅ Per-card `curated_corpus_passages` |
 | 6. Selection-based aggregation, not synthesis | ✅ Annotations published as-is; no synthesis layer |
 | 7. Avoiding correlated priors | ✅ Voices' priors are uncorrelated by construction |

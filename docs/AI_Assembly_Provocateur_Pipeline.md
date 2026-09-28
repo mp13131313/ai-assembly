@@ -50,9 +50,9 @@ The Provocateur is the strategic, editorial agent in the pipeline. Unlike the Re
 
 The Provocateur works in **five stages** — three parallel LLM tasks and two deterministic Python tasks:
 
-1. **Stage 1A — Triage Part A (per-voice ranking):** 12 parallel LLM calls, one per council member. The Provocateur reads ALL themes through ONE voice's profile and ranks where that voice has distinctive ground to contribute. Reasoning ABOUT the voice using profile data — not speaking AS them. Each voice's result writes an incremental checkpoint to disk.
+1. **Stage 1A — Triage Part A (per-voice ranking):** one parallel LLM call per council member (10 at Athens). The Provocateur reads ALL themes through ONE voice's profile and ranks where that voice has distinctive ground to contribute. Reasoning ABOUT the voice using profile data — not speaking AS them. Each voice's result writes an incremental checkpoint to disk.
 
-2. **Stage 1B — Triage Part B (theme editorial flags):** 1 LLM call in parallel with the 12 Part A calls. Tags each theme with three editorial signals: `worth_surfacing` (boolean veto), `audience_friction` (low/moderate/high), and `fault_line_present` (boolean) + `fault_line_description`. Cross-theme editorial judgment that needs the whole set at once.
+2. **Stage 1B — Triage Part B (theme editorial flags):** 1 LLM call in parallel with the Part A calls. Tags each theme with three editorial signals: `worth_surfacing` (boolean veto), `audience_friction` (low/moderate/high), and `fault_line_present` (boolean) + `fault_line_description`. Cross-theme editorial judgment that needs the whole set at once.
 
 3. **Stage 2 — Selection (pure Python, no LLM):** Deterministic nine-step algorithm. Drops vetoed themes, scores per voice, computes theme quality with friction + fault-line multipliers, builds per-voice candidate lists capped at hard_cap, enforces quorum via cascade, force-fits the minimum, optional stretch swap. Emits per-voice assignments. Always re-runs; not cached.
 
@@ -153,13 +153,13 @@ Tests: `runtime/tests/test_provocateur_selection.py` covers the filter end-to-en
 
 **Input:** All themes from the Researcher (titles and abstracts at theme level; cluster titles and abstracts within each theme — no raw extractions at this stage). The profile of ONE council member. The collective landscape and audience paragraph.
 
-**Runs:** 12 parallel LLM calls, one per council member. The Provocateur reads ALL themes through this one voice's profile.
+**Runs:** one parallel LLM call per council member (10 at Athens). The Provocateur reads ALL themes through this one voice's profile.
 
 **What it produces:** A ranked list of themes for this voice. Each ranked theme carries an `activation` label (`strong` or `moderate`), a boolean `is_stretch` flag (true if this theme lands in the voice's `stretch` field rather than `activates_on`), and a one-sentence `reason`. Themes where the voice would go flat or couldn't reach go into a separate `flat_themes` list with a one-sentence reason each, so the model's full judgment is preserved for Selection even though only ranked themes participate in scoring.
 
 **Why split from Triage Part B.** Reasoning about one voice requires holding that voice's specific profile in mind while scanning the day's themes — a pattern-match between `activates_on`/`goes_flat_on`/`stretch` and theme abstracts. Adding cross-theme editorial judgment (is this theme worth surfacing to the audience at all? does it open a fault line in the council?) pulls the model away from per-voice thinking into a different mode. The v1 combined-Triage prompt tried both at once and produced shallow activation tags + shallow editorial flags. Separating the tasks lets each prompt do one thing well.
 
-**Why parallel.** The 12 per-voice calls are fully independent — each reads the same themes but through a different voice's profile. Parallel submission brings wall time for Triage down to roughly one call's duration (60–120s on Opus + adaptive thinking) rather than 12× that.
+**Why parallel.** The per-voice calls are fully independent — each reads the same themes but through a different voice's profile. Parallel submission brings wall time for Triage down to roughly one call's duration (60–120s on Opus + adaptive thinking) rather than N× that (10× at Athens).
 
 **Output per voice:**
 ```json
@@ -183,7 +183,7 @@ Tests: `runtime/tests/test_provocateur_selection.py` covers the filter end-to-en
 
 **Input:** All themes from the Researcher (titles, abstracts, cluster titles and abstracts). The collective landscape and audience paragraph. Does NOT receive voice profiles.
 
-**Runs:** 1 LLM call, in parallel with the 12 Part A calls.
+**Runs:** 1 LLM call, in parallel with the Part A calls.
 
 **What it produces:** Three editorial signals per theme, spanning the whole set at once.
 
@@ -218,7 +218,7 @@ Tests: `runtime/tests/test_provocateur_selection.py` covers the filter end-to-en
 
 ## Stage 2: Selection — Deterministic Python Algorithm
 
-**Input:** All 12 per-voice triage results (`triage_voices/*.json`), the Triage Part B flags (`triage_flags.json`), the Researcher's `grouping.json` (for theme lookup), and `council_config.json` (for `selection_parameters` and member list).
+**Input:** All per-voice triage results (one per council member, 10 at Athens; `triage_voices/*.json`), the Triage Part B flags (`triage_flags.json`), the Researcher's `grouping.json` (for theme lookup), and `council_config.json` (for `selection_parameters` and member list).
 
 **Runs:** Pure Python, no LLM call. Always recomputed on every pipeline run — never cached, instant to re-run. Caching Selection would silently produce stale assignments when someone edits `selection_parameters` between runs.
 
@@ -429,7 +429,7 @@ A voice with the full picture might notice positions the curated quotes left out
 
 **The voice's own profile.** The Voice Pipeline agent IS the persona — it is loaded with its full v3.10 Persona Card as its system prompt. Re-shipping profile fragments in the briefing would be redundant and risks drift between what the Voice Pipeline loads and what the Provocateur describes.
 
-**`council_config_version`.** Lives in the run's `manifest.json`, not duplicated 12× across briefings.
+**`council_config_version`.** Lives in the run's `manifest.json`, not duplicated once per voice across briefings (10× at Athens).
 
 **`formulations_count`.** Derive from `len(formulations)`.
 

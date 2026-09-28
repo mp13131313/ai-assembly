@@ -245,8 +245,9 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
-Next: the doc-audit fixes (`doc_infrastructure_backlog.md` § 2026-09-28;
-operator picks) → Stage 4 (persona-pipeline catch-up on the
+Next: DR model into `model_routing.json` (voices §36, in progress) →
+the remaining doc-audit rows #19–#23 (`doc_infrastructure_backlog.md`)
+→ Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.

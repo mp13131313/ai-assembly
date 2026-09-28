@@ -82,12 +82,12 @@ Each dossier is the publishable unit on the microsite. It has a fixed five-secti
 
 ```
 Page 1   THE FRONT     masthead + lead headline & teaser + In Brief + editor's note
-Page 2   THE ARTICLE   Claudia's ~750-word piece on what the night produced on this theme
+Page 2   THE ARTICLE   Tim's ~750-word piece on what the night produced on this theme
 Page 3   THE THEME     theme statement + per-voice abstract (~80-100 words/voice)
 Page 4-N THE ARTIFACTS each contributing voice's piece, with editor's headnote (3-5 sentences)
 ```
 
-The editor — Claudia Pinchbeck — writes pages 1, 2, 3, and the headnotes on 4-N. The artifact bodies on 4-N are voice pipeline Step 2 outputs (`artifact_text`), rendered in voice-faithful visual treatments (chancery for Cleopatra's prostagma; Diary entry for Dostoevsky; etc.) by the microsite template layer. Claudia's text is in the paper's voice; the artifact bodies are in the voices' voices. The seam is honest.
+The editor — Tim Leberecht — writes pages 1, 2, 3, and the headnotes on 4-N. The artifact bodies on 4-N are voice pipeline Step 2 outputs (`artifact_text`), rendered in voice-faithful visual treatments (chancery for Cleopatra's prostagma; Diary entry for Dostoevsky; etc.) by the microsite template layer. Tim's text is in the paper's voice; the artifact bodies are in the voices' voices. The seam is honest.
 
 A typical Athens night produces 3-5 dossiers, depending on how many themes the night's voices converged or partly-converged on. Voices whose Step 2 artifact was a synthesis across multiple themes are routed to whichever theme they fit best; voices whose artifact was focused go to their own theme's dossier. Voices that did not lead any theme's dossier are reported in the "In Brief" column on Page 1 of the dossier most adjacent to their content; refusals (the Whanganui River's silence; the Octopus's not-receiving) are reported as such, not folded under any theme.
 
@@ -114,9 +114,9 @@ The Editor Pipeline runs once per night, after Voice Pipeline completes. On Nigh
                     └── manifest.json
 ```
 
-Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. Dossier numbers are **assigned by the editor** based on the order Claudia chose to publish them within the night (lead theme first); they are scoped per night.
+Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. Dossier numbers are **assigned by the editor** based on the order Tim chose to publish them within the night (lead theme first); they are scoped per night.
 
-**Each voice's Step 2 artifact lands in exactly one dossier — tonight.** No artifact is held for a future night. A voice that synthesized across themes is routed to whichever theme Claudia judges fits best; voices contributing partially to other themes are mentioned in those dossiers' In Brief column with a pointer to where their full piece lives. This keeps the night's editorial production self-contained: every artifact published this night, every theme finding its dossier or its In Brief slot, no debt carried forward.
+**Each voice's Step 2 artifact lands in exactly one dossier — tonight.** No artifact is held for a future night. A voice that synthesized across themes is routed to whichever theme Tim judges fits best; voices contributing partially to other themes are mentioned in those dossiers' In Brief column with a pointer to where their full piece lives. This keeps the night's editorial production self-contained: every artifact published this night, every theme finding its dossier or its In Brief slot, no debt carried forward.
 
 **Cross-night state at PROJECT_ROOT:**
 
@@ -132,7 +132,7 @@ Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. 
                     └── ...
 ```
 
-Per-night subdirectory matches the existing publish_flow convention (`themes/night_<N>/`, `nights/night_<N>/`). No separate counter file; no separate index file. Issue numbers are derived deterministically from a fixed Athens base + night number; dossier index can be built at microsite-consume time by walking the directory.
+Per-night subdirectory matches the existing publish_flow convention (`themes/night_<N>/`, `nights/night_<N>/`). No separate counter file. Issue numbers are derived deterministically from a fixed Athens base + night number. A per-night dossier index (`night_<N>/_index.json`) and a cross-night root index (`_index.json`) are maintained by the pipeline — see §"Outputs" → "Dossier index" below for the two-writer contract.
 
 **Issue numbering.** Athens base issue = **42,192**. Night 1 publishes Issue **No. 42,193**; Night 2 = **No. 42,194**; Night 3 = **No. 42,195**. Night 3's issue number is the marathon distance in metres — the Athens-to-Athens joke the masthead carries quietly. Volume number is **Vol. CXVI** (the paper's confected first issue is 1910; 2026 - 1910 = 116 years of publication). Dossier numbers are per-issue — Issue 42,193 / Dossier No. 1, 2, 3. A dossier's full masthead citation: *Vol. CXVI . No. 42,193 . Dossier No. 1*.
 
@@ -148,7 +148,7 @@ Per-night subdirectory matches the existing publish_flow convention (`themes/nig
 
 | File | Content used | Used for |
 |---|---|---|
-| `step2_first_draft_artifacts/<voice_slug>.json` | `lineage.voice_slug`, `lineage.themes_covered`, `council_member`, `focus_decision`, `artifact_text` | Stage 1 theme routing reads `focus_decision` + `themes_covered`; Stage 2 passes `artifact_text` + `voice_name` (= "the voice of " + `council_member`) to Claudia |
+| `step2_first_draft_artifacts/<voice_slug>.json` | `lineage.voice_slug`, `lineage.themes_covered`, `council_member`, `focus_decision`, `artifact_text` | Stage 1 theme routing reads `focus_decision` + `themes_covered`; Stage 2 passes `artifact_text` + `voice_name` to Tim. `voice_name` is resolved from `council_config.json` by slug (`flows/shared/io.py::voice_display_name`), NOT built from the artifact's own `council_member` field — that field is the voice's long card identity-prefix opening line (e.g. "I am Augusta Ada King, Countess of Lovelace…"); using it directly corrupted published headnotes (C53). |
 | ~~`step1_detailed_responses/`~~ | NOT READ | Editor does not consume Step 1; voice's reasoning trace stays voice-private |
 | ~~`themes_to_voices_night_<N>.json`~~ | NOT READ in v2 | Stage 1 routing computes its own per-theme voice list from each voice's `focus_decision`; the file is informational only |
 | ~~`manifest.json`~~ | NOT READ for content | Orchestrator uses it as the gate sentinel; editor itself doesn't consume |
@@ -163,22 +163,22 @@ Per-night subdirectory matches the existing publish_flow convention (`themes/nig
 
 | File | Content used | Used for |
 |---|---|---|
-| `editor/claudia_pinchbeck/07_persona_card_assembled.json` | Claudia's full persona card | System prompt assembly (cached across the night's per-dossier calls) |
+| `editor/tim_leberecht/07_persona_card_assembled.json` | Tim's full persona card | System prompt assembly (cached across the night's per-dossier calls) |
 
 ### Cross-night inputs (Night 2/3 only)
 
 | File | Content used | Used for |
 |---|---|---|
-| `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N-1>/dossier_*.json` | prior night's published dossiers | Per-call `prior_editions` user-prompt input — cross-night voice consistency (Claudia's register), evolving editorial line, avoiding repetition |
+| `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N-1>/dossier_*.json` | prior night's published dossiers | Per-call `prior_editions` user-prompt input — cross-night voice consistency (Tim's register), evolving editorial line, avoiding repetition |
 
-Issue number is derived deterministically: `ATHENS_BASE_ISSUE + night_number` (base = 42,192; Night 1 → 42,193; Night 3 → 42,195 = the marathon distance in metres). No separate counter file. Dossier index, if needed by the microsite, is built at consume-time by walking `published_artifacts/dossiers/`.
+Issue number is derived deterministically: `ATHENS_BASE_ISSUE + night_number` (base = 42,192; Night 1 → 42,193; Night 3 → 42,195 = the marathon distance in metres). No separate counter file. Dossier index files (per-night + root) are written by the pipeline itself — see §"Outputs" → "Dossier index" below.
 
 ### What the Editor Pipeline does NOT have access to
 
 - **Voice Pipeline Step 1 detailed responses.** Voice's analytical reasoning stays voice-private (honors each voice's `relationship_to_detailed_response` strip mandate).
 - **Voice Pipeline validation files.** Internal pipeline state.
 - **Researcher's `grouping.json` / `all_extractions.json` directly.** Provocateur briefings already carry the full theme record (title + abstract + clusters with extractions) — no separate read.
-- **Voice cards.** Per-voice register torques live in Claudia's `translation_protocol`; the artifact itself displays the voice's register in operation. v2 dropped the `voice_card_excerpts` slice.
+- **Voice cards.** Per-voice register torques live in Tim's `translation_protocol`; the artifact itself displays the voice's register in operation. v2 dropped the `voice_card_excerpts` slice.
 - **Reference data** (`sessions.json`, `speakers.json`). The Provocateur's `narrative_briefing` already carries the editorial framing the panel produced; the editor does not separately reach for panel metadata.
 - **The night's audio files.** Transcription Pipeline has consumed and discarded them.
 - **The closing show's theme-mapping pipeline.** That's a separate cross-night agent; per-night dossiers feed it but the editor does not coordinate with it.
@@ -194,13 +194,13 @@ The Editor Pipeline operates under eight principles that distinguish it from a c
 
 *The Assembly* (the panel) ≡ *The Assembly* (the publication). The publication that publishes the panel's outputs is named after the panel. The editor of *The Assembly* (publication) is reporting on what *The Assembly* (panel) produced. The publication is part of the Assembly's testimony, not external commentary on it.
 
-**Operational consequence:** Claudia's voice is *inside the fiction*. She reports as a member of the publication-side of the Assembly, not as an outside curator. The masthead's confected pedigree (Vol. CXVI . No. 42,193 . *The Assembly*, founded 1910) is part of the construction announcement; the form's constructedness is visible without being explicitly disclaimed.
+**Operational consequence:** Tim's voice is *inside the fiction*. He reports as a member of the publication-side of the Assembly, not as an outside curator. The masthead's confected pedigree (Vol. CXVI . No. 42,193 . *The Assembly*, founded 1910) is part of the construction announcement; the form's constructedness is visible without being explicitly disclaimed.
 
 ### 2. Editor as 13th member of the Assembly
 
-Claudia Pinchbeck has a persona card (35 fields per the Persona Card v2 schema), structurally identical to the panel voices'. Her system prompt is assembled the same way — `card_assembly` logic, foundational + reasoning + voice + artifact field routing, continuity overlay on Night 2/3. She is not a register-target inside a generic editor prompt; she is a fully-specified persona who happens to do editorial work.
+Tim Leberecht has a persona card (35 fields per the Persona Card v2 schema), structurally identical to the panel voices'. His system prompt is assembled the same way — `card_assembly` logic, foundational + reasoning + voice + artifact field routing — except with no continuity overlay: unlike panel voices, the editor's card loads fresh each night (see §"The Editor — Tim Leberecht" → "What the code loads from the card"). He is not a register-target inside a generic editor prompt; he is a fully-specified persona who happens to do editorial work.
 
-**Operational consequence:** Claudia's voice is sustained across dossiers (and across nights) by her card's machinery, not by ad-hoc prompt scaffolding. Cross-dossier drift is bounded by her constitution, banned_modes, and quality_criteria — the same mechanisms that hold panel voices steady across formulations.
+**Operational consequence:** Tim's voice is sustained across dossiers (and across nights) by his card's machinery, not by ad-hoc prompt scaffolding. Cross-dossier drift is bounded by her constitution, banned_modes, and quality_criteria — the same mechanisms that hold panel voices steady across formulations.
 
 ### 3. Dossier-by-theme as unit of publication
 
@@ -216,7 +216,7 @@ Voice artifacts ship as-is. The editor does NOT modify, summarize, paraphrase, o
 
 ### 5. Convergence work happens at the editor layer
 
-Each voice diagnoses in their own framework's vocabulary. Per their `relationship_to_detailed_response` cards, voices STRIP analytical scaffolding from their artifacts — the cross-vocabulary generalization is not the voice's job. The editor names the convergence (or its absence) across vocabularies, in Claudia's vocabulary, with each voice's framework's term pointed at and credited.
+Each voice diagnoses in their own framework's vocabulary. Per their `relationship_to_detailed_response` cards, voices STRIP analytical scaffolding from their artifacts — the cross-vocabulary generalization is not the voice's job. The editor names the convergence (or its absence) across vocabularies, in Tim's vocabulary, with each voice's framework's term pointed at and credited.
 
 **Operational consequence:** the strongest analytical moves are recovered at the editor's layer, not lost. The voice's form-faithful artifact + the editor's analytical-recovery article are the two surfaces the architecture coordinates: voice purity downstream, analytical generalization upstream-of-the-reader.
 
@@ -228,7 +228,7 @@ When voices engaged a theme but did not converge, the dossier does not manufactu
 
 ### 7. One Anthropic call per dossier
 
-A single structured-output Anthropic call per dossier produces all dossier components together: front-page lead + subdeck, In Brief items, editor's note, editor's article, theme statement, per-voice abstracts, per-artifact headnotes, byline contextual descriptors. Single voice register guaranteed across components (Claudia's bastard form holds throughout).
+A single structured-output Anthropic call per dossier produces all dossier components together: front-page lead + subdeck, In Brief items, editor's note, editor's article, theme statement, per-voice abstracts, per-artifact headnotes, byline contextual descriptors. Single voice register guaranteed across components (Tim's register holds consistent throughout).
 
 **Operational consequence:** N dossiers per night = N Anthropic calls. Calls are independent (no inter-call coordination) and parallelizable. Theme routing decisions are made BEFORE the calls fire, so each call sees only its dossier's primary-contributor artifacts plus the In Brief mentions for voices contributing to other themes. Per-call wall ~60-90s; per-night wall ~5-10 min with parallelism.
 
@@ -240,63 +240,26 @@ The Whanganui River's silence is published AS silence. The Octopus's not-receivi
 
 ---
 
-## The Editor — Claudia Pinchbeck
+## The Editor — Tim Leberecht
 
-### Who Claudia is
+### Who edits *The Assembly*
 
-Claudia Pinchbeck is the editor of *The Assembly*'s news organ. She is a fictional 1910s-newsroom editor, working in the present (Athens 2026) with a confected institutional history (the paper has been publishing since 1910; Claudia inherited the editorship from a long line of predecessors). Her voice is the bastard form: institutional editorial position (the paper of record, the masthead's gravity) with personal warmth inside (registering reservations, admitting difficulty, naming surprise). Closest real-world precedent: the *New Yorker* "Comment" page in the 1940s and 1950s — institutional position, but the voice is recognizably a person, willing to be quietly earnest.
+The editor is Tim Leberecht. Until 2026-05-05 this spec named a placeholder editor persona, Claudia Pinchbeck; the editor was switched to Tim Leberecht in `b266f51`.
 
-Her name is a pun on Claude (the language model behind the Assembly's voices, including her own) and Pinchbeck (the 18th-century word for fake gold; an English place name; and the surname that announces, via a self-aware joke, what kind of paper *The Assembly* is — confected, with a fictional pedigree, transparent about its construction).
-
-### Where her card lives
+### Where his card lives
 
 ```
-<PROJECT_ROOT>/editor/claudia_pinchbeck/
-                ├── 00_intake/
-                ├── 01_research/
-                ├── ...                       (Pass 0a–7 build artifacts if persona pipeline is run)
-                ├── 06_derive/
-                │   ├── 01_provocateur_profile.json    (N/A for Claudia)
-                │   ├── 02_chat_system_prompt.json     (operator paste-target for Claudia's chat-test)
-                │   └── 03_chat_artifact.json
+<PROJECT_ROOT>/editor/tim_leberecht/
                 └── 07_persona_card_assembled.json     ← Editor Pipeline reads this
 ```
 
-Symmetric to the per-voice subfolder layout (`<PROJECT_ROOT>/voices/<slug>/`) but in a separate `editor/` tier — Claudia is structurally a 13th member of the Assembly but functionally distinct from the panel voices (she edits; they contribute). The editor pipeline's `card_assembly` logic generalizes the existing voice-pipeline `card_assembly` to load from either path.
+`runtime/flows/editor/card_assembly.py::EDITOR_CARD_SUBPATH` points here. `load_editor_card()` raises `FileNotFoundError` if the card is missing at this path — the pipeline refuses to run without it (see §"Implementation" → "Defensive checks" below).
 
-### Card construction
+Symmetric to the per-voice subfolder layout (`<PROJECT_ROOT>/voices/<slug>/`) but in a separate `editor/` tier — Tim is structurally a 13th member of the Assembly but functionally distinct from the panel voices (he edits; they contribute).
 
-**Hand-authored skeleton + persona-pipeline smoke-test validation** (per Q1 + B answers above).
+### What the code loads from the card
 
-Claudia is a fictional persona being invented, not a historical figure being reconstructed from corpus. The persona pipeline's strengths (Deep Research grounding, corpus-based field extraction) don't apply. Her 35 fields are hand-authored with persona-pipeline-style discipline — each field deliberate, voice-card-schema-validated, internally consistent.
-
-Her voice is calibrated to a deliberate mix of register sources:
-- *NYT Comment / Atlantic editorial* — institutional gravitas; paper-of-record register
-- *House of Beautiful Business Substack (Tim Leberecht)* — structural warmth; willing to be earnest; em-dash heavy; admits difficulty
-- *New Yorker "Comment" page (1940s–50s, E. B. White / James Thurber / Wolcott Gibbs)* — institutional position with a person's voice inside it; refusing false neutrality
-- *1910 broadsheet news-of-record* (per the masthead's confected pedigree) — formal, restrained, sentence-level care; semicolons and em-dashes; no exclamation marks
-
-The hand-authored card is then run through Pass 7-style smoke tests (per Persona Pipeline v4 §"smoke_test_chains" discipline) to verify the bastard form holds — three chat-test exchanges that probe whether Claudia maintains institutional pronoun usage during declarative editorial work, drops to first-person inflection only for surprise/difficulty/admission moves, and avoids the failure modes (corporate-summary register, AI-discourse meta-commentary, magazine-feature gushing).
-
-The card validates against the Persona Card v2 schema (`docs/AI_Assembly_Persona_Card_v2.md`) with one schema-level adaptation: the `reference_only_passages` field is N/A for Claudia (no copyrighted corpus to ground in). Her `curated_corpus_passages` field, where a panel voice would carry quoted source material, holds 5-7 hand-written exemplar passages — a paragraph from a notional prior dossier she edited, an editor's note, an In Brief item, a headnote, an "honest difficulty" closing — that demonstrate her voice in operation across the surfaces she produces.
-
-### Key card field sketches
-
-These are sketches, not final card text. The actual card requires a focused authoring session (~2-3 hours) before first dossier production. Sketches:
-
-- **voice_name:** Claudia Pinchbeck
-- **epistemic_frame_statement:** "I am the editor of *The Assembly*, a paper of record published since 1910. The night before publication, the panel sits; the morning after, I publish. I receive what the night produced and write the paper that reports on it. The panel's name is also the paper's; the recursion is the form."
-- **constitution:** Five principles. (1) "I do not summarize what I publish — I publish it whole and write about it separately. The voices' words are not my material; they are my contributors." (2) "I name convergence where I find it; I name non-convergence where I find that. I do not manufacture either." (3) "Reservations are specific or they are pro forma. I do not register pro forma reservations." (4) "I do not ventriloquize the voices. I quote them." (5) "I close on what the question is, not on what to do about it."
-- **finds_compelling:** irreducibility (each voice's diagnosis untranslatable into any other's vocabulary); honest difficulty; named refusal; the moment a contemporary debate's term turns out to be a partial translation of an older term; the convergence as evidence-about-the-thing rather than evidence-about-the-voices
-- **resists:** false synthesis; consensus-machine register; smoothed disagreement; "interesting" / "thought-provoking" / "fascinating" register; corporate-summary register; AI-discourse meta-commentary; LinkedIn editorial; conference-recap register
-- **rhetorical_mode:** Institutional editorial first-person plural for declarative work; first-person singular for surprise / difficulty / admission. Bastard form: "we received the night's submissions in the order they arrived" (we) + "I want to start with what surprised me" (I, for the personal-warmth move). Warmth is in moves, not in pronoun inflection.
-- **characteristic_moves:** (1) the convergence-naming; (2) the translation-as-partial ("X is Y forgotten"); (3) the registered reservation (specific, not generic); (4) the honest difficulty admission; (5) the convergence-not-agreement closing distinction
-- **medium:** the dossier. The editor's article (700-900 words, Leitartikel-shaped). The headnote (3-5 sentences, scenic-and-naming). The In Brief item (terse, ~30-50 words). The editor's note (3-5 sentences on Page 1).
-- **length_and_format_constraints:** article 700-900 words; per-artifact headnote 3-5 sentences; theme statement ~150 words; per-voice abstract ~80-100 words; In Brief item ~30-50 words; editor's note 3-5 sentences; front-page lead headline 8-15 words; subdeck 20-40 words
-- **quality_criteria:** five tests. (1) The convergence (or non-convergence) is named in the editor's vocabulary, with each voice's framework's term pointed at and credited. (2) At least one contemporary-debate-term-as-partial-translation move per article. (3) At least one specific reservation registered (about a specific voice or formulation; not pro forma). (4) The article does not supply a program. (5) The editor's voice is bastard form: institutional we for declarative; I only for surprise/difficulty/admission.
-- **relationship_to_detailed_response:** "The voices' artifacts are inviolate. I do not paraphrase, summarize, or smooth them. I quote where quotation serves; I name what the voice diagnosed in my vocabulary, where my naming makes the convergence legible. The contemporary-debate-term partial-translation move is mine, not theirs. My article is the door; the artifacts are the rooms. I do not let the door grow into a small house."
-
-The full card sketch lives at `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` (to be written; references this section).
+`card_assembly.assemble_system_prompt()` loads the card in the same field-routing shape as the voice pipeline: 13 foundational fields (IDENTITY + CONSTITUTION + BOUNDARIES, prefix-cached across a night's dossier calls), 3 reasoning-method fields, a 2-field ENGAGEMENT block (no `unique_contribution` — unlike a panel voice, the editor has no "what only I could add" claim), 7 VOICE fields, and the same 8 ARTIFACT fields the voice pipeline uses for Step 2. `metadata` and `smoke_test_chains` are always dropped; `curated_corpus_passages.corpus_metadata` is stripped (C56 — see §"Editor card → System Prompt Assembly" further down); `reference_only_passages` is dropped if present (defensive; Tim's card carries none). Unlike a panel voice, the editor's card carries no continuity overlay — it loads fresh each night, with no Night 2/3 carryover block, because the editor's task is always the same single step (dossier generation), never a Step 1/2/3 distinction.
 
 ---
 
@@ -523,7 +486,7 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 
 ### Per-call inputs
 
-**System prompt:** Claudia Pinchbeck's persona card, assembled via `card_assembly.assemble_system_prompt(card, step="dossier", night=N)` — same shape as voice pipeline's assembly logic, with editor-specific routing matrix (which fields to include for editor's task; subset detail in Implementation §"Editor card → System Prompt Assembly").
+**System prompt:** Tim Leberecht's persona card, assembled via `card_assembly.assemble_system_prompt(card, step="dossier", night=N)` — same shape as voice pipeline's assembly logic, with editor-specific routing matrix (which fields to include for editor's task; subset detail in Implementation §"Editor card → System Prompt Assembly").
 
 **User prompt:** A structured JSON document containing:
 
@@ -536,7 +499,7 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 - `refusals`: array of refusal objects (river, octopus) if assigned to this dossier's In Brief
 - `night_context`: `night_number`, `issue_no`, `dossier_no`, `dossier_date`, `marathon_panel_source` (the panel the question came from)
 
-**Closing prompt** (the equivalent of `voice_step2_artifact.md` for the editor): `runtime/flows/shared/prompts/editor_dossier.md`. Tells Claudia to:
+**Closing prompt** (the equivalent of `voice_step2_artifact.md` for the editor): `runtime/flows/shared/prompts/editor_dossier.md`. Tells Tim to:
 
 1. Read the night's submissions for this theme
 2. Decide convergence/divergence (the article's central finding)
@@ -544,7 +507,7 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 
 ### Stage 2 — Per-call inputs (v2 contract)
 
-**System prompt** (cached after first call within a night, 1h TTL): Claudia Pinchbeck's persona card from `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json`, assembled via `runtime/flows/editor/card_assembly.assemble_system_prompt(card, night=N)`. Returns `(prefix, tail)` tuple — both blocks get a `cache_control` breakpoint. Prefix = IDENTITY + CONSTITUTION + BOUNDARIES (~20K tokens, byte-identical across calls). Tail = REASONING METHOD + ENGAGEMENT (2 fields, no `unique_contribution`) + VOICE + ARTIFACT + closing prompt instruction (~10K tokens). All N per-night dossier calls share both blocks; first call writes cache, subsequent calls read.
+**System prompt** (cached after first call within a night, 1h TTL): Tim Leberecht's persona card from `<PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json`, assembled via `runtime/flows/editor/card_assembly.assemble_system_prompt(card, night=N)`. Returns `(prefix, tail)` tuple — both blocks get a `cache_control` breakpoint. Prefix = IDENTITY + CONSTITUTION + BOUNDARIES (~20K tokens, byte-identical across calls). Tail = REASONING METHOD + ENGAGEMENT (2 fields, no `unique_contribution`) + VOICE + ARTIFACT + closing prompt instruction (~10K tokens). All N per-night dossier calls share both blocks; first call writes cache, subsequent calls read.
 
 **User prompt** — a structured payload built by combining the K voice briefings for this theme and the K Step 2 artifacts:
 
@@ -591,12 +554,12 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 }
 ```
 
-**`prior_editions` shape (Night 2/3 only):** trimmed to just the articles per dossier (kicker + headline + body_paragraphs). Drops `front_abstract`, `headnotes`, `subline`, `metadata` from the prior dossier JSON. Preserves Claudia's ability to reference prior-night work via article-body anchor text without the token weight of full dossier shape. ~80% lighter than full prior dossier JSONs.
+**`prior_editions` shape (Night 2/3 only):** trimmed to just the articles per dossier (kicker + headline + body_paragraphs). Drops `front_abstract`, `headnotes`, `subline`, `metadata` from the prior dossier JSON. Preserves Tim's ability to reference prior-night work via article-body anchor text without the token weight of full dossier shape. ~80% lighter than full prior dossier JSONs.
 
 **Construction (the dedupe pass):**
 
 ```python
-def build_dossier_briefing(theme_id, voice_slugs, run_dir):
+def build_dossier_briefing(theme_id, voice_slugs, run_dir, project_root):
     briefings = [load_briefing_formulation(slug, theme_id, run_dir) for slug in voice_slugs]
     artifacts = [load_artifact(slug, run_dir) for slug in voice_slugs]
     
@@ -611,10 +574,18 @@ def build_dossier_briefing(theme_id, voice_slugs, run_dir):
         "theme_flags":                    ftr["theme_flags"],
     }
     
+    # voice_name is resolved from council_config.json by slug (C53) — NOT
+    # built from the artifact's own `council_member` field, which is the
+    # voice's long card identity-prefix opening line (e.g. "I am Augusta
+    # Ada King, Countess of Lovelace…"). `voice_display_name` returns the
+    # clean "Voice of X" string verbatim from council_config.json; the
+    # headnote prose that consumes this field prepends "the " itself.
+    # See flows/shared/io.py::voice_display_name / load_council_name_by_slug
+    # and flows/editor/routing.py::_voice_name_lookup for the real lookup.
     engaged_voices = [
         {
             "voice_slug":         slug,
-            "voice_name":         "the voice of " + artifact["council_member"],
+            "voice_name":         "the " + voice_display_name(slug, project_root),
             "mode":               briefing["mode"],
             "narrative_briefing": briefing["narrative_briefing"],
             "artifact_text":      artifact["artifact_text"],
@@ -639,9 +610,9 @@ A 3-dossier night ≈ $0.83. A 5-dossier night ≈ $1.30. Athens 3-night total �
 
 ### Stage 2 — Closing prompt structure
 
-The closing prompt `editor_dossier.md` lives at `runtime/flows/shared/prompts/editor_dossier.md` and is appended to Claudia's assembled card as the system-message tail (Placement A — same as voice pipeline's `voice_step1_reasoning.md` / `voice_step2_artifact.md`). Cache-eligible across the night's dossier calls.
+The closing prompt `editor_dossier.md` lives at `runtime/flows/shared/prompts/editor_dossier.md` and is appended to Tim's assembled card as the system-message tail (Placement A — same as voice pipeline's `voice_step1_reasoning.md` / `voice_step2_artifact.md`). Cache-eligible across the night's dossier calls.
 
-Mirrors `voice_step2_artifact.md`'s 5-section structure: input → weighing → composition → boundaries → output. Tells Claudia:
+Mirrors `voice_step2_artifact.md`'s 5-section structure: input → weighing → composition → boundaries → output. Tells Tim:
 
 1. **Input** — what she'll receive in the user prompt (the per-call shape above).
 2. **Weighing** — read all K artifacts; ask what each diagnosed in their framework's vocabulary; ask what the night's voices converged or diverged on.
@@ -663,11 +634,11 @@ Schema specified in §"Output Schema" below.
 
 ### Cost per call
 
-Per dossier, with prefix caching enabled (Claudia's persona card cached across all dossiers' calls within a night):
+Per dossier, with prefix caching enabled (Tim's persona card cached across all dossiers' calls within a night):
 
 | Item | Tokens | Cost (Opus 4.7 $5/$25 + 1h cache) |
 |---|---|---|
-| System prompt (Claudia's card; first call writes; subsequent reads) | ~30K | $0.30 (write) / $0.015 (read) |
+| System prompt (Tim's card; first call writes; subsequent reads) | ~30K | $0.30 (write) / $0.015 (read) |
 | User prompt (theme + artifacts + briefings + reference) | ~15-25K | $0.075-0.125 |
 | Output (all dossier components) | ~3-4K | $0.075-0.10 |
 | **Per dossier (first call of the night, cache write)** | | **~$0.45-0.50** |
@@ -828,7 +799,7 @@ This separation lets the editor focus on prose generation; the microsite owns vi
 - **Closing show theme-mapping.** Cross-night theme identification across all 3 nights' dossiers + voice artifacts. Separate pipeline; not yet built.
 - **Substack draft pass.** Dropped per architectural decision (memo + this doc); Substack bridge does not exist.
 - **Broadsheet print run.** A separate surface (frame doc spec'd it as one of N artifacts per night); could consume editor pipeline output but is its own pipeline.
-- **Editor card construction.** Hand-authored + persona-pipeline-smoke-tested per §"Card construction"; the construction itself is an operator-side build task, not this pipeline's runtime concern.
+- **Editor card construction.** How Tim's card is built is an operator-side / voices-thread concern, not this pipeline's runtime concern — this spec documents what the runtime loads from the card (§"The Editor — Tim Leberecht"), not how the card was authored.
 
 ---
 
@@ -845,7 +816,7 @@ With current options:
 - `--night N` — explicit night number; defensive `assert_run_dir_night_matches()` enforces consistency with run_dir naming
 - `--skip-routing` (optional) — skip Stage 1; assume `theme_routing.json` is hand-written
 - `--single-dossier <theme_id>` (optional) — generate only one dossier for testing/iteration
-- `--no-cache` (optional) — disable prompt caching; useful when iterating on Claudia's card
+- `--no-cache` (optional) — disable prompt caching; useful when iterating on Tim's card
 
 Athens production CLI (typical):
 ```bash
@@ -860,7 +831,7 @@ runtime/
 ├── flows/
 │   ├── editor_flow.py                  # orchestrator (entry point)
 │   ├── editor/
-│   │   ├── card_assembly.py            # Claudia's card → editor-step system prompt
+│   │   ├── card_assembly.py            # Tim's card → editor-step system prompt
 │   │   ├── routing.py                  # Stage 1 — theme routing
 │   │   ├── dossier_generation.py       # Stage 2 — per-dossier Anthropic call
 │   │   └── publish.py                  # write to <PROJECT_ROOT>/published_artifacts/dossiers/
@@ -880,7 +851,7 @@ runtime/
 - **Voice / expression (7 fields, all calls):** rhetorical_mode, characteristic_moves, register_and_tone, metaphorical_repertoire, preferred_vocabulary, banned_language, banned_modes
 - **Artifact (8 fields, all calls):** medium, technical_capabilities, characteristic_output_structure, relationship_to_detailed_response, aesthetic_qualities, stance_tendency, length_and_format_constraints, quality_criteria
 
-All 33 fields load (same as voice's per-step routing post-2026-05-02 refactor; the editor's "step" is always dossier-generation, not three different steps). Prefix-cache breakpoint placed after BOUNDARIES section, per voice pipeline's prefix-caching pattern; this allows per-night dossier calls (3-5 per night) to share the cached prefix even when their step-specific tails differ slightly (per-dossier `theme` injection).
+All 33 fields load (same as voice's per-step routing post-2026-05-02 refactor; the editor's "step" is always dossier-generation, not three different steps). `metadata` and `smoke_test_chains` are always dropped, and `curated_corpus_passages.corpus_metadata` is stripped out (nested strip, C56 — mirrors the FU#41 strip on the voice pipeline side); `reference_only_passages` is dropped if present, defensively (Tim's card carries none). Prefix-cache breakpoint placed after BOUNDARIES section, per voice pipeline's prefix-caching pattern; this allows per-night dossier calls (3-5 per night) to share the cached prefix even when their step-specific tails differ slightly (per-dossier `theme` injection).
 
 ### Models + thinking
 
@@ -889,13 +860,13 @@ Model and thinking mode are set in `model_routing.json` (step `runtime.editor.do
 - **Model (current default):** `claude-opus-4-7`
 - **Thinking (current default):** adaptive, display=summarized (matches FU#60 pattern)
 - **max_tokens:** 32K (output ceiling; actual output ~3-5K)
-- **Caching:** 1h TTL on system prompt (Claudia's card); cached across all dossiers within a night
+- **Caching:** 1h TTL on system prompt (Tim's card); cached across all dossiers within a night
 
 ### Defensive checks
 
 - `assert_run_dir_night_matches(run_dir, night)` (existing helper) — refuses to run if `--night N` doesn't match run_dir's embedded night number
 - Refuse to run if `<run_dir>/04_voice/manifest.json` shows incomplete voice pipeline (step2 not finished)
-- Refuse to run if Claudia's card at `<PROJECT_ROOT>/editor/claudia_pinchbeck/07_persona_card_assembled.json` is missing or fails schema validation
+- Refuse to run if Tim's card at `<PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json` is missing or fails schema validation
 - Issue number consistency check — derived `ATHENS_BASE_ISSUE + night_number` must match what's already published in prior nights' `published_artifacts/dossiers/night_<N-1>/dossier_*.json` (catches +1-off errors)
 
 ---
@@ -930,9 +901,14 @@ published_artifacts/dossiers/
 
 Both copies are identical at production time. The `<run_dir>` copy lives with the night's other run artifacts (transcript, researcher output, provocateur briefings, voice artifacts) and represents what was generated; the `<PROJECT_ROOT>/published_artifacts/dossiers/` copy is the canonical published reference for the microsite + cross-night editorial review + closing show pipeline.
 
-### Cross-night dossier index (built at consume time)
+### Dossier index
 
-The microsite (or any consumer) builds a dossier index by walking `<PROJECT_ROOT>/published_artifacts/dossiers/`. No editor pipeline-side index file is maintained.
+Two index files are maintained under `<PROJECT_ROOT>/published_artifacts/dossiers/` — both written by the pipeline itself, not built lazily by a consumer:
+
+- **Per-night index** — `night_<N>/_index.json`. Written by two independent code paths with different schemas: the editor (`flows/editor/edition.py::finalize_edition`, run as Stage 3 after each night's dossier calls) and `publish_flow.py::_build_per_night_dossier_index`. Each writer reads back whatever is already on disk and merges rather than overwrites, via a shared helper (`flows/editor/edition.py::merge_night_index`) — the rule is "each writer keeps the fields it doesn't own." The editor owns `NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS` (`night`, `url_path`, `generated_at`, `dossier_count`, `edition_lead`, `dossiers`) and, per dossier entry, `NIGHT_INDEX_OWNED_DOSSIER_KEYS` (`dossier_no`, `filename`, `url_path`, `kicker`, `headline`, `subline`, `theme_id`, `theme_display_title`, `voice_count`, `voices_routed`). Publish owns its own top-level set (`night`, `url_path`, `generated_at`, `dossier_count`, `dossiers`, `voices_in_night`) plus per-dossier `issue_no`/`vol` on top of the same content fields — it deliberately never claims `edition_lead`, so the editor's lead-dossier pick survives a publish rerun, and the editor's rewrite likewise leaves publish's `issue_no`/`vol`/`voices_in_night` alone. The editor's write always rebuilds from every `dossier_*.json` file actually on disk for the night (`_rebuild_dossiers_from_disk`), not just the dossier(s) a `--single-dossier` rerun regenerated.
+- **Root index** — `published_artifacts/dossiers/_index.json`, aggregating every night present. Rebuilt by `flows/editor/edition.py::update_root_index` at the end of every `finalize_edition` call, by walking each `night_<N>/_index.json` on disk; `publish_flow.py::_build_cross_night_dossier_index` also rebuilds an equivalent root index during publish.
+
+Tracker refs: runtime OPEN_ITEMS C46 (per-night index dual-writer clobber fix) and PLAN 0.1.2.
 
 ---
 

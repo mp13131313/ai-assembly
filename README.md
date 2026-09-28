@@ -121,10 +121,10 @@ Per-voice subfolder layout under `<PROJECT_ROOT>/voices/<slug>/` is documented i
 The personas pipeline produces three runtime-relevant artifacts per voice:
 
 - **Provocateur Profile** (8 fields) at `<PROJECT_ROOT>/voices/<slug>/06_derive/01_provocateur_profile.json` → wires into `<PROJECT_ROOT>/reference/council_config.json` `members[]`.
-- **Persona Card** (35 generated + 2 continuity null + metadata) at `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` → loaded as Voice Pipeline system prompt. Runtime drops `metadata`, `smoke_test_chains`, and (for Step 2 only) `reference_only_passages`.
+- **Persona Card** (36 generated + 2 continuity null + metadata) at `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` → loaded as Voice Pipeline system prompt. Runtime drops `metadata`, `smoke_test_chains`, and (for Step 2 only) `reference_only_passages`.
 - **Chat artifact** at `<PROJECT_ROOT>/voices/<slug>/06_derive/03_chat_system_prompt.json` → operator paste-target for Claude project custom instructions; not consumed by runtime pipelines.
 
-**Current state:** Athens 2026 COMPLETE — 13 dossiers + 30 per-voice pages across Nights 1–3, both repos clean + pushed. For the per-night production detail, deployment_context discipline rules, voice-build state, open items, and follow-ups, see [`STATE.md`](STATE.md).
+**Current state:** Athens 2026 COMPLETE — 13 dossiers + 30 per-voice pages across Nights 1–3. For current branch / push status, per-night production detail, deployment_context discipline rules, voice-build state, open items, and follow-ups, see [`STATE.md`](STATE.md) (§"The two repos" has the branch/push detail).
 
 The athens-2026 production project has its own private git repo (`mp13131313/ai-assembly-athens2026-voices`) for backup of the per-project data. The code repo never touches per-project data.
 
