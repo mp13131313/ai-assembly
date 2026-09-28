@@ -51,6 +51,7 @@ Two workstreams, two subfolders, plus a few cross-cutting docs:
 - For runtime work: `_workspace/planning/runtime/{ONBOARDING,OPEN_ITEMS,HANDOFF*}.md`
 - For cross-cutting rules + DON'Ts: `_workspace/planning/ONBOARDING.md` (thin index)
 - For naming + organization conventions: `_workspace/planning/conventions.md`
+- **For keeping docs current (definition of done, per-session checklist): `_workspace/planning/WAYS_OF_WORKING.md` — follow it before ending any task**
 - For deferred doc-architecture follow-ups: `_workspace/planning/doc_infrastructure_backlog.md`
 - Frozen FU# ledger: `_workspace/planning/FOLLOW_UPS.md` (no new entries)
 

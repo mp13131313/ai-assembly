@@ -45,6 +45,11 @@ land in these patterns. **Document the convention BEFORE breaking it.**
 | `_workspace/planning/{runtime,voices}/OPEN_ITEMS.md` | authoritative open-item tracker for that workstream | state |
 | `_workspace/planning/{runtime,voices}/HANDOFF.md` | session-state-of-the-moment for that workstream | state in the durable sense |
 | `_workspace/planning/conventions.md` (this file) | naming + organization rules | examples (those are tests) |
+| `_workspace/planning/WAYS_OF_WORKING.md` | *when/how* docs get updated: definition of done, decisions vs inferences, checklists, planning-folder hygiene | doc roles (this table) |
+| `_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md` | order of work + operator decisions (a sequencing layer over the trackers) | item detail/status (trackers own those) |
+| `_workspace/planning/PRODUCT_assembly_hub.md` | product direction (governed voice hub) | tracked work |
+| `model_routing.json` (repo root) | which model runs each LLM step, both pipelines | call plumbing (code) |
+| `docs/LLM_CALL_INVENTORY.md` | generated inventory of every LLM call (regenerate, don't hand-edit) | model choice (`model_routing.json`) |
 | Sub-tree `README.md` (runtime/, personas/) | pointer-density nav for that sub-tree | duplicated content |
 | `docs/AI_Assembly_*_Pipeline.md` | spec for that pipeline component | state, history |
 | `personas/CROSS_REPO_CONTRACT.md` | cross-repo contract between personas + runtime (was `personas/HANDOFF.md` pre-2026-06-01 rename — overloaded with session-handoff term) | session handoffs |
@@ -63,6 +68,8 @@ land in these patterns. **Document the convention BEFORE breaking it.**
 - Open-item status changes (a C-item resolves or surfaces)
 - Voice-build state changes (a voice ships or gets a major rev)
 - Architectural validation finding (new empirical evidence)
+- A branch lands in `main`, or work sits on an unmerged branch (say which)
+- The published record changes (repair, republish)
 
 ## When NOT to put state in CLAUDE.md or root README
 

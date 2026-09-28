@@ -95,6 +95,9 @@ Subfolder-specific calibration (e.g., "always `--skip-validation` for dryrun wor
 |---|---|
 | `ONBOARDING.md` | this doc — index + cross-cutting rules |
 | `FOLLOW_UPS.md` | frozen historical ledger of FU#1–62 (cross-cutting reference; no new entries) |
+| `WAYS_OF_WORKING.md` | how docs stay current: definition of done, decision vs inference, checklists, planning-folder hygiene |
+| `PLAN_2026_06_12_post_athens_roadmap.md` | post-Athens roadmap — order of work + operator decisions |
+| `PRODUCT_assembly_hub.md` | product direction (governed voice hub) |
 
 The 6 dated persona-thread handoffs (`HANDOFF_2026_04_27.md … _NIGHT.md`) and `BRIEF_OPUS_4_7_THINKING_AUDIT_2026_04_29.md` were archived 2026-05-01 to `_workspace/archive/voices_consolidation_2026_05_01/` (commit `25d9ce6`). Going forward, voices session-state lives in `voices/HANDOFF.md` (replaced each session).
 
@@ -106,28 +109,9 @@ The 6 dated persona-thread handoffs (`HANDOFF_2026_04_27.md … _NIGHT.md`) and 
 
 ---
 
-## Doc hygiene — what lives where, what gets archived
+## Doc hygiene — moved
 
-To keep this folder load-bearing rather than archival, follow these rules. They apply to both workstream subfolders.
-
-**Stays here:**
-
-- **One current HANDOFF per workstream.** Append within the day; spawn a new dated HANDOFF only when starting a fresh day's work. Within `runtime/`, name it `HANDOFF_<YYYY_MM_DD>.md`. Within `voices/`, single rolling `HANDOFF.md` is fine (different convention, both work).
-- **OPEN_ITEMS.md** (per workstream) — authoritative, durable.
-- **ONBOARDING.md** (per workstream + this root one) — durable; updates are surgical, not append-only.
-
-**Gets archived (move to `_workspace/archive/session-artifacts/`):**
-
-- **Yesterday's HANDOFF** when today's HANDOFF supersedes it via "Predecessor handoff:" header. Keep only the latest in `_workspace/planning/<workstream>/`.
-- **Design docs** (e.g., `*_DESIGN_*.md`) once the thing they spec exists. Their content migrates to: implementation + a lifecycle/operations doc + an OPEN_ITEMS entry. The design doc itself becomes historical context.
-- **One-off briefs / audits** (`BRIEF_*.md`, `*_AUDIT_*.md`) once their findings have been actioned.
-
-**Stays under `docs/` (not here):**
-
-- Canonical pipeline specs.
-- Operational/lifecycle docs.
-
-**Trigger:** when proposing a new doc, ask first whether the content can live in OPEN_ITEMS, ONBOARDING, or an existing pipeline doc. Default is no new top-level doc. Spec → archive once shipped.
+Moved 2026-09-28 to [`WAYS_OF_WORKING.md`](WAYS_OF_WORKING.md) §11 (planning-folder hygiene), alongside the rules for *when* each doc gets updated — one home for "how docs are kept". Naming + doc roles stay in [`conventions.md`](conventions.md).
 
 ---
 
@@ -141,4 +125,4 @@ If a rule is subfolder-specific, it goes in the subfolder ONBOARDING. Only genui
 
 ---
 
-*End of planning/ONBOARDING.md (index version, last updated 2026-05-08 — added epistemic-hook DON'T + "universal" miscommunication calibration).*
+*End of planning/ONBOARDING.md (index version, last updated 2026-09-28 — doc hygiene moved to WAYS_OF_WORKING.md; root-file table lists the post-Athens planning docs).*
