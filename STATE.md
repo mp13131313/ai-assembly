@@ -42,7 +42,7 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `04ab6a8` (2026-09-28).
+  `phase0-fixes` is pushed through `03c84e1` (2026-09-28).
 
 ---
 
@@ -245,7 +245,10 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
-Next: backlog row #24 (Editor spec schema sections) → Stage 4 (persona-pipeline catch-up on the
+Backlog row #24 (Editor spec Dossier Shape + Output Schema) done 2026-09-28
+(`03c84e1`); its residual — other stale Editor-spec sections + 4 editor
+code/prompt defects — is listed in the spec's v3 changelog.
+Next: Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.
