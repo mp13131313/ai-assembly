@@ -42,7 +42,8 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `03c84e1` (2026-09-28).
+  `phase0-fixes` is pushed through `40c4d56` (2026-09-28); the C64
+  commits after it are local only.
 
 ---
 
@@ -246,8 +247,9 @@ fields).
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
 Backlog row #24 (Editor spec Dossier Shape + Output Schema) done 2026-09-28
-(`03c84e1`); its residual — other stale Editor-spec sections + 4 editor
-code/prompt defects — is listed in the spec's v3 changelog.
+(`03c84e1`); its residual — other stale Editor-spec sections — is listed
+in the spec's v3 changelog. The 4 editor code/prompt defects it found are
+fixed (C64, `9f415dd`).
 Next: Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
@@ -255,7 +257,8 @@ deployment profiles) → the hub.
 
 **Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
 C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
-C63 (model config) · dossier-index dual writers (PLAN 0.1.2) · voices
+C63 (model config) · C64 (editor dossier defects) · dossier-index dual
+writers (PLAN 0.1.2) · voices
 §32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config).
 
 **Runtime still open (`runtime/OPEN_ITEMS.md`):**
@@ -267,6 +270,9 @@ C63 (model config) · dossier-index dual writers (PLAN 0.1.2) · voices
 - **C47** editorial discipline rules → permanent prompt patches
 - **C52** event-agnostic config (PLAN 2.1)
 - **C57** editor closing prompt hardcoded to Tim
+- **C64 residual** — the 13 published Athens dossiers still start the
+  article with a stray `**`; cleanup is a separate task (operator:
+  later, not scheduled)
 - **C62** model generation — pinned models still live; a migration is now
   a `model_routing.json` edit plus voice re-validation (operator decision)
 - **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks
