@@ -302,29 +302,12 @@ All canonical pipeline specs are in `docs/`:
   cache token tracking landed 2026-05-02 PM (commits `ffad93f` + `9e1c987`);
   synthesis-bias structurally addressed; Test 3 validated. Athens 3-night
   cost ~$60-80 (was claimed $540-700 under deprecated $15/$75 pricing).
-- `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline **v2** (refinements
-  landed 2026-05-03 PM; v1 was 2026-05-02). Implements Frame Concept v1's
-  broadsheet surface as a runtime contract. **Editor as 13th Assembly
-  member** (Tim Leberecht) with full persona card; system prompt
-  assembled same way as panel voices. **Unit of publication is the dossier**,
-  organized by theme. **Substack bridge dropped**, micro-site only.
-  **Self-reportage recursion** — *The Assembly* (panel) ≡ *The Assembly*
-  (publication). One Anthropic call per dossier on Opus 4.7. Marathon-distance
-  issue numbering (Vol. CXVI . No. 42,193 → 42,195 across Athens; Night 3 =
-  marathon distance in metres). Athens cost ~$3-5 across 3 nights.
-  **v2 contract refinements** (single source family — Provocateur briefings
-  + Voice Step 2 artifacts; no Researcher direct read; article-first output
-  with shared kicker/headline; no in_brief cross-references; lead-vs-grid
-  is publish concern; closing prompt rewrite pending). Predecessor memo at
-  `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md`
-  is **archived** (folded into v2 spec). **Implementation shipped
-  2026-05-03 PM** (commit `fc5c2fb`): `runtime/flows/editor_flow.py` +
-  `runtime/flows/editor/*.py` (routing/card_assembly/dossier_generation/
-  publish) + `/admin/tonight/editor` drilldown + 38 tests. Tim's card
-  is at `editor/tim_leberecht/` (shipped 2026-05-05, see `STATE.md`);
-  closing prompt rewrite to v2 contract still open (runtime
-  `OPEN_ITEMS.md` C57). See OPEN_ITEMS A2 (✅ fully resolved) + B1 (🟢
-  implementation shipped).
+- `AI_Assembly_Editor_Pipeline.md` — Editor Pipeline: Tim Leberecht, as
+  editor with his own persona card, turns each night's Voice Step 2
+  artifacts + Provocateur briefings into one dossier per theme (Stage 1
+  theme routing; Stage 2 one Anthropic call per dossier; Stage 3 lead pick
+  + dossier indexes), and specifies the dossier JSON contract. Trust
+  status: `docs/README.md`.
 - `AI_Assembly_Runtime_Lifecycle.md` — what happens during an Athens
   night, end to end (v1, 2026-05-02). Stage-by-stage anatomy (trigger,
   reads, writes, sentinel), full filesystem layout, cross-night threading,
