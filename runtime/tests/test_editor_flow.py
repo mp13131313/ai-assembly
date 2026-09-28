@@ -344,3 +344,53 @@ def test_first_dossier_call_runs_alone_then_rest_in_parallel(tmp_path, monkeypat
     assert events[:2] == [("start", 0), ("end", 0)], events   # first call alone
     rest = events[2:]
     assert rest[0][0] == "start" and rest[1][0] == "start", events  # others overlap
+
+
+# --- C65: --no-prompt-cache ----------------------------------------------
+
+
+def test_no_prompt_cache_reaches_the_call(tmp_path, monkeypatch):
+    """C65: the flag used to stop at the manifest; it must reach
+    stream_voice_call as cache_system=False (default stays True)."""
+    project_root = tmp_path / "project"
+    editor_dir = project_root / "editor" / "tim_leberecht"
+    editor_dir.mkdir(parents=True)
+    (editor_dir / "07_persona_card_assembled.json").write_text(STUB_CARD_PATH.read_text())
+    run_dir = _setup_run_dir(tmp_path, ["plato"], theme_id="theme_001")
+
+    seen: list[bool] = []
+
+    def fake_call(*args, **kwargs):
+        seen.append(kwargs.get("cache_system", True))
+        usage = MagicMock(input_tokens=1, output_tokens=1,
+                          cache_creation_input_tokens=0, cache_read_input_tokens=0)
+        return ("**kicker:** OK\n**headline:** OK\n**body_paragraphs:**\np1\n",
+                "", MagicMock(usage=usage), 0)
+
+    monkeypatch.setattr(dossier_generation, "stream_voice_call", fake_call)
+    monkeypatch.setattr("anthropic.Anthropic", lambda *a, **kw: MagicMock())
+    from flows.editor_flow import run_editor_pipeline
+
+    manifest = run_editor_pipeline(run_dir, night=1, project_root=project_root,
+                                   bypass_gating=True, no_prompt_cache=True)
+    assert seen == [False]
+    assert manifest["config"]["no_prompt_cache"] is True
+
+    run_editor_pipeline(run_dir, night=1, project_root=project_root, bypass_gating=True)
+    assert seen == [False, True]
+
+
+def test_uncached_request_carries_no_cache_control():
+    """C65: with cache_system=False the editor's two system blocks go out
+    without cache_control; with the default they both carry it."""
+    from flows.shared.model_routing import step_config
+    from flows.voice._anthropic_call import stream_voice_call
+    from tests.test_model_routing_call_sites import _make_stream_client, _stream_kwargs
+
+    cfg = step_config("runtime.editor.dossier")
+    for cache_system, expect in ((False, False), (True, True)):
+        client = _make_stream_client("OK")
+        stream_voice_call(client, cfg=cfg, max_tokens=100, system=("prefix", "tail"),
+                          user="u", cache_system=cache_system)
+        blocks = _stream_kwargs(client)["system"]
+        assert [("cache_control" in b) for b in blocks] == [expect, expect]

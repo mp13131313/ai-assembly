@@ -29,7 +29,7 @@ CLI:
   python flows/editor_flow.py <run_dir> --night N
                                [--skip-routing]      Stage 1 already written by hand
                                [--single-dossier <theme_id>]   one dossier only (testing)
-                               [--no-cache]          disable prompt caching
+                               [--no-prompt-cache]   don't cache the system prompt (C65)
                                [--project PATH]      PROJECT_ROOT override
 
 Cost (Athens 3 nights, 3-5 dossiers/night, Opus 4.7 + 1h prefix cache):
@@ -92,7 +92,7 @@ def run_editor_pipeline(
     project_root: Path,
     skip_routing: bool = False,
     single_dossier: str | None = None,
-    no_cache: bool = False,
+    no_prompt_cache: bool = False,
     bypass_gating: bool = False,
 ) -> dict[str, Any]:
     """End-to-end Editor Pipeline. Returns the manifest dict.
@@ -218,6 +218,7 @@ def run_editor_pipeline(
                 client=client,
                 prior_editions=prior_editions,
                 logger=logger,
+                cache_system=not no_prompt_cache,
             )
             return (theme_id, dossier, None)
         except Exception as e:  # noqa: BLE001 — orchestrator must not crash on one dossier's failure
@@ -302,7 +303,7 @@ def run_editor_pipeline(
             "EDITOR_BATCH":  EDITOR_BATCH,
             "skip_routing":  skip_routing,
             "single_dossier": single_dossier,
-            "no_cache":      no_cache,
+            "no_prompt_cache": no_prompt_cache,
         },
     }
     write_json_atomic(run_dir / "05_editor" / "manifest.json", manifest)
@@ -326,8 +327,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="Skip Stage 1; assume theme_routing.json is hand-written.")
     ap.add_argument("--single-dossier", default=None,
                     help="Run Stage 2 for one theme only (theme_id).")
-    ap.add_argument("--no-cache", action="store_true",
-                    help="Disable prompt caching (useful when iterating on Claudia's card).")
+    ap.add_argument("--no-prompt-cache", action="store_true",
+                    help="Don't cache the system prompt (saves the cache-write cost on a one-off single-dossier run; an edited card never hits a stale cache anyway).")
     ap.add_argument("--bypass-gating", action="store_true",
                     help="Skip the per-voice review gate (refuses to run if any "
                          "voice is pending review). Use only for tests / one-off "
@@ -345,7 +346,7 @@ def main(argv: list[str] | None = None) -> int:
         project_root=project_root,
         skip_routing=args.skip_routing,
         single_dossier=args.single_dossier,
-        no_cache=args.no_cache,
+        no_prompt_cache=args.no_prompt_cache,
         bypass_gating=args.bypass_gating,
     )
     if manifest.get("gating_blocked"):

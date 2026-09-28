@@ -553,8 +553,12 @@ def generate_dossier(
     client: Any,
     prior_editions: list[dict[str, Any]] | None = None,
     logger: logging.Logger | None = None,
+    cache_system: bool = True,
 ) -> dict[str, Any]:
     """Run one dossier-generation call. Returns the full v2 dossier dict.
+
+    `cache_system=False` (editor_flow `--no-prompt-cache`, C65) sends the
+    system prompt without cache breakpoints.
 
     Caller is responsible for: (a) building system_prompt via
     `card_assembly.assemble_system_prompt`; (b) constructing `client`
@@ -587,6 +591,7 @@ def generate_dossier(
         system=system_prompt,
         user=user_prompt,
         logger=log,
+        cache_system=cache_system,
     )
     wall = time.time() - t0
 
