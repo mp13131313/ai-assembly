@@ -82,7 +82,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(_REPO_ROOT.parent / ".env")
+    load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import get_logger, write_json_atomic
     from flows.shared.project_root import add_project_arg, resolve_project_root
     from flows.editor.edition import merge_night_index
@@ -190,7 +190,13 @@ def _normalize_theme_record(theme_obj: dict[str, Any]) -> dict[str, Any]:
         "theme_id": theme_obj.get("theme_id") or theme_obj.get("id"),
         "researcher_title": theme_obj.get("title", ""),
         "researcher_abstract": theme_obj.get("abstract", ""),
-        "cluster_ids": theme_obj.get("cluster_ids", []),
+        # Current Researcher output embeds clusters inside each theme and has
+        # no `cluster_ids` list; without this fallback every theme file came
+        # out with zero clusters and zero extractions (C51).
+        "cluster_ids": theme_obj.get("cluster_ids") or [
+            c.get("cluster_id") or c.get("id")
+            for c in theme_obj.get("clusters", []) if isinstance(c, dict)
+        ],
     }
 
 
