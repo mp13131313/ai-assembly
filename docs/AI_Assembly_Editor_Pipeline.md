@@ -898,7 +898,7 @@ With current options:
 - `--night N` — explicit night number; defensive `assert_run_dir_night_matches()` enforces consistency with run_dir naming
 - `--skip-routing` (optional) — skip Stage 1; assume `theme_routing.json` is hand-written
 - `--single-dossier <theme_id>` (optional) — generate only one dossier for testing/iteration
-- `--no-cache` (optional) — meant to disable prompt caching when iterating on Tim's card. *As of 2026-09-28 it has no effect: `editor_flow.py` records it in the manifest but never passes it to the call (`:94, 292, 335`); runtime OPEN_ITEMS C65.*
+- `--no-prompt-cache` (optional) — send the system prompt without cache breakpoints (`stream_voice_call(cache_system=False)`). Saves the cache-write cost on a one-off single-dossier run. Not needed after editing Tim's card: the cache only matches an identical prompt, so an edited card never hits a stale entry. Recorded in the manifest as `config.no_prompt_cache`. *Was `--no-cache`, which did nothing until 2026-09-28 (C65). `--regenerate` is reserved for C45's "redo already-written dossiers".*
 
 Athens production CLI (typical):
 ```bash
