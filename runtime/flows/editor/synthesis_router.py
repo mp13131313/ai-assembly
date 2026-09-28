@@ -30,14 +30,22 @@ import json
 import logging
 import os
 import re
+import sys
+from pathlib import Path
 from typing import Any
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from flows.shared.model_routing import step_config  # noqa: E402
 
 # Sonnet 4.6 is sufficient — small comprehension task, deterministic-ish
 # pick from a list. Adaptive thinking off (no extended reasoning needed
-# for this pattern-matching call); keeps it cheap and fast.
-SYNTHESIS_ROUTER_MODEL = os.environ.get(
-    "SYNTHESIS_ROUTER_MODEL", "claude-sonnet-4-6"
-)
+# for this pattern-matching call); keeps it cheap and fast. Model +
+# thinking resolved via model_routing.json step "runtime.synthesis_router"
+# (shared by Voice Step 2's embedded call and the Editor's Stage 1 safety
+# net — see route_synthesis_voice below).
 SYNTHESIS_ROUTER_MAX_TOKENS = int(
     os.environ.get("SYNTHESIS_ROUTER_MAX_TOKENS", "500")
 )
@@ -120,13 +128,20 @@ def route_synthesis_voice(
     fallback_id = sorted(candidate_ids)[0]
 
     user_prompt = _build_user_prompt(voice_slug, artifact_text, candidates)
+    cfg = step_config("runtime.synthesis_router")
+    thinking_kwargs = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
 
     try:
         message = client.messages.create(
-            model=SYNTHESIS_ROUTER_MODEL,
+            model=cfg.model,
             max_tokens=SYNTHESIS_ROUTER_MAX_TOKENS,
             system=_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
+            **thinking_kwargs,
+            **cfg.output_config_kwargs(),
         )
     except Exception as exc:
         log.warning(

@@ -53,6 +53,7 @@ try:
         load_session_package,
         write_json_atomic,
     )
+    from flows.shared.model_routing import step_config
 except ImportError as e:
     sys.stderr.write(
         f"Missing dependency: {e.name}\n"
@@ -63,23 +64,13 @@ except ImportError as e:
 
 # --- Config ---------------------------------------------------------------
 
-# Default to Opus 4.7 — canonical model for Researcher Pipeline v3 per the
-# v2.4 validation run. Override via CLAUDE_MODEL env var for dev iteration
-# on Sonnet (CLAUDE_MODEL=claude-sonnet-4-6 python3 flows/researcher_flow.py).
-CLAUDE_MODEL = os.environ.get(
-    "RESEARCHER_CLAUDE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-
-# Extended thinking (Opus 4.7 is the recommended target, works on Sonnet
-# 4.6 too). Enabled via env var so the same code path supports both
-# "fast Sonnet baseline" and "slow Opus+thinking baseline" without edits.
-# When enabled, max_tokens headroom below must accommodate both output
-# and thinking tokens (in recent API versions thinking counts against
-# max_tokens).
-# Default to thinking ON — canonical setting for Researcher Pipeline v3.
-# Disable via RESEARCHER_THINKING=0 env var for dev iteration.
-THINKING_ENABLED = os.environ.get("RESEARCHER_THINKING", "1") != "0"
+# Model + thinking resolution for extraction/clustering/theming now comes
+# from model_routing.json steps "runtime.researcher.extraction" /
+# ".clustering" / ".theming" (still overridable with the legacy
+# RESEARCHER_CLAUDE_MODEL / CLAUDE_MODEL / RESEARCHER_THINKING env vars —
+# see model_routing.py). When thinking is enabled, max_tokens headroom
+# below must accommodate both output and thinking tokens (in recent API
+# versions thinking counts against max_tokens).
 EXTRACTION_THINKING_BUDGET = 8000
 CLUSTERING_THINKING_BUDGET = 20000
 THEMING_THINKING_BUDGET = 15000
@@ -113,17 +104,14 @@ THEMING_MAX_TOKENS = 24000  # was 8000 pre-thinking
 RESEARCHER_NODE1_BATCH = int(os.environ.get("RESEARCHER_NODE1_BATCH", "6"))
 
 
-def _thinking_kwargs(budget_tokens: int) -> dict:
+def _thinking_kwargs(cfg) -> dict:
     """Return the thinking kwargs for messages.create/stream when enabled.
 
-    When THINKING_ENABLED is False (default), returns an empty dict so
-    `**_thinking_kwargs(...)` is a no-op on the API call. When enabled,
+    When `cfg.thinking_on` is False, returns an empty dict so
+    `**_thinking_kwargs(cfg)` is a no-op on the API call. When enabled,
     returns Opus 4.7's recommended 'adaptive' thinking mode — the model
     decides how much to think based on the task, which Anthropic's own
-    testing shows outperforms fixed-budget 'enabled' mode. The
-    `budget_tokens` argument is kept for API symmetry but is unused in
-    adaptive mode (it's documented in the per-task constants for future
-    reference and fallback).
+    testing shows outperforms fixed-budget 'enabled' mode.
 
     `display: "summarized"` makes the model's thinking trace visible in
     the streamed response (Opus 4.7 default is `omitted`, which returns
@@ -134,7 +122,7 @@ def _thinking_kwargs(budget_tokens: int) -> dict:
     with `temperature` and `top_k` modifications — Opus 4.7 returns
     400 BadRequestError if `temperature` is set on a thinking call.
     """
-    if not THINKING_ENABLED:
+    if not cfg.thinking_on:
         return {}
     return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
@@ -280,6 +268,7 @@ def extract_session(session_package_path: str) -> dict:
     session package."""
     logger = _get_logger()
     client = Anthropic()
+    cfg = step_config("runtime.researcher.extraction")
 
     pkg_path = Path(session_package_path)
     pkg = load_session_package(pkg_path)
@@ -290,7 +279,7 @@ def extract_session(session_package_path: str) -> dict:
 
     logger.info(
         f"Node 1 extraction: {session_title} (session_id={session_id})"
-        + (f" [thinking={EXTRACTION_THINKING_BUDGET}]" if THINKING_ENABLED else "")
+        + (f" [thinking={EXTRACTION_THINKING_BUDGET}]" if cfg.thinking_on else "")
     )
     user = build_extraction_user_prompt(pkg, session_id)
 
@@ -312,11 +301,12 @@ def extract_session(session_package_path: str) -> dict:
     t0 = time.time()
     chunks = []
     with client.messages.stream(
-        model=CLAUDE_MODEL,
+        model=cfg.model,
         max_tokens=EXTRACTION_MAX_TOKENS,
         system=cached_system,
         messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(EXTRACTION_THINKING_BUDGET),
+        **_thinking_kwargs(cfg),
+        **cfg.output_config_kwargs(),
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)
@@ -372,11 +362,12 @@ def cluster_extractions(all_extractions: list) -> dict:
     """
     logger = _get_logger()
     client = Anthropic()
+    cfg = step_config("runtime.researcher.clustering")
 
     logger.info(
         f"Node 2 Round 1 (clustering): "
         f"{len(all_extractions)} extractions"
-        + (f" [thinking={CLUSTERING_THINKING_BUDGET}]" if THINKING_ENABLED else "")
+        + (f" [thinking={CLUSTERING_THINKING_BUDGET}]" if cfg.thinking_on else "")
     )
 
     # Build the minimal model-facing input. Each extraction gets a
@@ -410,11 +401,12 @@ def cluster_extractions(all_extractions: list) -> dict:
     t0 = time.time()
     chunks = []
     with client.messages.stream(
-        model=CLAUDE_MODEL,
+        model=cfg.model,
         max_tokens=CLUSTERING_MAX_TOKENS,
         system=CLUSTERING_SYSTEM,
         messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(CLUSTERING_THINKING_BUDGET),
+        **_thinking_kwargs(cfg),
+        **cfg.output_config_kwargs(),
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)
@@ -490,11 +482,12 @@ def group_clusters_into_themes(clusters_result: dict) -> dict:
     """
     logger = _get_logger()
     client = Anthropic()
+    cfg = step_config("runtime.researcher.theming")
 
     clusters = clusters_result.get("clusters", [])
     logger.info(
         f"Node 2 Round 2 (theming): {len(clusters)} clusters"
-        + (f" [thinking={THEMING_THINKING_BUDGET}]" if THINKING_ENABLED else "")
+        + (f" [thinking={THEMING_THINKING_BUDGET}]" if cfg.thinking_on else "")
     )
 
     # IMPORTANT: the input to Round 2 is deliberately stripped down to
@@ -527,11 +520,12 @@ def group_clusters_into_themes(clusters_result: dict) -> dict:
     t0 = time.time()
     chunks = []
     with client.messages.stream(
-        model=CLAUDE_MODEL,
+        model=cfg.model,
         max_tokens=THEMING_MAX_TOKENS,
         system=THEMING_SYSTEM,
         messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(THEMING_THINKING_BUDGET),
+        **_thinking_kwargs(cfg),
+        **cfg.output_config_kwargs(),
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)

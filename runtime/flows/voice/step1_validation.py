@@ -39,19 +39,12 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from flows.shared.io import get_logger, load_prompt, write_json_atomic
+from flows.shared.model_routing import step_config
 
 
 # Fallback ladder per spec — same as Persona Pipeline Pass 7-anachronism / 7a.
-# Override via VOICE_VALIDATION_MODELS env var (comma-separated).
-_DEFAULT_LADDER = ("gpt-5.4", "gpt-4.1", "o3", "gpt-4o", "gemini-2.5-pro")
-VALIDATION_LADDER = tuple(
-    s.strip()
-    for s in os.environ.get(
-        "VOICE_VALIDATION_MODELS",
-        ",".join(_DEFAULT_LADDER),
-    ).split(",")
-    if s.strip()
-)
+# Resolved via model_routing.json step "runtime.voice.step1_validation"
+# (still overridable with the legacy VOICE_VALIDATION_MODELS env var).
 VALIDATION_MAX_TOKENS = int(os.environ.get("VOICE_VALIDATION_MAX_TOKENS", "8192"))
 
 
@@ -69,8 +62,9 @@ def _call_openai_with_fallback(
     Returns dict with keys: text, model, usage, wall_clock_s.
     """
     from openai import OpenAI  # local import — runtime venv may not have it
+    ladder = step_config("runtime.voice.step1_validation").ladder
     last_err: Exception | None = None
-    for model in VALIDATION_LADDER:
+    for model in ladder:
         try:
             t0 = time.time()
             if model.startswith("gemini"):
@@ -90,7 +84,10 @@ def _call_openai_with_fallback(
                     "wall_clock_s": round(time.time() - t0, 2),
                 }
             client = OpenAI()
-            is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))
+            # Generic o-series reasoning-model prefix probe — not a routing
+            # default; the ladder itself comes from model_routing.json via
+            # step_config() above.
+            is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))  # model-scan: allow
             use_reasoning = is_o_series or reasoning_effort is not None
             kwargs: dict[str, Any] = {
                 "model": model,
@@ -123,7 +120,7 @@ def _call_openai_with_fallback(
             last_err = e
             continue
     raise RuntimeError(
-        f"All validation models in ladder failed: {VALIDATION_LADDER}. "
+        f"All validation models in ladder failed: {ladder}. "
         f"Last error: {last_err}"
     )
 

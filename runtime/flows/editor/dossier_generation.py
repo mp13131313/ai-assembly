@@ -42,14 +42,10 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from flows.shared.io import voice_display_name, write_json_atomic  # noqa: E402
+from flows.shared.model_routing import StepConfig, step_config  # noqa: E402
 from flows.voice._anthropic_call import stream_voice_call  # noqa: E402
 
 
-EDITOR_MODEL = os.environ.get(
-    "EDITOR_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-EDITOR_THINKING = os.environ.get("EDITOR_THINKING", "1") != "0"
 EDITOR_MAX_TOKENS = int(os.environ.get("EDITOR_MAX_TOKENS", "32000"))
 
 
@@ -57,15 +53,6 @@ EDITOR_MAX_TOKENS = int(os.environ.get("EDITOR_MAX_TOKENS", "32000"))
 # Edition / publication_date_long) was dropped 2026-05-05 — the dossier
 # is published under House of Beautiful Business, not as a fictional
 # newspaper. Night number is the only temporal anchor that survives.
-
-
-def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs (FU#60 canonical form). Mirrors voice
-    pipeline. See voice/step1_private_reasoning._thinking_kwargs for
-    full rationale on display=summarized + no-temperature + no-effort."""
-    if not EDITOR_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 # --- Dossier briefing assembly --------------------------------------------
@@ -438,6 +425,7 @@ def stamp_runtime_fields(
     thinking_trace: str = "",
     thinking_tokens: int = 0,
     panel_speakers: list[dict[str, str]] | None = None,
+    cfg: StepConfig | None = None,
 ) -> dict[str, Any]:
     """Stamp runtime fields onto the parsed dossier. Returns the full
     v2 dossier dict ready to write to disk.
@@ -449,7 +437,15 @@ def stamp_runtime_fields(
         was retired 2026-05-05)
       - metadata: theme_id + display_title echoed; night + token counts
         + wall from the call
+
+    `cfg` is the `step_config("runtime.editor.dossier")` the caller
+    already resolved for the actual call; defaults to a fresh lookup so
+    direct unit-test calls (which don't make a real call and have no
+    `cfg` handy) still get a real model/thinking value rather than a
+    stale hardcoded one.
     """
+    if cfg is None:
+        cfg = step_config("runtime.editor.dossier")
     # Enrich headnotes with all runtime-stamped fields so each headnote is
     # self-contained for the microsite — no separate per-voice file fetch
     # needed to render an artifact page. Stamps:
@@ -484,8 +480,8 @@ def stamp_runtime_fields(
         "theme_display_title":   theme_display_title,
         "night":                 night,
         "generated_by":          "editor_pipeline_v2",
-        "model":                 EDITOR_MODEL,
-        "thinking_enabled":      EDITOR_THINKING,
+        "model":                 cfg.model,
+        "thinking_enabled":      cfg.thinking_on,
         "thinking_tokens":       thinking_tokens,
         "wall_clock_s":          round(wall_clock_s, 2),
     }
@@ -570,17 +566,17 @@ def generate_dossier(
     artifact_form_by_slug = {v["voice_slug"]: v.get("selected_form", "") for v in briefing["engaged_voices"]}
     theme_display_title = briefing["theme"]["theme_display_title"]
 
+    cfg = step_config("runtime.editor.dossier")
     log.info(
-        f"  dossier call: theme={theme_id} voices={len(voice_slugs)} model={EDITOR_MODEL}"
+        f"  dossier call: theme={theme_id} voices={len(voice_slugs)} model={cfg.model}"
     )
     t0 = time.time()
     raw_text, thinking_trace, final_message, thinking_tokens = stream_voice_call(
         client,
-        model=EDITOR_MODEL,
+        cfg=cfg,
         max_tokens=EDITOR_MAX_TOKENS,
         system=system_prompt,
         user=user_prompt,
-        thinking_kwargs=_thinking_kwargs(),
         logger=log,
     )
     wall = time.time() - t0
@@ -601,6 +597,7 @@ def generate_dossier(
         thinking_trace=thinking_trace,
         thinking_tokens=thinking_tokens,
         panel_speakers=briefing.get("panel_speakers", []),
+        cfg=cfg,
     )
     log.info(
         f"  dossier done: theme={theme_id} "

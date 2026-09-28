@@ -55,6 +55,7 @@ try:
     from dotenv import load_dotenv
     load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import load_prompt, get_logger, extract_json, write_json_atomic
+    from flows.shared.model_routing import step_config
 except ImportError as e:
     sys.stderr.write(
         f"Missing dependency: {e.name}\n"
@@ -65,27 +66,18 @@ except ImportError as e:
 
 # --- Config ---------------------------------------------------------------
 
-# Per-flow override takes precedence over the shared CLAUDE_MODEL.
-# This prevents `export CLAUDE_MODEL=claude-opus-4-7` from silently
-# upgrading the cleaning pass (which doesn't benefit from Opus) along
-# with Researcher/Provocateur (which do).
-CLAUDE_MODEL = os.environ.get(
-    "TRANSCRIPTION_CLAUDE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6"),
-)
+# Model resolution for Speaker ID / Cleaning is via model_routing.json
+# steps "runtime.transcription.speaker_id" / "runtime.transcription.cleaning"
+# (still overridable with the legacy TRANSCRIPTION_SPEAKER_ID_MODEL /
+# TRANSCRIPTION_CLAUDE_MODEL / CLAUDE_MODEL env vars — see model_routing.py).
+# Optional per-step model override for Speaker ID: set
+# TRANSCRIPTION_SPEAKER_ID_MODEL="claude-opus-4-7" for difficult sessions
+# where the extra reasoning capacity helps — non-native English speakers,
+# complex multi-person Q&A, incomplete roster metadata, or any session
+# where Pass 5 re-attribution has to do non-trivial work. Cleaning and
+# semantic drift verification stay on Sonnet — the cost/benefit does not
+# favor Opus for those steps.
 CLAUDE_MAX_TOKENS = 64000
-
-# Optional per-step model override for Speaker ID. Defaults to
-# CLAUDE_MODEL (Sonnet in the baseline config). Set to
-# "claude-opus-4-7" for difficult sessions where the extra reasoning
-# capacity helps — non-native English speakers, complex multi-person
-# Q&A, incomplete roster metadata, or any session where Pass 5
-# re-attribution has to do non-trivial work. Cleaning and semantic
-# drift verification stay on CLAUDE_MODEL (Sonnet) — the cost/benefit
-# does not favor Opus for those steps.
-SPEAKER_ID_MODEL = os.environ.get(
-    "TRANSCRIPTION_SPEAKER_ID_MODEL", CLAUDE_MODEL
-)
 
 # Output directory — overridable so Level 3 can point at /mnt/drive/transcripts/dayN/.
 # When unset (CLI standalone use), defaults to the audio file's parent dir
@@ -425,9 +417,10 @@ def transcribe_with_assemblyai(audio_path, session):
         speakers_expected=expected + 2,
         language_detection=True,
     )
+    asr_model = step_config("runtime.transcription.asr").model
     # SDK 0.59.0 uses deprecated/incompatible fields for universal-3-pro.
     # Inject the modern fields directly on the raw model.
-    config.raw.speech_models = ["universal-3-pro"]
+    config.raw.speech_models = [asr_model]
     config.raw.speech_model = None
     if vocab:
         # universal-3-pro replaces word_boost with keyterms_prompt for
@@ -504,7 +497,8 @@ def identify_speakers(turns, session):
         f"{json.dumps(compact_turns, indent=2, ensure_ascii=False)}"
     )
 
-    logger.info(f"Speaker ID pass (model={SPEAKER_ID_MODEL})")
+    cfg = step_config("runtime.transcription.speaker_id")
+    logger.info(f"Speaker ID pass (model={cfg.model})")
     t0 = time.time()
     # Intentional exception to the "thinking ON for every Opus 4.7 call" rule:
     # Speaker ID output is small (mappings + flags, <2K tokens), so adaptive
@@ -519,8 +513,12 @@ def identify_speakers(turns, session):
     # wrote (per-session roster + transcript travel in user message). If the
     # system stays below the model's activation threshold, the breakpoint is
     # silently ignored — no penalty.
+    thinking_kwargs = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
     resp = client.messages.create(
-        model=SPEAKER_ID_MODEL,
+        model=cfg.model,
         max_tokens=4096,
         system=[
             {
@@ -530,6 +528,8 @@ def identify_speakers(turns, session):
             }
         ],
         messages=[{"role": "user", "content": user}],
+        **thinking_kwargs,
+        **cfg.output_config_kwargs(),
     )
     logger.info(
         f"  done in {time.time()-t0:.1f}s "
@@ -557,7 +557,8 @@ def clean_transcript(named_turns, session, vocabulary):
         f"{json.dumps(named_turns, indent=2, ensure_ascii=False)}"
     )
 
-    logger.info(f"Cleaning pass (model={CLAUDE_MODEL}, streaming)")
+    cfg = step_config("runtime.transcription.cleaning")
+    logger.info(f"Cleaning pass (model={cfg.model}, streaming)")
     t0 = time.time()
     # Intentional exception to the "thinking ON for every Opus 4.7 call" rule:
     # Cleaning is the largest LLM call by output volume (~18K tokens on big
@@ -572,9 +573,13 @@ def clean_transcript(named_turns, session, vocabulary):
     # minimum, so this is mostly defensive: if the prompt grows past the
     # threshold later, caching kicks in automatically; if not, the breakpoint
     # is silently ignored).
+    thinking_kwargs = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
     chunks = []
     with client.messages.stream(
-        model=CLAUDE_MODEL,
+        model=cfg.model,
         max_tokens=CLAUDE_MAX_TOKENS,
         system=[
             {
@@ -584,6 +589,8 @@ def clean_transcript(named_turns, session, vocabulary):
             }
         ],
         messages=[{"role": "user", "content": user}],
+        **thinking_kwargs,
+        **cfg.output_config_kwargs(),
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)

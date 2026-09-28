@@ -57,6 +57,7 @@ try:
     # env vars in the parent shell. Matches personas/run_persona_pipeline.py.
     load_dotenv(_REPO_ROOT.parent / ".env", override=True)
     from flows.shared.io import get_logger, member_slug, write_json_atomic
+    from flows.shared.model_routing import step_config
     from flows.shared.project_root import add_project_arg, resolve_project_root
     from flows.voice.card_assembly import load_persona_card
     from flows.voice.step1_private_reasoning import run_step1_for_pair
@@ -623,13 +624,17 @@ def run_voice(
     # scanning live logs. counts.<stage>_failures is the quick-glance
     # number; the per-stage arrays carry error_type + error_message +
     # traceback_excerpt per failure record.
+    # Representative step for the manifest's single model/thinking summary —
+    # Step 1/2/3 all resolve identically under the shared VOICE_MODEL/
+    # CLAUDE_MODEL/VOICE_THINKING legacy env vars today.
+    _manifest_cfg = step_config("runtime.voice.step1")
     manifest = {
         "pipeline": "voice",
         "pipeline_version": "v2",
         "night": night,
         "run_id": run_dir.name,
-        "model": os.environ.get("VOICE_MODEL", "claude-opus-4-7"),
-        "thinking_enabled": os.environ.get("VOICE_THINKING", "1") != "0",
+        "model": _manifest_cfg.model,
+        "thinking_enabled": _manifest_cfg.thinking_on,
         "voices_processed": sorted(briefings),
         "counts": {
             "step1_pairs_attempted": len(pairs),

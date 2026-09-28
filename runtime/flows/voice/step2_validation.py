@@ -47,14 +47,11 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from flows.shared.io import get_logger, load_prompt, write_json_atomic
+from flows.shared.model_routing import step_config
 
 
 # --- Constants ----------------------------------------------------------
 
-# Sonnet 4.6 — fast + cheap; validators don't need Opus.
-STEP2_VALIDATION_MODEL = os.environ.get(
-    "VOICE_STEP2_VALIDATION_MODEL", "claude-sonnet-4-6"
-)
 STEP2_VALIDATION_MAX_TOKENS = int(
     os.environ.get("VOICE_STEP2_VALIDATION_MAX_TOKENS", "4096")
 )
@@ -79,24 +76,32 @@ _AI_SLOP_LEXICON = {
 # --- Anthropic call helper ---------------------------------------------
 
 def _call_anthropic(*, system: str, user: str) -> dict[str, Any]:
-    """One Sonnet 4.6 call. Returns text + usage + wall.
+    """One Sonnet 4.6 call (per model_routing.json — validators don't need
+    Opus). Returns text + usage + wall.
 
     Returns dict with keys: text, model, input_tokens, output_tokens,
     wall_clock_s.
     """
     from anthropic import Anthropic
+    cfg = step_config("runtime.voice.step2_validation")
     client = Anthropic()
     t0 = time.time()
+    thinking_kwargs = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
     resp = client.messages.create(
-        model=STEP2_VALIDATION_MODEL,
+        model=cfg.model,
         max_tokens=STEP2_VALIDATION_MAX_TOKENS,
         system=system,
         messages=[{"role": "user", "content": user}],
+        **thinking_kwargs,
+        **cfg.output_config_kwargs(),
     )
     text_chunks = [b.text for b in resp.content if hasattr(b, "text")]
     return {
         "text": "".join(text_chunks),
-        "model": STEP2_VALIDATION_MODEL,
+        "model": cfg.model,
         "input_tokens": resp.usage.input_tokens,
         "output_tokens": resp.usage.output_tokens,
         "wall_clock_s": round(time.time() - t0, 2),

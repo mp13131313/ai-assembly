@@ -30,26 +30,12 @@ if str(_REPO_ROOT) not in sys.path:
 from anthropic import Anthropic
 
 from flows.shared.io import get_logger, write_json_atomic
+from flows.shared.model_routing import step_config
 from flows.voice.card_assembly import assemble_system_prompt, load_persona_card
 from flows.voice._anthropic_call import stream_voice_call
 
 
-VOICE_MODEL = os.environ.get(
-    "VOICE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-VOICE_THINKING = os.environ.get("VOICE_THINKING", "1") != "0"
 STEP2_MAX_TOKENS = int(os.environ.get("VOICE_STEP2_MAX_TOKENS", "64000"))
-
-
-def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs. See step1_private_reasoning._thinking_kwargs
-    for full rationale. Short version: no `temperature` key — Anthropic
-    docs §"Feature compatibility" say thinking is incompatible with
-    temperature modifications. SDK default 1.0 stands via omission."""
-    if not VOICE_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def build_step2_user_prompt(step1_outputs: list[dict[str, Any]]) -> str:
@@ -343,22 +329,22 @@ def run_step2_for_voice(
     if council_member_name is None:
         council_member_name = card.get("council_member_name", voice_slug)
 
+    cfg = step_config("runtime.voice.step2")
     system = assemble_system_prompt(card, step=2, night=night)
     user = build_step2_user_prompt(step1_outputs)
 
     logger.info(
         f"  Step 2 calling: {voice_slug} "
-        f"({len(step1_outputs)} Step 1 inputs, model={VOICE_MODEL})"
+        f"({len(step1_outputs)} Step 1 inputs, model={cfg.model})"
     )
     client = Anthropic()
     t0 = time.time()
     raw_text, thinking_trace, final, thinking_tokens = stream_voice_call(
         client,
-        model=VOICE_MODEL,
+        cfg=cfg,
         max_tokens=STEP2_MAX_TOKENS,
         system=system,
         user=user,
-        thinking_kwargs=_thinking_kwargs(),
         logger=logger,
     )
     thinking_trace = thinking_trace.strip()
@@ -435,8 +421,8 @@ def run_step2_for_voice(
         "artifact_text": parsed["artifact_text"],
         "thinking_trace": thinking_trace,
         "word_count": word_count,
-        "model": VOICE_MODEL,
-        "thinking_enabled": VOICE_THINKING,
+        "model": cfg.model,
+        "thinking_enabled": cfg.thinking_on,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "thinking_tokens": thinking_tokens,

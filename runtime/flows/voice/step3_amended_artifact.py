@@ -32,6 +32,7 @@ if str(_REPO_ROOT) not in sys.path:
 from anthropic import Anthropic
 
 from flows.shared.io import get_logger, write_json_atomic
+from flows.shared.model_routing import step_config
 from flows.voice.card_assembly import (
     assemble_system_prompt,
     filter_first_draft_for_step3,
@@ -40,20 +41,7 @@ from flows.voice.card_assembly import (
 from flows.voice._anthropic_call import stream_voice_call
 
 
-VOICE_MODEL = os.environ.get(
-    "VOICE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-VOICE_THINKING = os.environ.get("VOICE_THINKING", "1") != "0"
 STEP3_MAX_TOKENS = int(os.environ.get("VOICE_STEP3_MAX_TOKENS", "64000"))
-
-
-def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs (FU#60 canonical form).
-    See step1_private_reasoning._thinking_kwargs for full rationale."""
-    if not VOICE_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def _find_shared_themes(
@@ -241,6 +229,7 @@ def run_step3_for_voice(
     if council_member_name is None:
         council_member_name = card.get("council_member_name", voice_slug)
 
+    cfg = step_config("runtime.voice.step3")
     system = assemble_system_prompt(card, step=3, night=night)
     user, voices_read = build_step3_user_prompt(
         own_first_draft, other_first_drafts, theme_display_titles
@@ -248,17 +237,16 @@ def run_step3_for_voice(
 
     logger.info(
         f"  Step 3 calling: {voice_slug} "
-        f"({len(voices_read)} other voices on shared themes)"
+        f"({len(voices_read)} other voices on shared themes, model={cfg.model})"
     )
     client = Anthropic()
     t0 = time.time()
     raw_text, thinking_trace, final, thinking_tokens = stream_voice_call(
         client,
-        model=VOICE_MODEL,
+        cfg=cfg,
         max_tokens=STEP3_MAX_TOKENS,
         system=system,
         user=user,
-        thinking_kwargs=_thinking_kwargs(),
         logger=logger,
     )
     thinking_trace = thinking_trace.strip()
@@ -336,8 +324,8 @@ def run_step3_for_voice(
         "thinking_trace": thinking_trace,
         "word_count": word_count,
         "responded_to_graph": responded_to_graph,
-        "model": VOICE_MODEL,
-        "thinking_enabled": VOICE_THINKING,
+        "model": cfg.model,
+        "thinking_enabled": cfg.thinking_on,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "thinking_tokens": thinking_tokens,

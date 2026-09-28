@@ -59,13 +59,10 @@ try:
         write_json_atomic,
     )
     from flows.shared.project_root import add_project_arg, resolve_project_root  # noqa: E402
+    from flows.shared.model_routing import step_config  # noqa: E402
     from flows.editor.card_assembly import assemble_system_prompt, load_editor_card  # noqa: E402
     from flows.editor.routing import write_routing_manifest  # noqa: E402
-    from flows.editor.dossier_generation import (  # noqa: E402
-        EDITOR_MODEL,
-        EDITOR_THINKING,
-        generate_dossier,
-    )
+    from flows.editor.dossier_generation import generate_dossier  # noqa: E402
     from flows.editor.publish import load_prior_editions, write_dossier  # noqa: E402
 except ImportError as e:
     sys.stderr.write(
@@ -225,9 +222,11 @@ def run_editor_pipeline(
         except Exception as e:  # noqa: BLE001 — orchestrator must not crash on one dossier's failure
             return (theme_id, None, e)
 
+    _dossier_cfg = step_config("runtime.editor.dossier")
     logger.info(
         f"Stage 2: dossier generation ({len(dossier_specs)} dossier(s), "
-        f"batch={EDITOR_BATCH}, model={EDITOR_MODEL}, thinking={EDITOR_THINKING})"
+        f"batch={EDITOR_BATCH}, model={_dossier_cfg.model}, "
+        f"thinking={_dossier_cfg.thinking_on})"
     )
     with ThreadPoolExecutor(max_workers=EDITOR_BATCH) as ex:
         futures = {ex.submit(_run_one, d): d for d in dossier_specs}
@@ -272,8 +271,8 @@ def run_editor_pipeline(
         "schema_version":   "2.0",
         "night":            night,
         "run_id":           run_dir.name,
-        "model":            EDITOR_MODEL,
-        "thinking_enabled": EDITOR_THINKING,
+        "model":            _dossier_cfg.model,
+        "thinking_enabled": _dossier_cfg.thinking_on,
         "counts": {
             "themes_routed":      len(routing["themes_to_dossiers"]),
             "dossiers_succeeded": len(dossier_results),

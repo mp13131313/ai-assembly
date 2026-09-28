@@ -32,6 +32,7 @@ if str(_REPO_ROOT) not in sys.path:
 from anthropic import Anthropic
 
 from flows.shared.io import write_json_atomic, get_logger
+from flows.shared.model_routing import step_config
 from flows.voice.card_assembly import (
     assemble_system_prompt,
     filter_theme_record_for_step1,
@@ -40,38 +41,7 @@ from flows.voice.card_assembly import (
 from flows.voice._anthropic_call import stream_voice_call
 
 
-VOICE_MODEL = os.environ.get(
-    "VOICE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-VOICE_THINKING = os.environ.get("VOICE_THINKING", "1") != "0"
 STEP1_MAX_TOKENS = int(os.environ.get("VOICE_STEP1_MAX_TOKENS", "64000"))
-
-
-def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs (FU#60 canonical form).
-
-    Adaptive mode lets the model decide how much to think; the only
-    supported thinking mode on Opus 4.7. Returns no `temperature` key
-    by design — per Anthropic docs §"Feature compatibility":
-    "Thinking isn't compatible with `temperature` or `top_k`
-    modifications." The SDK default for temperature is 1.0; we let it
-    stand by omitting the key.
-
-    `display: "summarized"` (FU#60, dd64782 + 0381278): Opus 4.7
-    defaults `display` to `"omitted"` — thinking blocks come back
-    empty (signature only). Setting `summarized` makes traces visible
-    so we can audit what we're paying for.
-
-    Effort: deliberately NOT set. Per Anthropic docs, the API default
-    is `high` — setting it explicitly is a no-op. `xhigh` is for
-    long-running agentic/coding work (not artifact composition);
-    `max` carries overthinking risk on structured outputs. `high`
-    default is the right level for voice + editor reasoning depth.
-    """
-    if not VOICE_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 _TAIL_RE = re.compile(
@@ -174,22 +144,22 @@ def run_step1_for_pair(
     if council_member_name is None:
         council_member_name = card.get("council_member_name", voice_slug)
 
+    cfg = step_config("runtime.voice.step1")
     system = assemble_system_prompt(card, step=1, night=night)
     user = build_step1_user_prompt(formulation_entry)
 
     logger.info(
         f"  Step 1 calling: {voice_slug}__{theme_id} "
-        f"(model={VOICE_MODEL}, thinking={VOICE_THINKING})"
+        f"(model={cfg.model}, thinking={cfg.thinking_on})"
     )
     client = Anthropic()
     t0 = time.time()
     detailed_response, thinking_trace, final, thinking_tokens = stream_voice_call(
         client,
-        model=VOICE_MODEL,
+        cfg=cfg,
         max_tokens=STEP1_MAX_TOKENS,
         system=system,
         user=user,
-        thinking_kwargs=_thinking_kwargs(),
         logger=logger,
     )
     detailed_response = detailed_response.strip()
@@ -233,8 +203,8 @@ def run_step1_for_pair(
         "detailed_response": detailed_response,
         "extractions_engaged": extractions_engaged,
         "thinking_trace": thinking_trace,
-        "model": VOICE_MODEL,
-        "thinking_enabled": VOICE_THINKING,
+        "model": cfg.model,
+        "thinking_enabled": cfg.thinking_on,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "thinking_tokens": thinking_tokens,

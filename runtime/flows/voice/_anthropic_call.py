@@ -17,6 +17,14 @@ count for observability, we subtract the response token count
 This gives accurate billed thinking tokens — necessary because the
 SDK's Usage object has no `thinking_tokens` field (verified empirically
 on SDK 0.94.1 + Anthropic docs Apr 2026).
+
+Model/thinking/effort resolution: callers pass a `StepConfig` (from
+`flows.shared.model_routing.step_config`) instead of raw `model` +
+`thinking_kwargs` values. This is the one place the "adaptive,
+display=summarized" thinking shape and `output_config_kwargs()` are
+applied for every Voice Step 1/2/3, Continuity, and Editor dossier
+call — callers no longer each carry their own `_thinking_kwargs()`
+copy (see docs/LLM_CALL_INVENTORY.md §2.4 preamble).
 """
 
 from __future__ import annotations
@@ -24,6 +32,8 @@ from __future__ import annotations
 import logging
 import time
 from typing import Any
+
+from flows.shared.model_routing import StepConfig
 
 
 def _estimate_thinking_tokens(client: Any, model: str, response_text: str, output_tokens: int, logger: logging.Logger | None = None) -> int:
@@ -55,11 +65,10 @@ def _estimate_thinking_tokens(client: Any, model: str, response_text: str, outpu
 def stream_voice_call(
     client: Any,
     *,
-    model: str,
+    cfg: StepConfig,
     max_tokens: int,
     system: str | tuple[str, str],
     user: str,
-    thinking_kwargs: dict | None = None,
     retry_backoff_s: int = 5,
     logger: logging.Logger | None = None,
     cache_system: bool = True,
@@ -67,6 +76,14 @@ def stream_voice_call(
     """Stream a messages call; extract text + thinking from final.content.
 
     Returns: (detailed_text, thinking_trace, final_message, thinking_tokens).
+
+    `cfg` is the caller's `step_config("runtime.voice.step1")` (or
+    step2/step3/continuity/editor.dossier) — this function is the single
+    place that turns `cfg.thinking_on` into the `{"type": "adaptive",
+    "display": "summarized"}` payload (FU#60 canonical form: no
+    `temperature` key, since thinking is incompatible with temperature
+    modifications) and forwards `cfg.output_config_kwargs()` (a no-op
+    today since every step's effort is null).
 
     `final_message` is the Anthropic Message object — caller can read
     `.usage.input_tokens / .output_tokens` for accounting (the SDK does
@@ -89,8 +106,12 @@ def stream_voice_call(
     retrying a permanent error once is one wasted call, which is
     acceptable.
     """
-    if thinking_kwargs is None:
-        thinking_kwargs = {}
+    model = cfg.model
+    thinking_kwargs: dict[str, Any] = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
+    output_config_kwargs = cfg.output_config_kwargs()
     # Prompt caching on the system prompt. Two strategies:
     #   - tuple `(prefix, tail)`: place breakpoints on BOTH blocks (1h TTL)
     #     so Step 2/3 calls READ the prefix Step 1's first call wrote.
@@ -132,6 +153,7 @@ def stream_voice_call(
                 system=cached_system,
                 messages=[{"role": "user", "content": user}],
                 **thinking_kwargs,
+                **output_config_kwargs,
             ) as stream:
                 for _ in stream.text_stream:
                     pass  # consume; final assembly via final.content below

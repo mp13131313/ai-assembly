@@ -32,24 +32,12 @@ if str(_REPO_ROOT) not in sys.path:
 from anthropic import Anthropic
 
 from flows.shared.io import extract_json, get_logger, load_prompt, write_json_atomic
+from flows.shared.model_routing import step_config
 from flows.shared.project_root import resolve_project_root
 from flows.voice._anthropic_call import stream_voice_call
 
 
-CONTINUITY_MODEL = os.environ.get(
-    "VOICE_CONTINUITY_MODEL",
-    "claude-sonnet-4-6",
-)
-CONTINUITY_THINKING = os.environ.get("VOICE_CONTINUITY_THINKING", "1") != "0"
 CONTINUITY_MAX_TOKENS = int(os.environ.get("VOICE_CONTINUITY_MAX_TOKENS", "8000"))
-
-
-def _thinking_kwargs() -> dict:
-    """Adaptive thinking kwargs for continuity (Sonnet 4.6, FU#60 form).
-    See voice/step1_private_reasoning._thinking_kwargs for full rationale."""
-    if not CONTINUITY_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def _load_voice_step1_outputs(
@@ -166,6 +154,7 @@ def generate_continuity(
         )
         return {}
 
+    cfg = step_config("runtime.voice.continuity")
     system = load_prompt("voice_continuity")
     user = _build_continuity_user_prompt(
         voice_slug, night_just_completed, step1_outputs, step2_output, step3_output
@@ -173,17 +162,16 @@ def generate_continuity(
 
     logger.info(
         f"  Continuity calling: {voice_slug} for night {next_night} "
-        f"(model={CONTINUITY_MODEL})"
+        f"(model={cfg.model})"
     )
     client = Anthropic()
     t0 = time.time()
     raw_text, _thinking_trace, final, _thinking_tokens = stream_voice_call(
         client,
-        model=CONTINUITY_MODEL,
+        cfg=cfg,
         max_tokens=CONTINUITY_MAX_TOKENS,
         system=system,
         user=user,
-        thinking_kwargs=_thinking_kwargs(),
         logger=logger,
         cache_system=False,  # single-call flow; 2.0× write with no reads is net cost
     )
@@ -245,7 +233,7 @@ def generate_continuity(
         f"continuity_block_artifact_if_night_{next_night}": cb_artifact,
         "signature_moves_deployed": signature_moves_deployed,
         "generated_date": time.strftime("%Y-%m-%d"),
-        "model": CONTINUITY_MODEL,
+        "model": cfg.model,
         "input_tokens": final.usage.input_tokens,
         "output_tokens": final.usage.output_tokens,
         "cache_creation_input_tokens": getattr(final.usage, "cache_creation_input_tokens", 0) or 0,

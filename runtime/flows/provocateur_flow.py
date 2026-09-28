@@ -103,24 +103,17 @@ from flows.shared.io import (
     member_slug,
     write_json_atomic,
 )
+from flows.shared.model_routing import StepConfig, step_config
 
 
 # --- Config ---------------------------------------------------------------
 
-# Default to Opus 4.7 — canonical model for Provocateur Pipeline v1 per
-# the validation run on dev_msc_test. Override via CLAUDE_MODEL env var
-# for dev iteration on Sonnet.
-CLAUDE_MODEL = os.environ.get(
-    "PROVOCATEUR_CLAUDE_MODEL",
-    os.environ.get("CLAUDE_MODEL", "claude-opus-4-7"),
-)
-
-# Adaptive thinking for all three LLM tasks — the Provocateur is
-# editorially heavy (activation scoring, coverage balancing, and
-# grounded formulation writing) and benefits from extended thinking
-# the same way the Researcher's clustering and theming do.
-PROVOCATEUR_THINKING = os.environ.get("PROVOCATEUR_THINKING", "1") == "1"
-
+# Model + thinking resolution for triage/formulation now comes from
+# model_routing.json steps "runtime.provocateur.triage_voice" /
+# ".triage_flags" / ".formulation" (still overridable with the legacy
+# PROVOCATEUR_CLAUDE_MODEL / CLAUDE_MODEL / PROVOCATEUR_THINKING env vars
+# — see model_routing.py).
+#
 # Max token budgets. Triage and Selection outputs are small but
 # adaptive thinking tokens count against max_tokens, so the ceilings
 # are generous. 40K matches the Researcher clustering task where
@@ -129,19 +122,6 @@ PROVOCATEUR_THINKING = os.environ.get("PROVOCATEUR_THINKING", "1") == "1"
 TRIAGE_MAX_TOKENS = 40000
 FORMULATION_MAX_TOKENS = 40000
 # Note: no SELECTION_MAX_TOKENS — Selection is pure Python, no LLM call.
-
-
-def _thinking_kwargs() -> dict[str, Any]:
-    """Return the thinking block kwargs if thinking is enabled.
-
-    `display: "summarized"` makes the model's thinking trace visible in
-    the streamed response (Opus 4.7 default is `omitted`, which returns
-    no thinking content). Matches the persona + voice pipeline pattern
-    landed under FU#60.
-    """
-    if not PROVOCATEUR_THINKING:
-        return {}
-    return {"thinking": {"type": "adaptive", "display": "summarized"}}
 
 
 def _get_logger() -> Any:
@@ -374,12 +354,22 @@ def _stream_and_parse(
     task_label: str,
     logger: Any,
     cache_system: bool = False,
+    *,
+    cfg: StepConfig,
 ) -> dict:
     """Run a streaming LLM call, collect text, parse JSON defensively.
 
     Centralizes the three-way failure-mode handling that every Provocateur
     task shares: empty text stream (thinking ate the budget), max_tokens
     stop reason, and JSON parse errors with visible content.
+
+    `cfg` is the caller's `step_config("runtime.provocateur.<step>")` —
+    triage_voice, triage_flags, and formulate_for_member each resolve
+    their own step so an env override (or a future per-step split in
+    model_routing.json) can differ between them even though today they
+    all resolve to the same model/thinking under the shared
+    PROVOCATEUR_CLAUDE_MODEL / CLAUDE_MODEL / PROVOCATEUR_THINKING
+    legacy env vars.
 
     Raises a descriptive exception on any failure so Prefect retries
     have useful context.
@@ -408,12 +398,17 @@ def _stream_and_parse(
         ]
     else:
         system_arg = system
+    thinking_kwargs = (
+        {"thinking": {"type": "adaptive", "display": "summarized"}}
+        if cfg.thinking_on else {}
+    )
     with client.messages.stream(
-        model=CLAUDE_MODEL,
+        model=cfg.model,
         max_tokens=max_tokens,
         system=system_arg,
         messages=[{"role": "user", "content": user}],
-        **_thinking_kwargs(),
+        **thinking_kwargs,
+        **cfg.output_config_kwargs(),
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)
@@ -457,7 +452,7 @@ def _stream_and_parse(
     # can include Provocateur. Voice Step 1/2/3 + Editor + Continuity
     # already persist these on their output JSONs; this closes the gap.
     if isinstance(result, dict):
-        result["model"] = CLAUDE_MODEL
+        result["model"] = cfg.model
         result["input_tokens"] = usage.input_tokens
         result["output_tokens"] = usage.output_tokens
         result["cache_creation_input_tokens"] = (
@@ -557,6 +552,7 @@ def triage_voice(
         task_label=label,
         logger=logger,
         cache_system=True,  # C19c: ~10 voices share system per night
+        cfg=step_config("runtime.provocateur.triage_voice"),
     )
     # Defensive: ensure voice name is echoed back even if model omitted it
     result.setdefault("voice", voice["name"])
@@ -610,6 +606,7 @@ def triage_flags(themes: list[dict], council: dict) -> dict:
         max_tokens=TRIAGE_MAX_TOKENS,
         task_label="TriageFlags",
         logger=logger,
+        cfg=step_config("runtime.provocateur.triage_flags"),
     )
     n_flags = len(result.get("theme_flags", []))
     n_keep = sum(
@@ -1147,6 +1144,7 @@ def formulate_for_member(
         task_label=label,
         logger=logger,
         cache_system=True,  # C19a: voice's 3-5 formulations share system prompt
+        cfg=step_config("runtime.provocateur.formulation"),
     )
     # Defensive: ensure member + theme_id echoed back even if model omitted them
     result.setdefault("member", member_name)
@@ -1736,14 +1734,19 @@ def run_provocateur(
     n_kept = len(selection_result.get("kept_themes", []))
     n_dropped = len(selection_result.get("dropped_themes", []))
     coverage = selection_result.get("coverage_per_member", {})
+    # Representative step for the manifest's single model/thinking summary —
+    # triage_voice, triage_flags, and formulation all resolve identically
+    # under the shared PROVOCATEUR_CLAUDE_MODEL/CLAUDE_MODEL/PROVOCATEUR_THINKING
+    # legacy env vars today (see _MODEL_ENV / _THINKING_ENV in model_routing.py).
+    _manifest_cfg = step_config("runtime.provocateur.triage_voice")
 
     manifest = {
         "pipeline": "provocateur",
         "pipeline_version": "v3",
         "council_config_version": council["version"],
         "council_members_count": len(council["members"]),
-        "model": CLAUDE_MODEL,
-        "thinking_enabled": PROVOCATEUR_THINKING,
+        "model": _manifest_cfg.model,
+        "thinking_enabled": _manifest_cfg.thinking_on,
         "inputs": {
             "extractions": len(all_extractions),
             "themes": len(themes),
