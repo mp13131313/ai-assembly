@@ -37,6 +37,9 @@ PROJECT_ROOT = Path(os.environ.get(
     "/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026",
 ))
 OUTPUT_DIR = PROJECT_ROOT / "published_artifacts" / "data_views"
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from flows.shared.io import voice_display_name  # noqa: E402
 NIGHTS = ["night_1", "night_2", "night_3"]
 
 
@@ -448,6 +451,13 @@ def extract_dossiers(night: str, graph: dict, dossiers_dir=None) -> None:
         graph["nights"][night]["dossiers_index"] = index
     for df in sorted(d_dir.glob("dossier_*.json")):
         d = load_json(df) or {}
+        # C53: dossiers read straight from a run dir (the pre-conference
+        # edition) were never restamped. Normalize headnote names by slug,
+        # same rule as scripts/restamp_published_voice_names.py (no-op for
+        # the already-repaired published nights).
+        for hn in d.get("headnotes", []):
+            if isinstance(hn, dict) and hn.get("voice_slug"):
+                hn["voice_name"] = "the " + voice_display_name(hn["voice_slug"], PROJECT_ROOT)
         dossier_num = df.stem
         meta = d.get("metadata", {})
         theme_id_raw = meta.get("theme_id")
