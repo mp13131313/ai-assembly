@@ -8,9 +8,10 @@ Per spec v2 (`docs/AI_Assembly_Editor_Pipeline.md`):
   on focus_decision. Writes <run_dir>/05_editor/theme_routing.json.
 
   Stage 2 (per-dossier Anthropic call): for each engaged theme, call
-  Claudia with the deduped dossier briefing + the night's engaged voices'
-  artifacts. One call per dossier; calls run in parallel via
-  ThreadPoolExecutor; system prompt cached across the night.
+  the editor (Tim) with the deduped dossier briefing + the night's engaged
+  voices' artifacts. One call per dossier. The first call runs alone and
+  writes the system-prompt cache; the rest then run in parallel via
+  ThreadPoolExecutor and read it (C66).
 
 Reads (per spec v2 §"What the Editor Pipeline Knows"):
   <run_dir>/04_voice/step2_first_draft_artifacts/<voice>.json
@@ -228,26 +229,38 @@ def run_editor_pipeline(
         f"batch={EDITOR_BATCH}, model={_dossier_cfg.model}, "
         f"thinking={_dossier_cfg.thinking_on})"
     )
+    def _collect(result: tuple[str, dict[str, Any] | None, Exception | None]) -> None:
+        theme_id, dossier, err = result
+        if err is not None or dossier is None:
+            logger.error(f"  dossier theme={theme_id} FAILED: {err}")
+            dossier_failures.append({"theme_id": theme_id, "error": str(err)})
+            return
+        # Find dossier_no from routing
+        dspec = next(d for d in routing["themes_to_dossiers"] if d["theme_id"] == theme_id)
+        dossier_no = dspec["dossier_no"]
+        run_path, pub_path = write_dossier(
+            dossier,
+            run_dir=run_dir,
+            project_root=project_root,
+            night=night,
+            dossier_no=dossier_no,
+        )
+        dossier_results[theme_id] = dossier
+        logger.info(f"  wrote {run_path.name} (run_dir + published)")
+
+    # C66: every dossier call shares the night's system prompt, cached with a
+    # 1h breakpoint — but a cache entry only serves calls that start after it
+    # exists. Started all at once (as at Athens), every call wrote the cache
+    # and none read it. So the first dossier that makes a call runs alone and
+    # writes the cache; the rest then run in parallel and read it.
+    first = next((d for d in dossier_specs if _voices_routed_to(routing, d["theme_id"])), None)
+    if first is not None:
+        _collect(_run_one(first))
+    rest = [d for d in dossier_specs if d is not first]
     with ThreadPoolExecutor(max_workers=EDITOR_BATCH) as ex:
-        futures = {ex.submit(_run_one, d): d for d in dossier_specs}
+        futures = {ex.submit(_run_one, d): d for d in rest}
         for fut in as_completed(futures):
-            theme_id, dossier, err = fut.result()
-            if err is not None or dossier is None:
-                logger.error(f"  dossier theme={theme_id} FAILED: {err}")
-                dossier_failures.append({"theme_id": theme_id, "error": str(err)})
-                continue
-            # Find dossier_no from routing
-            dspec = next(d for d in routing["themes_to_dossiers"] if d["theme_id"] == theme_id)
-            dossier_no = dspec["dossier_no"]
-            run_path, pub_path = write_dossier(
-                dossier,
-                run_dir=run_dir,
-                project_root=project_root,
-                night=night,
-                dossier_no=dossier_no,
-            )
-            dossier_results[theme_id] = dossier
-            logger.info(f"  wrote {run_path.name} (run_dir + published)")
+            _collect(fut.result())
 
     # ---- Stage 3: edition lead-pick + per-night/root indices ------------
     edition_audit: dict[str, Any] = {}

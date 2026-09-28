@@ -284,3 +284,63 @@ def test_editor_flow_handles_failed_dossier(tmp_path, monkeypatch):
     assert manifest["counts"]["dossiers_failed"] == 1
     assert manifest["counts"]["dossiers_succeeded"] == 1
     assert len(manifest["dossier_failures"]) == 1
+
+
+def test_first_dossier_call_runs_alone_then_rest_in_parallel(tmp_path, monkeypatch):
+    """C66: the first dossier call must finish (writing the night's
+    system-prompt cache) before any other starts; the rest still overlap."""
+    import threading
+    import time
+
+    project_root = tmp_path / "project"
+    editor_dir = project_root / "editor" / "tim_leberecht"
+    editor_dir.mkdir(parents=True)
+    (editor_dir / "07_persona_card_assembled.json").write_text(STUB_CARD_PATH.read_text())
+
+    run_dir = tmp_path / "athens_night_2"
+    for tid, slug in (("theme_001", "v1"), ("theme_002", "v2"), ("theme_003", "v3")):
+        bp = run_dir / "03_provocateur" / "briefings" / f"{slug}.json"
+        bp.parent.mkdir(parents=True, exist_ok=True)
+        bp.write_text(json.dumps({"formulations": [{
+            "theme_id": tid, "theme_display_title": "T", "mode": "question",
+            "narrative_briefing": "<x>",
+            "full_theme_record": {"theme_title_from_researcher": "T",
+                                  "theme_abstract_from_researcher": "A",
+                                  "clusters": [], "theme_flags": {}},
+        }]}))
+        ap = run_dir / "04_voice" / "step2_first_draft_artifacts" / f"{slug}.json"
+        ap.parent.mkdir(parents=True, exist_ok=True)
+        ap.write_text(json.dumps({
+            "lineage": {"voice_slug": slug, "themes_covered": [tid]},
+            "council_member": slug.upper(),
+            "focus_decision": "Focus on Response 1.",
+            "artifact_text": "<x>",
+        }))
+
+    events: list[tuple[str, int]] = []
+    lock = threading.Lock()
+    counter = {"n": 0}
+
+    def fake_call(*args, **kwargs):
+        with lock:
+            i = counter["n"]
+            counter["n"] += 1
+            events.append(("start", i))
+        time.sleep(0.05)
+        with lock:
+            events.append(("end", i))
+        usage = MagicMock(input_tokens=1, output_tokens=1,
+                          cache_creation_input_tokens=0, cache_read_input_tokens=0)
+        return ("**kicker:** OK\n**headline:** OK\n**body_paragraphs:**\np1\n",
+                "", MagicMock(usage=usage), 0)
+
+    monkeypatch.setattr(dossier_generation, "stream_voice_call", fake_call)
+    monkeypatch.setattr("anthropic.Anthropic", lambda *a, **kw: MagicMock())
+
+    from flows.editor_flow import run_editor_pipeline
+    manifest = run_editor_pipeline(run_dir, night=2, project_root=project_root, bypass_gating=True)
+
+    assert manifest["counts"]["dossiers_succeeded"] == 3
+    assert events[:2] == [("start", 0), ("end", 0)], events   # first call alone
+    rest = events[2:]
+    assert rest[0][0] == "start" and rest[1][0] == "start", events  # others overlap
