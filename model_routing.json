@@ -1,0 +1,72 @@
+{
+  "_doc": [
+    "Which model runs each LLM step, across both pipelines. One place to change it (later: the studio UI's model page).",
+    "Loaded by runtime/flows/shared/model_routing.py and personas/flows/shared/model_routing.py (identical copies).",
+    "steps.*: model (must be listed under models), thinking ('adaptive' | 'off', Anthropic only), effort (null = don't send; model default).",
+    "The loader refuses unsafe combinations: thinking 'off' on a model that can't disable it, or effort null on a model whose default isn't 'high' (a silent quality drop).",
+    "Legacy per-step env vars (docs/LLM_CALL_INVENTORY.md §5) still override this file so existing run commands keep working; prefer editing here.",
+    "Switching a voice-writing step's model changes how the voices write: re-validate the voices (sentinel regen) before relying on it. See runtime/OPEN_ITEMS.md C62."
+  ],
+
+  "models": {
+    "claude-opus-4-7":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
+    "claude-sonnet-4-6":   {"vendor": "anthropic", "sampling_params": true,  "thinking_can_disable": true,  "default_effort": "high"},
+    "claude-opus-5-5":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": false, "default_effort": "medium"},
+    "claude-sonnet-5":     {"vendor": "anthropic", "sampling_params": false, "thinking_can_disable": true,  "default_effort": "high"},
+    "gpt-5.4":             {"vendor": "openai"},
+    "gpt-4.1":             {"vendor": "openai"},
+    "o3":                  {"vendor": "openai"},
+    "gpt-4o":              {"vendor": "openai"},
+    "gemini-2.5-pro":      {"vendor": "google"},
+    "sonar-deep-research": {"vendor": "perplexity"},
+    "universal-3-pro":     {"vendor": "assemblyai"}
+  },
+
+  "steps": {
+    "runtime.transcription.asr":         {"label": "Transcription · speech-to-text + diarization", "model": "universal-3-pro"},
+    "runtime.transcription.speaker_id":  {"label": "Transcription · speaker identification (5-pass)", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "runtime.transcription.cleaning":    {"label": "Transcription · cleaning", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+
+    "runtime.researcher.extraction":     {"label": "Researcher · extraction (per session)", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.researcher.clustering":     {"label": "Researcher · clustering", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.researcher.theming":        {"label": "Researcher · theming", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+
+    "runtime.provocateur.triage_voice":  {"label": "Provocateur · triage per voice", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.provocateur.triage_flags":  {"label": "Provocateur · theme editorial flags", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.provocateur.formulation":   {"label": "Provocateur · formulation per (theme, voice)", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+
+    "runtime.voice.step1":               {"label": "Voice · Step 1 private reasoning", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.voice.step2":               {"label": "Voice · Step 2 first-draft artifact", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.voice.step3":               {"label": "Voice · Step 3 amended artifact (skipped at Athens)", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "runtime.voice.continuity":          {"label": "Voice · cross-night continuity", "model": "claude-sonnet-4-6", "thinking": "adaptive", "effort": null},
+    "runtime.voice.step1_validation":    {"label": "Voice · Step 1 validation (off by default; cross-vendor ladder)", "model": "gpt-5.4", "ladder": ["gpt-5.4", "gpt-4.1", "o3", "gpt-4o", "gemini-2.5-pro"]},
+    "runtime.voice.step2_validation":    {"label": "Voice · Step 2 validation (4 pillars, operator gate)", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "runtime.synthesis_router":          {"label": "Voice + Editor · synthesis router (rare)", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "runtime.editor.dossier":            {"label": "Editor · dossier composition", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+
+    "personas.pass_0a_voice_config":     {"label": "Persona · 0a voice config", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_0b_tailor":           {"label": "Persona · 0b research-prompt tailoring", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_1a_perplexity":       {"label": "Persona · 1a Perplexity deep research", "model": "sonar-deep-research"},
+    "personas.pass_1b_gemini":           {"label": "Persona · 1b Gemini broad scan", "model": "gemini-2.5-pro"},
+    "personas.pass_1_merge":             {"label": "Persona · 1.1–1.6 chunked research merge", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_1_7_coherence":       {"label": "Persona · 1.7 coherence audit", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_1d_excerpts":         {"label": "Persona · 1d excerpt selection", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_2":                   {"label": "Persona · 2 identity & boundaries", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_3":                   {"label": "Persona · 3 intellectual core", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_4a":                  {"label": "Persona · 4a voice", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_4b":                  {"label": "Persona · 4b artifact", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_5":                   {"label": "Persona · 5 engagement", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_6":                   {"label": "Persona · 6 corpus curation", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.ct_compress":              {"label": "Persona · coherence-thread compression (after 2/3/4a/4b)", "model": "claude-sonnet-4-6", "thinking": "adaptive", "effort": null},
+    "personas.pass_7pre_extract":        {"label": "Persona · 7-pre citation extract", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "personas.pass_7pre_verify":         {"label": "Persona · 7-pre citation verify (batched)", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "personas.pass_7pre_boddice":        {"label": "Persona · 7-pre Boddice check", "model": "claude-sonnet-4-6", "thinking": "off", "effort": null},
+    "personas.pass_7_anachronism":       {"label": "Persona · 7 anachronism check (cross-vendor ladder)", "model": "gpt-5.4", "ladder": ["gpt-5.4", "gpt-4.1", "o3", "gpt-4o", "gemini-2.5-pro"]},
+    "personas.pass_7a":                  {"label": "Persona · 7a cross-model validation (ladder)", "model": "gpt-5.4", "ladder": ["gpt-5.4", "gpt-4.1", "o3", "gpt-4o", "gemini-2.5-pro"]},
+    "personas.pass_7a_fix":              {"label": "Persona · 7a-FIX linear patcher", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_7a_final":            {"label": "Persona · 7a FINAL post-assembly validation (ladder)", "model": "gpt-5.4", "ladder": ["gpt-5.4", "gpt-4.1", "o3", "gpt-4o", "gemini-2.5-pro"]},
+    "personas.pass_7b":                  {"label": "Persona · 7b worked provocations", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null},
+    "personas.pass_7c":                  {"label": "Persona · 7c negative constraints", "model": "gemini-2.5-pro", "fallback": {"model": "claude-sonnet-4-6", "thinking": "off", "effort": null}},
+    "personas.derive":                   {"label": "Persona · Derive (Provocateur profile + rubric)", "model": "claude-opus-4-7", "thinking": "adaptive", "effort": null}
+  }
+}
