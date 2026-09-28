@@ -18,7 +18,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from flows.shared.model_routing import StepConfig, step_config
+from flows.shared.model_routing import StepConfig, model_vendor, step_config
 
 load_dotenv()
 
@@ -513,3 +513,52 @@ def call_openai(
             raise RuntimeError(f"OpenAI ({model}) returned invalid JSON: {e}") from e
     _record(slug, pass_name, "openai", model, oai_usage, out["_wall_seconds"], project_root)
     return out
+
+
+# --- Cross-model validator ladder (Passes 7-anachronism, 7a, 7a FINAL) ---
+
+def _parse_json_text(text: str) -> Any:
+    """JSON from a plain-text reply, tolerating a ``` fence around it."""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+    return json.loads(cleaned)
+
+
+def call_validator_ladder(
+    step: str,
+    *,
+    system: str,
+    user: str,
+    max_tokens: int = 16384,
+    warn: Any = print,
+) -> dict[str, Any] | None:
+    """Try the step's validator ladder in order; return the first JSON verdict.
+
+    Each rung is routed by its vendor in model_routing.json — OpenAI rungs via
+    call_openai (reasoning_effort=high on gpt-5.x), Google rungs via
+    call_gemini — not by its position in the ladder. The loader admits only
+    these two vendors in a ladder (a cross-model check must not be Claude).
+
+    Returns {"validator": "<vendor>:<model>", "model", "usage", "result"}, or
+    None when every rung failed (each failure is reported through `warn`).
+    """
+    for model in step_config(step).ladder:
+        vendor = model_vendor(model)
+        try:
+            if vendor == "openai":
+                effort = "high" if model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
+                r = call_openai(system=system, user=user, model=model,
+                                temperature=0.0, max_tokens=max_tokens,
+                                reasoning_effort=effort,
+                                response_format_json=True)
+                result = r["json"]
+            else:  # "google"
+                r = call_gemini(user=system + "\n\n" + user, temperature=0.0,
+                                max_output_tokens=max_tokens, model=model)
+                result = _parse_json_text(r["text"])
+            return {"validator": f"{vendor}:{model}", "model": r["model"],
+                    "usage": r["usage"], "result": result}
+        except Exception as e:  # noqa: BLE001 — try the next rung
+            warn(f"  WARN: {model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
+    return None

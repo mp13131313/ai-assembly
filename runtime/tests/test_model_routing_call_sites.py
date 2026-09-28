@@ -721,6 +721,25 @@ class TestVoiceStep1ValidationLadder:
 
         assert result["model"] == "gpt-4o"
 
+    def test_rungs_route_by_vendor_not_position(self, monkeypatch):
+        # A Google rung first must go to GenAI, not to OpenAI.
+        monkeypatch.setenv("VOICE_VALIDATION_MODELS", "gemini-2.5-pro,gpt-4o")
+        fake_genai_client = MagicMock()
+        fake_genai_client.models.generate_content.return_value = MagicMock(text="PASS")
+        fake_genai = types.SimpleNamespace(Client=lambda *a, **kw: fake_genai_client)
+        monkeypatch.setitem(sys.modules, "google", types.SimpleNamespace(genai=fake_genai))
+        monkeypatch.setitem(sys.modules, "google.genai", fake_genai)
+        fake_openai_client = MagicMock()
+        monkeypatch.setitem(sys.modules, "openai",
+                            types.SimpleNamespace(OpenAI=lambda *a, **kw: fake_openai_client))
+
+        result = v1v._call_openai_with_fallback(
+            system="sys", user="usr", max_tokens=100, reasoning_effort="high",
+        )
+
+        assert result["model"] == "gemini-2.5-pro" and result["text"] == "PASS"
+        fake_openai_client.chat.completions.create.assert_not_called()
+
 
 # ===========================================================================
 # 7. Voice Step 2 validation (4 pillars, shared _call_anthropic)

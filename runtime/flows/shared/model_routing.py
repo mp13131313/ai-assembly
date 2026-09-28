@@ -11,8 +11,11 @@ file, so documented run commands keep working. Empty env values count as
 unset (the Claude Code shell pre-sets some vars to "").
 
 Unsafe combinations raise `ModelRoutingError` instead of reaching the API:
-thinking "off" on a model that can't disable it, or no explicit effort on a
-model whose default effort isn't "high" (which would silently lower quality).
+thinking "off" on a model that can't disable it, no explicit effort on a
+model whose default effort isn't "high" (which would silently lower quality),
+or a validator ladder rung that isn't an OpenAI or Google model (ladders are
+cross-model checks of Claude output — a Claude rung would be same-family).
+Ladder call sites route each rung by `model_vendor(model)`, not by position.
 
 This file is duplicated byte-for-byte at personas/flows/shared/model_routing.py
 — the two pipelines have separate venvs and don't import each other (same
@@ -31,6 +34,7 @@ CONFIG_PATH = Path(__file__).resolve().parents[3] / "model_routing.json"
 
 _EFFORTS = {"low", "medium", "high", "xhigh", "max"}
 _OFF = {"0", "false", "off", "no"}
+_LADDER_VENDORS = {"openai", "google"}  # what the validator ladder call sites can call
 
 # step (or step prefix ending in ".") -> legacy model env vars, first set wins.
 _MODEL_ENV: dict[str, tuple[str, ...]] = {
@@ -122,6 +126,11 @@ def _build(step: str, raw: dict[str, Any], models: dict[str, Any],
             raise ModelRoutingError(
                 f"{step}: model {m!r} is not listed under 'models' in model_routing.json "
                 f"— add it with its rules first.")
+    for m in ladder:
+        if models[m]["vendor"] not in _LADDER_VENDORS:
+            raise ModelRoutingError(
+                f"{step}: ladder rung {m!r} is a {models[m]['vendor']} model — validator "
+                f"ladders take only {sorted(_LADDER_VENDORS)} models (cross-model check).")
     spec = models[model]
     effort = raw.get("effort")
     if spec["vendor"] == "anthropic":
@@ -173,6 +182,14 @@ def step_config(step: str, *, path: Path | None = None) -> StepConfig:
         ladder = tuple(m.strip() for m in _env(ladder_env).split(",") if m.strip())
         model = model or ladder[0]
     return _build(step, data["steps"][step], data["models"], model, thinking, ladder)
+
+
+def model_vendor(model: str, *, path: Path | None = None) -> str:
+    """The vendor of a model listed in model_routing.json ("anthropic", "openai", "google", …)."""
+    models = _load(path or CONFIG_PATH)["models"]
+    if model not in models:
+        raise ModelRoutingError(f"model {model!r} is not listed under 'models' in model_routing.json.")
+    return models[model]["vendor"]
 
 
 def all_steps(*, path: Path | None = None) -> dict[str, StepConfig]:

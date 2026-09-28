@@ -3010,8 +3010,8 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 - Legacy per-step env vars still override the file (documented run commands keep working); empty env values count as unset.
 - Golden test pins today's production models per step; changing a default means updating that table in the same commit.
 
-**Status:** foundation committed; call-site conversion (runtime + personas, behavior-preserving) in progress.
-**Still to do after conversion:** (1) update `docs/LLM_CALL_INVENTORY.md` §5 + the pipeline specs to point at the file as the source of truth; (2) *later, with the studio UI:* per-project override file + the Models page, including a "voices last validated on" column so a model switch shows which voices need re-checking. **Relationship to PLAN 2.2 (vendor abstraction):** this is the model-*choice* half; the unified call-plumbing half (one client wrapper per vendor) remains PLAN 2.2, not yet started.
+**Status:** call sites converted in both pipelines, behavior-preserving (personas `f818767`, runtime `8fb718d`). **Ladder follow-up done 2026-09-28:** validator ladders (runtime Step-1 validation; persona 7-anachronism, 7a, 7a FINAL) now route each rung by its vendor via `model_vendor()`, not by position (persona code had sent every rung but the last to OpenAI and the last to Gemini); the three persona copies became one `clients.call_validator_ladder`; the loader refuses a ladder rung that isn't OpenAI/Google (a cross-model check must not be Claude).
+**Still to do:** (1) update `docs/LLM_CALL_INVENTORY.md` §5 + the pipeline specs to point at the file as the source of truth; (2) *later, with the studio UI:* per-project override file + the Models page, including a "voices last validated on" column so a model switch shows which voices need re-checking. **Relationship to PLAN 2.2 (vendor abstraction):** this is the model-*choice* half; the unified call-plumbing half (one client wrapper per vendor) remains PLAN 2.2, not yet started.
 
 ## Section F — Recently landed (for context)
 

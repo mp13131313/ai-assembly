@@ -38,7 +38,7 @@ from flows.shared.io import load_prompt, load_voice_input, voice_slug, write_jso
 from flows.shared.node0_validation import validate_input
 from flows.shared.project_root import add_project_arg, resolve_project_root
 from flows.shared.prompt_render import render
-from flows.shared.clients import call_claude, call_gemini, call_openai
+from flows.shared.clients import call_claude, call_gemini, call_validator_ladder
 from flows.shared.model_routing import step_config
 from flows.shared.node1c_fetch import fetch_all
 from flows.shared.node1d_excerpt_selection import build_structural_index, apply_selections
@@ -1059,41 +1059,21 @@ def _pass_7_anachronism():
     # anachronism evaluation. Gemini 2.5 Pro last resort.
     # max_tokens bumped 8192→16384 because reasoning tokens count against
     # max_completion_tokens budget for gpt-5.x high-effort calls.
-    # Ladder (model names + order) comes from model_routing.json; the last
-    # rung is always the Gemini fallback, the rest are tried via OpenAI.
-    _ladder = step_config("personas.pass_7_anachronism").ladder
-    for openai_model in _ladder[:-1]:
-        try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
-            r = call_openai(system=sysp, user=userp, model=openai_model,
-                            temperature=0.0, max_tokens=16384,
-                            reasoning_effort=_effort,
-                            response_format_json=True)
-            return {"voice_name": vi["name"], "voice_slug": SLUG,
-                    "pass": "7_anachronism_check",
-                    "validator": f"openai:{openai_model}", "model": r["model"],
-                    "usage": r["usage"], "result": r["json"]}
-        except Exception as e:
-            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
-    _gemini_model = _ladder[-1]
-    try:
-        r = call_gemini(user=sysp + "\n\n" + userp, temperature=0.0,
-                        max_output_tokens=16384, model=_gemini_model)
-        cleaned = r["text"].strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-        return {"voice_name": vi["name"], "voice_slug": SLUG,
-                "pass": "7_anachronism_check",
-                "validator": f"google:{_gemini_model}", "model": r["model"],
-                "usage": r["usage"], "result": json.loads(cleaned)}
-    except Exception as e:
-        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+    # Ladder (model names + order) comes from model_routing.json; each rung
+    # is routed by its vendor (call_validator_ladder).
+    v = call_validator_ladder("personas.pass_7_anachronism",
+                              system=sysp, user=userp, warn=stamp)
+    if v is None:
+        stamp("  WARN: every validator in the ladder failed; skipping")
         return {"voice_name": vi["name"], "voice_slug": SLUG,
                 "pass": "7_anachronism_check", "validator": "skipped",
                 "result": {"overall": "SKIPPED",
                            "summary": "No cross-model evaluator available."}}
+    return {"voice_name": vi["name"], "voice_slug": SLUG,
+            "pass": "7_anachronism_check", **v}
 
-stamp("PASS 7-anachronism: TimeChara temporal check (gpt-5.4 high → Gemini fallback)")
+stamp("PASS 7-anachronism: TimeChara temporal check "
+      f"({' → '.join(step_config('personas.pass_7_anachronism').ladder)})")
 pass7_anach = call_or_cache(_paths.pass_7_anachronism(SLUG, PROJECT_ROOT),
                             "Pass 7-anachronism", _pass_7_anachronism)
 _anach_flags = pass7_anach["result"].get("anachronism_flags", [])
@@ -1118,41 +1098,19 @@ def _pass_7a():
     # rubric evaluation Pass 7a performs. Gemini 2.5 Pro last resort.
     # max_tokens bumped 8192→16384 because reasoning tokens count against
     # max_completion_tokens budget for gpt-5.x high-effort calls.
-    # Ladder (model names + order) comes from model_routing.json; the last
-    # rung is always the Gemini fallback, the rest are tried via OpenAI.
-    _ladder = step_config("personas.pass_7a").ladder
-    for openai_model in _ladder[:-1]:
-        try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
-            r = call_openai(system=sysp, user=userp, model=openai_model,
-                            temperature=0.0, max_tokens=16384,
-                            reasoning_effort=_effort,
-                            response_format_json=True)
-            return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
-                    "validator": f"openai:{openai_model}", "model": r["model"],
-                    "usage": r["usage"], "result": r["json"]}
-        except Exception as e:
-            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
-    # Fall back to Gemini
-    _gemini_model = _ladder[-1]
-    try:
-        full_prompt = sysp + "\n\n" + userp
-        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384,
-                        model=_gemini_model)
-        # Parse JSON out of Gemini text
-        cleaned = r["text"].strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-        return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
-                "validator": f"google:{_gemini_model}", "model": r["model"],
-                "usage": r["usage"], "result": json.loads(cleaned)}
-    except Exception as e:
-        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+    # Ladder (model names + order) comes from model_routing.json; each rung
+    # is routed by its vendor (call_validator_ladder).
+    v = call_validator_ladder("personas.pass_7a", system=sysp, user=userp, warn=stamp)
+    if v is None:
+        stamp("  WARN: every validator in the ladder failed; skipping")
         return {"voice_name": vi["name"], "voice_slug": SLUG, "pass": "7a_cross_model_validation",
                 "validator": "skipped", "result": {"overall": "SKIPPED",
                 "summary": "No cross-model validator available."}}
+    return {"voice_name": vi["name"], "voice_slug": SLUG,
+            "pass": "7a_cross_model_validation", **v}
 
-stamp("PASS 7a: Cross-Model Validation (gpt-5.4 high -> Gemini fallback)")
+stamp("PASS 7a: Cross-Model Validation "
+      f"({' → '.join(step_config('personas.pass_7a').ladder)})")
 pass7a = call_or_cache(_paths.pass_7a(SLUG, PROJECT_ROOT), "Pass 7a", _pass_7a)
 stamp(f"  validator: {pass7a.get('validator', '?')} | overall: {pass7a['result'].get('overall', '?')}")
 
@@ -1972,43 +1930,21 @@ def _pass_7a_final():
                    persona_card_json=json.dumps(full_card_for_validate,
                                                  ensure_ascii=False, indent=2))
     # Same model ladder as per-pass 7a (model_routing.json:
-    # personas.pass_7a_final; last rung is always the Gemini fallback).
-    _ladder = step_config("personas.pass_7a_final").ladder
-    for openai_model in _ladder[:-1]:
-        try:
-            _effort = "high" if openai_model.startswith("gpt-5") else None  # MODEL-LITERAL-OK: reasoning_effort vendor-family gate, not a model-selection literal
-            r = call_openai(system=sysp, user=userp, model=openai_model,
-                            temperature=0.0, max_tokens=16384,
-                            reasoning_effort=_effort,
-                            response_format_json=True)
-            return {"voice_name": vi["name"], "voice_slug": SLUG,
-                    "pass": "7a_final_post_assembly",
-                    "validator": f"openai:{openai_model}", "model": r["model"],
-                    "usage": r["usage"], "result": r["json"]}
-        except Exception as e:
-            stamp(f"  WARN: {openai_model} failed ({type(e).__name__}: {str(e)[:120]}); trying next")
-    _gemini_model = _ladder[-1]
-    try:
-        full_prompt = sysp + "\n\n" + userp
-        r = call_gemini(user=full_prompt, temperature=0.0, max_output_tokens=16384,
-                        model=_gemini_model)
-        cleaned = r["text"].strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-        return {"voice_name": vi["name"], "voice_slug": SLUG,
-                "pass": "7a_final_post_assembly",
-                "validator": f"google:{_gemini_model}", "model": r["model"],
-                "usage": r["usage"], "result": json.loads(cleaned)}
-    except Exception as e:
-        stamp(f"  WARN: Gemini fallback also failed ({type(e).__name__}); skipping")
+    # personas.pass_7a_final); each rung is routed by its vendor.
+    v = call_validator_ladder("personas.pass_7a_final", system=sysp, user=userp, warn=stamp)
+    if v is None:
+        stamp("  WARN: every validator in the ladder failed; skipping")
         return {"voice_name": vi["name"], "voice_slug": SLUG,
                 "pass": "7a_final_post_assembly",
                 "validator": "skipped",
                 "result": {"overall": "SKIPPED",
                            "summary": "No cross-model validator available."}}
+    return {"voice_name": vi["name"], "voice_slug": SLUG,
+            "pass": "7a_final_post_assembly", **v}
 
 
-stamp("PASS 7a FINAL: cross-model against assembled card (gpt-5.4 high → Gemini)")
+stamp("PASS 7a FINAL: cross-model against assembled card "
+      f"({' → '.join(step_config('personas.pass_7a_final').ladder)})")
 pass7a_final = call_or_cache(_paths.pass_7a_final(SLUG, PROJECT_ROOT),
                               "Pass 7a FINAL", _pass_7a_final)
 final_verdict = pass7a_final["result"].get("overall", "?")

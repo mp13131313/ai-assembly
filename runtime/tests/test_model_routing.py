@@ -145,6 +145,22 @@ def test_ladder_env(monkeypatch):
     assert cfg.ladder == ("gpt-4o", "gemini-2.5-pro") and cfg.model == "gpt-4o"
 
 
+def test_model_vendor():
+    assert mr.model_vendor(OPUS) == "anthropic"
+    assert mr.model_vendor("gemini-2.5-pro") == "google"
+    with pytest.raises(mr.ModelRoutingError, match="not listed"):
+        mr.model_vendor("claude-made-up-9")
+
+
+def test_ladder_rung_must_be_openai_or_google(tmp_path, monkeypatch):
+    p = _config(tmp_path, {"s": {"model": "gpt-5.4", "ladder": ["gpt-5.4", SONNET]}})
+    with pytest.raises(mr.ModelRoutingError, match="cross-model"):
+        mr.step_config("s", path=p)
+    monkeypatch.setenv("VOICE_VALIDATION_MODELS", f"gpt-4o,{OPUS}")  # env path too
+    with pytest.raises(mr.ModelRoutingError, match="cross-model"):
+        mr.step_config("runtime.voice.step1_validation")
+
+
 def test_env_to_unknown_model_raises(monkeypatch):
     monkeypatch.setenv("EDITOR_MODEL", "claude-made-up-9")
     with pytest.raises(mr.ModelRoutingError, match="not listed"):

@@ -39,7 +39,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from flows.shared.io import get_logger, load_prompt, write_json_atomic
-from flows.shared.model_routing import step_config
+from flows.shared.model_routing import model_vendor, step_config
 
 
 # Fallback ladder per spec — same as Persona Pipeline Pass 7-anachronism / 7a.
@@ -55,19 +55,20 @@ def _call_openai_with_fallback(
     max_tokens: int,
     reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
-    """Try the OpenAI ladder; return first success.
+    """Try the validation ladder in order; return the first success.
 
-    Final entry "gemini-2.5-pro" falls through to Google's GenAI SDK.
+    Each rung is routed by its vendor in model_routing.json (Google rungs go
+    through Google's GenAI SDK, OpenAI rungs through the OpenAI SDK) — not by
+    its position in the ladder. The loader admits only these two vendors.
     Each call gets temperature=0.0 for determinism on a check task.
     Returns dict with keys: text, model, usage, wall_clock_s.
     """
-    from openai import OpenAI  # local import — runtime venv may not have it
     ladder = step_config("runtime.voice.step1_validation").ladder
     last_err: Exception | None = None
     for model in ladder:
         try:
             t0 = time.time()
-            if model.startswith("gemini"):
+            if model_vendor(model) == "google":
                 # Fallback path: Google GenAI
                 from google import genai
                 client = genai.Client()
@@ -83,6 +84,7 @@ def _call_openai_with_fallback(
                     "usage": {},
                     "wall_clock_s": round(time.time() - t0, 2),
                 }
+            from openai import OpenAI  # local import — runtime venv may not have it
             client = OpenAI()
             # Generic o-series reasoning-model prefix probe — not a routing
             # default; the ladder itself comes from model_routing.json via
