@@ -2,7 +2,7 @@
 ## AI Assembly — Role Specification
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v3 (2026-09-28) — canonical. v3 is a docs-only correction: §"Dossier Shape" and §"Output Schema" now describe the dossier contract that actually shipped, verified 2026-09-28 against the closing prompt, the dossier writer, and all 13 published Athens dossiers (see Changelog → v3, which also lists the sections that still carry pre-ship design). v2 (2026-05-03 PM) set the runtime architecture; it superseded v1 (2026-05-02) + the runtime memo at `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` (now archived). **Implementation shipped 2026-05-03 PM in commit `fc5c2fb`** (`runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` + `/admin/tonight/editor` drilldown + 38 tests); the closing prompt `runtime/flows/shared/prompts/editor_dossier.md` was rewritten to the v2 contract 2026-05-04 (`4c7c315`) and generated all 13 published Athens dossiers. Replaces conceptual sketches in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` (now archived) and OPEN_ITEMS A2 (which set architectural direction; this doc fills the spec).
+**Status:** v3.2 (2026-09-28) — canonical. v3 and v3.1 are docs-only corrections and v3.2 follows a code fix, all 2026-09-28: v3 rewrote §"Dossier Shape" and §"Output Schema" to the dossier contract that actually shipped; v3.1 corrected the other sections that still described the pre-ship design (In Brief column, newspaper masthead and issue numbers, Stage 2 inputs and closing prompt, microsite render contract). v3.2 records the four dossier defects fixed in code (`9f415dd`, C64). All three were verified against the code, the closing prompt and all 13 published Athens dossiers; the sections not yet re-verified (Stage 1 routing, cost figures, CLI) are listed in Changelog → v3.1. v2 (2026-05-03 PM) set the runtime architecture; it superseded v1 (2026-05-02) + the runtime memo at `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` (now archived). **Implementation shipped 2026-05-03 PM in commit `fc5c2fb`** (`runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` + `/admin/tonight/editor` drilldown + 38 tests); the closing prompt `runtime/flows/shared/prompts/editor_dossier.md` was rewritten to the v2 contract 2026-05-04 (`4c7c315`) and generated all 13 published Athens dossiers. Replaces conceptual sketches in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` (now archived) and OPEN_ITEMS A2 (which set architectural direction; this doc fills the spec).
 **Purpose:** Specifies the runtime Editor Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract for the Editor Pipeline end-to-end** — it defines what the pipeline reads, what it writes, in what order, with which model, in which prompt, at which checkpoint. Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (shipped 2026-05-03 PM in commit `fc5c2fb`).
 
 **Predecessor:** `docs/AI_Assembly_Frame_Concept_v1.md` — the architectural document that names *The Assembly* (panel) ≡ *The Assembly* (publication) recursion, the broadsheet form, the per-voice render registers, the strikethrough discipline, and the five frame moves the editor pipeline operationalizes. The Editor Pipeline doc instantiates the broadsheet surface; closely related surfaces (microsite, broadsheet print run, closing show) live in their own concept docs.
@@ -10,6 +10,50 @@
 ---
 
 ## Changelog
+
+### v3.2 (2026-09-28) — the four dossier defects v3 found are fixed in code
+
+**Outcome:** the spec now describes the code at `9f415dd` (runtime OPEN_ITEMS C64), which fixed the four defects listed under v3 below. Checked 2026-09-28 against that commit's diff and by re-running the fixed parser on the prompt's own template (first paragraph now clean). Body line citations for `dossier_generation.py` were moved to `9f415dd` (36 citations; lines up to 301 did not move; the changelog entries keep their original numbers as history).
+
+| Defect (v3) | Fix in `9f415dd` | Spec change |
+|---|---|---|
+| 1. Stray `**` in `body_paragraphs[0]` | The body and headnotes parsers accept markdown after the label's colon (`dossier_generation.py:315, 350`) | Known quirks #1 now says "Athens data only": the 13 published dossiers still carry it (operator decision 2026-09-28, *"Clean later, separate task"*); `body_paragraphs` provenance row updated |
+| 2. `front_abstract` prompt contradiction | `editor_dossier.md:253` now reads "independent framing of the article's tension — not lifted from its opening" | Known quirks #5 removed (old #6 is now #5); Page 1 row, closing-prompt section and See Also updated |
+| 3. `publish_flow.py` reading dropped `issue_no` / `vol` | Removed from both index writers and from publish's owned keys; `publication_date` dropped from the cross-night index (operator decision 2026-09-28, *"Remove all three"*) | §"Outputs" → "Dossier index": publish now owns the same per-dossier keys as the editor; pre-2026-05-05 indexes keep old keys via the merge rule |
+| 4. Stale `voice_name` comments | Comments now say the name comes from `council_config.json` via `build_dossier_briefing` | None needed |
+
+### v3.1 (2026-09-28) — the rest of the spec stops describing the pre-ship design (docs-only)
+
+**Outcome:** the sections v3 flagged (below) now describe current behavior: no In Brief column, no newspaper masthead or issue numbers, the real Stage 2 inputs and closing prompt, and a render contract in which dossiers embed their artifacts. Checked 2026-09-28 against the code at commit `40c4d56` (this entry's line citations refer to that commit; v3.2 moved the body's citations to `9f415dd`), the closing prompt at `6973221`, the 13 published Athens dossiers and their four index files, and the three Athens run dirs' `theme_routing.json`, operator decisions and deployment-context files (all read-only). No code or prompt changed. Tracker: `_workspace/planning/doc_infrastructure_backlog.md` row #25.
+
+**Why:** after v3 the spec contradicted itself — §"Dossier Shape" said no masthead ships while §"The Paper" specified one, and Principle 7 listed output fields that v3's Output Schema said never existed.
+
+**What changed, by section:**
+
+| Section | Was | Now | Evidence |
+|---|---|---|---|
+| Overview | Voices not leading a dossier reported in an In Brief column, refusals too; the editor inherits issue numbers; inputs include Step 1 and Researcher files | Each routed voice in exactly one dossier, never cross-referenced; refusals and held voices in no dossier; `prior_editions` is the only carry-over | `routing.py:353-366, 458-464`; 13 dossiers, 29 headnotes |
+| Multi-night convention | Run dir `athens_2026_2026_05_07_night1`; dossier number = Tim's publication order, lead first; In Brief; issue No. 42,193-42,195, Vol. CXVI | Run dir `athens_night_<N>`; dossier numbers set by Stage 1 (most voices first); the lead picked separately by Stage 3 (Night 3's lead was dossier 2); held voices; no issue or volume | `routing.py:504-535`; `edition.py:14-21, 173`; `night_3/_index.json` |
+| What the Editor Pipeline Knows | No reference data or validation files read; cross-night input is night N-1 only; issue number derived | Adds the review gate's validation and decision files, `conference_facts.json`, `council_config.json`, `speakers.json` and the optional deployment-context file; cross-night input is every earlier night | `routing.py:236-366`; `card_assembly.py:220-283`; `dossier_generation.py:83-130, 226-244`; `publish.py:61-99` |
+| Principles 1, 3, 4, 7, 8 | Masthead pedigree; In Brief; a "structured-output" call emitting In Brief items, editor's note, per-voice abstracts and byline descriptors; 60-90 s per call; Whanganui and Octopus as refusals named in In Brief | Tim as unnamed HoBB editor, no masthead; one dossier per voice; the shipped field list, prose-and-parse; 91-298 s per call (median 151 s); refusals kept out of dossiers, none at Athens | `editor_dossier.md:27, 52, 184-207`; `metadata.wall_clock_s` in 13 dossiers; three `theme_routing.json` |
+| §"The Paper — *The Assembly*", now §"The Publication" | Masthead, issue and volume schemes, a confected 1910 founding, a 1910s broadsheet visual register | No masthead; what identifies a dossier (night, dossier number, theme, lead, colophon); the renderers; no styling in the data | `dossier_generation.py:52-55, 402-409`; `admin_render_dossier.html:6-12, 139-144` |
+| Stage 1 routing manifest example | `schema_version` "2.0" plus `athens_base_issue` / `issue_no` / `vol` | `"1.0"`, no issue fields; the rest of Stage 1 not re-verified (see below) | `routing.py:542-551` |
+| Stage 2 per-call inputs | A v1 list (`theme_question`, `primary_contributors`, `in_brief_voices`, `refusals`, `night_context`), then a v2 example without `selected_form`, `panel_speakers` or `deployment_context` and with `issue_no` in `prior_editions`; pseudo-code builder | The two system-prompt blocks (including the deployment block); a user-prompt field table; an abridged real example (N2/004); measured cache behavior | `card_assembly.py:286-368`; `dossier_generation.py:133-259`; `publish.py:61-99` |
+| Stage 2 closing prompt structure | Five sections mirroring `voice_step2_artifact.md`; `front_abstract` derived from the article's opening | The 14 blocks with line ranges, plus the prompt's inconsistencies | `editor_dossier.md` at `6973221`; block set unchanged since `5ea5084` |
+| Microsite Render Contract | Item 1 left out `pull_quote` and the theme page; item 4 "referenced, not embedded"; item 5 had publish writing `lead_dossier_no` + `grid_dossier_nos` | Full field list; artifacts embedded; the editor's Stage 3 writes `edition_lead.lead_dossier_no`, and there is no grid field | `dossier_generation.py:465-476`; `edition.py:173` |
+| Scope; Constraint 2; Defensive checks; Open Questions Q5, Q6 | "front-page components"; every artifact lands tonight; an issue-number consistency check; a colophon naming date, volume and issue; numbering "within each issue (42,193 …)" | Named fields, plus Stage 3; held and refused voices excepted; the check removed (never built); the real colophon text; per-night numbering | `dossier_generation.py:402-409`; `git show 641e31d^:runtime/flows/editor_flow.py` has no issue-number code |
+
+Also: Principle 2's "her constitution" (a Claudia leftover) now reads "his"; the v2.1 entry gets a dated note that all three Athens run dirs had a deployment-context file; §"Outputs" → "Dossier index" notes that publish's `issue_no` / `vol` are always `null`; Stage 1, the three cost sections and the CLI's `--no-cache` line carry an in-place "not re-verified" or "no effect" note pointing here.
+
+**Found while verifying, not fixed** (docs-only):
+1. `--no-cache` does nothing. `editor_flow.py` records it in the manifest (`:94, 292, 335`) but never passes it to the call, which caches by default (`voice/_anthropic_call.py:74`).
+2. The closing prompt contradicts itself in four more places (theme-page lengths, `issue_no` in `prior_editions`, how to cite speakers, `unique_contribution`), listed in §"Stage 2 — Closing prompt structure".
+3. On Nights 2 and 3 no dossier call read the prompt cache; every call paid the cache write (§"Stage 2" → "Per-call inputs").
+
+**Still not re-verified** — do not rely on these sections without checking:
+- §"Stage 1 — Theme Routing". Routing now takes Step 2's `lineage.primary_theme_id` first — every Athens voice was routed that way (`routing.py:144-146`) — and an LLM synthesis router shipped 2026-05-05 (`641e31d`, `runtime/flows/editor/synthesis_router.py`). The section still presents the Response-N parser as primary and the LLM pass as a TODO, as does Open Questions Q1. Its case labels and the rest of its example are unchecked.
+- Cost figures: the Overview's per-dossier estimate, Stage 2 "Per-call cost" and "Cost per call", §"Cost & Envelope". They assume a ~30K-token system prompt and 3-5K output tokens; Athens measured 52,641 cached tokens and 5,906-24,401 output tokens per call (thinking included).
+- §"Implementation" → CLI and "Defensive checks": `--bypass-gating` and `--project` are undocumented; the voice-manifest and card-schema checks are unverified.
 
 ### v3 (2026-09-28) — the spec now describes the dossier contract that shipped (docs-only)
 
@@ -45,7 +89,9 @@
 3. `runtime/flows/publish_flow.py:923-924` and `:1033-1034` still read `metadata.issue_no` / `metadata.vol`, which no dossier has carried since `641e31d`. No published dossier or index carries an issue number or volume.
 4. Code comments at `dossier_generation.py:434-435` and `:452` still say `voice_name` comes from the artifact's `council_member`; since C53 it comes from `council_config.json` (`:199`).
 
-**Still describing the pre-ship design elsewhere in this spec** (outside v3's scope; flagged 2026-09-28 for a follow-up pass): the In Brief column (Overview, "Multi-night, multi-theme convention", Principles 3, 4, 7 and 8); the newspaper masthead and issue/volume numbering (§"The Paper — *The Assembly*", "Multi-night, multi-theme convention"); the v1-shaped per-call input list at the top of §"Stage 2 — Dossier Generation" (`primary_contributors`, `in_brief_voices`, `refusals`, `night_context`); the v2 per-call input example, which lacks `panel_speakers`, `selected_form` and `deployment_context`; §"Stage 2 — Closing prompt structure" (describes a 5-section prompt that derives `front_abstract` from the article; the shipped prompt has 14 blocks since `5ea5084`); §"Microsite Render Contract" items 1 and 4 (omit `pull_quote` and the theme page; say artifacts are referenced, not embedded); §"Scope" ("front-page components"); and Open Questions Q5's colophon default text.
+*(All four fixed 2026-09-28 in `9f415dd`, runtime OPEN_ITEMS C64 — see v3.2. The published Athens dossiers still carry defect 1. Line numbers in this list are as of `40c4d56`.)*
+
+**Still describing the pre-ship design elsewhere in this spec** (outside v3's scope; flagged 2026-09-28 for a follow-up pass): the In Brief column (Overview, "Multi-night, multi-theme convention", Principles 3, 4, 7 and 8); the newspaper masthead and issue/volume numbering (§"The Paper — *The Assembly*", "Multi-night, multi-theme convention"); the v1-shaped per-call input list at the top of §"Stage 2 — Dossier Generation" (`primary_contributors`, `in_brief_voices`, `refusals`, `night_context`); the v2 per-call input example, which lacks `panel_speakers`, `selected_form` and `deployment_context`; §"Stage 2 — Closing prompt structure" (describes a 5-section prompt that derives `front_abstract` from the article; the shipped prompt has 14 blocks since `5ea5084`); §"Microsite Render Contract" items 1 and 4 (omit `pull_quote` and the theme page; say artifacts are referenced, not embedded); §"Scope" ("front-page components"); and Open Questions Q5's colophon default text. *(Resolved the same day in v3.1, above; v3.1 also lists what is still not re-verified.)*
 
 ### v2.1 (2026-05-07) — `deployment_context` override mechanism
 
@@ -55,7 +101,7 @@ Adds a thin extension to v2 — an optional override for the dossier briefing's 
 
 **When it fires:** the default contract assumes the day's panels happened and Tim composes the morning paper. For non-canonical run dirs — a conference-programme-read produced before Day 1, a reflection-import bundle, an operator-staged seed — the default contract makes Tim stage events that did not occur. The deployment_context override prevents this by giving Tim a different posture for the run.
 
-**Default behaviour unchanged** when the override file is absent. All canonical Athens-night-N runs continue to operate under v2's panels-happened contract without modification.
+**Default behaviour unchanged** when the override file is absent. All canonical Athens-night-N runs continue to operate under v2's panels-happened contract without modification. *(Later: all three Athens run dirs did get an override file, each keeping the panels-happened framing and adding editorial rules for the night — see §"Stage 2" → "Per-call inputs", checked 2026-09-28.)*
 
 **Implementation:**
 - `runtime/flows/editor/dossier_generation.py::build_dossier_briefing` checks for the override file and injects the contents as `deployment_context` (string) into the user-prompt JSON.
@@ -112,7 +158,7 @@ First version. The Editor Pipeline did not exist as a runtime contract before th
 
 ## Overview
 
-The Editor Pipeline is the fourth runtime agent in the overnight pipeline, after Transcription, Researcher, Provocateur, and Voice. It receives the night's Voice Pipeline outputs (Step 1 detailed responses + Step 2 artifacts + their themes_covered metadata), the night's Provocateur briefings (formulations + theme records), and the night's Researcher themes (clusters + theme statements). It produces one or more **dossiers**, each organized around a single theme that the night's voices engaged.
+The Editor Pipeline is the fourth runtime agent in the overnight pipeline, after Transcription, Researcher, Provocateur, and Voice. It reads the night's Voice Pipeline Step 2 artifacts and the night's Provocateur briefings, which carry each voice's formulation and the Researcher's full theme record (§"What the Editor Pipeline Knows"). It produces one or more **dossiers**, each organized around a single theme that the night's voices engaged.
 
 Each dossier is the publishable unit on the microsite. It has a fixed four-part swipeable structure (field-level detail in §"Dossier Shape"; corrected 2026-09-28 to the shipped fields):
 
@@ -125,52 +171,51 @@ Page 4-N THE ARTIFACTS each engaged voice's piece verbatim, under Tim's title + 
 
 The editor — Tim Leberecht — writes pages 1, 2, 3, and the headnotes on 4-N. The artifact bodies on 4-N are voice pipeline Step 2 outputs (`artifact_text`), rendered in voice-faithful visual treatments (chancery for Cleopatra's prostagma; Diary entry for Dostoevsky; etc.) by the microsite template layer. Tim's text is in the paper's voice; the artifact bodies are in the voices' voices. The seam is honest.
 
-A typical Athens night produces 3-5 dossiers, depending on how many themes the night's voices converged or partly-converged on. Voices whose Step 2 artifact was a synthesis across multiple themes are routed to whichever theme they fit best; voices whose artifact was focused go to their own theme's dossier. Voices that did not lead any theme's dossier are reported in the "In Brief" column on Page 1 of the dossier most adjacent to their content; refusals (the Whanganui River's silence; the Octopus's not-receiving) are reported as such, not folded under any theme.
+An Athens night produced 3-5 dossiers (Night 1: 5, Night 2: 5, Night 3: 3 — `night_<N>/_index.json` `dossier_count`), one per theme at least one voice was routed to. Stage 1 routes each voice's Step 2 artifact to exactly one theme, and the artifact appears in that theme's dossier and nowhere else: there is no In Brief column and no cross-dossier mention of a voice (all 13 published dossiers carry only their own `headnotes[]`; 29 headnotes, no voice twice in one night). Two kinds of voice appear in no dossier: a refusal (empty `themes_covered` or a refusal marker in `focus_decision`), which goes into `theme_routing.json` `refusals[]` (`runtime/flows/editor/routing.py:458-464`) — none occurred on the three Athens nights — and a voice the operator held for regeneration (C28b `hold_for_regen`), which routing skips (`routing.py:353-366`) — Night 2's Whanganui River. The Whanganui River and the Octopus were not refusals at Athens; they appear as engaged voices in five dossiers (N1/002, N1/003, N2/004, N3/001, N3/003).
 
 **Per-night envelope (Athens production):** ~3-5 dossiers per night × ~$0.30-0.40 per dossier = ~$1-2 per night API; ~$3-6 across Athens 3 nights. Wall time: ~5-10 min per night (single Anthropic call per dossier, parallelizable across themes). Cost dominated by output tokens (~3-4K per dossier). **Measured 2026-09-28** from `04_voice/manifest.json` → `05_editor/manifest.json` timestamps on the two clean (non-resumed) nights: Night 2 = 4m59s (5 dossiers), Night 3 = 8m44s (3 dossiers, slower theme routing). Night 1's `05_editor/manifest.json` reflects only a resumed single-dossier rerun (`wall_clock_s: 91.89`, `single_dossier: "theme_010"`) and is not a full-night measurement.
 
-The Editor Pipeline runs once per night, after Voice Pipeline completes. On Night 2 + Night 3, the editor inherits awareness of prior dossiers (issue numbers, dossier numbers, voices already led, themes already published) via cross-night state at PROJECT_ROOT.
+The Editor Pipeline runs once per night, after Voice Pipeline completes. On Night 2 + Night 3, Tim also receives `prior_editions`: the kicker, headline and article body of every dossier published on earlier nights, read from `<PROJECT_ROOT>/published_artifacts/dossiers/` (`runtime/flows/editor/publish.py:61-99`). Nothing else carries over — no dossier numbers, no list of voices already led.
 
 ### Multi-night, multi-theme convention
 
 **One run_dir per night, one editor invocation per night, multiple dossiers per invocation.**
 
 ```
-<PROJECT_ROOT>/runs/athens_2026_2026_05_07_night1/
+<PROJECT_ROOT>/runs/athens_night_1/
                 ├── 01_transcription/
                 ├── 02_researcher/
                 ├── 03_provocateur/
                 ├── 04_voice/
                 └── 05_editor/             ← this pipeline writes here
+                    ├── theme_routing.json       Stage 1: which voice → which theme; dossier numbers
                     ├── dossiers/
-                    │   ├── dossier_001.json    (Theme: Legitimacy of the Invisible)
-                    │   ├── dossier_002.json    (Theme: Space of Appearance)
-                    │   └── dossier_003.json    (Theme: ...)
-                    ├── theme_routing.json       routing decisions (which voice → which theme)
-                    └── manifest.json
+                    │   ├── dossier_001.json
+                    │   └── ...                  one per routed theme
+                    ├── manifest.json
+                    └── gating_blocked.json      only when the voice-review gate blocks the run
 ```
 
-Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. Dossier numbers are **assigned by the editor** based on the order Tim chose to publish them within the night (lead theme first); they are scoped per night.
+Theme IDs from the Researcher (`theme_001`, `theme_002`, …) reset each night. **Dossier numbers** are per night and set by Stage 1, not by Tim: the theme with the most routed voices is `dossier_001`, ties broken by lowest `theme_id` (`runtime/flows/editor/routing.py:504-535`); to reorder, the operator hand-edits `theme_routing.json` and reruns with `--skip-routing` (`runtime/flows/editor_flow.py:152-160`). The dossier number is not the lead: Stage 3 picks the night's lead separately (`runtime/flows/editor/edition.py:14-21`, scored on routed voices, audience friction and fault line) and records it as `edition_lead.lead_dossier_no` in `night_<N>/_index.json`. At Athens the lead was dossier 1 on Nights 1 and 2 and dossier 2 on Night 3.
 
-**Each voice's Step 2 artifact lands in exactly one dossier — tonight.** No artifact is held for a future night. A voice that synthesized across themes is routed to whichever theme Tim judges fits best; voices contributing partially to other themes are mentioned in those dossiers' In Brief column with a pointer to where their full piece lives. This keeps the night's editorial production self-contained: every artifact published this night, every theme finding its dossier or its In Brief slot, no debt carried forward.
+**Each routed Step 2 artifact lands in exactly one of tonight's dossiers.** Nothing is carried to a later night. A voice whose artifact spans several themes still goes to one theme (Stage 1), and no other dossier mentions it. A voice the operator holds for regeneration (`hold_for_regen`) is left out of tonight's dossiers altogether (`routing.py:353-366`; Athens Night 2: the Whanganui River); a refusal likewise appears in no dossier (see Overview).
 
 **Cross-night state at PROJECT_ROOT:**
 
 ```
 <PROJECT_ROOT>/published_artifacts/dossiers/
+                ├── _index.json             root index, all nights
                 ├── night_1/
+                │   ├── _index.json         per-night index (edition_lead, dossier roll-up)
                 │   ├── dossier_001.json
-                │   ├── dossier_002.json
-                │   └── dossier_003.json
+                │   └── ...
                 ├── night_2/
                 │   └── ...
                 └── night_3/
                     └── ...
 ```
 
-Per-night subdirectory matches the existing publish_flow convention (`themes/night_<N>/`, `nights/night_<N>/`). No separate counter file. Issue numbers are derived deterministically from a fixed Athens base + night number. A per-night dossier index (`night_<N>/_index.json`) and a cross-night root index (`_index.json`) are maintained by the pipeline — see §"Outputs" → "Dossier index" below for the two-writer contract.
-
-**Issue numbering.** Athens base issue = **42,192**. Night 1 publishes Issue **No. 42,193**; Night 2 = **No. 42,194**; Night 3 = **No. 42,195**. Night 3's issue number is the marathon distance in metres — the Athens-to-Athens joke the masthead carries quietly. Volume number is **Vol. CXVI** (the paper's confected first issue is 1910; 2026 - 1910 = 116 years of publication). Dossier numbers are per-issue — Issue 42,193 / Dossier No. 1, 2, 3. A dossier's full masthead citation: *Vol. CXVI . No. 42,193 . Dossier No. 1*.
+Per-night subdirectory matches the existing publish_flow convention (`themes/night_<N>/`, `nights/night_<N>/`). No counter file and no issue or volume number: the night number is the only time anchor a dossier carries (`metadata.night`). The per-night and root indexes are maintained by the pipeline — see §"Outputs" → "Dossier index" below for the two-writer contract. (History: this section used to specify a newspaper issue number per night, "No. 42,193" to "No. 42,195", and "Vol. CXVI". The code dropped them 2026-05-05 in `641e31d`; the spec caught up 2026-09-28 — see Changelog → v3.1.)
 
 ---
 
@@ -184,7 +229,8 @@ Per-night subdirectory matches the existing publish_flow convention (`themes/nig
 
 | File | Content used | Used for |
 |---|---|---|
-| `step2_first_draft_artifacts/<voice_slug>.json` | `lineage.voice_slug`, `lineage.themes_covered`, `council_member`, `focus_decision`, `artifact_text` | Stage 1 theme routing reads `focus_decision` + `themes_covered`; Stage 2 passes `artifact_text` + `voice_name` to Tim. `voice_name` is resolved from `council_config.json` by slug (`flows/shared/io.py::voice_display_name`), NOT built from the artifact's own `council_member` field — that field is the voice's long card identity-prefix opening line (e.g. "I am Augusta Ada King, Countess of Lovelace…"); using it directly corrupted published headnotes (C53). |
+| `step2_first_draft_artifacts/<voice_slug>.json` | `lineage.voice_slug`, `lineage.primary_theme_id`, `lineage.themes_covered`, `focus_decision`, `selected_form`, `artifact_text` | Stage 1 theme routing reads `lineage.primary_theme_id` first (`routing.py:144-146`; every Athens voice was routed this way), then `focus_decision` + `themes_covered`; Stage 2 passes `artifact_text` + `selected_form` to Tim with a `voice_name` (`dossier_generation.py:184-211`). `voice_name` is resolved from `council_config.json` by slug (`flows/shared/io.py::voice_display_name`), NOT built from the artifact's own `council_member` field — that field is the voice's long card identity-prefix opening line (e.g. "I am Augusta Ada King, Countess of Lovelace…"); using it directly corrupted published headnotes (C53). |
+| `step2_validation/<voice_slug>.json`, `operator_decisions/<voice_slug>.json` | `overall_verdict`; `decision` (`release` / `hold_for_regen`) | The voice-review gate before Stage 1 (`routing.py:236-332`): each voice needs a PASS verdict or an operator decision, or the run stops. Held voices are left out of routing (`routing.py:335-366`). |
 | ~~`step1_detailed_responses/`~~ | NOT READ | Editor does not consume Step 1; voice's reasoning trace stays voice-private |
 | ~~`themes_to_voices_night_<N>.json`~~ | NOT READ in v2 | Stage 1 routing computes its own per-theme voice list from each voice's `focus_decision`; the file is informational only |
 | ~~`manifest.json`~~ | NOT READ for content | Orchestrator uses it as the gate sentinel; editor itself doesn't consume |
@@ -200,22 +246,26 @@ Per-night subdirectory matches the existing publish_flow convention (`themes/nig
 | File | Content used | Used for |
 |---|---|---|
 | `editor/tim_leberecht/07_persona_card_assembled.json` | Tim's full persona card | System prompt assembly (cached across the night's per-dossier calls) |
+| `conference_facts.json` | `conference_context_paragraph`, `session_role_for_ai_assembly` | "THE GATHERING" and "YOUR ROLE" blocks in the cached system-prompt prefix (`runtime/flows/editor/card_assembly.py:220-283`) |
+| `council_config.json` | `collective_landscape`; each member's `name` | "THE PANEL" block in the same prefix; each voice's `voice_name` (C53) |
+| `reference/speakers.json` | `name`, `title`, `affiliation` | Joined onto every speaker quoted in the theme's extractions to build `panel_speakers[]` (`dossier_generation.py:83-130`) — sent to Tim and written into the dossier. Optional: a missing file gives name-only entries. |
+
+**4. Optional run-level override** (`<run_dir>/_dossier_deployment_context.md`): if present, its text goes to Tim as `deployment_context` (`dossier_generation.py:226-244`) — see Changelog → v2.1.
 
 ### Cross-night inputs (Night 2/3 only)
 
 | File | Content used | Used for |
 |---|---|---|
-| `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N-1>/dossier_*.json` | prior night's published dossiers | Per-call `prior_editions` user-prompt input — cross-night voice consistency (Tim's register), evolving editorial line, avoiding repetition |
+| `<PROJECT_ROOT>/published_artifacts/dossiers/night_<M>/dossier_*.json`, every earlier night M < N | `kicker`, `headline`, `body_paragraphs` | Per-call `prior_editions` user-prompt input (`publish.py:61-99`) — cross-night voice consistency (Tim's register), evolving editorial line, avoiding repetition |
 
-Issue number is derived deterministically: `ATHENS_BASE_ISSUE + night_number` (base = 42,192; Night 1 → 42,193; Night 3 → 42,195 = the marathon distance in metres). No separate counter file. Dossier index files (per-night + root) are written by the pipeline itself — see §"Outputs" → "Dossier index" below.
+No counter file and no issue number. Dossier index files (per-night + root) are written by the pipeline itself — see §"Outputs" → "Dossier index" below.
 
 ### What the Editor Pipeline does NOT have access to
 
 - **Voice Pipeline Step 1 detailed responses.** Voice's analytical reasoning stays voice-private (honors each voice's `relationship_to_detailed_response` strip mandate).
-- **Voice Pipeline validation files.** Internal pipeline state.
 - **Researcher's `grouping.json` / `all_extractions.json` directly.** Provocateur briefings already carry the full theme record (title + abstract + clusters with extractions) — no separate read.
 - **Voice cards.** Per-voice register torques live in Tim's `translation_protocol`; the artifact itself displays the voice's register in operation. v2 dropped the `voice_card_excerpts` slice.
-- **Reference data** (`sessions.json`, `speakers.json`). The Provocateur's `narrative_briefing` already carries the editorial framing the panel produced; the editor does not separately reach for panel metadata.
+- **`reference/sessions.json`.** The Provocateur's `narrative_briefing` already carries the editorial framing the panel produced. (`speakers.json` *is* read, for `panel_speakers[]` — see above.)
 - **The night's audio files.** Transcription Pipeline has consumed and discarded them.
 - **The closing show's theme-mapping pipeline.** That's a separate cross-night agent; per-night dossiers feed it but the editor does not coordinate with it.
 - **The microsite's CSS or layout.** Editor produces structured JSON; microsite renders. Lead-vs-grid composition is publish-pipeline concern.
@@ -230,25 +280,25 @@ The Editor Pipeline operates under eight principles that distinguish it from a c
 
 *The Assembly* (the panel) ≡ *The Assembly* (the publication). The publication that publishes the panel's outputs is named after the panel. The editor of *The Assembly* (publication) is reporting on what *The Assembly* (panel) produced. The publication is part of the Assembly's testimony, not external commentary on it.
 
-**Operational consequence:** Tim's voice is *inside the fiction*. He reports as a member of the publication-side of the Assembly, not as an outside curator. The masthead's confected pedigree (Vol. CXVI . No. 42,193 . *The Assembly*, founded 1910) is part of the construction announcement; the form's constructedness is visible without being explicitly disclaimed.
+**Operational consequence:** Tim writes from inside the gathering, as "the unnamed editor of this Assembly" (`runtime/flows/shared/prompts/editor_dossier.md:52`), not as an outside curator. Since 2026-05-05 the dossier is framed as a House of Beautiful Business publication (`editor_dossier.md:27`) and carries no masthead; see §"The Publication".
 
 ### 2. Editor as 13th member of the Assembly
 
 Tim Leberecht has a persona card (35 fields per the Persona Card v2 schema), structurally identical to the panel voices'. His system prompt is assembled the same way — `card_assembly` logic, foundational + reasoning + voice + artifact field routing — except with no continuity overlay: unlike panel voices, the editor's card loads fresh each night (see §"The Editor — Tim Leberecht" → "What the code loads from the card"). He is not a register-target inside a generic editor prompt; he is a fully-specified persona who happens to do editorial work.
 
-**Operational consequence:** Tim's voice is sustained across dossiers (and across nights) by his card's machinery, not by ad-hoc prompt scaffolding. Cross-dossier drift is bounded by her constitution, banned_modes, and quality_criteria — the same mechanisms that hold panel voices steady across formulations.
+**Operational consequence:** Tim's voice is sustained across dossiers (and across nights) by his card's machinery, not by ad-hoc prompt scaffolding. Cross-dossier drift is bounded by his constitution, banned_modes, and quality_criteria — the same mechanisms that hold panel voices steady across formulations.
 
 ### 3. Dossier-by-theme as unit of publication
 
-The publishable unit is the dossier, organized around a single theme. Not by voice, not by night. A night produces 1-N dossiers (one per theme the night's voices engaged). Voices contribute to one dossier as primary contributors; they may be mentioned in other dossiers' In Brief column with pointers.
+The publishable unit is the dossier, organized around a single theme. Not by voice, not by night. A night produces 1-N dossiers (one per theme at least one voice was routed to). Each voice contributes to exactly one dossier per night, and no other dossier mentions it.
 
-**Operational consequence:** the editor's first job is not curation (arrangement) but **recognition** — identifying convergence within a theme, naming it in editor's vocabulary, registering reservations specifically. The dossier's existence commits the editor to recognition; the multi-dossier-per-night structure prevents forced-fit (a voice that didn't engage theme X gets reported in In Brief of X's dossier, not folded into X's article).
+**Operational consequence:** the editor's first job is not curation (arrangement) but **recognition** — identifying convergence within a theme, naming it in editor's vocabulary, registering reservations specifically. The dossier's existence commits the editor to recognition; the multi-dossier-per-night structure prevents forced-fit: Tim sees only the voices routed to this theme (`engaged_voices[]`), so a voice that didn't engage theme X is never folded into X's article.
 
 ### 4. Voice purity preserved
 
 Voice artifacts ship as-is. The editor does NOT modify, summarize, paraphrase, or smooth Step 2 `artifact_text`. The editor's article QUOTES the artifact body where quotation serves; the artifact itself appears in full on Pages 4-N of the dossier.
 
-**Operational consequence:** the editor pipeline's output never replaces or transforms voice pipeline outputs. The dossier carries voice pipeline outputs intact and adds editor-pipeline-generated chrome (titles, headnotes, abstracts, In Brief mentions) around them. The seam between paper-voice (chrome) and voice's-own-form (artifact body) is honest.
+**Operational consequence:** the editor pipeline's output never replaces or transforms voice pipeline outputs. The dossier carries each artifact verbatim in `headnotes[i].artifact_text` (copied by the runtime, not by Tim — `dossier_generation.py:202, 481`) and adds Tim's text around it: kicker, headline, front abstract, subline, pull quote, article, theme title and abstract, and each headnote's title and framing text. The seam between paper-voice (chrome) and voice's-own-form (artifact body) is honest.
 
 ### 5. Convergence work happens at the editor layer
 
@@ -264,15 +314,15 @@ When voices engaged a theme but did not converge, the dossier does not manufactu
 
 ### 7. One Anthropic call per dossier
 
-A single structured-output Anthropic call per dossier produces all dossier components together: front-page lead + subdeck, In Brief items, editor's note, editor's article, theme statement, per-voice abstracts, per-artifact headnotes, byline contextual descriptors. Single voice register guaranteed across components (Tim's register holds consistent throughout).
+A single Anthropic call per dossier produces every text Tim writes for it, as labelled prose the runtime parses (prose-and-parse, not structured output): `kicker`, `headline`, `front_abstract`, `subline`, `pull_quote`, `body_paragraphs`, `theme_title_for_dossier`, `theme_abstract_for_dossier`, and each headnote's `artifact_title` + `framing_text` (`editor_dossier.md:184-207`). Single voice register guaranteed across components (Tim's register holds consistent throughout).
 
-**Operational consequence:** N dossiers per night = N Anthropic calls. Calls are independent (no inter-call coordination) and parallelizable. Theme routing decisions are made BEFORE the calls fire, so each call sees only its dossier's primary-contributor artifacts plus the In Brief mentions for voices contributing to other themes. Per-call wall ~60-90s; per-night wall ~5-10 min with parallelism.
+**Operational consequence:** N dossiers per night = N Anthropic calls. Calls are independent (no inter-call coordination) and run in parallel, up to `EDITOR_BATCH` = 6 at once (`runtime/flows/editor_flow.py:75, 231`). Theme routing decisions are made BEFORE the calls fire, so each call sees only the voices routed to its theme. Measured per-call wall across the 13 Athens dossiers (`metadata.wall_clock_s`): 91-298 s, median 151 s. Measured per-night editor wall: see Overview.
 
 ### 8. Refusals reported as refusals
 
-The Whanganui River's silence is published AS silence. The Octopus's not-receiving the question is published AS not-receiving. These artifacts publish on their own URLs in their native form (the river: a near-blank page; the Octopus: an explanation of why the architecture doesn't assemble a will-attend representation). The In Brief column on Page 1 of the dossier most adjacent to their content names them and points to their full piece. Refusals are not folded under any theme.
+A voice whose Step 2 output is a refusal — empty `themes_covered`, or a refusal marker ("refused", "silence", "decline", …) in `focus_decision` — is not folded under any theme. Stage 1 records it in `theme_routing.json` `refusals[]` (`routing.py:458-464`) and no dossier carries it: no dossier field names refusals, and Tim never sees them (they are not in `engaged_voices[]`). Publishing a refusal in its own form is left to the publish layer and microsite, outside this pipeline (§"Stage 1" → "Refusals").
 
-**Operational consequence:** the dossier respects what the voice produced. A voice that refuses the question is not absorbed into a theme it didn't engage; their refusal IS the engagement, and the form publishes it as such.
+**Operational consequence:** a voice that refuses the question is not absorbed into a theme it didn't engage. At Athens no voice refused (`refusals[]` empty on all three nights); the Whanganui River and the Octopus both engaged and appear as ordinary engaged voices (see Overview). (History: v1 expected those two to refuse and had refusals named in an In Brief column; v2 dropped both ideas — see Changelog → v2 and v3.1.)
 
 ---
 
@@ -299,72 +349,37 @@ Symmetric to the per-voice subfolder layout (`<PROJECT_ROOT>/voices/<slug>/`) bu
 
 ---
 
-## The Paper — *The Assembly*
+## The Publication
 
-The publication has fixed conventions that the editor pipeline honours per dossier and per night.
+*Rewritten 2026-09-28 (v3.1) against `editor_dossier.md`, `dossier_generation.py`, the admin dossier view and the 13 published Athens dossiers. This section used to specify a fictional newspaper called* The Assembly *— masthead, "Vol. CXVI", issue numbers "No. 42,193" to "No. 42,195", a confected 1910 founding. The code dropped that design 2026-05-05 (`641e31d`), before Athens ran; the spec caught up 2026-09-28 — see Changelog → v3.1.*
 
-### Masthead
+**What it is.** Each dossier is published under the House of Beautiful Business, with Tim as its unnamed editor: the closing prompt asks for "one HoBB dossier — a single editorial publication under the House of Beautiful Business" and tells Tim "You are the unnamed editor" (`editor_dossier.md:27`). No dossier field names the publication.
 
-```
-THE ASSEMBLY
-Vol. CXVI . . No. 42,193  ·  DOSSIER NO. 1  ·  Friday, May 8th, 2026
-Late Night Edition  ·  Ten Cents
-```
+**No masthead.** A dossier carries no masthead fields: no publication name, volume, issue number, edition label or long-form date (`dossier_generation.py:52-55`; none of the 13 published dossiers or the four index files carries one). What identifies a dossier:
 
-| Element | Source | Variability |
+| What | Where | Example (Athens) |
 |---|---|---|
-| `THE ASSEMBLY` | Constant | Never changes |
-| `Vol. CXVI` | Constant for Athens series | 2026 - 1910 = 116 years; reset only if paper's confected pedigree is revised |
-| `No. 42,193` | Derived: `ATHENS_BASE_ISSUE + night_number` | +1 per night published |
-| `DOSSIER NO. 1` | Per-dossier within the night | Editor's lead-theme dossier is No. 1; subsequent dossiers numbered in publication order |
-| `Friday, May 8th, 2026` | Derived from `night_date + 1 day` (publication is morning-after) | Long-form date in 1910s broadsheet style |
-| `Late Night Edition` | Constant for Athens series | Could vary post-Athens (Morning Edition, Special Edition) |
-| `Ten Cents` | Constant for Athens series | Period-appropriate masthead furniture |
+| Night | `metadata.night`; the `night_<N>/` folder | `1` |
+| Dossier number, per night | the filename `dossier_<NNN>.json`; `dossier_no` in `night_<N>/_index.json` | `dossier_001.json` |
+| Theme | `metadata.theme_id`, `metadata.theme_display_title` | `theme_002`, "Between Executing and Forming the Mind" (N1/001) |
+| Lead of the night | `edition_lead.lead_dossier_no` in `night_<N>/_index.json` | Night 3: `2` |
+| Colophon | `colophon`, stamped by the runtime (`dossier_generation.py:409-416`) | "Filed by the Editor's desk on the morning of Night 1." |
 
-The masthead is rendered by the microsite template, not the editor pipeline. The editor pipeline writes structured fields (`issue_number`, `dossier_number`, `dossier_date`); the microsite template applies the layout.
+How dossier numbers and the lead are assigned: §"Multi-night, multi-theme convention".
 
-### Issue numbering scheme
+**Renderers.** The in-repo renderer is the admin dashboard's dossier view. It heads each dossier with "`theme_display_title` · Night N" (`runtime/ingest/templates/admin_render_dossier.html:6-12`) and prints the colophon last (`:139-144`). The public microsite is built outside this repo; its page header, typography and per-voice visual treatments are not specified by this pipeline and cannot be verified from here.
 
-Athens base issue = **42,192**. Per-night increment of +1.
-
-- Night 1 (May 7 → publishes May 8 morning) = Issue **No. 42,193**
-- Night 2 (May 8 → publishes May 9 morning) = Issue **No. 42,194**
-- Night 3 (May 9 → publishes May 10 morning) = Issue **No. 42,195** *(= 42.195 km, the marathon distance — the Athens-to-Athens joke)*
-
-Per-dossier within an issue: **DOSSIER NO. 1, NO. 2, NO. 3, ...** in publication order (lead-theme dossier first).
-
-### Volume number scheme
-
-**Vol. CXVI** for the Athens series (year 2026 - confected first issue 1910 = 116 years).
-
-Volume increments by year. If *The Assembly* publishes after Athens (post-Forum continuation), Vol. CXVI continues through the rest of 2026, becoming Vol. CXVII in 2027.
-
-### Confected pedigree
-
-*The Assembly* (per the masthead) is a paper founded in 1910 as the news organ of an annual assembly of voices. The first issue in 1910 covered the 1st Assembly (which, by the confected pedigree, was a smaller and differently-constituted gathering than the WBBF Athens 2026 panel). The 2026 Athens Forum is, per the confected pedigree, the 116th annual Assembly — and the marathon's worth of issues (the 42,193rd → 42,195th) reflects the fact that the paper has published more frequently than annually across its history (suggesting the Assembly meets and adjourns more than once per year, with intervening issues covering... unspecified business).
-
-The confected pedigree is **announced via the masthead, never disclaimed in prose**. Readers are expected to recognize that a 114-year-old paper called *The Assembly* about an AI assembly does not exist; the recognition IS the form's discipline. The frame doc warns about the cardboard-newsroom failure mode — a fully-specified editor persona (Tim Leberecht, replacing the placeholder Claudia Pinchbeck 2026-05-05) is the mitigation: a 35-field card with sustained voice, not a generic editor-voice. (Claudia's name carried a self-aware pun — *Pinchbeck*, an English place name and 18th-century word for fake gold — that was specific to that placeholder and does not carry over to Tim; Tim's dossiers carry no printed byline at all, per "Dossier Shape" below, so the mitigation now runs entirely through the card's specificity rather than through a named attribution.)
-
-### Visual register
-
-| Element | Rendering |
-|---|---|
-| Typography (chrome, masthead) | 1910s broadsheet — Caslon-style serif; tight kerning; long leading; Title Case headlines; em-dashes for sentence-level pivots; semicolons for elaboration; no exclamation marks |
-| Page layout | Swipeable single-column on phone; multi-column 1910s broadsheet on tablet/desktop; masthead engraved-feeling at the top |
-| Per-voice artifact treatment | Voice-faithful — chancery parchment for Cleopatra's prostagma; lighter beige with Arabic script for Battuta's riḥla; theme-aware neutral for Plato's dialogue; warm paper for Dostoevsky's Diary; etc. (microsite template; not editor pipeline) |
-| Strikethrough | Used at most once per dossier (per Frame Concept v1); applied to a single specific phrase the editor identifies; renders as `<del>` HTML element with strikethrough styling |
-
-The visual chrome is microsite-template work, not editor pipeline. The editor pipeline produces structured JSON; the microsite renders.
+**Visual register.** The dossier carries no styling. Two conventions travel inside the text: an element equal to `"* * *"` in `body_paragraphs[]` is a section break, and prose fields carry inline markdown `*italics*` (§"Output Schema" → "Known quirks" #2). Neither the closing prompt nor any published dossier uses strikethrough.
 
 ---
 
 ## Dossier Shape
 
-Each dossier is one self-contained JSON file (`dossier_<NNN>.json`) that carries everything needed to render four kinds of page: the front teaser (Page 1), the article (Page 2), the theme page (Page 3), and one artifact page per engaged voice (Pages 4-N). Tim writes every reader-facing text except the artifact bodies; the runtime adds each voice's identity, its artifact body, and the audit fields. The page-to-field mapping is set by the closing prompt's `<emitted_fields>` block and mirrored in the field order the runtime writes (`gen:500-531`).
+Each dossier is one self-contained JSON file (`dossier_<NNN>.json`) that carries everything needed to render four kinds of page: the front teaser (Page 1), the article (Page 2), the theme page (Page 3), and one artifact page per engaged voice (Pages 4-N). Tim writes every reader-facing text except the artifact bodies; the runtime adds each voice's identity, its artifact body, and the audit fields. The page-to-field mapping is set by the closing prompt's `<emitted_fields>` block and mirrored in the field order the runtime writes (`gen:509-540`).
 
 *Verified 2026-09-28 against the prompt, the writer, and all 13 published Athens dossiers (29 headnotes); all 13 share one identical key set. The public microsite is built outside this repo; the in-repo renderer is the admin dashboard's dossier view, `runtime/ingest/templates/admin_render_dossier.html`.*
 
-**Evidence keys** (used here and in §"Output Schema"): `prompt:N` = `runtime/flows/shared/prompts/editor_dossier.md` line N · `gen:N` = `runtime/flows/editor/dossier_generation.py` line N · `N1/001` = `<athens-2026>/published_artifacts/dossiers/night_1/dossier_001.json`, and so on (read-only reference project) · **Measured** = whitespace-split word counts across all 13 published dossiers.
+**Evidence keys** (used here and in §"Output Schema"): `prompt:N` = `runtime/flows/shared/prompts/editor_dossier.md` line N · `gen:N` = `runtime/flows/editor/dossier_generation.py` line N at `9f415dd` · `N1/001` = `<athens-2026>/published_artifacts/dossiers/night_1/dossier_001.json`, and so on (read-only reference project) · **Measured** = whitespace-split word counts across all 13 published dossiers.
 
 ### Page 1 — The Front
 
@@ -373,7 +388,7 @@ Each dossier is one self-contained JSON file (`dossier_<NNN>.json`) that carries
 | Masthead | *none* | — | — | — | The dossier carries no masthead fields. Volume, issue number, edition label and long-form date were dropped 2026-05-05 (`641e31d`; `gen:52-55`): the dossier is a House of Beautiful Business publication (`prompt:27`), not a fictional newspaper. The only time anchor is `metadata.night`; the dossier number is the filename and `dossier_no` in `night_<N>/_index.json`. No published dossier or index carries `issue_no` or `vol`. The admin view's masthead reads "`theme_display_title` · Night N". |
 | Kicker | `kicker` | Tim | 3-5 words, ALL-CAPS; shared with Page 2 | 3-5; all caps 13/13 | `prompt:188, 250` · N1/001: "WHO TEACHES THE TEACHERS" |
 | Headline | `headline` | Tim | 8-12 words; shared with Page 2 | 9-13 | `prompt:189, 251` · N1/001: "Tool or partner, the room asked; on whose authority, the voices replied." |
-| Front abstract | `front_abstract` | Tim | 25-40 words; Page 1 only. Frames the tension the article will work, in its own words — not lifted from the article, not a recap of the headline | 30-41 | `prompt:190` · N1/001: "Sean White called for a personal AI in every hand. Four traditions answered tonight, and each named the same missing question: …". No 6-word run of any published `front_abstract` appears in its article (13/13). The prompt's length table (`prompt:253`) still says "drawn from the article's opening" — a stale leftover; see §"Output Schema" → "Known quirks". |
+| Front abstract | `front_abstract` | Tim | 25-40 words; Page 1 only. Frames the tension the article will work, in its own words — not lifted from the article, not a recap of the headline | 30-41 | `prompt:190, 253` · N1/001: "Sean White called for a personal AI in every hand. Four traditions answered tonight, and each named the same missing question: …". No 6-word run of any published `front_abstract` appears in its article (13/13). |
 
 No theme banner, lead subdeck, lead teaser, In Brief column or editor's note ships.
 
@@ -398,32 +413,34 @@ The Researcher's own title survives as `metadata.theme_display_title`; the admin
 
 ### Pages 4-N — The Artifacts (one per engaged voice)
 
-One page per `headnotes[i]`, in `engaged_voices[]` order (`prompt:170, 265-267`). The runtime builds the list from the voices routed to this theme and slots Tim's text in by `voice_slug` (`gen:461-476`), so a voice Tim skipped still gets its page, with an empty title and framing.
+One page per `headnotes[i]`, in `engaged_voices[]` order (`prompt:170, 265-267`). The runtime builds the list from the voices routed to this theme and slots Tim's text in by `voice_slug` (`gen:470-485`), so a voice Tim skipped still gets its page, with an empty title and framing.
 
 | Element | Field | Written by | Envelope (prompt) | Measured | Evidence |
 |---|---|---|---|---|---|
 | Page heading | *none* | renderer | — | — | Admin view: "PAGE [N] — [VOICE NAME]", built from `headnotes[i].voice_name` (`admin_render_dossier.html:114`). |
-| Voice name | `headnotes[i].voice_name` | runtime | — | — | `gen:199, 468`: `"the " + voice_display_name(slug)`, resolved from `council_config.json` (C53; published values were also restamped by `runtime/scripts/restamp_published_voice_names.py`) · N1/001: "the Voice of Ada Lovelace" |
+| Voice name | `headnotes[i].voice_name` | runtime | — | — | `gen:199, 477`: `"the " + voice_display_name(slug)`, resolved from `council_config.json` (C53; published values were also restamped by `runtime/scripts/restamp_published_voice_names.py`) · N1/001: "the Voice of Ada Lovelace" |
 | Artifact title | `headnotes[i].artifact_title` | Tim | 4-8 words; the voice's form and register inflect the title through Tim's `translation_protocol` | 4-10 (2 over 8) | `prompt:175, 203, 258` · N1/001 (ada_lovelace): "Note H: A Frontier I Did Not Draw" |
 | Framing text | `headnotes[i].framing_text` | Tim | 50-80 words; self-standing, for a reader who lands on this page directly; three movements — the theme, the formulation the voice received, what to read for (optionally one reservation) | 65-86 (5 over 80) | `prompt:172-181, 204, 259` · N1/001 (ada_lovelace): "Tonight's theme: where the marathon's debate over personal versus centralised AI passed over the question of who authorises any agent that forms a citizen's mind. The formulation put to her: … Read for …". Replaces v1's 3-5-sentence headnote body and absorbs the old `byline_descriptor`. |
-| Artifact form | `headnotes[i].artifact_form` | runtime | — | 1-43 | `gen:208, 471`: the voice's Step 2 `selected_form` · N1/001 (plato): "Compressed dialogue between Socrates and Adeimantus on the colonnade." Code comments call it a CSS-bundle key (`8b84e58`), but most published values are free-text descriptions, not short keys. |
-| Formulation | `headnotes[i].formulation_text` | runtime | — | — | `gen:201, 473`: the voice's Provocateur `narrative_briefing` for this theme, verbatim · N1/001 (plato) begins "THEME: Paideia for Every Citizen / CONTEXT FROM TODAY'S SESSIONS: …". The admin view shows it collapsed. |
-| Artifact body | `headnotes[i].artifact_text` | runtime (from voice pipeline Step 2) | — | — | `gen:202, 472`: the Step 2 `artifact_text`, verbatim and inviolate (Principle 4). Embedded in the dossier since 2026-05-04 (`8b84e58`). |
+| Artifact form | `headnotes[i].artifact_form` | runtime | — | 1-43 | `gen:208, 480`: the voice's Step 2 `selected_form` · N1/001 (plato): "Compressed dialogue between Socrates and Adeimantus on the colonnade." Code comments call it a CSS-bundle key (`8b84e58`), but most published values are free-text descriptions, not short keys. |
+| Formulation | `headnotes[i].formulation_text` | runtime | — | — | `gen:201, 482`: the voice's Provocateur `narrative_briefing` for this theme, verbatim · N1/001 (plato) begins "THEME: Paideia for Every Citizen / CONTEXT FROM TODAY'S SESSIONS: …". The admin view shows it collapsed. |
+| Artifact body | `headnotes[i].artifact_text` | runtime (from voice pipeline Step 2) | — | — | `gen:202, 481`: the Step 2 `artifact_text`, verbatim and inviolate (Principle 4). Embedded in the dossier since 2026-05-04 (`8b84e58`). |
 | Form-marker, closing seal | *none* | public microsite | — | — | Per-voice script marks (e.g. ΠΡΟΣΤΑΓΜΑ above a prostagma, γινέσθωι below it) are a microsite rendering concern, not dossier data; not verifiable from this repo. |
 
 ### Outside the pages
 
 | Field | Written by | What it is | Evidence |
 |---|---|---|---|
-| `schema_version` | runtime | `"2.0"` — a constant, not bumped as fields were added | `gen:507` · 13/13 |
-| `panel_speakers[]` | runtime | `{name, title, affiliation}` for every speaker quoted in the theme's extractions, joined from `reference/speakers.json`; audience members get the name only. Also sent to Tim, who cites speakers by name + role (`prompt:146`). Used by the admin view's quote audit; not shown to readers. | `gen:106-130, 213-215, 526` · N1/001: 17 entries, e.g. `{"name": "Sean White", "title": "Pioneer of Human-Centered AI", …}` |
-| `thinking_trace` | runtime | Tim's summarized thinking for the call | `gen:528, 574` · N1/001: 21,996 characters |
-| `colophon` | runtime | `"Filed by the Editor's desk on the morning of Night {N}."` | `gen:402-409` · N1/001 |
-| `metadata` | runtime | Theme ids, night, model, token and timing figures — see §"Output Schema" | `gen:478-498` · 13/13 |
+| `schema_version` | runtime | `"2.0"` — a constant, not bumped as fields were added | `gen:516` · 13/13 |
+| `panel_speakers[]` | runtime | `{name, title, affiliation}` for every speaker quoted in the theme's extractions, joined from `reference/speakers.json`; audience members get the name only. Also sent to Tim, who cites speakers by name + role (`prompt:146`). Used by the admin view's quote audit; not shown to readers. | `gen:106-130, 213-215, 535` · N1/001: 17 entries, e.g. `{"name": "Sean White", "title": "Pioneer of Human-Centered AI", …}` |
+| `thinking_trace` | runtime | Tim's summarized thinking for the call | `gen:537, 583` · N1/001: 21,996 characters |
+| `colophon` | runtime | `"Filed by the Editor's desk on the morning of Night {N}."` | `gen:409-416` · N1/001 |
+| `metadata` | runtime | Theme ids, night, model, token and timing figures — see §"Output Schema" | `gen:487-507` · 13/13 |
 
 ---
 
 ## Stage 1 — Theme Routing
+
+*Not re-verified (2026-09-28): routing now takes Step 2's `lineage.primary_theme_id` first — every Athens voice was routed that way (`routing.py:144-146`) — and the LLM synthesis router described below as "planned" shipped 2026-05-05 (`641e31d`, `synthesis_router.py`). Only the routing-manifest example's header fields were corrected; see Changelog → v3.1.*
 
 Theme routing is a deterministic pre-pass that runs before the editor pipeline's Anthropic calls fire. Its job: assign each voice's Step 2 artifact to exactly one dossier (its primary theme). v2 dropped the "in_brief cross-references" concept — each voice now appears in only one dossier; cross-dossier mentions don't exist in the editor's output.
 
@@ -477,11 +494,8 @@ Output: `<run_dir>/05_editor/theme_routing.json`
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "1.0",
   "night": 1,
-  "athens_base_issue": 42192,
-  "issue_no": 42193,
-  "vol": "CXVI",
   "themes_to_dossiers": [
     {"theme_id": "theme_001", "dossier_no": 1, "theme_title": "...", "n_engaged_voices": 4},
     {"theme_id": "theme_005", "dossier_no": 2, "theme_title": "...", "n_engaged_voices": 3},
@@ -511,6 +525,8 @@ Output: `<run_dir>/05_editor/theme_routing.json`
 }
 ```
 
+*Corrected 2026-09-28 (v3.1): `schema_version` is `"1.0"` and the manifest carries no `athens_base_issue` / `issue_no` / `vol` (`routing.py:542-551`; all three Athens `theme_routing.json` files). The rest of this example, and of Stage 1, has not been re-verified — see Changelog → v3.1.*
+
 **v2 changes vs v1:**
 - ~~`in_brief_mentions[]` per voice~~ — dropped (no cross-dossier mentions)
 - ~~`refusals[].in_brief_dossier`~~ — dropped (refusals don't get routed to a dossier; flat list)
@@ -535,114 +551,77 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 
 ### Per-call inputs
 
-**System prompt:** Tim Leberecht's persona card, assembled via `card_assembly.assemble_system_prompt(card, step="dossier", night=N)` — same shape as voice pipeline's assembly logic, with editor-specific routing matrix (which fields to include for editor's task; subset detail in Implementation §"Editor card → System Prompt Assembly").
+*Rewritten 2026-09-28 (v3.1) from the code that builds the call — `assemble_system_prompt` (`runtime/flows/editor/card_assembly.py:286-368`) and `build_dossier_briefing` (`runtime/flows/editor/dossier_generation.py:133-245`) — and checked against the three Athens run dirs. The v1 input list (`primary_contributors`, `in_brief_voices`, `refusals`, `night_context`) and the v2 example that stood here are history; see Changelog → v3.1.*
 
-**User prompt:** A structured JSON document containing:
+**System prompt** — the same two blocks for every dossier call of a night, each with a 1h cache breakpoint (`runtime/flows/voice/_anthropic_call.py:127-134`):
 
-- `theme`: full theme record (from Researcher)
-  - `theme_id`, `theme_title`, `theme_abstract`, clusters
-- `theme_question`: the formulation as it was put (from Provocateur briefings; one of the per-voice briefing's `narrative_briefing` text serves; pick the first or most representative)
-- `primary_contributors`: array of voice objects, one per voice routed to this theme as primary
-  - For each: `voice_slug`, `voice_name`, `voice_card_excerpts` (5 fields: medium, register_and_tone, character, focus_decision, selected_form), `step2_artifact` (full `artifact_text` + `weight_assessment` + `focus_rationale` + `stance_rationale` + `form_rationale`), `provocateur_formulation` (the briefing text + theme_record this voice received)
-- `in_brief_voices`: array of voice objects routed to OTHER themes but whose `themes_covered` includes this theme. Each: `voice_slug`, `voice_name`, `primary_dossier_no` (where their full piece lives), `step2_artifact_summary` (one-line summary derived from the focus_rationale)
-- `refusals`: array of refusal objects (river, octopus) if assigned to this dossier's In Brief
-- `night_context`: `night_number`, `issue_no`, `dossier_no`, `dossier_date`, `marathon_panel_source` (the panel the question came from)
+| Block | Contents | Evidence |
+|---|---|---|
+| Prefix | "You are " + the card's `council_member_name` ("Tim Leberecht — writer, host, co-founder of the House of Beautiful Business. …"), then its IDENTITY, CONSTITUTION and BOUNDARIES sections, then a deployment block: THE GATHERING and YOUR ROLE (from `conference_facts.json`) and THE PANEL (`council_config.json` `collective_landscape`) | `card_assembly.py:320-351`, `:220-283` |
+| Tail | The card's REASONING METHOD, ENGAGEMENT (2 fields, no `unique_contribution`), VOICE and ARTIFACT sections, then `# YOUR TASK` and the closing prompt `editor_dossier.md` | `card_assembly.py:353-361` |
 
-**Closing prompt** (the equivalent of `voice_step2_artifact.md` for the editor): `runtime/flows/shared/prompts/editor_dossier.md`. Tells Tim to:
+`{night}` is replaced with the night number in both blocks (`card_assembly.py:366-367`). Measured: the two blocks came to 52,641 cached tokens on every Athens call. On Nights 2 and 3 all 8 calls *wrote* the cache and none read it (`cache_creation_input_tokens` 52,641, `cache_read_input_tokens` 0); on Night 1 all 5 read it and none wrote. *Inferred, not confirmed:* the calls start together (§"Architecture: Eight Principles" → 7), so none can read what another is still writing.
 
-1. Read the night's submissions for this theme
-2. Decide convergence/divergence (the article's central finding)
-3. Produce all dossier components in the structured output schema below
+**User prompt** — one sentence ("You are receiving the materials for one dossier…") followed by the dossier briefing as a fenced JSON block (`build_user_prompt`, `dossier_generation.py:248-259`). The briefing's fields:
 
-### Stage 2 — Per-call inputs (v2 contract)
+| Field | Contents | Source · evidence |
+|---|---|---|
+| `night` | The night number | `--night` · `dossier_generation.py:232` |
+| `theme` | `theme_id`, `theme_display_title`, `theme_title_from_researcher`, `theme_abstract_from_researcher`, `clusters[]` (each with full `extractions[]`), `theme_flags` (`audience_friction`, `fault_line_present`, `theme_quality`) | The first routed voice's briefing entry for this theme — every voice's copy of `full_theme_record` is identical · `:173-182` |
+| `engaged_voices[]` | Per routed voice, sorted by slug: `voice_slug`, `voice_name` ("the Voice of X"), `mode` (`question` / `proposition`), `narrative_briefing`, `artifact_text`, `selected_form` | Briefing + Step 2 artifact · `:184-211`; order from `editor_flow.py:78-84` |
+| `panel_speakers[]` | `{name, title, affiliation}` for every speaker quoted in the theme's extractions, first appearance first; audience members and unknown names get the name only | `reference/speakers.json` · `:83-130, 213-215` |
+| `prior_editions[]` | Empty on Night 1. Nights 2-3: one entry per earlier night, `{night, dossiers: [{kicker, headline, body_paragraphs}]}` | `published_artifacts/dossiers/night_<M>/` · `publish.py:61-99` |
+| `deployment_context` | Present only if `<run_dir>/_dossier_deployment_context.md` exists: its text | `:226-229, 243-244`; see Changelog → v2.1 |
 
-**System prompt** (cached after first call within a night, 1h TTL): Tim Leberecht's persona card from `<PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json`, assembled via `runtime/flows/editor/card_assembly.assemble_system_prompt(card, night=N)`. Returns `(prefix, tail)` tuple — both blocks get a `cache_control` breakpoint. Prefix = IDENTITY + CONSTITUTION + BOUNDARIES (~20K tokens, byte-identical across calls). Tail = REASONING METHOD + ENGAGEMENT (2 fields, no `unique_contribution`) + VOICE + ARTIFACT + closing prompt instruction (~10K tokens). All N per-night dossier calls share both blocks; first call writes cache, subsequent calls read.
+About `deployment_context` at Athens: all three Athens run dirs have the file; each states "**Default framing PRESERVED**" (the panels happened) and adds editorial rules for that night. Its modification times put it before the dossiers on Nights 2 and 3; on Night 1 it was last modified (12:26) between the first dossier write (12:20) and the last (12:30), so which Night 1 dossiers saw it cannot be told from the files.
 
-**User prompt** — a structured payload built by combining the K voice briefings for this theme and the K Step 2 artifacts:
+Example — abridged from Athens Night 2, dossier 004 (theme_003, one voice). Strings are cut with `…`; one of four clusters, one extraction, two of eight panel speakers and one of Night 1's five prior dossiers are shown.
 
 ```json
 {
-  "night": 1,
+  "night": 2,
   "theme": {
-    "theme_id": "theme_001",
-    "theme_display_title": "...",
-    "theme_title_from_researcher": "...",
-    "theme_abstract_from_researcher": "...",
+    "theme_id": "theme_003",
+    "theme_display_title": "The Centre That Was Assumed",
+    "theme_title_from_researcher": "AI architecture as contested design choice",
+    "theme_abstract_from_researcher": "cluster_005, cluster_006, cluster_008, and cluster_002 together refuse AI's current shape as inevitable: …",
     "clusters": [
       {
-        "cluster_id": "...",
-        "cluster_title": "...",
-        "cluster_abstract": "...",
-        "extractions": [{id, speaker, lens, extraction, context, engagement, ...}, ...]
+        "cluster_id": "cluster_002",
+        "cluster_title": "Group pull on the dance floor as tech diagnostic",
+        "cluster_abstract": "…",
+        "extractions": [
+          {"id": "day_two_demos_ai_democracy_marathon_dance_and_dissent_a_nightwalk_2230:005",
+           "speaker": "Participant 11", "lens": "assertion",
+           "extraction": "Group dynamics are dangerous even without coercion — the mere presence of others …",
+           "context": "…", "engagement": "unengaged", "responds_to": "None", "energy": "normal"}
+        ]
       }
     ],
-    "theme_flags": {audience_friction, fault_line_present, theme_quality}
+    "theme_flags": {"audience_friction": "high", "fault_line_present": true, "theme_quality": 68.85}
   },
   "engaged_voices": [
     {
-      "voice_slug": "plato",
-      "voice_name": "the voice of Plato",
+      "voice_slug": "octopus",
+      "voice_name": "the Voice of the Octopus",
       "mode": "question",
-      "narrative_briefing": "THEME: ... CONTEXT FROM TODAY'S SESSIONS: ... [3K-char briefing this voice received]",
-      "artifact_text": "..."
+      "narrative_briefing": "THEME: The Centre That Was Assumed\n\nCONTEXT FROM TODAY'S SESSIONS:\n…",
+      "artifact_text": "…",
+      "selected_form": "Continuous tank-side registration paired with chromatophore display — …"
     }
   ],
+  "panel_speakers": [
+    {"name": "Participant 11", "title": "", "affiliation": ""},
+    {"name": "Zoe Scaman", "title": "Strategy Genius for the Age of AI", "affiliation": "Founder of strategy studio Bodacious …"}
+  ],
   "prior_editions": [
-    {
-      "night": 1,
-      "issue_no": 42193,
-      "dossiers": [
-        {
-          "kicker":           "FOUR NAMINGS OF A DISSOLVED THING",
-          "headline":         "Four Voices, One Foreclosure",
-          "body_paragraphs":  ["...", "...", "* * *", "..."]
-        }
-      ]
-    }
-  ]
+    {"night": 1, "dossiers": [{"kicker": "WHO TEACHES THE TEACHERS", "headline": "Tool or partner, the room asked; on whose authority, the voices replied.", "body_paragraphs": ["…"]}]}
+  ],
+  "deployment_context": "## Deployment context — Athens Night 2 (2026-05-08)\n\n**Default framing PRESERVED**: …"
 }
 ```
 
-**`prior_editions` shape (Night 2/3 only):** trimmed to just the articles per dossier (kicker + headline + body_paragraphs). Drops `front_abstract`, `headnotes`, `subline`, `metadata` from the prior dossier JSON. Preserves Tim's ability to reference prior-night work via article-body anchor text without the token weight of full dossier shape. ~80% lighter than full prior dossier JSONs.
-
-**Construction (the dedupe pass):**
-
-```python
-def build_dossier_briefing(theme_id, voice_slugs, run_dir, project_root):
-    briefings = [load_briefing_formulation(slug, theme_id, run_dir) for slug in voice_slugs]
-    artifacts = [load_artifact(slug, run_dir) for slug in voice_slugs]
-    
-    # All K briefings carry identical full_theme_record — take the first
-    ftr = briefings[0]["full_theme_record"]
-    theme = {
-        "theme_id":                       briefings[0]["theme_id"],
-        "theme_display_title":            briefings[0]["theme_display_title"],
-        "theme_title_from_researcher":    ftr["theme_title_from_researcher"],
-        "theme_abstract_from_researcher": ftr["theme_abstract_from_researcher"],
-        "clusters":                       ftr["clusters"],
-        "theme_flags":                    ftr["theme_flags"],
-    }
-    
-    # voice_name is resolved from council_config.json by slug (C53) — NOT
-    # built from the artifact's own `council_member` field, which is the
-    # voice's long card identity-prefix opening line (e.g. "I am Augusta
-    # Ada King, Countess of Lovelace…"). `voice_display_name` returns the
-    # clean "Voice of X" string verbatim from council_config.json; the
-    # headnote prose that consumes this field prepends "the " itself.
-    # See flows/shared/io.py::voice_display_name / load_council_name_by_slug
-    # and flows/editor/routing.py::_voice_name_lookup for the real lookup.
-    engaged_voices = [
-        {
-            "voice_slug":         slug,
-            "voice_name":         "the " + voice_display_name(slug, project_root),
-            "mode":               briefing["mode"],
-            "narrative_briefing": briefing["narrative_briefing"],
-            "artifact_text":      artifact["artifact_text"],
-        }
-        for slug, briefing, artifact in zip(voice_slugs, briefings, artifacts)
-    ]
-    return {"night": night, "theme": theme, "engaged_voices": engaged_voices, "prior_editions": [...]}
-```
+*Not re-verified (2026-09-28): the estimates below assume a ~30K-token system prompt and 3-5K output tokens; Athens measured 52,641 cached tokens and 5,906-24,401 output tokens per call — see Changelog → v3.1.*
 
 **Per-call cost** (~25-30K total input + ~3-5K output, Opus 4.7 + 1h prefix cache):
 
@@ -659,17 +638,32 @@ A 3-dossier night ≈ $0.83. A 5-dossier night ≈ $1.30. Athens 3-night total �
 
 ### Stage 2 — Closing prompt structure
 
-The closing prompt `editor_dossier.md` lives at `runtime/flows/shared/prompts/editor_dossier.md` and is appended to Tim's assembled card as the system-message tail (Placement A — same as voice pipeline's `voice_step1_reasoning.md` / `voice_step2_artifact.md`). Cache-eligible across the night's dossier calls.
+The closing prompt `runtime/flows/shared/prompts/editor_dossier.md` is appended to the system-prompt tail under a `# YOUR TASK` heading (`card_assembly.py:360-361`) — Placement A, as in the voice pipeline — so it is cached with the rest of the tail. Since 2026-05-05 (`5ea5084`, "Step1+2-merged structure") it has 14 XML-tagged blocks; the only changes since are to their contents (`641e31d`, `cbcdf82`, `fda8091`, `19a528c`, `6973221`, `9f415dd`). *Checked 2026-09-28 against the file at `9f415dd`, its last change, which only rewrote line 253.*
 
-Mirrors `voice_step2_artifact.md`'s 5-section structure: input → weighing → composition → boundaries → output. Tells Tim:
+| # | Block | Lines | What it tells Tim |
+|---|---|---|---|
+| 1 | `<input>` | 1-24 | What each field of the user-prompt JSON is and how to use it (see "Per-call inputs") |
+| 2 | `<task>` | 26-38 | Produce one House of Beautiful Business dossier as "the unnamed editor"; bridge what the conference surfaced, what the voices did with it, and the reader |
+| 3 | `<your_core>` | 40-53 | The card fields to reason from |
+| 4 | `<engaging_the_material>` | 55-61 | Read the theme record, then each voice's `narrative_briefing`, then each whole `artifact_text` |
+| 5 | `<weighing>` | 63-81 | Per voice: what it diagnosed, refused, couldn't translate; across voices: converged, diverged, or partly converged |
+| 6 | `<focus>` | 83-89 | Focus the article through one voice, or synthesize only when two or more carry equal weight and share a through-line |
+| 7 | `<stance>` | 91-103 | Choose an editorial posture from the card |
+| 8 | `<form>` | 105-118 | The article's form, from the card's four-beat essay structure |
+| 9 | `<boundaries>` | 120-129 | Hard limits, banned modes and language, care topics; at most one sentence per article drawn from `prior_editions` |
+| 10 | `<composition>` | 131-161 | Write the article first. Quote rules (at least one quote, ideally 2-3, at most two per voice; a multi-voice article quotes at least two voices; "the Voice of X"; panel speakers by name and role); pronoun discipline; no programme; close like a Beauty Shot |
+| 11 | `<theme_page>` | 163-167 | Then the theme page: the Researcher's title and abstract in Tim's register, without restating the article |
+| 12 | `<headnotes>` | 169-182 | Then one self-standing headnote per engaged voice, in `engaged_voices[]` order: title + 50-80-word framing (theme, formulation, what to read for) |
+| 13 | `<emitted_fields>` | 184-207 | What each output field is for and where it lands (Page 1 / 2 / 3 / 4-N) |
+| 14 | `<output>` | 209-270 | The exact labelled-prose template, the length table, asterism and headnote-ordering rules |
 
-1. **Input** — what she'll receive in the user prompt (the per-call shape above).
-2. **Weighing** — read all K artifacts; ask what each diagnosed in their framework's vocabulary; ask what the night's voices converged or diverged on.
-3. **Composition** — write the article first; apply her bastard-form discipline; the article must not wander.
-4. **Boundaries** — banned modes / banned language / hard limits / topics_requiring_care.
-5. **Output** — emit the prose-and-parse output described in §"Output Schema" below. Article-first, then derive front_abstract from the article's opening.
+The output contract (`<emitted_fields>` + `<output>`) is documented field by field in §"Dossier Shape" and §"Output Schema". Unlike the v2 design, `front_abstract` is not derived from the article's opening: `<emitted_fields>` and the length table both ask for independent framing (lines 190, 253; the table agreed only from `9f415dd`).
 
-The actual prompt is implementation work (§"Implementation"); v2 spec defines the contract; the prompt encodes it.
+**Inconsistencies in the prompt** (current behavior; none fixed — docs-only):
+- `<input>` gives the theme page different lengths (`theme_title_for_dossier` "5-10 words", `theme_abstract_for_dossier` "60-100 words", lines 9-10) from `<emitted_fields>` and the length table (4-8 and 50-80 words, lines 198-199 and 255-256). Published output: 4-9 and 69-86 words (§"Output Schema").
+- `<input>` says each `prior_editions` entry carries `issue_no` (line 21). The runtime sends only `night` and `dossiers` (`publish.py:95-98`).
+- `<input>` says to cite speakers "by **role or title**" (line 11); `<composition>` says "by **name + role/title**" (line 146). Published articles name them (e.g. N1/001: "Helen Edwards, of the Artificiality Institute, reframed the machine as …").
+- `<your_core>` and `<weighing>` point Tim at `unique_contribution` (lines 52, 70), a card field the system prompt deliberately leaves out (`card_assembly.py:74-80`).
 
 ### Output
 
@@ -682,6 +676,8 @@ Stage 2 writes one JSON per dossier:
 Schema specified in §"Output Schema" below.
 
 ### Cost per call
+
+*Not re-verified (2026-09-28) — see the note under "Per-call inputs" and Changelog → v3.1.*
 
 Per dossier, with prefix caching enabled (Tim's persona card cached across all dossiers' calls within a night):
 
@@ -701,7 +697,7 @@ A 3-dossier night ≈ $0.83 ($0.50 + 2 × $0.20). A 5-dossier night ≈ $1.30. A
 
 A dossier JSON file holds Tim's prose for one dossier plus the runtime-stamped identity, artifact and audit fields. It is written to `<run_dir>/05_editor/dossiers/dossier_<NNN>.json` and copied to `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/` (§"Outputs"). The microsite renders pages from it; the per-night and root indexes (§"Outputs" → "Dossier index") summarize it.
 
-The file says `"schema_version": "2.0"` (`gen:507`). That constant was not bumped as fields were added after v2, so it does not tell you which fields a file has; all 13 published Athens dossiers share the key set below (checked 2026-09-28). Evidence keys (`prompt:N`, `gen:N`, `N1/001`) as defined in §"Dossier Shape".
+The file says `"schema_version": "2.0"` (`gen:516`). That constant was not bumped as fields were added after v2, so it does not tell you which fields a file has; all 13 published Athens dossiers share the key set below (checked 2026-09-28). Evidence keys (`prompt:N`, `gen:N`, `N1/001`) as defined in §"Dossier Shape".
 
 **Design principles, as shipped:**
 - **Article-first.** Tim composes the article first; everything else derives from it (`prompt:132`).
@@ -710,7 +706,7 @@ The file says `"schema_version": "2.0"` (`gen:507`). That constant was not bumpe
 - **Self-contained.** Each headnote embeds the artifact body, its form and the formulation the voice received, so every page renders from the dossier alone (since 2026-05-04, `8b84e58`).
 - **Layout-agnostic.** The dossier says nothing about lead vs grid. Which dossier leads a night is recorded in `night_<N>/_index.json` `edition_lead` (§"Outputs" → "Dossier index").
 - **No newspaper chrome.** No volume, issue number, edition label or dated masthead (dropped 2026-05-05, `641e31d`).
-- **Prose-and-parse.** Tim emits labelled prose (`prompt:209-270`); `parse_dossier_output` (`gen:371-396`) turns it into fields; `stamp_runtime_fields` (`gen:412-531`) adds the rest. Asterism breaks are `"* * *"` elements in `body_paragraphs[]`.
+- **Prose-and-parse.** Tim emits labelled prose (`prompt:209-270`); `parse_dossier_output` (`gen:378-403`) turns it into fields; `stamp_runtime_fields` (`gen:419-540`) adds the rest. Asterism breaks are `"* * *"` elements in `body_paragraphs[]`.
 
 Example — abridged from `N1/001`, key order as written. Strings are cut with `…`; one of four headnotes and one of 17 panel speakers are shown. The leading `**\n` in the first paragraph is really there (Known quirks #1).
 
@@ -768,22 +764,22 @@ Example — abridged from `N1/001`, key order as written. Strings are cut with `
 | Field | Written by | How | Evidence |
 |---|---|---|---|
 | `kicker`, `headline`, `front_abstract`, `subline`, `pull_quote`, `theme_title_for_dossier`, `theme_abstract_for_dossier` | Tim | One labelled line each in his output, matched by `_FIELD_LABEL_RE` (`gen:280-288`); markdown `**` / `*` / `_` trimmed from both ends (`_strip_chrome`, `gen:291-296`). A missing label gives `""`. | `prompt:212-234` · all 13 dossiers |
-| `body_paragraphs[]` | Tim | The block after the `body_paragraphs:` label, split on blank lines; `* * *` survives as its own element (`gen:299-326`). No trimming — see Known quirks #1. | `prompt:223-230, 261-263` · all 13 |
-| `headnotes[i].voice_slug`, `.artifact_title`, `.framing_text` | Tim | Parsed from the `headnotes:` block (`gen:329-368`), then re-keyed onto the routed voice list by slug (`gen:461-476`). Tim's `voice_slug` is only the join key; the routed list sets which voices appear and in what order. | `prompt:236-243, 265-267` · all 29 headnotes |
-| `headnotes[i].voice_name` | runtime | `"the " + voice_display_name(slug)` from `council_config.json` (C53) | `gen:199, 468` · N1/001 "the Voice of Plato" |
-| `headnotes[i].artifact_form` | runtime | The voice's Step 2 `selected_form` | `gen:208, 471` |
-| `headnotes[i].artifact_text` | runtime | The voice's Step 2 `artifact_text`, verbatim | `gen:202, 472` |
-| `headnotes[i].formulation_text` | runtime | The voice's Provocateur `narrative_briefing` for this theme, verbatim | `gen:201, 473` |
-| `schema_version` | runtime | Constant `"2.0"` | `gen:507` |
-| `panel_speakers[]` | runtime | Speakers quoted in the theme's extractions, deduplicated, joined with `reference/speakers.json` | `gen:106-130, 526` |
-| `thinking_trace` | runtime | Summarized thinking returned by the streaming call | `gen:528, 574` |
-| `colophon` | runtime | Night-only template | `gen:402-409` |
-| `metadata.theme_id`, `.theme_display_title` | runtime | Echoed from the theme record in the input | `gen:479-480` |
-| `metadata.night` | runtime | The `--night` argument | `gen:481` |
-| `metadata.generated_by` | runtime | Constant `"editor_pipeline_v2"` | `gen:482` |
-| `metadata.model`, `.thinking_enabled` | runtime | `model_routing.json`, step `runtime.editor.dossier` | `gen:483-484` |
-| `metadata.thinking_tokens`, `.wall_clock_s` | runtime | Measured on the call | `gen:485-486` |
-| `metadata.input_tokens`, `.output_tokens`, `.cache_creation_input_tokens`, `.cache_read_input_tokens` | runtime | The API response's `usage`; left out if the response has none (present 13/13) | `gen:488-498` |
+| `body_paragraphs[]` | Tim | The block after the `body_paragraphs:` label, split on blank lines; `* * *` survives as its own element (`gen:299-329`). Markdown after the label's colon is skipped (since `9f415dd`); nothing inside the block is trimmed. Athens data: Known quirks #1. | `prompt:223-230, 261-263` · all 13 |
+| `headnotes[i].voice_slug`, `.artifact_title`, `.framing_text` | Tim | Parsed from the `headnotes:` block (`gen:332-375`), then re-keyed onto the routed voice list by slug (`gen:470-485`). Tim's `voice_slug` is only the join key; the routed list sets which voices appear and in what order. | `prompt:236-243, 265-267` · all 29 headnotes |
+| `headnotes[i].voice_name` | runtime | `"the " + voice_display_name(slug)` from `council_config.json` (C53) | `gen:199, 477` · N1/001 "the Voice of Plato" |
+| `headnotes[i].artifact_form` | runtime | The voice's Step 2 `selected_form` | `gen:208, 480` |
+| `headnotes[i].artifact_text` | runtime | The voice's Step 2 `artifact_text`, verbatim | `gen:202, 481` |
+| `headnotes[i].formulation_text` | runtime | The voice's Provocateur `narrative_briefing` for this theme, verbatim | `gen:201, 482` |
+| `schema_version` | runtime | Constant `"2.0"` | `gen:516` |
+| `panel_speakers[]` | runtime | Speakers quoted in the theme's extractions, deduplicated, joined with `reference/speakers.json` | `gen:106-130, 535` |
+| `thinking_trace` | runtime | Summarized thinking returned by the streaming call | `gen:537, 583` |
+| `colophon` | runtime | Night-only template | `gen:409-416` |
+| `metadata.theme_id`, `.theme_display_title` | runtime | Echoed from the theme record in the input | `gen:488-489` |
+| `metadata.night` | runtime | The `--night` argument | `gen:490` |
+| `metadata.generated_by` | runtime | Constant `"editor_pipeline_v2"` | `gen:491` |
+| `metadata.model`, `.thinking_enabled` | runtime | `model_routing.json`, step `runtime.editor.dossier` | `gen:492-493` |
+| `metadata.thinking_tokens`, `.wall_clock_s` | runtime | Measured on the call | `gen:494-495` |
+| `metadata.input_tokens`, `.output_tokens`, `.cache_creation_input_tokens`, `.cache_read_input_tokens` | runtime | The API response's `usage`; left out if the response has none (present 13/13) | `gen:497-507` |
 
 Not in the dossier: `issue_no`, `vol`, `publication_date`, `publication_date_long`, `edition_label` (all dropped 2026-05-05, `641e31d`) and `dossier_no` (it is the filename, and `dossier_no` in the indexes).
 
@@ -806,14 +802,13 @@ Per-voice torque for `artifact_title` (how each voice's form inflects its title)
 
 ### Known quirks
 
-Current behavior of the shipped data, verified 2026-09-28. Consumers must handle these; none is fixed by v3 (docs-only).
+What consumers of the dossiers must handle, verified 2026-09-28.
 
-1. **Stray `**` before the first paragraph.** In all 13 published dossiers `body_paragraphs[0]` begins with `"**\n"`. The body parser (`gen:311-314`) allows markdown only *before* the colon of the `**body_paragraphs:**` label, so the closing `**` is captured as body text; the one-line fields escape this because `_strip_chrome` trims them. Reproduced by running `parse_dossier_output` on the prompt's own template. The admin view shows the `**`.
+1. **Stray `**` before the first paragraph — Athens data only.** All 13 published Athens dossiers begin `body_paragraphs[0]` with `"**\n"`: the parser used to leave the closing `**` of the prompt's own `**body_paragraphs:**` label in the body. Fixed in code 2026-09-28 (`9f415dd`, runtime OPEN_ITEMS C64): the label may now carry markdown after its colon (`gen:315`), and running `parse_dossier_output` on the prompt's template gives a clean first paragraph. The published Athens files were not cleaned — operator decision 2026-09-28, *"Clean later, separate task"* (open C64 residual) — so anything rendering the Athens data must still strip it. The admin view shows the `**`.
 2. **Inline markdown in prose fields.** `body_paragraphs`, `framing_text` and `pull_quote` carry `*italics*` (e.g. N1/001's Arendt headnote: "*thinking partner*"; N1/001's `pull_quote` wraps the whole quotation in `*…*`). Renderers must interpret or strip it.
 3. **`pull_quote` is not always one unbroken run of the body.** 12/13 appear verbatim (ignoring quote marks and italics). N3/001 rejoins a quotation that the body splits around its attribution: "*The absence of the decision*, the Voice of Hannah Arendt writes, *is not the same thing as consent.*"
 4. **Length envelopes are not enforced** — see the table above.
-5. **The prompt contradicts itself on `front_abstract`.** `prompt:190` (independent framing; changed 2026-05-05, `641e31d`) against `prompt:253` (length table: "drawn from the article's opening", a leftover). Published output follows `prompt:190`.
-6. **`artifact_form` is mostly free text** (1-43 words), not the short render key the code comments describe.
+5. **`artifact_form` is mostly free text** (1-43 words), not the short render key the code comments describe.
 
 ### Schema history — v1 design → v2 design → shipped
 
@@ -836,26 +831,26 @@ Kept as history. "v2 design" is what this spec specified on 2026-05-03 PM; "Ship
 
 ## Microsite Render Contract
 
-The editor pipeline writes structured JSON. The microsite renders. The publish pipeline composes the per-night front-page layout (lead-vs-grid). The contract:
+The editor pipeline writes structured JSON; the microsite renders it. The public microsite is built outside this repo, so items 2 and 3 are the intended division of labour and cannot be verified here; items 1, 4 and 5 were checked 2026-09-28 (v3.1) against the code and the 13 published Athens dossiers.
 
-1. **Editor pipeline produces editorial prose.** kicker, headline, subline, body_paragraphs, headnotes (framing_text), front_abstract. All paper-voice; all in Tim's register.
+1. **Editor pipeline produces the editorial prose**, all in Tim's register: `kicker`, `headline`, `front_abstract` (Page 1); `subline`, `pull_quote`, `body_paragraphs` (Page 2, with the shared kicker and headline); `theme_title_for_dossier`, `theme_abstract_for_dossier` (Page 3); each headnote's `artifact_title` + `framing_text` (Pages 4-N). Page-by-page detail: §"Dossier Shape".
 
-2. **Microsite renders typography, layout, and per-voice visual treatments.** Masthead engraving, multi-column or single-column responsive layout, per-voice CSS bundles (form-markers, palettes, closing-seal templates), responsive design.
+2. **Microsite renders typography, layout, and per-voice visual treatments** — single- or multi-column responsive layout, per-voice CSS bundles (form-markers, palettes, closing seals). The dossier carries no styling and no masthead (§"The Publication").
 
-3. **Per-voice render-config bundles** live in the microsite (NOT in editor pipeline output). Each voice's `medium` field on their persona card is the key — the microsite has a registry mapping `prostagma`, `rihla`, `dialogue`, `diary_entry`, etc. to their CSS bundles (form-marker character, ground palette, closing seal). Editor does NOT emit `voice_render_config_key`; microsite computes it from voice card itself.
+3. **Per-voice render-config bundles** live in the microsite (NOT in editor pipeline output). The microsite maps a voice's form (`prostagma`, `rihla`, `dialogue`, `diary_entry`, …) to its CSS bundle (form-marker character, ground palette, closing seal). Editor does NOT emit a `voice_render_config_key`. The nearest thing the dossier carries is `headnotes[i].artifact_form`, the voice's Step 2 `selected_form` — mostly free text, not a short key (§"Output Schema" → "Known quirks" #5).
 
-4. **Voice pipeline outputs are referenced, not embedded.** Microsite reads voice's `artifact_text` from `<run_dir>/04_voice/step2_first_draft_artifacts/<voice>.json` (or its published copy) directly. Editor's dossier doesn't embed.
+4. **Voice pipeline outputs are embedded, verbatim.** Each headnote carries the voice's `artifact_text`, `artifact_form` and `formulation_text` (`dossier_generation.py:474-485`), so a renderer needs nothing but the dossier file to draw every page. Embedded since 2026-05-04 (`8b84e58`); v2 had specified "referenced, not embedded".
 
-5. **Lead-vs-grid is publish-pipeline concern.** Publish reads all the night's editor dossier JSONs + applies its own ordering rule (or operator override) and writes per-night `_index.json` with `lead_dossier_no` + `grid_dossier_nos`. Microsite reads `_index.json` for layout, then reads each dossier JSON for content.
+5. **Which dossier leads the night is decided outside Tim's call.** The editor's Stage 3 (`runtime/flows/editor/edition.py`) scores the night's dossiers and writes `edition_lead.lead_dossier_no` into `night_<N>/_index.json` (`edition.py:173`); the root `_index.json` repeats it per night in `editions_by_night`. There is no `grid_dossier_nos` field: every dossier that is not the lead is simply listed in `dossiers[]`. A microsite reads the index for layout, then each dossier JSON for content. (Corrected 2026-09-28: this item said publish writes `lead_dossier_no` + `grid_dossier_nos`.)
 
-This separation lets the editor focus on prose generation; the microsite owns visual rendering; publish owns front-page composition.
+This separation lets the editor focus on prose generation; the microsite owns visual rendering; the edition index says which dossier leads.
 
 ---
 
 ## Constraints
 
 1. **Single Anthropic call per dossier.** No iterative refinement, no multi-pass generation. Per Principle 7.
-2. **No artifact crosses to next night.** Every Step 2 artifact lands in one of tonight's dossiers. No "held for next dossier" debt.
+2. **No artifact crosses to next night.** Every routed Step 2 artifact lands in one of tonight's dossiers; nothing is queued for a later dossier. A voice the operator holds (`hold_for_regen`) or a refusal appears in no dossier (§"Multi-night, multi-theme convention").
 3. **Voice artifacts inviolate.** Editor pipeline does NOT modify, summarize, or paraphrase Step 2 `artifact_text`. Per Principle 4.
 4. **Editor reads Step 2 only.** Voice's Step 1 detailed responses stay voice-private. Per the §"What the Editor Pipeline Knows" architectural decision.
 5. **Article length: 300-450 single-voice / 450-600 multi-voice.** Hard constraint per `runtime/flows/shared/prompts/editor_dossier.md`'s `body_paragraphs` envelope (corrected 2026-09-28 from "350-500 / 500-700," which matched neither the shipped prompt nor Tim's card). The article must not wander; a reader who only reads the article should get the question stated more sharply than the contemporary debate states it. (History: v1 said 700-900 words; v2's changelog narrowed to 350-500/500-700 per a voices-thread memo, but the prompt that shipped narrowed further to 300-450/450-600. Measured Athens output: 429-449 words single-voice, 566-627 multi-voice — see Constraints table above.) Tim's own card field `length_and_format_constraints` states a general "350–550 words" without the single/multi-voice split; the closing prompt's more specific per-voice-count envelope is what's actually enforced at generation time.
@@ -871,9 +866,10 @@ This separation lets the editor focus on prose generation; the microsite owns vi
 
 ### In scope (this pipeline)
 
-- Reading voice pipeline Step 2 artifacts + Provocateur briefings + Researcher themes + reference data
+- Reading voice pipeline Step 2 artifacts (plus their validation verdicts and operator decisions, for the review gate) + Provocateur briefings (which carry the Researcher's theme records) + reference data (`speakers.json`, `council_config.json`, `conference_facts.json`)
 - Routing voices to dossiers (Stage 1)
-- Generating per-dossier prose (Stage 2): front-page components, editor's article, theme page, per-artifact headnotes
+- Generating per-dossier prose (Stage 2): the front-page teaser (`kicker`, `headline`, `front_abstract`), the article with its `subline` and `pull_quote`, the theme page, per-artifact headnotes
+- Picking the night's lead dossier and writing the per-night and root dossier indexes (Stage 3)
 - Persisting structured dossier JSON to `<run_dir>/05_editor/dossiers/`
 - Cross-night state at `<PROJECT_ROOT>/published_artifacts/dossiers/night_<N>/`
 - Token cost / wall accounting
@@ -881,7 +877,7 @@ This separation lets the editor focus on prose generation; the microsite owns vi
 ### Out of scope (other pipelines + microsite + post-Athens)
 
 - **Voice pipeline outputs.** This pipeline reads them; voice pipeline produces them.
-- **Microsite rendering.** Per-voice CSS bundles, masthead typography, swipeable layout, responsive design. Microsite owns this.
+- **Microsite rendering.** Per-voice CSS bundles, page headers and typography, swipeable layout, responsive design. Microsite owns this.
 - **Closing show theme-mapping.** Cross-night theme identification across all 3 nights' dossiers + voice artifacts. Separate pipeline; not yet built.
 - **Substack draft pass.** Dropped per architectural decision (memo + this doc); Substack bridge does not exist.
 - **Broadsheet print run.** A separate surface (frame doc spec'd it as one of N artifacts per night); could consume editor pipeline output but is its own pipeline.
@@ -902,7 +898,7 @@ With current options:
 - `--night N` — explicit night number; defensive `assert_run_dir_night_matches()` enforces consistency with run_dir naming
 - `--skip-routing` (optional) — skip Stage 1; assume `theme_routing.json` is hand-written
 - `--single-dossier <theme_id>` (optional) — generate only one dossier for testing/iteration
-- `--no-cache` (optional) — disable prompt caching; useful when iterating on Tim's card
+- `--no-cache` (optional) — meant to disable prompt caching when iterating on Tim's card. *As of 2026-09-28 it has no effect: `editor_flow.py` records it in the manifest but never passes it to the call (`:94, 292, 335`).*
 
 Athens production CLI (typical):
 ```bash
@@ -953,7 +949,8 @@ Model and thinking mode are set in `model_routing.json` (step `runtime.editor.do
 - `assert_run_dir_night_matches(run_dir, night)` (existing helper) — refuses to run if `--night N` doesn't match run_dir's embedded night number
 - Refuse to run if `<run_dir>/04_voice/manifest.json` shows incomplete voice pipeline (step2 not finished)
 - Refuse to run if Tim's card at `<PROJECT_ROOT>/editor/tim_leberecht/07_persona_card_assembled.json` is missing or fails schema validation
-- Issue number consistency check — derived `ATHENS_BASE_ISSUE + night_number` must match what's already published in prior nights' `published_artifacts/dossiers/night_<N-1>/dossier_*.json` (catches +1-off errors)
+
+(Removed 2026-09-28, v3.1: an "issue number consistency check" listed here. It was never built — `editor_flow.py` had no issue-number code before the numbering was dropped in `641e31d` — and there is no issue number left to check.)
 
 ---
 
@@ -991,7 +988,7 @@ Both copies are identical at production time. The `<run_dir>` copy lives with th
 
 Two index files are maintained under `<PROJECT_ROOT>/published_artifacts/dossiers/` — both written by the pipeline itself, not built lazily by a consumer:
 
-- **Per-night index** — `night_<N>/_index.json`. Written by two independent code paths with different schemas: the editor (`flows/editor/edition.py::finalize_edition`, run as Stage 3 after each night's dossier calls) and `publish_flow.py::_build_per_night_dossier_index`. Each writer reads back whatever is already on disk and merges rather than overwrites, via a shared helper (`flows/editor/edition.py::merge_night_index`) — the rule is "each writer keeps the fields it doesn't own." The editor owns `NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS` (`night`, `url_path`, `generated_at`, `dossier_count`, `edition_lead`, `dossiers`) and, per dossier entry, `NIGHT_INDEX_OWNED_DOSSIER_KEYS` (`dossier_no`, `filename`, `url_path`, `kicker`, `headline`, `subline`, `theme_id`, `theme_display_title`, `voice_count`, `voices_routed`). Publish owns its own top-level set (`night`, `url_path`, `generated_at`, `dossier_count`, `dossiers`, `voices_in_night`) plus per-dossier `issue_no`/`vol` on top of the same content fields — it deliberately never claims `edition_lead`, so the editor's lead-dossier pick survives a publish rerun, and the editor's rewrite likewise leaves publish's `issue_no`/`vol`/`voices_in_night` alone. The editor's write always rebuilds from every `dossier_*.json` file actually on disk for the night (`_rebuild_dossiers_from_disk`), not just the dossier(s) a `--single-dossier` rerun regenerated.
+- **Per-night index** — `night_<N>/_index.json`. Written by two independent code paths with different schemas: the editor (`flows/editor/edition.py::finalize_edition`, run as Stage 3 after each night's dossier calls) and `publish_flow.py::_build_per_night_dossier_index`. Each writer reads back whatever is already on disk and merges rather than overwrites, via a shared helper (`flows/editor/edition.py::merge_night_index`) — the rule is "each writer keeps the fields it doesn't own." The editor owns `NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS` (`night`, `url_path`, `generated_at`, `dossier_count`, `edition_lead`, `dossiers`) and, per dossier entry, `NIGHT_INDEX_OWNED_DOSSIER_KEYS` (`dossier_no`, `filename`, `url_path`, `kicker`, `headline`, `subline`, `theme_id`, `theme_display_title`, `voice_count`, `voices_routed`). Publish owns its own top-level set (`night`, `url_path`, `generated_at`, `dossier_count`, `dossiers`, `voices_in_night`) and, per dossier, the same keys as the editor (`publish_flow.py:826-832`; its old per-dossier `issue_no`/`vol` were removed 2026-09-28 in `9f415dd`) — it deliberately never claims `edition_lead`, so the editor's lead-dossier pick survives a publish rerun, and the editor's rewrite likewise leaves publish's `voices_in_night` alone. Because each writer carries forward keys it doesn't own, a per-night index written before 2026-05-05 keeps any `issue_no`/`vol` it already had; no Athens index has them (two dev dry-runs under `projects/current-tests/` do). The editor's write always rebuilds from every `dossier_*.json` file actually on disk for the night (`_rebuild_dossiers_from_disk`), not just the dossier(s) a `--single-dossier` rerun regenerated.
 - **Root index** — `published_artifacts/dossiers/_index.json`, aggregating every night present. Rebuilt by `flows/editor/edition.py::update_root_index` at the end of every `finalize_edition` call, by walking each `night_<N>/_index.json` on disk; `publish_flow.py::_build_cross_night_dossier_index` also rebuilds an equivalent root index during publish.
 
 Tracker refs: runtime OPEN_ITEMS C46 (per-night index dual-writer clobber fix) and PLAN 0.1.2.
@@ -999,6 +996,8 @@ Tracker refs: runtime OPEN_ITEMS C46 (per-night index dual-writer clobber fix) a
 ---
 
 ## Cost & Envelope
+
+*Not re-verified (2026-09-28): built on the per-call estimates above; Athens measured far larger system prompts and outputs — see Changelog → v3.1.*
 
 Per the per-call cost above, scaled to Athens 3 nights:
 
@@ -1040,8 +1039,8 @@ These are settled-enough-to-build defaults, with operator-overrideable choices:
 | 2 | **`prior_editions` shape on Night 2/3** | ✅ **Just the articles** (kicker + headline + body_paragraphs per prior dossier; drop front_abstract / headnotes / metadata) | Saves ~80% of token weight vs full dossier JSONs; preserves Tim's ability to write "as we noted last night, the river that did not speak" with anchor text |
 | 3 | **`metadata.form_fit_status`** | ✅ **DROPPED.** The form-fit-honesty premise (memo §5) assumed Whanganui / Octopus / Marley produce non-prose artifacts. They don't: Whanganui will emit legal text (reflecting its legal personhood), Octopus produces prose (chromatophore display is a separate microsite render layer), Marley emits lyric-prose the editor's broadsheet form can carry. No voice in Athens needs the form-failure flag. | — |
 | 4 | **`metadata.night_finding`** | ✅ **DROPPED.** Article body should already make the convergence/divergence finding clear; the field would be redundant. Closing-show pipeline (B5) doesn't exist yet, so designing for it is premature; if/when B5 lands, it can extract findings from articles via its own pass. | — |
-| 5 | **`colophon`** | ✅ **Embedded in dossier JSON output, runtime-stamps near-static template.** Default: `"Filed by the Editor's desk on the morning of Night [N], from [date]. Vol. CXVI · Issue No. [N]."` | Tim doesn't emit it; purely metadata-derived. Confirmed against published dossiers (e.g. `night_1/dossier_001.json`: `"colophon": "Filed by the Editor's desk on the morning of Night 1."`) — `editor_dossier.md`'s emitted-fields list does not include `colophon`. Can be extended later (per-night quip, named correspondent attribution) |
-| 6 | **Cross-night dossier numbering + theme handling** | ✅ **Per-night reset** within each issue (42,193 / 42,194 / 42,195). **Editor does NOT track cross-night theme identity** — that's Provocateur's job via C9 exclusion (matches by normalized title since theme_ids are not stable across Researcher runs). Tim references prior nights via prior_editions article text, not by theme_id matching. | Per [`provocateur_flow.py:579-580`](../runtime/flows/provocateur_flow.py:579) — "theme_ids are not stable across Researcher runs (each run generates fresh sequential IDs)" |
+| 5 | **`colophon`** | ✅ **Embedded in dossier JSON output, runtime-stamps near-static template.** Text: `"Filed by the Editor's desk on the morning of Night {N}."` (`dossier_generation.py:409-416`) | Tim doesn't emit it (`editor_dossier.md`'s emitted fields do not include it). All 13 published dossiers carry exactly this text for their night (checked 2026-09-28). The v2 default also named the date, volume and issue number; that part was dropped with the masthead, 2026-05-05 (`641e31d`). Can be extended later (per-night quip, named correspondent attribution) |
+| 6 | **Cross-night dossier numbering + theme handling** | ✅ **Per-night reset**: each night's dossiers are numbered from `dossier_001` (§"Multi-night, multi-theme convention"). **Editor does NOT track cross-night theme identity** — that's Provocateur's job via C9 exclusion (matches by normalized title since theme_ids are not stable across Researcher runs). Tim references prior nights via prior_editions article text, not by theme_id matching. | Per [`provocateur_flow.py:579-580`](../runtime/flows/provocateur_flow.py:579) — "theme_ids are not stable across Researcher runs (each run generates fresh sequential IDs)" |
 | 7 | **Operator-trigger vs auto-fire** | ✅ **Auto** — orchestrator polls `04_voice/manifest.json` and fires editor as soon as voice pipeline completes | Editor is just another stage in the chain |
 | 8 | **Per-voice render-config bundles** (form-markers, palettes, closing seals) | ✅ **Microsite-side concern**, not editor-pipeline output. Microsite computes from voice's `medium` field. | — |
 
@@ -1072,7 +1071,7 @@ Q1, Q2, Q5, Q6, Q7, Q8 are settled. Q3 + Q4 deferred for separate reasoning.
 - `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` *(now archivable)* — predecessor memo capturing per-call input/output contract refinements; superseded by v2 of this spec
 - `_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` — Claudia Pinchbeck persona-construction reasoning (dead link fixed 2026-09-28: this doc previously cited a `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` that was never written; this is the actual historical prep doc, marked 🟫 DEPRECATED in its own header since Tim Leberecht shipped as editor 2026-05-05). The draft 44-field card itself lives at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` (historical only; not used at runtime)
 - `runtime/flows/editor_flow.py` — implementation entry point (shipped 2026-05-03 PM, commit `fc5c2fb`)
-- `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt. Rewritten to the v2 contract 2026-05-04 (`4c7c315`); last changed 2026-05-08 (`6973221`, `pull_quote`); generated all 13 published Athens dossiers. Its `<emitted_fields>` block is the ground truth for §"Dossier Shape" and §"Output Schema", which were rewritten against it on 2026-09-28 (v3). It contradicts itself on `front_abstract` — see §"Output Schema" → "Known quirks" #5.
+- `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt. Rewritten to the v2 contract 2026-05-04 (`4c7c315`); last content change before Athens 2026-05-08 (`6973221`, `pull_quote`); generated all 13 published Athens dossiers; line 253 fixed 2026-09-28 (`9f415dd`). Its `<emitted_fields>` block is the ground truth for §"Dossier Shape" and §"Output Schema", which were rewritten against it on 2026-09-28 (v3). Its remaining self-contradictions are listed in §"Stage 2 — Closing prompt structure".
 - `runtime/flows/editor/dossier_generation.py` — parses Tim's output and stamps the runtime fields (`parse_dossier_output`, `stamp_runtime_fields`).
 - `runtime/ingest/templates/admin_render_dossier.html` — the in-repo dossier renderer (admin dashboard); the public microsite lives outside this repo.
 
