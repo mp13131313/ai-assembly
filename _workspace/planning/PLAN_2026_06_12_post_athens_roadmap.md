@@ -20,6 +20,7 @@
 | **1.3** editor interleave / editor Tim-hardcoding / reader gates / validator-economy | runtime **C47, C57**; voices **§24/§28, §4 FU#56**; runtime **C28/C42/C43** |
 | **2.1** split-card + event config | voices **§10 / FU#42**; runtime **C52** |
 | **2.2–2.4** vendor layer + deployment profiles (vatican/chat/voice) | **net-new — no OPEN_ITEMS home;** vatican `SPEC_2026_05_27_…` + this doc are canonical |
+| **Model config** (per-step model choice, both pipelines; future UI Models page) | runtime **C63** (+ C62); voices **§35** — *in progress 2026-09-28* |
 | **Deferred** agentic-architecture backlog (per-stage moves; validation triage ⚖; visible Step-3 deliberation ⚖) | runtime **Section H / C59–C61**; voices **§34** — *design-and-shelve under the net-complexity gate; NOT in the execution stages below* |
 
 The detailed Phase 0/1 bodies below are now **rationale subordinate to those IDs** (read OPEN_ITEMS for current status/decision trail). **Phase 2 stays canonical here** — the versatile-assembly vision, vendor abstraction, and chat/voice profiles are genuinely net-new design with no OPEN_ITEMS entry.

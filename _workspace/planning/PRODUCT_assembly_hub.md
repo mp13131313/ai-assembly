@@ -103,6 +103,7 @@ Several have existing seeds:
 5. **Validation review queue** — the C28b gate as a screen: release/hold with a click instead of hand-writing decision JSON.
 6. **Output preview + publish** — read dossiers/artifacts, edit deployment-context, publish to a hosted microsite.
 7. **Library + voice cards** — browse/search published voices; each card shows flags, attestations, validation badge, provenance, license; publish-tier controls.
+8. **Models page** *(added 2026-09-28, operator request)* — one table of every LLM step across both pipelines with its model, thinking and effort, editable per project; a "voices last validated on" column warns when a step's model differs from what the voices were checked against. *(Backend exists: `code/model_routing.json`, runtime OPEN_ITEMS C63.)*
 
 ---
 

@@ -3000,6 +3000,19 @@ When B1 (editor) lands, these mini-concepts should be drafted:
 
 Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $5/$25; Sonnet 5 $2/$10 vs Sonnet 4.6 $3/$15 per MTok. Extends §32.4 (voices) — re-validate the §6 corpus-gateway behavior on whichever model is chosen.
 
+### C63. Central model config — `model_routing.json` 🟢 IN PROGRESS (operator request 2026-09-28; cross-ref voices §35)
+**Why:** the operator wants to choose, per step and across both pipelines, which model runs — eventually from a Models page in the studio UI (PRODUCT §7 surface 8). Today the choice is scattered across ~40 hardcoded model strings plus a dozen env vars (docs/LLM_CALL_INVENTORY.md §1, §5). This is also the practical answer to C62: once it lands, a model migration is a config edit plus voice re-validation.
+
+**Design (landed `6a5a828`):**
+- `code/model_routing.json` — every LLM step in both pipelines (41) with a UI-ready label, model, thinking (`adaptive`/`off`), optional effort; plus a `models` table of per-model rules (accepts temperature? can thinking be disabled? default effort).
+- Loader `flows/shared/model_routing.py`, byte-identical in `runtime/` and `personas/` (same pattern as `project_root.py`; a test in each suite enforces it). `step_config(step)` → model/thinking/effort.
+- Refuses unsafe setups at load time: thinking off on a model that can't disable it (Opus 5.5); no explicit effort on a model whose default is below `high` (Opus 5.5's `medium` — a silent quality drop).
+- Legacy per-step env vars still override the file (documented run commands keep working); empty env values count as unset.
+- Golden test pins today's production models per step; changing a default means updating that table in the same commit.
+
+**Status:** foundation committed; call-site conversion (runtime + personas, behavior-preserving) in progress.
+**Still to do after conversion:** (1) update `docs/LLM_CALL_INVENTORY.md` §5 + the pipeline specs to point at the file as the source of truth; (2) *later, with the studio UI:* per-project override file + the Models page, including a "voices last validated on" column so a model switch shows which voices need re-checking. **Relationship to PLAN 2.2 (vendor abstraction):** this is the model-*choice* half; the unified call-plumbing half (one client wrapper per vendor) remains 2.2 and stays shelved.
+
 ## Section F — Recently landed (for context)
 
 These items closed within the last 2 weeks. Listed here so the runtime onboarding has context for the current state.

@@ -1351,3 +1351,9 @@ If built, each voice card needs three new fields (the runtime can't fake these �
 - **calibrated confidence per move** — the anti-collapse signal (Zhu et al.): voices mark amendments with confidence so a downstream selector (Tim) has the diversity-preserving signal. Pairs with the selection-over-synthesis editor preference.
 
 Each lands one-at-a-time with the sentinel-regen + thinking-on gate, like all Phase-1.1 card work. Relates: [[runtime C61]], §33 (validation track — the deliberation is also where genuine-perspective-vs-ventriloquism becomes *visible*), §30 (voice_temporal_stance — address rhetoric must respect the assembly-fiction frame), briefing line 91 (the collective-constitution principle this move closes).
+
+---
+
+## 35. Central model config covers the persona pipeline too 🟢 IN PROGRESS (2026-09-28) — see runtime `OPEN_ITEMS.md` C63
+
+Every persona pass (0a → Derive, incl. the three cross-vendor validator ladders and the 7c fallback) is an entry in `code/model_routing.json`; `personas/flows/shared/model_routing.py` is the byte-identical twin of the runtime loader. Voice-side consequence: switching a voice-writing pass's model changes the cards it generates, so any switch goes through the sentinel-regen gate (same discipline as Stage 4 / §32.4). Also makes `call_claude` model-aware about `temperature`, so a later move to Sonnet 5 can't break Pass 7-pre (C62).
