@@ -11,6 +11,12 @@ history lives in `git log`.
 
 ## 2026-09-28
 
+### `phase0-fixes` merged into `main`
+
+- **Merged by fast-forward** (`main` → `40fe490`) after two Fable 5.1 code reviews: the branch diff (verdict: merge after fixes) and the code it left unchanged (verdict: ripple zone clear). Both reports are in `_workspace/planning/runtime/`. The branch findings were fixed before the merge (C67, `02006f5`). The untouched-code findings predate the branch and are filed as runtime C68 and voices §37.
+- **Branches retired:** `post-athens-planning` and `phase0-fixes` are tagged `archive/post-athens-planning-2026-09-28` and `archive/phase0-fixes-2026-09-28` (`conventions.md`).
+
+
 ### Published record repaired; central model config
 
 - **athens-2026 published record repaired and pushed** (`0b2af19`):

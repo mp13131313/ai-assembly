@@ -13,14 +13,14 @@ COMPLETE.
 
 **Post-Athens (2026-06 → now).** The June planning set (roadmap, both
 trackers, product direction — see *Where the detail lives*) drives the
-work. Phase 0 code-quality fixes landed on branch `phase0-fixes`
-(2026-09-27/28). The **published record was repaired and pushed
+work. Phase 0 code-quality fixes (2026-09-27/28) were reviewed by two
+independent code reviews and **merged into `main` on 2026-09-28**. The **published record was repaired and pushed
 2026-09-28**: voice names (C53), the Night 1/2 voice indexes (C50), and
 per-theme files (C51). **Every LLM step in both pipelines now reads its
 model from one file, `model_routing.json`** (C63, done 2026-09-28).
 **Direction:** the governed voice hub (`PRODUCT_assembly_hub.md`), built on
 the operator's own intent — no external event needed. Test suites
-(runtime, ingest, personas) green on `phase0-fixes`.
+(runtime 382, ingest 114, personas 242) green on `main`.
 
 | Night | Lead dossier | Dossiers | Voices |
 |---|---|---|---|
@@ -38,12 +38,12 @@ the operator's own intent — no external event needed. Test suites
   full JSON "making-of" record: transcripts → voice reasoning → validation
   → dossiers; **audio excluded for size**). `main` carries the 2026-09-28
   published-record repair.
-- **Branches (this repo):** `main` = the Athens-complete code (2026-06-04).
-  `post-athens-planning` = the June planning docs. `phase0-fixes`
-  (branched from it) = all post-Athens code fixes + tracker updates.
-  **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed to origin (checked 2026-09-28, after the
-  C65/C66 merge `0fc94e0`). `git status -sb` shows anything newer.
+- **Branches (this repo):** `main` holds everything as of 2026-09-28
+  (fast-forwarded to `40fe490`). `post-athens-planning` and `phase0-fixes`
+  were merged and tagged `archive/post-athens-planning-2026-09-28` and
+  `archive/phase0-fixes-2026-09-28`; the branches themselves still exist
+  until deleted. New work goes on `fix/…` or `feature/…` branches
+  (`conventions.md`). Push status: `git status -sb`.
 
 ---
 
@@ -248,6 +248,10 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
+**2026-09-28:** two Fable 5.1 code reviews before the merge: branch diff and untouched code (reports in
+`_workspace/planning/runtime/REVIEW_2026_09_28_*.md`). Branch findings fixed (C67, `02006f5`). Pre-existing findings
+filed: runtime C68, voices §37. Eleven further Fable analysis and design tasks are running, and their deliverables
+will be filed on arrival (briefs: `_workspace/planning/BRIEF_2026_09_28_*.md`).
 Editor spec (`docs/AI_Assembly_Editor_Pipeline.md`) brought to v3.2 on
 2026-09-28 — backlog rows #24–#26 done (`03c84e1`, `6bbb6f5`, `b1e4387`);
 the 4 code/prompt defects row #24 found are fixed (C64, `9f415dd`). Still
@@ -258,10 +262,10 @@ Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.
 
-**Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
+**Resolved since 2026-06-01 (merged into `main` 2026-09-28):** C46 · C49 · C50 ·
 C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
 C63 (model config) · C64 (editor dossier defects) · C65 (`--no-prompt-cache`) ·
-C66 (editor prompt-cache reads; code) · dossier-index dual
+C66 (editor prompt-cache reads; code) · C67 (branch-review findings) · dossier-index dual
 writers (PLAN 0.1.2) · voices
 §32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config).
 
@@ -279,6 +283,8 @@ writers (PLAN 0.1.2) · voices
   later, not scheduled)
 - **C66 live check** — confirm on the next real multi-dossier editor run
   that the later dossiers read the prompt cache (none scheduled)
+- **C68** untouched-code review, runtime: reflections converter metadata (Athens reflection sessions reached
+  the Researcher untitled), `reset_run` continuity and scope, intake validation, setup scripts, VM sandbox paths
 - **C62** model generation — pinned models still live; a migration is now
   a `model_routing.json` edit plus voice re-validation (operator decision)
 - **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks
