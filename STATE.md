@@ -42,9 +42,8 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `fa98ee4` (2026-09-28), including
-  C64 (`9f415dd`, `e806dd4`) and the Editor-spec docs (`6bbb6f5`,
-  `b1e4387`, `fa98ee4`).
+  `phase0-fixes` is pushed to origin (checked 2026-09-28, after the
+  C65/C66 merge `0fc94e0`). `git status -sb` shows anything newer.
 
 ---
 
@@ -261,7 +260,8 @@ deployment profiles) → the hub.
 
 **Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
 C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
-C63 (model config) · C64 (editor dossier defects) · dossier-index dual
+C63 (model config) · C64 (editor dossier defects) · C65 (`--no-prompt-cache`) ·
+C66 (editor prompt-cache reads; code) · dossier-index dual
 writers (PLAN 0.1.2) · voices
 §32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config).
 
@@ -277,9 +277,8 @@ writers (PLAN 0.1.2) · voices
 - **C64 residual** — the 13 published Athens dossiers still start the
   article with a stray `**`; cleanup is a separate task (operator:
   later, not scheduled)
-- **C65** editor `--no-cache` flag does nothing (naming to settle with C45)
-- **C66** editor dossier calls never read the prompt cache on
-  multi-dossier nights (Athens Nights 2–3: every call wrote it)
+- **C66 live check** — confirm on the next real multi-dossier editor run
+  that the later dossiers read the prompt cache (none scheduled)
 - **C62** model generation — pinned models still live; a migration is now
   a `model_routing.json` edit plus voice re-validation (operator decision)
 - **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks

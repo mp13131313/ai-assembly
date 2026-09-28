@@ -23,6 +23,9 @@ history lives in `git log`.
   - Validator ladders route each rung by vendor rather than position. The runtime Step-1 ladder's gpt-4.x fallback rungs, which could only fail, now work.
   - `docs/LLM_CALL_INVENTORY.md` regenerated; the specs point at the file. Two specs had stated wrong model defaults (Voice, Researcher) and were corrected.
 - **Documentation staleness sweep fixed** (16 of the 18 findings; `doc_infrastructure_backlog.md`). The Editor spec and Lifecycle now describe the built editor (Tim Leberecht) and the shared dossier index. The Voice spec states the real Step-1 validation default (off since C28). Also fixed: the Provocateur panel size, the C49 fallback documentation, the field counts, and `docs/README.md` re-rated with a last-checked column. Five new findings were filed (#19–#23).
+- **Editor caching fixed** (merged `0fc94e0`):
+  - C66: the first dossier call now writes the night's system-prompt cache and the rest read it. At Athens every call on Nights 2–3 paid for a write.
+  - C65: `--no-cache` did nothing. Renamed `--no-prompt-cache` and wired through (operator's naming; `--regenerate` reserved for C45).
 - **Doc rows #19–#23 fixed:**
   - The Voice spec's cost and timing are now measured from the Athens runs: ~$23 / ~$25 / ~$23 per night, ~$72 in total. Step-1 validation never ran at Athens. The Step-2 validator got its own section.
   - The Editor spec no longer names Claudia outside its history notes. Its word limits match the prompt (300–450 single-voice, 450–600 multi-voice).
