@@ -87,7 +87,7 @@ ASSEMBLYAI_API_KEY=…
 AI_ASSEMBLY_PROJECT_ROOT=/opt/ai-assembly-athens2026
 
 # Optional overrides
-# CLAUDE_MODEL=claude-opus-4-7
+# CLAUDE_MODEL=claude-opus-4-7   # legacy override of model_routing.json, which is the source of truth for defaults
 # TRANSCRIPTION_CACHE=0
 ```
 

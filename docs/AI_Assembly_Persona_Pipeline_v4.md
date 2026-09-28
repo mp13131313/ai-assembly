@@ -121,7 +121,9 @@ Five principles:
 
 ## The Pipeline at a Glance
 
-| Phase | Pass | Tool | Script | Output |
+Which model (and thinking mode, and — for validators — which cross-vendor ladder) runs each pass is set in `model_routing.json`, keyed by step (`personas.pass_2`, `personas.pass_7a_fix`, `personas.ct_compress`, etc., generally following the Pass column's name) — that file is the source of truth for model choice, not this table or the per-pass sections below. The "Tool" column below shows the current default; `docs/LLM_CALL_INVENTORY.md` §5 lists the legacy per-pass env vars that still override it.
+
+| Phase | Pass | Tool (current `model_routing.json` default) | Script | Output |
 |---|---|---|---|---|
 | **0** Intake | 0a Voice Config | Opus 4.7 + adaptive thinking | run_pass0a_voice_config.py | `voices/<slug>/00_intake/02_voice_config.json` + `03_review_doc.md` |
 | **0.5** Pre-DR research | 1a Perplexity dossier | Perplexity sonar-deep-research | run_phase0_1_research.py | `voices/<slug>/01_research/01_perplexity_dossier.json` |
@@ -169,7 +171,7 @@ Five principles:
 
 ## Phase 0: Intake
 
-**Pass 0a — Voice Config.** `run_pass0a_voice_config.py "Voice Name" [--wiki URL] [--hint TEXT] [--project PATH]`. Opus 4.7 + adaptive thinking. Reads `conference_facts.json` + `panel_roster.json` for context. Pre-hook: Wikipedia search via API + interactive picker (or `--wiki URL` direct, or `--hint TEXT` fallback for voices without a Wikipedia match). Output: `02_voice_config.json` (validated against `schemas/voice_config.py`) + `03_review_doc.md`. Validation retries once on `InputRejected.reason` with critique appended; specific failed field name + value logged.
+**Pass 0a — Voice Config.** `run_pass0a_voice_config.py "Voice Name" [--wiki URL] [--hint TEXT] [--project PATH]`. Model set in `model_routing.json` (step `personas.pass_0a_voice_config`); current default Opus 4.7 + adaptive thinking. Reads `conference_facts.json` + `panel_roster.json` for context. Pre-hook: Wikipedia search via API + interactive picker (or `--wiki URL` direct, or `--hint TEXT` fallback for voices without a Wikipedia match). Output: `02_voice_config.json` (validated against `schemas/voice_config.py`) + `03_review_doc.md`. Validation retries once on `InputRejected.reason` with critique appended; specific failed field name + value logged.
 
 **Operator gate.** The review doc is the human-review surface. Each ends with `✍ CURATOR ACTION REQUIRED` for `editorial_rationale` fill-in. Optional — Phase 0.5 runs without it. **Do NOT hand-author voice configs bypassing Pass 0a** — Pass 0a is operator-trusted (CURRENT_STATE §5.26); if review disagrees, edit and re-run Pass 0a.
 
@@ -179,16 +181,16 @@ Five principles:
 
 **Script:** `run_phase0_1_research.py`. **Wall time:** 5–10 min per voice.
 
-**Pass 1a — Perplexity dossier.** `sonar-deep-research`. System prompt: one of `persona_pass_1a_{human, fictional, non_human_organism, non_human_system}.md`, selected by `type`. Hostile-source appendix injected when `hostile_sources=true`. Output: `01_perplexity_dossier.json` (6-section structured dossier — auto-split via `flows/shared/perplexity_split.py` into per-section dict for downstream chunk passes).
+**Pass 1a — Perplexity dossier.** Model set in `model_routing.json` (step `personas.pass_1a_perplexity`); current default `sonar-deep-research`. System prompt: one of `persona_pass_1a_{human, fictional, non_human_organism, non_human_system}.md`, selected by `type`. Hostile-source appendix injected when `hostile_sources=true`. Output: `01_perplexity_dossier.json` (6-section structured dossier — auto-split via `flows/shared/perplexity_split.py` into per-section dict for downstream chunk passes).
 
-**Pass 1b — Gemini broad scan.** Gemini 2.5 Pro. System prompt: one of `persona_pass_1b_{human, fictional, non_human_organism, non_human_system}.md`. Cross-disciplinary breadth, NOT sectioned (passed in full to every chunk pass). Output: `02_gemini_broad_scan.json`.
+**Pass 1b — Gemini broad scan.** Model set in `model_routing.json` (step `personas.pass_1b_gemini`); current default Gemini 2.5 Pro. System prompt: one of `persona_pass_1b_{human, fictional, non_human_organism, non_human_system}.md`. Cross-disciplinary breadth, NOT sectioned (passed in full to every chunk pass). Output: `02_gemini_broad_scan.json`.
 
 Pass 1a + Pass 1b run in parallel via `ThreadPoolExecutor`.
 
 **Pass 0b — DR prompt assembly.** Two-stage:
 
 1. **Base render** (`pass_0b_header.md` + type-specific body `pass_0b_{human, fictional, non_human_organism, non_human_system}.md` + `pass_0b_footer.md` + research-discipline include `_pass_0b_research_discipline.md`). Pure Jinja, no LLM. Conditional blocks: hostile-source appendix, `lyrics_patterns_only` constraint, system-entity grounding.
-2. **Tailor** (`run_pass0b_dr_prompt.py`, prompt `pass_0b_tailor.md`). Opus 4.7 + thinking. **Structured injections only** — splices voice-specific guidance into the monolithic prompt at marked sections (PB#2 base preservation enforced architecturally per `pass_0b_tailor.py`); does NOT full-rewrite. Outputs tailored monolithic + `02_tailoring_notes.json`.
+2. **Tailor** (`run_pass0b_dr_prompt.py`, prompt `pass_0b_tailor.md`). Model set in `model_routing.json` (step `personas.pass_0b_tailor`); current default Opus 4.7 + thinking. **Structured injections only** — splices voice-specific guidance into the monolithic prompt at marked sections (PB#2 base preservation enforced architecturally per `pass_0b_tailor.py`); does NOT full-rewrite. Outputs tailored monolithic + `02_tailoring_notes.json`.
 3. **Split** (`scripts/split_tailored_prompt.py`). Splits the tailored monolithic into 6 per-section prompts. `02_tailoring_notes.json` + 6 section files in `03_dr_prompts/`.
 
 **Operator gate (manual claude.ai DR).** 6 sessions per voice on claude.ai with Extended Thinking + Deep Research:
@@ -206,7 +208,7 @@ Per-section runtime: 20–60 min wall. If past 60 min without draft streaming, c
 **This is the v4 architectural shift** (CURRENT_STATE §5.18, "1-arch" decisions 04–08). Replaced v3.10's monolithic Pass 1-merge.
 
 **Per-chunk runner:** `flows/shared/chunk_runner.py:run_chunk()`.
-- Model: Opus 4.7 + adaptive thinking, `max_tokens=48000`.
+- Model: set in `model_routing.json` (step `personas.pass_1_merge`); current default Opus 4.7 + adaptive thinking. `max_tokens=48000`.
 - System prompt: `pass_1_N_merge.md` for N ∈ {1,2,3,4,5,6}.
 - Inputs: relevant Perplexity section (auto-split) + full Gemini scan + per-section Claude DR dossier file (or monolithic fallback).
 - Output: Pydantic-validated structured JSON (per-chunk schema in `schemas/pass_1_N.py`).
@@ -229,7 +231,7 @@ Per-section runtime: 20–60 min wall. If past 60 min without draft streaming, c
 
 **Pass 1.7 Coherence audit (NARROW).** Sequential after 1.1–1.6. Three stages:
 - Stage A (Python): compose audit prompt from 6 chunks.
-- Stage B (Opus 4.7 + thinking, max 24K): emits `CoherenceAuditResult` with `coherence_flags[]` + `coherence_resolutions[]` + `edits[]` (each edit = `{path, op: append|set, value, rationale}`).
+- Stage B (model set in `model_routing.json`, step `personas.pass_1_7_coherence`; current default Opus 4.7 + thinking, max 24K): emits `CoherenceAuditResult` with `coherence_flags[]` + `coherence_resolutions[]` + `edits[]` (each edit = `{path, op: append|set, value, rationale}`).
 - Stage C (Python): `apply_edits_to_chunks()` writes patches into per-key chunk JSONs. **Chunks are source of truth** (1-arch-05 Part B); `08_merged_dossier.json` is convenience snapshot rebuilt from chunks.
 
 **MergedDossier alias gotcha (FU#22):** schema field is `voice_register` (Python attr) aliased to JSON key `register` (Pydantic `register()` method shadow). All consumers use dict-key access `merged_dossier["register"]`, not attribute access. Audit-clean as of 2026-04-26.
@@ -244,7 +246,7 @@ Per-section runtime: 20–60 min wall. If past 60 min without draft streaming, c
 
 **Pass 1c REVIEW GATE.** `sys.exit()` if `03_primary_texts_reviewed.flag` doesn't exist. Writes `04_primary_texts_review.md` with fetch results + operator instructions.
 
-**Pass 1d — Excerpt Selection.** Opus 4.7 + thinking, `max_tokens=16000`. Prompt: `persona_pass_1d_excerpt_selection.md`. **60K char budget** (FU#46 raised from 30K for richer-corpus voices). Inputs: `build_structural_index()` of fetch results + chunk vars (passages, works, reasoning_method_chunk, register, moves). Output: `03_corpus/02_excerpt_selections.json`. SKIPPED if no primary texts (emits SKIPPED status + sets `voice_basis="training-data"`).
+**Pass 1d — Excerpt Selection.** Model set in `model_routing.json` (step `personas.pass_1d_excerpts`); current default Opus 4.7 + thinking. `max_tokens=16000`. Prompt: `persona_pass_1d_excerpt_selection.md`. **60K char budget** (FU#46 raised from 30K for richer-corpus voices). Inputs: `build_structural_index()` of fetch results + chunk vars (passages, works, reasoning_method_chunk, register, moves). Output: `03_corpus/02_excerpt_selections.json`. SKIPPED if no primary texts (emits SKIPPED status + sets `voice_basis="training-data"`).
 
 **Pass 1d runs late** (after Pass 3 CT compress in code order, before Pass 4a) so the excerpt selection benefits from the compressed Pass 2+3 reasoning summary.
 
@@ -252,7 +254,7 @@ Per-section runtime: 20–60 min wall. If past 60 min without draft streaming, c
 
 ## Phase 2: Section-by-Section Generation
 
-Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt files per pass. CT compress (Sonnet 4.6 + thinking, max 16K) after each pass; CT output feeds the next pass's `pass_N_summary` user-prompt variable.
+Each generation pass's model is set in `model_routing.json` (steps `personas.pass_2` / `.pass_3` / `.pass_4a` / `.pass_4b` / `.pass_5` / `.pass_6`); current default Opus 4.7 + adaptive thinking for all six. System + user prompt files per pass. CT compress (model set in `model_routing.json`, step `personas.ct_compress`; current default Sonnet 4.6 + thinking, max 16K) after each pass; CT output feeds the next pass's `pass_N_summary` user-prompt variable.
 
 ### Pass 2 — Identity & Boundaries
 
@@ -323,7 +325,7 @@ Each generation pass uses Opus 4.7 + adaptive thinking. System + user prompt fil
 
 ### Coherence Threading (CT)
 
-After each generation pass: Sonnet 4.6 + thinking, `max_tokens=16000`. Compresses completed fields into a summary string for the next pass. Files: `02_ct_after_pass_2.json`, `04_ct_after_pass_3.json`, `06_ct_after_pass_4a.json`, `08_ct_after_pass_4b.json`. Prompt: `persona_coherence_threading.md` (17 lines).
+After each generation pass: model set in `model_routing.json` (step `personas.ct_compress`); current default Sonnet 4.6 + thinking. `max_tokens=16000`. Compresses completed fields into a summary string for the next pass. Files: `02_ct_after_pass_2.json`, `04_ct_after_pass_3.json`, `06_ct_after_pass_4a.json`, `08_ct_after_pass_4b.json`. Prompt: `persona_coherence_threading.md` (17 lines).
 
 ---
 
@@ -345,11 +347,11 @@ If files touched: reloads pass2–pass6 from disk into in-memory vars. Placement
 
 `flows/shared/pass_7pre_chunked.run_chunked_pass_7pre()`. Replaces single-shot Sonnet (which hit 128K output ceiling on rich cards). 3 stages:
 
-**Stage 1: Extract claims.** `persona_pass_7pre_extract.md` + `_user.md`. Sonnet 4.6, `temperature=0.0`, `max_tokens=32000`. Emits verifiable-claim items list.
+**Stage 1: Extract claims.** `persona_pass_7pre_extract.md` + `_user.md`. Model set in `model_routing.json` (step `personas.pass_7pre_extract`); current default Sonnet 4.6, `temperature=0.0`, `max_tokens=32000`. Emits verifiable-claim items list.
 
-**Stage 2: Verify claim batches.** `persona_pass_7pre_verify_batch.md` + `_user.md`. Sonnet 4.6, `temperature=0.0`, `max_tokens=16000`. **N parallel batches (~25 claims each), max 4 workers.** 1 retry on transient JSON failures. Inputs per batch: claim batch + `01_primary_texts.json` + Perplexity dossier.
+**Stage 2: Verify claim batches.** `persona_pass_7pre_verify_batch.md` + `_user.md`. Model set in `model_routing.json` (step `personas.pass_7pre_verify`); current default Sonnet 4.6, `temperature=0.0`, `max_tokens=16000`. **N parallel batches (~25 claims each), max 4 workers.** 1 retry on transient JSON failures. Inputs per batch: claim batch + `01_primary_texts.json` + Perplexity dossier.
 
-**Stage 3: Boddice tag check.** `persona_pass_7pre_boddice_check.md` + `_user.md`. Sonnet 4.6, `temperature=0.0`, `max_tokens=8000`. **Parallel with Stage 2.** Verifies Boddice biocultural tags survived Pass 6.5-clean.
+**Stage 3: Boddice tag check.** `persona_pass_7pre_boddice_check.md` + `_user.md`. Model set in `model_routing.json` (step `personas.pass_7pre_boddice`); current default Sonnet 4.6, `temperature=0.0`, `max_tokens=8000`. **Parallel with Stage 2.** Verifies Boddice biocultural tags survived Pass 6.5-clean.
 
 **Aggregate** (Python): unions Stage 2 + Stage 3 results into final report. Output: `05_validation/01_pass_7_pre_citation.json`. **On any-stage failure:** writes `VERIFICATION_SKIPPED` sentinel.
 
@@ -359,7 +361,7 @@ If files touched: reloads pass2–pass6 from disk into in-memory vars. Placement
 
 System: `persona_pass_7_anachronism.md` (94 lines). User: inline.
 
-**Model ladder:** gpt-5.4 (`reasoning_effort="high"`) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro. `max_tokens=16384`, `temperature=0.0`. On all-fail: writes SKIPPED sentinel.
+**Model ladder:** set in `model_routing.json` (step `personas.pass_7_anachronism`); current default gpt-5.4 (`reasoning_effort="high"`) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro. `max_tokens=16384`, `temperature=0.0`. On all-fail: writes SKIPPED sentinel.
 
 **Output:** `02_pass_7_anachronism.json` with `anachronism_flags[]` (each: `category`, `field_path`, `problematic_text`, `reason`, `suggested_fix`, `severity`) + `overall ∈ {PASS, REVISION_NEEDED}`.
 
@@ -369,7 +371,7 @@ System: `persona_pass_7_anachronism.md` (94 lines). User: inline.
 
 System: `persona_pass_7a_cross_model.md` (74 lines). User: `persona_pass_7a_cross_model_user.md` (5 lines, renders card as JSON).
 
-**Model ladder:** same as 7-anachronism. `max_tokens=16384`, `temperature=0.0`.
+**Model ladder:** set in `model_routing.json` (step `personas.pass_7a`); current default same as 7-anachronism. `max_tokens=16384`, `temperature=0.0`.
 
 **Output:** `03_pass_7a_cross_model.json` with `field_issues[]` + `overall` + `revision_target_passes`.
 
@@ -383,7 +385,7 @@ Fires only if `pass7a.result.overall == REVISION_NEEDED` AND `_fix_log.json` doe
 
 System: `persona_pass_7a_fix.md` (147 lines). User: `persona_pass_7a_fix_user.md` (47 lines). Renders `field_issues`, `relevant_pass_outputs`, voice context (`rhetorical_mode`, `register_and_tone`, `characteristic_moves`, `translation_protocol`, `knowledge_boundary` — for FU#44 register-drift + internal-contradiction guardrails).
 
-**Model:** Opus 4.7 + thinking, `max_tokens=32000`, `temperature=1.0`. **Single call** — not a loop.
+**Model:** set in `model_routing.json` (step `personas.pass_7a_fix`); current default Opus 4.7 + thinking. `max_tokens=32000`, `temperature=1.0`. **Single call** — not a loop.
 
 `flows/shared/patch_walker.apply_patch_in_place()` applies each patch (`{pass_id, field_path, new_value, rationale}`) to in-memory dict + writes cache file.
 
@@ -401,7 +403,7 @@ System: `persona_pass_7a_fix.md` (147 lines). User: `persona_pass_7a_fix_user.md
 
 ### Pass 7b — Worked Provocations
 
-Opus 4.7 + thinking, `max_tokens=24000`, `temperature=1.0`. System: `persona_pass_7b_smoke_test.md` (88 lines, template vars: `conference_context`, `voice_mode`, `subtype`). User: `persona_pass_7b_smoke_test_user.md` (6 lines).
+Model set in `model_routing.json` (step `personas.pass_7b`); current default Opus 4.7 + thinking. `max_tokens=24000`, `temperature=1.0`. System: `persona_pass_7b_smoke_test.md` (88 lines, template vars: `conference_context`, `voice_mode`, `subtype`). User: `persona_pass_7b_smoke_test_user.md` (6 lines).
 
 Output: `04_pass_7b_smoke_test.json` (`smoke_test_chains` field — 3–5 provocation→response chains).
 
@@ -411,8 +413,8 @@ Output: `04_pass_7b_smoke_test.json` (`smoke_test_chains` field — 3–5 provoc
 
 System: `persona_pass_7c_negative.md` (102 lines, parameterized by `claude_fallback` bool). User: `persona_pass_7c_negative_user.md` (21 lines).
 
-**Primary:** Gemini 2.5 Pro, `temperature=0.0`, `max_tokens=16384`.
-**Fallback:** Sonnet 4.6 with bias-aware variant, `temperature=0.0`, `max_tokens=8192`, `thinking=False`.
+**Primary:** set in `model_routing.json` (step `personas.pass_7c`); current default Gemini 2.5 Pro, `temperature=0.0`, `max_tokens=16384`.
+**Fallback:** current default Sonnet 4.6 with bias-aware variant (also in `model_routing.json`'s `fallback` block for this step), `temperature=0.0`, `max_tokens=8192`, `thinking=False`.
 
 **Inputs:** `rhetorical_mode`, `characteristic_moves`, `register_and_tone`, `banned_language`/`banned_modes` (Pass 4a seeds), `smoke_test_chains` (from Pass 7b).
 
@@ -424,7 +426,7 @@ After Pass 7c, before Phase 4, three new stages execute:
 
 **1. ASSEMBLE (skeleton)** — `run_persona_pipeline.py:_build_assembled_card_dict()` writes `07_persona_card_assembled.json` with skeleton metadata (no Derive output yet, validation_status `"pre_7a_final_pending"`). Gated on file presence: if the assembled card already exists on disk (operator patches from a prior run), the skeleton write is skipped — preserves operator edits across re-runs.
 
-**2. Pass 7a FINAL** — `_pass_7a_final()`. Mirrors the per-pass `_pass_7a` but reads the assembled card from disk + strips the standard EXCLUDE set (metadata, smoke_test_chains, reference_only_passages, continuity blocks, voice routing fields). Same OpenAI-ladder + Gemini-fallback as the per-pass 7a. Output: `05_validation/06_pass_7a_final.json`.
+**2. Pass 7a FINAL** — `_pass_7a_final()`. Mirrors the per-pass `_pass_7a` but reads the assembled card from disk + strips the standard EXCLUDE set (metadata, smoke_test_chains, reference_only_passages, continuity blocks, voice routing fields). Same OpenAI-ladder + Gemini-fallback as the per-pass 7a (model set in `model_routing.json`, step `personas.pass_7a_final`). Output: `05_validation/06_pass_7a_final.json`.
 
 **Why post-assembly is structurally different from per-pass:** the per-pass 7a validates Pass 4a / Pass 6 / etc. in isolation. Pass 7a FINAL sees the FULL assembled card with Pass 7c's banned_language/banned_modes replacements integrated and Pass 7b's smoke_test_chains in place. Catches **cross-pass contradictions invisible to the per-pass view** — proven on Plato 2026-04-29 where Pass 7a FINAL caught: banned_language Jowett-rejection vs. curated_corpus_passages Jowett-use; corpus_metadata source_count = 7 (actual 4); leftover `[ADDED FROM TESTING…]` operator-patch annotations across banned_modes/banned_language.
 
@@ -443,7 +445,7 @@ The operator patches the assembled card directly (`07_persona_card_assembled.jso
 
 ### Derive — Provocateur Profile + Evaluation Rubric
 
-Opus 4.7 + thinking, `max_tokens=24000`, `temperature=1.0`. System: `persona_derive.md` (100 lines). User: `persona_derive_user.md` (6 lines).
+Model set in `model_routing.json` (step `personas.derive`); current default Opus 4.7 + thinking. `max_tokens=24000`, `temperature=1.0`. System: `persona_derive.md` (100 lines). User: `persona_derive_user.md` (6 lines).
 
 Emits:
 - **`provocateur_profile`** (8 fields): `speaks_from`, `core_commitment`, `activates_on`, `goes_flat_on`, `stretch`, `translation_range`, `stance_tendency`, `medium`. Wired to `runtime/flows/shared/council/council_config.json` `members[]`.

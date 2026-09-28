@@ -18,7 +18,7 @@
 | `AI_Assembly_Infrastructure.md` | **Current** (v1 draft 2026-05-02) | Athens 2026 deployment spec. Three reasons for VM (ingest + safety + operator-detachment); three systemd units; Hetzner CX22 + Ubuntu 24.04; PROJECT_ROOT = clone of athens-2026 private repo. Supersedes archived `Infrastructure_Setup.md`. **VM not actually provisioned for Athens 2026 — operator ran from laptop.** |
 | `AI_Assembly_Frame_Concept_v1.md` | **Current** (with caveat) | Frame layer (broadsheet / microsite / Substack / closing show). Voice Pipeline produces artifacts that the frame layer wraps. Strip rule needs to be voice-register-conditional per FU#61 finding — see `_workspace/planning/runtime/OPEN_ITEMS.md`. |
 | `AUDIENCE_BRIEF.md` | **Current** (refreshed 2026-04-26 for athens-2026 deployment) | Audience characterization + contributors-vs-audience distinction. |
-| `LLM_CALL_INVENTORY.md` | **Current** (rewritten 2026-04-27) with caveat | Updated for arch-03 chunked merge, Pass 0b tailor, Pass 6.5-clean, Pass 7-pre 3-stage (FU#2), Pass 7-anachronism, Pass 7a-FIX linear patcher (FU#13), FU#41 chat builder. 5-model fallback ladder for Pass 7-anach + Pass 7a (gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro). **Does not yet include Voice Pipeline + Editor Pipeline calls** — both shipped post-write; refresh pending. |
+| `LLM_CALL_INVENTORY.md` | **Current** (generated from code 2026-09-28) | Every LLM call site in both pipelines with its parameters and its `model_routing.json` step key. Which model runs which step lives in `../model_routing.json`, not here. Generated doc: regenerate when calls change (`_workspace/planning/WAYS_OF_WORKING.md` §6). |
 
 ## Archived / stale
 

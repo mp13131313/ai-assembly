@@ -41,24 +41,34 @@ runtime/flows/voice/
 │                                   and filter_first_draft_for_step3() for stripping
 │                                   pipeline-meta from upstream JSON before showing voice.
 ├── step1_private_reasoning.py      Step 1 task. One LLM call per (voice, formulation)
-│                                   pair. Opus 4.7 + adaptive thinking, max 64K, streamed.
+│                                   pair. Model set in model_routing.json (step
+│                                   runtime.voice.step1; current default Opus 4.7 +
+│                                   adaptive thinking, max 64K), streamed.
 │                                   Output: 04_voice/step1_detailed_responses/<slug>__<theme_id>.json
 ├── step1_validation.py             Optional anachronism + constitutional checks via
-│                                   OpenAI ladder (gpt-5.4 high → gpt-4.1 → o3 → gpt-4o
-│                                   → gemini-2.5-pro fallback). Cross-model validation
-│                                   pattern matching Persona Pipeline Pass 7-anachronism.
+│                                   the cross-vendor ladder in model_routing.json (step
+│                                   runtime.voice.step1_validation; current default
+│                                   gpt-5.4 high → gpt-4.1 → o3 → gpt-4o → gemini-2.5-pro
+│                                   fallback). Cross-model validation pattern matching
+│                                   Persona Pipeline Pass 7-anachronism.
 ├── step2_first_draft_artifact.py   Step 2 task. One LLM call per voice. Voice reads
 │                                   back its Step 1 outputs, makes focus/stance/form
-│                                   decisions, produces the artifact text. Opus 4.7 +
-│                                   adaptive thinking, max 64K, streamed.
+│                                   decisions, produces the artifact text. Model set in
+│                                   model_routing.json (step runtime.voice.step2;
+│                                   current default Opus 4.7 + adaptive thinking, max
+│                                   64K), streamed.
 ├── step3_amended_artifact.py       Step 3 task. FU#49E cross-framework reading. Voice
 │                                   reads other voices' first-drafts on shared themes,
 │                                   decides amend (extend / mark-limit / sharpen-
 │                                   disagreement) or stand-pat. Runs after ALL voices'
-│                                   Step 2 complete. Opus 4.7 + adaptive thinking, max 64K.
-└── continuity.py                   Continuity block generation. Per-voice Sonnet 4.6
-                                    summariser writes voice-grammar memory of prior
-                                    night, output to PROJECT_ROOT/voices/<slug>/
+│                                   Step 2 complete. Model set in model_routing.json
+│                                   (step runtime.voice.step3; current default Opus 4.7
+│                                   + adaptive thinking, max 64K).
+└── continuity.py                   Continuity block generation. Per-voice summariser
+                                    (model set in model_routing.json, step
+                                    runtime.voice.continuity; current default Sonnet
+                                    4.6) writes voice-grammar memory of prior night,
+                                    output to PROJECT_ROOT/voices/<slug>/
                                     continuity_night_<N+1>.json. Runs inline in
                                     voice_flow.py orchestrator after Step 3 completes
                                     (Nights 1+2 only; output consumed on Nights 2+3).
@@ -99,17 +109,23 @@ for each voice.
 
 ### Environment variables
 
-| Variable | Default | Notes |
+Which model and thinking mode each step actually uses is set in
+`model_routing.json` (steps `runtime.voice.step1` / `.step2` / `.step3` /
+`.continuity` / `.step1_validation`) — that file is the source of truth,
+not this table. The vars below are legacy overrides of `model_routing.json`
+that still work (checked first; unset falls through to the file):
+
+| Variable | Default (`model_routing.json`, if unset) | Notes |
 |---|---|---|
-| `VOICE_MODEL` | `claude-opus-4-7` | Override for dev iteration; per-card override possible via `voice_config.runtime_model` |
-| `VOICE_THINKING` | `1` | Set to `0` to disable adaptive thinking (dev only — production uses thinking) |
-| `VOICE_STEP1_MAX_TOKENS` | `64000` | Same for STEP2 / STEP3 |
+| `VOICE_MODEL` | `claude-opus-4-7` | **Legacy override of `model_routing.json`** for Steps 1/2/3 (no per-voice override exists) |
+| `VOICE_THINKING` | `1` (adaptive) | **Legacy override of `model_routing.json`**'s thinking mode for Steps 1/2/3; set to `0` to disable (dev only — production uses thinking) |
+| `VOICE_STEP1_MAX_TOKENS` | `64000` | Same for STEP2 / STEP3 (not a `model_routing.json` field) |
 | `VOICE_STEP1_BATCH` | `4` | Parallel concurrency for Step 1 calls |
 | `VOICE_BATCH_WAIT_S` | `20` | Wait between Step 1 batches (Anthropic rate limits) |
-| `VOICE_VALIDATION_MODELS` | `gpt-5.4,gpt-4.1,o3,gpt-4o,gemini-2.5-pro` | OpenAI ladder |
+| `VOICE_VALIDATION_MODELS` | `gpt-5.4,gpt-4.1,o3,gpt-4o,gemini-2.5-pro` | **Legacy override of `model_routing.json`**'s validation ladder (step `runtime.voice.step1_validation`) |
 | `VOICE_VALIDATION_MAX_TOKENS` | `8192` | |
-| `VOICE_CONTINUITY_MODEL` | `claude-sonnet-4-6` | Compression task; doesn't need Opus |
-| `VOICE_CONTINUITY_THINKING` | `1` | Adaptive thinking on so the summariser holds the voice's grammar + temporal stance from the inputs |
+| `VOICE_CONTINUITY_MODEL` | `claude-sonnet-4-6` | **Legacy override of `model_routing.json`** (step `runtime.voice.continuity`); compression task, doesn't need Opus |
+| `VOICE_CONTINUITY_THINKING` | `1` (adaptive) | **Legacy override of `model_routing.json`**'s thinking mode for continuity; adaptive on so the summariser holds the voice's grammar + temporal stance from the inputs |
 | `VOICE_CONTINUITY_MAX_TOKENS` | `8000` | |
 
 ### Outputs

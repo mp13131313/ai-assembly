@@ -119,6 +119,13 @@ Four categories:
   by default — mention it explicitly if you want Claude to look here.**
 - `.env` — shared secrets at `code/.env` (not committed). Both sub-trees
   load from `../.env`.
+- `model_routing.json` — **which model runs each LLM step, in both
+  pipelines** (model, thinking, effort, validator ladders; plus per-model
+  rules). Read by `flows/shared/model_routing.py` (byte-identical copy in
+  `runtime/` and `personas/`). Never hardcode a model name in code — a
+  test fails on it; change the file (and the golden table in
+  `runtime/tests/test_model_routing.py`) instead. Legacy env vars such as
+  `VOICE_MODEL` still override it. See runtime OPEN_ITEMS C63.
 
 ## Planning / tracking conventions
 
@@ -332,8 +339,9 @@ All canonical pipeline specs are in `docs/`:
   microsite hosting, backup strategy, Claude-Code-on-VM auth. See
   OPEN_ITEMS B10 (🟡 specified, awaiting operator input on items 1+2).
 - `AUDIENCE_BRIEF.md` — audience characterization
-- `LLM_CALL_INVENTORY.md` — call inventory (needs update for new
-  passes since 2026-04-21)
+- `LLM_CALL_INVENTORY.md` — every LLM call site with its parameters and
+  its `model_routing.json` step key; generated from code (regenerate
+  when calls change — `_workspace/planning/WAYS_OF_WORKING.md` §6)
 - `_archive/AI_Assembly_Persona_Pipeline_v3_10.md` — archived (preceding
   pipeline spec)
 - `_workspace/archive/specs/AI_Assembly_Architecture_v1.md` — STALE

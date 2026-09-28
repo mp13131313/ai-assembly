@@ -1354,6 +1354,8 @@ Each lands one-at-a-time with the sentinel-regen + thinking-on gate, like all Ph
 
 ---
 
-## 35. Central model config covers the persona pipeline too 🟢 IN PROGRESS (2026-09-28) — see runtime `OPEN_ITEMS.md` C63
+## 35. Central model config covers the persona pipeline too ✅ DONE 2026-09-28 — see runtime `OPEN_ITEMS.md` C63
 
 Every persona pass (0a → Derive, incl. the three cross-vendor validator ladders and the 7c fallback) is an entry in `code/model_routing.json`; `personas/flows/shared/model_routing.py` is the byte-identical twin of the runtime loader. Voice-side consequence: switching a voice-writing pass's model changes the cards it generates, so any switch goes through the sentinel-regen gate (same discipline as Stage 4 / §32.4). Also makes `call_claude` model-aware about `temperature`, so a later move to Sonnet 5 can't break Pass 7-pre (C62).
+
+**Done 2026-09-28:** persona call sites converted (`f818767`). The validator ladders (7-anachronism, 7a, 7a FINAL) now route each rung by vendor through one `clients.call_validator_ladder` (`f5de9db`); the loader refuses a Claude rung. `docs/AI_Assembly_Persona_Pipeline_v4.md` points at `model_routing.json` per pass. No voice was regenerated and no model changed. The sentinel-regen discipline above applies to the first real model switch.

@@ -344,7 +344,7 @@ A diarized transcript per session: a JSON array of turns, each with anonymous sp
 
 **Input:** The diarized transcript from Step 2 plus the session work package (roster, bios, session metadata). Runs once per session.
 
-**Operation.** A single Claude Sonnet 4.6 call performs multi-pass attribution: explicit name cues first (self-introductions, moderator introductions, direct address), then role detection (moderator vs. panelist vs. audience), then expertise matching (utterance content against bios), then confidence-gated output, **then a per-turn sanity check that re-attributes individual contaminated turns to audience members** (Pass 5, new in v2). The model is explicitly instructed never to guess: speakers below the confidence threshold are returned as `Unidentified Speaker N`, not force-matched to a roster name.
+**Operation.** A single Claude call (model set in `model_routing.json` — see "Model selection" below, which is the source of truth for this and every other step) performs multi-pass attribution: explicit name cues first (self-introductions, moderator introductions, direct address), then role detection (moderator vs. panelist vs. audience), then expertise matching (utterance content against bios), then confidence-gated output, **then a per-turn sanity check that re-attributes individual contaminated turns to audience members** (Pass 5, new in v2). The model is explicitly instructed never to guess: speakers below the confidence threshold are returned as `Unidentified Speaker N`, not force-matched to a roster name.
 
 **Why this approach.** Voice enrollment is not available — there are no advance voice samples for the contributors. Published research on text-based speaker identification (Adobe Research 2024, DiarizationLM, "From Who Said What to Who They Are" 2025) consistently shows that LLM attribution from content cues works well when speakers introduce themselves or are introduced, and degrades sharply when those cues are absent. The multi-pass structure exploits the strong cues first and falls back to weaker ones only as needed, with confidence flags exposing the difference.
 
@@ -362,13 +362,13 @@ A market survey conducted Apr 14 2026 identified AssemblyAI's Speech Understandi
 
 **Architectural incompatibility even if it worked.** Even if the plumbing were accessible, AssemblyAI's native speaker_identification provides label-to-name mapping only. It does NOT produce evidence fields ("self-identifies at 03:42 as 'Minister of Defense'"), confidence reasoning (the multi-pass workflow), bio-based expertise matching (Pass 3), or diarization contamination detection (Pass 5). The downstream Researcher depends on evidence and confidence flowing through, not just names. Replacing the Claude-based stage with AssemblyAI's native feature would produce a simpler pipeline that feeds the Researcher less useful data.
 
-**Decision:** Keep the custom Sonnet 4.6 Speaker ID stage. Revisit only if (1) AssemblyAI publishes an SDK version that exposes the Speech Understanding endpoint directly, AND (2) that endpoint returns evidence/confidence metadata, not just label-to-name mapping, AND (3) the cost per call is meaningfully lower than the current ~$0.05 per Speaker ID call via Claude. All three must hold. None hold today.
+**Decision:** Keep the custom Claude-based Speaker ID stage (model set in `model_routing.json`, currently Sonnet 4.6). Revisit only if (1) AssemblyAI publishes an SDK version that exposes the Speech Understanding endpoint directly, AND (2) that endpoint returns evidence/confidence metadata, not just label-to-name mapping, AND (3) the cost per call is meaningfully lower than the current ~$0.05 per Speaker ID call via Claude. All three must hold. None hold today.
 
-### Model selection — default Sonnet, optional Opus for difficult sessions
+### Model selection — set in `model_routing.json`, optional per-run override for difficult sessions
 
-The Speaker ID LLM call defaults to Claude Sonnet 4.6. Across the three MSC 2026 Level 2 test sessions, Sonnet 4.6 produced 100% high-confidence attributions with 5-pass re-attribution catching real edge cases (Mustafa Barghouti self-introduction in Breaking Point, 15 audience-member reassignments across 8 flags in West-West Divide). The baseline is sufficient for well-behaved conference audio.
+Which model runs Speaker ID is set in `model_routing.json` (step `runtime.transcription.speaker_id`) — that file is the source of truth, not this spec. Current default: Claude Sonnet 4.6. Across the three MSC 2026 Level 2 test sessions, Sonnet 4.6 produced 100% high-confidence attributions with 5-pass re-attribution catching real edge cases (Mustafa Barghouti self-introduction in Breaking Point, 15 audience-member reassignments across 8 flags in West-West Divide). The baseline is sufficient for well-behaved conference audio.
 
-For difficult sessions, operators can override the Speaker ID model per-run via the `TRANSCRIPTION_SPEAKER_ID_MODEL` environment variable:
+For difficult sessions, operators can override the Speaker ID model per-run via the legacy `TRANSCRIPTION_SPEAKER_ID_MODEL` environment variable (checked first; `CLAUDE_MODEL` is the next fallback; both are legacy overrides of `model_routing.json`):
 
 ```bash
 TRANSCRIPTION_SPEAKER_ID_MODEL=claude-opus-4-7 python flows/transcription_flow.py ...
@@ -383,9 +383,9 @@ When to flip this toggle:
 
 Opus 4.7's extra reasoning capacity helps on these edge cases. It does NOT help on well-behaved sessions and costs ~5× more per call, so it should not be the default.
 
-**Thinking mode is NOT used in Transcription** even when Opus is selected. The Speaker ID output is small (mappings + flags, under 2K tokens), so the latency cost of adaptive thinking is large relative to its benefit. The Speaker ID call stays non-streaming with `max_tokens=4096` regardless of model choice.
+**Thinking mode is NOT used in Transcription** even when Opus is selected. The Speaker ID output is small (mappings + flags, under 2K tokens), so the latency cost of adaptive thinking is large relative to its benefit. The Speaker ID call stays non-streaming with `max_tokens=4096` regardless of model choice. (Set via `"thinking": "off"` on both Transcription steps in `model_routing.json`; no legacy env var toggles thinking here.)
 
-**Cleaning and semantic drift verification remain on the default model (Sonnet).** Cleaning is the largest LLM call in the whole overnight pipeline by output volume and its judgment work is mostly local per turn, not cross-turn synthesis, so thinking adds little. Drift verification is a short quality-gate check, not a reasoning task. Neither benefits from the Opus upgrade and both incur significant cost increase if flipped.
+**Cleaning remains on the `model_routing.json` default for `runtime.transcription.cleaning` (currently Sonnet 4.6); semantic drift verification, where run, follows the same default.** Cleaning is the largest LLM call in the whole overnight pipeline by output volume and its judgment work is mostly local per turn, not cross-turn synthesis, so thinking adds little. Drift verification is a short quality-gate check, not a reasoning task. Neither benefits from the Opus upgrade and both incur significant cost increase if flipped.
 
 ### Step 3 Output
 
@@ -397,18 +397,18 @@ A mapping table merged into the transcript: each turn now carries a named speake
 
 **Input:** The named transcript from Step 3 plus the vocabulary list. Runs once per session.
 
-**Operation.** A single Claude Sonnet 4.6 call performs constrained cleaning: fix ASR errors using the vocabulary list (especially proper nouns), remove disfluencies and false starts, repair sentence fragments. The model is given hard rules against paraphrasing, summarizing, adding content, or altering speaker labels and turn boundaries. Uncertain corrections are marked `[verify]` rather than silently applied.
+**Operation.** A single Claude call (model set in `model_routing.json`, step `runtime.transcription.cleaning`; currently Sonnet 4.6) performs constrained cleaning: fix ASR errors using the vocabulary list (especially proper nouns), remove disfluencies and false starts, repair sentence fragments. The model is given hard rules against paraphrasing, summarizing, adding content, or altering speaker labels and turn boundaries. Uncertain corrections are marked `[verify]` rather than silently applied.
 
 **Why these constraints.** The downstream Researcher extracts atomic positions and atomic positions are exactly what gets flattened when an LLM is allowed to "format" a transcript. Standard cleaning produces smoother prose and worse fidelity. The constraints exist to make cleaning narrowly mechanical: it fixes what is provably wrong (misspelled names, dropped phonemes, broken sentences) and leaves everything else exactly as recognized, including the characteristic phrasings of non-native English speakers, which are themselves signal.
 
-**Single-pass over chunked.** Sonnet 4.6's 200K context window accommodates a full 120-minute transcript in one pass, which eliminates the chunk boundary errors (dropped turns, duplicated segments) that plague chunked cleaning. For exceptionally long sessions, cleaning is split at natural turn boundaries with explicit overlap.
+**Single-pass over chunked.** The current default model's (Sonnet 4.6, per `model_routing.json`) 200K context window accommodates a full 120-minute transcript in one pass, which eliminates the chunk boundary errors (dropped turns, duplicated segments) that plague chunked cleaning. For exceptionally long sessions, cleaning is split at natural turn boundaries with explicit overlap.
 
 **Streaming is mandatory.** On the West-West Divide Level 2 test session (142 turns from a 69-minute panel), the cleaning pass generated 18,712 output tokens. With a `max_tokens=16000` cap, this truncated silently — the cleaning call hit the budget exactly, returned a JSON object with an unterminated string, and the downstream parse failed with `JSONDecodeError`. Raising `max_tokens` above ~21,333 triggers the Anthropic SDK's non-streaming timeout heuristic (formula: `expected_time = 3600 * max_tokens / 128_000`; if `expected_time > 600` seconds the SDK refuses to send the request). Resolution: the cleaning task **must** use `client.messages.stream()` as a context manager regardless of expected output size. Non-streaming is unsafe for any transcript that could plausibly need more than ~20K output tokens, which rules out almost any full-length conference panel.
 
 ```python
 chunks = []
 with client.messages.stream(
-    model=CLAUDE_MODEL,              # "claude-sonnet-4-6"
+    model=cfg.model,                  # model_routing.json step "runtime.transcription.cleaning" (default "claude-sonnet-4-6")
     max_tokens=64_000,                # Step 4 budget — large, streaming required
     system=CLEANING_SYSTEM,
     messages=[{"role": "user", "content": user}],
@@ -544,7 +544,7 @@ def transcribe_with_assemblyai(audio_path: Path, session: dict) -> list[dict]:
 
 For production Athens runs, caching should be **disabled** (every session is fresh). For development and for prompt iteration this saves real money — tonight's Level 2 testing burned ~$4.50 in AssemblyAI costs re-running West-West Divide three times while iterating on SDK compatibility; with caching it would have been ~$1.50.
 
-Four LLM-facing nodes need prompts. All Claude nodes use **Claude Sonnet 4.6** via API (`claude-sonnet-4-6`).
+Four LLM-facing nodes need prompts. Which model each Claude node uses is set in `model_routing.json` (steps `runtime.transcription.speaker_id` and `runtime.transcription.cleaning`) — that file is the source of truth, not this spec. Current default for both: **Claude Sonnet 4.6** (`claude-sonnet-4-6`).
 
 ---
 
@@ -574,9 +574,9 @@ See Step 2 "AssemblyAI SDK version drift" for the rationale.
 
 ---
 
-### Node 2: Speaker Identification (Claude Sonnet 4.6 — once per session)
+### Node 2: Speaker Identification (model set in `model_routing.json` — once per session)
 
-**Runtime config:** `model` defaults to `CLAUDE_MODEL` env var (baseline: `claude-sonnet-4-6`), overridable via `TRANSCRIPTION_SPEAKER_ID_MODEL` env var for per-run model selection; `max_tokens=4096`; non-streaming. See "Model selection" subsection above for when to override the default.
+**Runtime config:** model comes from `model_routing.json` (step `runtime.transcription.speaker_id`; current default `claude-sonnet-4-6`, thinking off). The legacy `TRANSCRIPTION_SPEAKER_ID_MODEL` / `CLAUDE_MODEL` env vars still override it, in that order. `max_tokens=4096`; non-streaming. See "Model selection" subsection above for when to use the override.
 
 **System prompt:**
 
@@ -653,9 +653,9 @@ Diarized transcript:
 
 ---
 
-### Node 3: Cleaning (Claude Sonnet 4.6 — once per session)
+### Node 3: Cleaning (model set in `model_routing.json` — once per session)
 
-**Runtime config:** `model="claude-sonnet-4-6"`, `max_tokens=64000`, **streaming required** (`client.messages.stream()` context manager). See Step 4 "Streaming is mandatory" for the rationale.
+**Runtime config:** model comes from `model_routing.json` (step `runtime.transcription.cleaning`; current default `claude-sonnet-4-6`, thinking off). The legacy `TRANSCRIPTION_CLAUDE_MODEL` / `CLAUDE_MODEL` env vars still override it. `max_tokens=64000`, **streaming required** (`client.messages.stream()` context manager). See Step 4 "Streaming is mandatory" for the rationale.
 
 **System prompt:**
 
@@ -709,11 +709,11 @@ Named transcript:
 
 ---
 
-### Node 4: Validation Diff (Claude Sonnet 4.6 — optional, once per session)
+### Node 4: Validation Diff (optional, once per session)
 
 A cheap insurance pass that compares raw vs. cleaned transcript and flags any segments where meaning may have shifted.
 
-**Runtime config:** `model="claude-sonnet-4-6"`, `max_tokens=4096`, non-streaming.
+**Runtime config:** this optional node is not currently implemented in `runtime/flows/transcription_flow.py` and has no dedicated `model_routing.json` step; if built, it should get one rather than hardcoding a model. Spec assumption: `max_tokens=4096`, non-streaming, same default model as Cleaning (currently `claude-sonnet-4-6`).
 
 **System prompt:**
 

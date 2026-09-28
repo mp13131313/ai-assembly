@@ -393,11 +393,11 @@ Review queue — turns containing words the cleaning pass flagged as uncertain (
 
 ---
 
-### Node 2a: Clustering (Claude Opus 4.7 — once, after all sessions extracted)
+### Node 2a: Clustering (model set in `model_routing.json` — once, after all sessions extracted)
 
 **Loaded from:** `flows/shared/prompts/researcher_clustering.md`
 
-**Runtime config:** `model="claude-opus-4-7"`, `thinking.type=adaptive`, `max_tokens=40000`, **streaming required**.
+**Runtime config:** model and thinking mode come from `model_routing.json` — the source of truth for which model runs which step, not this spec (step `runtime.researcher.clustering`; current default `claude-opus-4-7`, `thinking.type=adaptive`). The legacy `RESEARCHER_CLAUDE_MODEL` / `CLAUDE_MODEL` / `RESEARCHER_THINKING` env vars still override it. `max_tokens=64000`, **streaming required**.
 
 **System prompt:**
 
@@ -515,11 +515,11 @@ Return only the JSON object, no preamble or commentary.
 
 ---
 
-### Node 2b: Theming (Claude Opus 4.7 — once, after clustering)
+### Node 2b: Theming (model set in `model_routing.json` — once, after clustering)
 
 **Loaded from:** `flows/shared/prompts/researcher_theming.md`
 
-**Runtime config:** `model="claude-opus-4-7"`, `thinking.type=adaptive`, `max_tokens=24000`, **streaming required**.
+**Runtime config:** model and thinking mode come from `model_routing.json` (step `runtime.researcher.theming`; current default `claude-opus-4-7`, `thinking.type=adaptive`). The legacy `RESEARCHER_CLAUDE_MODEL` / `CLAUDE_MODEL` / `RESEARCHER_THINKING` env vars still override it. `max_tokens=24000`, **streaming required**.
 
 **System prompt:**
 
@@ -619,9 +619,9 @@ Return only the JSON object, no preamble or commentary.
 
 *These are draft instructions. Test against sample transcripts and refine before Athens.*
 
-**Model and thinking configuration (as of v3, validated Apr 14 2026).** All three Researcher tasks (`extract_session`, `cluster_extractions`, `group_clusters_into_themes`) use **Claude Opus 4.7** with **`thinking.type=adaptive`** enabled. This is the canonical configuration and produced the cleanest output on dev_msc_test (106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio, perfect integrity).
+**Model and thinking configuration.** Model and thinking mode for all three Researcher tasks (`extract_session`, `cluster_extractions`, `group_clusters_into_themes`) are set in `model_routing.json` (steps `runtime.researcher.extraction` / `.clustering` / `.theming`) — nowhere else. Current default: **Claude Opus 4.7** with **`thinking.type=adaptive`**. (Validated Apr 14 2026: this configuration produced the cleanest output on dev_msc_test — 106 extractions → 25 clusters → 6 themes, 83% cross-session theme ratio, perfect integrity.)
 
-The model is selected via the `CLAUDE_MODEL` environment variable (default `claude-sonnet-4-6` for backward compatibility); adaptive thinking is enabled via `RESEARCHER_THINKING=1`. The canonical Athens run command is:
+The legacy `RESEARCHER_CLAUDE_MODEL` / `CLAUDE_MODEL` env vars still override `model_routing.json` for these three tasks (first one set wins); `RESEARCHER_THINKING` overrides the thinking mode the same way. Left unset, both fall back to the file's current default above — not to Sonnet. The canonical Athens run command, which reproduces that default explicitly:
 
 ```bash
 RESEARCHER_THINKING=1 CLAUDE_MODEL=claude-opus-4-7 python flows/researcher_flow.py runs/<run_id>
@@ -633,7 +633,7 @@ RESEARCHER_THINKING=1 CLAUDE_MODEL=claude-opus-4-7 python flows/researcher_flow.
 
 **Streaming requirement.** All three tasks (extraction, clustering, theming) use streaming. When thinking is enabled, the SDK's non-streaming timeout heuristic refuses operations that might exceed 10 minutes, so non-streaming is not a fallback. Streaming also handles ThinkingBlock filtering transparently — `stream.text_stream` yields only text deltas.
 
-**Token budgets.** Max tokens are set well above what non-thinking output needs, to accommodate thinking tokens that count against `max_tokens` in the current API: `EXTRACTION_MAX_TOKENS=40000`, `CLUSTERING_MAX_TOKENS=40000`, `THEMING_MAX_TOKENS=24000`. These are ceilings; typical usage is 5-20% of budget.
+**Token budgets.** Max tokens are set well above what non-thinking output needs, to accommodate thinking tokens that count against `max_tokens` in the current API: `EXTRACTION_MAX_TOKENS=40000`, `CLUSTERING_MAX_TOKENS=64000`, `THEMING_MAX_TOKENS=24000`. These are ceilings; typical usage is 5-20% of budget.
 
 **Cost estimate.** Opus 4.7 with adaptive thinking on a 6-session Athens night: approximately $15-25 depending on thinking token consumption. Sonnet baseline on the same night: approximately $3-5. At Athens scale this is a defensible cost for a one-of-a-kind experimental artifact; at iterative development scale, consider running Sonnet with `RESEARCHER_THINKING=0` for quick validation passes.
 

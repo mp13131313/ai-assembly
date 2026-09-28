@@ -721,6 +721,22 @@ class TestVoiceStep1ValidationLadder:
 
         assert result["model"] == "gpt-4o"
 
+    def test_reasoning_effort_only_on_reasoning_models(self, monkeypatch):
+        monkeypatch.setenv("VOICE_VALIDATION_MODELS", "gpt-4o")
+        fake_openai_client = MagicMock()
+        fake_openai_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="PASS"))],
+            usage=MagicMock(prompt_tokens=1, completion_tokens=1),
+        )
+        monkeypatch.setitem(sys.modules, "openai",
+                            types.SimpleNamespace(OpenAI=lambda *a, **kw: fake_openai_client))
+
+        v1v._call_openai_with_fallback(system="s", user="u", max_tokens=100, reasoning_effort="high")
+
+        kwargs = fake_openai_client.chat.completions.create.call_args.kwargs
+        assert "reasoning_effort" not in kwargs
+        assert kwargs["temperature"] == 0.0 and kwargs["max_tokens"] == 100
+
     def test_rungs_route_by_vendor_not_position(self, monkeypatch):
         # A Google rung first must go to GenAI, not to OpenAI.
         monkeypatch.setenv("VOICE_VALIDATION_MODELS", "gemini-2.5-pro,gpt-4o")

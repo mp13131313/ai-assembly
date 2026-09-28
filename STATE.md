@@ -16,8 +16,8 @@ trackers, product direction — see *Where the detail lives*) drives the
 work. Phase 0 code-quality fixes landed on branch `phase0-fixes`
 (2026-09-27/28). The **published record was repaired and pushed
 2026-09-28**: voice names (C53), the Night 1/2 voice indexes (C50), and
-per-theme files (C51). A central per-step model config
-(`model_routing.json`, C63) is being wired into both pipelines.
+per-theme files (C51). **Every LLM step in both pipelines now reads its
+model from one file, `model_routing.json`** (C63, done 2026-09-28).
 **Direction:** the governed voice hub (`PRODUCT_assembly_hub.md`), built on
 the operator's own intent — no external event needed. Test suites
 (runtime, ingest, personas) green on `phase0-fixes`.
@@ -41,7 +41,9 @@ the operator's own intent — no external event needed. Test suites
 - **Branches (this repo):** `main` = the Athens-complete code (2026-06-04).
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
-  **Neither branch is merged into `main` yet.**
+  **Neither branch is merged into `main` yet.** Push status:
+  `phase0-fixes` is pushed through `01df63a`; the 2026-09-28 C63 commits
+  after it are local until pushed.
 
 ---
 
@@ -244,14 +246,16 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
-Next: finish C63 (model config) → Stage 4 (persona-pipeline catch-up on the
+Next: the doc-audit fixes (`doc_infrastructure_backlog.md` § 2026-09-28;
+operator picks) → Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.
 
 **Resolved since 2026-06-01 (branch `phase0-fixes`):** C46 · C49 · C50 ·
 C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
-dossier-index dual writers (PLAN 0.1.2) · voices §32.1 / .2 / .3 / .5.
+C63 (model config) · dossier-index dual writers (PLAN 0.1.2) · voices
+§32.1 / .2 / .3 / .5 · §35.
 
 **Runtime still open (`runtime/OPEN_ITEMS.md`):**
 
@@ -262,14 +266,13 @@ dossier-index dual writers (PLAN 0.1.2) · voices §32.1 / .2 / .3 / .5.
 - **C47** editorial discipline rules → permanent prompt patches
 - **C52** event-agnostic config (PLAN 2.1)
 - **C57** editor closing prompt hardcoded to Tim
-- **C62** model generation — pinned models still live; after C63 a
-  migration is a config edit plus voice re-validation
-- **C63** central model config — in progress
+- **C62** model generation — pinned models still live; a migration is now
+  a `model_routing.json` edit plus voice re-validation (operator decision)
 - **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks
 
 **Voices-thread (`voices/OPEN_ITEMS.md`):** §16.1 Plato anachronism · §31
 Gap-J coherence audit · §11 reader gates · §33 validation track (decision
-open) · §34 agentic Step-3 card fields · §35 model config (persona side) ·
+open) · §34 agentic Step-3 card fields ·
 FU#55 family of forms (BUILD, gate-exempt, after Stage 4).
 
 **External, not built:** B2 microsite (redeploy needed to show the

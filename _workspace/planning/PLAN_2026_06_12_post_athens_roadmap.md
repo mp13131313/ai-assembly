@@ -20,7 +20,7 @@
 | **1.3** editor interleave / editor Tim-hardcoding / reader gates / validator-economy | runtime **C47, C57**; voices **§24/§28, §4 FU#56**; runtime **C28/C42/C43** |
 | **2.1** split-card + event config | voices **§10 / FU#42**; runtime **C52** |
 | **2.2–2.4** vendor layer + deployment profiles (vatican/chat/voice) | **net-new — no OPEN_ITEMS home;** vatican `SPEC_2026_05_27_…` + this doc are canonical |
-| **Model config** (per-step model choice, both pipelines; future UI Models page) | runtime **C63** (+ C62); voices **§35** — *in progress 2026-09-28* |
+| **Model config** (per-step model choice, both pipelines; future UI Models page) | runtime **C63** (+ C62); voices **§35** — *backend done 2026-09-28; Models page comes with the studio UI* |
 | **Deferred** agentic-architecture backlog (per-stage moves; validation triage ⚖; visible Step-3 deliberation ⚖) | runtime **Section H / C59–C61**; voices **§34** — *design-and-shelve under the net-complexity gate; NOT in the execution stages below* |
 
 The detailed Phase 0/1 bodies below are now **rationale subordinate to those IDs** (read OPEN_ITEMS for current status/decision trail). **Phase 2 stays canonical here** — the versatile-assembly vision, vendor abstraction, and chat/voice profiles are genuinely net-new design with no OPEN_ITEMS entry.
@@ -188,6 +188,8 @@ The shipped cards embody ~100 operator interventions the pipeline can't reproduc
 **Lean-quality principle.** Sonnet is the default. Opus only where it earns its keep — (a) voice-quality-sensitive prompt design, (b) genuine architecture. Effort: **low** = string/config/delete; **medium** = logic + tests; **high** reserved for the two design builds. Every voice-prompt change lands one-at-a-time with **sentinel-regen + thinking-on** as the empirical quality gate — so even Sonnet-written prompt edits are checked against the shipped-card baseline.
 
 **Progress 2026-09-27 (branch `phase0-fixes`, not merged/pushed):** Stage 1 done (C55 stopgap, C56, C58, §32.3, §32.5) except §32.4-text (superseded by runtime C62 model decision) and the optional plan-body strip. Stage 2 done (C49, C50, C53 code, C54, §32.1, §32.2). Tests: runtime 266 / ingest 114 / personas 223 green. Still open from Phases 0–1: C53 republish+push and C51 (operator), C62 model decision, everything from Stage 4 on.
+
+**Progress 2026-09-28 (branch `phase0-fixes`, not merged into `main`; push status in `STATE.md`):** C53 republish and C51 done and pushed (athens-2026 `0b2af19`); dossier-index writers merge; model config (C63 / §35) done. Tests: runtime 355 / ingest 114 / personas 239. Next: the doc-audit fixes (operator picks), then Stage 4 (needs a spend cap).
 
 **Hard dependency:** only one — Stage 4 (1.1 prompts stable) must precede Stage 5 (1.2 + 2.1). Stage 3 (operator) runs in parallel throughout. Within Stage 1 everything is parallel-safe.
 

@@ -86,11 +86,13 @@ def _call_openai_with_fallback(
                 }
             from openai import OpenAI  # local import — runtime venv may not have it
             client = OpenAI()
-            # Generic o-series reasoning-model prefix probe — not a routing
-            # default; the ladder itself comes from model_routing.json via
-            # step_config() above.
-            is_o_series = any(model.startswith(p) for p in ("o1", "o3", "o4"))  # model-scan: allow
-            use_reasoning = is_o_series or reasoning_effort is not None
+            # Request-shape gate, not a routing default (the ladder comes from
+            # model_routing.json via step_config() above): reasoning models
+            # (gpt-5.x, o-series) take max_completion_tokens + reasoning_effort;
+            # gpt-4.1 / gpt-4o reject reasoning_effort, so they get the plain
+            # shape. (Until 2026-09-28 every rung got reasoning_effort, so the
+            # gpt-4.x fallback rungs could only ever fail.)
+            use_reasoning = any(model.startswith(p) for p in ("gpt-5", "o1", "o3", "o4"))  # model-scan: allow
             kwargs: dict[str, Any] = {
                 "model": model,
                 "messages": [

@@ -512,7 +512,9 @@ Selection and Packaging have no prompt files — they're pure Python functions (
 
 ### Model Configuration
 
-Default model: `claude-opus-4-7` with `thinking.type=adaptive`. Override via `CLAUDE_MODEL` env var for Sonnet dev iteration. Thinking can be disabled via `PROVOCATEUR_THINKING=0` (not recommended; validated quality relies on adaptive thinking).
+Model and thinking mode for all three Provocateur LLM tasks (Triage Part A, Triage Part B, Formulation) are set in `model_routing.json` (steps `runtime.provocateur.triage_voice`, `runtime.provocateur.triage_flags`, `runtime.provocateur.formulation`) — that file is the source of truth, not this spec. Current default: `claude-opus-4-7` with `thinking.type=adaptive`.
+
+The legacy `PROVOCATEUR_CLAUDE_MODEL` / `CLAUDE_MODEL` env vars still override it (checked in that order) — e.g. for Sonnet dev iteration. `PROVOCATEUR_THINKING=0` still overrides the thinking mode the same way (disables adaptive thinking; not recommended — validated quality relies on it).
 
 Token budgets: Triage and Formulation both set `max_tokens=40000`. This is a ceiling, not a target — thinking consumes budget before visible text is emitted, so generous ceilings prevent the "empty text stream" failure mode. Observed usage in validation: 15-25K output tokens per call, well inside the ceiling.
 

@@ -87,7 +87,7 @@ The Voice Pipeline is the third agent in the overnight pipeline. It receives the
 Plus two supporting flows:
 
 - **Validation nodes** (optional, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). Default ON for Athens Night 1.
-- **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice Sonnet call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
+- **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Model and thinking mode are set in `model_routing.json` (step `runtime.voice.continuity`) — that file is the source of truth for which model runs every step in this pipeline, not this spec; current default is Sonnet 4.6 + adaptive thinking. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
 
 **Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$20-40 / ~45-75 min wall (validation ON); Nights 2+3 ~$15-30 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$60-80. *Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25, not deprecated $15/$75 used previously) + prefix caching landed.* See §"Cost & Envelope" for breakdown.
 
@@ -318,14 +318,16 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 
 ## Pipeline at a Glance
 
-| Stage | Step | Tool | Script | Output |
+Which model (and, for validation, which cross-vendor ladder) runs each row below is set in `model_routing.json` — that file is the source of truth for this pipeline's model choices, not this spec. The "Tool" column shows the current default.
+
+| Stage | Step | Tool (current default; `model_routing.json` step) | Script | Output |
 |---|---|---|---|---|
-| **Step 1** | Private Reasoning per formulation | **Opus 4.7 + adaptive thinking**, max 64K | `step1_private_reasoning.py` | `04_voice/step1_detailed_responses/<voice_slug>__<theme_id>.json` |
-| **Validation A** (optional, Night 1 only) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K | `step1_validation.py:check_anachronism` | diagnostic flag → manifest.validation_failures[] for operator review |
-| **Validation B** (optional, Night 1 only) | Constitutional self-reflection | **OpenAI ladder** (same as A) | `step1_validation.py:check_constitution` | diagnostic flag → manifest.validation_failures[] for operator review |
-| **Step 2** | First-Draft Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K | `step2_first_draft_artifact.py` | `04_voice/step2_first_draft_artifacts/<voice_slug>.json` |
-| **Step 3** | Amended Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K | `step3_amended_artifact.py` | `04_voice/step3_amended_artifacts/<voice_slug>.json` |
-| **Continuity** (Night 2+3) | Per-voice summary of prior night | Sonnet 4.6 + adaptive thinking, max 8K | `continuity.py` | `<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json` |
+| **Step 1** | Private Reasoning per formulation | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step1`) | `step1_private_reasoning.py` | `04_voice/step1_detailed_responses/<voice_slug>__<theme_id>.json` |
+| **Validation A** (optional, Night 1 only) | Anachronism + tense check | **OpenAI ladder**: gpt-5.4 (reasoning_effort=high) → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback, max 8K (`runtime.voice.step1_validation`) | `step1_validation.py:check_anachronism` | diagnostic flag → manifest.validation_failures[] for operator review |
+| **Validation B** (optional, Night 1 only) | Constitutional self-reflection | **OpenAI ladder** (same step + ladder as A) | `step1_validation.py:check_constitution` | diagnostic flag → manifest.validation_failures[] for operator review |
+| **Step 2** | First-Draft Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step2`) | `step2_first_draft_artifact.py` | `04_voice/step2_first_draft_artifacts/<voice_slug>.json` |
+| **Step 3** | Amended Artifact per voice | **Opus 4.7 + adaptive thinking**, max 64K (`runtime.voice.step3`) | `step3_amended_artifact.py` | `04_voice/step3_amended_artifacts/<voice_slug>.json` |
+| **Continuity** (Night 2+3) | Per-voice summary of prior night | Sonnet 4.6 + adaptive thinking, max 8K (`runtime.voice.continuity`) | `continuity.py` | `<PROJECT_ROOT>/voices/<slug>/continuity_night_N.json` |
 
 **Why Opus 4.7 + thinking on Steps 1/2/3, not Sonnet:** these are the load-bearing creative-reasoning calls of the entire overnight pipeline. The cost of getting them wrong (a Plato dialogue that could have been written by any well-read essayist; a Step 3 amendment that smooths over disagreement; an artifact whose register collapses under cross-framework pressure) is the cost of failing Briefing v3.1's Layer 2 ("could a well-read human essayist have arrived here?") and Layer 3 ("does the conversation become more-than"). Opus 4.7's larger reasoning capacity + adaptive thinking is calibrated for this pressure. The output budget is generous (64K) so that thinking can run as long as it needs without truncating the final response.
 
@@ -333,7 +335,7 @@ If lift-phrases from `reference_only_passages` appear in Step 2 or Step 3 output
 
 **Why Sonnet 4.6 on continuity:** continuity is summarisation/compression of an existing artifact + detailed responses. Cheap, fast, doesn't carry the same generative pressure. Adaptive thinking still on so the summariser can hold the voice's own grammar and the temporal stance written in its card while compressing.
 
-**Adaptive thinking is ON for all steps.** Env var `VOICE_THINKING=0` disables for development (do NOT use for Athens production). Per-card model override possible via `voice_config.runtime_model` if a voice's chat-test reveals a stronger alternative; defaults to the table above.
+**Adaptive thinking is ON for all steps by default in `model_routing.json`.** The legacy `VOICE_THINKING=0` env var still overrides thinking for Steps 1/2/3 (do NOT use for Athens production); continuity's thinking is overridden separately via `VOICE_CONTINUITY_THINKING`. Models are per step, not per voice: a per-card override (`voice_config.runtime_model`) was planned but never built. Current defaults are in the table above.
 
 **Streaming is REQUIRED on Steps 1/2/3** — Opus + thinking + max_tokens=64K is well past the SDK's non-streaming timeout heuristic (10 min). Validation + continuity may use non-streaming.
 
@@ -489,7 +491,7 @@ Implementation note: this filtering happens in `step1_private_reasoning.py:rende
 **Reasoning trace capture** — when `thinking.type=adaptive` (or `enabled`) is set on the Anthropic API call, the response stream returns thinking blocks alongside text blocks. The Voice Pipeline captures both: `detailed_response` is the concatenation of text-block content (the final response the voice produced); `thinking_trace` is the concatenation of thinking-block content (the model's working reasoning). The implementation extracts both from `final.content` after the stream completes — simpler and more robust than capturing per-event deltas, and matches the `researcher_flow.py` pattern. Schematic:
 
 ```python
-with client.messages.stream(model="claude-opus-4-7", thinking={"type": "adaptive"}, max_tokens=64000, ...) as stream:
+with client.messages.stream(model=cfg.model, thinking={"type": "adaptive"}, max_tokens=64000, ...) as stream:  # cfg = step_config("runtime.voice.step1")
     for _ in stream.text_stream:
         pass  # consume; final assembly happens via final.content below
     final = stream.get_final_message()
@@ -524,7 +526,7 @@ Two optional validation calls run after each Step 1 detailed response, before St
 
 ### Anachronism check
 
-`step1_validation.py:check_anachronism(detailed_response, knowledge_boundary, voice_temporal_stance)`. **OpenAI ladder** (gpt-5.4 with `reasoning_effort="high"` → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback) via `flows.shared.clients.call_openai()`. `temperature=0.0`, `max_tokens=8192`.
+`step1_validation.py:check_anachronism(detailed_response, knowledge_boundary, voice_temporal_stance)`. The validation ladder is set in `model_routing.json` (step `runtime.voice.step1_validation`) — current default: **OpenAI ladder** (gpt-5.4 with `reasoning_effort="high"` → gpt-4.1 → o3 → gpt-4o → Gemini 2.5 Pro fallback) via `flows.shared.clients.call_openai()`. The legacy `VOICE_VALIDATION_MODELS` comma-separated env var still overrides it. `temperature=0.0`, `max_tokens=8192`.
 
 **Why OpenAI here, not Sonnet** — same rationale as Persona Pipeline's Pass 7-anachronism (CURRENT_STATE §5.22 family): cross-model validation catches blind spots same-family validation misses. The voice's Step 1 detailed response was generated by Opus; checking for anachronism with another Anthropic model risks the same family blind spots. OpenAI sees what Anthropic doesn't.
 
@@ -1061,7 +1063,7 @@ After Night N completes (Step 3 artifacts written), before Night N+1 Provocateur
 
 Continuity is skipped on Night 3 (no Night 4 to feed) and skippable via the `--skip-continuity` CLI flag.
 
-**Per voice:** `continuity.py:generate_continuity(voice_slug, night)`. Sonnet 4.6, `max_tokens=8000`. Reads:
+**Per voice:** `continuity.py:generate_continuity(voice_slug, night)`. Model set in `model_routing.json` (step `runtime.voice.continuity`; current default Sonnet 4.6 + adaptive thinking), `max_tokens=8000`. Reads:
 
 - All of this voice's Night N detailed responses (`step1_detailed_responses/<voice_slug>__*.json`)
 - This voice's Night N first-draft (`step2_first_draft_artifacts/<voice_slug>.json`)
@@ -1159,9 +1161,9 @@ runtime/flows/
 
 ### Model configuration
 
-Default model: `claude-sonnet-4-6`. Override via `VOICE_MODEL` env var for dev iteration. Per-card override possible via `voice_config.runtime_model` if a specific voice tested better on Opus 4.7 (some voices may need this — empirically validate during dry runs against `dev_msc_test`). Adaptive thinking ON by default (`VOICE_THINKING=1`).
+Model and thinking mode for every Voice Pipeline step are set in `model_routing.json` (steps `runtime.voice.step1` / `.step2` / `.step3` / `.continuity`, plus the `runtime.voice.step1_validation` ladder) — that file is the source of truth, not this spec. Current defaults: Steps 1/2/3 on Claude Opus 4.7 + adaptive thinking; continuity on Claude Sonnet 4.6 + adaptive thinking; validation on the OpenAI ladder (see "Pipeline at a Glance" above). The legacy `VOICE_MODEL` env var still overrides Steps 1/2/3 (continuity has its own `VOICE_CONTINUITY_MODEL`); `VOICE_THINKING` / `VOICE_CONTINUITY_THINKING` override thinking mode the same way; `VOICE_VALIDATION_MODELS` overrides the validation ladder. Models are per step, not per voice: a per-card override (`voice_config.runtime_model`) was planned but never built.
 
-Token budgets: Step 1 `max_tokens=32000`, Step 2 `max_tokens=24000`, Step 3 `max_tokens=24000`, validation `max_tokens=4096`, continuity `max_tokens=8000`. These are ceilings that accommodate adaptive thinking; observed usage on dry runs will tune these.
+Token budgets (current code defaults, each overridable by its own env var): Step 1 `max_tokens=64000` (`VOICE_STEP1_MAX_TOKENS`), Step 2 `max_tokens=64000` (`VOICE_STEP2_MAX_TOKENS`), Step 3 `max_tokens=64000` (`VOICE_STEP3_MAX_TOKENS`), validation `max_tokens=8192` (`VOICE_VALIDATION_MAX_TOKENS`), continuity `max_tokens=8000` (`VOICE_CONTINUITY_MAX_TOKENS`). These are ceilings that accommodate adaptive thinking; observed usage on dry runs will tune these.
 
 Streaming: REQUIRED on Step 1, Step 2, Step 3 (any LLM call with thinking + max_tokens > 21K hits the SDK's non-streaming timeout heuristic). Validation + continuity may use non-streaming.
 

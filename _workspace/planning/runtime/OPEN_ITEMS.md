@@ -2987,6 +2987,8 @@ When B1 (editor) lands, these mini-concepts should be drafted:
 ---
 
 ### C62. Model generation moved on — migration audit (4.7 / Sonnet 4.6 → 5.x) 🔵 OPERATOR DECISION (filed 2026-09-27)
+**Update 2026-09-28 (after C63):** the break list below no longer bites as written. `call_claude` sends temperature only to models that accept it (the Sonnet 5 400s are gone); Opus 5.5 with thinking off, or without an explicit effort, is refused by the loader before any call. A migration is now: edit `model_routing.json`, update the golden table, re-validate voices. Current per-site detail: `docs/LLM_CALL_INVENTORY.md` §10. The decision itself (whether and when to migrate) stays the operator's.
+
 **Status check (live Models API, 2026-09-27):** the pinned IDs still resolve — `claude-opus-4-7` (12 call sites) and `claude-sonnet-4-6` (10) are AVAILABLE, as are `claude-opus-5-5` and `claude-sonnet-5`. **Nothing is forcing a migration; the pipelines run as-is.** Migration is a quality/cost choice, gated like §32.4 (voice output changes → sentinel-regen + re-validation per voice).
 
 **Known breaking points if migrating (from the Claude API migration reference):**
@@ -3000,7 +3002,7 @@ When B1 (editor) lands, these mini-concepts should be drafted:
 
 Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $5/$25; Sonnet 5 $2/$10 vs Sonnet 4.6 $3/$15 per MTok. Extends §32.4 (voices) — re-validate the §6 corpus-gateway behavior on whichever model is chosen.
 
-### C63. Central model config — `model_routing.json` 🟢 IN PROGRESS (operator request 2026-09-28; cross-ref voices §35)
+### C63. Central model config — `model_routing.json` ✅ DONE 2026-09-28 (backend; Models page comes with the studio UI) (operator request 2026-09-28; cross-ref voices §35)
 **Why:** the operator wants to choose, per step and across both pipelines, which model runs — eventually from a Models page in the studio UI (PRODUCT §7 surface 8). Today the choice is scattered across ~40 hardcoded model strings plus a dozen env vars (docs/LLM_CALL_INVENTORY.md §1, §5). This is also the practical answer to C62: once it lands, a model migration is a config edit plus voice re-validation.
 
 **Design (landed `6a5a828`):**
@@ -3010,8 +3012,17 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 - Legacy per-step env vars still override the file (documented run commands keep working); empty env values count as unset.
 - Golden test pins today's production models per step; changing a default means updating that table in the same commit.
 
-**Status:** call sites converted in both pipelines, behavior-preserving (personas `f818767`, runtime `8fb718d`). **Ladder follow-up done 2026-09-28:** validator ladders (runtime Step-1 validation; persona 7-anachronism, 7a, 7a FINAL) now route each rung by its vendor via `model_vendor()`, not by position (persona code had sent every rung but the last to OpenAI and the last to Gemini); the three persona copies became one `clients.call_validator_ladder`; the loader refuses a ladder rung that isn't OpenAI/Google (a cross-model check must not be Claude).
-**Still to do:** (1) update `docs/LLM_CALL_INVENTORY.md` §5 + the pipeline specs to point at the file as the source of truth; (2) *later, with the studio UI:* per-project override file + the Models page, including a "voices last validated on" column so a model switch shows which voices need re-checking. **Relationship to PLAN 2.2 (vendor abstraction):** this is the model-*choice* half; the unified call-plumbing half (one client wrapper per vendor) remains PLAN 2.2, not yet started.
+**Status: ✅ DONE 2026-09-28.** Models for all 41 steps now come from `model_routing.json`; the golden test pins them, and a scan test fails on any model name hardcoded in code.
+- Call sites converted, behavior-preserving: personas `f818767`, runtime `8fb718d`.
+- Validator ladders (`f5de9db`): runtime Step-1 validation and persona 7-anachronism / 7a / 7a FINAL now route each rung by its vendor (`model_vendor()`), not by position. The persona code had sent every rung but the last to OpenAI and the last to Gemini. The three persona copies became one `clients.call_validator_ladder`. The loader refuses a ladder rung that isn't an OpenAI or Google model: a cross-model check must not be Claude.
+- Found while documenting (fixed in the docs commit): the runtime Step-1 ladder sent `reasoning_effort` to every rung, so its gpt-4.1/gpt-4o fallback rungs could only fail. It now sends it only to reasoning models (gpt-5.x, o-series).
+- Docs: `docs/LLM_CALL_INVENTORY.md` regenerated from code (each call site carries its step key; §5 says the file is the source of truth and lists the legacy env overrides). Pipeline specs (Voice, Transcription, Researcher, Provocateur, Editor, Persona v4, Infrastructure) and `runtime/flows/voice/README.md` point at the file. Pointers in `CLAUDE.md` and `README.md`; both `.env.example` files updated.
+  - Two specs had stated wrong defaults, both corrected: Voice said Sonnet 4.6 with 32K/24K budgets (code: Opus 4.7, 64K); Researcher said Sonnet 4.6 and `CLUSTERING_MAX_TOKENS=40000` (code: Opus 4.7, 64000).
+  - `OPENAI_MODEL` and, for persona steps, `CLAUDE_MODEL` do nothing (never reached in practice) and are no longer advertised.
+  - The Voice spec's per-voice model override (`voice_config.runtime_model`) was never built; the specs now say models are per step.
+- Suites: runtime 355, personas 239.
+
+**Later (with the studio UI, not open work now):** a per-project override file plus the Models page, including a "voices last validated on" column so a model switch shows which voices need re-checking. **Relationship to PLAN 2.2 (vendor abstraction):** this is the model-*choice* half; the unified call-plumbing half (one client wrapper per vendor) remains PLAN 2.2, not yet started. A possible refinement: move the reasoning-model request-shape probes (`startswith("gpt-5")`, o-series) into per-model rules in the `models` table. *(Inference, not filed as work.)*
 
 ## Section F — Recently landed (for context)
 

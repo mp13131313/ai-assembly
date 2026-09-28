@@ -31,7 +31,7 @@ Reason 3 is sometimes folded into Reason 2; whether you treat them as two reason
 - **Ingest service** — FastAPI app at `runtime/ingest/app.py` + per-session normalize/transcribe subprocess pipeline. Receives audio uploads from HoBB during the panel.
 - **`<PROJECT_ROOT>/runs/`** — the run_dir tree. Ingest writes here as audio comes in.
 - **`<PROJECT_ROOT>/reference/sessions.json`** — read by ingest on every request.
-- **`.env`** — `ANTHROPIC_API_KEY`, `ASSEMBLYAI_API_KEY`, `UPLOAD_APP_PASSWORD`, optional `CLAUDE_MODEL` override.
+- **`.env`** — `ANTHROPIC_API_KEY`, `ASSEMBLYAI_API_KEY`, `UPLOAD_APP_PASSWORD`, optional `CLAUDE_MODEL` override (legacy override of `model_routing.json`, which is the source of truth for which model runs which step — see that file, not this list, for current defaults).
 
 ### On the VM (deployed as ready, fall back to laptop until then)
 

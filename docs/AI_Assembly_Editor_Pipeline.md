@@ -805,7 +805,7 @@ This separation lets the editor focus on prose generation; the microsite owns vi
 6. **No program-supply.** The article does NOT supply solutions or programs. Closes on the question stated more sharply, not on what to do. Per Claudia's quality_criteria 4.
 7. **No exclamation marks.** Per Claudia's `register_and_tone`.
 8. **Bastard-form pronoun discipline.** Institutional we for declarative editorial work; first-person I only for surprise / difficulty / admission. Warmth in moves, not in pronoun inflection.
-9. **One Anthropic call per dossier on Opus 4.7.** Sonnet would lose the bastard form's calibration; Haiku won't carry the analytical generalization work; Opus 4.7 + thinking is the right model.
+9. **One Anthropic call per dossier** (model set in `model_routing.json`, step `runtime.editor.dossier` — see "Models + thinking" below; current default Opus 4.7). Sonnet would lose the bastard form's calibration; Haiku won't carry the analytical generalization work; Opus 4.7 + thinking is the right model.
 10. **No retry on failure beyond 1.** Same as voice pipeline's `stream_voice_call` retry budget.
 
 ---
@@ -884,8 +884,10 @@ All 33 fields load (same as voice's per-step routing post-2026-05-02 refactor; t
 
 ### Models + thinking
 
-- **Model:** `claude-opus-4-7`
-- **Thinking:** adaptive, display=summarized (matches FU#60 pattern)
+Model and thinking mode are set in `model_routing.json` (step `runtime.editor.dossier`) — that file is the source of truth, not this spec. The legacy `EDITOR_MODEL` / `CLAUDE_MODEL` env vars still override the model; `EDITOR_THINKING` overrides the thinking mode the same way.
+
+- **Model (current default):** `claude-opus-4-7`
+- **Thinking (current default):** adaptive, display=summarized (matches FU#60 pattern)
 - **max_tokens:** 32K (output ceiling; actual output ~3-5K)
 - **Caching:** 1h TTL on system prompt (Claudia's card); cached across all dossiers within a night
 

@@ -155,6 +155,8 @@ Start with [`docs/README.md`](docs/README.md) — staleness index for canonical 
 - [Runtime Lifecycle](docs/AI_Assembly_Runtime_Lifecycle.md) — what happens during a night, end to end
 - [Infrastructure](docs/AI_Assembly_Infrastructure.md) — Athens 2026 VM deployment spec
 - [Ingest deploy README](runtime/ingest/deploy/README.md) — VM provisioning checklist
+- [`model_routing.json`](model_routing.json) — which model runs each LLM step, in both pipelines (the one place to change it)
+- [LLM call inventory](docs/LLM_CALL_INVENTORY.md) — every LLM call site and its parameters, generated from code
 
 **Planning / fresh-session pickup:**
 

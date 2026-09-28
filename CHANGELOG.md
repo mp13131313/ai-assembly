@@ -19,7 +19,9 @@ history lives in `git log`.
   - **Per-theme files (C51):** 24 generated after fixing the builder, which had never worked (`4b7ac0d`).
   - **data_views** regenerated.
 - **Dossier-index writers** (editor + publish_flow) now merge instead of clobbering each other (PLAN 0.1.2, `3871e11`).
-- **`model_routing.json`** (C63): one per-step model config for both pipelines. It refuses unsafe setups and keeps the legacy env overrides working. Call-site conversion in progress.
+- **`model_routing.json`** (C63, done): every LLM step in both pipelines (41) now reads its model, thinking mode and effort from this one file. It refuses unsafe setups and keeps the legacy env overrides working.
+  - Validator ladders route each rung by vendor rather than position. The runtime Step-1 ladder's gpt-4.x fallback rungs, which could only fail, now work.
+  - `docs/LLM_CALL_INVENTORY.md` regenerated; the specs point at the file. Two specs had stated wrong model defaults (Voice, Researcher) and were corrected.
 - **Operator decisions:**
   - Family of forms is exempt from the net-complexity gate (conditional).
   - The Assembly invariant is the loose four-part version (PRODUCT §11.5).

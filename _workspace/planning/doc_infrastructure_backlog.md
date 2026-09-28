@@ -344,7 +344,7 @@ First run of the WAYS_OF_WORKING §8 sweep, after the Phase 0 work landed withou
 | 4 | `CLAUDE.md` L12 (+ L301, 317) | "no work in flight"; editor = Claudia; "Claudia's card pending" | Status one-liner → point at STATE.md; Tim | WRONG |
 | 5 | `docs/AI_Assembly_Voice_Pipeline.md` L69, 575–585, 1183–1192 | Step-1 validation "Night 1 ON", opt-out `--skip-validation` — code is default OFF, opt-in `--enable-step1-validation` (C28) | Rewrite policy + CLI subsection | WRONG |
 | 6 | `docs/AI_Assembly_Runtime_Lifecycle.md` L134–149, 142, 245–246 | Stage 6 editor "specified, not built"; Claudia card path | Editor built + ran all 3 nights; Tim path | WRONG |
-| 7 | `docs/AI_Assembly_Researcher_Pipeline.md` L624, 636 | Default model "claude-sonnet-4-6"; `CLUSTERING_MAX_TOKENS=40000` | Opus 4.7 default (now: `model_routing.json`); 64000 since 2026-05-08 | WRONG |
+| 7 ✅ 2026-09-28 (with C63) | `docs/AI_Assembly_Researcher_Pipeline.md` L624, 636 | Default model "claude-sonnet-4-6"; `CLUSTERING_MAX_TOKENS=40000` | Opus 4.7 default (now: `model_routing.json`); 64000 since 2026-05-08 | WRONG |
 | 8 | `docs/AI_Assembly_Provocateur_Pipeline.md` L53, 156 | "12 parallel calls, one per council member" | 10 (dev_msc_test mentions of 12 are historical — keep) | WRONG |
 | 9 | `README.md` (root) L127 | "both repos clean + pushed" | Point at STATE.md's branch section | WRONG |
 | 10 | `docs/AI_Assembly_Persona_Pipeline_v4.md` L20, 195 | Opus 4.6 for DR §1–§5 (banned per ONBOARDING DON'T) — already tracked §II.1 above | Resolve §II.1 | WRONG (known) |
@@ -356,6 +356,6 @@ First run of the WAYS_OF_WORKING §8 sweep, after the Phase 0 work landed withou
 | 16 | `_workspace/planning/runtime/ONBOARDING.md` branch section | "all work on main" | Label historical / point at STATE.md | STALE |
 | 17 | vatican SPEC §8 table row | "✅ 3-tier per-voice temperature" | Mark infeasible on Anthropic models (§5 already corrected) | STALE |
 | 18 | Editor Pipeline §card assembly L874–883 | Doesn't mention the corpus_metadata strip (C56) | One line | STALE |
-| — | model config (C63) | Not mentioned in CLAUDE.md, README, runtime/README, docs/README, LLM_CALL_INVENTORY | Add pointers when C63 lands | gap |
+| — ✅ 2026-09-28 | model config (C63) | Not mentioned in CLAUDE.md, README, runtime/README, docs/README, LLM_CALL_INVENTORY | Pointers added in CLAUDE.md, README, docs/README; inventory regenerated; specs point at the file (runtime/README had no model statements) | gap |
 
 HISTORICAL (leave): athens-2026 `EDITORIAL_ASSESSMENT.md` (self-dated 2026-05-29); runtime ONBOARDING pre-Athens dryrun history. Checked current: Briefing v3.1, Infrastructure, AUDIENCE_BRIEF, runtime/ + personas/ READMEs, CROSS_REPO_CONTRACT, planning + voices ONBOARDING, conventions. Possibly no doc action: C54 (internal dispatch logic).
