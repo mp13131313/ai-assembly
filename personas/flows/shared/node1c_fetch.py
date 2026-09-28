@@ -6,14 +6,16 @@ plaintext, stripping Project Gutenberg headers/footers when present.
 Output: list of {url, source, text, char_count} saved to
 runs/<slug>/01_research/primary_texts.json
 
-SECURITY: _check_url uses getaddrinfo (all A records) for SSRF checks. Still
-TOCTOU-vulnerable — urlopen resolves the hostname again, and DNS rebinding
-could return a private IP between checks. Acceptable for the current vetted
+SECURITY: _check_url uses getaddrinfo (all A records) for SSRF checks, and
+every redirect target is re-checked before it is followed (voices OPEN_ITEMS
+§37 A13, 2026-09-28). Still TOCTOU-vulnerable — the opener resolves the
+hostname again, and DNS rebinding could return a private IP between checks. Acceptable for the current vetted
 URL set (Wikipedia/Gutenberg/academic). Not acceptable if this pipeline ever
 accepts user-controlled URLs — upgrade to a custom opener that pins the
 pre-resolved IP into the socket connect() call.
 """
 from __future__ import annotations
+import html as _html
 import ipaddress
 import re
 import socket
@@ -35,11 +37,15 @@ GUTENBERG_END = re.compile(r"\*\*\*\s*END OF (?:THE|THIS) PROJECT GUTENBERG.*?\*
 
 # Perseus Digital Library XML wrapper pattern
 _PERSEUS_XML = re.compile(r"<tei[^>]*>.*?</tei>", re.I | re.S)
-# Wikisource / MediaWiki content wrapper
-_WIKISOURCE_CONTENT = re.compile(
-    r'<div[^>]+class="[^"]*(?:mw-content-text|mw-parser-output)[^"]*"[^>]*>(.*?)</div>',
-    re.I | re.S,
-)
+# Wikisource / MediaWiki content wrapper. The body is found by matching the
+# wrapper's own closing </div> (nested divs counted) — a non-greedy
+# `(.*?)</div>` stopped at the first nested div and kept only the header
+# template: Lovelace's "Sketch of the Analytical Engine" was stored as 697
+# chars of CSS (voices OPEN_ITEMS §37 A3, 2026-09-28).
+_MEDIAWIKI_OPEN = re.compile(
+    r'<div[^>]+class="[^"]*\b(mw-parser-output|mw-content-text)\b[^"]*"[^>]*>', re.I)
+_DIV_TAG = re.compile(r"<(/?)div\b[^>]*>", re.I)
+_SCRIPT_STYLE = re.compile(r"<(script|style)\b.*?</\1\s*>", re.I | re.S)
 
 # Max bytes accepted per URL — prevents memory exhaustion on large texts.
 MAX_RESPONSE_BYTES = 5 * 1024 * 1024  # 5 MB
@@ -61,8 +67,11 @@ _PRIVATE_NETS = [
     ipaddress.ip_network("192.168.0.0/16"),
     ipaddress.ip_network("127.0.0.0/8"),
     ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("100.64.0.0/10"),  # carrier-grade NAT
     ipaddress.ip_network("::1/128"),
     ipaddress.ip_network("fc00::/7"),
+    ipaddress.ip_network("fe80::/10"),
 ]
 
 
@@ -87,6 +96,8 @@ def _check_url(url: str) -> None:
             addr = ipaddress.ip_address(raw_ip)
         except ValueError:
             continue
+        if getattr(addr, "ipv4_mapped", None):  # ::ffff:127.0.0.1 is 127.0.0.1
+            addr = addr.ipv4_mapped
         for net in _PRIVATE_NETS:
             if addr in net:
                 raise ValueError(
@@ -94,27 +105,56 @@ def _check_url(url: str) -> None:
                 )
 
 
+class _CheckedRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Re-run the SSRF check on every redirect target before following it."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _check_url(newurl)  # ValueError propagates: blocked, not retried
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_OPENER = urllib.request.build_opener(_CheckedRedirectHandler)
+
+
+def _mediawiki_content(html: str) -> str | None:
+    """Inner HTML of the MediaWiki content wrapper (prefers mw-parser-output),
+    up to its matching </div>; None if the page has no such wrapper."""
+    opens = list(_MEDIAWIKI_OPEN.finditer(html))
+    if not opens:
+        return None
+    start = next((o for o in opens if o.group(1).lower() == "mw-parser-output"), opens[0])
+    depth = 1
+    for tag in _DIV_TAG.finditer(html, start.end()):
+        depth += -1 if tag.group(1) else 1
+        if depth == 0:
+            return html[start.end():tag.start()]
+    return html[start.end():]  # unbalanced markup: keep the rest
+
+
 def _html_to_text(html: str, url: str) -> str:
     """Convert HTML to plain text. Uses BeautifulSoup if available; falls back
-    to simple tag stripping. Attempts to extract main content from Perseus /
-    Wikisource wrappers before full-page extraction.
+    to regex tag stripping (the personas venv has no bs4, so this is the path
+    production takes). Extracts the main content from Perseus / Wikisource
+    wrappers before full-page extraction.
     """
     # Try Perseus XML
     m = _PERSEUS_XML.search(html)
     if m:
         html = m.group(0)
     # Try Wikisource / MediaWiki content wrapper
-    m = _WIKISOURCE_CONTENT.search(html)
-    if m:
-        html = m.group(1)
+    body = _mediawiki_content(html)
+    if body is not None:
+        html = body
 
     if _HAS_BS4:
         soup = _BS4(html, "html.parser")
         for tag in soup(["script", "style", "nav", "header", "footer"]):
             tag.decompose()
         return soup.get_text(separator="\n").strip()
-    # Fallback: strip tags with regex
-    return re.sub(r"<[^>]+>", " ", html).strip()
+    # Fallback: drop script/style bodies (they are not text), strip tags,
+    # decode entities.
+    html = _SCRIPT_STYLE.sub(" ", html)
+    return _html.unescape(re.sub(r"<[^>]+>", " ", html)).strip()
 
 
 def _strip_boilerplate(raw: str, content_type: str, url: str) -> tuple[str, str]:
@@ -168,7 +208,7 @@ def fetch_url(url: str, timeout: int = 30) -> dict[str, Any]:
     req = urllib.request.Request(
         url, headers={"User-Agent": "Mozilla/5.0 (AI-Assembly-Persona-Pipeline)"}
     )
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with _OPENER.open(req, timeout=timeout) as r:
         content_type = r.headers.get("Content-Type", "")
         raw_bytes = r.read(MAX_RESPONSE_BYTES + 1)
     if len(raw_bytes) > MAX_RESPONSE_BYTES:

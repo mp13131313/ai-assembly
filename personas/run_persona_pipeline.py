@@ -390,6 +390,11 @@ def _write_primary_texts_review(review_path: Path) -> None:
                     tag = "ERROR"
                 lines.append(f"- FAIL [{tag}] {url}")
                 lines.append(f"  {err}")
+            elif p.get("char_count", 0) < 2000:
+                # §37 A3: a "successful" fetch this short is usually a page
+                # header or template, not the text (Lovelace's Sketch: 697 chars).
+                lines.append(f"- SUSPECT [SHORT] {url} — only {p['char_count']:,} chars "
+                             f"(source: {p['source']}); check it is the text, not a header")
             else:
                 lines.append(f"- OK {url} — {p['char_count']:,} chars (source: {p['source']})")
     lines += [

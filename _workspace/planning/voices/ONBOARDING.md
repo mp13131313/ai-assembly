@@ -433,23 +433,31 @@ Per-voice logs: `$PROJECT/batch_logs/<slug>.pipeline.log`. Summary: `_batch_resu
 
 When running Phase 0.5 on multiple voices in parallel, can hit Anthropic 429 rate limit. **Octopus retry succeeded only on serial after parallel 429.** If a voice's Phase 0.5 dies with 429, retry serially.
 
-### Sentinel regen for prompt edits (FU#29)
+### Sentinel regen for prompt edits (FU#29; Stage 4 quality gate)
+
+A regen re-runs the persona pipeline (real API calls), so it always runs in a
+**sandbox copy**, never in athens-2026. The script refuses a project that is its
+own git repository. Repaired 2026-09-28 (voices OPEN_ITEMS §37 A5).
 
 ```bash
-# Snapshot pre-edit voice
-mkdir -p _workspace/sentinel_baselines/2026-MM-DD-pre-X/<slug>
-cp <PROJECT_ROOT>/voices/<slug>/04_generation/<file>.json \
-   _workspace/sentinel_baselines/2026-MM-DD-pre-X/<slug>/
+cd personas
+# 1. Sandbox the sentinel voices (plus the project-level JSON):
+venv/bin/python scripts/sentinel_regen.py sandbox \
+  --from "<PROJECT_ROOT of athens-2026>" --to "<new empty sandbox dir>" \
+  --voices plato,fyodor_dostoevsky
 
-# Edit prompt, then:
-python scripts/sentinel_regen.py regen \
-  --pass <PASS_NAME> --voices <slug> \
-  --baseline-snapshot _workspace/sentinel_baselines/2026-MM-DD-pre-X
+# 2. Edit the prompt, then see which passes it affects:
+venv/bin/python scripts/sentinel_regen.py detect
+
+# 3. Regenerate that pass in the sandbox; diff against the shipped original:
+venv/bin/python scripts/sentinel_regen.py regen --pass <PASS_NAME> \
+  --project "<sandbox dir>" --baseline-project "<PROJECT_ROOT of athens-2026>" \
+  --voices plato,fyodor_dostoevsky
 ```
 
-`--baseline-snapshot` takes a parent dir; per FU#50(2) the runner auto-resolves `<DIR>/<voice_slug>/<filename>` per voice, so a single arg works for multi-voice regen.
-
-After regen: inspect diff. If smoke-test (not real generation), restore baseline.
+`--baseline-snapshot <DIR>` still works instead of `--baseline-project` (it
+auto-resolves `<DIR>/<voice_slug>/<filename>`, FU#50(2)). Keep each regen inside
+the Stage 4 spend cap (roadmap decisions block).
 
 ### Pass 0b templates are de-anchored from panel exemplars (FU#19)
 

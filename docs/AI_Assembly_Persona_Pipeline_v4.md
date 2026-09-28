@@ -567,12 +567,11 @@ The pipeline's runtime contract to the Voice Pipeline + Provocateur Pipeline is 
 
 For prompt edits that risk silently changing card outputs across all voices.
 
-**Workflow:**
-1. **Snapshot pre-edit voice:** `<baseline-snapshot-dir>/<voice_slug>/<filename>` (e.g. `_workspace/sentinel_baselines/2026-04-27-pre-49D/plato/01_pass_2_identity_boundaries.json`).
-2. Make prompt edit.
-3. **Regen:** `python scripts/sentinel_regen.py regen --pass <PASS_NAME> --voices <slug> --baseline-snapshot <DIR>`.
-4. Inspect diff. Validate intended pattern surfaced.
-5. Restore voice baseline post-validation if it was a smoke-test (not a real generation).
+**Workflow** (a regen makes real API calls, so it runs in a sandbox copy, never in production; the script refuses a project that is its own git repository):
+1. **Sandbox:** `python scripts/sentinel_regen.py sandbox --from <production project> --to <new dir> --voices <slugs>`.
+2. Make the prompt edit; `sentinel_regen.py detect` lists the affected passes.
+3. **Regen:** `python scripts/sentinel_regen.py regen --pass <PASS_NAME> --project <sandbox> --baseline-project <production project> --voices <slugs>`. The diff compares against the shipped files. `--baseline-snapshot <DIR>` also works.
+4. Inspect the diff and check the intended pattern surfaced.
 
 5 sentinel runs landed FU#49H/I/J/K/D in the 2026-04-26 cycle (subsequently reverted 2026-04-28 except 49D). Per-voice baseline subdir support landed in FU#50(2).
 

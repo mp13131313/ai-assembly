@@ -100,6 +100,21 @@ def test_patch_walker_missing_mid_key_raises():
         apply_patch_in_place(d, "a.c.d", "new")
 
 
+def test_patch_walker_misspelled_final_key_raises():
+    """§37 A12: a misspelled field must fail, not add a junk key."""
+    d = {"knowledge_boundary": "old"}
+    with pytest.raises(KeyError):
+        apply_patch_in_place(d, "knowledge_boundry", "new")
+    assert d == {"knowledge_boundary": "old"}
+
+
+def test_patch_walker_misspelled_nested_final_key_raises():
+    d = {"world": {"framework_for_difficulty_note": "x"}}
+    with pytest.raises(KeyError):
+        apply_patch_in_place(d, "world.framework_for_difficulty", "y")
+    assert d == {"world": {"framework_for_difficulty_note": "x"}}
+
+
 def test_patch_walker_non_list_index_raises():
     d = {"not_a_list": {"x": 1}}
     with pytest.raises(TypeError, match="expected list"):

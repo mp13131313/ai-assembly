@@ -15,7 +15,10 @@ Examples:
 
 Raises:
   ValueError — empty path
-  KeyError — missing dict key mid-path
+  KeyError — missing dict key anywhere on the path, including the final key.
+    A patch only replaces an existing field; a misspelled path
+    ("knowledge_boundry") used to add a junk key and log "APPLIED" while the
+    real field stayed unfixed (voices OPEN_ITEMS §37 A12, 2026-09-28).
   TypeError — expected list but got non-list at indexed token
   IndexError — list index out of range
 
@@ -90,6 +93,9 @@ def apply_patch_in_place(d: dict[str, Any], path: str, new_value: Any) -> None:
     for i, (name, idx) in enumerate(tokens):
         is_last = i == len(tokens) - 1
         if is_last and idx is None:
+            if not isinstance(cur, dict) or name not in cur:
+                raise KeyError(f"Path {path!r}: missing key {name!r} at depth {i} "
+                               f"(a patch replaces an existing field; it never adds one)")
             cur[name] = new_value
             return
         if is_last and idx is not None:
