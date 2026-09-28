@@ -65,7 +65,7 @@ The v1 partial draft was a working sketch of Steps 1+2 written before arch-03 + 
 | **File layout** | Implicit | **Mirrors Researcher (`02_researcher/`) + Provocateur (`03_provocateur/`) conventions** under `runs/<run>/04_voice/` | §"Outputs" below |
 | **Validation nodes** | "Optional, recommended on" | **Default policy specified**: Athens Night 1 ON; Nights 2/3 OFF. **Diagnostic-only** (no regen-on-flag — decided 2026-05-01 FU#62 path B; operator morning-review is the correction loop). **Superseded 2026-05-04 (C28):** Step 1 validation defaulted OFF for all nights (no actionable consumer); opt-in via `--enable-step1-validation`. C28b's Step 2 validator (default ON) is now the operator gate — see §"Validation Nodes" → "Default policy for Athens" below | §"Validation Nodes" below |
 | **Continuity block generation** | Sketched in Step 2 system prompt | **Separate flow** with defined runtime trigger (after Night N Step 3 artifacts written, before Night N+1 Provocateur reads them); per-voice override file | §"Continuity Block Generation" below |
-| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). **Night 1: ~$20-40, ~45-75 min wall** (validation ON); **Nights 2+3: ~$15-30, ~25-40 min wall** (validation OFF, +continuity). 3-night total ~$60-80. Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25 not deprecated $15/$75) + Test 3 empirical anchor + prefix caching | §"Cost & Envelope" below |
+| **Cost & Envelope** | Single guess ($20-40/night) | **Per-stage table** for 10-voice panel (Athens production, Step 3 skipped per A1). Pre-Athens estimate (2026-05-02, correct Opus 4.7 pricing + Test 3 anchor): Night 1 ~$20-40 (**assumed Step 1 validation ON — never actually run**; see below) / ~45-75 min wall; Nights 2+3 ~$15-30 / ~25-40 min wall. **Measured 2026-09-28 from Athens production data** (all 3 nights ran with Step 1 validation OFF per C28, which shipped before Night 1): Night 1 ~$23, Night 2 ~$25, Night 3 ~$23; 3-night total ~$72. Reliable single wall-clock totals aren't recoverable from `manifest.json` — see §"Cost & Envelope" for per-call medians and why | §"Cost & Envelope" below |
 | **CLI** | — | `python flows/voice_flow.py <run_dir> --night N [--skip-step3] [--enable-step1-validation]`. **Athens production:** always pass `--skip-step3` (A1 decision 2026-05-01). **Current (since C28, 2026-05-04):** Step 1 validation is OFF by default on all nights; `--skip-validation` is a no-op kept for back-compat; pass `--enable-step1-validation` to opt back in for diagnostics. | §"Implementation" below |
 
 **Stable from v1:**
@@ -86,10 +86,10 @@ The Voice Pipeline is the third agent in the overnight pipeline. It receives the
 
 Plus two supporting flows:
 
-- **Step 1 validation nodes** (opt-in, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). **Default OFF for all nights since C28 (2026-05-04)** — opt in with `--enable-step1-validation` for diagnostics. Superseded as the operator gate by the Step 2 validator (C28b, default ON, three pillars — safeguards / engagement / voice fidelity — halt-on-any-flag; `runtime/flows/voice/step2_validation.py`).
+- **Step 1 validation nodes** (opt-in, between Step 1 and Step 2): anachronism check (against `knowledge_boundary` + `voice_temporal_stance`) and constitutional self-reflection (against `constitution`). **Default OFF for all nights since C28 (2026-05-04)** — opt in with `--enable-step1-validation` for diagnostics. Superseded as the operator gate by the Step 2 validator (C28b, default ON, three pillars — safeguards / engagement / voice fidelity — plus cross-night echo on Nights 2+3 — halt-on-any-flag; `runtime/flows/voice/step2_validation.py`; see §"Step 2 Validator — Pillars, Model, and the Operator Gate" below).
 - **Continuity Block Generation** (after Night N completes, before Night N+1 Provocateur runs): per-voice call summarising prior nights' positions/moves/threads + artifact focus/stance/form choices. Model and thinking mode are set in `model_routing.json` (step `runtime.voice.continuity`) — that file is the source of truth for which model runs every step in this pipeline, not this spec; current default is Sonnet 4.6 + adaptive thinking. Written to per-voice continuity override file; loaded by next-night Voice Pipeline.
 
-**Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01): Night 1 ~$20-40 / ~45-75 min wall (validation ON); Nights 2+3 ~$15-30 / ~25-40 min wall (validation OFF, continuity ON). 3-night total ~$60-80. *Revised 2026-05-02 with correct Opus 4.7 pricing ($5/$25, not deprecated $15/$75 used previously) + prefix caching landed.* See §"Cost & Envelope" for breakdown.
+**Per-night envelope** (10-voice panel, Athens production with Step 3 skipped per A1 2026-05-01), **measured from Athens production data (2026-09-28):** Night 1 ~$23 (no continuity); Night 2 ~$25 (+continuity); Night 3 ~$23 (+continuity). 3-night total ~$72. All three nights ran with Step 1 validation OFF (C28 shipped 2026-05-04, before Night 1) — the Step-2 validator (C28b) is the only validation that actually ran at Athens. A single reliable per-night wall-clock total could not be recovered from `manifest.json` (see §"Cost & Envelope"); per-call medians run Step 1 ~90-115s/call, Step 2 ~65-95s/call, Step 2 validation ~8-10s/pillar-call, continuity ~80-85s/call. See §"Cost & Envelope" for the full breakdown and pricing assumptions.
 
 The Voice Pipeline runs once per night across three Athens nights. On Night 2 + Night 3, the continuity override is loaded as a card supplement; otherwise the pipeline shape is identical.
 
@@ -339,7 +339,7 @@ Which model (and, for validation, which cross-vendor ladder) runs each row below
 
 **Streaming is REQUIRED on Steps 1/2/3** — Opus + thinking + max_tokens=64K is well past the SDK's non-streaming timeout heuristic (10 min). Validation + continuity may use non-streaming.
 
-**Per-voice cost (10-voice panel, per night, Athens production with Step 3 skipped per A1 2026-05-01; revised 2026-05-02 with correct Opus 4.7 pricing $5/$25 + prefix caching):** Step 1 ~$0.30-0.50/call × 30-50 calls = ~$10-25; validation (Night 1 only) ~$3-15; Step 2 ~$0.30-0.50/call × 10 calls = ~$3-5; ~~Step 3~~ skipped ($0; was ~$15-20); continuity ~$1 per night (Night 2+3 only). **Night 1 total: ~$20-40; Nights 2+3: ~$15-30 each; Athens 3-night total: ~$60-80.** Wall time: Night 1 ~45-75 min (validation per-voice serial); Nights 2+3 ~25-40 min. See §"Cost & Envelope" for full breakdown.
+**Per-voice cost (10-voice panel, per night, Athens production with Step 3 skipped per A1 2026-05-01), measured from Athens production data (2026-09-28):** Step 1 ~30-46 calls/night = ~$18-20; Step 2 validator (3 pillars, +cross-night echo Nights 2/3) ~29-30 calls/night = ~$0.75-0.81; Step 2 = 10 calls/night = ~$2.80-3.80; ~~Step 3~~ skipped ($0); continuity (Nights 2+3 only, generated the prior night) = 10 calls = ~$0.85-1. **Night 1 total: ~$23; Night 2: ~$25; Night 3: ~$23; Athens 3-night total: ~$72.** All three nights ran with Step 1 validation OFF (superseded by C28 before Athens began). A reliable single wall-clock total per night isn't recoverable from `manifest.json`; per-call medians: Step 1 ~90-115s, Step 2 ~65-95s, Step 2 validation ~8-10s/pillar-call, continuity ~80-85s. See §"Cost & Envelope" for full breakdown, pricing assumptions, and why totals aren't measurable.
 
 ---
 
@@ -589,6 +589,21 @@ Rationale (C28): validation was diagnostic-only with zero downstream loss from s
 **The operator gate for Athens is now the Step 2 validator** (`runtime/OPEN_ITEMS.md` C28b, shipped 2026-05-04, `runtime/flows/voice/step2_validation.py`): three pillars (safeguards / engagement / voice fidelity) plus cross-night echo on Nights 2+3, one call per pillar (model: `model_routing.json` step `runtime.voice.step2_validation`), halt-on-any-flag, operator clears WARN/HOLD per-voice via the dashboard before the pipeline proceeds to Editor. Default ON; disable only for unattended dryruns with `--skip-step2-validation`. This is the real gate described conceptually (without the Step 1/Step 2 distinction) by the "Regeneration policy" section above — treat this section as current, the paragraphs above as the superseded Step-1-only design.
 
 **Validation outputs** are written to `04_voice/validation/<voice_slug>__<theme_id>.json` with `{anachronism: PASS|<issues>, constitution: PASS|<issues>, regen_count: 0, final_status: clean|flagged}`. `regen_count` is hardcoded `0` (no regen); `final_status: flagged` means the operator should review the file.
+
+### Step 2 Validator — Pillars, Model, and the Operator Gate (C28b)
+
+This is the validation that actually ran at Athens (the Step 1 nodes above were off all three nights). It runs after Step 2 produces a voice's artifact (`runtime/flows/voice/step2_validation.py`), one Anthropic call per pillar — model and thinking are set by `model_routing.json` step `runtime.voice.step2_validation`, not repeated here (see "Which model runs which step?" in `WAYS_OF_WORKING.md` §1).
+
+- **Safeguards** — would publishing this hurt the project? Hard-coded universal checks (AI-self-acknowledgment; defamation risk against living attendees — both absolute **HOLD**) plus per-voice card fields: `topics_requiring_care` breach (**HOLD**), `hard_limits` breach, `banned_modes` slip, the AI-slop subset of `banned_language` (all **WARN**), first-person presence leak (low-priority **WARN**).
+- **Engagement** — would the reader read this? Form fidelity against `selected_form`/`characteristic_output_structure`/`medium`, a mechanical length-compliance check against `length_and_format_constraints` (no LLM call), and grounding fidelity against the voice's `lineage.grounding_extraction_ids`. **WARN** ceiling. Runs every night.
+- **Voice fidelity** — did the voice deliver what its card promised? Checks the voice's own `characteristic_moves` and `quality_criteria` against the artifact. **WARN** ceiling. Runs every night.
+- **Cross-night echo** — Nights 2 and 3 only, gated on the prior night's published artifact existing: does tonight's artifact rehash last night's? Mild echo is info-only, moderate is **WARN**, heavy (verbatim core-claim repetition) is **HOLD**.
+
+Per-voice `overall_verdict` is `HOLD` if any pillar is `HOLD`, else `WARN` if any pillar is `WARN`, else `PASS`; `operator_recommendation` is `hold_for_regen` / `review` / `publish` accordingly. Results land at `<run_dir>/04_voice/step2_validation/<voice_slug>.json`.
+
+**Halt-on-any-flag (Option C).** `overnight_orchestrator.py`'s Stage 3.5 gate (`validation_gate_state()`) reads every voice's `overall_verdict`; if any `WARN`/`HOLD` voice has no matching file under `04_voice/operator_decisions/`, the orchestrator reports `awaiting_validation_clearance` and does not fire the Editor stage. The operator clears each flagged voice from the dashboard (`/admin/tonight/voice`, Release/Hold buttons → `POST /admin/voice/<slug>/release` or `/hold` in `runtime/ingest/app.py`), which writes `04_voice/operator_decisions/<voice_slug>.json` (`{voice_slug, night, decision: "release"|"hold_for_regen", decided_at, decided_by}`). A `hold_for_regen` decision excludes that voice from `voice/publish.py`'s output for the night — it is held, not regenerated; no autonomous regen path exists. `--skip-step2-validation` on `voice_flow.py` skips the stage entirely (unattended dryruns only); with no `step2_validation/` directory present, the gate reads as `all_clear`.
+
+**Athens counts** (measured from `step2_validation/*.json` + `operator_decisions/*.json` across all three nights): Night 1 — 3 PASS / 6 WARN / 1 HOLD (7/10 flagged), all 7 released. Night 2 — 2 PASS / 8 WARN / 0 HOLD (8/10 flagged), 7 released + 1 held (Whanganui River — an operator discretionary hold, not one the validator itself rated HOLD). Night 3 — 2 PASS / 7 WARN / 1 HOLD (8/10 flagged), all 8 released. Across the three nights, 22 of 23 flagged voice-nights were released (~96%; Nights 1 and 3 were 100%) — matching the Night 1 figure `runtime/OPEN_ITEMS.md` C60 cites ("Night 1: 7/10 voices flagged → 100% operator-released", cross-referencing C42's safeguards-validator misfire history) as evidence the validator currently runs closer to a noisy pre-publish check than a hard quality gate.
 
 ---
 
@@ -1248,43 +1263,39 @@ Continuity overrides (per-voice, written by `continuity.py`):
 
 ## Cost & Envelope
 
-Per night, 10-voice panel. Costs reflect Opus 4.7 (`$5/MTok input, $25/MTok output`) + adaptive thinking on Steps 1/2/3 (the load-bearing creative-reasoning calls) and OpenAI ladder (gpt-5.4 high → fallbacks) on validation. Prefix caching enabled per OPEN_ITEMS C19a (1h TTL on shared prefix + step-specific tail blocks; ~20-25K shared tokens cached across Step 1+Step 2 within a voice/night). Continuity opt-out of caching (single-call flow). Generous max_tokens ceilings let thinking run without truncating final response.
+Per night, 10-voice panel. **Pricing assumptions (stated once here):** Opus 4.7 $5/$25 per MTok input/output; Sonnet 4.6 $3/$15 per MTok input/output; prompt-cache writes at 2× the input rate (1-hour TTL — Steps 1/2/3 use `cache_control: {type: "ephemeral", ttl: "1h"}` per `runtime/flows/voice/_anthropic_call.py`, chosen because the wall envelope exceeds the 5-minute default TTL); cache reads at 0.1× the input rate. The Step 2 validator and continuity calls do not use prompt caching (single-call flows; `cache_creation_input_tokens`/`cache_read_input_tokens` are 0 throughout the Athens data for both). Generous max_tokens ceilings let thinking run without truncating the final response.
 
-**Cost figures revised 2026-05-02** with corrected Opus 4.7 pricing ($5/$25, not the deprecated Opus 4 / $15/$75 used in earlier versions of this doc) + Test 3 empirical anchor (4 voices × 1 night × 3 formulations measured at ~$5-6 actual; per voice per night ≈ $1.40).
+**Figures below are measured (2026-09-28) from Athens production data** (`athens-2026/runs/athens_night_{1,2,3}/04_voice/*` per-artifact `usage` fields — input, output, cache-creation, and cache-read tokens, priced per the assumptions above), not estimates. **All three Athens nights ran with Step 1 validation OFF** — C28 (2026-05-04) turned it off for every night, three days before Night 1 (2026-05-08) — so the "Validation A+B, Night 1 only" row from the pre-Athens estimate never actually ran in production; it is kept below labelled **(pre-C28 estimate, validation ON — not run at Athens)** for historical reference, since no measured figure can replace it. The Step 2 validator (C28b) is the validation that actually ran every night; see §"Step 2 Validator — Pillars, Model, and the Operator Gate" above for what it checks.
 
-| Stage | Calls | Model | Per-call cost | Stage total |
+| Stage | Calls (N1 / N2 / N3) | Model | Night 1 | Night 2 | Night 3 |
+|---|---|---|---|---|---|
+| Step 1 (Opus 4.7 + thinking, max 64K) | 43 / 46 / 36 | claude-opus-4-7 | $19.58 | $19.61 | $18.21 |
+| Step 2 (Opus 4.7 + thinking, max 64K) | 10 / 10 / 10 | claude-opus-4-7 | $2.82 | $3.79 | $3.40 |
+| Step 2 validator (3 pillars + cross-night echo Nights 2/3) | 29 / 30 / 30 | *(`model_routing.json` → `runtime.voice.step2_validation`)* | $0.75 | $0.81 | $0.81 |
+| ~~Validation A+B~~ *(pre-C28 estimate, validation ON — not run at Athens)* | ~60-100 | OpenAI ladder | ~$3-15 | — | — |
+| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | — | $0 | $0 | $0 |
+| Continuity (Night 2+3 only; generated the prior night, per `model_routing.json` → `runtime.voice.continuity`) | 0 / 10 / 10 | claude-sonnet-4-6 | — | $0.85 | $0.99 |
+| **Per-night total (measured)** | | | **~$23** | **~$25** | **~$23** |
+
+**Athens 3-night total (measured): ~$72** in API costs. (Step 3 skipped per A1 2026-05-01; if it re-enables post-editor/microsite, the pre-Athens estimate of ~$15/night × 3 = ~$45 remains the only available planning figure — it never ran, so there's no measured number to replace it with.)
+
+The pre-Athens "~$60-80" estimate and the "meaningfully higher than Sonnet-on-everything (~$120-150)" comparison both used the corrected Opus 4.7 pricing above; the measured ~$72 total lands inside that estimate's range, so the 2026-05-02 pricing correction held up under production data. Steps 1/2 remain the load-bearing creative-reasoning calls (Briefing v3.1 Layers 2-3); Opus + thinking is the right calibration regardless of the modest premium over an all-Sonnet build.
+
+### Wall time
+
+Reliable single wall-clock **totals** per night are not recoverable from `manifest.json`: its `wall_clock_s` field (94-172s across the three nights) covers only the final invocation of `voice_flow.py` for that night, not the full night's work (`manifest.json`'s `voices_processed` for that same run is a 1-3-voice subset, confirming it's a resumed invocation, not the whole panel). Each Athens night shows at least one voice (Whanganui River every night; also Scheherazade on Nights 2 and 3) landing its Step 2 + validation well after the rest of the panel — Night 1: ~33 min after the other 7 voices finished; Night 2: ~42 min after the other 8; Night 3: a more gradual trail (Ibn Battuta, Plato, Scheherazade, then Whanganui River, each 10-25 min apart, spanning ~36 min past the main cluster). This is consistent with a separate, later manual re-run (the same voices the voice-card-iteration workstream in `OPEN_ITEMS.md` was actively revising), not additional pipeline compute time, but we did not attempt to net it out. Per-call medians instead, computed from each artifact's own `wall_clock_s`:
+
+| Stage | Parallelism | Night 1 | Night 2 | Night 3 |
 |---|---|---|---|---|
-| Step 1 (Opus 4.7 + thinking, max 64K) | ~30-50 | claude-opus-4-7 | ~$0.30-0.50 | **~$10-25** |
-| Validation A + B (Night 1 only, diagnostic) | ~60-100 | OpenAI ladder | ~$0.05-0.15 | **~$3-15** |
-| Step 2 (Opus 4.7 + thinking, max 64K) | 10 | claude-opus-4-7 | ~$0.30-0.50 | **~$3-5** |
-| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | — | — | **$0** (was ~$15-20) |
-| Continuity (Sonnet 4.6 + thinking, max 8K, Night 2+3 only) | 10 | claude-sonnet-4-6 | ~$0.05-0.15 | **~$1** |
-| **Per-night total — Night 1** (validation ON, Step 3 skipped) | | | | **~$20-40** |
-| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | | | **~$15-30** |
+| Step 1 | batches of `VOICE_STEP1_BATCH` (default 6), `VOICE_BATCH_WAIT_S` (default 5s) between batches | 114s/call | 107s/call | 89s/call |
+| Step 2 | up to `VOICE_STEP2_BATCH` (default 6) voices in parallel | 83s/call | 93s/call | 65s/call |
+| Step 2 validator | up to `VOICE_STEP2_BATCH` voices in parallel, × up to `STEP2_VALIDATION_PILLAR_BATCH` (default 6) pillars per voice | 8s/call | 10s/call | 8s/call |
+| ~~Step 3~~ *(SKIPPED for Athens)* | — | — | — | — |
+| Continuity (Night 2+3 only) | parallel across voices | — | 79s/call | 84s/call |
 
-**Athens 3-night total:** ~$60-80 in API costs (Step 3 skipped per A1 2026-05-01 saves ~$45 across 3 nights at corrected pricing). Continuity runs only on Nights 1 and 2 — its output is consumed on Nights 2 and 3. Validation runs only on Night 1 per FU#62 path B decision.
+For the 8-9 of 10 voices that complete without a later resumed invocation, file timestamps put the whole Step 1 → Step 2 → Step 2 validator sequence at roughly **20-28 minutes end to end** each night (e.g. Night 1: first Step 1 file at 11:01:43 to the last of the first 7 voices' validation at 11:25:59 ≈ 24 min); the 1-2 straggler voices then add the ~33-42 minute tail described above. Treat ~20-30 min as the pipeline's own compute-bound envelope and the tail as an operational variable (tied to whichever voices needed a card-iteration re-run that night), not a fixed pipeline property — unlike the old ~45-75 min / ~25-40 min estimates, which built a (never-run) Step 1 validation phase into the per-night plan.
 
-If Step 3 re-enables post-editor/microsite, add ~$15/night × 3 nights = ~$45 back.
-
-Per-validation-call costs revised 2026-05-01 from prior ~$0.50/call estimate down to ~$0.05-0.15/call based on observed dryrun behavior (gpt-5.4 reasoning_effort=high on ~5K-token prompts).
-
-The original "this is meaningfully higher than Sonnet-on-everything ($120-150)" claim was based on inflated Opus 4.7 pricing. Under corrected pricing, Opus 4.7 + thinking on Steps 1/2/3 is ~$60-80 across Athens 3 nights — only modestly above a Sonnet build. Steps 1/2/3 are the load-bearing creative-reasoning calls; getting them wrong fails Briefing v3.1's Layer 2 ("could a well-read human essayist have arrived here?") and Layer 3 (does the conversation become more-than). Opus + thinking is the right calibration regardless of cost.
-
-Wall time per night, with parallelism + Anthropic batch wait. Opus + thinking is slower per call than Sonnet (more reasoning tokens to generate); parallelism + batched submission keeps total wall manageable but the per-night envelope grows from ~25-35 min to:
-
-| Stage | Parallel | Wall time |
-|---|---|---|
-| Step 1 (parallel across pairs, batched 4 + 20s wait, ~90-120s per call) | ~30-50 calls in batches of 4 | ~22-30 min |
-| Validation (Night 1 only — per-voice serial, gpt-5.4 reasoning is slower than expected) | ~60-100 calls | ~20-40 min on Night 1; OFF on Nights 2/3 |
-| Step 2 (parallel across voices, ~120-180s per call) | 10 calls | ~3-5 min |
-| ~~Step 3~~ *(SKIPPED for Athens per A1 2026-05-01)* | 0 | 0 min (was ~3-5 min) |
-| Continuity (parallel across voices, Nights 2+3 only, Sonnet is fast) | 10 calls | ~2-3 min |
-| **Per-night total — Night 1** (validation ON, per-voice serial, Step 3 skipped) | | **~45-75 min** |
-| **Per-night total — Nights 2+3** (validation OFF, +continuity, Step 3 skipped) | | **~25-40 min** |
-
-Wall-time revised 2026-05-01 from prior ~30-50 min envelope. Validation observed at 20-40 min/night on Night 1 (per-voice serial, not the per-pair-parallel-overlapping-Step-1 originally specified). Athens Night 1 morning-of-Day-2 wall budget should plan for the ~50-80 min envelope.
-
-Rate limits: Anthropic Opus 4.7 tier currently has tighter tokens-per-minute caps than Sonnet 4.6, which is why default `VOICE_STEP1_BATCH=4` with 20-second wait between batches is conservative. Monitor the first dry run; if rate limits relax pre-Athens, raise `VOICE_STEP1_BATCH` to 6-8 first.
+Rate limits: `VOICE_STEP1_BATCH` defaults to 6 with a 5-second wait between batches (`runtime/flows/voice_flow.py`) — raise it only after checking current Opus 4.7 tokens-per-minute headroom.
 
 ---
 

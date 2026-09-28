@@ -40,7 +40,7 @@
 
 **End state:** `<PROJECT_ROOT>/published_artifacts/nights/night_<N>/_index.json` exists. The microsite render reads from `published_artifacts/`; once `_index.json` is present, the night is publishable.
 
-**Time budget per night:** transcription parallel with ingest (~5-15 min after panel ends, depending on session count). Then orchestrator: Researcher (~30-60 min), Provocateur (~30-60 min), Voice (~2-4 hr), Editor (~30 min), Publish (~5 min). Total: ~4-8 hours. Designed to complete overnight without operator attention.
+**Time budget per night:** transcription parallel with ingest (~5-15 min after panel ends, depending on session count). Then orchestrator: Researcher (~30-60 min), Provocateur (~30-60 min), Voice (~2-4 hr), Editor (~5-10 min), Publish (~5 min). Total: ~4-8 hours. Designed to complete overnight without operator attention. (Editor figure corrected 2026-09-28 from "~30 min" — see §8 for the measurement.)
 
 **Operator's role during the night:** none, by design. Orchestrator runs unattended; halts cleanly on stage failure with logs at `<run_dir>/_orchestrator_logs/`. Operator wakes up to either ✅ complete or ❌ a failure that needs investigation before the day's panel.
 
@@ -432,9 +432,11 @@ sudo systemctl start orchestrator@3.service
 | Researcher | 30-60 min |
 | Provocateur | 30-60 min |
 | Voice | 2-4 hr |
-| Editor | 30 min |
+| Editor | 5-10 min |
 | Publish | 5 min |
 | **Total: panel end → publish complete** | **4-8 hours** |
+
+**Editor timing, corrected 2026-09-28:** this table said "30 min" for Editor; the Editor Pipeline spec already claimed "~5-10 min per night," and measurement confirms the shorter figure. Measured from `04_voice/manifest.json` → `05_editor/manifest.json` file timestamps (Stage 5 done → Stage 6 done) on the two clean, non-resumed nights: Night 2 = 4m59s (5 dossiers), Night 3 = 8m44s (3 dossiers — slower theme routing that night). Night 1's `05_editor/manifest.json` reports `wall_clock_s: 91.89` with `single_dossier: "theme_010"` in its config — that manifest was overwritten by a later resumed run that only regenerated one missing dossier, so it reflects that one call, not the full night, and isn't used as a basis here (its file's own dossier timestamps span 12:20-12:31, consistent with a multi-invocation session rather than one clean ~5-10 min pass). See [Editor Pipeline](AI_Assembly_Editor_Pipeline.md) §"Cost & Envelope" for the same figures.
 
 **Estimated cost per night (Opus 4.7 $5/$25):**
 

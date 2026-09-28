@@ -2,8 +2,8 @@
 ## AI Assembly — Role Specification
 
 **Project:** The AI Assembly · World Beautiful Business Forum · Athens · May 7–10, 2026
-**Status:** v2 — refinements landed 2026-05-03 PM (this version is canonical). Supersedes v1 (2026-05-02) + the runtime memo at `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` (now archived). **Implementation shipped 2026-05-03 PM in commit `fc5c2fb`** (`runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` + `/admin/tonight/editor` drilldown + 38 tests). Closing-prompt rewrite to v2 contract still pending. Replaces conceptual sketches in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` (now archived) and OPEN_ITEMS A2 (which set architectural direction; this doc fills the spec).
-**Purpose:** Specifies the runtime Editor Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract for the Editor Pipeline end-to-end** — it defines what the pipeline reads, what it writes, in what order, with which model, in which prompt, at which checkpoint. Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (shipped 2026-05-03 PM in commit `fc5c2fb`; closing prompt rewrite to v2 contract still pending).
+**Status:** v2 — refinements landed 2026-05-03 PM (this version is canonical). Supersedes v1 (2026-05-02) + the runtime memo at `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` (now archived). **Implementation shipped 2026-05-03 PM in commit `fc5c2fb`** (`runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` + `/admin/tonight/editor` drilldown + 38 tests). Replaces conceptual sketches in `_workspace/planning/PIPELINE_DOWNSTREAM_DESIGN_2026_04_30.md` (now archived) and OPEN_ITEMS A2 (which set architectural direction; this doc fills the spec). **Correction 2026-09-28:** this line previously said the closing-prompt rewrite to v2 contract was "still pending" — false. `runtime/flows/shared/prompts/editor_dossier.md` has been written and generated all 13 published Athens dossiers; its field set has since evolved past this doc's own documented v2 Output Schema (see "See Also" below for the specifics) — that section, not the prompt, is what's stale.
+**Purpose:** Specifies the runtime Editor Pipeline's function, process, and design constraints in enough detail that a technical team could build and prompt it. **This document is the runtime contract for the Editor Pipeline end-to-end** — it defines what the pipeline reads, what it writes, in what order, with which model, in which prompt, at which checkpoint. Implementation: `runtime/flows/editor_flow.py` + `runtime/flows/editor/*.py` (shipped 2026-05-03 PM in commit `fc5c2fb`).
 
 **Predecessor:** `docs/AI_Assembly_Frame_Concept_v1.md` — the architectural document that names *The Assembly* (panel) ≡ *The Assembly* (publication) recursion, the broadsheet form, the per-voice render registers, the strikethrough discipline, and the five frame moves the editor pipeline operationalizes. The Editor Pipeline doc instantiates the broadsheet surface; closely related surfaces (microsite, broadsheet print run, closing show) live in their own concept docs.
 
@@ -82,7 +82,7 @@ Each dossier is the publishable unit on the microsite. It has a fixed five-secti
 
 ```
 Page 1   THE FRONT     masthead + lead headline & teaser + In Brief + editor's note
-Page 2   THE ARTICLE   Tim's ~750-word piece on what the night produced on this theme
+Page 2   THE ARTICLE   Tim's 300-450 (single-voice) / 450-600-word (multi-voice) piece on what the night produced on this theme
 Page 3   THE THEME     theme statement + per-voice abstract (~80-100 words/voice)
 Page 4-N THE ARTIFACTS each contributing voice's piece, with editor's headnote (3-5 sentences)
 ```
@@ -91,7 +91,7 @@ The editor — Tim Leberecht — writes pages 1, 2, 3, and the headnotes on 4-N.
 
 A typical Athens night produces 3-5 dossiers, depending on how many themes the night's voices converged or partly-converged on. Voices whose Step 2 artifact was a synthesis across multiple themes are routed to whichever theme they fit best; voices whose artifact was focused go to their own theme's dossier. Voices that did not lead any theme's dossier are reported in the "In Brief" column on Page 1 of the dossier most adjacent to their content; refusals (the Whanganui River's silence; the Octopus's not-receiving) are reported as such, not folded under any theme.
 
-**Per-night envelope (Athens production):** ~3-5 dossiers per night × ~$0.30-0.40 per dossier = ~$1-2 per night API; ~$3-6 across Athens 3 nights. Wall time: ~5-10 min per night (single Anthropic call per dossier, parallelizable across themes). Cost dominated by output tokens (~3-4K per dossier).
+**Per-night envelope (Athens production):** ~3-5 dossiers per night × ~$0.30-0.40 per dossier = ~$1-2 per night API; ~$3-6 across Athens 3 nights. Wall time: ~5-10 min per night (single Anthropic call per dossier, parallelizable across themes). Cost dominated by output tokens (~3-4K per dossier). **Measured 2026-09-28** from `04_voice/manifest.json` → `05_editor/manifest.json` timestamps on the two clean (non-resumed) nights: Night 2 = 4m59s (5 dossiers), Night 3 = 8m44s (3 dossiers, slower theme routing). Night 1's `05_editor/manifest.json` reflects only a resumed single-dossier rerun (`wall_clock_s: 91.89`, `single_dossier: "theme_010"`) and is not a full-night measurement.
 
 The Editor Pipeline runs once per night, after Voice Pipeline completes. On Night 2 + Night 3, the editor inherits awareness of prior dossiers (issue numbers, dossier numbers, voices already led, themes already published) via cross-night state at PROJECT_ROOT.
 
@@ -244,7 +244,7 @@ The Whanganui River's silence is published AS silence. The Octopus's not-receivi
 
 ### Who edits *The Assembly*
 
-The editor is Tim Leberecht. Until 2026-05-05 this spec named a placeholder editor persona, Claudia Pinchbeck; the editor was switched to Tim Leberecht in `b266f51`.
+The editor is Tim Leberecht. Until 2026-05-05 this spec named a placeholder editor persona, Claudia Pinchbeck; the editor was switched to Tim Leberecht in `b266f51`. The dossier itself carries no byline (see "Dossier Shape" → Page 2 "Byline" row below) — Tim's name is the editor pipeline's structural identity (the card the system prompt is assembled from), not a printed attribution.
 
 ### Where his card lives
 
@@ -307,7 +307,7 @@ Volume increments by year. If *The Assembly* publishes after Athens (post-Forum 
 
 *The Assembly* (per the masthead) is a paper founded in 1910 as the news organ of an annual assembly of voices. The first issue in 1910 covered the 1st Assembly (which, by the confected pedigree, was a smaller and differently-constituted gathering than the WBBF Athens 2026 panel). The 2026 Athens Forum is, per the confected pedigree, the 116th annual Assembly — and the marathon's worth of issues (the 42,193rd → 42,195th) reflects the fact that the paper has published more frequently than annually across its history (suggesting the Assembly meets and adjourns more than once per year, with intervening issues covering... unspecified business).
 
-The confected pedigree is **announced via the masthead, never disclaimed in prose**. Readers are expected to recognize that a 114-year-old paper called *The Assembly* about an AI assembly does not exist; the recognition IS the form's discipline. The frame doc warns about the cardboard-newsroom failure mode — naming the editor (Claudia Pinchbeck) is the mitigation; the Pinchbeck pun (fake gold) is the self-aware acknowledgment.
+The confected pedigree is **announced via the masthead, never disclaimed in prose**. Readers are expected to recognize that a 114-year-old paper called *The Assembly* about an AI assembly does not exist; the recognition IS the form's discipline. The frame doc warns about the cardboard-newsroom failure mode — a fully-specified editor persona (Tim Leberecht, replacing the placeholder Claudia Pinchbeck 2026-05-05) is the mitigation: a 35-field card with sustained voice, not a generic editor-voice. (Claudia's name carried a self-aware pun — *Pinchbeck*, an English place name and 18th-century word for fake gold — that was specific to that placeholder and does not carry over to Tim; Tim's dossiers carry no printed byline at all, per "Dossier Shape" below, so the mitigation now runs entirely through the card's specificity rather than through a named attribution.)
 
 ### Visual register
 
@@ -336,7 +336,7 @@ Each dossier has a fixed five-section swipeable structure. The order is publicat
 | Lead subdeck | 20-40 words | editor pipeline (`front_lead_subdeck`) | Multi-clause subdeck in 1910s broadsheet style; semicolon-chained. |
 | Lead teaser | 80-120 words | editor pipeline (`front_lead_teaser`) | First few paragraphs of the editor's article, ending with "*Continued on Page 2.*" |
 | In Brief column | 3-5 items | editor pipeline (`in_brief_items`) | Each item ~30-50 words. Includes (a) voices that contributed to OTHER themes this night with pointer; (b) refusals (river silence, Octopus); (c) any "held" items if cross-night state surfaces relevant cross-references. |
-| Editor's note | 3-5 sentences | editor pipeline (`editors_note`) | Contextualizes the night's question source (which Marathon panel; what humans said) and the dossier's relation to it. Signed *— The Editor* (Claudia's name implicit from the bastard form; the unnamed signature reads as institutional-with-person-inside). |
+| Editor's note | 3-5 sentences | editor pipeline (`editors_note`) | Contextualizes the night's question source (which Marathon panel; what humans said) and the dossier's relation to it. Signed *— The Editor* (Tim's name implicit from the bastard form; the unnamed signature reads as institutional-with-person-inside). |
 
 ### Page 2 — The Article
 
@@ -345,9 +345,9 @@ Each dossier has a fixed five-section swipeable structure. The order is publicat
 | Column header | constant | microsite template | "FROM THE EDITOR'S DESK" — recurring column header at the top of every editor's article, lives across all dossiers. Period-appropriate (1910s-20s newspaper convention for the editor's recurring column). |
 | Article headline | 8-15 words | editor pipeline (`article_headline`) | Paper-voice; tighter than the Page 1 lead — names the convergence/divergence finding more directly |
 | Article subdeck | 20-40 words | editor pipeline (`article_subdeck`) | Optional; 1910s broadsheet semicolon-chained subdeck |
-| Byline | constant | microsite template | "By Claudia Pinchbeck" — appears below headline + subdeck, above article body. Named at byline level; institutional column header above the headline carries the paper-voice. |
-| Article body | 700-900 words | editor pipeline (`article_body`) | The Leitartikel-shaped piece. Five-paragraph rough shape: surprise → diagnosis → translations → reservation → close on what-the-question-IS. Quotes voice artifacts where quotation serves; names what each voice diagnosed in editor's vocabulary; registers specific reservations; closes on convergence-but-not-agreement (or non-convergence-as-finding). |
-| Closing signature | constant | microsite template | *— C.P.* (the article closes with Claudia's initials, in the small-press tradition; institutional close that doesn't repeat the byline) |
+| Byline | **dropped** | — | No per-article byline ships at the field level. v1 drafted "By Claudia Pinchbeck"; the v2 changelog above ("Byline dropped") already retired it, but this row was never updated to match — fixed 2026-09-28. Confirmed against all 13 published dossiers (`published_artifacts/dossiers/night_{1,2,3}/dossier_*.json`): none carries a byline field. `editor_dossier.md` frames Tim explicitly as "the unnamed editor." Authorship is structural (the card the system prompt loads is Tim's), not printed. |
+| Article body | 300-450 words single-voice / 450-600 multi-voice (per `editor_dossier.md`; measured Athens output 429-449 / 566-627 words — see Constraints #5) | editor pipeline (`body_paragraphs`) | The essay-shaped piece. Tim's four-beat motion per his `characteristic_output_structure`: dated/sensory place tableau → name the binary the moment set up → reach for the third term that refuses both poles → close vow-shaped. Quotes voice artifacts and/or panel speakers where quotation serves (≥1 quote, ideally 2-3; a multi-voice piece quotes ≥2 voices); names what each voice diagnosed in the editor's vocabulary; closes on the question sharpened, never a recommendation. (v1/Claudia's five-part shape — surprise → diagnosis → translations → reservation → close-on-question — does not match Tim's card and is superseded; corrected 2026-09-28.) |
+| Closing signature | **dropped** | — | No closing signature ships in the schema or in any published dossier; the article ends on the last `body_paragraphs` line. v1 drafted *— C.P.* (Claudia Pinchbeck's initials); with the byline gone and the editor unnamed at the field level, there is no signature to carry forward — corrected 2026-09-28. |
 
 ### Page 3 — The Theme
 
@@ -356,7 +356,7 @@ Each dossier has a fixed five-section swipeable structure. The order is publicat
 | Theme statement headline | 8-15 words | editor pipeline (`theme_statement_headline`) | Paper-voice. Lifts the theme title; subdeck contextualizes |
 | Theme statement subdeck | 20-40 words | editor pipeline (`theme_statement_subdeck`) | Names the source — the Marathon panel the question came from; preserves real speakers' phrasings as quotation |
 | Question/proposition statement | ~150 words | editor pipeline (`theme_question`) | The formulation as it was put to the night's voices. Quotes the Researcher's `theme_abstract` + one or two key extractions verbatim. |
-| What the night produced (header) | constant | editor pipeline (`night_section_header`) | "WHAT THE NIGHT PRODUCED" or similar — Claudia's framing |
+| What the night produced (header) | constant | editor pipeline (`night_section_header`) | "WHAT THE NIGHT PRODUCED" or similar — the editor's framing |
 | Per-voice abstract | ~80-100 words each, N voices | editor pipeline (`voice_abstracts[]`) | One paragraph per voice naming what each framework supplied. Quotes voice's strongest move (a phrase from `artifact_text`); names what the voice's framework contributed; ends with what the voice closed on. |
 | Hand-off line | 1-2 sentences | editor pipeline (`handoff_line`) | "The four pieces follow." or "The pieces follow, with a brief note at the head of each." or similar. Final line of Page 3 before the swipe to Pages 4-N. |
 
@@ -368,7 +368,7 @@ Each dossier has a fixed five-section swipeable structure. The order is publicat
 | Artifact title | 4-12 words | editor pipeline (`headnotes[i].artifact_title`) | Paper-voice. Editor titles the piece for the desk — *not* the voice's voice. Examples: "DOCTORS OR COOKS?" (Plato); "A LETTER ON THE DOORMAT" (Dostoevsky); "A HALT RECALLED IN ANSWER" (Battuta); "A PROSTAGMA, ISSUED AT NIGHT" (Cleopatra). |
 | Editor's headnote | 3-5 sentences | editor pipeline (`headnotes[i].body`) | Names the form, names the editor's chosen highlight ("read for X at the centre"), optionally registers a reservation ("the editor's reservation on Page 2 applies most directly here"). Paper-voice. |
 | Form-marker (e.g., ΠΡΟΣΤΑΓΜΑ, ر ح ل ة, ΔΙΑΛΟΓΟΣ, ДНЕВНИКЪ ПИСАТЕЛЯ) | constant per voice | microsite template, keyed by voice's `medium` field | Voice's own script. Centred above the artifact body. Microsite-side per-voice render-config. |
-| Byline | voice's name + Claudia-generated descriptor | hybrid: name from voice card, descriptor from editor pipeline (`headnotes[i].byline_descriptor`) | E.g., "Cleopatra Thea Philopator · synthesised across three petitions" or "Plato son of Ariston · withdrawing his name from the page". Descriptor names what the voice did this night — derived from `focus_decision`, `selected_form`, voice context. |
+| Byline | **superseded** — see below | hybrid: `voice_name` (runtime-stamped) + `framing_text` (editor-authored) | The separate hyphenated descriptor concept (e.g. "Cleopatra Thea Philopator · synthesised across three petitions") did not ship. The old `headnotes[i].byline_descriptor` field was already collapsed into `framing_text` per the v2 changelog above (2026-05-03); this row described the pre-collapse design and was never updated — fixed 2026-09-28. Published dossiers carry the voice's name plain (`voice_name`, e.g. "the Voice of Ada Lovelace") with no appended descriptor; the editorial framing lives in the 50-80 word `framing_text` paragraph above the artifact. |
 | Artifact body | voice's `artifact_text` | voice pipeline Step 2 | Inviolate. Editor pipeline does not modify. Microsite renders in voice-faithful visual treatment (chancery, beige, neutral, warm paper, etc.). |
 | Closing seal/marker (e.g., γινέσθωι, Tawakkaltu ʿalā Allāh) | constant per voice OR derived from artifact_text's last line | microsite template | Voice's own. Centred below the artifact body. |
 
@@ -476,7 +476,7 @@ Output: `<run_dir>/05_editor/theme_routing.json`
 
 Refusals (Whanganui silence, Octopus not-receiving when those happen, OR genuinely-refusing voices) are detected by empty `themes_covered` or refusal-marker `focus_decision`. They land in the flat `refusals[]` list. They are NOT per-call input; they are NOT routed to a dossier's In Brief; they surface only via the microsite + publish layer (e.g., a per-night index could surface "voices who refused tonight: [...]" — that's publish/microsite concern).
 
-**Important distinction:** voices like Octopus, Whanganui, Marley are NOT refusals — they engage and produce artifacts. Their artifact_text is prose (Octopus prose with chromatophore display rendered separately by the microsite; Whanganui legal text; Marley lyric-prose). They appear in `engaged_voices` like any other voice; Claudia's form carries them.
+**Important distinction:** voices like Octopus, Whanganui, Marley are NOT refusals — they engage and produce artifacts. Their artifact_text is prose (Octopus prose with chromatophore display rendered separately by the microsite; Whanganui legal text; Marley lyric-prose). They appear in `engaged_voices` like any other voice; the editor's form carries them.
 
 ---
 
@@ -653,10 +653,10 @@ A 3-dossier night ≈ $0.83 ($0.50 + 2 × $0.20). A 5-dossier night ≈ $1.30. A
 A dossier JSON file contains the editor pipeline's prose output for one dossier, plus metadata. The microsite reads this file and renders the dossier's pages; the publish layer reads it (alongside other dossiers' files) to compose the per-night front-page index.
 
 **v2 design principles:**
-- **Article-first, teaser derivative.** Claudia writes the full article (`kicker`, `headline`, `subline`, `body_paragraphs`, `headnotes`); then derives `front_abstract` (30-50 words) from the article's opening for front-page grid placement.
+- **Article-first, teaser derivative.** Tim writes the full article (`kicker`, `headline`, `subline`, `body_paragraphs`, `headnotes`); then derives `front_abstract` (30-50 words) from the article's opening for front-page grid placement.
 - **Single source per dossier for kicker + headline.** Both the article page and the front-page teaser use the same kicker and headline.
 - **Layout-agnostic.** No lead-vs-grid distinction in editor's output. Publish-pipeline composes layout.
-- **Prose-and-parse encoding.** Claudia emits prose with field labels; runtime parses (mirrors voice pipeline). Asterism breaks encoded as `"* * *"` array elements in `body_paragraphs[]`.
+- **Prose-and-parse encoding.** Tim emits prose with field labels; runtime parses (mirrors voice pipeline). Asterism breaks encoded as `"* * *"` array elements in `body_paragraphs[]`.
 - **Runtime stamps masthead chrome + per-voice headnote stable fields post-generation.**
 
 ```json
@@ -712,12 +712,12 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
 }
 ```
 
-**Field provenance (Claudia emits vs. runtime stamps):**
+**Field provenance (Tim emits vs. runtime stamps):**
 
 | Field | Source |
 |---|---|
-| `kicker`, `headline`, `subline`, `body_paragraphs`, `front_abstract` | Claudia emits (article-first; front_abstract derived from article opening) |
-| `headnotes[i].voice_slug`, `headnotes[i].artifact_title`, `headnotes[i].framing_text` | Claudia emits (artifact_title is paper-voice, B9-torqued per voice register; framing_text is 1-2 sentence editorial framing; voice_slug is her disambiguator) |
+| `kicker`, `headline`, `subline`, `body_paragraphs`, `front_abstract` | Tim emits (article-first; front_abstract derived from article opening) |
+| `headnotes[i].voice_slug`, `headnotes[i].artifact_title`, `headnotes[i].framing_text` | Tim emits (artifact_title is paper-voice, torqued per voice register via `translation_protocol`; framing_text is 50-80 words, three-movement editorial framing per `editor_dossier.md` — corrected 2026-09-28 from "1-2 sentence"; voice_slug is his disambiguator) |
 | `headnotes[i].voice_name` | Runtime stamps from artifact's `council_member` ("the voice of " + name) |
 | `headnotes[i].formulation_text` | Runtime stamps from `briefings/<voice>.json` (`narrative_briefing` for this theme) |
 | `colophon` | Runtime stamps from a near-static template (per "Pending operator decisions") |
@@ -725,15 +725,15 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
 | `metadata.night`, `issue_no`, `vol`, `publication_date*`, `edition_label` | Runtime stamps (issue_no = ATHENS_BASE_ISSUE + night) |
 | `metadata.model`, `thinking_enabled`, `input_tokens`, `output_tokens`, `cache_*`, `wall_clock_s` | Runtime stamps from Anthropic call's response |
 
-**Field length envelopes** (Claudia emits):
+**Field length envelopes** (Tim emits):
 
 | Field | Length |
 |---|---|
 | `kicker` | 3-7 words, ALL-CAPS |
 | `headline` | 8-15 words; sentence about an event; uses "the voice of X" naming where appropriate |
 | `subline` | 25-60 words; italic deck; semicolon-chained 1910s broadsheet register |
-| `body_paragraphs` total | **350-500 words single-voice / 500-700 multi-voice** (where multi-voice = ≥2 engaged voices) |
-| `headnotes[i].artifact_title` | 4-12 words; paper-voice; B9-torqued per voice register (Plato → Gorgias-style question; Dostoevsky → compound, occasionally with strikethrough; Whanganui → wire-service terse; Marley → song-title-grammar; Octopus → chromatic/sensory; etc.). Examples: "DOCTORS OR COOKS?" (Plato), "A LETTER ON THE DOORMAT" (Dostoevsky), "A HALT RECALLED IN ANSWER" (Battuta), "A PROSTAGMA, ISSUED AT NIGHT" (Cleopatra). Per-voice torque content lives in Claudia's `translation_protocol` field on her persona card. |
+| `body_paragraphs` total | **300-450 words single-voice / 450-600 multi-voice** (where multi-voice = ≥2 engaged voices). Corrected 2026-09-28 from "350-500 / 500-700" to match `editor_dossier.md`'s actual constraint; measured Athens output (13 published dossiers) runs 429-449 words single-voice / 566-627 words multi-voice — inside envelope except the two highest multi-voice dossiers, which ran slightly over 600. |
+| `headnotes[i].artifact_title` | 4-12 words; paper-voice; torqued per voice register (Plato → Gorgias-style question; Dostoevsky → compound, occasionally with strikethrough; Whanganui → wire-service terse; Marley → song-title-grammar; Octopus → chromatic/sensory; etc.). Examples: "DOCTORS OR COOKS?" (Plato), "A LETTER ON THE DOORMAT" (Dostoevsky), "A HALT RECALLED IN ANSWER" (Battuta), "A PROSTAGMA, ISSUED AT NIGHT" (Cleopatra) — illustrative torque examples predating Athens production; real published titles (e.g. "Note H: A Frontier I Did Not Draw," "An Envoy Without His Letters") follow the same discipline. Per-voice torque content lives in Tim's `translation_protocol` field on his persona card. |
 | `headnotes[i].framing_text` | 1-2 sentences; light poetic editorial framing |
 | `front_abstract` | 30-50 words; drawn from article's opening |
 
@@ -752,7 +752,7 @@ A dossier JSON file contains the editor pipeline's prose output for one dossier,
 
 The editor pipeline writes structured JSON. The microsite renders. The publish pipeline composes the per-night front-page layout (lead-vs-grid). The contract:
 
-1. **Editor pipeline produces editorial prose.** kicker, headline, subline, body_paragraphs, headnotes (framing_text), front_abstract. All paper-voice; all in Claudia's register.
+1. **Editor pipeline produces editorial prose.** kicker, headline, subline, body_paragraphs, headnotes (framing_text), front_abstract. All paper-voice; all in Tim's register.
 
 2. **Microsite renders typography, layout, and per-voice visual treatments.** Masthead engraving, multi-column or single-column responsive layout, per-voice CSS bundles (form-markers, palettes, closing-seal templates), responsive design.
 
@@ -772,9 +772,9 @@ This separation lets the editor focus on prose generation; the microsite owns vi
 2. **No artifact crosses to next night.** Every Step 2 artifact lands in one of tonight's dossiers. No "held for next dossier" debt.
 3. **Voice artifacts inviolate.** Editor pipeline does NOT modify, summarize, or paraphrase Step 2 `artifact_text`. Per Principle 4.
 4. **Editor reads Step 2 only.** Voice's Step 1 detailed responses stay voice-private. Per the §"What the Editor Pipeline Knows" architectural decision.
-5. **Article length: 350-500 single-voice / 500-700 multi-voice** (v2). Hard constraint per Claudia's `length_and_format_constraints`. The article must not wander; reader who only reads the article should get the question stated more sharply than the contemporary debate states it. (v1 said 700-900 words; v2 narrows per voices-thread memo §2 length envelopes.)
-6. **No program-supply.** The article does NOT supply solutions or programs. Closes on the question stated more sharply, not on what to do. Per Claudia's quality_criteria 4.
-7. **No exclamation marks.** Per Claudia's `register_and_tone`.
+5. **Article length: 300-450 single-voice / 450-600 multi-voice.** Hard constraint per `runtime/flows/shared/prompts/editor_dossier.md`'s `body_paragraphs` envelope (corrected 2026-09-28 from "350-500 / 500-700," which matched neither the shipped prompt nor Tim's card). The article must not wander; a reader who only reads the article should get the question stated more sharply than the contemporary debate states it. (History: v1 said 700-900 words; v2's changelog narrowed to 350-500/500-700 per a voices-thread memo, but the prompt that shipped narrowed further to 300-450/450-600. Measured Athens output: 429-449 words single-voice, 566-627 multi-voice — see Constraints table above.) Tim's own card field `length_and_format_constraints` states a general "350–550 words" without the single/multi-voice split; the closing prompt's more specific per-voice-count envelope is what's actually enforced at generation time.
+6. **No program-supply.** The article does NOT supply solutions or programs. Closes on the question stated more sharply, not on what to do. Per Tim's `quality_criteria` closing test (item 4) and `hard_limits` (no tactical/operational advice in self-help register).
+7. **No "in conclusion" / bulleted takeaway close.** Per Tim's `quality_criteria` closing test: essays end on a vow, an aphoristic refusal, a small self-revision, or someone else's poem — never on "in conclusion," "ultimately," or a list. (Corrected 2026-09-28: v1/Claudia's card specified "no exclamation marks" under `register_and_tone`; that literal rule does not appear anywhere in Tim's card or in `editor_dossier.md`, so it is dropped rather than carried over unverified.)
 8. **Bastard-form pronoun discipline.** Institutional we for declarative editorial work; first-person I only for surprise / difficulty / admission. Warmth in moves, not in pronoun inflection.
 9. **One Anthropic call per dossier** (model set in `model_routing.json`, step `runtime.editor.dossier` — see "Models + thinking" below; current default Opus 4.7). Sonnet would lose the bastard form's calibration; Haiku won't carry the analytical generalization work; Opus 4.7 + thinking is the right model.
 10. **No retry on failure beyond 1.** Same as voice pipeline's `stream_voice_call` retry budget.
@@ -933,14 +933,14 @@ Wall time per night: ~5-10 min. The 3-5 dossier calls run in parallel; per-call 
 
 ## Validation Notes
 
-The editor pipeline does not have separate validation nodes (unlike the voice pipeline's anachronism + constitutional checks). Quality is enforced by Claudia's `quality_criteria` field (5 tests, applied during her thinking) plus operator review of generated dossiers before publication.
+The editor pipeline does not have separate validation nodes (unlike the voice pipeline's anachronism + constitutional checks). Quality is enforced by Tim's `quality_criteria` field (5 tests — opening, third-term, earned-uplift, closing, breakfast-table — verified present on his card 2026-09-28) applied during his thinking, plus operator review of generated dossiers before publication.
 
-For Athens production: operator should review at minimum the FIRST dossier's article body before publication, to verify the bastard form is operating, the convergence-naming work landed, and the article-length constraint held. Subsequent dossiers can publish with lighter operator review if Claudia's voice is consistent.
+For Athens production: operator should review at minimum the FIRST dossier's article body before publication, to verify the bastard form is operating, the convergence-naming work landed, and the article-length constraint held. Subsequent dossiers can publish with lighter operator review if Tim's voice is consistent.
 
 Future post-Athens validation surfaces (not in v1):
-- Stylometric check against Claudia's exemplar dossier-articles in her `curated_corpus_passages`
+- Stylometric check against Tim's exemplar dossier-articles in his `curated_corpus_passages`
 - LLM-as-judge pass scoring the article against quality_criteria 1-5
-- Cross-dossier consistency check (Claudia's voice across multiple dossiers in a night should not drift)
+- Cross-dossier consistency check (Tim's voice across multiple dossiers in a night should not drift)
 
 ---
 
@@ -951,11 +951,11 @@ These are settled-enough-to-build defaults, with operator-overrideable choices:
 | # | Question | v2 decision | Notes |
 |---|---|---|---|
 | 1 | **Stage 1 routing — synthesis-only voices** (Case C, e.g. "Synthesise.") | ✅ **Sonnet 4.6 LLM-assisted call** for Case C voices (~$0.50 across Athens) | TODO marker in OPEN_ITEMS B1; ~30 min implementation + tests |
-| 2 | **`prior_editions` shape on Night 2/3** | ✅ **Just the articles** (kicker + headline + body_paragraphs per prior dossier; drop front_abstract / headnotes / metadata) | Saves ~80% of token weight vs full dossier JSONs; preserves Claudia's ability to write "as we noted last night, the river that did not speak" with anchor text |
-| 3 | **`metadata.form_fit_status`** | ✅ **DROPPED.** The form-fit-honesty premise (memo §5) assumed Whanganui / Octopus / Marley produce non-prose artifacts. They don't: Whanganui will emit legal text (reflecting its legal personhood), Octopus produces prose (chromatophore display is a separate microsite render layer), Marley emits lyric-prose Claudia's broadsheet form can carry. No voice in Athens needs the form-failure flag. | — |
+| 2 | **`prior_editions` shape on Night 2/3** | ✅ **Just the articles** (kicker + headline + body_paragraphs per prior dossier; drop front_abstract / headnotes / metadata) | Saves ~80% of token weight vs full dossier JSONs; preserves Tim's ability to write "as we noted last night, the river that did not speak" with anchor text |
+| 3 | **`metadata.form_fit_status`** | ✅ **DROPPED.** The form-fit-honesty premise (memo §5) assumed Whanganui / Octopus / Marley produce non-prose artifacts. They don't: Whanganui will emit legal text (reflecting its legal personhood), Octopus produces prose (chromatophore display is a separate microsite render layer), Marley emits lyric-prose the editor's broadsheet form can carry. No voice in Athens needs the form-failure flag. | — |
 | 4 | **`metadata.night_finding`** | ✅ **DROPPED.** Article body should already make the convergence/divergence finding clear; the field would be redundant. Closing-show pipeline (B5) doesn't exist yet, so designing for it is premature; if/when B5 lands, it can extract findings from articles via its own pass. | — |
-| 5 | **`colophon`** | ✅ **Embedded in dossier JSON output, runtime-stamps near-static template.** Default: `"Filed by the Editor's desk on the morning of Night [N], from [date]. Vol. CXVI · Issue No. [N]."` | Claudia doesn't emit; purely metadata-derived. Can be extended later (per-night quip, named correspondent attribution) |
-| 6 | **Cross-night dossier numbering + theme handling** | ✅ **Per-night reset** within each issue (42,193 / 42,194 / 42,195). **Editor does NOT track cross-night theme identity** — that's Provocateur's job via C9 exclusion (matches by normalized title since theme_ids are not stable across Researcher runs). Claudia references prior nights via prior_editions article text, not by theme_id matching. | Per [`provocateur_flow.py:579-580`](../runtime/flows/provocateur_flow.py:579) — "theme_ids are not stable across Researcher runs (each run generates fresh sequential IDs)" |
+| 5 | **`colophon`** | ✅ **Embedded in dossier JSON output, runtime-stamps near-static template.** Default: `"Filed by the Editor's desk on the morning of Night [N], from [date]. Vol. CXVI · Issue No. [N]."` | Tim doesn't emit it; purely metadata-derived. Confirmed against published dossiers (e.g. `night_1/dossier_001.json`: `"colophon": "Filed by the Editor's desk on the morning of Night 1."`) — `editor_dossier.md`'s emitted-fields list does not include `colophon`. Can be extended later (per-night quip, named correspondent attribution) |
+| 6 | **Cross-night dossier numbering + theme handling** | ✅ **Per-night reset** within each issue (42,193 / 42,194 / 42,195). **Editor does NOT track cross-night theme identity** — that's Provocateur's job via C9 exclusion (matches by normalized title since theme_ids are not stable across Researcher runs). Tim references prior nights via prior_editions article text, not by theme_id matching. | Per [`provocateur_flow.py:579-580`](../runtime/flows/provocateur_flow.py:579) — "theme_ids are not stable across Researcher runs (each run generates fresh sequential IDs)" |
 | 7 | **Operator-trigger vs auto-fire** | ✅ **Auto** — orchestrator polls `04_voice/manifest.json` and fires editor as soon as voice pipeline completes | Editor is just another stage in the chain |
 | 8 | **Per-voice render-config bundles** (form-markers, palettes, closing seals) | ✅ **Microsite-side concern**, not editor-pipeline output. Microsite computes from voice's `medium` field. | — |
 
@@ -980,11 +980,11 @@ Q1, Q2, Q5, Q6, Q7, Q8 are settled. Q3 + Q4 deferred for separate reasoning.
 - `docs/AI_Assembly_Provocateur_Pipeline.md` — Provocateur Pipeline (per-voice briefings = editor's other primary input source)
 - `docs/AI_Assembly_Researcher_Pipeline.md` — Researcher Pipeline (theme records that ride inside Provocateur briefings; v2 editor does NOT read Researcher outputs directly)
 - `docs/AI_Assembly_Frame_Concept_v1.md` — frame architecture document (this pipeline operationalizes the broadsheet surface)
-- `docs/AI_Assembly_Persona_Card_v2.md` — Claudia's card uses this schema
-- `docs/AI_Assembly_Persona_Pipeline_v4.md` — used to smoke-test Claudia's hand-authored card
+- `docs/AI_Assembly_Persona_Card_v2.md` — Tim's card uses this schema (Claudia Pinchbeck's deprecated draft card also used it)
+- `docs/AI_Assembly_Persona_Pipeline_v4.md` — the standard persona pipeline Tim's card was built through (operator's Claude.ai Deep Research sessions + Beauty Shot operational supplement, merged); previously used to smoke-test Claudia's hand-authored draft card
 - `docs/AI_Assembly_Briefing_v3_1.md` — project briefing (this pipeline's success criteria derive from §"Layer 1 / 2 / 3" tests)
 - `_workspace/archive/MEMO_2026_05_03_editor_flow_input_output_contract.md` *(now archivable)* — predecessor memo capturing per-call input/output contract refinements; superseded by v2 of this spec
-- `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` *(to be written)* — full draft of Claudia's 35-field card
+- `_workspace/archive/session-artifacts/CLAUDIA_PINCHBECK_PERSONA_PREP_2026-05-03.md` — Claudia Pinchbeck persona-construction reasoning (dead link fixed 2026-09-28: this doc previously cited a `_workspace/planning/runtime/CLAUDIA_PINCHBECK_CARD_DRAFT_2026_05_02.md` that was never written; this is the actual historical prep doc, marked 🟫 DEPRECATED in its own header since Tim Leberecht shipped as editor 2026-05-05). The draft 44-field card itself lives at `projects/current-tests/voices/claudia_pinchbeck/07_persona_card_assembled.json` (historical only; not used at runtime)
 - `runtime/flows/editor_flow.py` — implementation entry point (shipped 2026-05-03 PM, commit `fc5c2fb`)
-- `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt; **needs rewrite to v2 contract before first build** (currently encodes v1 contract with v1 input/output fields)
+- `runtime/flows/shared/prompts/editor_dossier.md` — closing prompt. **Correction 2026-09-28:** this row previously said the prompt "needs rewrite to v2 contract before first build (currently encodes v1 contract with v1 input/output fields)" — false as of this reading. The prompt has been written and is in production use (it generated all 13 published Athens dossiers); its field set (`kicker`, `headline`, `front_abstract`, `subline`, `pull_quote`, `theme_title_for_dossier`, `theme_abstract_for_dossier`, `headnotes[].{artifact_title, framing_text}`) has evolved past both v1 *and* this spec's documented v2 Output Schema (which still describes `theme_statement_headline`/`voice_abstracts[]`/`handoff_line` and omits `pull_quote` and the theme-page field names actually in use). The "Dossier Shape" and "Output Schema (v2)" sections below need their own pass against the shipped prompt; out of scope for this fix, flagged for follow-up.
 
