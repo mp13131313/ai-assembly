@@ -3054,7 +3054,7 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 **Done =** either the flag reaches `stream_voice_call(cache_system=False)` with a test that the request carries no `cache_control`, or the flag and its mentions (CLI help, spec §"Implementation" → CLI) are removed.
 
-### C66. Editor dossier calls never read the prompt cache on multi-dossier nights 🟡 (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` §"Stage 2" → "Per-call inputs"; cross-ref C19a)
+### C66. Editor dossier calls never read the prompt cache on multi-dossier nights ✅ CODE FIXED 2026-09-28 (`d07e5cf`, branch `fix/c66-editor-cache-reads`) · ⏸ live check awaits the next real multi-dossier editor run · (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` §"Stage 2" → "Per-call inputs"; cross-ref C19a)
 **Why:** the system prompt (Tim's card + deployment block + closing prompt) is identical for every dossier call of a night and carries a 1h cache breakpoint, so the plan (C19a) was one cache write, then reads. The published Athens dossiers show otherwise (`metadata.cache_*`, read-only, 2026-09-28): on Nights 2 and 3 all 8 calls *wrote* the 52,641-token cache and none read it; on Night 1 all 5 read it and none wrote.
 
 **Cause (inferred, not confirmed):** `editor_flow.py` starts all dossier calls at once (`ThreadPoolExecutor(max_workers=EDITOR_BATCH)`, `:231`; `EDITOR_BATCH` = 6, `:75`), so no call can read an entry another call is still writing.
@@ -3062,6 +3062,8 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 **Cost (estimate, inference):** at the Opus 4.7 input price the spec uses ($5/MTok) and a 1h write at 2× input / a read at 0.1× (the ratios cited in `_anthropic_call.py:121-123`), Night 2 paid ≈$2.63 for system-prompt caching instead of ≈$0.63 and Night 3 ≈$1.58 instead of ≈$0.58 — about $3 over the two nights. Small per night; it grows with dossier count.
 
 **Done =** on a multi-dossier night, one call writes the cache and the others read it (e.g. run the first dossier alone, then the rest in parallel), verified from the new dossiers' `metadata.cache_creation_input_tokens` / `cache_read_input_tokens`.
+
+**Fixed 2026-09-28 (`d07e5cf`):** cause confirmed by reading the code: `editor_flow.py` submitted every dossier call to the `ThreadPoolExecutor` at once. Stage 2 now runs the first dossier that makes a call alone, then the rest in parallel. A mocked test shows the first call finishes before any other starts; it fails on the old scheduling. Cost: one dossier's wall time (~1.5–5 min at Athens) added per night. Waiting for the first streamed token instead of the whole call would save most of that, but needs a hook inside `stream_voice_call`. *Inference, not filed.* **⏸ Live check:** on the next real multi-dossier run, the first dossier's `metadata.cache_creation_input_tokens` should be about 52K and the others' `cache_read_input_tokens` about 52K. Waits on the next real editor run; none is scheduled.
 
 ## Section F — Recently landed (for context)
 
