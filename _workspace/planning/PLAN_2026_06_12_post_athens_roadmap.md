@@ -248,6 +248,7 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 - **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
 - **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.
+- **Editor defects (runtime C64)** — `publish_flow`'s dead newspaper-field reads: *"Remove all three"* (`issue_no`, `vol`, `publication_date`). The stray `**` in the 13 published Athens dossiers: *"Clean later, separate task"* (filed as a C64 residual; not scheduled).
 
 ---
 

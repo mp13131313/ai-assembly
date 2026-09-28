@@ -299,17 +299,20 @@ def _strip_chrome(value: str) -> str:
 def _parse_body_paragraphs(raw_text: str) -> list[str]:
     """Extract body_paragraphs from the model output.
 
-    Two parsing strategies, in order:
-      1. Look for a `body_paragraphs:` label followed by a fenced-or-bare
-         block; split on `\\n\\n`.
-      2. Look for an `article body:` or `body:` heading and split everything
-         after it on blank lines.
+    Looks for a `body_paragraphs:` label followed by a fenced-or-bare
+    block, up to the next labelled field; splits it on blank lines. No
+    label → empty list.
 
     Asterism breaks (`* * *`) survive as their own array elements.
     """
-    # Strategy 1
+    # Markdown chrome is allowed on both sides of the label's colon. The
+    # prompt's own label is `**body_paragraphs:**`, whose closing `**` sits
+    # AFTER the colon; before C64 the regex left it in the body, so every
+    # Athens dossier's body_paragraphs[0] starts with "**\n". The closing
+    # chrome only counts when whitespace follows it, so a first paragraph
+    # that opens in `*italics*` keeps its asterisk.
     rx = re.compile(
-        r"^\s*[*_#\-]*\s*body[_\s]*paragraphs\s*[*_]*\s*[:=]\s*\n?(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+\s*[:=]|\Z)",
+        r"^\s*[*_#\-]*\s*body[_\s]*paragraphs\s*[*_]*\s*[:=](?:[ \t]*[*_]+(?=\s))?\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+\s*[:=]|\Z)",
         re.I | re.M | re.S,
     )
     m = rx.search(raw_text)
@@ -339,8 +342,12 @@ def _parse_headnotes(raw_text: str) -> list[dict[str, str]]:
     Defensive: missing fields → empty strings, no crash. Pairing is by
     interleaved alternation (slugs / titles / framings parallel arrays).
     """
+    # Same label rule as _parse_body_paragraphs: chrome on both sides of
+    # the colon, so `**headnotes:**`'s closing `**` isn't read as block
+    # content (harmless today — the fields below are found by label — but
+    # kept identical so the two can't drift).
     rx = re.compile(
-        r"^\s*[*_#\-]*\s*headnotes\s*[*_]*\s*[:=]\s*\n?(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+\s*[:=]|\Z)",
+        r"^\s*[*_#\-]*\s*headnotes\s*[*_]*\s*[:=](?:[ \t]*[*_]+(?=\s))?\s*(.+?)(?=\n\s*[*_#\-]+\s*[a-z][a-z_]+\s*[:=]|\Z)",
         re.I | re.M | re.S,
     )
     m = rx.search(raw_text)
@@ -432,7 +439,8 @@ def stamp_runtime_fields(
 
     Per spec v2 field provenance:
       - voice_name + formulation_text per headnote: runtime fills from
-        artifact's council_member + briefing's narrative_briefing
+        the briefing's voice_name ("the " + council_config display name,
+        C53 — see build_dossier_briefing) + narrative_briefing
       - colophon: minimal night-only template (Vol/Issue/edition chrome
         was retired 2026-05-05)
       - metadata: theme_id + display_title echoed; night + token counts
@@ -449,7 +457,8 @@ def stamp_runtime_fields(
     # Enrich headnotes with all runtime-stamped fields so each headnote is
     # self-contained for the microsite — no separate per-voice file fetch
     # needed to render an artifact page. Stamps:
-    #   voice_name        — from per-voice artifact's council_member
+    #   voice_name        — "the " + council_config display name (C53;
+    #                       resolved in build_dossier_briefing)
     #   formulation_text  — from briefing's narrative_briefing for this theme
     #   artifact_text     — from per-voice Step 2 artifact_text (the body)
     #   artifact_form     — from per-voice selected_form (CSS bundle key)

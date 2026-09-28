@@ -182,8 +182,8 @@ def build_night_index(
 # `publish_flow.py::_build_per_night_dossier_index`. Each writer only
 # knows its own fields; naively overwriting the file (as both used to do)
 # means whichever writer runs second erases the other's exclusive fields
-# (`issue_no`/`vol`/`voices_in_night` on the publish side; `edition_lead`
-# on the editor side). Fixed 2026-09 per operator direction ("each writer
+# (`voices_in_night` on the publish side; `edition_lead` on the editor
+# side). Fixed 2026-09 per operator direction ("each writer
 # keeps the fields it doesn't own") with `merge_night_index` below — one
 # shared helper, imported by `publish_flow.py` rather than duplicated.
 #
@@ -242,8 +242,9 @@ def merge_night_index(
     - `list_key` entries (default `"dossiers"`) are matched between
       `existing` and `new` by `match_key` (default `"dossier_no"`). For
       each matched pair, keys on the existing entry that are NOT in
-      `owned_dossier_keys` are copied onto the new entry (e.g. publish's
-      `issue_no`/`vol` survive an editor rewrite). Entries only in
+      `owned_dossier_keys` are copied onto the new entry (a per-dossier
+      field only the other writer produces survives the rewrite; today
+      both writers own the same per-dossier keys). Entries only in
       `existing` (no match in `new`) are dropped — the new writer's own
       dossier list is authoritative for which dossiers currently exist,
       so a dossier removed from disk is not resurrected in the index.
@@ -475,7 +476,7 @@ def finalize_edition(
             / f"night_{night}" / "_index.json"
         )
         # Merge onto whatever's already on disk (e.g. publish_flow.py's
-        # `issue_no`/`vol`/`voices_routed`/`voices_in_night`) so this
+        # `voices_in_night`) so this
         # write doesn't clobber the other writer's fields — see
         # `merge_night_index` above. Unreadable/malformed existing file
         # is treated the same as no file: just write fresh.

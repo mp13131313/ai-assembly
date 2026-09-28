@@ -250,7 +250,7 @@ Length envelopes (hard constraints):
 | `kicker` | 3-5 words, ALL-CAPS |
 | `headline` | 8-12 words |
 | `subline` | 25-40 words |
-| `front_abstract` | 25-40 words; drawn from the article's opening |
+| `front_abstract` | 25-40 words; independent framing of the article's tension — not lifted from its opening |
 | `pull_quote` | 10-30 words including attribution; format `"<phrase>" — <attribution>`; the phrase must appear in body_paragraphs[]; optional |
 | `theme_title_for_dossier` | 4-8 words; in your editorial register; lifts and tightens `theme_title_from_researcher` |
 | `theme_abstract_for_dossier` | 50-80 words; in your editorial register |

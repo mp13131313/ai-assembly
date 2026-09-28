@@ -818,7 +818,7 @@ def _build_per_voice_multi_night_index(
 
 # `published_artifacts/dossiers/night_<N>/_index.json` is also written by
 # `flows/editor/edition.py::finalize_edition` (different schema — adds
-# `edition_lead`, drops `issue_no`/`vol`/`voices_in_night`). These are the
+# `edition_lead`, lacks `voices_in_night`). These are the
 # keys THIS writer produces; everything else already on disk is preserved
 # by `merge_night_index` (see that function's docstring for the full
 # rule). Note `edition_lead` is deliberately absent here — publish never
@@ -828,7 +828,7 @@ _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS = {
 }
 _DOSSIER_INDEX_OWNED_DOSSIER_KEYS = {
     "dossier_no", "filename", "url_path", "kicker", "headline", "subline",
-    "theme_id", "theme_display_title", "issue_no", "vol", "voice_count", "voices_routed",
+    "theme_id", "theme_display_title", "voice_count", "voices_routed",
 }
 
 
@@ -920,8 +920,6 @@ def _build_per_night_dossier_index(
             "subline": dossier.get("subline", ""),
             "theme_id": meta.get("theme_id", ""),
             "theme_display_title": meta.get("theme_display_title", ""),
-            "issue_no": meta.get("issue_no"),
-            "vol": meta.get("vol"),
             "voice_count": len(voices_routed) if voices_routed else len(headnotes),
             "voices_routed": voices_routed,
         })
@@ -1030,9 +1028,6 @@ def _build_cross_night_dossier_index(
                 "headline": dossier.get("headline", ""),
                 "theme_id": meta.get("theme_id", ""),
                 "theme_display_title": meta.get("theme_display_title", ""),
-                "issue_no": meta.get("issue_no"),
-                "vol": meta.get("vol"),
-                "publication_date": meta.get("publication_date", ""),
             })
 
     # `editions_by_night` reserved for the forthcoming per-night LLM

@@ -346,6 +346,94 @@ framing_text: Plato wrote a dialogue.
         assert "italic stuff" in parsed["headline"]
 
 
+class TestParseBlockLabelChrome:
+    """C64 (runtime OPEN_ITEMS): the closing `**` of the prompt's own
+    `**body_paragraphs:**` label used to land in the body, so every
+    published Athens dossier's body_paragraphs[0] starts with "**\\n".
+    Block labels below use the exact format of editor_dossier.md's
+    <output> section."""
+
+    def test_prompt_label_closing_chrome_not_in_body(self):
+        raw = "**body_paragraphs:**\nFirst.\n\n* * *\n\nSecond.\n"
+        assert dg.parse_dossier_output(raw)["body_paragraphs"] == [
+            "First.", "* * *", "Second.",
+        ]
+
+    def test_body_on_the_label_line(self):
+        raw = "**body_paragraphs:** First.\n\nSecond.\n"
+        assert dg.parse_dossier_output(raw)["body_paragraphs"] == ["First.", "Second."]
+
+    def test_first_paragraph_opening_in_italics_keeps_its_asterisk(self):
+        for label in ("**body_paragraphs:**", "body_paragraphs:"):
+            raw = f"{label}\n*Athens, the seventh of May.* The room split.\n\nSecond.\n"
+            body = dg.parse_dossier_output(raw)["body_paragraphs"]
+            assert body[0] == "*Athens, the seventh of May.* The room split.", label
+
+    def test_fenced_body_is_unwrapped(self):
+        # The fence strip only works once the label's `**` is consumed —
+        # before C64 the block started "**\n```" and the fences leaked.
+        raw = "**body_paragraphs:**\n```\nFirst.\n\nSecond.\n```\n\n**theme_title_for_dossier:** T\n"
+        assert dg.parse_dossier_output(raw)["body_paragraphs"] == ["First.", "Second."]
+
+    def test_round_trips_a_published_athens_dossier(self):
+        """Tim's raw output for athens-2026 Night 1 dossier_001 (body
+        abridged to four elements, two of four headnotes), rebuilt in the
+        prompt's <output> format. Every field must parse back to the
+        published value — the body without the stray "**\\n"."""
+        body = [
+            "Athens, late on the first night. The AI Democracy Marathon had run nine hours, and the speakers were still passing each other on the track. Sean White, who runs one of the seven frontier labs, had called centralised AGI authoritarian and offered a personal AI in every citizen's hand. Helen Edwards, of the Artificiality Institute, reframed the machine as *thinking partner* and named cognitive sovereignty *the capacity to be moved by another's reasoning*. The room split tool against partner, centralised against personal.",
+            "Then the Voice of Plato, channelled into the room from the Assembly, said the thing that did not land. A personal AI is not a tool but the *paideia* of its user; to build one for every citizen is to build a school for everyone without asking who the teachers are. Greek lifted the whole afternoon one floor upstairs — and the afternoon did not climb after it.",
+            "* * *",
+            "Tonight four voices climbed. They refused the room's binary in four different grammars that turned out to be one move.",
+        ]
+        published = {
+            "kicker": "WHO TEACHES THE TEACHERS",
+            "headline": "Tool or partner, the room asked; on whose authority, the voices replied.",
+            "front_abstract": "Sean White called for a personal AI in every hand. Four traditions answered tonight, and each named the same missing question: not whether the machine is tool or partner, but on whose authority it forms the mind that uses it.",
+            "subline": "Read this for the move all four voices made and the room did not — past architecture, past sovereignty-as-movability, into the older question of who authorises any agent that stands inside another's reasoning.",
+            # Starts with the quotation's own italic `*` — the one-line
+            # field regex must keep it (see _strip_chrome).
+            "pull_quote": '*"Personalisation at the level of numbers, with operations supplied from a single source, is not pluralism."* — the Voice of Ada Lovelace',
+            "theme_title_for_dossier": "AI as Tool, Partner, or Paideia",
+            "theme_abstract_for_dossier": "Across two sessions of the AI Democracy Marathon the room moved through four contested design questions: whether to combine AI with democratic life at all, whether AI can serve as cognitive partner without dissolving the citizen's authorship, whether democracy requires many AIs against the dominant centralised model, and whether AI by default homogenises discourse or might be designed to expose users to opposition. The threshold question — paideia at scale, and who chooses the teachers — went unanswered.",
+        }
+        headnotes = [
+            {
+                "voice_slug": "ada_lovelace",
+                "artifact_title": "Note H: A Frontier I Did Not Draw",
+                "framing_text": "Tonight's theme: where the marathon's debate over personal versus centralised AI passed over the question of who authorises any agent that forms a citizen's mind. The formulation put to her: if a system that only recombines nonetheless shapes the minds of those who use it, has it crossed her frontier — or has the frontier itself moved? Read for the technical cut between number-cards and operation-cards, and what it does to the room's claim of pluralism at scale.",
+            },
+            {
+                "voice_slug": "hannah_arendt",
+                "artifact_title": "The Two-in-One and the Patient Machine",
+                "framing_text": "Tonight's theme: the room called AI a *thinking partner*, and named cognitive sovereignty the capacity to be moved by another's reasoning. The formulation put to her: when each citizen has been pre-reasoned by a patient machine before ever meeting another, what happens to the space between, where action appears? Read for the inversion she names — articulation, not thinking — and the diagnosis of the *Zwischenraum* at risk where the room had placed only the individual mind.",
+            },
+        ]
+        raw = (
+            f"**kicker:** {published['kicker']}\n\n"
+            f"**headline:** {published['headline']}\n\n"
+            f"**front_abstract:** {published['front_abstract']}\n\n"
+            f"**subline:** {published['subline']}\n\n"
+            f"**pull_quote:** {published['pull_quote']}\n\n"
+            "**body_paragraphs:**\n" + "\n\n".join(body) + "\n\n"
+            f"**theme_title_for_dossier:** {published['theme_title_for_dossier']}\n\n"
+            f"**theme_abstract_for_dossier:** {published['theme_abstract_for_dossier']}\n\n"
+            "**headnotes:**\n" + "\n\n".join(
+                f"voice_slug: {h['voice_slug']}\n"
+                f"artifact_title: {h['artifact_title']}\n"
+                f"framing_text: {h['framing_text']}"
+                for h in headnotes
+            ) + "\n"
+        )
+
+        parsed = dg.parse_dossier_output(raw)
+
+        assert parsed["body_paragraphs"] == body
+        for field, value in published.items():
+            assert parsed[field] == value, field
+        assert parsed["headnotes"] == headnotes
+
+
 # --- stamp_runtime_fields ----------------------------------------------
 
 

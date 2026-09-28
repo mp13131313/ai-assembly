@@ -403,8 +403,8 @@ def _publish_shaped_index(night: int, dossiers: list[dict]) -> dict:
 class TestFinalizeEditionMergesOntoPublish:
     """`_workspace/planning/runtime/OPEN_ITEMS.md` — publish and the editor
     write the same `_index.json` with different schemas; the editor must
-    not clobber publish's `issue_no`/`vol`/`voices_routed`/
-    `voices_in_night` when it rewrites the file after publish already ran.
+    not clobber publish's `voices_in_night` when it rewrites the file
+    after publish already ran.
     """
 
     THEMES_TO_DOSSIERS = [
@@ -435,19 +435,17 @@ class TestFinalizeEditionMergesOntoPublish:
             project_root / "published_artifacts" / "dossiers" / "night_1" / "_index.json"
         )
         # Simulate publish_flow.py having already written the index for
-        # this night, with fields the editor's own build_night_index
-        # never produces (issue_no, vol, voices_in_night).
+        # this night, with a field the editor's own build_night_index
+        # never produces (voices_in_night).
         write_json_atomic(idx_path, _publish_shaped_index(1, [
             {"dossier_no": 1, "filename": "dossier_001.json",
              "url_path": "/dossiers/night-1/dossier_001", "kicker": "STALE",
              "headline": "", "subline": "", "theme_id": "theme_001",
-             "theme_display_title": "", "issue_no": 42193, "vol": "CXVI",
-             "voice_count": 0, "voices_routed": []},
+             "theme_display_title": "", "voice_count": 0, "voices_routed": []},
             {"dossier_no": 2, "filename": "dossier_002.json",
              "url_path": "/dossiers/night-1/dossier_002", "kicker": "STALE",
              "headline": "", "subline": "", "theme_id": "theme_002",
-             "theme_display_title": "", "issue_no": 42194, "vol": "CXVI",
-             "voice_count": 0, "voices_routed": []},
+             "theme_display_title": "", "voice_count": 0, "voices_routed": []},
         ]))
 
         finalize_edition(
@@ -465,19 +463,18 @@ class TestFinalizeEditionMergesOntoPublish:
         # Editor now owns and has set a real edition_lead (was None).
         assert idx["edition_lead"]["lead_dossier_no"] == 1
 
-        # Publish-only fields the editor doesn't produce survive the
-        # editor's rewrite, per-dossier...
-        assert by_no[1]["issue_no"] == 42193
-        assert by_no[1]["vol"] == "CXVI"
-        assert by_no[2]["issue_no"] == 42194
-        # ...and top-level.
+        # The publish-only field the editor doesn't produce survives the
+        # editor's rewrite.
         assert idx["voices_in_night"] == {"plato": {"voice_slug": "plato", "primary_dossier_no": 1}}
 
     def test_editor_rewrite_drops_dossier_removed_from_disk(self, tmp_path):
         """publish's stale index carries a 3rd dossier that's no longer on
         disk; the editor's rewrite (sourced from disk, per C46) must not
-        resurrect it, even though it carried issue_no/vol worth keeping
-        in principle for dossiers that DO still exist."""
+        resurrect it, even though its entry carried an unowned key that
+        survives for dossiers that DO still exist. (The key is a legacy
+        `issue_no`, as in indexes written before 2026-05-05; publish
+        stopped writing it in C64, but the merge rule still carries
+        unowned keys forward.)"""
         run_dir = tmp_path / "athens_night_1"
         project_root = tmp_path / "project"
         routing = self._routing()
@@ -506,7 +503,7 @@ class TestFinalizeEditionMergesOntoPublish:
         idx = json.loads(idx_path.read_text())
         assert idx["dossier_count"] == 2
         assert {d["dossier_no"] for d in idx["dossiers"]} == {1, 2}
-        # Survivors still carry publish's issue_no.
+        # Survivors still carry the unowned legacy key.
         by_no = {d["dossier_no"]: d for d in idx["dossiers"]}
         assert by_no[1]["issue_no"] == 1
         assert by_no[2]["issue_no"] == 2
@@ -523,7 +520,6 @@ class TestFinalizeEditionMergesOntoPublish:
         )
         assert "edition_lead" in NIGHT_INDEX_OWNED_TOP_LEVEL_KEYS
         assert "edition_lead" not in _DOSSIER_INDEX_OWNED_TOP_LEVEL_KEYS
-        # No per-dossier key is editor-only — publish's per-dossier schema
-        # is a strict superset (it adds issue_no/vol on top of every
-        # field the editor also produces).
+        # No per-dossier key is editor-only — publish's per-dossier
+        # schema covers the editor's (today the two are identical).
         assert NIGHT_INDEX_OWNED_DOSSIER_KEYS <= _DOSSIER_INDEX_OWNED_DOSSIER_KEYS

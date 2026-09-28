@@ -36,9 +36,6 @@ def _theme_routing(night: int = 1) -> dict:
     return {
         "schema_version": "1.0",
         "night": night,
-        "athens_base_issue": 42193,
-        "issue_no": 42193,
-        "vol": "CXVI",
         "themes_to_dossiers": [
             {
                 "theme_id": "theme_001",
@@ -106,19 +103,18 @@ def _dossier(
         "body_paragraphs": ["body paragraph one", "body paragraph two"],
         "headnotes": headnotes,
         "front_abstract": "front abstract",
-        "colophon": {"editor": "Claudia Pinchbeck"},
+        # Shaped like the shipped dossiers (athens-2026, all 13): no
+        # volume / issue / date chrome since 2026-05-05 (`641e31d`).
+        "colophon": f"Filed by the Editor's desk on the morning of Night {night}.",
         "metadata": {
             "theme_id": theme_id,
             "theme_display_title": title,
             "night": night,
-            "issue_no": 42192 + night,
-            "vol": "CXVI",
-            "publication_date": f"2026-05-{6 + night:02d}",
-            "publication_date_long": f"May {6 + night}, 2026",
-            "edition_label": f"Night {night}",
-            "generated_by": "tim_leberecht",
+            "generated_by": "editor_pipeline_v2",
             "model": "claude-opus-4-7",
             "thinking_enabled": True,
+            "thinking_tokens": 0,
+            "wall_clock_s": 1.0,
         },
     }
 
@@ -312,7 +308,7 @@ class TestPerNightDossierIndex:
 # `published_artifacts/dossiers/night_<N>/_index.json` is also written by
 # `flows/editor/edition.py::finalize_edition` (`build_night_index`),
 # which has a different schema — it produces `edition_lead` (which
-# publish never computes) and omits `issue_no`/`vol` (which publish
+# publish never computes) and omits `voices_in_night` (which publish
 # adds). `merge_night_index` (defined in `flows.editor.edition`, imported
 # here) is the shared helper both writers route their write through so
 # neither clobbers the other. See `test_editor_edition.py`'s
@@ -398,9 +394,9 @@ class TestPerNightDossierIndexMergeWithEditor:
         assert sorted(v["voice_slug"] for v in by_no[1]["voices_routed"]) == ["cleopatra", "plato"]
         assert by_no[2]["kicker"] == "Kicker for theme_002"
         assert by_no[2]["voice_count"] == 1
-        # And publish's own-only fields are present as usual.
-        assert by_no[1]["issue_no"] is not None
-        assert by_no[1]["vol"] == "CXVI"
+        # And publish's own-only field is present as usual (keyed by the
+        # seeded dossiers' headnote slugs).
+        assert set(index["voices_in_night"]) == {"v0", "v1"}
 
     def test_dossier_removed_from_disk_disappears_from_publish_index(self, tmp_path):
         """A dossier the editor indexed previously, that's no longer on
@@ -431,9 +427,8 @@ class TestPerNightDossierIndexMergeWithEditor:
 
     def test_no_editor_dossier_only_keys_at_dossier_level(self):
         """Documents the schema contract: publish's per-dossier owned-key
-        set is a strict superset of the editor's (it adds issue_no/vol on
-        top of everything the editor also produces), so there is no
-        editor-only per-dossier field for publish to worry about
+        set covers the editor's (today the two are identical), so there
+        is no editor-only per-dossier field for publish to worry about
         preserving — only the top-level `edition_lead`."""
         assert NIGHT_INDEX_OWNED_DOSSIER_KEYS <= _DOSSIER_INDEX_OWNED_DOSSIER_KEYS
 
@@ -472,6 +467,51 @@ class TestCrossNightDossierIndex:
         second = _build_cross_night_dossier_index(project_root)
         assert first["dossier_count"] == second["dossier_count"]
         assert first["nights_present"] == second["nights_present"]
+
+
+# --- Retired newspaper keys (runtime OPEN_ITEMS C64) -------------------
+
+_RETIRED_INDEX_KEYS = {"issue_no", "vol", "publication_date"}
+
+
+def _seed_current_and_legacy_dossiers(project_root: Path) -> None:
+    """Night 1: dossier_001 shaped like the shipped Athens dossiers, and
+    dossier_002 shaped like a pre-2026-05-05 dossier whose metadata still
+    carries the newspaper chrome dropped in `641e31d`."""
+    out_dir = _seed_dossiers_for_night(project_root, 1, [(1, "theme_001", "Current")])
+    legacy = _dossier(2, "theme_002", "Legacy", night=1)
+    legacy["metadata"].update({
+        "issue_no": 42193, "vol": "CXVI", "publication_date": "2026-05-07",
+    })
+    write_json_atomic(out_dir / "dossier_002.json", legacy)
+
+
+class TestRetiredNewspaperKeys:
+    """Operator decision 2026-09-28 (C64): the dossier indexes no longer
+    carry `issue_no`, `vol` or `publication_date` — not even as nulls, and
+    not when an old dossier still has them in its metadata."""
+
+    def test_per_night_index_has_no_retired_keys(self, tmp_path):
+        run_dir = _seed_run_dir_with_routing(tmp_path)
+        project_root = tmp_path / "project"
+        _seed_current_and_legacy_dossiers(project_root)
+        result = _build_per_night_dossier_index(run_dir, 1, project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert len(index["dossiers"]) == 2
+        for entry in index["dossiers"]:
+            assert not _RETIRED_INDEX_KEYS & set(entry), entry
+
+    def test_cross_night_index_has_no_retired_keys(self, tmp_path):
+        project_root = tmp_path / "project"
+        _seed_current_and_legacy_dossiers(project_root)
+        result = _build_cross_night_dossier_index(project_root)
+        index = json.loads(Path(result["index_path"]).read_text())
+        assert len(index["dossiers"]) == 2
+        for entry in index["dossiers"]:
+            assert not _RETIRED_INDEX_KEYS & set(entry), entry
+
+    def test_publish_does_not_own_retired_keys(self):
+        assert not _RETIRED_INDEX_KEYS & _DOSSIER_INDEX_OWNED_DOSSIER_KEYS
 
 
 # --- Lineage graph extension to dossiers ------------------------------
