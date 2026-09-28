@@ -3094,14 +3094,14 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 | # | Sev. | Finding (report §2) | Status |
 |---|---|---|---|
-| A1 | BLOCKER | `reflections_to_session_package.py` writes `title`, but the Researcher reads `session_title`/`session_description`/`session_format`. All 5 Athens reflection sessions (103 extractions) reached the Researcher with a blank title and description and format "panel" | open. **Operator:** fix forward; the published Athens record stays as it is? |
+| A1 | BLOCKER | `reflections_to_session_package.py` writes `title`, but the Researcher reads `session_title`/`session_description`/`session_format`. All 5 Athens reflection sessions (103 extractions) reached the Researcher with a blank title and description and format "panel" | open. **Operator decision 2026-09-28:** fix forward; the published Athens record stays as it is. Optional cosmetic restamp of the missing session titles offered |
 | A2 | MAJOR | `reset_run.py` leaves the next night's `continuity_night_<N+1>.json`, and continuity reuses it. After a reset, the voices remember deleted pieces | open |
 | A4 | MAJOR | The systemd sandboxes (`ingest.service`, `orchestrator@.service`) allow pre-Tier-3 paths, so uploads and continuity writes would fail on a VM. The VM was never provisioned (B10) | open; only matters when a VM is set up |
 | A6 | MINOR | Four voices' system prompts open "You are I am …" (`card_assembly.py:421-422` + the cards' `council_member_name`), on every call, all three nights. Third surface of the C53 root cause | open. Changes voice input, so re-validate. Cross-ref voices §37 |
 | A7 | MINOR | `vendor_intake.land()` overwrites the valid package before validating the new one; a non-string `speaker` crashes | open |
 | A8 | MINOR | A per-night `reset_run` deletes all nights' published extractions and voice pages plus the cross-night index; `run_dir` isn't checked to be inside the project | open |
 | A9 | MINOR | `generate_sessions_json.py` / `apply_ai_assembly_flags_from_csv.py` silently drop or unflag the 7 hand-added `__audio*` sessions | open |
-| A10 | MINOR | Night-3 continuity summarises Night 2 only; the spec says it merges Nights 1+2 | open. **Operator:** fix the code or the spec? |
+| A10 | MINOR | Night-3 continuity summarises Night 2 only; the spec says it merges Nights 1+2 | open. **Operator decision 2026-09-28:** correct the spec now; decide the code in Stage 5 (count-agnostic continuity) |
 | A11 | MINOR | A session stuck in `normalizing` after a restart is never flagged; `/retry` refuses | open |
 | A14 | NIT | Provocateur prompts say "12 voices" and use Peter Thiel (removed) as the worked example | open |
 | A15 | NIT | The voice prompt headers read literally "FROM NIGHT N-1" | open |

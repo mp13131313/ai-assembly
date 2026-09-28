@@ -248,6 +248,8 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 - **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
 - **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.
+- **Stage 4 spend cap (2026-09-28): USD 10 on the Claude API.** Enough for targeted pass-level sentinel regens, not full voice rebuilds. The main session estimates each regen's cost before the first paid run and stops at the cap.
+- **Code-review follow-ups (2026-09-28):** Athens reflection record: fix the converter going forward and leave the published record as it is (runtime C68 A1). Night-3 continuity: correct the spec now, decide the code in Stage 5 (C68 A10). Lovelace: re-fetch her Wikisource text after the fetcher fix, then check whether her card needs a patch (voices §37 A3).
 - **Editor defects (runtime C64)** — `publish_flow`'s dead newspaper-field reads: *"Remove all three"* (`issue_no`, `vol`, `publication_date`). The stray `**` in the 13 published Athens dossiers: *"Clean later, separate task"* (filed as a C64 residual; not scheduled).
 
 ---
