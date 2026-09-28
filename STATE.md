@@ -42,8 +42,9 @@ the operator's own intent — no external event needed. Test suites
   `post-athens-planning` = the June planning docs. `phase0-fixes`
   (branched from it) = all post-Athens code fixes + tracker updates.
   **Neither branch is merged into `main` yet.** Push status:
-  `phase0-fixes` is pushed through `40c4d56` (2026-09-28); the C64
-  commits after it are local only.
+  `phase0-fixes` is pushed through `40c4d56` (2026-09-28); everything
+  after it is local only — C64 (`9f415dd`, `e806dd4`), the Editor-spec
+  docs (`6bbb6f5`, `b1e4387`) and this STATE update.
 
 ---
 
@@ -91,7 +92,9 @@ the operator's own intent — no external event needed. Test suites
 - ✅ Voice: 46 Step 1 / 10 Step 2. Final validation: 2 PASS, 8 WARN, 0 HOLD.
 - ✅ Editor: 5 dossiers · lead = dossier_001 (*WHOSE MOUTH IS MOVING*,
   3 voices). Default framing preserved; Night-1 discipline rules carried
-  forward.
+  forward. The dossiers carry 9 voices: the Whanganui River was held
+  (`hold_for_regen`) and is in no Night 2 dossier; its voice page is
+  published (checked 2026-09-28).
 - ✅ Publish: `dossiers/night_2/` (5) + `nights/night_2/` (10 voice pages).
 
 ### Night 3 — CLOSING EDITION (2026-05-09 panels → published 2026-05-11)
@@ -246,10 +249,11 @@ fields).
 ## Open items
 
 **Order of work:** the roadmap (`_workspace/planning/PLAN_2026_06_12_post_athens_roadmap.md`).
-Backlog row #24 (Editor spec Dossier Shape + Output Schema) done 2026-09-28
-(`03c84e1`); its residual — other stale Editor-spec sections — is listed
-in the spec's v3 changelog. The 4 editor code/prompt defects it found are
-fixed (C64, `9f415dd`).
+Editor spec (`docs/AI_Assembly_Editor_Pipeline.md`) brought to v3.2 on
+2026-09-28 — backlog rows #24–#26 done (`03c84e1`, `6bbb6f5`, `b1e4387`);
+the 4 code/prompt defects row #24 found are fixed (C64, `9f415dd`). Still
+not re-verified in that spec: Stage 1 routing, the cost figures, the CLI
+list (its v3.1 changelog has the details).
 Next: Stage 4 (persona-pipeline catch-up on the
 Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
@@ -273,6 +277,9 @@ writers (PLAN 0.1.2) · voices
 - **C64 residual** — the 13 published Athens dossiers still start the
   article with a stray `**`; cleanup is a separate task (operator:
   later, not scheduled)
+- **C65** editor `--no-cache` flag does nothing (naming to settle with C45)
+- **C66** editor dossier calls never read the prompt cache on
+  multi-dossier nights (Athens Nights 2–3: every call wrote it)
 - **C62** model generation — pinned models still live; a migration is now
   a `model_routing.json` edit plus voice re-validation (operator decision)
 - **Section H** (C59–C61) agentic-architecture backlog — deferred, open forks

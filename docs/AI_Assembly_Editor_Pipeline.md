@@ -46,9 +46,9 @@
 Also: Principle 2's "her constitution" (a Claudia leftover) now reads "his"; the v2.1 entry gets a dated note that all three Athens run dirs had a deployment-context file; §"Outputs" → "Dossier index" notes that publish's `issue_no` / `vol` are always `null`; Stage 1, the three cost sections and the CLI's `--no-cache` line carry an in-place "not re-verified" or "no effect" note pointing here.
 
 **Found while verifying, not fixed** (docs-only):
-1. `--no-cache` does nothing. `editor_flow.py` records it in the manifest (`:94, 292, 335`) but never passes it to the call, which caches by default (`voice/_anthropic_call.py:74`).
+1. `--no-cache` does nothing. `editor_flow.py` records it in the manifest (`:94, 292, 335`) but never passes it to the call, which caches by default (`voice/_anthropic_call.py:74`). Filed as runtime OPEN_ITEMS C65.
 2. The closing prompt contradicts itself in four more places (theme-page lengths, `issue_no` in `prior_editions`, how to cite speakers, `unique_contribution`), listed in §"Stage 2 — Closing prompt structure".
-3. On Nights 2 and 3 no dossier call read the prompt cache; every call paid the cache write (§"Stage 2" → "Per-call inputs").
+3. On Nights 2 and 3 no dossier call read the prompt cache; every call paid the cache write (§"Stage 2" → "Per-call inputs"). Filed as runtime OPEN_ITEMS C66.
 
 **Still not re-verified** — do not rely on these sections without checking:
 - §"Stage 1 — Theme Routing". Routing now takes Step 2's `lineage.primary_theme_id` first — every Athens voice was routed that way (`routing.py:144-146`) — and an LLM synthesis router shipped 2026-05-05 (`641e31d`, `runtime/flows/editor/synthesis_router.py`). The section still presents the Response-N parser as primary and the LLM pass as a TODO, as does Open Questions Q1. Its case labels and the rest of its example are unchecked.
@@ -560,7 +560,7 @@ For each dossier (one per theme this night), Stage 2 fires one Anthropic call. T
 | Prefix | "You are " + the card's `council_member_name` ("Tim Leberecht — writer, host, co-founder of the House of Beautiful Business. …"), then its IDENTITY, CONSTITUTION and BOUNDARIES sections, then a deployment block: THE GATHERING and YOUR ROLE (from `conference_facts.json`) and THE PANEL (`council_config.json` `collective_landscape`) | `card_assembly.py:320-351`, `:220-283` |
 | Tail | The card's REASONING METHOD, ENGAGEMENT (2 fields, no `unique_contribution`), VOICE and ARTIFACT sections, then `# YOUR TASK` and the closing prompt `editor_dossier.md` | `card_assembly.py:353-361` |
 
-`{night}` is replaced with the night number in both blocks (`card_assembly.py:366-367`). Measured: the two blocks came to 52,641 cached tokens on every Athens call. On Nights 2 and 3 all 8 calls *wrote* the cache and none read it (`cache_creation_input_tokens` 52,641, `cache_read_input_tokens` 0); on Night 1 all 5 read it and none wrote. *Inferred, not confirmed:* the calls start together (§"Architecture: Eight Principles" → 7), so none can read what another is still writing.
+`{night}` is replaced with the night number in both blocks (`card_assembly.py:366-367`). Measured: the two blocks came to 52,641 cached tokens on every Athens call. On Nights 2 and 3 all 8 calls *wrote* the cache and none read it (`cache_creation_input_tokens` 52,641, `cache_read_input_tokens` 0); on Night 1 all 5 read it and none wrote. *Inferred, not confirmed:* the calls start together (§"Architecture: Eight Principles" → 7), so none can read what another is still writing. Filed as runtime OPEN_ITEMS C66.
 
 **User prompt** — one sentence ("You are receiving the materials for one dossier…") followed by the dossier briefing as a fenced JSON block (`build_user_prompt`, `dossier_generation.py:248-259`). The briefing's fields:
 
@@ -898,7 +898,7 @@ With current options:
 - `--night N` — explicit night number; defensive `assert_run_dir_night_matches()` enforces consistency with run_dir naming
 - `--skip-routing` (optional) — skip Stage 1; assume `theme_routing.json` is hand-written
 - `--single-dossier <theme_id>` (optional) — generate only one dossier for testing/iteration
-- `--no-cache` (optional) — meant to disable prompt caching when iterating on Tim's card. *As of 2026-09-28 it has no effect: `editor_flow.py` records it in the manifest but never passes it to the call (`:94, 292, 335`).*
+- `--no-cache` (optional) — meant to disable prompt caching when iterating on Tim's card. *As of 2026-09-28 it has no effect: `editor_flow.py` records it in the manifest but never passes it to the call (`:94, 292, 335`); runtime OPEN_ITEMS C65.*
 
 Athens production CLI (typical):
 ```bash

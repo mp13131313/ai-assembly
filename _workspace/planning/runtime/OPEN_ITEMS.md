@@ -3047,6 +3047,22 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 
 **Residual — ⏸ waits on the operator scheduling it:** one-off repair of the published Athens record, in the pattern of the C53 restamp (dry run by default; operator reviews the diff and pushes in athens-2026): strip the leading `"**\n"` from `body_paragraphs[0]` in the 13 files under `published_artifacts/dossiers/night_{1,2,3}/`, then regenerate `data_views/` with `runtime/scripts/build_athens_data_graph.py` (both `athens_data_graph.json` and `view_by_theme.html` embed the bodies).
 
+### C65. Editor `--no-cache` flag does nothing 🟡 (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` Changelog → v3.1; cross-ref C45)
+**Why:** the spec and the CLI help promise that `--no-cache` disables prompt caching ("useful when iterating on Tim's card"). It doesn't. `editor_flow.py` takes the flag (`:94`), records it in the manifest (`:292`) and passes it to `run_editor_pipeline` (`:335`), but never on to the call: `generate_dossier` calls `stream_voice_call` without `cache_system` (`runtime/flows/editor/dossier_generation.py:583` at `9f415dd`), and `cache_system` defaults to `True` (`runtime/flows/voice/_anthropic_call.py:74`). So every dossier call caches its system prompt whatever the flag says. Checked 2026-09-28 by reading the code; not run.
+
+**Decide first:** C45 proposes a `--no-cache` flag with a different meaning (skip the per-dossier file cache and regenerate). Pick the names for both behaviours together.
+
+**Done =** either the flag reaches `stream_voice_call(cache_system=False)` with a test that the request carries no `cache_control`, or the flag and its mentions (CLI help, spec §"Implementation" → CLI) are removed.
+
+### C66. Editor dossier calls never read the prompt cache on multi-dossier nights 🟡 (filed 2026-09-28; found while verifying the Editor spec — `docs/AI_Assembly_Editor_Pipeline.md` §"Stage 2" → "Per-call inputs"; cross-ref C19a)
+**Why:** the system prompt (Tim's card + deployment block + closing prompt) is identical for every dossier call of a night and carries a 1h cache breakpoint, so the plan (C19a) was one cache write, then reads. The published Athens dossiers show otherwise (`metadata.cache_*`, read-only, 2026-09-28): on Nights 2 and 3 all 8 calls *wrote* the 52,641-token cache and none read it; on Night 1 all 5 read it and none wrote.
+
+**Cause (inferred, not confirmed):** `editor_flow.py` starts all dossier calls at once (`ThreadPoolExecutor(max_workers=EDITOR_BATCH)`, `:231`; `EDITOR_BATCH` = 6, `:75`), so no call can read an entry another call is still writing.
+
+**Cost (estimate, inference):** at the Opus 4.7 input price the spec uses ($5/MTok) and a 1h write at 2× input / a read at 0.1× (the ratios cited in `_anthropic_call.py:121-123`), Night 2 paid ≈$2.63 for system-prompt caching instead of ≈$0.63 and Night 3 ≈$1.58 instead of ≈$0.58 — about $3 over the two nights. Small per night; it grows with dossier count.
+
+**Done =** on a multi-dossier night, one call writes the cache and the others read it (e.g. run the first dossier alone, then the rest in parallel), verified from the new dossiers' `metadata.cache_creation_input_tokens` / `cache_read_input_tokens`.
+
 ## Section F — Recently landed (for context)
 
 These items closed within the last 2 weeks. Listed here so the runtime onboarding has context for the current state.
