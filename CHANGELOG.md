@@ -9,6 +9,18 @@ history lives in `git log`.
 
 ---
 
+## 2026-09-29
+
+### Pre-Stage-4 fixes; published dossiers cleaned; branches retired
+
+- **Voices §37 fixes, merged into `main`:**
+  - The Stage 4 quality gate (`sentinel_regen.py`) runs again. It works in a sandbox copy, compares against the production files, and refuses to regenerate inside a production git repository.
+  - Misspelled 7a-FIX patch paths now fail visibly.
+  - Wikisource pages are fetched whole: the fetcher had been saving Lovelace's Notes as 697 characters of CSS. Her card needed no patch; the Notes were in her corpus from two other copies.
+  - Fetch redirects are re-checked against private addresses.
+- **Published record (athens-2026 `e4c4e39`):** the stray `**` stripped from all 13 dossier bodies, and `data_views` rebuilt. No model calls (C64 residual).
+- **Branches retired:** `post-athens-planning` and `phase0-fixes` deleted, locally and on GitHub. Their `archive/*-2026-09-28` tags remain.
+
 ## 2026-09-28
 
 ### `phase0-fixes` merged into `main`

@@ -37,12 +37,13 @@ the operator's own intent — no external event needed. Test suites
   3 editions + editorial assessment + data inventory), and `runs/` (the
   full JSON "making-of" record: transcripts → voice reasoning → validation
   → dossiers; **audio excluded for size**). `main` carries the 2026-09-28
-  published-record repair.
-- **Branches (this repo):** `main` holds everything as of 2026-09-28
-  (fast-forwarded to `40fe490`). `post-athens-planning` and `phase0-fixes`
-  were merged and tagged `archive/post-athens-planning-2026-09-28` and
-  `archive/phase0-fixes-2026-09-28`; the branches themselves still exist
-  until deleted. New work goes on `fix/…` or `feature/…` branches
+  published-record repair, plus (2026-09-29, `e4c4e39`) the stray `**`
+  stripped from the 13 dossier bodies.
+- **Branches (this repo):** `main` holds everything. `post-athens-planning`
+  and `phase0-fixes` were merged 2026-09-28 and deleted 2026-09-29; their
+  tips are tagged `archive/post-athens-planning-2026-09-28` and
+  `archive/phase0-fixes-2026-09-28`. `fix/s37-pre-stage4` was merged
+  2026-09-29. New work goes on `fix/…` or `feature/…` branches
   (`conventions.md`). Push status: `git status -sb`.
 
 ---
@@ -258,7 +259,10 @@ the 4 code/prompt defects row #24 found are fixed (C64, `9f415dd`). Still
 not re-verified in that spec: Stage 1 routing, the cost figures, the CLI
 list (its v3.1 changelog has the details).
 Next: Stage 4 (persona-pipeline catch-up on the
-Athens lessons; needs a spend cap) → Stage 5 (family of forms; split-card +
+Athens lessons). Its quality gate runs again (voices §37 A5, 2026-09-29).
+Spend cap set at $10 (operator); the Stage 4 design draft
+(`voices/DESIGN_2026_09_28_stage4_prompt_backport.md`) estimates ~$113 for
+all items, so the cap and the order are open → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.
 
@@ -267,7 +271,8 @@ C51 · C53 (code + published record) · C54 · C55 (stopgap) · C56 · C58 ·
 C63 (model config) · C64 (editor dossier defects) · C65 (`--no-prompt-cache`) ·
 C66 (editor prompt-cache reads; code) · C67 (branch-review findings) · dossier-index dual
 writers (PLAN 0.1.2) · voices
-§32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config).
+§32.1 / .2 / .3 / .5 · §35 · §36 (DR model into the config) · §37 A3 / A5 /
+A12 / A13 (pre-Stage-4 fixes, 2026-09-29) · C64 residual (published `**`, 2026-09-29).
 
 **Runtime still open (`runtime/OPEN_ITEMS.md`):**
 
@@ -278,9 +283,6 @@ writers (PLAN 0.1.2) · voices
 - **C47** editorial discipline rules → permanent prompt patches
 - **C52** event-agnostic config (PLAN 2.1)
 - **C57** editor closing prompt hardcoded to Tim
-- **C64 residual** — the 13 published Athens dossiers still start the
-  article with a stray `**`; cleanup is a separate task (operator:
-  later, not scheduled)
 - **C66 live check** — confirm on the next real multi-dossier editor run
   that the later dossiers read the prompt cache (none scheduled)
 - **C68** untouched-code review, runtime: reflections converter metadata (Athens reflection sessions reached
