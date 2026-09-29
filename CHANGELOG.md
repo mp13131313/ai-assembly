@@ -19,7 +19,8 @@ history lives in `git log`.
   - Wikisource pages are fetched whole: the fetcher had been saving Lovelace's Notes as 697 characters of CSS. Her card needed no patch; the Notes were in her corpus from two other copies.
   - Fetch redirects are re-checked against private addresses.
 - **Published record (athens-2026 `e4c4e39`):** the stray `**` stripped from all 13 dossier bodies, and `data_views` rebuilt. No model calls (C64 residual).
-- **Branches retired:** `post-athens-planning` and `phase0-fixes` deleted, locally and on GitHub. Their `archive/*-2026-09-28` tags remain.
+- **Branches retired:** `post-athens-planning` and `phase0-fixes` deleted, locally and on GitHub. Their `archive/*-2026-09-28` tags remain. `fix/s37-pre-stage4` was merged and deleted too (tag `archive/fix-s37-pre-stage4-2026-09-29`).
+- **athens-2026 pushed** (`e4c4e39`).
 
 ## 2026-09-28
 

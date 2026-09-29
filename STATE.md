@@ -42,8 +42,8 @@ the operator's own intent — no external event needed. Test suites
 - **Branches (this repo):** `main` holds everything. `post-athens-planning`
   and `phase0-fixes` were merged 2026-09-28 and deleted 2026-09-29; their
   tips are tagged `archive/post-athens-planning-2026-09-28` and
-  `archive/phase0-fixes-2026-09-28`. `fix/s37-pre-stage4` was merged
-  2026-09-29. New work goes on `fix/…` or `feature/…` branches
+  `archive/phase0-fixes-2026-09-28`. `fix/s37-pre-stage4` was merged and
+  deleted 2026-09-29 (tag `archive/fix-s37-pre-stage4-2026-09-29`). New work goes on `fix/…` or `feature/…` branches
   (`conventions.md`). Push status: `git status -sb`.
 
 ---
