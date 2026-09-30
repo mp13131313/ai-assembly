@@ -202,7 +202,7 @@ C53 (headnote corruption, both surfaces — port `dashboard.py` slug→council_c
 **Stage 3 — operator gates · (parallel; not model work)** — = the Operator decision points below.
 C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32.4 re-validate §6 on Opus 4.8 · reader-gate scheduling · validation-track decision · vatican §16 · chat product shape.
 
-**Stage 4 — Phase 1.1 backport** *(operator 2026-09-28: approved, run after the remaining Phase 0 work; spend cap to be set before the first sentinel regen)* · mostly `Sonnet / medium`, `Opus / medium` for subtle · one-at-a-time, sentinel-regen gate. MUST precede Stage 5.**
+**Stage 4 — Phase 1.1 backport** *(operator 2026-09-28: approved, run after the remaining Phase 0 work; spend decided per test, best-quality vs best-value options; the USD 10 cap was lifted 2026-09-30)* · mostly `Sonnet / medium`, `Opus / medium` for subtle · one-at-a-time, sentinel-regen gate. MUST precede Stage 5.**
 `Sonnet`: Voice-of-X native emission (§18) · `manual_grounding`/`editorial_rationale`→Pass 4a/4b (§23) · §31 mechanical gaps (D/E/G/H/I).
 `Opus`: mediated-voice clarification across Pass 2/3/4a (§9 universal-pattern + per-voice worked examples — voice-fidelity-critical). *Target is set (cards are canon) → most is execution; Opus only for the cross-cutting voice design.*
 
@@ -245,10 +245,11 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 - **Family-of-forms vs the gate (PRODUCT §11.6)** — **exempt, conditionally** (only the one upstream Pass 4b edit; re-enters the gate if it grows).
 - **Dossier-index writers (#5)** — done (`3871e11`): each writer preserves the fields it doesn't own.
 - **C51 per-theme files** — done: builder bug fixed (`4b7ac0d`), 24 files generated and pushed with the record repair.
-- **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator sets a spend cap before the first sentinel regen.
+- **Stage 4 (1.1 backport)** — approved, **deferred until the other work is done**; operator picks each test's option (best quality / best value) before the first sentinel regen; the USD 10 cap was lifted 2026-09-30.
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
 - **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.
-- **Stage 4 spend cap (2026-09-28): USD 10 on the Claude API.** Enough for targeted pass-level sentinel regens, not full voice rebuilds. The main session estimates each regen's cost before the first paid run and stops at the cap.
+- **Stage 4 spend cap: ~~USD 10 (2026-09-28)~~ lifted 2026-09-30 (operator).** No blanket cap on tests. Every proposed paid test lists a **best-for-quality** and a **best-value** option with cost estimates, and the operator picks per test. The main session still estimates each run's cost before the first paid call and asks before firing.
+- **Consolidation (2026-09-30, operator: the hybrid).** Every tracker, this roadmap, the product note, the doc backlog, FOLLOW_UPS, and the 13 Fable reports plus 11 reviews are consolidated into one register. Capture is exhaustive and script-checked; planning is product-style: Now / Next / Later by outcome, a decision log that keeps rejected options, and a not-doing list with gates. The result **replaces this roadmap's sequencing sections** after operator approval. Method: `CONSOLIDATION_2026_09_30/METHOD.md`. It starts after the stage-quality Part B and the cap re-plans land.
 - **Code-review follow-ups (2026-09-28):** Athens reflection record: fix the converter going forward and leave the published record as it is (runtime C68 A1). Night-3 continuity: correct the spec now, decide the code in Stage 5 (C68 A10). Lovelace: re-fetch her Wikisource text after the fetcher fix, then check whether her card needs a patch (voices §37 A3).
 - **Editor defects (runtime C64)** — `publish_flow`'s dead newspaper-field reads: *"Remove all three"* (`issue_no`, `vol`, `publication_date`). The stray `**` in the 13 published Athens dossiers: *"Clean later, separate task"* (filed as a C64 residual; not scheduled).
 

@@ -4,7 +4,7 @@
 **Written:** 2026-09-28/29 by a Fable 5.1 session, Task 3 of `_workspace/planning/BRIEF_2026_09_28_fable_batch2.md`.
 **Data:** `athens-2026` (read-only): the 10 cards, 125 Step 1 records, 30 Step 2 artifacts, 30 Step 2 validation files, and briefings. Offline scripts only; no model calls.
 **Labels:** CONFIRMED = seen in data or code. PLAUSIBLE = consistent with the data but not proven. *Inference* = my reading. Decisions are the operator's.
-**Revised 2026-09-29** after the independent review `REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/09_card_field_utility.md`: per-voice controls added; three verdicts downgraded; ablation redesigned for the USD 10 Stage 4 cap. §8 lists every change.
+**Revised 2026-09-29** after the independent review `REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/09_card_field_utility.md`: per-voice controls added; three verdicts downgraded; removal test redesigned. **Revised 2026-09-30:** the removal test is now two plans, best for quality and best value (§6.5). §8 lists every change.
 
 ---
 
@@ -33,7 +33,7 @@
 5. **Recommendation:**
    - fix the voice Step 1 cache race and the note leak now (both subtractive);
    - use the §3 table in Task 1's partition;
-   - run a small removal test before any trimming or on-demand card loading. A Step-2-only arm fits the USD 10 Stage 4 cap (≈ $9); one full-rerun variant brings it to ≈ $13–15 (§6.5);
+   - run a removal test before any trimming or on-demand card loading. §6.5 gives two plans: best value ≈ $40–50, best for quality ≈ $600–750. Run the best-value plan first;
    - keep C59's `read_persona_card_section()` tool-use shelved: nothing here supports it, and it would put the strongest-effect fields at risk (§6.2).
 
 ---
@@ -299,47 +299,72 @@ See §2. This matters for any trace-based evaluation, including Task 4's §33 me
 - **Pass 6 / assembly:** never put operator-facing notes in a field the runtime renders (§5.1).
 - **Prompt-level naming works:** the Step 2 weighing cites the fields the prompt lists. Deleting a field means also deleting its name from the closing prompts, or the model will reason about an absent field.
 
-### 6.5 The honest test: a small removal run, sized to the Stage 4 cap (option; operator decision)
+### 6.5 The honest test: a removal run (two plans; operator decision)
 
-The operator's Stage 4 spend cap is **USD 10**. The estimates below:
-- are from on-disk token counts at Opus 4.7 prices, so lower bounds;
-- assume each voice's calls run sequentially (no §5.2 race);
-- need the Athens model (`claude-opus-4-7`) pinned in `model_routing.json` for the run, or the Athens outputs stop being a valid comparison.
+Remove fields from the card, rerun the voice steps, and compare with the shipped card. Nothing else can tell dead weight from insurance.
 
-**Step 2 cost per voice-night, reusing the Athens Step 1 outputs:**
-- the first call writes the shared prefix and its tail: ≈ $0.62;
-- each further variant reads the prefix and writes only its own tail: ≈ $0.39;
-- so three variants ≈ **$1.40 per voice-night**.
+**Variants** (both plans draw on these):
 
-**Package 1, within USD 10: the Step 2-only arm (≈ $8.50).**
-- 3 voices (Octopus, strong fidelity; Cleopatra, weak; Whanganui, sacred grammar) × Nights 1–2.
-- Three variants:
-  - a rerun of the shipped card, which measures run-to-run noise;
-  - (b) the Step 2 reasoning trio removed;
-  - (d) the no-visible-effect artifact fields removed.
-- Judge by blind reading against the rerun and the Athens artifact.
-- The existing validators add ≈ $0.10 per artifact (≈ $1.80 total) and would push it to about $10.30.
-- This arm is also exactly the test Option B needs.
+| | Variant | Needs |
+|---|---|---|
+| (a) | Prevention fields removed: `hard_limits`, `knowledge_boundary`, `topics_requiring_care`, `world.anachronisms_to_avoid` | Full Step 1+2 rerun (changes the shared prefix) |
+| (b) | Step 2 reasoning trio removed: `reasoning_method`, `default_questions`, `disagreement_protocol` | Step 2 only |
+| (c) | The three lists with unused tails cut to their first half: `characteristic_moves`, `preferred_vocabulary`, `metaphorical_repertoire` | Full rerun |
+| (d) | No-visible-effect artifact fields removed: `aesthetic_qualities`, `relationship_to_detailed_response`, `technical_capabilities` | Step 2 only |
+| (e) | Lean card: (b) + (d) + `character`, `register_and_tone`, `finds_compelling` removed at once. Tests whether small fields add up | Full rerun |
 
-**Package 2, within USD 15: Package 1 plus (a) prevention fields removed (≈ $12–13).**
-- (a) touches the shared prefix, so it needs full Step 1+2 reruns: 2 voices × Night 1 at ≈ $1.70–2.25 each, compared with the Athens outputs.
+**Unit costs** (on-disk token counts at Opus 4.7 prices, so lower bounds):
+- full Step 1+2 run for one voice-night, with the §5.2 race avoided: ≈ **$1.76** (range $1.18–2.18);
+- Step 2 only, reusing the Athens Step 1 outputs: first call ≈ $0.63; each new variant ≈ $0.39; each repeat of a variant already run ≈ $0.20;
+- Step 2 validators: ≈ $0.08 per artifact.
 
-**Out of budget:** (c) every list cut to half. It also touches the prefix; it fits within USD 15 only as a replacement for (a).
+**Assumptions, both plans:**
+- The voice steps stay on `claude-opus-4-7`, as `model_routing.json` has them today. On another model the Athens outputs stop being a baseline.
+- The §5.2 race is fixed first, or each voice's calls run one after another. Otherwise full-rerun arms cost about 30% more.
+- Runs reuse the Athens briefings and the Athens continuity files, so the card is the only thing that varies.
+- Runs write to a sandbox project, since `athens-2026` is read-only. Nothing is published; that matters for the Marley and Whanganui variants with limits removed.
+- A small harness is needed: variant cards and a Step-2-only entry point. `voice_flow` has `--voices` but no Step-2-only flag (CONFIRMED). Engineering time is not costed.
+- The LLM judge cost (~$0.05 per comparison) is an estimate, not measured.
 
-**What it can show:** whether the Step 2 reasoning trio and the artifact descriptors matter (Package 1), and whether the prevention fields carry weight (Package 2).
+| | **Best for quality** | **Best value** |
+|---|---|---|
+| Voices | All 10 | Step 2 arm: all 10. Full-rerun arm: 4 (Octopus, Cleopatra, Whanganui, Hannah) |
+| Nights | All 3 | Night 1 |
+| Full-rerun arms | Shipped card ×3; (a) ×2; (c) ×2; (e) ×2 | Shipped card ×1; (a) ×1; (c) ×1 |
+| Step-2-only arms | Shipped card ×3; (b) ×2; (d) ×2 | Shipped card ×2; (b) ×1; (d) ×1 |
+| Noise measure | 3 fresh baselines per voice-night, plus the Athens output | Step 2 arm: 2 fresh baselines plus Athens. Full arm: 1 fresh baseline plus Athens |
+| New artifacts | 480 | 52 |
+| Judging | Validators on all; a blind pairwise LLM judge on all; operator blind read of a sample (~40 pairs); this review's scripts rerun on the outputs | Validators on all; operator blind read of the 12 full-rerun artifacts and a sample of the Step 2 arm; this review's scripts rerun |
+| Cost | Full arms $475 + Step 2 arms $66 + validators $38 + judge ~$25 ≈ **$600**; ≈ $750 if the race is unfixed | Step 2 arm $16 + full arm $20 + validators $4 ≈ **$40**; ≈ $50 if the race is unfixed |
+| Reading load | ~290K words of artifacts | ~31K words |
+| Can show | Per-voice effects against a noise floor, across three nights' topics and the continuity nights; whether small fields add up | Large effects only. Whether the Step 2 fields matter, across all 10 voices. A first read on prevention fields and list length in 4 voices |
+| Can't show | Effects on topics Athens didn't raise | Small effects. "No loss" for (a) or (c): n = 4 without repeats is too few |
 
-**What it can't show:** effects on topics these formulations don't raise, or anything statistical at n = 2–3. It is also the cheapest instance of FU#30's card-richness question.
+**Why these four voices for the full-rerun arm:** Octopus has the highest move fidelity, Cleopatra the lowest, Whanganui carries sacred grammar and the strongest card-verbatim behaviour, and Hannah is the documented case where a prevention field collided with the rest of the card (voices §31 Gap-J).
+
+**The earlier, smaller design is not the best value.** That design ran Step 2 only, on 3 voices × 2 nights, for ≈ $8.50.
+- It tested only (b) and (d), the two questions with the least at stake.
+- Three voices are too few, now that the effects turn out to be voice-dependent (§1 table). A Step 2 variant costs ≈ $0.39, so all 10 voices cost $16.
+- The questions with design consequences are prevention fields (C59, the split card) and list length (Stage 4). Both need full reruns; four voices × three runs cost $20.
+
+**Recommendation: run the best-value plan first, then quality-scale arms only for changes the operator wants to make.**
+- The changes at stake save $1–3 per Athens-scale run. The payoff is design knowledge, and the scarce resource is blind-reading time: 52 artifacts against 480.
+- A clear loss in the best-value plan settles that field: keep it.
+- No visible difference does not justify a trim by itself for (a) or (c). Before acting, run that one arm at quality scale: ≈ $105 for the variant ×2 over all 30 voice-nights, plus ≈ $160 once for the three baselines.
+- Go straight to the quality plan only if the operator wants general evidence on card richness (voices FU#30, §33) rather than answers to these specific trims.
+
+**What neither plan can show:** effects on topics these formulations don't raise.
 
 ## 7. Options and recommendation
 
 | Option | What | Cost | Net-complexity |
 |---|---|---|---|
 | **A** | Fix the §5.2 cache race (C66 pattern) and the §5.1 note rendering; hand the §3 table to Task 1 | ~2 h engineering; saves ~$16 per Athens-scale run | Subtractive |
-| **B** | A + drop `reasoning_method`, `default_questions` and `disagreement_protocol` from Step 2 | ~$1 per run saved. Needs a paid Voice Step 2 rerun, which is §6.5 Package 1; the persona sentinel regen doesn't exercise runtime routing. It partly reverts the 2026-05-02 routing refactor | Subtractive, small |
-| **C** | A + the §6.5 removal run before any Stage 4 list-length rule or card trim | Package 1 ≈ $8.50 (within the USD 10 cap); Package 2 ≈ $12–13 | Adds nothing permanent |
+| **B** | A + drop `reasoning_method`, `default_questions` and `disagreement_protocol` from Step 2 | ~$1 per run saved. Needs a paid Voice Step 2 rerun, which is the Step 2 arm of either §6.5 plan; the persona sentinel regen doesn't exercise runtime routing. It partly reverts the 2026-05-02 routing refactor | Subtractive, small |
+| **C** | A + a §6.5 removal run before any Stage 4 list-length rule or card trim | Best value ≈ $40–50; best for quality ≈ $600–750 | Adds nothing permanent |
 | **D** | C59 tool-use card loading | Weeks | Additive; not supported by this evidence |
 
-**Recommendation: A now; C (Package 1, within the USD 10 cap) before Stage 4 touches list lengths or card size; B only if Package 1 shows no loss; D stays shelved.**
+**Recommendation: A now; C before Stage 4 touches list lengths or card size, starting with the best-value plan; B only if the Step 2 arm shows no loss; D stays shelved.**
 
 **To file** (for the main session; this review makes no tracker edits):
 - §5.2 as a runtime C-item next to C66;
@@ -364,7 +389,7 @@ The operator's Stage 4 spend cap is **USD 10**. The estimates below:
     - the duplicated length sentence is removed;
     - the C18/C20 citation is replaced by `ffad93f` + `9e1c987`.
 11. **Option B:** needs a paid Voice Step 2 rerun, not the persona sentinel regen.
-12. **Removal test:** redesigned for the USD 10 Stage 4 cap (§6.5, §7).
+12. **Removal test:** redesigned (§6.5, §7); replaced again on 2026-09-30, below.
 13. **Smaller corrections:** the bold-line quasi-headings are noted; the trace-density figure is corrected.
 
 **Not changed, with reasons:**
@@ -372,3 +397,12 @@ The operator's Stage 4 spend cap is **USD 10**. The estimates below:
 - **Marginal cost per 1K tokens.** $0.75 is kept; the review's ~$0.84 comes from a different averaging, and the conclusion doesn't change.
 
 **Scripts:** still only in this session's scratchpad, since the brief allowed one deliverable file. The main session can copy them if the numbers are to be regenerated.
+
+### 2026-09-30: removal test replanned
+
+The operator lifted the Stage 4 spend cap, so the test is no longer sized to a budget.
+- **§6.5 rewritten** as two plans side by side: best for quality (≈ $600–750, 480 artifacts) and best value (≈ $40–50, 52 artifacts), with assumptions and a recommendation.
+- **Variant (e) added** (lean card); variant (c) narrowed to the three lists with unused tails.
+- **Unit costs recomputed per voice-night:** full run ≈ $1.76; Step 2 ≈ $0.63 first call, $0.39 per new variant, $0.20 per repeat; validators ≈ $0.08 per artifact (was ≈ $0.10).
+- **Budget wording removed** from the header, Outcome item 5, §6.5, §7 (options B and C, the recommendation) and item 12 above.
+- Nothing else changed.

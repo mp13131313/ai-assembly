@@ -3107,6 +3107,21 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 | A15 | NIT | The voice prompt headers read literally "FROM NIGHT N-1" | open |
 | R3 | risk | Published fields the external microsite may read changed shape (names, index fields, theme files, no leading `**`) | **Operator:** check the microsite before its next build |
 
+### C69. Researcher cluster and theme labels are inventories, not headlines 🔵 OPERATOR DECISION (filed 2026-09-30; analysis `NOTE_2026_09_30_researcher_labels.md`; cross-ref `REVIEW_2026_09_28_stage_output_quality.md` Part A)
+**Why:** browsing Athens in the explorer, the Researcher's clusters and themes read as "boring / general" (operator). The KJ affinity grouping itself is deliberate and stays neutral (spec v3 §D, §E, §G). The labels are the problem:
+- titles are topics ("plain and topical", `researcher_clustering.md:83`);
+- summaries justify the grouping and list nominalized items;
+- the "declarative findings" ban also stops the Researcher reporting what speakers claimed;
+- the theme round sees only those summaries, never the statements.
+
+**Proposal:** labels that report what was said, attributed, with the split and what stayed open. Titles become sentences. Add one or two key statements per cluster, and move the "why grouped" sentence to an audit field. Optionally add the KJ relations step (the map). Clustering unchanged.
+
+**Test, priced in the note (§5):** relabel the fixed Athens memberships in a sandbox.
+- Best value: ≈ $2 (Opus 4.7, one draw).
+- Best quality: ≈ $11 (a current-prompt control, 2 draws, an Opus 5.5 arm, a support check, the relations map), or ≈ $15 with a Fable arm.
+
+**Decide:** whether to run it, and which package. Also whether C68 A1 (reflections labelled "panel") is fixed first. Relabelling Athens keeps its memberships, so A1 doesn't block this test.
+
 
 ## Section F — Recently landed (for context)
 

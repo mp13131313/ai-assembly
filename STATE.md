@@ -260,9 +260,9 @@ not re-verified in that spec: Stage 1 routing, the cost figures, the CLI
 list (its v3.1 changelog has the details).
 Next: Stage 4 (persona-pipeline catch-up on the
 Athens lessons). Its quality gate runs again (voices §37 A5, 2026-09-29).
-Spend cap set at $10 (operator); the Stage 4 design draft
-(`voices/DESIGN_2026_09_28_stage4_prompt_backport.md`) estimates ~$113 for
-all items, so the cap and the order are open → Stage 5 (family of forms; split-card +
+No blanket spend cap (the $10 cap was lifted 2026-09-30); each paid test
+lists best-quality and best-value options and the operator picks. Design
+draft: `voices/DESIGN_2026_09_28_stage4_prompt_backport.md`; the order is open → Stage 5 (family of forms; split-card +
 event config) → Stage 6 (validator prune, editor prompt, vendor layer,
 deployment profiles) → the hub.
 

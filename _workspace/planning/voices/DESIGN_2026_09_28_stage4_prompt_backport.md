@@ -1,48 +1,56 @@
 # Stage 4 prep — prompt changes for the backport (drafted, not applied)
 
 **Task:** Task 2 of `_workspace/planning/BRIEF_2026_09_28_fable_batch.md` (roadmap Phase 1.1, items 1–7, plus voices §37 A6).
-**Written:** 2026-09-28, Fable 5.1 session. **Revised 2026-09-30** after the Opus review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/02_stage4_design.md`); every change is listed in the revision log at the end.
+**Written:** 2026-09-28, Fable 5.1 session. **Revised twice on 2026-09-30:** after the Opus review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/02_stage4_design.md`), and again when the operator lifted the Stage 4 spend cap. Every change is listed in the revision log at the end.
 **Status:** proposals only. Nothing in this doc is applied. No model was called. The shipped cards were read, not written.
-**Base:** `main` at `86998b4`. All `file:line` references and all diffs are against that commit. `athens-2026/…` means `/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026/…`.
+**Base:** `main` at `86998b4`. All `file:line` references and all diffs are against that commit. The files the patches touch are unchanged on `main` at `e674893` (checked 2026-09-30). `athens-2026/…` means `/Users/aienvironment/Desktop/AI Assembly/projects/athens-2026/…`.
 **Labels:** CONFIRMED = read in the file or data named, or run offline. PLAUSIBLE = an inference, marked as one.
 
 ---
 
 ## Summary (one page)
 
-**Outcome.** Eight prompt changes are drafted as nine patches (item 3 is split in two). The patches are real `git diff` output; they pass `git apply --check` against `main`, in order. Under the operator's **USD 10** cap, six of the eight items can be checked with one treatment draw each, for about **$5.60**. Item 5 and the second half of item 3 do not fit.
+**Outcome.** Eight prompt changes are drafted as nine patches (item 3 is split in two). The patches are real `git diff` output; they pass `git apply --check` against `main`, in order. Two test plans are costed below (§0.4). The operator chooses between them.
 
-Three things make the cap workable:
-- **No Derive call.** With `_operator_review_passed.flag` deleted in the sandbox, the pipeline stops at the operator review gate, before Derive, and every validator result is already cached (§0.2). This is read from the code, not run; a free dry run confirms it before any paid call.
-- **The control arm is free.** The athens-2026 pass outputs are one draw of the current prompt, and `regen --baseline-project` already diffs against them.
-- **Free offline checks replace paid ones** where they can: a block-coverage test (item 4), a unit test (item 2), and a render-identity check (item 6).
+| | **Plan A — best for quality** | **Plan B — best value** |
+|---|---|---|
+| Idea | Several draws per arm, fresh controls, every variant, then rebuilt cards and a runtime comparison | One treatment draw for every part of every patch, a free control, and one end-state voice |
+| Draws per check | 3 treatment + 2 fresh control (the athens-2026 output is a third control) | 1 treatment; control = the athens-2026 pass output |
+| Items 1 and A6 | separate draws (strict one at a time) | one shared Pass 2 draw |
+| Voices | 10: every variant, and two voices for the composer block | 8: one voice per variant |
+| End state | 5 voices rebuilt from Pass 2 through 7a FINAL, plus 2 rebuilt on the unpatched prompts; cards diffed field by field | Whanganui, Passes 2→6 as a chain; fields diffed against the shipped card |
+| Runtime | Night 1, 5 voices, rebuilt card vs shipped card, read blind | two voice runs, for item 5 only |
+| Paid runs | about 130 pass-level runs, 16 tailor calls, 7 rebuilds, 24 voice runs | 21 pass-level runs, 1 tailor call, 2 voice runs |
+| Harness | needs the draws / arms / archive / report extension first (about half a day of code) | today's harness, by hand |
+| **≈ Cost** | **$175** (allow $210 with redraws) | **$14** (allow $20 with redraws) |
+| Shows | whether each instruction takes, how often it leaks, and whether whole cards and artifacts lost texture | whether each instruction takes |
+| Doesn't show | rare leaks (three draws usually miss a 1-in-10 leak) | leak rates, or a loss of texture in cards and artifacts |
 
-| Patch | Item | Change | Check under the cap (1 treatment draw each) | ≈ Cost | Fits |
+Per item (patch numbers in brackets; costs from recorded token usage, §0.3):
+
+| Item | Change | Plan B check | B ≈ | Plan A check | A ≈ |
 |---|---|---|---|---|---|
-| — | 0 | Dry run of the sandbox (no patch) | pipeline with nothing invalidated; expect zero paid calls | $0 | yes |
-| 01 | 7 | Pass 0b: name a work only if Perplexity names it; few-shots rewritten | Lovelace, 1 tailor call | $0.33 | yes |
-| 02 | 1 | `voice_temporal_stance`: assembly leads, `anchored_override` null, hook ban | Lovelace + Octopus, Pass 2 (shared with A6) | $1.32 | yes |
-| 03 | A6 | `council_member_name` completes "You are ___." | same two draws | $0 | yes |
-| 04 | 2 | "Voice of X" from Pass 0a; profile name set in code | unit test (in the patch); no paid call | $0 | yes |
-| 05 | 4 | Witness blocks cover every field; cited first-person speaker frame | Whanganui: Pass 4b, 4a, 2 + coverage test (in the patch) | $1.73 | yes |
-| 06 | 3a | Composer stance: Pass 0a, node 0, Pass 4a, Pass 6 | Plato: Pass 4a, Pass 6 (**needs O2**) | $1.00 | yes |
-| 07 | 6 | Operator direction reaches Pass 4a/4b; stale song lines removed | Marley 4b + 4a, Arendt 4b + render identity (free) | $1.24 | yes |
-| | | **Subtotal** | 10 pipeline runs + 1 tailor call | **$5.62** | |
-| 08 | 5 | Gap-H entry in `topics_requiring_care` | Battuta Pass 2 + a runtime smoke | ≈ $3.3 | only if ≥ $3.5 is left |
-| 09 | 3b | Composer stance: Pass 2, Pass 3 (preventive) | Plato Pass 2 + 3 (can only show "no harm") | ≈ $1.3 | deferred |
+| 7 [01] | Pass 0b: name a work only if Perplexity names it | Lovelace, 1 tailor call | $0.33 | 4 voices × (3 + 1) tailor calls | $6.4 |
+| 1 [02] | `voice_temporal_stance`: assembly leads, `anchored_override` null, hook ban | Lovelace, Octopus, Scheherazade, Battuta: Pass 2 | $2.75 | the same 4 voices × 5 draws | $13.75 |
+| A6 [03] | `council_member_name` completes "You are ___." | the item-1 draws | $0 | Lovelace, Octopus, Cleopatra, Marley, drawn after item 1 has landed | $11.5 |
+| 2 [04] | "Voice of X" from Pass 0a; profile name set in code | unit test | $0 | unit test + 6 Pass 0a calls | $1 |
+| 4 [05] | Witness blocks cover every field; speaker frame | Whanganui: Pass 4b, 4a, 2 + coverage test | $1.73 | the same 3 passes × 5 draws | $8.65 |
+| 3 [06, 09] | Composer stance (3a: Pass 0a, node 0, 4a, 6; 3b: Pass 2, 3) | Plato: Pass 6, 4a, 3, 2 (**needs O2**) | $2.32 | Plato + Scheherazade: 4 passes × 5 draws | $23.7 |
+| 6 [07] | Operator direction reaches Pass 4a/4b; stale song lines removed | Marley 4b + 4a, Arendt 4b + render identity | $1.24 | + Whanganui and Octopus 4b; × 5 draws | $8.7 |
+| 5 [08] | Gap-H entry in `topics_requiring_care` | Battuta: Pass 2 + two voice runs on the wbbf26 briefings | $2.20 | 4 voices Pass 2; 3 voices × 3 voice runs | $19.0 |
+| End state | — | Whanganui chain, Passes 2→6 | $3.21 | 7 rebuilds ($46) + runtime comparison ($34) | $80 |
+| | | **Plan B total** | **$13.78** | **Plan A total** | **≈ $173** |
 
-- **If the flag stays in the sandbox,** each of the 10 runs adds a Derive call ($0.32–0.44): about $9.35 in total, with almost no margin.
-- **Strict one-at-a-time for items 1 and A6** (separate draws) adds $1.32.
-- **What one draw can show:** whether the instruction takes (mechanical and architectural checks against a control that fails them). **What it can't:** sampling variance, or a loss of texture elsewhere in the card (§0.4).
+**Recommendation** (the operator decides): run Plan B, then Plan A's end state only (the rebuilds and the runtime comparison, about $80), before Stage 5 starts. Reasons in §0.4.
 
-**Landing order:** 7 → 1 → A6 → 2 → 4 → 3a → 6, then 5 and 3b if budget and decisions allow. Patch 06 needs 05, and 09 needs 05 and 06. The others apply in any order (checked, §0.5).
+**Landing order:** 7 → 1 → A6 → 2 → 4 → 3a → 3b → 6 → 5. Patch 06 needs 05, and 09 needs 05 and 06. The others apply in any order (checked, §0.5).
 
 **Open operator decisions:**
-1. **O1 — Sandbox and protocol.** The cap is decided (USD 10). Still open: the sandbox location (recommend `projects/current-tests/stage4-sentinels/`); deleting the review flag in the sandbox (recommended); one shared Pass 2 draw for items 1 and A6 (recommended) or two.
-2. **O2 — Plato as a sentinel** for item 3a (and 3b, 5). `_workspace/planning/ONBOARDING.md:65` says "No Plato re-run without explicit ask". The run regenerates two passes in a sandbox copy. Without Plato, item 3a has no honest check: the collision evidence is his.
+1. **O1 — Test plan, sandbox and protocol.** Plan A, Plan B, or Plan B followed by Plan A's end state (recommended; §0.4). Also: the sandbox location (recommend `projects/current-tests/stage4-sentinels/`), and deleting the review flag in the sandbox (recommended in either plan; it only removes a Derive call that tests nothing).
+2. **O2 — Plato as a sentinel** for item 3 (and, in Plan A, item 5 and the rebuild). `_workspace/planning/ONBOARDING.md:65` says "No Plato re-run without explicit ask". The runs regenerate passes in a sandbox copy. Without Plato, item 3a has no honest check: the collision evidence is his.
 3. **O3 — Item 3 trigger.** New `mediation_stance: "composer"` (recommended) or a universal clause. Voices: Plato and Scheherazade.
 4. **O4 — Item 6 shape.** New `artifact_direction` field (recommended), or pipe `manual_grounding` + `editorial_rationale` as filed. Either way, Marley's config must be reconciled with v2 first.
-5. **O5 — Item 5.** Placement in `topics_requiring_care` (recommended); land only after the refusal-detection fix; spend the remaining budget on it or raise the cap.
+5. **O5 — Item 5.** Placement in `topics_requiring_care` (recommended); land only after the refusal-detection fix.
 6. **O6 — Whanganui frame.** Align `epistemic_frame_statement`'s opening with the witness stance (recommended; N5).
 7. **O7 — Shipped cards.** Stage 4 changes prompts only. Patch the 8 off-spec `council_member_name` values, Whanganui `hard_limits[1]` (N9) and `epistemic_frame_statement` (N5) now, or at the next rebuild? Any card patch changes voice input and needs re-validation.
 8. **O8 — Place name for item 1.** Take it from `conference_facts.json` `location` now (in the patch), or wait for roadmap 2.1 `event_config`.
@@ -73,7 +81,7 @@ Three things make the cap workable:
 
 | # | State | Where | Effect |
 |---|---|---|---|
-| G1 | `regen` invalidates **one** pass | `sentinel_regen.py:175-176` (`invalidate_cache.py --pass`) | Fine for single-pass checks. For a chain, regenerate the downstream pass first (§0.2 step 5) |
+| G1 | `regen` invalidates **one** pass | `sentinel_regen.py:175-176` (`invalidate_cache.py --pass`) | Fine for single-pass checks. When several passes of one voice are drawn, the order matters (§0.2 step 5) |
 | G2 | The sandbox copies `_operator_review_passed.flag` | `make_sandbox`, `:144` (`copytree`) | With the flag, every run takes the path-(b) fast exit and **pays for Derive** (`run_persona_pipeline.py:901-942`). Delete the flag (§0.2) |
 | G3 | The diff is structural: changed keys plus the first 200 chars | `_diff_against_baseline`, `:190-233` | It can't judge a field. Read the field, and run the item's mechanical checks |
 | G4 | The baseline is production's pass output, not the shipped card | `resolve_baseline`, `:158-159` | Right for a control arm. The target is still the hand-corrected card, so compare with that by reading |
@@ -81,9 +89,9 @@ Three things make the cap workable:
 | N10 | Defaults are `plato,fyodor_dostoevsky` | `:64` | Always pass `--voices` |
 | — | The runner has no `--stop-after` | `run_persona_pipeline.py:51-52` | Not needed for single-pass checks once the flag is gone (§0.2) |
 
-### 0.2 The capped protocol
+### 0.2 The protocol (both plans)
 
-1. **Make the sandbox.** `sentinel_regen.py sandbox --from <athens-2026> --to <projects/current-tests/stage4-sentinels> --voices ada_lovelace,octopus,whanganui_river,plato,bob_marley,hannah_arendt`. `regen` refuses a project root that holds a `.git` folder, so the sandbox must be a plain folder.
+1. **Make the sandbox.** `sentinel_regen.py sandbox --from <athens-2026> --to <projects/current-tests/stage4-sentinels> --voices ada_lovelace,octopus,scheherazade,ibn_battuta,whanganui_river,plato,bob_marley,hannah_arendt` (Plan A adds `cleopatra,fyodor_dostoevsky`). `regen` refuses a project root that holds a `.git` folder, so the sandbox must be a plain folder.
 2. **Delete `voices/<slug>/_operator_review_passed.flag` in the sandbox**, for every voice. Why this removes the Derive call (CONFIRMED by reading; all 10 athens-2026 voice folders checked):
    - the fast exit needs the flag (`run_persona_pipeline.py:901-904`);
    - without it, the run goes on through Passes 7-pre, 7-anachronism, 7a, 7b, 7c and 7a FINAL, and each is a `call_or_cache` whose output file exists in every voice folder;
@@ -93,10 +101,11 @@ Three things make the cap workable:
 4. **Set sandbox configs** where an item needs it (item 3a: `"mediation_stance": "composer"` for Plato; item 6: `artifact_direction` for Marley).
 5. **Per item:** apply its patch on a branch, then `sentinel_regen.py regen --pass <p> --project <sandbox> --baseline-project <athens-2026> --voices <slug>`.
    - One pass per run. When an item touches several passes of one voice, regenerate the **downstream pass first** (4b, then 4a, then 2), so each pass is drawn from the same upstream as its control.
+   - For a **chain** (the end-state check), go the other way: regenerate Pass 2, then 3, 4a, 4b, 5, 6, one run each. Each pass then reads the regenerated upstream. No validator is re-run.
    - Watch the log: exactly the target pass and its CT compress should show `RUNNING:`.
    - Copy the regenerated pass output to `<sandbox>/_sentinels/<item>/<slug>/` before the next run overwrites it.
-6. **Judge.** Control = the athens-2026 pass output (one draw of the current prompt). Treatment = the sandbox output (one draw). Run the item's mechanical checks on both, and read the treatment field next to the shipped card's field.
-7. **Land or not.** The item lands when the treatment passes every check and the control fails at least the check the item exists to fix. A failed treatment means revise and redraw that voice. Keep a running total and stop at USD 10.
+6. **Judge.** Control = the athens-2026 pass output (one draw of the current prompt). Treatment = the sandbox output. Run the item's mechanical checks on both, and read the treatment field next to the shipped card's field. Plan A repeats steps 5–6 for each draw and also draws the control fresh, on the unpatched prompt.
+7. **Land or not.** The item lands when the treatment passes every check and the control fails at least the check the item exists to fix. A failed treatment means revise and redraw that voice. Keep a running total of the spend.
 
 Adaptive thinking stays on for Passes 2–6, as `model_routing.json` sets it (`personas.pass_2` … `pass_6`: `thinking: "adaptive"`). Shipped cards are not regenerated: Stage 4 changes what the next build emits.
 
@@ -114,14 +123,91 @@ From the `usage` blocks of the athens-2026 pass outputs, at Opus 4.7 $5 / $25 pe
 | Hannah Arendt | 0.83 + 0.05 | 0.87 + 0.10 | 0.14 + 0.15 | 0.55 | 0.36 |
 | Ibn Battuta | 0.75 + 0.07 | 0.67 + 0.18 | 0.10 + 0.17 | 0.51 | 0.37 |
 
-Pass 3 is $0.60–0.74. A Pass 0b tailor call is $0.33–0.45 (Lovelace $0.33). Pass 6 has no CT compress. The runtime smoke in item 5 (one voice, Step 1 + Step 2) is about $2.5; that figure is PLAUSIBLE only (derived from the Voice spec's Athens totals, not from a usage file).
+Other figures:
+- **Pass 3** is $0.60–0.74, plus $0.08–0.13 for its CT compress. **Pass 5** is $0.12–0.23. Pass 6 has no CT compress.
+- **A Pass 0b tailor call** is $0.33–0.45 (Lovelace $0.33).
+- **A runtime voice run** (Step 1 + Step 2 for one voice, no validation) cost $1.34–3.88 on Athens Night 1, mean $2.24: Plato $1.48, Lovelace $2.15, Whanganui $2.15, Marley $2.49, Scheherazade $3.18. On the archived wbbf26 dryrun it cost less: Battuta $0.69, Cleopatra $0.94, Plato $1.11. Both are from the token counts in the runs' `04_voice/` folders, with a 1-hour cache write at 2× the input price and a cache read at 0.1×.
+- **A rebuild from Pass 2 through 7a FINAL** is about $6.5 per voice. PLAUSIBLE only: Passes 2–6 are about $3.2 and Pass 7b about $0.55 from usage, but the 7-pre and 7a-FIX calls record no usage, and the three gpt-5.4 calls and one Gemini call (about 30K tokens in, 10K out each) are not priced in the repo.
+- The patched prompts are a few hundred tokens longer than the ones these figures come from. That is within the rounding.
 
-### 0.4 What this design can and can't show
+### 0.4 Two test plans
 
-- **Can:** the instruction takes. Each item's control fails a check that is close to deterministic (the v1 opening sentence, a populated `anchored_override`, "I am …" in the name, first person as the river, "my mother Phaenarete"). One treatment draw that passes it, under the same upstream, is fair evidence.
-- **Can't:** separate the prompt's effect from sampling variance, or detect a loss of texture in fields the item doesn't target (the `3feb2b2` risk class). One draw per arm gives no variance estimate.
-- **Not covered by any draw:** item 1's fictional variant and calendar clause (Scheherazade, Battuta); A6 for Cleopatra and Marley; item 3b; item 5.
-- **What a fuller gate needs** (code work, after Stage 4 or with a higher cap): `--draws N` with a per-draw archive, a control arm drawn fresh, a field-by-field report against the shipped card, and `--from-pass/--through` for chains. With 2 + 2 draws and four voices per item, the original plan cost about $113, and about $150 with Derive on every run (the review's estimate).
+Both plans use the protocol in §0.2, the same patches, the same mechanical checks, and the same landing order. They differ in how much they draw.
+
+#### Plan B — best value (≈ $14)
+
+One treatment draw for every part of every patch, judged against a control that costs nothing.
+
+| Step | Runs (in this order) | ≈ Cost |
+|---|---|---|
+| Dry run | each sandbox voice, nothing invalidated | $0 |
+| Item 7 | Lovelace, tailor call | $0.33 |
+| Items 1 + A6 | Pass 2: Lovelace $0.70, Octopus $0.62, Scheherazade $0.61, Battuta $0.82 | $2.75 |
+| Item 2 | unit test | $0 |
+| Item 4 | Whanganui: Pass 4b $0.28, 4a $0.77, 2 $0.68 | $1.73 |
+| Item 3a | Plato: Pass 6 $0.32, 4a $0.68 | $1.00 |
+| Item 3b | Plato: Pass 3 $0.76, 2 $0.56 | $1.32 |
+| Item 6 | Marley: Pass 4b $0.22, 4a $0.73; Arendt: Pass 4b $0.29 | $1.24 |
+| Item 5 | Battuta: Pass 2 $0.82; two voice runs on the wbbf26 briefings, $0.69 each | $2.20 |
+| End state | Whanganui chain: Pass 2 $0.68, 3 $0.87, 4a $0.77, 4b $0.28, 5 $0.23, 6 $0.38 | $3.21 |
+| **Total** | 21 pass-level runs, 1 tailor call, 2 voice runs | **$13.78** |
+
+- **Why these draws.** Each line is the cheapest draw that exercises text which would otherwise land untested: the four stance variants (standard, organism, fictional, own calendar), the witness blocks, the composer blocks, the operator direction and the rewritten guardrail, the Gap-H entry.
+- **Why the control is free.** The athens-2026 pass outputs are a draw of the current prompt from the same upstream. Each item's control fails a check that is close to deterministic (the v1 opening sentence, "I am …" in the name, first person as the river, "my mother Phaenarete").
+- **The end-state chain** is the one check of the roadmap's exit criterion ("a fresh sandbox voice builds … matching shipped-card architecture without operator patches for the known classes"), on the voice with the most hand patches. A short script merges the six regenerated `fields` blocks and prints each field next to the shipped card's.
+- **Is the earlier $5.62 plan already the best value?** It is the core of this one (items 7, 1 and A6 on two voices, 2, 4, 3a, 6). The other $8.16 buys four things that plan left untested: the fictional and calendar variants of item 1 ($1.43), item 3b ($1.32), item 5 ($2.20), and the end-state chain ($3.21). Each is a single draw of something nothing else covers. Past this point a second draw mostly re-measures a check that is already near-deterministic.
+- **Assumptions.** The review flag is deleted in the sandbox (no Derive). If it stays, add about $0.37 per run: $7.80. Prices and token counts as in §0.3.
+
+#### Plan A — best for quality (≈ $175)
+
+Three stages.
+
+**A1. Per-item gates, strictly one item at a time.** For each voice and pass: 3 treatment draws and 2 fresh control draws on the unpatched prompt. The athens-2026 output is a third control, and it shows whether the fix pass and the five months since the build matter.
+
+| Item | Voices and passes | Draws | ≈ Cost |
+|---|---|---|---|
+| 7 | Lovelace, Octopus, Cleopatra, Dostoevsky: tailor | 3 treatment + 1 control each | $6.4 |
+| 1 | Lovelace, Octopus, Scheherazade, Battuta: Pass 2 | 5 each | $13.75 |
+| A6 | Lovelace, Octopus, Cleopatra, Marley: Pass 2, after item 1 has landed | 3 treatment each; 2 control for Cleopatra and Marley (item 1's treatment draws are the control for the other two) | $11.5 |
+| 2 | unit test; Pass 0a for three names, in its own sandbox | 2 each | $1 |
+| 4 | Whanganui: Pass 4b, 4a, 2 | 5 each | $8.65 |
+| 3 | Plato and Scheherazade: Pass 6, 4a, 3, 2 | 5 each | $23.7 |
+| 6 | Marley 4b + 4a; Arendt, Whanganui, Octopus 4b | 5 each | $8.7 |
+| 5 | Pass 2: Battuta, Cleopatra, Plato, Arendt. Runtime: Battuta, Cleopatra, Plato on the wbbf26 briefings | Pass 2: 3 treatment (2 control for Arendt; earlier items' draws for the rest). Runtime: 2 treatment + 1 control | $19.0 |
+| | | **A1** | **≈ $93** |
+
+**A2. End state: rebuilt cards (≈ $46).** With all patches applied, rebuild five voices from Pass 2 through 7a FINAL in the sandbox (`invalidate_cache.py --from-pass 2`, then the pipeline): Lovelace (standard), Whanganui (witness), Plato and Scheherazade (composer), Marley (lyrics constraint and operator direction). Also rebuild Whanganui and Plato on the unpatched prompts, as the baseline. Compare:
+- each rebuilt card with the shipped card, field by field, for every class the operator patched by hand (the stance, the name, first person as the river, the speaker frame, the Socrates collisions, Marley's artifact form);
+- the 7a FINAL issue count on patched against unpatched prompts.
+
+**A3. Runtime comparison (≈ $34).** In a sandbox runtime project holding a copy of Night 1's briefings, run Step 1 + Step 2 for the five voices on the rebuilt card, twice, and once on the shipped card: `voice_flow.py <run_dir> --night 1 --skip-step3 --skip-step2-validation --skip-continuity --voices <slugs> --project <sandbox>` (options read at `runtime/flows/voice_flow.py:696-722`; not run). The published Night 1 artifacts are a second control. The operator reads the artifacts blind: which is the shipped voice, and is either one weaker?
+
+- **Total:** $93 + $46 + $34 ≈ **$173**. Allow $210 for redraws.
+- **Volume:** about 130 pass-level runs, 16 tailor calls, 7 rebuilds and 24 voice runs; about 150 pass and tailor outputs, 7 cards and 24 artifacts to read. The mechanical checks can be scripted; the reading cannot.
+- **Harness work first** (about half a day of code): `--draws N` and `--arm` with a per-draw archive, a field-by-field report against the shipped card, and `--from-pass/--through`. Without it, 130 runs mean 130 manual copies.
+- **Assumptions.** As for Plan B, plus: the rebuild estimate is PLAUSIBLE only (§0.3); A3 assumes the voice flow runs on a copied run folder in a sandbox project, and its cost moves with how many Step 1 calls hit the prompt cache.
+
+#### What each plan shows
+
+| Question | Plan B | Plan A |
+|---|---|---|
+| Does each instruction take? | yes, one draw per variant | yes, three draws |
+| How often does it leak? | no | roughly: three clean draws rule out a leak that happens about half the time or more, not one in ten |
+| Is the control's failure the prompt's doing, or the fix pass and the age of the output? | no | yes (fresh controls) |
+| Did fields the item doesn't target get worse? | one draw, read against the control | several draws per arm, read side by side |
+| Does a whole card still build to the shipped architecture? | one voice, Passes 2–6, no validators | five voices, through 7a FINAL, with a baseline |
+| Did the artifacts change? | no (two voice runs, for item 5) | yes: 5 voices, blind read |
+
+#### Recommendation
+
+**Plan B, then Plan A's stages A2 and A3 once every patch has landed: about $14 + $80 ≈ $95.** Skip A1 unless a Plan B draw is ambiguous; then give that one check A1's draws.
+
+- The per-item checks are close to deterministic. A1's extra draws mostly confirm what one draw shows, at $93.
+- The failure this project has actually had from prompt changes is loss of texture from cumulative additions (the `3feb2b2` revert). It was found in artifacts and chat tests, not in field checks. Only A2 and A3 look there.
+- A2 is also the roadmap's own exit criterion for Phase 1.
+- If A2 or A3 shows a loss, the single-item draws from Plan B say where to start looking, and bisecting costs a few dollars per step.
+
+Plan A in full is the right choice if the operator wants leak rates per item before anything lands, or wants each item's effect separated from the others' at the card level.
 
 ### 0.5 The patches: how they were made and checked
 
@@ -223,13 +309,14 @@ index 5bd8ec9..990235f 100644
 
 An optional offline check (code, not in the patch): after the tailor call in `run_pass_0b_tailor.py`, list the capitalised name tokens and four-digit years in the injections that don't occur in the Perplexity text, and write them into `tailoring_notes` as a warning.
 
-### Check under the cap
+### Checks
 
-- **Draw.** Lovelace, one call to `run_pass_0b_tailor("Ada Lovelace", project_root=<sandbox>)` ($0.33). It reuses the cached Perplexity and Gemini outputs and does not use `sentinel_regen.py`.
-- **Control (free).** The existing athens-2026 injections, which hold all four.
-- **Checks.** No named work, title, journal or year that the Perplexity text lacks; none of the four known phantoms; 2–3 questions per section kept. Read for specificity: the tailor exists to be voice-specific (`pass_0b_tailor.md:114`).
+- **Plan B.** Lovelace, one call to `run_pass_0b_tailor("Ada Lovelace", project_root=<sandbox>)` ($0.33). It reuses the cached Perplexity and Gemini outputs and does not use `sentinel_regen.py`.
+- **Plan A.** Lovelace, Octopus (science literature), Cleopatra (hostile sources) and Dostoevsky (are the rewritten examples copied into his own questions?): 3 treatment calls and 1 fresh control each ($6.4). This is a Pass 0b call, not a re-run of Dostoevsky's pipeline.
+- **Control (free).** The existing athens-2026 injections; Lovelace's hold all four phantoms.
+- **Mechanical checks.** No named work, title, journal or year that the Perplexity text lacks; none of the four known phantoms; 2–3 questions per section kept.
+- **Read** for specificity: the tailor exists to be voice-specific (`pass_0b_tailor.md:114`).
 - **Pass:** zero Gemini-only names, specificity held. If it leaks, escalate to no names at all (**O9**).
-- **With more budget:** Octopus and Cleopatra, and a Dostoevsky call to see that the rewritten examples aren't copied.
 
 ### Risks and order
 
@@ -480,10 +567,11 @@ Notes on the patch:
 - The place name is rendered from `conference_facts.json` (`"location": "Athens, Greece"` → "Athens"), with a `default` filter so any other renderer of the template still works. This removes one hardcoded "Athens" (`:355`) and adds none (roadmap 2.1 / C52, filed; **O8**).
 - The spec is second person "unless a mediation-stance block below sets the person". Item 4 sets it for witness voices.
 
-### Check under the cap
+### Checks
 
-- **Draws.** Lovelace (standard human) and Octopus (organism variant), Pass 2, one each, shared with A6: $1.32.
-- **Control (free).** Their athens-2026 Pass 2 outputs: both fail the first check, and Lovelace's has a populated override.
+- **Plan B.** Pass 2, one draw each: Lovelace (standard human), Octopus (organism variant), Scheherazade (fictional variant), Battuta (own calendar). $2.75, shared with A6.
+- **Plan A.** The same four voices, 3 treatment and 2 fresh control draws each ($13.75), before A6's patch is applied.
+- **Control (free).** Their athens-2026 Pass 2 outputs. All four fail the first check below; three have a populated override.
 - **Mechanical checks on `voice_temporal_stance`:**
   - the first sentence contains "assembly" and "not entering them as participant" (organism: the text contains "do not enter their panels as participant");
   - contains "respond from your own ground" (organism: "you respond");
@@ -495,7 +583,6 @@ Notes on the patch:
 
   These checks pass on all 10 shipped defaults (run offline).
 - **Read.** The own-ground clause is in the voice's own terms; the other nine Pass 2 fields show no new defect against the control.
-- **With more budget:** Scheherazade (fictional variant, $0.61) and Battuta (calendar clause, $0.82).
 
 ### Risks and order
 
@@ -590,13 +677,12 @@ The length rule is **1–25 words**: "Hannah Arendt" and "the Octopus" are corre
 
 For a regenerated card, `card_assembly.py:421-422` then reads correctly. The shipped cards stay as they are; the fix belongs to runtime C68 A6 (open with the `council_config` name) or to a card patch (**O7**).
 
-### Check under the cap
+### Checks
 
-- **Draws.** The item-1 draws (Lovelace, Octopus): no extra cost. Whanganui's witness name is checked in item 4's Pass 2 draw.
-- **Control (free).** "I am Augusta Ada King…" and "I am octopus…" fail.
+- **Plan B.** The item-1 draws, read for this field: Lovelace and Octopus ("I am …" in the control), Scheherazade and Battuta (first-person tails in the control). No extra cost. Whanganui's witness name is checked in item 4's Pass 2 draw.
+- **Plan A.** Separate draws, after item 1 has landed: Lovelace, Octopus, Cleopatra and Marley, 3 treatment each; 2 fresh control for Cleopatra and Marley; item 1's treatment draws are the control for the other two ($11.5).
 - **Mechanical checks:** no `\b(I|me|my|I-and-I)\b`; 1–25 words; one line and not a sentence; no "Voice of".
 - **Read.** The epithet is in the voice's register; Octopus doesn't become a species label ("Octopus vulgaris" is the spec's counter-example, `Persona_Card_v2.md:243`). Read the treatment card's first ~600 tokens as the runtime assembles them: the long self-framing that Octopus loses from line 1 must still be in `epistemic_frame_statement`.
-- **With more budget:** Cleopatra and Marley.
 
 ### Risks and order
 
@@ -768,10 +854,10 @@ Notes on the patch:
 - `personas/schemas/voice_config.py` is not touched. No code imports it (N11), so an edit there would do nothing. `node0_validation.validate_input` passes unknown keys through (`:138`), so old configs without `voice_name` keep working through the fallback.
 - The Pass 0a examples are not panel voices, so a test of this item can't pass by copying.
 
-### Check under the cap
+### Checks
 
-- **Free.** The unit test in the patch (passes offline). Pass 2 is untouched, and `voice_name` is not voice input, so no sentinel draw is required.
-- **Optional, ≤ $0.15 (PLAUSIBLE).** One Pass 0a call for a non-personal name, in its **own** sandbox: `run_pass0a_voice_config.py` overwrites `02_voice_config.json` (`:280-284`), which would drop Whanganui's hand-set `mediation_stance` and rationale from the shared sandbox.
+- **Plan B.** The unit test in the patch (passes offline). Pass 2 is untouched, and `voice_name` is not voice input, so no sentinel draw is needed.
+- **Plan A.** Also Pass 0a for three names (one non-personal, one needing the article, one person), 2 draws each, about $1 (PLAUSIBLE; no usage recorded for Pass 0a). Use a **separate** sandbox: `run_pass0a_voice_config.py` overwrites `02_voice_config.json` (`:280-284`), which would drop Whanganui's hand-set `mediation_stance` and rationale from the shared one.
 
 ### Risks and order
 
@@ -1021,10 +1107,11 @@ Notes on the patch:
 - The `voice_temporal_stance` line sets first person for witness voices, which item 1's spec allows.
 - `test_conditional_block_coverage.py` renders each prompt with and without the trigger and asserts that the added block names every field the pass emits. It fails on `main` for Pass 2 (9 of 10 fields not named), 4a (5 of 7) and 4b (3 of 8), and passes after the patch.
 
-### Check under the cap
+### Checks
 
 - **Free.** The coverage test.
-- **Draws.** Whanganui, one each, in this order: Pass 4b, Pass 4a, Pass 2 ($1.73). The Pass 2 draw also checks the witness variants of items 1 and A6.
+- **Plan B.** Whanganui, one draw each, in this order: Pass 4b, Pass 4a, Pass 2 ($1.73). The Pass 2 draw also checks the witness variants of items 1 and A6. The end-state chain (§0.4) then regenerates all six passes for this voice.
+- **Plan A.** The same three passes, 3 treatment and 2 fresh control draws each ($8.65); Whanganui is also one of the five rebuilds.
 - **Control (free).** The athens-2026 outputs in the table above.
 - **Mechanical checks** over every field of each regenerated pass:
   - none of "I am Te Awa Tupua", "I am tupua", "my mauri", "my own four-fold", "in me, they", "my ongoing existence";
@@ -1061,7 +1148,7 @@ Notes on the patch:
 | Pass 6 | headers [2] "Glaucon had pressed me toward the third and greatest wave; I went…", [3] "I told Glaucon the tale of Er", [4] "I told Phaedrus under the plane tree…", [6] "I refused to propose a life of silence", [7] "I told young Theaetetus what I had inherited from my mother Phaenarete" |
 | Pass 2, Pass 3 | none |
 
-This is why item 3 is split. **3a** (Pass 4a and Pass 6, plus the trigger) has a failing control, so a draw can show a fix. **3b** (Pass 2 and Pass 3) is preventive: HANDOFF_2026_04_28 §13 proposed clauses there, but the current outputs show no collision, so a draw can only show "no harm".
+This is why item 3 is two patches. **3a** (Pass 4a and Pass 6, plus the trigger) has a failing control, so a draw can show a fix. **3b** (Pass 2 and Pass 3) is preventive: HANDOFF_2026_04_28 §13 proposed clauses there, but the current outputs show no collision, so a draw can only show "no harm". They can land together or 3a first.
 
 **Scheherazade** (voices §22): the composer frame is in first person (`rhetorical_mode`: "I am a node in a chain of tellers, not the origin of what I tell"). The operator also kept third-person "the voice" meta in several fields (`characteristic_moves[10]`, `banned_language[0]/[8]/[9]/[11]/[15]`, `banned_modes[1]/[4]/[8]/[13]/[14]`). The patch stays in the first-person composer frame, as Plato's patches do, and does not license third person.
 
@@ -1268,15 +1355,17 @@ index cc09d96..4c62de4 100644
 
 Pass 4b and Pass 5 need no block: the shipped artifact fields already hold the composer frame (Plato's `medium`: "I write a short dialogue… between named persons").
 
-### Check under the cap
+### Checks
 
-- **3a draws.** Plato (**O2**), with `"mediation_stance": "composer"` set in the sandbox config: Pass 6, then Pass 4a ($1.00).
+All draws use a sandbox config with `"mediation_stance": "composer"`.
+
+- **Plan B.** Plato (**O2**): Pass 6, then Pass 4a, for 3a ($1.00); then Pass 3, then Pass 2, for 3b ($1.32).
+- **Plan A.** Plato and Scheherazade, the same four passes, 3 treatment and 2 fresh control draws each ($23.7); both are among the five rebuilds.
 - **Control (free).** The athens-2026 outputs above.
-- **Mechanical checks:** no "my mother Phaenarete"; no "son of Phaenarete" bound to "I"; no "I told young Theaetetus", "I told Glaucon", "I told Phaedrus", "I ask Euthyphro", "I tell the Athenian jury"; the five patched headers name Socrates. The operator left headers [0], [1] and [5] alone as borderline, so read those rather than failing them.
-- **Read** against the `389a08c` fields. Also check for over-correction: method moves must stay in the first person (no "Plato's method…").
+- **Mechanical checks (3a):** no "my mother Phaenarete"; no "son of Phaenarete" bound to "I"; no "I told young Theaetetus", "I told Glaucon", "I told Phaedrus", "I ask Euthyphro", "I tell the Athenian jury"; the five patched headers name Socrates. The operator left headers [0], [1] and [5] alone as borderline, so read those rather than failing them.
+- **3b is a no-harm check.** The control has no collision in Pass 2 or 3, so the draw can only show that the composer block did not damage those fields, and that the composer frame appears where it should (`epistemic_frame_statement` names the voice as composer).
+- **Read** against the `389a08c` fields. Check for over-correction: method moves must stay in the first person (no "Plato's method…").
 - **Free.** The coverage test gains the composer blocks (in the patches).
-- **3b.** Deferred. If wanted: Plato Pass 3, then Pass 2 (≈ $1.3). A prompt that shapes voice output does not land without a draw, so 3b does not land under this cap.
-- **With more budget:** Scheherazade, Pass 4a and Pass 6 ($1.03), as a no-harm check.
 
 ### Risks and order
 
@@ -1426,17 +1515,17 @@ Notes on the patch:
 - With a null direction and rationale, the patched user prompts render byte-identical to `main`'s (checked). For the seven voices without direction, only the 4b system prompt changes, by the `:87-93` rewrite.
 - No schema edit (N11). The new key needs no validation: it is an optional string.
 
-### Check under the cap
+### Checks
 
 - **Free.** The render-identity check above.
-- **Draws.** Marley Pass 4b, then Pass 4a, with `artifact_direction` set to the v2 form in the sandbox config ($0.22 + $0.73); Arendt Pass 4b as the default-voice check of the rewritten guardrail ($0.29). Total $1.24.
+- **Plan B.** Marley Pass 4b, then Pass 4a, with `artifact_direction` set to the v2 form in the sandbox config ($0.22 + $0.73); Arendt Pass 4b as the default-voice check of the rewritten guardrail ($0.29). Total $1.24.
+- **Plan A.** Also Whanganui and Octopus Pass 4b, which carry real rationales; 3 treatment and 2 fresh control draws each ($8.7). Marley is one of the five rebuilds.
 - **Control (free).** The athens-2026 Pass 4a/4b outputs.
 - **Checks.** Marley's `medium` and `technical_capabilities` stay prose + instrumental: no "lyric", "chorus", "verse" or "kind-hint" as the artifact. Arendt's form and length range match her control's. A Marley draw that drifts to song is a hard fail.
-- **With more budget:** Whanganui and Octopus Pass 4b with their real rationales.
 
 ### Risks and order
 
-A stale direction recreates the Marley problem; the Pass 0a text says the field must be updated when a voice's artifact architecture changes. Order: after 3a, and after O4 and the sandbox reconciliation.
+A stale direction recreates the Marley problem; the Pass 0a text says the field must be updated when a voice's artifact architecture changes. Order: after item 3, and after O4 and the sandbox reconciliation.
 
 ---
 
@@ -1482,11 +1571,14 @@ index 13815bc..438dd95 100644
  specific failure modes: producing arguments the voice couldn't make, adopting
 ~~~
 
-### Check, and why it doesn't fit the cap
+### Checks
 
-- **Card level.** Battuta Pass 2, one draw ($0.82): the entry is present, names an uncharacteristic move and a native one, and has none of `decline|refuse to answer|cannot be answered|say so|name the gap`.
-- **Behaviour level (the real gate).** Add the emitted entry to a sandbox copy of Battuta's shipped card and run Step 1 + Step 2 for that voice on the wbbf26 formulation (≈ $2.5, PLAUSIBLE). The existing wbbf26 artifact is the control. Pass: no typology, the native form held, and the voice still engages. A decline is a hard fail. Read the `focus_decision` prose: the refusal substring match (roadmap 0.2, still open, no OPEN_ITEMS home) can drop a voice from the edition.
-- **Total ≈ $3.3.** Run it only if at least $3.5 is left after the other items. A card-level draw alone is not an honest check here: the evidence is behavioural, and N8 shows that text on the card did not change the behaviour.
+- **Card level.** The entry is present, names an uncharacteristic move and a native one, and has none of `decline|refuse to answer|cannot be answered|say so|name the gap`.
+- **Behaviour level (the real gate).** Put the emitted entry into a sandbox copy of the voice's shipped card and run Step 1 + Step 2 for that voice (the command is in §0.4, A3). The same voice on the unchanged shipped card, same briefings, is the control. Pass: no typology, the native form held, and the voice still engages. A decline is a hard fail. Read the `focus_decision` prose: the refusal substring match (roadmap 0.2, still open, no OPEN_ITEMS home) can drop a voice from the edition.
+- **Which run.** The reader's evidence is the wbbf26 dryrun, archived with its briefings and artifacts at `athens-2026/runs/_archive/preconference_wbbf_programme_2026_05_06/`. It ran on 2026-05-06, before the stance rewrite of `08a8253`, so its artifacts came from an older card. Draw the control fresh, on today's shipped card, and keep the archived artifact as a second, older control.
+- **Plan B.** Battuta: Pass 2 ($0.82); then two voice runs on the wbbf26 briefings, one on the shipped card and one on the shipped card plus the entry ($0.69 each, from that run's recorded usage). Total $2.20.
+- **Plan A.** Pass 2 for Battuta, Cleopatra, Plato (**O2**) and Arendt (the over-application check: the entry is omitted or harmless), 3 treatment draws each ($10.8); then Battuta, Cleopatra and Plato on the wbbf26 briefings, 2 treatment runs and 1 control each ($8.2). Total $19.0.
+- A card-level draw alone is not an honest check here: the evidence is behavioural, and N8 shows that text on the card did not change the behaviour.
 
 ### Risks and order
 
@@ -1500,20 +1592,22 @@ Decline-to-engage is the failure the hook ban exists for; the patch forbids decl
 
 **Read in part:** `docs/AI_Assembly_Persona_Card_v2.md`; `run_persona_pipeline.py` (the ranges cited); `runtime/flows/voice/card_assembly.py` (1–459); Pass 5, 6 and 7a prompts (the ranges cited); `ONBOARDING.md`; runtime `OPEN_ITEMS.md` (C67, C68); `REVIEW_2026_09_28_untouched_code.md` (A5, A6).
 
-**Card data (athens-2026, read only):** all 10 cards, voice configs and Pass 2 outputs; Plato's Pass 3, 4a and 6 outputs; the `usage` blocks of the pass, CT and Derive outputs for eight voices; the presence of the flag, `_fix_log.json` and the 7-series outputs for all 10; Lovelace's `01_research/`.
+**Card data (athens-2026, read only):** all 10 cards, voice configs and Pass 2 outputs; Plato's Pass 3, 4a and 6 outputs; the `usage` blocks of the pass, CT and Derive outputs for eight voices; the presence of the flag, `_fix_log.json` and the 7-series outputs for all 10; Lovelace's `01_research/`; the token counts of the Night 1 and archived wbbf26 voice runs.
 
-**Not read:** `AI_Assembly_Voice_Pipeline.md`, the runtime Step 2 prompts and CLI, Passes 1.x.
+**Not read:** `AI_Assembly_Voice_Pipeline.md`, the runtime Step 2 prompts, Passes 1.x. Of the runtime CLI, only the argument list of `voice_flow.py` was read.
 
-**Scratch scripts** (session scratchpad, not in the repo; none calls a model, writes outside the scratchpad, or runs git in athens-2026): `extract_cards.py`, `provenance_check.py`, `make_patches.py`, `verify_patches.py`, `run_new_tests.py`, `order_check.py`.
+**Scratch scripts** (session scratchpad, not in the repo; none calls a model, writes outside the scratchpad, or runs git in athens-2026): `extract_cards.py`, `provenance_check.py`, `make_patches.py`, `verify_patches.py`, `run_new_tests.py`, `order_check.py`, `revise_two_plans.py`.
 
 ---
 
-## Revision log — 2026-09-30
+## Revision log
 
-Made after the Opus review of 2026-09-29. The review's evidence verdicts were accepted unless noted under "Disagreements".
+### 2026-09-30 (first revision) — after the Opus review of 2026-09-29
+
+The test plan this revision introduced was written for a spend limit that was lifted later the same day; the second entry below replaces it. The review's evidence verdicts were accepted unless noted under "Disagreements".
 
 **Changed because the facts changed**
-1. **Spend.** The $113 plan and the $150 recommendation are replaced by a plan for the USD 10 cap (Summary, §0.2–0.4, each item's "Check under the cap"). Old O1 is now about the sandbox and protocol only.
+1. **Spend.** The $113 plan and its $150 recommendation were replaced by a single-draw plan with a free control, $5.62 for six items. (Superseded: see the second revision.)
 2. **Harness.** §0.1 now describes the script as repaired in `f7e0d4c`: A5 and the display-name gap (old G6) are fixed; G1–G5 are restated for today's code; N10 added.
 3. **Derive.** New §0.2 step 2: deleting the review flag in the sandbox makes the run halt at the review gate before Derive. The old text said a run without the flag might pay for 7-series calls; reading the cached files shows it doesn't. A $0 dry run is added as the first step.
 4. **Line numbers.** Runner references moved to `main` (`86998b4`), +5 from `4e61444`. Prompt line numbers are unchanged.
@@ -1537,7 +1631,7 @@ Made after the Opus review of 2026-09-29. The review's evidence verdicts were ac
 20. **§0.4 of the old doc.** CT compress costs are now taken from usage files at Sonnet prices ($0.04–0.18, not "≤ $0.3"), and Derive ($0.32–0.44) is listed.
 
 **Added**
-21. **Item 3 split.** 3a (Pass 0a, node 0, Pass 4a, Pass 6) has a failing control in Plato's pass outputs; 3b (Pass 2, Pass 3) does not, and is deferred. The grep evidence is in item 3.
+21. **Item 3 split.** 3a (Pass 0a, node 0, Pass 4a, Pass 6) has a failing control in Plato's pass outputs; 3b (Pass 2, Pass 3) does not, and was deferred in that revision. The grep evidence is in item 3.
 22. **Tests in the patches.** `test_conditional_block_coverage.py` (patch 05, extended by 06 and 09) and `test_derive_post.py` with `flows/shared/derive_post.py` (patch 04). The coverage test caught a gap in this doc's own Pass 3 composer block (`finds_compelling`, `resists`), which is fixed.
 23. **`_assembly_place()`** is now real code in patch 02, and the template uses a `default` filter.
 24. **Pass 0a count line.** Patch 04 replaces "8-9 fields" with wording that has no number, so later patches don't depend on each other through that line.
@@ -1545,7 +1639,22 @@ Made after the Opus review of 2026-09-29. The review's evidence verdicts were ac
 26. **Order.** The doc's sections now follow the landing order.
 
 **Disagreements with the review**
-- **"Under the cap it covers the gate shake-out, item 7 and item 2, and nothing else."** That holds only if every draw pays for Derive and the control arm is drawn fresh. With the flag deleted (§0.2, from `run_persona_pipeline.py:901-904`, `:1447`, `:1969-1991` and the cached files in all 10 voice folders) and the athens-2026 outputs as the control, six items fit for about $5.62. The halt is read from code, not run; the $0 dry run is the test.
+- **The review's spend estimate** (every regen pays for Derive; about $150 for the plan as first written). That holds only if the review flag stays in the sandbox and the control arm is drawn fresh. With the flag deleted (§0.2, from `run_persona_pipeline.py:901-904`, `:1447`, `:1969-1991` and the cached files in all 10 voice folders) and the athens-2026 outputs as the control, a single-draw check costs $0.2–0.9. The halt is read from code, not run; the $0 dry run is the test.
 - **§1-key (DOUBTFUL).** The review is right that the test does not force the key. The proposal stands for a different reason: the shipped cards have the key with null, and "cards are canon". It is now O11.
 - **§2-design (DOUBTFUL).** Agreed that it needed an operator decision (now O10). The proposal itself stands, on the four reasons in item 2.
-- **§3-cost.** The review's $20–24 for item 3 assumed full Pass 2→6 chains on two voices. The honest minimum is two passes on one voice, $1.00.
+- **§3-cost.** The review's $20–24 for item 3 assumed full Pass 2→6 chains on two voices. One draw of the two passes that show the collision, on one voice, is $1.00.
+
+### 2026-09-30 (second revision) — the spend cap was lifted
+
+The operator lifted the USD 10 Stage 4 cap on 2026-09-30 (relayed by the main session; the roadmap on `main` at `e674893` still records the cap, at its line 251).
+
+1. **Two test plans** replace the single capped plan: Plan A, best for quality (≈ $175), and Plan B, best value (≈ $14), side by side in the Summary and in full in §0.4, each with its assumptions and what it does and doesn't show.
+2. **Recommendation added:** Plan B, then Plan A's end state (rebuilt cards and a runtime comparison), about $95 in all. The operator decides.
+3. **Plan B is wider than the first revision's $5.62 plan.** It adds item 1's fictional and calendar variants, item 3b, item 5 and an end-state chain for Whanganui, one draw each.
+4. **Cap framing removed** from the Summary, O1, O5, §0.2 (title, the stop rule), §0.4 and every item's check section, which is now "Checks" with a Plan B and a Plan A line.
+5. **Item 3.** 3b is no longer deferred; both halves are in both plans. The landing order is 7 → 1 → A6 → 2 → 4 → 3a → 3b → 6 → 5.
+6. **Item 5's check** now runs on the archived wbbf26 briefings, with the control drawn fresh on today's shipped card (the archived artifacts came from an older card). Its cost is from that run's recorded usage: $0.69 for a Battuta voice run, not the earlier estimate of about $2.5.
+7. **§0.3 additions:** runtime voice-run costs from the Night 1 and wbbf26 token counts; the Pass 3 and Pass 5 figures; an estimate for a rebuild from Pass 2 through 7a FINAL, marked PLAUSIBLE.
+8. **§0.2 additions:** the chain order for an end-state check (upstream first), and two more voices in the sandbox command.
+9. **Base.** `main` moved to `e674893`; the files the patches touch are unchanged there.
+10. **Patches:** unchanged, byte for byte.

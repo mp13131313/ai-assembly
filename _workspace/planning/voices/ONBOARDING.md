@@ -456,8 +456,9 @@ venv/bin/python scripts/sentinel_regen.py regen --pass <PASS_NAME> \
 ```
 
 `--baseline-snapshot <DIR>` still works instead of `--baseline-project` (it
-auto-resolves `<DIR>/<voice_slug>/<filename>`, FU#50(2)). Keep each regen inside
-the Stage 4 spend cap (roadmap decisions block).
+auto-resolves `<DIR>/<voice_slug>/<filename>`, FU#50(2)). Estimate each regen's cost
+and run the option the operator picked (best quality or best value; roadmap
+decisions block — no blanket cap since 2026-09-30).
 
 ### Pass 0b templates are de-anchored from panel exemplars (FU#19)
 
