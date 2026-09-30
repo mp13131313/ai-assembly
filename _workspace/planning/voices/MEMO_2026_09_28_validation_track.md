@@ -1,6 +1,6 @@
 # MEMO — Validation track: genuine perspective or elaborate ventriloquism? (voices §33)
 
-**Date:** 2026-09-28; revised 2026-09-29 and 2026-09-30 after the independent review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/10_validation_memo.md`). §10 lists every change, answers the review's questions and says where I disagree.
+**Date:** 2026-09-28; revised 2026-09-29 and 2026-09-30 after the independent review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/10_validation_memo.md`). §10 lists every change, answers the review's questions and says where I disagree. On 2026-09-30 the paid tests were re-planned after the operator lifted the spend cap (§10.4).
 **For:** the operator's open decision from June (voices `OPEN_ITEMS.md` §33; roadmap Stage 3, "validation-track decision").
 **Written by:** a Fable 5.1 session, Task 4 of `_workspace/planning/BRIEF_2026_09_28_fable_batch2.md`.
 **Status:** decision memo. Nothing here is decided. Claims are labelled **CONFIRMED** (seen in data or code) or **PLAUSIBLE**; interpretations are marked *inference*.
@@ -22,8 +22,8 @@
 3. **Recommendation**, in order:
    - **(a)** A second coder repeats the 30-verdict audit. Free, about half a day.
    - **(b)** File leading formulations as a Provocateur defect, whatever is decided here. Any later test of the voices needs questions that don't contain their answer.
-   - **(c)** A small replay, **Design A′**: the ten voices, a thin-card version of each, and a plain essayist answer one Athens theme from a neutral question. About **$8**. Extend it to two themes with repeats (about $43) only if the result is unclear.
-   - **(d)** An expert blind panel (B) and the reader gates used as validation (C), in parallel.
+   - **(c)** A replay, **Design A′**: the ten voices, a thin-card version of each, and a plain essayist answer Athens themes from a neutral question. §5.1 costs two plans: best value **≈ $24**, best for quality **≈ $190**. I recommend the best-value plan first.
+   - **(d)** An expert blind panel (B) and the reader gates used as validation (C), in parallel. Each also has two plans (§5.2, §5.3).
 
    A′ should finish before two things: the voice-card / deployment-card field partition is frozen (roadmap 2.1), and any validation badge is shown. It blocks nothing else.
 
@@ -189,58 +189,70 @@ The neutral condition keeps the Researcher's record, which already carries the t
 | Arm | System prompt | User input | Role |
 |---|---|---|---|
 | **Full-neutral** | shipped card | neutral question | what the configured voice concludes when not led |
-| **L2 thin card** | voice name + one-line identity + `medium` + length | neutral question | the same, with almost no card |
+| **Full-led** | shipped card | the Athens briefing, unchanged | a fresh led sample made under the replay's own conditions, so that the question is the only difference from Full-neutral |
+| **Full-targeted** | shipped card | the Athens briefing with its formulation rewritten to drop the verdict | what a Provocateur that kept its own rule (`provocateur_formulation.md:21,28`) would send |
+| **L2 thin card** | voice name + one-line identity + `medium` + length | neutral question | the same as Full-neutral, with almost no card |
 | **G0 essayist** | no persona | neutral question | Briefing Layer 2's "well-read essayist"; voice-independent, so sampled per theme |
-| L1 (optional) | thin card | the Athens formulation | the card's contribution *under* a leading question (FU#30) |
+| L1 (optional) | thin card | the Athens briefing, unchanged | the card's contribution *under* a leading question (FU#30) |
 
 The thin card renders because `_render_section` skips missing fields (`runtime/flows/voice/card_assembly.py:285–300`, CONFIRMED). G0 needs its own short system prompt, so a small sandbox script (PLAUSIBLE; not built).
 
-**Themes.** N3 `theme_001` (the child and the hive mind) and N2 `theme_007` (the good-life panel). All ten voices answered both at Athens (CONFIRMED from the Step-1 files), so every voice's answer to the leading question exists for comparison. N3 `theme_001` is the most S-heavy convergence case. N2 `theme_007` is where Plato and Cleopatra went beyond their questions. Run without continuity, so the arms are comparable with each other. The comparison with the Athens originals then carries two differences at once (the question and the continuity), so it is secondary.
+Every arm runs without continuity, so the arms are comparable with each other. The Athens originals differ from the replay in two ways at once (the question and the continuity). That is why Full-led is run fresh instead of reusing them.
 
-**Two sizes:**
+**Two plans for A′.** The operator lifted the spend cap on 2026-09-30, so neither plan is sized to one. The first gives the most evidence per dollar. The second is what I would run with no cost constraint.
 
-| | **A′-min** | **A′-full** |
+| | **Best value** | **Best for quality** |
 |---|---|---|
-| Themes | N3 `theme_001` | + N2 `theme_007` |
-| Samples | 1 per voice | 2 per voice × theme |
-| Arms | Full-neutral, L2, 3 essays | Full-neutral, L2, 5 essays per theme; L1 optional |
-| Steps | Step 1 only | Step 1 for all; Step 2 on one sample per cell |
-| Calls | 10 + 10 + 3 | 90 Step 1, 40 Step 2 |
-| Cost | **≈ $8** | **≈ $43** (≈ $55 with L1) |
-| Blind coding | ~½ day per coder | ~2 days per coder |
-| Answers | Do the ten voices still reach one verdict when not led? Is it the essayist's verdict? | Adds the re-roll noise floor, the card's effect on verdict and mechanism, and form |
+| **Themes** | 2, both answered by all ten voices at Athens: N2 `theme_007` ("Contesting the good life") and N3 `theme_001` ("AI reframed as a human and social question") | 6, two per night: those two plus N1 `theme_002`, N1 `theme_004`, N2 `theme_001` and N3 `theme_003`. Three hold P1 convergence cases; on the other three the traditions could plausibly pull apart. |
+| **Arms and samples** | Full-neutral ×2, Full-led ×1, L2 ×1, 5 essays per theme | Full-neutral ×3, Full-led ×2, Full-targeted ×2, L2 ×3, 10 essays per theme. Led and targeted run on the 51 voice × theme cells that have an Athens formulation. |
+| **Steps** | Step 1 only. Verdicts are formed there, and the Athens record already shows that form differs by voice. | Step 1 for all. Step 2 on one sample per cell for Full-neutral, Full-targeted and L2, to check that the result survives into the published form. |
+| **Calls** | 90: 60 full-card, 20 thin-card, 10 essays | 795: 384 + 111 full-card (Step 1 + Step 2), 180 + 60 thin-card, 60 essays |
+| **Coding** | Two people code all 90 texts blind, about 2 days each | A non-Claude judge model codes all 795 texts on the same sheet. Two people code a 90-text subsample (two themes, one sample per cell), about 2 days each. The judge's codes are used only if they match the human codes on at least 85% of the subsample (proposed threshold). |
+| **Preparation** | one sandbox briefing file per voice; the essayist script | the same, plus 51 formulations rewritten by hand and checked by a second person, and the judge prompt |
+| **API cost** | **≈ $24** | **≈ $190** |
+| **If same-voice calls run in parallel** | ≈ $41 | ≈ $340 |
+| **Elapsed** | about a week | 3–4 weeks |
+| **What it adds** | the three contrasts (question, card, essayist), read against a noise floor | whether the result holds across themes and nights; what rewritten questions would produce; form; the pairs the expert panel needs (§5.3) |
+| **What it can't do** | Two themes, so a result could be theme-specific. Nothing on rewritten questions or on form. | It is still not expert judgement. The judge's reliability is an assumption, which the subsample tests. |
 
-**Cost arithmetic.** Per-call prices come from Athens token medians (CONFIRMED) at the repo's stated rates (Opus 4.7 at $5 / $25 per MTok; cache writes 2×, reads 0.1×; `docs/AI_Assembly_Voice_Pipeline.md:1266`):
-- full-card Step 1 ≈ $0.54; full-card Step 2 ≈ $0.37;
-- thin-card or essayist Step 1 ≈ $0.21; thin-card Step 2 ≈ $0.18.
+**Assumptions behind both estimates:**
+1. **Prices.** Opus 4.7 at $5 / $25 per MTok; one-hour cache writes at 2×, cache reads at 0.1× (`docs/AI_Assembly_Voice_Pipeline.md:1266`).
+2. **Token sizes** are the Athens medians (CONFIRMED from the Step-1 and Step-2 records). A Step 1 call reads about 8.4K uncached and 37.6K cached tokens and writes 6.6K. A Step 2 call reads about 9.7K uncached and 45.5K cached and writes 5.3K.
+3. **Warm cache.** Each voice's full-card calls run one after another, so only the first writes the card to the cache and the rest read it. A read renews the one-hour timer. In `voice_flow.py` same-voice calls run in parallel by default (`:78,194`), and at Athens each of them wrote the cache (the race in `voices/REVIEW_2026_09_28_card_field_utility.md` §5.2). The second cost line is that case.
+4. **Thin-card and essay calls** are priced without caching.
+5. **No retries.** Add about 10%.
+6. **Same model as Athens.** `claude-opus-4-7` is still pinned for `runtime.voice.step1` and `step2` in `model_routing.json` (CONFIRMED at `40fe490`). If that changes (C62), every arm runs on the new model and the Athens originals stop being comparable.
+7. **The judge** (quality plan only) is priced at Opus 4.7's rates as a ceiling. It would be one of the non-Claude validator models already routed in `model_routing.json`; their prices are not in the repo.
 
-| | Step 1 | Step 2 | Total |
-|---|---|---|---|
-| A′-min | 10 × $0.54 + 13 × $0.21 = $8.13 | none | **≈ $8** |
-| A′-full, Full-neutral | 40 × $0.54 = $21.60 | 20 × $0.37 = $7.40 | $29.00 |
-| A′-full, L2 | 40 × $0.21 = $8.40 | 20 × $0.18 = $3.60 | $12.00 |
-| A′-full, G0 | 10 × $0.21 = $2.10 | none | $2.10 |
-| **A′-full** | | | **≈ $43** |
-| L1 (optional) | 40 × $0.21 = $8.40 | 20 × $0.18 = $3.60 | + $12.00 → ≈ $55 |
+**Unit prices:** full-card Step 1 ≈ $0.58 for a voice's first call and ≈ $0.23 after that; full-card Step 2 ≈ $0.37, then ≈ $0.20; thin-card or essay Step 1 ≈ $0.21; thin-card Step 2 ≈ $0.18.
 
-Notes on the estimate:
-- The original memo's $32 assumed one sample per cell, against its own rule.
-- $43 is an upper estimate. It uses Athens's per-call median, where same-voice calls each wrote the prompt cache (the race described in `voices/REVIEW_2026_09_28_card_field_utility.md` §5.2). If each voice's four Full calls run one after another, three of them read the cache and A′-full comes to about $34.
-- `claude-opus-4-7` is still the pinned model for `runtime.voice.step1` and `step2` in `model_routing.json` (CONFIRMED at `40fe490`). If that changes (C62), the Athens originals stop being a valid comparison.
+| | Best value | Best for quality |
+|---|---|---|
+| Full-card Step 1 | 10 × $0.58 + 50 × $0.23 = $17.30 | 10 × $0.58 + 374 × $0.23 = $91.82 |
+| Full-card Step 2 | none | 10 × $0.37 + 101 × $0.20 = $23.90 |
+| Thin card | 20 × $0.21 = $4.20 | 180 × $0.21 + 60 × $0.18 = $48.60 |
+| Essays | 10 × $0.21 = $2.10 | 60 × $0.21 = $12.60 |
+| Judge | none | ≤ $14 |
+| **Total** | **≈ $24** | **≈ $190** |
+| Every full-card call writes the cache | 60 × $0.58 + $6.30 ≈ $41 | 384 × $0.58 + 111 × $0.37 + $61.20 + $14 ≈ $340 |
+
+L1, if wanted, adds about $4 to the value plan and about $21 to the quality plan.
 
 **Decision rules (corrected: relative, not absolute; fix them before coding).** Code each Step-1 response blind on one sheet: verdict, direction relative to the room, mechanism, new coinage.
-- **Convergence (both sizes).** On each theme, count how many of the ten Full-neutral responses share the most common verdict, and whether that is the essays' verdict. Proposed reading:
+- **Question test.** On the same cells, compare Full-led with Full-neutral. If the led samples reach the Athens verdict and the neutral ones do not, the question set the verdict.
+- **Convergence.** On each theme, count how many of the ten Full-neutral responses share the most common verdict, and whether that is the essays' verdict. Proposed reading:
   - 8 or more of 10 on the essayist's verdict: the verdict is the model's default, whatever the question. The supportable claim is "route, not verdict".
   - 5 or fewer: Athens's convergence came from the questions, and fixing the Provocateur is the lever.
-  - 6 or 7: unclear; run A′-full.
-- **Noise floor (A′-full).** *r* = the share of the 20 voice × theme cells where the two Full-neutral samples get the same verdict.
-- **Card test (A′-full).** Compare agreement(L2, Full-neutral) with *r*. With 20 cells only large gaps are readable. A gap of 6 or more cells is roughly where noise stops being a plausible explanation (rough two-proportion test, p ≈ 0.03–0.05). A gap of 5 cells gives p ≈ 0.09. Smaller gaps are inconclusive, not evidence that the card does nothing.
+  - 6 or 7: unclear. In the value plan, that is the signal to run the quality plan's other themes.
+- **Noise floor.** *r* = the share of voice × theme cells where two Full-neutral samples get the same verdict (20 cells in the value plan, 60 in the quality plan).
+- **Card test.** Compare agreement(L2, Full-neutral) with *r*. Only large gaps are readable. With 20 cells, a gap of 6 or more is roughly where noise stops being a plausible explanation (rough two-proportion test, p ≈ 0.03–0.05); 5 cells gives p ≈ 0.09. With 60 cells the same point is a gap of about 10. Smaller gaps are inconclusive, not evidence that the card does nothing.
 - **Mechanism.** If L2 and G0 match Full-neutral on verdict but not on mechanism, the card buys the route.
+- **Rewritten questions (quality plan).** If Full-targeted spreads the verdicts the way Full-neutral does, enforcing the Provocateur's own rule is enough. If it converges like Full-led, the voice-specific framing leads even without a stated verdict.
 
-**Can show:** whether the voices converge when not led; whether the card shapes verdicts or only routes.
+**Can show:** whether the question set the verdict; whether the voices converge when not led; whether the card shapes verdicts or only routes.
 **Can't show:** fidelity (that needs experts); audience effect; Marley and Whanganui (in-tradition readers only).
-**Pitfalls:** identification can succeed on texture alone, which is why the sheet codes verdict and mechanism. Use two coders.
-**Tooling:** the runtime Step code in the sandbox project (`projects/current-tests/voice-pipeline-dryrun`), never athens-2026. The field-removal run proposed in `voices/REVIEW_2026_09_28_card_field_utility.md` §6.5 (≈ $8.50) asks a different question (which fields matter) but uses the same sandbox and the same pinned model; the two can share one blind-reading session. `personas/phase_5_cross_persona_qc.py` measures voice-vs-voice distinctiveness at card level; it is a complement, and its paths are stale (roadmap 0.4).
+**Pitfalls:** identification can succeed on texture alone, which is why the sheet codes verdict and mechanism. Use two coders. A rewritten formulation can still lead, which is why a second person checks each one.
+**Tooling:** the runtime Step code in the sandbox project (`projects/current-tests/voice-pipeline-dryrun`), never athens-2026. The field-removal run proposed in `voices/REVIEW_2026_09_28_card_field_utility.md` §6.5 asks a different question (which fields matter) but uses the same sandbox and the same pinned model; the two can share one blind-reading session. `personas/phase_5_cross_persona_qc.py` measures voice-vs-voice distinctiveness at card level; it is a complement, and its paths are stale (roadmap 0.4).
 
 ### 5.2 The reader gates used as a validation instrument
 
@@ -256,12 +268,48 @@ The reader answers three questions:
 
 For Whanganui, question 2 becomes reporting fidelity, plus whether the "honest-extension" closes are acceptable.
 
-**Cost:** ~$5 API; the reader's time (~3–4 h); an honorarium or koha (operator's call).
+**Two plans for C:**
+
+| | **Best value** | **Best for quality** |
+|---|---|---|
+| **Readers** | one per voice, 2 in all | two per voice, 4 in all. For Whanganui one of them is a named body or role, which the draft publish rules already ask of a public voice (PRODUCT §11.2). |
+| **What they read** | the protocol above: the card's handling, three artifacts, 2–3 Step-1 responses, and a blind thin-card version of each artifact | everything the voice produced at Athens: the card's handling, all three artifacts, every Step-1 response (Marley 14, Whanganui 9), the dossier passages that quote the voice, and blind thin-card versions on three themes, two samples each |
+| **Form** | written answers to the three questions | written answers, then a conversation; a second pass after any card patch |
+| **API cost** | **≈ $3** | **≈ $11** |
+| **Reader time** | 3–4 h each | 6–8 h each, plus the second pass |
+| **Elapsed** | open-ended, and overdue | the same; the second reader should not delay the first |
+
+**Assumptions:**
+- Unit prices as in §5.1.
+- Value: a thin-card Step 1 and Step 2 for each of the three artifacts' themes, per voice, under the same Athens briefing: 2 × 3 × ($0.21 + $0.18) = $2.34.
+- Quality: two samples of that (2 × 6 × $0.39 = $4.68), plus fresh full-card samples on the same themes so that both versions come from one run (2 × ($0.58 + 5 × $0.23 + $0.37 + 5 × $0.20) = $6.20). Together $10.88.
+- The cost that matters here is the honorarium or koha. The record gives no figure; it is the operator's call.
+
 **Candidates (corrected):**
 - Whanganui: voices §28.
 - Marley: a Rastafari-orbit candidate pool is named at `voices/HANDOFF.md:84`. The original memo said none was named.
 
 **Status:** required before any Marley or Whanganui reuse (roadmap 1.3; decision point 4). No scheduling record in STATE, voices HANDOFF or runtime OPEN_ITEMS.
+
+### 5.3 The expert blind panel: two plans
+
+**Protocol (both plans).** Each expert reads Step-1 pairs on the same neutral question: the configured voice (Full-neutral) and its thin-card version (L2), unlabelled and in random order. For each pair the expert says which is the configured voice and which is more faithful to the figure. Those are the two halves of the PRODUCT §11.3 badge. The expert then answers FU#49G's provotype question on the voice's three Athens artifacts, with the formulations shown: is there a move the corpus supports but does not contain?
+
+| | **Best value** | **Best for quality** |
+|---|---|---|
+| **Voices** | 3 with large scholarly pools: Plato, Arendt, and one of Dostoevsky, Lovelace or Cleopatra. Cleopatra has two of the five pieces that went beyond their question. | all 7 with a scholarly field: Plato, Cleopatra, Dostoevsky, Ibn Battuta, Arendt, Lovelace, Scheherazade. The Octopus goes to two cephalopod scientists, for fidelity to the science only. Marley and Whanganui belong to C. |
+| **Experts per voice** | 2 | 3, so that each verdict has a majority |
+| **Pairs per voice** | 10 | 12 (6 themes × 2 samples) |
+| **API cost** | **≈ $14** (≈ $24 if same-voice calls run in parallel) | **$0** if the quality replay has run, because its outputs are the pairs. Otherwise ≈ $40 (≈ $66). |
+| **Expert time** | 4–6 h each (≈ 22K words read and rated); 24–36 h in all | 5–7 h each (≈ 27K words); about 105–150 h in all, plus the Octopus readers |
+| **Elapsed** | 4–8 weeks | several months: 21 experts to recruit |
+| **What it shows** | whether experts can tell the configured voice at all, and whether any Athens move passes the provotype test | a result for every voice the hub would badge |
+
+**Assumptions:**
+- Unit prices and the warm-cache assumption as in §5.1.
+- Value: per voice, 10 full-card calls ($0.58 + 9 × $0.23 = $2.65) and 10 thin-card calls ($2.10): $4.75, so $14.25 for three voices. The ten questions are any ten of the 18 selected Athens themes; under a neutral question a voice need not have been assigned the theme.
+- Quality, if generated separately: per voice, 12 full-card calls ($3.11) and 12 thin-card calls ($2.52): $5.63, so $39.41 for seven voices.
+- Honoraria are the real cost and the record gives no rate. The estimate is expert-hours times whatever the operator sets.
 
 ---
 
@@ -270,10 +318,10 @@ For Whanganui, question 2 becomes reporting fidelity, plus whether the "honest-e
 | | **0 — Seeding audit** | **A′ — Neutral-question replay** | **B — Expert blind panel** | **C — Reader gates as instrument** |
 |---|---|---|---|---|
 | **Tests** | Where the Athens verdicts came from | Convergence without leading questions; C1 at card level; C3 via the essayist | C1 + C2 | C2 + permission, for the sacred-grammar voices |
-| **Scope** | The 30 artifacts against their formulations. First pass done here (§3 P4); a second coder re-codes blind. **0b (optional):** the same coding for all 125 Step-1 responses, each against its one formulation. It sizes the Provocateur fix and tests the withdrawn P5 (does Step 2's focus choice favour any class?). | A′-min, then A′-full if unclear (§5.1) | 3 voices (Plato, Arendt, Dostoevsky or Lovelace); 10 neutral-question Step-1 pairs per voice (Full vs L2); 2 experts per voice | Marley, Whanganui (optionally the Octopus with a cephalopod scientist) |
-| **API** | $0 | ≈ $8, then ≈ $43 (≈ $55 with L1) | ≈ $7.50 per voice | ≈ $5 |
-| **People** | ~½ day; 0b ~2 days | ½ day per coder, then 2 days per coder | **4–6 h per expert per voice** (≈ 22K words read and rated; corrected from 3 h) | ~3–4 h per reader + relationship time |
-| **Elapsed** | days | days, then 1–2 weeks | 4–8 weeks | open-ended, and overdue |
+| **Scope** | The 30 artifacts against their formulations. First pass done here (§3 P4); a second coder re-codes blind. **0b (optional):** the same coding for all 125 Step-1 responses, each against its one formulation. It sizes the Provocateur fix and tests the withdrawn P5 (does Step 2's focus choice favour any class?). | Two plans (§5.1): 2 themes, or 6 themes with rewritten questions and Step 2 | Two plans (§5.3): 3 voices × 2 experts, or 7 voices × 3 experts | Marley, Whanganui. Two plans (§5.2): one reader per voice, or two with the full reading set |
+| **API** | $0 | ≈ $24, or ≈ $190 | ≈ $14, or $0 to ≈ $40 | ≈ $3, or ≈ $11 |
+| **People** | ~½ day; 0b ~2 days | about 2 days per coder in either plan | 24–36 expert-hours, or about 105–150 (4–6 h per expert per voice; corrected from 3 h) | 3–4 h per reader, or 6–8 h, plus relationship time |
+| **Elapsed** | days | about a week, or 3–4 weeks | 4–8 weeks, or several months | open-ended, and overdue |
 | **Placement** | **Now** | **Before the 2.1 field partition is frozen and before any validation badge.** Nothing else waits on it (corrected from "gate all of Stage 5"). | Parallel; calibrates the PRODUCT §11.3 thresholds | Parallel; already gating reuse |
 | **Decision rule** | Report the S / O / N shares and the agreement between coders | §5.1 | §11.3 + the coding sheet + at least one expert-confirmed C2 move per voice | Reader verdict attached to the card (PRODUCT §5) |
 
@@ -283,14 +331,16 @@ For Whanganui, question 2 becomes reporting fidelity, plus whether the "honest-e
 
 1. **Design 0 now:** a second coder re-codes the 30 verdicts blind.
 2. **File leading formulations as a Provocateur defect, independent of this decision.** The prompt already forbids them (`provocateur_formulation.md:21,28`), so another sentence in the prompt is unlikely to help. The fix is enforcement: a check on each formulation before it reaches a voice. For the main session to file; runtime thread.
-3. **Run A′-min (≈ $8).** Extend to A′-full only if the convergence result is unclear or the card question matters for the partition.
+3. **Run the best-value replay (≈ $24).** It gives the three contrasts, read against a noise floor, for about two days of reading per coder. Reading time is the limit here, not API cost. Move to the quality plan if the convergence result is unclear, or once a badge or a public claim is going to rest on the answer.
 4. **B and C in parallel.** Both are needed anyway: B for the hub badge, C before any Marley or Whanganui reuse.
+   - **B:** start with the best-value panel (three voices). Recruit the full panel only if the hub is going to show a badge on every voice.
+   - **C:** start the best-value plan now, since it is overdue. Treat the quality plan's second reader, or named body, as required before any public reuse of Marley or Whanganui.
 
 | Option | For | Against |
 |---|---|---|
 | 1. Proceed, treating the core as sound | Zero cost. Authenticity is disclaimed. The editorial output was strong. | P4 shows the Athens record cannot support Layer 2 as it stands: the verdicts were in the questions. Card loading and the badge would rest on unmeasured card effects. |
-| **2. Staged (recommended)** | Design 0 is free and A′-min is about $8. Together they answer the one question the record leaves open. B and C are needed anyway. | A′ is a spend outside the Stage 4 cap. Blind coding takes discipline. |
-| 3. Full gate: A′-full + B + C before any Phase 2 | Strongest position | B and C calendars stall the build over a question A′ mostly frames |
+| **2. Staged (recommended)** | Design 0 is free and the best-value replay is about $24. Together they answer the one question the record leaves open. B and C are needed anyway. | Blind coding takes about two days per coder, and discipline. |
+| 3. Full gate: the quality plans of A′, B and C before any Phase 2 | Strongest position | B and C calendars stall the build over a question A′ mostly frames |
 
 ---
 
@@ -298,9 +348,9 @@ For Whanganui, question 2 becomes reporting fidelity, plus whether the "honest-e
 
 1. **Validation track yes or no**, and which of 0 / A′ / B / C.
 2. **Placement of A′:** before the 2.1 field partition is frozen and before any badge (recommended), or fully parallel.
-3. **Spend cap for A′.** A′-min: USD 10–12. A′-full, only if needed: USD 55, or 70 with L1. This is separate from the Stage 4 cap of USD 10 (set 2026-09-28, roadmap:251; the original memo called it unset).
+3. **Which plan for each paid test:** best value or best for quality, for A′ (§5.1), C (§5.2) and B (§5.3). The costs and assumptions are in each table.
 4. **Coders** for 0 and A′: operator + Till, or an outside assistant.
-5. **B:** which 3 voices; expert names; honoraria.
+5. **B:** which voices (three, or all seven); expert names; honoraria.
 6. **C:** reader names and dates (decision point 4; unscheduled since May).
 7. **(Reframed.) Leading formulations:** add a check to the Provocateur before the next run of any deployment. The original "credit the Provocateur" framing is withdrawn: formulations are already published, and the example phrase is the Whanganui voice's own `core_commitment`.
 
@@ -337,7 +387,7 @@ The 30-verdict classification (§3 P4) is a manual read; the table is its record
 - `runtime/flows/shared/prompts/provocateur_formulation.md:21,28,36–41,49`; `docs/AI_Assembly_Provocateur_Pipeline.md:335`
 - `voices/REVIEW_2026_09_28_card_field_utility.md` §5.2, §6.5
 - PRODUCT §5, §8.2, §11.3
-- roadmap 1.2, 2.1, decision point 4, line 251
+- roadmap 1.2, 2.1, decision point 4; operator decisions, line 251 on `main` (no blanket spend cap; two plans per paid test)
 - `EDITORIAL_ASSESSMENT.md`
 
 ---
@@ -383,15 +433,15 @@ The 30-verdict classification (§3 P4) is a manual read; the table is its record
     - the neutral question is defined from the code, and is now the condition for every primary arm;
     - the arms are renamed, and L1 (thin card under the Athens formulation) becomes optional;
     - the two themes are chosen so that all ten voices have an Athens answer to compare;
-    - a one-theme first step (A′-min, ≈ $8) added;
-    - A′-full costed at two samples per cell with the arithmetic shown (≈ $43; ≈ $55 with L1);
+    - a one-theme first step added (replaced on 2026-09-30, §10.4);
+    - the two-theme design costed at two samples per cell, with the arithmetic shown (replaced on 2026-09-30, §10.4);
     - the absolute 70% rule replaced by rules relative to the essayist and the re-roll floor, with the sample-size limit stated;
     - "no prompt changes" corrected;
     - the link to the card-field review's removal run added.
 17. **§5.2:** the reader now sees the formulations, and the blind comparison uses the thin-card version. Marley candidate pool at `voices/HANDOFF.md:84`.
 18. **§6:** Design 0 and 0b added. Design A renamed A′; it no longer gates all of Stage 5. B's pairs now use neutral questions. Expert time corrected to 4–6 h.
-19. **§7:** the Provocateur check recommended regardless of the track; A′-min recommended before A′-full; options table updated.
-20. **§8:** Stage 4 cap corrected (USD 10); caps restated; decision 7 reframed.
+19. **§7:** the Provocateur check recommended regardless of the track; the smaller replay recommended first; options table updated.
+20. **§8:** decision 7 reframed.
 21. **§9:** full scratchpad path; the new script listed; the term-versus-thesis limit and the primary-theme limit stated.
 22. **§10** added.
 
@@ -410,4 +460,21 @@ The 30-verdict classification (§3 P4) is a manual read; the table is its record
 
 1. **E1 stays as the lead candidate.** The review is right that its shape is P2's template beat. Its content is not seeded: "optional somebody" has no match in Arendt's card, her corpus or her N2 briefing, and the artifact rejects both horns the formulation offered.
 2. **Gap-H is a neighbour, not the same finding.** It is about formulations asking voices for analytic work they don't natively do. Formulations that state the verdict are not in either tracker.
-3. **The cost base.** The review's $49.5 doubles the original cells. Under a neutral question the Athens originals can't serve as the Full sample, and the essayist needn't be run per voice. That gives ≈ $43 for the full design and ≈ $8 for a first step.
+3. **The cost base.** The review's $49.5 doubles the original cells. Under a neutral question the Athens originals can't serve as the Full sample, and the essayist needn't be run per voice. The current plans and their costs are in §5.1.
+
+### 10.4 Second revision, 2026-09-30: the spend cap was lifted; two plans per paid test
+
+The operator lifted the USD 10 spend cap on 2026-09-30. Every paid test now comes as a best-for-quality plan and a best-value plan, and the operator picks per test (roadmap, operator decisions, line 251 on `main`). Changes:
+
+1. **§5.1, two plans for A′.** The one-theme first step and the two-theme design are replaced by a best-value plan (2 themes, ≈ $24) and a best-for-quality plan (6 themes, ≈ $190), each with its arithmetic and assumptions.
+2. **§5.1, two new arms.** Full-led is a fresh led sample, so that the question is the only difference from the neutral arm. The Athens originals are no longer used for that, because they also differ in continuity. Full-targeted (rewritten questions) is in the quality plan only.
+3. **§5.1, cost basis.** The estimates now assume each voice's calls run one after another, so the card is written to the cache once. The cost if they run in parallel is given beside each total.
+4. **§5.2, two plans for the reader gates** (≈ $3 and ≈ $11 of API). The earlier "~$5" is replaced by the arithmetic.
+5. **§5.3 is new:** the expert panel's protocol and its two plans (≈ $14; and $0 to ≈ $40). Before, the panel had only a column in §6.
+6. **§6, §7, §8 decision 3 and the bottom line** follow the new plans and costs. §7 now says which plan I recommend for each test.
+7. **Cap framing removed:** §8 decision 3, the "against" cell of option 2 in §7, and change-log item 20.
+8. **§10.1 items 16 and 19** point here, and §10.3 item 3 no longer quotes the replaced figures.
+9. **§5.1 decision rules:** a question test and a rewritten-questions rule added; the card test now gives the readable gap for 60 cells as well as 20. "Can show" and "Pitfalls" updated to match.
+10. **Smaller edits:** the header and the §9 roadmap cross-reference; §8 decision 5 now covers both panel sizes; the cost of the card-field review's removal run is no longer quoted in §5.1 (that document gives its own figure).
+
+Nothing else changed.

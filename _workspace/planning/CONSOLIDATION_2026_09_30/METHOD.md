@@ -188,7 +188,7 @@ Loop until each check has **zero open failures**. Every resolution is recorded i
 ## 9. Prerequisites and timing
 
 1. The stage-quality review's Part B is done and copied into the repo.
-2. The cap re-plans are done and copied: 2/5 ✅ and B3 ✅ (2026-09-30), then B4 and 4/5.
+2. The cap re-plans are done and copied: 2/5, B3, B4 and 4/5 all ✅ (2026-09-30).
 3. Everything is committed, which is the freeze.
 
 Then Steps 0 → 8 run in order. **After Step 8:** the public snapshot (doc backlog rows #27 and #28; the operator's name in nothing public). Steps 0 and 7 need the operator; the others need the operator only for scope changes and approvals.

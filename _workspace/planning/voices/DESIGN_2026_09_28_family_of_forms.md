@@ -3,6 +3,7 @@
 **Status:** proposal for the operator's decision. Nothing here is built, applied or committed.
 **Written:** 2026-09-28, Fable 5.1 session, brief `_workspace/planning/BRIEF_2026_09_28_fable_batch.md` Task 4.
 **Checkout read:** `phase0-fixes` at `4e61444`. Shipped cards, corpora and the Athens record were read read-only from `projects/athens-2026/`.
+**Revised 2026-09-30:** paid tests restated as best-for-quality and best-value plans (§7.5, D11), after the operator lifted the USD 10 limit.
 **Revised 2026-09-29** after the independent review `_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/04_family_of_forms.md`. Every substantive finding was re-checked before it was accepted; the changes are listed in §11.
 **Line references** are to `4e61444`. On `main` (`0910a66`), `run_persona_pipeline.py` references from line 390 on are +5 (`f7e0d4c`), and `editor/dossier_generation.py` references moved (`02006f5`).
 **Labels:** **[C]** CONFIRMED (read or run). **[P]** PLAUSIBLE (not verified). **[I]** inference.
@@ -35,6 +36,7 @@
 - Promote each voice by the per-voice criteria in §7.4.
 - Only after at least one KEEP: the single Pass 4b edit and its sentinel.
 - Hold the Stage 2 prompt text (§5) as the pre-written next step if the dryrun shows default-lock.
+- Test sizes: each paid test comes in a best-for-quality and a best-value plan (§7.5). I recommend the quality plan for the dryrun and the value plan for the rest: about $80, or about $105 with a baseline arm (D11).
 
 **Open operator decisions:** D1–D14, in §9.
 
@@ -646,7 +648,7 @@ Today's render call omits `corpus_constraint` and `mediation_stance` (`standalon
 | **Whanganui** | witness variant: forms must be citation-and-gloss, no ritual genre |
 | **Arendt** (added) | unreadable-excerpt case: checks the §6.3 readability guard |
 
-**Arms:** A = current 4b, B = new 4b. Two samples each, from the same cached upstream passes: 20 calls. **About $4–6** [C for the per-call base]: Athens 4b calls cost $0.09–0.15 each from their recorded usage, plus the added input. My first draft's $8–12 was about twice too high.
+**Arms:** A = current 4b, B = new 4b. Two samples each, from the same cached upstream passes: 20 calls. **About $4–6** [C for the per-call base]: Athens 4b calls cost $0.09–0.15 each from their recorded usage, plus the added input. My first draft's $8–12 was about twice too high. This is the best-value size; §7.5 (T3) gives the best-for-quality size.
 
 **Pass criteria (B vs A):**
 1. Plato emits exactly one form in both samples.
@@ -661,6 +663,8 @@ Today's render call omits `corpus_constraint` and `mediation_stance` (`standalon
 ### 7.3 Two-night sandbox dryrun (Step 2 only)
 
 **Design.** The Athens record is the baseline (§2.1). Step 1 is file-cached (`step1_private_reasoning.py:138`), and Step 1 never sees artifact fields. So rerunning **only Step 2** on the Athens Step 1 outputs isolates the card change [C]. Step 2 is also cached (`step2_first_draft_artifact.py:316`), so its outputs must be absent.
+
+This section describes the **best-value** shape (2 nights, one sample per voice-night). §7.5 (T1) gives the best-for-quality shape, which I recommend.
 
 **Setup (corrected): a fresh, empty PROJECT_ROOT**, e.g. `projects/current-tests/fof-dryrun-<date>/`.
 
@@ -691,9 +695,9 @@ Then repeat with `--night 2`. Step 2 validation stays **on** for both nights (de
 **Threats to validity:**
 - One sample per voice per night, so the unpatched voices (Plato, Octopus, Whanganui, Lovelace, Cleopatra) are the noise floor.
 - Athens Night-2 Step 1 was conditioned on Athens Night-1 *reasoning* memory, which mentions the Night-1 form. The contamination is small [I].
-- **Baseline arm.** If the Step 2 prompt or the system-prompt opening changes before the dryrun, the Athens record stops being a baseline. That is likely: C68 A6's "You are I am …" fix is to be decided with Stage 4, and Stage 4 precedes Stage 5. Then add a baseline arm (unpatched cards, same prompt), about +$12–16 for two nights.
+- **Baseline arm.** If the Step 2 prompt or the system-prompt opening changes before the dryrun, the Athens record stops being a baseline. That is likely: C68 A6's "You are I am …" fix is to be decided with Stage 4, and Stage 4 precedes Stage 5. Then add a baseline arm (unpatched cards, same prompt): §7.5, T2.
 
-**Cost [I]:** Athens Step 2 cost $2.82 / $3.79 / $3.40 per night for 10 voices, computed from `step2_first_draft_artifacts/*.json` usage at $5/$25 with a 2× 1-hour cache write (the review reproduced these). Without Step 1 warming the cache, expect about $6–7 per night, plus Sonnet validation and continuity at under $1 each per night: **about $15–17 per two-night pass** (first draft: $12–20).
+**Cost [I]:** Athens Step 2 cost $2.82 / $3.79 / $3.40 per night for 10 voices, computed from `step2_first_draft_artifacts/*.json` usage at $5/$25 with a 2× 1-hour cache write (the review reproduced these). Without Step 1 warming the cache, expect about $6.60–7.10 per night, plus Sonnet validation and continuity at under $1 each per night: **about $16.50–17.50 per two-night pass.** §7.5 has the full cost model.
 
 **What to measure (per patched voice unless noted):**
 
@@ -717,7 +721,7 @@ Then repeat with `--night 2`. Step 2 validation stays **on** for both nights (de
 
 **Decision rule:**
 - **1–4 pass:** promote voices by §7.4.
-- **1 fails** (0–1 voices switch): first rule out a card-data cause. Check M6b and each `form_rationale` for a criterion or through-line sentence that vetoed a form; if one did, fix the card and rerun that voice. Only if none did is the exemption's claim falsified for Step 2. The operator then chooses between (a) §5 under the gate, then rerun the same Step-2-only dryrun (same inputs, about $15–17, which measures §5 alone), and (b) close §H by FU#55's original rule.
+- **1 fails** (0–1 voices switch): first rule out a card-data cause. Check M6b and each `form_rationale` for a criterion or through-line sentence that vetoed a form; if one did, fix the card and rerun that voice. Only if none did is the exemption's claim falsified for Step 2. The operator then chooses between (a) §5 under the gate, then rerun the same Step-2-only dryrun (same inputs; §7.5, T4; this measures §5 alone), and (b) close §H by FU#55's original rule.
 - **2 or 4 fail for a voice:** fix that voice's menu once, or revert it.
 
 ### 7.4 FU#55 resolution criteria, per voice (after the override)
@@ -739,6 +743,102 @@ The original criteria ("0/10 → close §H; 1–2 → opt-in; 3+ → land univer
 | 3+ | Make the 4b edit and run its sentinel (§7.2). |
 
 Record per-voice results in voices OPEN_ITEMS under FU#55. `FOLLOW_UPS.md` is frozen.
+
+### 7.5 Paid tests: two plans each (added 2026-09-30)
+
+The operator lifted the USD 10 limit on 2026-09-30 and set no blanket limit in its place. So each paid test is given here in two sizes, and the operator picks per test (D11):
+- **Best for quality:** what I would run with no cost constraint.
+- **Best value:** the most evidence per dollar. §7.2 and §7.3 describe this shape.
+
+**Pricing assumptions for every figure below:**
+- Opus 4.7 at $5 / $25 per million tokens and Sonnet 4.6 at $3 / $15, as in `model_routing.json` today. A model switch (runtime C62) changes every number.
+- **Step 2:** $0.54–0.84 per voice-night. This is the Athens Step 2 usage re-priced with all input billed as a 1-hour cache write (2×), i.e. with no warm cache [C for the usage, I for the re-pricing]. Ten voices: $6.60–7.10 per night.
+- **Step 2 validation:** about $0.80 per night (Athens: 29–30 Sonnet calls per night) [C].
+- **Continuity:** $0.85–1.00 per night transition [C]. It runs after Nights 1 and 2 only.
+- **Step 1**, where a plan regenerates it: $18–20 per night (Athens: 36–46 Opus calls per night) [C].
+- **Pass 4b:** $0.09–0.15 per call at Athens [C], plus 5–25K input tokens from the new excerpt block: about $0.12–0.28 per call [I].
+- **One full replicate of 10 voices:** about **$16.50–17.50** for two nights, about **$24–26** for three.
+- Replicates run within the hour share the cached system-prompt prefix, which would cut the figures below by an amount I haven't measured. The figures are therefore upper bounds [I].
+- All figures are estimates. None includes the operator's reading time, which is the larger cost in the quality plans (noted per test).
+
+**How a replicate works.** A replicate is one more fresh PROJECT_ROOT, set up as in §7.3. Continuity files and published artifacts live under the project root and Step 2 outputs under the run dir, and both are file-cached [C]. So a second sample of the same voice-night needs its own root. No code change is needed.
+
+#### T1. The dryrun (patched cards)
+
+| | Best for quality | Best value |
+|---|---|---|
+| Shape | **3 nights × 3 replicates**, all 10 voices, validation on | **2 nights × 1 replicate**, all 10 voices, validation on (§7.3 as written) |
+| Draws per patched voice | 9 | 2 |
+| Cost | about **$72–78** | about **$16–17.50** |
+| Operator reading | form use (M1) is read off `selected_form` for all 9 draws. Blind reads (M3) on one replicate plus every non-default artifact: about 2–3 hours | about 1 hour |
+| What it buys | A switch *rate* per voice, not a single yes or no. A third matter per voice. Night 3 tests "the same form twice" against real memory | The minimum that can answer the §7.3 pass criteria |
+
+**Why the draw count matters** [I, an illustration that treats draws as independent, which nights are not quite]: suppose a voice would truly pick a non-default form on 30% of matters. With 2 draws it shows no switch 49% of the time (0.7²). With 9 draws, 4% (0.7⁹). At a true rate of 15% the figures are 72% and 23%. The build-level rule "at least 2 voices switch" is applied to these draws, and a miss sends the build to §5 under the gate. So the value plan has a real chance of a false "default-lock".
+
+**Pass criteria under the quality plan** (proposal):
+- A voice is **KEEP** with a non-default form in at least 2 of its 9 draws, blind reads not worse, and no new HOLD.
+- 1 of 9 is **WATCH**.
+- The build-level criterion 1 becomes "at least 2 voices at KEEP".
+- REVERT is unchanged.
+
+A cheaper variant of the value plan is possible: `--voices` limits the run to the 5 patched voices plus 2 controls (about $12 for two nights). I don't recommend it. The other three controls cost about $5 and are the noise floor.
+
+#### T2. The baseline arm (unpatched cards, same prompt and code)
+
+| | Best for quality | Best value |
+|---|---|---|
+| When | **Always**, whether or not anything changed since Athens | **Only if** the Step 2 prompt, the system-prompt opening (C68 A6) or the model has changed since Athens. Otherwise the Athens record is the baseline at no cost |
+| Shape | Matched to T1: 3 nights × 3 replicates | The same nights as the T1 plan chosen, 1 replicate |
+| Cost | about **$72–78** | **$0**, or about **$16–17.50** (2 nights) / **$24–26** (3 nights) |
+| What it buys | A same-voice noise floor: how much an *unpatched* voice's artifact varies from draw to draw. Blind reads then compare fresh draws on both sides, not against one sample from May | Keeps the comparison valid after a prompt change, and nothing more |
+
+Stage 4 precedes Stage 5 and C68 A6 is to be decided with Stage 4, so the "only if" condition will probably be met. Validation stays on in both plans, because M5 and M6 compare validator verdicts between arms.
+
+#### T3. The Pass 4b sentinel (only after at least one KEEP)
+
+| | Best for quality | Best value |
+|---|---|---|
+| Shape | **All 10 voices × 2 arms × 3 samples** (60 calls) with `standalone_pass4b_test.py`. **Plus** an end-to-end downstream regen for 2 voices (Dostoevsky, Whanganui): Pass 4b through Derive in a `sentinel_regen.py sandbox` copy | **5 voices × 2 arms × 2 samples** (20 calls), as in §7.2 |
+| Cost | 60 calls about $7–17; the downstream regen about $8–10 per voice from the spec's cost table (`AI_Assembly_Persona_Pipeline_v4.md:583-600`, the rows from Pass 5 on) [I]. Total about **$23–37** | about **$4–6** |
+| Operator time | the downstream regen stops at the 7a FINAL gate, so it needs an operator walk-through per voice | reading 10 B-arm outputs against 10 A-arm outputs |
+| What it buys | One-form discipline checked on every voice, not just Plato. Three samples show how stable a menu is. The downstream regen **runs** what I only code-read: that Pass 5, 6, 7a, 7b, 7c, the register check, Derive and the chat builder accept an object `medium` (§3.3) | The four pass-or-fail questions of §7.2 on the voices chosen to stress them |
+
+#### T4. The §5 rerun (only after a default-lock result with no card-data cause)
+
+| | Best for quality | Best value |
+|---|---|---|
+| Shape | Two arms, each 3 nights × 3 replicates: **(a)** the full §5 text; **(b)** an ablation with only the two `medium` lines (the `calls_for` anchor and the exact-name rule), no nudge and no "most famous form" question | The full §5 text, the same nights as T1, 1 replicate |
+| Cost | about **$145–155** | about **$16–17.50** (2 nights) / **$24–26** (3 nights) |
+| What it buys | Shows which lines do the work, so the smallest text lands. The 04-28 revert was caused by stacked prompt additions | Shows whether §5 as a whole breaks the lock |
+
+#### T5. Other paid runs
+
+| Run | Best for quality | Best value |
+|---|---|---|
+| **Rerun of one voice after a card fix** (§7.3 decision rule) | that voice in every replicate and night of the plan in use: about $6–9 at 3 × 3 | that voice only (`--voices`), the nights already run: about **$2** |
+| **End-to-end check with Step 1 regenerated.** This removes the one contamination in the design: Athens' Night-2 and Night-3 Step 1 outputs were written under Athens' own memory of Night 1 (§7.3 threats) | one replicate per arm, Step 1 regenerated on Nights 2 and 3: about $62–64 per arm, **about $125** for both | **don't run.** The contamination is small [I], and regenerating Step 1 adds its own variance to every comparison |
+| **Path-(b) re-Derive on promotion** | about $0.20 per promoted voice (voices §31: about $2 for 10). It is not a test and is the same in both plans | same |
+| **Chat test per patched voice** | the operator's claude.ai session; no API cost | same |
+
+#### Totals
+
+| Path | Best for quality | Best value |
+|---|---|---|
+| T1 + T3 (nothing changed since Athens, at least one KEEP) | about $95–115 | about **$20–24** |
+| + T2 | about $170–195 | about $37–41 |
+| + T4 (only on default-lock) | + about $150 | + about $17 |
+| + the end-to-end check | + about $125 | not run |
+
+#### Recommendation (the operator decides, D11)
+
+Mix the plans by test:
+- **T1: best for quality** (about $75). The build's go / no-go rests on how many voices switch. Two draws per voice can't separate "won't switch" from "didn't this time", and a false default-lock would send the build under the gate for nothing. This is the one place where the extra money buys a materially safer decision.
+- **T2: best value**, sized to T1's three nights (about $25), and only if something changed since Athens.
+- **T3: best value** (about $5). The downstream regen's question gets answered at no extra cost the first time a new voice is built with the edited Pass 4b, and that build has the operator at the 7a FINAL gate anyway.
+- **T4: best value** (about $25 at three nights), only if needed.
+- **Skip the end-to-end check.**
+
+That comes to about **$80** if nothing has changed since Athens, about **$105** with the baseline arm, and about $25 more if §5 is needed.
 
 ---
 
@@ -777,7 +877,7 @@ The criterion edits are more numerous than my first draft counted (one per voice
 | Gate tooling | `standalone_pass4b_test.py` about +6 lines | same |
 | New files, config keys, flags | 0 | 0 |
 | Docs, when built | Card spec `medium` / cos / lfc + §H status; `CROSS_REPO_CONTRACT.md` (`medium` shape); Voice Pipeline spec (the E1 form-decision note; already neutral); `LLM_CALL_INVENTORY.md` (4b inputs) | same |
-| API spend | dryrun ~$15–17 (+ baseline arm ~$12–16 if the Step 2 prompt has changed); then, only on a KEEP, 4b sentinel ~$4–6 and a path-(b) re-Derive per promoted voice (~$0.20 each, from the §31 figure of ~$2 for 10) | + §5 rerun ~$15–17 |
+| API spend | see §7.5. Best value: about $20–24 (dryrun + sentinel), about $37–41 with a baseline arm. Best for quality: about $95–115, about $170–195 with a baseline arm | + the §5 rerun: about $17 (value) or about $150 (quality) |
 
 ---
 
@@ -795,7 +895,7 @@ The criterion edits are more numerous than my first draft counted (one per voice
 | D8 | Length-check revival + `selected_form` to the engagement validator | Split it. The length check: defer to the Stage-6 validator prune-vs-fix decision (runtime C60 / C42). The one-line `selected_form` pass-through: needed **before any production run with menus**, because the validator runs every night and a WARN halts the voice. It is a runtime edit, so it goes under the gate; the dryrun's M6 count says how urgent. |
 | D9 | *Denktagebuch* language | English with German seams (a German-throughout entry would lose the breakfast reader) |
 | D10 | §27's Plato "Myth" and Whanganui "Karakia + whakataukī cluster" | Reject the karakia cluster (witness contract); defer Myth (fork test) |
-| D11 | Spend cap | about **$25** for one dryrun pass plus the sentinel; about **$40** if the baseline arm is needed; about $17 more if §5 is needed |
+| D11 | Which test plan, per paid test (§7.5): best for quality or best value? | **Quality for the dryrun (T1), value for the rest**, and skip the end-to-end check: about $80, about $105 with a baseline arm, about $25 more if §5 is needed. All value: about $20–24 / $37–41. All quality: about $95–115 / $170–195, plus about $150 for §5 and about $125 for the end-to-end check if run. |
 | D12 | `council_config.json` `members[].medium` | Leave as is. Optionally append the family's names in one line; that is hand-wired config, not code. |
 | D13 | Order: dryrun before the Pass 4b edit? | Yes. The dryrun uses hand-patched cards; a 0-KEEP result then costs no upstream edit. |
 | D14 | Arendt's unreadable excerpts when 4b is rebuilt | Fix the fetch (the §37 A3 class) and rerun her 1c/1d; the 3-line guard in `_pass_4b()` as the interim |
@@ -898,6 +998,21 @@ None of these changes a recommendation.
 - **Dostoevsky QC (3):** the review reads it as needing a criterion patch. I fixed it by moving the вдруг sentence to the through-line instead, because both new forms have the swerve natively and the criterion is one of his strongest texture tests.
 - **Cleopatra:** the review suggests more patches (QC 2, lfc). I went further and deferred her, because the attested temple texts are not in her voice at all.
 - **The letter is attested for register only.** The review upgrades it to "corpus-attested". The extracts are fragments inside an editor's prose; no whole letter is in the corpus, so the arc's frame stays [P].
+
+### 11.4 Revision 2026-09-30: test plans as quality and value options
+
+The operator lifted the USD 10 limit on 2026-09-30 with no blanket limit in its place. The main session asked for each paid test in two plans. No model calls were made for this revision; the only new data read was Athens Step 1, validation and continuity usage (read-only).
+
+| # | Where | Change |
+|---|---|---|
+| 1 | §7.5 (new) | Every paid test (T1 dryrun, T2 baseline arm, T3 Pass 4b sentinel, T4 §5 rerun, T5 other runs) in a best-for-quality and a best-value plan, with costs, assumptions, totals and a recommendation |
+| 2 | §7.5 | Pass criteria restated for the 9-draw quality plan (KEEP needs 2 of 9; 1 of 9 is WATCH) |
+| 3 | §7.2, §7.3 | One-line pointers: these sections describe the best-value shape. §7.3's cost line aligned to the §7.5 model ($16.50–17.50 for two nights); the baseline-arm and §5-rerun costs now point to T2 and T4 |
+| 4 | §8.2 | API-spend row replaced by the §7.5 totals |
+| 5 | §9 D11 | Reframed from a spending limit to the choice of plan per test. No spending-limit wording remains in the document |
+| 6 | §0, header | One recommendation bullet and one revision line added |
+
+Nothing else changed. The §11.2 log above still records the earlier cost corrections as they were made.
 
 ---
 
