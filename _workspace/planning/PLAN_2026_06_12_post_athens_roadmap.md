@@ -249,6 +249,17 @@ C51 (per-theme files: deliver or drop) · C53 republish + push (your OK) · §32
 - **Model choice (C62)** — operator wants model-per-step selection surfaced in the planned studio UI (an overview page across both pipelines). Prerequisite: one central model-routing config instead of ~40 hardcoded model literals.
 - **Invariant (#10)** — **decided: the loose four-part invariant** (PRODUCT §11.5). Strict variant declined.
 - **Stage 4 spend cap: ~~USD 10 (2026-09-28)~~ lifted 2026-09-30 (operator).** No blanket cap on tests. Every proposed paid test lists a **best-for-quality** and a **best-value** option with cost estimates, and the operator picks per test. The main session still estimates each run's cost before the first paid call and asks before firing.
+- **Public = latest version only, name-free (2026-09-30, operator).** The operator's words: *"my name should stay out of everything, and only the current state should be public, all planning and workspace should not, so only the 'latest version' is visible."* **Confirmed the same day:**
+- the repo is private (done 2026-09-30);
+- the snapshot goes under the operator's account;
+- publishing waits until after the consolidation ("no one has the link anyway");
+- "everything" covers the code, the snapshot and the Athens microsite record, and docs say "the operator".
+
+Mechanism:
+  1. ✅ `mp13131313/ai-assembly` made private 2026-09-30; it is the working repo, with its history, so every cited commit hash stays valid;
+  2. publish a separate public repo holding one history-free snapshot, built from an allowlist (code, specs, a public README), scrubbed of the operator's name and email, with a script that fails if either remains;
+  3. republish at each milestone.
+  (An earlier same-day note that planning stays public was superseded within the hour.)
 - **Consolidation (2026-09-30, operator: the hybrid).** Every tracker, this roadmap, the product note, the doc backlog, FOLLOW_UPS, and the 13 Fable reports plus 11 reviews are consolidated into one register. Capture is exhaustive and script-checked; planning is product-style: Now / Next / Later by outcome, a decision log that keeps rejected options, and a not-doing list with gates. The result **replaces this roadmap's sequencing sections** after operator approval. Method: `CONSOLIDATION_2026_09_30/METHOD.md`. It starts after the stage-quality Part B and the cap re-plans land.
 - **Code-review follow-ups (2026-09-28):** Athens reflection record: fix the converter going forward and leave the published record as it is (runtime C68 A1). Night-3 continuity: correct the spec now, decide the code in Stage 5 (C68 A10). Lovelace: re-fetch her Wikisource text after the fetcher fix, then check whether her card needs a patch (voices §37 A3).
 - **Editor defects (runtime C64)** — `publish_flow`'s dead newspaper-field reads: *"Remove all three"* (`issue_no`, `vol`, `publication_date`). The stray `**` in the 13 published Athens dossiers: *"Clean later, separate task"* (filed as a C64 residual; not scheduled).

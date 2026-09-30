@@ -4,17 +4,19 @@ A provotype for the World Beautiful Business Forum AI Democracy Marathon, Athens
 
 Ten non-human and historical voices (a river, an octopus, Plato, Hannah Arendt, and others) read each day's human panel transcripts overnight and produce written responses — provocations, queries, reflections — that re-enter the human conversation the following morning via a published microsite.
 
+**Status (2026-09):** Athens 2026 ran: 13 dossiers and 30 voice pages over three nights. Post-Athens work is under way: review, consolidation, and a persona-pipeline catch-up. [`STATE.md`](STATE.md) has the current state.
+
 ## Filesystem layout (Tier 3 — code/project separation)
 
 ```
 ~/Desktop/AI Assembly/
-├── code/                   # THE GIT REPO — `mp13131313/ai-assembly` (private)
+├── code/                   # THE GIT REPO — `mp13131313/ai-assembly` (private working repo since 2026-09-30)
 │   ├── docs/               # PRODUCTION: canonical specs + briefing docs
 │   │   ├── research/       # PRESERVED: grounding Deep Research artifacts
 │   │   └── _archive/       # historical specs (e.g. v3.10 pipeline)
 │   ├── runtime/            # PRODUCTION: ingest + flows + orchestrator
 │   ├── personas/           # PRODUCTION: Persona Pipeline (v4)
-│   ├── _workspace/         # planning/ + archive/ (out of scope for code reviews)
+│   ├── _workspace/         # planning/ + archive/ (out of scope for code reviews; never published)
 │   └── .env                # Shared secrets (gitignored — see .env.example)
 ├── projects/               # NEVER pushed — per-project data, sibling to code/
 │   ├── current-tests/      # container: dev_msc_test/ + voice-pipeline-dryrun/
@@ -73,7 +75,7 @@ venv/bin/python scripts/overnight_orchestrator.py --night 1
 venv/bin/python scripts/overnight_orchestrator.py --date 2026-05-07
 ```
 
-22 trigger-path tests in `runtime/tests/test_orchestrator.py`. See [`docs/AI_Assembly_Runtime_Lifecycle.md`](docs/AI_Assembly_Runtime_Lifecycle.md) §3 for details.
+23 trigger-path tests in `runtime/tests/test_orchestrator.py`. See [`docs/AI_Assembly_Runtime_Lifecycle.md`](docs/AI_Assembly_Runtime_Lifecycle.md) §3 for details.
 
 ### VM deployment
 
@@ -120,7 +122,7 @@ Per-voice subfolder layout under `<PROJECT_ROOT>/voices/<slug>/` is documented i
 
 The personas pipeline produces three runtime-relevant artifacts per voice:
 
-- **Provocateur Profile** (8 fields) at `<PROJECT_ROOT>/voices/<slug>/06_derive/01_provocateur_profile.json` → wires into `<PROJECT_ROOT>/reference/council_config.json` `members[]`.
+- **Provocateur Profile** (`name` + 8 fields) at `<PROJECT_ROOT>/voices/<slug>/06_derive/01_provocateur_profile.json` → wires into `<PROJECT_ROOT>/reference/council_config.json` `members[]`.
 - **Persona Card** (36 generated + 2 continuity null + metadata) at `<PROJECT_ROOT>/voices/<slug>/07_persona_card_assembled.json` → loaded as Voice Pipeline system prompt. Runtime drops `metadata`, `smoke_test_chains`, and (for Step 2 only) `reference_only_passages`.
 - **Chat artifact** at `<PROJECT_ROOT>/voices/<slug>/06_derive/03_chat_system_prompt.json` → operator paste-target for Claude project custom instructions; not consumed by runtime pipelines.
 
@@ -148,7 +150,7 @@ Start with [`docs/README.md`](docs/README.md) — staleness index for canonical 
 - [Researcher Pipeline](docs/AI_Assembly_Researcher_Pipeline.md)
 - [Provocateur Pipeline](docs/AI_Assembly_Provocateur_Pipeline.md)
 - [Voice Pipeline v2.1](docs/AI_Assembly_Voice_Pipeline.md)
-- [Editor Pipeline v2](docs/AI_Assembly_Editor_Pipeline.md) — spec + implementation shipped 2026-05-03; closing-prompt rewrite to v2 still pending
+- [Editor Pipeline v3.2](docs/AI_Assembly_Editor_Pipeline.md) — Tim Leberecht as editor, one dossier per theme; checked against the code and all 13 Athens dossiers 2026-09-28 (the caveats are in `docs/README.md`)
 
 **Runtime / operations:**
 

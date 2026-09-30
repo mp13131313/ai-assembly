@@ -55,6 +55,14 @@ A change is **done** when, on the same branch as the code:
 5. **STATE.md** — if current state changed (per `conventions.md`: a result,
    an item resolving, a voice shipping, a branch landing).
 6. **CHANGELOG.md** — if it's a milestone (per `conventions.md`).
+7. **Public face** — only the **latest version** is public, and the operator's
+   name is in **nothing** public (operator decision 2026-09-30). The working repo
+   (history, `_workspace/`, STATE, CHANGELOG) is private (since 2026-09-30).
+   The public copy is a name-free snapshot with no history, under the operator's
+   account, first published after the consolidation (doc backlog row #28) and
+   republished at each CHANGELOG milestone; check its README and GitHub "About"
+   box then. In every doc, public or private, write **"the operator"**, never
+   the name.
 
 Code without its doc updates is not "done, docs later" — it's not done.
 
@@ -185,3 +193,4 @@ To keep this folder load-bearing rather than archival, follow these rules. They 
 | "Night 2 index cosmetic" written without checking Night 1 | §7 verify |
 | An architecture analysis existed only in a chat transcript | §7 |
 | Branches named `post-athens-planning` / `phase0-fixes` instead of `feature/…` / `fix/…` | `conventions.md` branch naming (§8 at merge) |
+| The root README called the public repo "private" from April to September 2026; the working notes and the operator's name were public the whole time | §3.7 |

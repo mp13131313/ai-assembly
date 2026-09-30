@@ -191,4 +191,4 @@ Loop until each check has **zero open failures**. Every resolution is recorded i
 2. The cap re-plans are done and copied: 2/5 ✅ and B3 ✅ (2026-09-30), then B4 and 4/5.
 3. Everything is committed, which is the freeze.
 
-Then Steps 0 → 8 run in order. Steps 0 and 7 need the operator; the others need the operator only for scope changes and approvals.
+Then Steps 0 → 8 run in order. **After Step 8:** the public snapshot (doc backlog rows #27 and #28; the operator's name in nothing public). Steps 0 and 7 need the operator; the others need the operator only for scope changes and approvals.

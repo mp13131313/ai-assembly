@@ -51,9 +51,9 @@ What would change (the cluster memberships stay the same):
 - **Theme round:** it also sees each cluster's key statements.
 - **Optional:** a relations step between clusters (contradicts / answers / builds on), which gives the map.
 
-Illustrative rewrites. These are the main session's drafts, untested:
-- **N3 cluster_013** ("How a better future arrives"): title *"Crisis, healing, or taking power: how does a better future come?"*; summary *"The Beastopia panel split three ways: coming crises will force reinvention; collective healing of generational trauma must come first ('a river of frozen tears'); progressives dissolve the power already in the room by asking who is missing. The panel asked, and left open, whether these compete or are one path."*
-- **N1 cluster_013** ("Modern democracy bent or hollowed"): title *"Democracy has drifted from its purpose; renewal may need a collapse"*; summary *"Speakers agreed modern democracy now serves the few and has lost Athens' patient wrestling; they split on the cure: civic education, institutionalized reminders of purpose, or, for two of them, a period of destruction like the chaos democracy was born from."*
+Illustrative rewrites. These are the main session's drafts, untested, **corrected 2026-09-30** (§6):
+- **N3 cluster_013** ("How a better future arrives"): title *"Civic memory, crisis, or healing: how does a better future arrive?"*; summary *"On the Beastopia panel, Apostolakis argued for patient civic memory-work, where people remember their pre-power selves; Johar argued that converging crises will force reinvention, and that progressives dissolve the power in the room by always asking who is missing; Fox argued that generational trauma has to be healed first ('a river of frozen tears'). The panel's own open question stayed open: do these compete, come in sequence, or name one thing?"*
+- **N1 cluster_013** ("Modern democracy bent or hollowed"): title *"Democracy has drifted from its purpose; renewal may need a collapse"*; summary *"In reflections written separately after the sessions, nine participants described modern democracy as drifted from its purpose and fragile, looking for renewal in civic education, institutionalized reminders of purpose, or a period of destruction like the chaos democracy was born from. One panel speaker (Apostolakis) reframed the problem: the young applied the ROI logic they were taught."*
 
 ## 5. Test: rewrite the labels only, on fixed Athens memberships
 
@@ -80,9 +80,9 @@ The Athens cluster and theme memberships are kept exactly as they are; only the 
 | Support check of one label set (Opus 5.5: is every attributed claim in the cited statements?) | ≈ $1.0 |
 | Relations map, three nights (Opus 5.5) | ≈ $0.6 |
 
-**Best value, ≈ $2:** the new label prompt on Opus 4.7, one draw, all three nights, clusters and themes. The operator reads it in the explorer. It answers "does the label instruction fix the complaint?" with no model confound.
+**Best value, ≈ $3:** the new label prompt on Opus 4.7, one draw, all three nights, clusters and themes, **plus the support check** (≈ $1). The check belongs in the cheap package too; see §6. The operator reads the result in the explorer. It answers "does the label instruction fix the complaint?" with no model confound.
 
-**Best quality, ≈ $11 (≈ $15 with a Fable arm):**
+**Best quality, ≈ $11 (≈ $15 with a Fable arm; the stage-quality review estimates $12–16 on its own token assumptions):**
 1. A control: the *current* label prompt re-run on the fixed memberships (Opus 4.7), to separate run-to-run noise from the prompt effect. ≈ $1.9.
 2. The new prompt on Opus 4.7, two draws, for variance. ≈ $3.8.
 3. The new prompt on Opus 5.5, one draw, for the forward model (C62). ≈ $1.6.
@@ -91,6 +91,27 @@ The Athens cluster and theme memberships are kept exactly as they are; only the 
 6. Optional: a Fable 5.1 arm. ≈ $3.9.
 
 **Not in these numbers:** the engineering. That is a relabel script and prompt plus a way to show both label sets in the explorer, which is Sonnet-shaped work. The operator's own reading time.
+
+## 6. Corrections and additions (2026-09-30, from the stage-quality review, Part A revision)
+
+The review (`REVIEW_2026_09_28_stage_output_quality.md`) checked this note. Both of the note's first rewrites carried attribution errors, both confirmed by the main session against the extractions:
+- **N3:** the "three ways" had two positions from the same speaker (Johar) and left out Apostolakis. The Researcher's own open question (`beastopia:026`) had all three right.
+- **N1:** "Speakers agreed … they split" presented nine separately written reflections, plus one panel speaker, as a discussion.
+
+Those two errors are the case for the review's additions, which the note adopts:
+1. **Labelling is its own call.** It needs speaker and session, which the clustering call must never see.
+2. **Session kind is an input** (panel, reflection, workshop, staged meeting, an Assembly intervention), so a label never narrates reflections as an exchange.
+3. **The Researcher's own open questions are the label step's first source.** They already name the positions correctly.
+4. **The support check is in every package,** including the cheap one: three hand-written drafts have carried attribution errors.
+5. **"Verbatim" isn't available.** Key statements are the Researcher's paraphrases, with no link back to the transcript. Call them "key extractions".
+6. **Speaker names in six audio recordings are the Researcher's inference** (the transcript names nobody) and are unaudited. Labels must not lean on them without a flag.
+7. **In production, Round 1 becomes two calls:** grouping (blind to speaker and session, as now) and labelling (sighted: speaker, session, engagement).
+8. **Include the relations map in the test, plus one cross-night pass.** Example from the review: Irving's "ask who isn't at the table" (N2 `clash:018`) against Johar's (N3 `beastopia:014`). 58 of the 78 open questions are synthesized across speakers like `beastopia:026`, so they are a ready source for the label step.
+
+**Operator decisions that block the label prompt** (the review recommends; the operator decides):
+- **Absences:** may a label report one ("no board member argued for the cuts")? Recommended: yes, as a plain fact.
+- **Reflections:** how are they narrated? Recommended: always as separate reflections, never with verbs of exchange.
+- **The Assembly's own interventions:** how are they attributed? Recommended: "the Voice of X, channelled into the room", as the Night-1 dossier rule already does.
 
 ## Status
 

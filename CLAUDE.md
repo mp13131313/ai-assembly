@@ -213,7 +213,8 @@ demands more.**
 
 **Consult as needed:**
 
-- `README.md` — public-facing project overview (external context only)
+- `README.md` — project overview for this private working repo; the public
+  face is a separate name-free snapshot (WAYS_OF_WORKING §3.7)
 - `CHANGELOG.md` — when did X happen? (time-stamped history)
 - `_workspace/planning/conventions.md` — read before editing docs or
   reorganizing the filesystem
@@ -263,7 +264,7 @@ automatically when scripts are run from the monorepo root or the
 
 Per voice, the persona pipeline produces three runtime-relevant artifacts:
 
-- **Provocateur Profile** (8 fields) at
+- **Provocateur Profile** (`name` + 8 fields) at
   `voices/<slug>/06_derive/01_provocateur_profile.json` → wires into
   `runtime/flows/shared/council/council_config.json` `members[]`.
 - **Persona Card** (36 generated + 2 continuity null + metadata) at

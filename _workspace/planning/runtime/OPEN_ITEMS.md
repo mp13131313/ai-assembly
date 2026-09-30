@@ -3117,10 +3117,10 @@ Reference pricing (skill table cached 2026-06-24): Opus 5.5 $4/$20 vs Opus 4.7 $
 **Proposal:** labels that report what was said, attributed, with the split and what stayed open. Titles become sentences. Add one or two key statements per cluster, and move the "why grouped" sentence to an audit field. Optionally add the KJ relations step (the map). Clustering unchanged.
 
 **Test, priced in the note (§5):** relabel the fixed Athens memberships in a sandbox.
-- Best value: ≈ $2 (Opus 4.7, one draw).
+- Best value: ≈ $3 (Opus 4.7, one draw, plus the support check).
 - Best quality: ≈ $11 (a current-prompt control, 2 draws, an Opus 5.5 arm, a support check, the relations map), or ≈ $15 with a Fable arm.
 
-**Decide:** whether to run it, and which package. Also whether C68 A1 (reflections labelled "panel") is fixed first. Relabelling Athens keeps its memberships, so A1 doesn't block this test.
+**Decide:** whether to run it, and which package. Also whether C68 A1 (reflections labelled "panel") is fixed first. Relabelling Athens keeps its memberships, so A1 doesn't block this test. **Also blocking the label prompt** (note §6, from the stage-quality review): may labels report absences; how reflections are narrated; how the Assembly's own interventions are attributed. The note's first two example rewrites carried attribution errors and were corrected 2026-09-30.
 
 
 ## Section F — Recently landed (for context)

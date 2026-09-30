@@ -30,8 +30,10 @@ the operator's own intent — no external event needed. Test suites
 
 ## The two repos
 
-- **`mp13131313/ai-assembly`** (this repo) — runtime + personas + docs +
-  planning trackers.
+- **`mp13131313/ai-assembly`** (this repo; **private since 2026-09-30**, was
+  public) — runtime + personas + docs + planning trackers. A name-free public
+  snapshot of the latest version comes after the consolidation
+  (WAYS_OF_WORKING §3.7).
 - **`mp13131313/ai-assembly-athens2026-voices`** (private) — the Athens
   production instance: 10 voice cards + config, `published_artifacts/` (the
   3 editions + editorial assessment + data inventory), and `runs/` (the
