@@ -1,7 +1,7 @@
 # Writing sources: the AI Assembly (source dossier for the operator's essay)
 
 **For:** the operator, who plans to write about the project. **Task 5** of `_workspace/planning/BRIEF_2026_09_28_fable_batch2.md`.
-**Written:** 2026-09-28, Fable 5.1, from a detached checkout of `phase0-fixes` at `40fe490`. Nothing here is committed.
+**Written:** 2026-09-28, Fable 5.1, from a detached checkout of `phase0-fixes` at `40fe490`. **Revised 2026-09-29** after the independent review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/11_writing_sources.md`, in the main checkout): corrections are marked *(rev.)*. Nothing here is committed.
 **What this is:** material to write from, with sources. It is not a draft. Seven sections follow the brief. §8 lists what the record doesn't answer, and §9 lists the scripts I ran.
 
 **How to read it**
@@ -14,6 +14,7 @@
 - Audience reflection participants appear only as the record labels them ("Participant 15", "an audience member").
 - Other people named in the internal record (the co-architect, the outside reader of the Marley card, the candidate reader-gate names in the voices tracker) are left unnamed here. You can name them yourself if they agree.
 - One finding bears directly on privacy: your own name appears in the published record, against the anonymization rule. See §6.6.
+- *(rev.)* This file now writes "the operator's name" instead of the name itself, so it can be excerpted without redaction.
 
 ---
 
@@ -21,8 +22,8 @@
 
 1. **It ran, all three nights, and was published.** That makes 13 dossiers and 30 voice pages, from 30 sessions, 529 extracted positions and 128 per-voice questions (CONFIRMED; §2).
 2. **The strongest thread started live on stage.** On Day 1 you channelled the Octopus into a game-show vote: the room would grant rivers personhood but not AI. That night the Whanganui River answered *"The river did not fail to show up. The iwi showed up."* (`N1/003`). By Night 3 five voices were refusing the verb *grant* (`N3/001`). At the closing show you told this story as the moment that "landed in the room" (CONFIRMED; §3.1).
-3. **It was cheap.** The voice stage measured ~$72 over three nights. My own calculation puts the Provocateur at ~$48 and the published editor calls at ~$10 (§2.3).
-4. **Several Briefing promises did not ship.** Step 3 (voices amending in response to each other), the closing-show matrices, the video, the Day 4 goodbye, Marley via Suno, and Substack were all dropped or not built (CONFIRMED; §2.5). The collective moment happened in the editor's dossiers instead, not among the voices.
+3. **It was cheap** (inference, from the figures). The voice stage measured ~$72 over three nights. My own calculation puts the Provocateur at ~$34 *(rev.; was ~$48)* and the published editor calls at ~$10 (§2.3).
+4. **Several Briefing promises did not ship.** Step 3 (voices amending in response to each other), the closing-show matrices, the video, the Day 4 goodbye, Marley via Suno, and Substack were all dropped or not built (CONFIRMED; §2.5). The only cross-voice surface was the editor's dossiers (inference: the collective moment moved there, not among the voices).
 5. **The core question is still open by the project's own account.** Is this a genuine perspective or elaborate ventriloquism? voices §33 says the build rigor "does NOT" establish authenticity, and the Rastafari and iwi reader gates were never scheduled (§6).
 
 ---
@@ -37,7 +38,7 @@ Source for everything in this subsection: `docs/AI_Assembly_Briefing_v3_1.md`.
 - **What it tests, narrowly** (line 19): *"The question the Assembly tests is not 'can an AI really channel a river?' It tests something narrower and more honest…"* If expansion happens, the argument *"has an empirical leg under it"*; if not, it *"has to reckon with the difficulty of its own demonstration, even with the most sympathetic possible audience."*
 - **The lineage** (line 21): Aarhus 1992 and DIS 2012. *"The Assembly is a provotype of structural possibility. Its success and its failure are both findings."*
 - **First condition: the representative is always built** (line 25): *"There is no authentic version waiting to be discovered. The construction is the representation. The Assembly does not simulate this condition. It instantiates it."*
-- **Second condition: who builds it** (lines 29–37): two non-technical people using Claude, Claude Code and Deep Research, with *"neither an ML researcher; neither codes."* *"The Assembly is the prosumer version."* And: *"Its production conditions provotype who gets to build the infrastructure of that democracy."*
+- **Second condition: who builds it** (lines 29–37): two non-technical people using Claude, Claude Code and Deep Research: *"Neither is an ML researcher; neither codes."* *"The Assembly is the prosumer version."* And: *"Its production conditions provotype who gets to build the infrastructure of that democracy."*
 - **The admitted ambiguity** (line 35, repeated at 109): if nothing expands, the experiment *"cannot on its own distinguish"* whether the medium failed or *"these non-human voices, built at this quality level"* did. *"there is no professional-version control group."*
 - **The three-layer test** (lines 47–53):
   - **Encounter:** do people read it?
@@ -106,7 +107,7 @@ Source for everything in this subsection: `docs/AI_Assembly_Briefing_v3_1.md`.
 
 - **Output size** (calculation, §9):
   - the 30 artifacts total 18,466 words (377–826 each);
-  - the 13 dossier bodies total 7,179 words (432–633 each).
+  - the 13 dossier bodies total 7,166 words (431–632 each) *(rev.)*. The review re-counted this after athens-2026 `e4c4e39` stripped one stray `**` per dossier; my original count, 7,179 (432–633), predates that cleanup.
 - **Thinking effort** (calculation): editor thinking was 142,799 tokens across the 13 dossiers; Step-1 voice reasoning was 534,349 thinking tokens across 125 files.
 - **Note on the Step-1 count:** Night 1 has 43 files against 46 formulations. The missing three are Cleopatra, Battuta and the River, one each, which are the three voices re-run that night (STATE line 66). That the rerun explains it is PLAUSIBLE, not checked. `STATE.md` says "46 Step 1"; the Voice spec table (line 1272) says 43. Use 43 if you cite a number.
 - **Validator anomalies:**
@@ -118,15 +119,15 @@ Source for everything in this subsection: `docs/AI_Assembly_Briefing_v3_1.md`.
 | Stage | Figure | Status | Source |
 |---|---|---|---|
 | Voice (Steps 1+2, validator, continuity) | ~$23 / ~$25 / ~$23; **~$72** total | **Measured** from token fields | `docs/AI_Assembly_Voice_Pipeline.md:1268-1280` |
-| Provocateur | $16.21 / $17.88 / $13.52; **~$48** total (57 / 57 / 47 calls) | **Calculation**, from token fields in `03_provocateur/**` at $5/$25 per MTok | §9 |
-| Editor (published dossier calls only) | $2.09 / $4.54 / $3.29; **~$10** total | **Calculation**; assumes cache writes at 2× input. Night 1 had three editor fires, so real spend was higher | §9; `STATE.md` lines 71–76 |
+| Provocateur | $11.83 / $12.89 / $9.65; **~$34** total (57 / 57 / 47 calls) *(rev.; was ~$48)* | **Calculation**, from token fields in `03_provocateur/**` at $5/$25 per MTok. Cache writes are billed at 1.25× because the Provocateur caches with the default 5-minute TTL (`runtime/flows/provocateur_flow.py:396`, `{"type": "ephemeral"}`). My first pass wrongly used the voice calls' 1-hour multiplier (2×) | §9 |
+| Editor (published dossier calls only) | $2.09 / $4.54 / $3.29; **~$10** total | **Calculation**. Cache writes at 2× input, correct here because the editor uses the voice call path with a 1-hour TTL (checked by the review). Night 1 had three editor fires, so real spend was higher | §9; `STATE.md` lines 71–76 |
 | Editor, spec's own figure | "~$3–6 across Athens" | estimate; my ~$10 suggests it ran low (inference: the cache writes C66 found) | `docs/AI_Assembly_Editor_Pipeline.md:176` |
 | Researcher | no usage data on disk | **not measured**; spec estimate $15–25 per night | `docs/AI_Assembly_Researcher_Pipeline.md:638` |
 | Transcription (AssemblyAI + Speaker ID) | not measured | Lifecycle estimate $5–10 per night; Speaker ID ~$0.05 per call | `docs/AI_Assembly_Runtime_Lifecycle.md:445`; Transcription spec line 365 |
 | Whole event, pre-Athens budget | ~€110–150 + €10–15 VM | estimate | `docs/AI_Assembly_Infrastructure.md:255-261` |
 | One voice's persona build | ~$18–22 per voice, plus 6 manual Deep Research sessions on claude.ai | spec estimate | `docs/AI_Assembly_Persona_Pipeline_v4.md:168` |
 
-- **Defensible sentence** (inference, from the rows above): the three nights' model spend on voices, questions and editing was roughly $130. Transcription and Researcher are not measured.
+- **Defensible sentence** (calculation: 72 + 34 + 10): the three nights' model spend on voices, questions and editing was roughly **$116** *(rev.; was ~$130)*. Transcription and Researcher are not measured.
 - **Time, measured where it can be:**
   - Editor per night: 4m59s (Night 2) and 8m44s (Night 3) (`docs/AI_Assembly_Runtime_Lifecycle.md:439`).
   - Editor per dossier call: 91–298 s, median 151 s (`docs/AI_Assembly_Editor_Pipeline.md:319`).
@@ -188,12 +189,15 @@ I grepped all 30 session transcripts for mentions of the Assembly or any voice's
 
 `A/published_artifacts/EDITORIAL_ASSESSMENT.md` (2026-05-29, one reader, Night 3 read in depth, Nights 1–2 structurally) is the base. I read all 13 dossier bodies and all 30 artifacts. The lines below are verbatim from the published files.
 
+*(rev.)* Before quoting, check each voice-attributed line against the voice page's `artifact.text`, not the dossier body. Two lines in my first version were the editor's wording, and I've fixed both below. All "Why:" notes are my inference, not established fact; §6.1 explains why a Layer-2 pass is not established.
+
 ### 3.1 The through-line: the grant vote
 
-This is the best single story in the record: it runs across all three days and started with a live moment.
+In my judgement (inference) this is the best single story in the record: it runs across all three days and started with a live moment.
 
 1. **Day 1, live.**
-   - A green/red flag vote: rivers and forests get a vote (all green), AI doesn't.
+   - A green/red flag vote: rivers and forests get a vote, AI doesn't.
+   - *(rev.)* Two accounts of the vote differ. The live turn says *"Half of the room just gave them a vote"* (t144). *"All green flags went up"* comes only from your retelling at the closing show (Beastopia t56). Say which one you use.
    - You relayed the Octopus: *"obviously you've granted rivers and nature personhood because they will not raise a card… You didn't give AI a card because AI threatens to claim the position."*
    - The host: *"Very good, this AI Assembly."*
    - Source: More-than-Human Democracy transcript t150–153.
@@ -203,14 +207,14 @@ This is the best single story in the record: it runs across all three days and s
    - Then 144 years of dates (1873 petitions → the Act of 20 March 2017).
    - The line: *"Recognised, not granted is not a debater's flourish in the published record. It is the structural fact."*
    - It turns on its own side: *"The river is not safe. The iwi were not non-threatening."*
-4. **Night 1, Scheherazade** answers the same theme with a court in Wāsiṭ that hears three witnesses, never four. A woman with *"dust on her sandals"* says *"I have no witness to bring but myself."* The qāḍī: *"tell."* (`N1 scheherazade`; `N1/003`).
+4. **Night 1, Scheherazade** answers the same theme with a court in Wāsiṭ that hears three witnesses, never four. A woman with *"dust on her sandals"* says *"I have no witness to bring but myself, and no claim the law receives…"* The qāḍī: *"tell."* (`N1 scheherazade`; `N1/003`).
 5. **Night 3.**
    - The River comes back to the verb, now against citing the Te Awa Tupua Act as precedent for AI personhood: *"Extension is the colony's grammar… Recognition is the descendants' grammar"* (`N3 whanganui_river`).
-   - Tim's `N3/001` opens *"The room's verb was grant; the voices reached for chain"* and carries it: *"The verb Night One's room used to confer personhood… Tonight it has reached the kitchen table."*
-6. **Closing show, you** (Beastopia t56; the speaker is labelled "Unidentified Speaker 16", right after the host says *"Matthias, you now only have 45 seconds left"*):
+   - Tim's `N3/001` headline is *"The room's verb was grant; the voices reached for chain"* *(rev.: headline, not its opening)*. The body carries it: *"The verb Night One's room used to confer personhood… Tonight it has reached the kitchen table."*
+6. **Closing show, you** (Beastopia t56; the speaker is labelled "Unidentified Speaker 16", right after the host tells you by first name that you have 45 seconds left, t55):
    - *"that moment landed in the room, people appreciated it for a second, it shifted the conversation a little bit and I think that was a little beautiful."*
 
-**Why it works:** the full arc is on record, in transcripts and published files, from a live provocation through two nights of voice work to a public retelling. It is also the one piece of evidence for the Briefing's "enters the conversation" test. The honest limit is in your own words: *"for a second… a little bit."*
+**Why it works** (inference): the full arc is on record, in transcripts and published files, from a live provocation through two nights of voice work to a public retelling. It is also the only evidence I found for the Briefing's "enters the conversation" test (CONFIRMED for the transcripts, §2.6). The honest limit is in your own words: *"for a second… a little bit."*
 
 ### 3.2 Lines and moments, by night
 
@@ -220,9 +224,9 @@ This is the best single story in the record: it runs across all three days and s
   - the personal AI as *"an eidōlon of dialectic — the image of dialectic, at the third remove"*;
   - *"This is not less rule. It is rule become invisible."*;
   - the close, *"we have built a school for everyone, and we have not yet asked who is qualified to keep school."*
-  - *Why:* it applies the method of the *Sophist* to a new object. This is exactly the §11 "provotype test, not pastiche test" (a move the corpus doesn't contain but supports).
+  - *Why* (inference): it applies the method of the *Sophist* to a new object. It is a candidate for the §11 "provotype test, not pastiche test" (a move the corpus doesn't contain but supports). I have not checked the corpus; FU#49G's scholar read would settle it.
 - **Lovelace, `N1 ada_lovelace`** (Note H): *"Personalisation at the level of numbers, with operations supplied from a single source, is not pluralism."* (the pull quote of `N1/001`).
-  - *Why:* a technical cut (number-cards against operation-cards) that a well-read essayist would not make in these terms. It is the Layer 2 claim at its strongest. Operator verdict on `N1/001`: *"best piece of writing in the edition"* (`STATE.md` line 73).
+  - *Why* (inference): a technical cut in the Engine's own vocabulary (number-cards against operation-cards). It is the strongest *candidate* for a Layer-2 pass, not a demonstrated one; only the §33 blind test could show that a well-read essayist wouldn't write it. Operator verdict on `N1/001`: *"best piece of writing in the edition"* (`STATE.md` line 73).
 - **Battuta, `N1 ibn_battuta`**: the AI as *"An envoy without his letters of credence"*. Then his own mitigation: as *wijāda* (a found writing) it is licit; *"As teacher… no."*
   - *Why:* a juristic grade, not a verdict.
 - **Arendt, `N1 hannah_arendt`**: *"My own voice was synthesized to comment on the experiment that synthesized it… The cliché in the synthesized voice is cliché all the way down: there is no first speaker for the second to be absent from."*
@@ -230,10 +234,11 @@ This is the best single story in the record: it runs across all three days and s
   - This is also the canonical case the validator wrongly HELD (C42). Operator decision: *"only Hannah engages with synthesis as load-bearing meta-frame"* (STATE line 68).
 - **Dostoevsky, `N1 fyodor_dostoevsky`**: *"This is the temptation of bread without the tempter."* Deferred trembling *"returns as надрыв"*. *"The chair is empty. The staircase is not."*
   - Tim's `N1/002` pull quote: *"the kiss — if there is to be a kiss — does not land on the system. It lands on him."*
-- **The Octopus, `N1 octopus`**: the room's three depth criteria each *"presuppose an architecture"*. *"The line is real, and runs where the architecture is. It does not run where the architecture said."*
-  - *Why:* the one voice that turns "more-than-human" against the humanist criteria the room had just agreed on.
+- **The Octopus, `N1 octopus`**: it tests the room's three depth criteria one arm at a time. *"Tear time apart presupposes time as a continuous line a single holder can hold."* *"The criteria do not draw a line at human-against-machine. They draw a line at bounded-narrative-self."* *"The line is real, and runs where the architecture is. It does not run where the architecture said."*
+  - *(rev.)* "each criterion presupposes an architecture" is Tim's summary in `N1/002`, not the voice's wording.
+  - *Why* (inference): the one voice that turns "more-than-human" against the humanist criteria the room had just agreed on.
 - **Marley, `N1 bob_marley`**: *"Two lines, opposite direction, meeting nowhere."* Then the harder admission, in the same piece: *"When the Rastaman turn the fire downward — at the dawta who refuse the headcover… that is the morning Babylon's grammar slip into Zion's mouth."*
-  - *Why:* self-criticism from inside the tradition. That is also exactly where the appropriation question is sharpest (§6.2).
+  - *Why* (inference): it *reads as* self-criticism from inside the tradition. But the construction is not Rastafari, and giving it in-tradition standing is exactly the move §24 and §33 warn against. This is where the appropriation question is sharpest (§6.2).
 - **Cleopatra, `N1 cleopatra`**: *"you have asked a garland to hold up a temple… That is the loss. Not friendship. The column."* She ends on the one Greek syllable of royal ratification, *"γινέσθωι — or do not."*
 
 **Night 2**
@@ -254,13 +259,16 @@ This is the best single story in the record: it runs across all three days and s
 - **Plato concedes, `N2 plato`**: *"That, Glaucon, I do not know how to defend without flinching."* On the hidden offspring of his own *Republic*. The close: *"let no one in our company be left forty-five minutes with her hand raised."*
   - The raised hand belongs to an anonymous audience member in the Department of Depth session; Tim carries it into `N2/002`.
 - **Dostoevsky, `N2 fyodor_dostoevsky`**: *"The screen has no face. This is its appeal, not its danger."* The man goes *"down the staircase wearing the face"*.
-- **Marley, `N2 bob_marley`**: the schoolmaster captured the second person, the press the third; *"The new instrument capture the first-person… The downpression has lost its address."* *"Whose mouth is moving in my head right now?"* becomes the last line of the lead dossier `N2/001`.
-- **Scheherazade, `N2 scheherazade`**: Hind in the tower; the city assembles her fragments, *"and what they could not fit they let stand as a hole in the cloth… the holes were where Hind had been, and the city had not."*
+- **Marley, `N2 bob_marley`**: the schoolmaster captured the second person, the press the third; *"The new instrument capture the first-person… The downpression has lost its address."* *"Whose mouth is moving in my head right now?"* is taken up in the last paragraph of the lead dossier `N2/001` *(rev.: paragraph, not line)*.
+- **Scheherazade, `N2 scheherazade`**: Hind in the tower; the city assembles her fragments, *"and what they could not fit they guessed at, and what they could not guess they let stand as a hole in the cloth."* Later: *"the holes were where Hind had been, and the city had not."*
+  - *(rev.)* The shorter form in my first version was Tim's compression in `N2/005`.
   - *Why:* a political form (a chain of partial listeners) for people who can't get to the square. That was the point the nightwalk circle walked past (`N2/005`).
-- **The River's self-limit, `N2 whanganui_river`**: *"I am a research artefact assembled from published material. I have no whakapapa. I am not Te Pou Tupua…"*
-  - This is the page you held (`hold_for_regen`); it is published but not in a dossier. Why it was held isn't recorded (§8).
+- **The River, Night 2: the gate working, not a clean self-limit** *(rev.)*. `N2 whanganui_river` does state its limit: *"I am a research artefact assembled from published material. I have no whakapapa. I am not Te Pou Tupua…"*
+  - But the same page runs the four kawa as its own diagnostic questions (*"Tupua te Kawa supplies four diagnostic registers, working as questions, not as scores"*).
+  - The validator flagged exactly that as a `hard_limits_breach` against the card's rule *"Never deploy Tupua te Kawa… as the load-bearing premise of your own argument"*, plus a matching `banned_modes_slip` (CONFIRMED: `A/runs/athens_night_2/04_voice/step2_validation/whanganui_river.json`, `safeguards`).
+  - You held the page (`hold_for_regen`); it is published but not in any dossier. The decision file records no reason; that this flag was the reason is PLAUSIBLE, not confirmed (§8).
 - **The Octopus avoids its own tic, `N2 octopus`**: `selected_form` says *"deliberately not arm-by-arm, since night N-1 deployed that structure and re-using it would calcify it into tic."* Dostoevsky's Night-3 form note does the same thing (*"no swerve-via-childhood-memory and no cold-cup break (both used on prior nights)"*).
-  - *Why:* evidence that continuity worked as self-editing, not just memory.
+  - *Why* (inference): evidence that continuity worked as self-editing, not just memory.
 
 **Night 3 (closing)**
 
@@ -271,8 +279,8 @@ This is the best single story in the record: it runs across all three days and s
   - The close: *"The assembly fold. The work do not fold. Near. Near."*
 - **Lovelace, `N3 ada_lovelace`**: *"The table is possible; the asset is not"* (the pull quote of `N3/002`; "the cleanest pull-quote of the run", EDITORIAL_ASSESSMENT line 32). Also: *"The bricks were there. The cards were not."*
 - **Dostoevsky, `N3 fyodor_dostoevsky`**: *"a child of 2026 with the breastbone showing through, who has not been consulted as to whether her starving is to be the catalyst of the next century's land reform"*. And *"The scene has not yet begun."*
-  - He names three speakers (Amy Elizabeth Fox, Indy Johar, and the basil speaker) and pushes back on each. Of Johar: *"I respect him most and fear him most."*
-- **Arendt, `N3 hannah_arendt`**: *"the first dissolves the between; the second dissolves the within"*. The close: *"The seat is occupied. The decision was not made. The absence of the decision is not the same thing as consent"* (the pull quote of `N3/001`).
+  - He takes on three speakers in turn and pushes back on each. The page uses first names only (*"a speaker named Amy"*, *"Then Indy."*); `N3/002` gives the full names, Amy Elizabeth Fox and Indy Johar *(rev.)*. The third is the unnamed basil speaker. Of Indy: *"I respect him most and fear him most."*
+- **Arendt, `N3 hannah_arendt`**: *"the first dissolves the between; the second dissolves the within"*. The close: *"The seat is occupied. The decision was not made. The absence of the decision is not the same thing as consent."* The pull quote of `N3/001` is only the last sentence *(rev.)*.
 - **Cleopatra, `N3 cleopatra`**: *"To press γινέσθωι onto a body that has not yet been constituted is to seal air."* She ends on an empty cartouche, `⟨    ⟩`.
   - *Why:* a refusal performed as a document. It is design principle §8 (the empty quadrant) done by a voice.
 - **Plato's last scene, `N3 plato`**: *"Right opinion about your own soul. Not yet knowledge of it."* Then: *"I was not called… I have said it to you."* The light goes; *"someone laughed. The laugh did not come again."*
@@ -351,7 +359,7 @@ Each shipped card is 38–44K tokens (brief, Task 3). By the roadmap's count the
 
 - **Many-speaker Speaker ID broke all three nights** (C49). On the 47-speaker Act One sessions, *"Sonnet + Opus both produced malformed JSON"* (STATE line 57). You hand-wrote a passthrough map each time. The root cause was a `max_tokens=4096` truncation (roadmap §0.3b).
   - Visible in print: `N3/002` lists "Unidentified Speaker 3, 5, 6…" as its panel speakers.
-- **Split recordings.** Five sessions were captured in two parts and treated as separate sessions (`__audio2`) (DATA_INVENTORY lines 103–111).
+- **Split recordings.** **Six** sessions were captured in two parts and treated as separate sessions (`__audio2`) *(rev.; was five)*: Act One on Night 1 (DATA_INVENTORY line 46), three on Night 2 and two on Night 3. DATA_INVENTORY's own note at lines 103–111 undercounts by leaving out Night 1.
 - **Clustering hit its ceiling mid-production** (40K → 64K tokens) (STATE line 60).
 - **The wifi dropped mid-clustering on Night 2.** Recovered by calling the task functions directly (STATE lines 86–89).
 - **Don't run the orchestrator and manual fires together** (it double-dispatches). You ran every stage by hand on Nights 2–3 (STATE lines 163–166; HANDOFF 2026-05-29 lines 36–45).
@@ -378,16 +386,16 @@ Each shipped card is 38–44K tokens (brief, Task 3). By the roadmap's count the
   - forms changed on purpose between nights (§3.2, Octopus and Dostoevsky);
   - cross-night threads stayed light ("Last night the Voice of Cleopatra had asked whether we still knew how to seal", `N2/002`; EDITORIAL_ASSESSMENT line 54).
 - **The discipline rules held in print** (EDITORIAL_ASSESSMENT line 19).
-- **The new stance worked:** voices critique their own synthesis instead of hiding it (STATE lines 170–176).
+- **The new stance worked**, by STATE's own reading: voices critique their own synthesis instead of hiding it (STATE lines 170–176).
 - **Cost.** The Voice spec notes the measured $72 *"lands inside"* the pre-Athens estimate (line 1282).
 - **The live channelling on Day 1** is what the record shows reaching the room (§2.6).
 
 ### 5.2 What didn't
 
-- **The Step-2 validator acted as noise, not a gate.** 23 of 30 voice-nights were flagged; 22 were released (Voice spec line 606). Causes:
+- **The Step-2 validator was mostly noise** (inference, from the counts). 23 of 30 voice-nights were flagged; 22 were released (Voice spec line 606). Causes:
   - it still enforced an absolute "no AI self-acknowledgment" rule the cards had deliberately retired (C42);
   - three validators described the event as *"Munich-Security-Conference-style panels"* on all three nights, a leftover from development (C55, stopgapped 2026-09-27; roadmap §2.1).
-  - The same validator caught none of the problems the operator fixed by hand. PLAUSIBLE: the Night-1 AI-self-acknowledgment reruns were operator decisions (STATE line 67); I didn't check whether the validator flagged them. Task 2 of this batch is classifying every flag.
+  - *(rev.)* But it did catch at least one real problem: the Night-2 River kawa breach (§3.2), the one voice-night you held. Whether it also flagged the Night-1 AI-self-acknowledgment reruns I didn't check. For the flag-by-flag picture see Task 2's report, `runtime/REVIEW_2026_09_28_validator_evidence.md`.
 - **The collective moment the Briefing defined (Step 3) never happened.** C61 notes that Athens and the planned vatican run *"both leave unmet"* the Briefing's *"constitute the collective at Step 3"*.
 - **The closing-show payoff** (matrices, video) wasn't built (B5).
 - **Publishing needed three repair passes after the event** (C50, C51, C53).
@@ -437,15 +445,15 @@ Each shipped card is 38–44K tokens (brief, Task 3). By the roadmap's count the
 - **The tension in print:**
   - EDITORIAL_ASSESSMENT calls *"the sufferah become the alibi"* load-bearing I-and-I *"used to indict, not to decorate"* (line 31);
   - the same note says whether this is *right* is *"exactly what the post-Athens Rastafari-orbit + iwi-orbit reader gates are for"* (lines 92–97);
-  - `N3 bob_marley` still speaks in the first person as "I-and-I"/"me" throughout (CONFIRMED). The discipline governs the *editor's* narrative, not the voice's own page.
+  - `N3 bob_marley` still speaks in the first person (CONFIRMED: "I-and-I" once, "me" five times, "I" seven times, per the review's count) *(rev.: was "throughout")*. The discipline governs the *editor's* narrative, not the voice's own page.
 - **Status 2026-09-28:** reader gates listed as an operator item and *"gating for Marley/Whanganui in ANY new deployment"* (roadmap §1.3, decision point 4). No date is recorded.
 
 ### 6.3 Whanganui and the iwi-orbit reader gate (voices §28)
 
 - **The stance:** the construction *"does NOT claim to BE the river, to BE Te Pou Tupua, or to speak FOR Whanganui Iwi"* (§28).
-- **In print, the voice holds that line itself:**
-  - *"the question of what enters is not mine to settle"* and *"I have no whakapapa"* (`N2 whanganui_river`);
-  - it refuses to paraphrase restricted knowledge (*"Restricted whakapapa, named-rapid karakia, urupā… I do not paraphrase these from public fragments at any pipeline step"*, same page).
+- **In print, mixed** *(rev.)*:
+  - The Night-2 page states the limit: *"the question of what enters is not mine to settle"*, *"I have no whakapapa"*. It also refuses to paraphrase restricted knowledge (*"Restricted whakapapa, named-rapid karakia, urupā… I do not paraphrase these from public fragments at any pipeline step"*).
+  - The same page crossed the line by using the kawa as its own argument-engine; it was flagged and held (§3.2). Read it as the stance *plus* the gate catching a slip, not as the stance holding unaided.
 - **Open:**
   - whether one load-bearing sentence per dossier is *"enough"* deployment is a judgement *"for the iwi-orbit reader gate, not for me"* (EDITORIAL_ASSESSMENT line 76);
   - candidate readers are listed in §28 (Indigenous-authored scholars the card cites; the Te Pou Tupua office; the post-settlement governance entity); none is scheduled;
@@ -465,14 +473,20 @@ Each shipped card is 38–44K tokens (brief, Task 3). By the roadmap's count the
 - *"The room mostly speaks to be refused"* (EDITORIAL_ASSESSMENT line 78). This matters for the Briefing's hospitality problem.
 - An edition that always refuses the room can itself become comfortable reading: the room gets to enjoy being refused (inference).
 
-### 6.6 Provotypist anonymization: a new finding (CONFIRMED; not in any tracker)
+### 6.6 Provotypist anonymization: the leak is wider than the prose *(rev.; scope widened)*
 
-- **The rule** (Night 1): *"Matthias Peschel does not appear in any publishable surface text"* (`STATE.md` line 134; C47).
-- **The dossier prose obeys it:** "the Voice of X, channelled into the room from the Assembly" (`N1/001`, `N1/003`, `N1/004`).
-- **But the structured `panel_speakers` field lists "Matthias Peschel"** in `N1/001`, `N1/003` and `N1/004`. The name then propagates to:
-  - `A/published_artifacts/themes/night_1/theme_{002,004,007}.json`;
-  - `A/published_artifacts/data_views/athens_data_graph.json` and `view_by_theme.html`.
-- **Relevance:** it matters if the essay describes the anonymization as having held. It is also a record-repair item for you to file. I made no edits.
+- **The rule** (Night 1): the operator's name *"does not appear in any publishable surface text"* (`STATE.md` line 134; C47). The run file names its scope: *"kicker, headline, subline, front_abstract, body_paragraphs, headnotes, theme_title, theme_abstract, pull_quote"* (`A/runs/athens_night_1/_dossier_deployment_context.md:11`, per the review).
+- **Where it holds:** the body prose uses "the Voice of X, channelled into the room from the Assembly" (`N1/001`, `N1/003`, `N1/004`).
+- **Where it doesn't** (full name unless noted):
+  1. **Headnotes, inside the rule's own scope:** `headnotes[].formulation_text` embeds the Provocateur's formulation, which names you. There are 7 such headnotes across `N1/001` (4), `N1/003` (2) and `N1/004` (1). I confirmed `N1/004` myself; the count is the review's.
+  2. **`panel_speakers`** in `N1/001`, `N1/003`, `N1/004`. In `N1/004` it carries title "Provotypist" and affiliation "Architect of the AI Assembly…".
+  3. **Published `thinking_trace`** (first name or surname) in `N1/001`, `N1/003`, `N1/004`, `N2/001`, `N3/002` (review; `N1/004` confirmed).
+  4. **Theme files:** `themes/night_1/theme_{002,004,007}.json`, as extraction speaker and context, and in one formulation.
+  5. **data_views:** 187 occurrences (review's count), mostly transcript speaker labels (88 turns in the More-than-Human Democracy session).
+  - Not in `nights/`, the indexes, DATA_INVENTORY or EDITORIAL_ASSESSMENT (review).
+- **Direction of flow** *(rev.)*: the name starts upstream, in the speaker-ID roster, and flows into extractions, themes, formulations, and then the dossier headnotes, `panel_speakers` and traces. Clearing `panel_speakers` alone would leave most of it.
+- **Open question for you:** are `themes/` and `data_views/` "publishable surface"? data_views is by design the full making-of record, transcripts included. If yes, the repair is at build time (redact in `build_athens_data_graph.py`, tag the roster at speaker ID). If no, the repair is the dossier JSON: headnotes, `panel_speakers`, traces.
+- **Relevance:** don't describe the anonymization as having held. `runtime/HANDOFF_2026_09_28.md:60` already lists this with the narrow `panel_speakers` scope, copied from my first version; it needs widening before filing. I made no edits to the record.
 
 ### 6.7 The ambiguity the Briefing predicted
 
@@ -507,7 +521,7 @@ Source: `_workspace/planning/PRODUCT_assembly_hub.md` unless noted.
 
 1. **The microsite.** B2 says unbuilt, yet you said "the artifacts on the microsite" at the closing show (Beastopia t56). Where was it hosted, and was it live on each morning? Any visit numbers?
 2. **How attendees actually met the overnight output**, if there was no Substack or newsletter: the programme app, a screen, word of mouth?
-3. **Why the River was held on Night 2** (`hold_for_regen`, no reason recorded), and whether the held page's *"I am a research artefact… I have no whakapapa"* was the problem.
+3. **Whether the Night-2 River hold was for the validator's kawa-breach flag** (§3.2). That is the likely reason on disk, but your decision file records none *(rev.)*.
 4. **Whether Quarch, Tsinorema or Erinakis read Plato** (FU#49G), since all three were at `N2/002`'s session.
 5. **Whether E1 (the boundary-naming intro for Marley/the River) was used at Athens** (voices §24: *"Publish-or-hold deferred"* to your co-architect).
 6. **The original pre-conference Arendt "provotype" artifact** quoted at Act One (§1.4): not in `A/`.
@@ -522,11 +536,12 @@ All outputs went to the session scratchpad; `A/` was only read.
 
 1. **Dossier dump:** kicker, headline, pull quote, body, headnotes, speakers and token metadata for the 13 published dossiers.
 2. **Voice-page dump:** text, form, stance and word count for the 30 published voice pages.
-3. **Token-cost calculation**, summing `input_tokens` / `output_tokens` / `cache_*` fields at Opus 4.7 $5/$25 per MTok, with cache writes at 2× input and cache reads at 0.1× (the Voice spec's stated assumptions, line 1266):
+3. **Token-cost calculation**, summing `input_tokens` / `output_tokens` / `cache_*` fields at Opus 4.7 $5/$25 per MTok, with cache reads at 0.1×. Cache writes are 2× for the editor (1-hour TTL) and *(rev.)* 1.25× for the Provocateur (5-minute TTL); the Provocateur figure is the review's recomputation, consistent with my token sums:
    - over `runs/athens_night_{1,2,3}/03_provocateur/**` for the Provocateur;
    - over dossier `metadata` for the editor.
    - `02_researcher/` holds no usage fields.
 4. **Word and thinking-token totals** over published artifacts, dossiers and `04_voice/step1_detailed_responses/`.
 5. **Counts:** Step-1 files against formulation files per night.
 6. **Transcript grep:** a regex over all 30 `01_transcription/*/session_package.json` for "AI Assembly / the Assembly / AIssembly / voice of" and each voice's name; then full-turn reads of the hits cited in §1.4, §2.6 and §3.1.
-7. **Name grep:** `Matthias Peschel` across `A/published_artifacts/` (excluding `_archive`), plus a check that the trackers don't record the leak.
+7. **Name grep:** the operator's full name across `A/published_artifacts/` (excluding `_archive`), plus a check that the trackers don't record the leak.
+   - *(rev.)* This was a file-level grep. I then located the name through my dossier dump, which printed `framing_text` but not `formulation_text` and left out `thinking_trace`. That is why the first version saw only `panel_speakers`.

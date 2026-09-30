@@ -1,30 +1,38 @@
 # Review: each stage's Athens output against what the provotype is for
 
-**Date:** 2026-09-28 · **Reviewer:** Claude Fable 5.1 (`claude-fable-5-1`), one session, read-only
+**Date:** 2026-09-28, revised 2026-09-29 · **Reviewer:** Claude Fable 5.1 (`claude-fable-5-1`), one session, read-only
 **Brief:** `_workspace/planning/BRIEF_2026_09_28_stage_quality_review.md`
 **Checkout:** `phase0-fixes` at `3b185f2` (detached). The two commits after the brief (`02006f5`, `3b185f2`) touch no Researcher prompt or spec.
-**Status:** Part A (Researcher) is written. **Part B and the synthesis wait for the operator's answer at the checkpoint.**
-**Uncommitted.** No API calls. `athens-2026` was only read.
+**Status:** Part A (Researcher) is written and **revised** after an independent review (`REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/06_stage_quality_partA.md`). The changes are listed at the end of Part A. **Part B and the synthesis wait for the operator's answer at the checkpoint.**
+**Commit state:** this worktree copy is uncommitted. The main session committed the first version as `0910a66`. No API calls; `athens-2026` was only read.
 
 ---
 
 ## Summary
 
-The operator's reading holds, and it can be stated precisely: **the Researcher's clusters and themes are inventories, not findings.** All 86 cluster abstracts make "the items" their grammatical subject, and 74 of them are em-dash lists. All 24 theme abstracts are routing tables that cite cluster ids. Nothing at cluster or theme level says what the room settled, what nobody challenged, or what nobody said.
+The operator's reading holds for the grouping layer: **the Researcher's clusters and themes are inventories, not findings.** No cluster or theme says what the room settled, what nobody challenged, or what nobody said. A few theme abstracts relate clusters to one another; none reports where the room stood.
 
-The flatness is designed, not accidental:
-- The spec calls the Researcher "unbiased … not an editorial voice".
-- The v2.4 clustering prompt explicitly bans "declarative findings".
-- The clustering call is never shown who disagreed with whom.
+This holds on panel sessions alone. Several large panel-only themes contain zero or one challenged extraction:
+- N2 theme_004, the *Clash of the Titans* board meeting: 15 extractions, 0 challenged;
+- N3 theme_001: 26 extractions, 0 challenged;
+- N2 theme_007 "Contesting the good life": 33 extractions, 1 challenged.
 
-It shows most at Athens because Athens barely argued. Only 6% of the 529 extractions were `challenged`. On the Munich Security Conference test set the prompts were validated on, the figure was 32%, and there the same prompts produced positioned themes.
+Two causes are established:
+- **Neutrality is designed in.** The spec says the Researcher is "not an editorial voice". The clustering prompt bans "declarative findings". The clustering call never sees who disagreed with whom.
+- **Athens argued little.** On panels, 6.6% of extractions were challenged, against 32% in the Munich Security Conference (MSC) test run.
 
-The edge is not lost. The extractions carry it, especially the Researcher's own synthesized open questions, and the Provocateur's formulations recover it by reading raw extractions. But three things are wrong with how it is recovered:
-- It happens per voice, up to nine times per theme, and never reaches the record the operator browsed.
-- Triage and selection read only the flat abstracts, so they cannot tell a contested theme from a consensual one. All 22 fault lines have the form "whether A, B or C", and the most contested theme of Night 1 was dropped.
-- The one Night-3 report that the Assembly had "visibly shifted the room" ended as an isolate.
+The first version claimed "the method mirrors the room". That is now only **PLAUSIBLE**, because three confounds stand in the way:
+- MSC ran on Opus 4.6, Athens (by code default) on Opus 4.7;
+- the 103 reflection extractions reached the Researcher mislabelled as a panel (runtime C68 A1);
+- the control is one run of three MSC panels.
 
-**Recommendation:** add a separate "room reading" per theme and per night, with evidence ids for every sentence: what the room settled, what stayed open, what went unchallenged, what nobody said. Keep it apart from the neutral layer, and send it first to Provocateur triage and the record, not to the voices.
+The Provocateur's formulations recover the edge by reading raw extractions. But they do it per voice, never in the record the operator browsed. And no triage signal measures whether the room itself disagreed.
+
+**Recommendation, now sequenced cheapest first:**
+1. Fix C68 A1.
+2. Add deterministic room statistics to the explorer.
+3. Run a capped test of whether the theme prompt's existing invitation to findings works on another model.
+4. Only then consider a separate evidence-linked "room reading", with a support check.
 
 **Part B follows the checkpoint.**
 
@@ -37,17 +45,17 @@ The review measures against these goals, quoted from the project's own documents
 | Label | Goal | Source |
 |---|---|---|
 | **G1 Not a summary** | "The default behaviour of any LLM system is to summarise; this Assembly is designed to do the opposite. If the artifacts merely reorganise the day's discussions into pretty prose, the provotype has failed." | Briefing v3.1, "What it is not" |
-| **G2 Tensions, not consensus** | "Not a consensus machine. The Assembly exposes tensions rather than resolving them." / "Expose tensions, don't resolve them." | Briefing, "What it is not" + Design principles |
+| **G2 Tensions, not consensus** | "Not a consensus machine. The Assembly exposes tensions rather than resolving them." | Briefing, "What it is not" |
 | **G3 Generative** | "could the humans in the room have arrived here without this voice? If yes, the provotype has failed." | Briefing, Design principles |
 | **G4 Opinion demands response** | "An opinion demands agreement, disagreement, or reckoning with why you're dismissing it." | Briefing, Design principles |
 | **G5 Construction visible** | "Every layer of translation — from human discussion to Researcher extraction, from extraction to Provocateur formulation … — is visible somewhere." | Briefing, Design principles |
 | **G6 Layer 3 evidence** | "Attendees reference the Assembly's artifacts in the day's human sessions … The Researcher captures these references in Night 2 and Night 3's transcripts, which means Night 2 and Night 3 can respond to them." | Briefing, "What success looks like" |
-| **G7 Against hospitality** | "their well-curated openness is itself the failure mode: they are too good at performing reception to know when they are not actually being changed." It goes flat on "Standard progressive talking points without edge". It activates on "Naming of contradictions the room holds but rarely articulates." | AUDIENCE_BRIEF, Activation and failure conditions |
-| **G8 Specificity and disagreement** | "Caption-style labels, precise attributions, explicit disagreement markers … When in doubt, choose the forensic over the evocative." Also: "Empty quadrants are more provocative than populated ones." | DesignPrinciples §7, §8 |
+| **G7 Against hospitality** | "their well-curated openness is itself the failure mode: they are too good at performing reception to know when they are not actually being changed." It goes flat on "Standard progressive talking points without edge". It activates on "Naming of contradictions the room holds but rarely articulates." | AUDIENCE_BRIEF |
+| **G8 Specificity and disagreement** | "Caption-style labels, precise attributions, explicit disagreement markers … When in doubt, choose the forensic over the evocative." | DesignPrinciples §7 |
 | **G9 Comparing** | "Two positions, pick which is closer to yours … Kills it: a neutral/both option." | Nine Modes §1 |
 | **G10 The Researcher's own contract** | "The Researcher is unbiased … It captures what was discussed and flags which extractions carried high energy in the room — nothing more. It is a design research instrument, not an editorial voice." | Researcher spec, Overview |
 
-**G10 pulls against G1, G2 and G7.** The project as a whole is designed against summary and against hospitable absorption. The Researcher is the one stage that is told to summarise faithfully and add nothing. Part A is mostly about what that tension produced.
+**G10 pulls against G1, G2 and G7.** The project is designed against summary and against hospitable absorption. The Researcher is the one stage that is told to summarise faithfully and add nothing.
 
 ---
 
@@ -55,43 +63,52 @@ The review measures against these goals, quoted from the project's own documents
 
 **Read in full:**
 - the Briefing, the Design Principles, the Nine Modes, the Frame Concept and the AUDIENCE_BRIEF;
-- the Researcher spec;
-- the three Researcher prompts, which are byte-identical to the spec except for two closure sentences, and whose git history shows no change since 2026-04-16, so Athens ran the validated v2.4 prompts;
-- `researcher_flow.py` prompt assembly (`build_extraction_user_prompt`, `cluster_extractions`, `group_clusters_into_themes`);
-- the Provocateur spec (overview, triage, formulation);
+- the Researcher spec and its three prompts;
+- the prompt assembly in `researcher_flow.py`;
+- the Provocateur spec, and `provocateur_triage_flags.md` for the fault-line definition;
 - `DATA_INVENTORY.md` and `EDITORIAL_ASSESSMENT.md`;
-- the data explorer's Conference Data renderer in `build_athens_data_graph.py`.
+- the explorer's renderers in `build_athens_data_graph.py`;
+- runtime OPEN_ITEMS C68 A1.
+
+**Prompts and models:**
+- The Researcher prompts have not changed since the subtree add (`bd3e27d`, 2026-04-16).
+- **The two runs used different models.**
+  - MSC v2.4 ran on **Opus 4.6** with adaptive thinking: `dev_msc_test/_manifest.json`, *"claude-opus-4-6 with thinking.type=adaptive"*.
+  - The Athens Researcher's model is **not recorded in the run data**. The code Athens ran had the default `claude-opus-4-7` with thinking on: `researcher_flow.py` at `394029f` (2026-05-08); the switch from 4.6 is `37e883b` (2026-04-17). An environment override is possible but unrecorded. The Provocateur files from the same nights record `claude-opus-4-7`.
+  - `model_routing.json` postdates both runs (2026-09-28), so it documents neither.
+  - Athens Researcher = Opus 4.7 is therefore **PLAUSIBLE (strongly)**, not CONFIRMED.
 
 **Athens data read directly:**
-- all 24 themes and 86 clusters of all three nights, with abstracts;
-- whole-session extraction sets from five different session types: a two-speaker panel (N1 *Human Democracy Is Dead* audio), audience reflections (N1 *Birthplace of Democracy Tour*), a staged board meeting (N2 *Clash of the Titans*, both captures), a workshop with scoring (N3 *Citizen Assembly with AI*) and a main-stage closing (N3 *Beastopia*);
-- all extractions inside the clusters rewritten below;
-- all 46 Night-1 formulations, all nine Night-3 theme_003 formulations and narratives, one full briefing (Plato N1), one Step 1 response and one Step 2 artifact.
+- all 24 themes and 86 clusters, with abstracts;
+- whole-session extraction sets from five session types: a two-speaker panel, audience reflections, a staged board meeting (both captures), a scored workshop, and a main-stage closing;
+- every extraction in the clusters rewritten below;
+- all 46 Night-1 formulations, the nine Night-3 theme_003 formulations and narratives, selected Night-2 narratives, one briefing, one Step 1 response and one Step 2 artifact;
+- the Beastopia turn quoted below, from the transcript itself.
 
-**Offline scripts** (scratchpad only; they read JSON and count, nothing else):
-- `stats.py`: lens, engagement and energy counts per night;
-- `themes.py`, `clustersess.py`: theme and cluster dumps, plus how many sessions feed each cluster;
-- `sess.py`: whole-session extraction dumps;
-- `assembly_refs.py`: every extraction mentioning the Assembly or a voice, and where it landed;
-- `flags.py`: triage flags and selection per night;
-- `forms.py`: formulation texts, and the lens/engagement mix of each formulation's grounding;
-- `textstats.py`: abstract grammar, fault-line form, and challenged items per theme.
+**Offline scripts** (scratchpad; they read JSON and count). The exact patterns behind every count are in Appendix A, so the counts can be reproduced.
 
-The MSC comparison uses `projects/current-tests/dev_msc_test/02_researcher/`, the v2.4 validation run the spec cites.
+**Session format matters.** Five of the 30 ingested sessions are **vendor reflection takeaways**, not panels:
+- `birthplace`;
+- `hdid_refl`;
+- the N1 and N2 nightwalks;
+- `mpga`.
 
-**Session short-names used in ids below.** Every id is `<night> <short-name>:NNN`, where NNN is the extraction's number within its session.
+Together they hold 103 of 529 extractions (19%). Each is a separately recorded summary by one participant, and per C68 A1 all reached the Researcher **with a blank title and format "panel"**. Engagement labels on them (`reinforced`, `responds_to`) were inferred by the Researcher across contributions that were not a conversation. **All examples in this Part are now built from panel (audio) sessions.** Reflection material is named as such where it appears.
 
-| Short name | Full `session_id` |
-|---|---|
-| `hdid_audio` | `day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330__audio` |
-| `hdid_refl` | `day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330` (reflections) |
-| `mthd` | `day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445` |
-| `birthplace` | `day_one_demos_ai_democracy_marathon_departme_birthplace_of_democracy_tour_1000` (reflections) |
-| `act_one` | `day_one_theatre_main_stage_act_one_the_story_of_us_2000` |
-| `clash`, `clash_a2` | `day_two_theatre_main_stage_act_three_clash_of_the_titans_1045` (+ `__audio2`) |
-| `citizen` | `day_three_demos_ai_democracy_marathon_citizen_assembly_with_ai_1400` |
-| `mpga` | `day_three_demos_ai_democracy_marathon_make_politics_great_again_1600` (reflections) |
-| `beastopia` | `day_three_theatre_main_stage_act_five_beastopia_2000` |
+**Session short-names used in ids.** Every id is `<night> <short-name>:NNN`.
+
+| Short name | Full `session_id` | Kind |
+|---|---|---|
+| `hdid_audio` | `day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330__audio` | panel |
+| `hdid_refl` | `day_one_demos_ai_democracy_marathon_human_democracy_is_dead_1330` | reflections |
+| `mthd` | `day_one_mikro_pallas_ai_democracy_marathon_the_more_than_human_democracy_1445` | panel (with audience vote) |
+| `birthplace` | `day_one_demos_ai_democracy_marathon_departme_birthplace_of_democracy_tour_1000` | reflections |
+| `act_one` | `day_one_theatre_main_stage_act_one_the_story_of_us_2000` | main stage |
+| `clash`, `clash_a2` | `day_two_theatre_main_stage_act_three_clash_of_the_titans_1045` (+ `__audio2`) | staged board meeting |
+| `tunnels`, `tunnels_a2` | `day_two_mikro_pallas_agentic_agora_ai_democracy_mar_the_reality_tunnels_1400` (+ `__audio2`) | panel |
+| `citizen` | `day_three_demos_ai_democracy_marathon_citizen_assembly_with_ai_1400` | scored workshop |
+| `mpga` | `day_three_demos_ai_democracy_marathon_make_politics_great_again_1600` | reflections |
+| `beastopia` | `day_three_theatre_main_stage_act_five_beastopia_2000` | main stage, track reportbacks |
 
 ---
 
@@ -99,181 +116,206 @@ The MSC comparison uses `projects/current-tests/dev_msc_test/02_researcher/`, th
 
 ## A.1 See it: the data at a glance
 
-All figures below are CONFIRMED, counted by the scripts above.
+All figures CONFIRMED (Appendix A).
 
 | | Extractions | challenged | reinforced | unengaged | Clusters | single-session clusters | Themes | Isolates |
 |---|---|---|---|---|---|---|---|---|
 | Night 1 | 205 | 14 (7%) | 74 | 87 | 37 | 18 | 11 | 0 |
 | Night 2 | 199 | 13 (7%) | 73 | 84 | 35 | 29 | 8 | 2 |
 | Night 3 | 125 | 5 (4%) | 46 | 55 | 14 | 8 | 5 | 3 |
-| **Athens** | **529** | **32 (6%)** | 193 | 226 | 86 | **55** | 24 | 5 |
-| MSC test (v2.4 validation) | 106 | **34 (32%)** | 21 | 38 | 25 | 21 | 6 | — |
+| **Athens** | **529** | **32 (6.0%)** | 193 | 226 | 86 | **55** | 24 | 5 |
+| Athens panels only | 426 | 28 (6.6%) | 155 | 180 | | | | |
+| Athens reflections only | 103 | 4 (3.9%) | 38 | 46 | | | | |
+| MSC test (v2.4, **Opus 4.6**) | 106 | **34 (32%)** | 21 | 38 | 25 | 21 | 6 | 4 |
 
 **Notes on the table:**
-- The remaining extractions are open questions, which carry no engagement label.
-- On Athens audio panels alone, 7% were challenged; on reflections, 4%. So the low rate is not an artifact of the reflection format.
-- **The extractions are good.** They are specific, attributed and carry their context. The Researcher's own synthesized open questions (`speaker: null`) often carry the sharpest observation in a session. Example, N1 `hdid_audio:011`: *"does the optimistic finding generalize beyond a self-selected sample?"* with context *"the room did not interrogate this."*
+- Open questions carry no engagement label.
+- **The extractions are good.** They are specific, attributed and carry their context. The Researcher's own synthesized open questions (`speaker: null`) often carry the sharpest observation in a session. Examples:
+  - N1 `hdid_audio:011` asks whether an optimistic finding *"generalize[s] beyond a self-selected sample?"*, with context *"the room did not interrogate this."*
+  - N1 `hdid_audio:010` records that two panellists' claims were *"neither … tested against the structural reality of AI market concentration."*
 - **The flatness sets in at clustering.**
 
 ## A.2 Name what the operator means
 
-"No finding in itself" and "no position" come down to six concrete things in this data.
+"No finding in itself" and "no position" come down to five concrete things. All examples are from panels.
 
 ### 1. No verdict on the room
 
-No cluster or theme says what the day **settled**, what it **left open**, or what went **unchallenged**. The information needed is in the data; the grouping layer never uses it.
+No cluster or theme says what the day **settled**, what it **left open**, or what went **unchallenged**. The data to say it is there, but the grouping layer doesn't use it.
 
-- **N1 theme_005 "Diagnosing modern democracy's hollowness".** 28 extractions from six sessions; **0 challenged**. The abstract: *"These clusters wrestle with what modern democracy is for and whether it is dying — cluster_009 takes the obituary frame seriously, cluster_013 diagnoses drift…, cluster_014 argues for active defense…"*. Twenty-eight positions and not one contested: that is the finding, and the abstract doesn't state it.
-- **N2 *Clash of the Titans* (30 extractions across both captures): 0 challenged.** No speaker defended the layoff plan; the only case for it was the scripted "interns' pitch" (`clash:002`, context: *"Responding to the interns' pitch to cut 5,000 FTEs"*). The Researcher's theme_004 abstract calls this *"a coherent governance argument"*. It adopts the stage's consensus as a structure instead of noticing that the clash had no second side.
+- **N2 *Clash of the Titans*** (30 extractions across both captures, **0 challenged**). The session was a fictional board meeting (`clash:001`, context: *"setting up the fictional Mighty Titan board meeting"*). It was called on an interns' plan to cut 5,000 jobs (`clash:002`, context). Every board voice rejected the plan, and no extraction argues for it.
+  - The Researcher's theme_004 abstract calls this *"a coherent governance argument"*. It adopts the stage's consensus as a structure instead of noticing that the clash had one side.
+- **N3 theme_001 "AI reframed as a human and social question"** (26 panel extractions, **0 challenged**). Abstract: *"… converge on moving AI's hard problems off the technical layer"*.
+  - Convergence is reported as a pattern, never as a question ("why did no one on stage defend the technical framing?").
 
-### 2. Consensus is recorded as "convergence", or erased
+### 2. Where the room did split, the abstract blurs the split
 
-The binding vocabulary turns agreement into a neutral pattern. Fifteen cluster abstracts open with "All …" (e.g. N1 cluster_010, *"All argue democracy's organizing aspiration should be aliveness…"*).
+- **N3 cluster_002** (25 items from three sessions) says the items engage the prompt *"taking positions across the 1–5 spectrum"*.
+- The panel extractions show a clear on-stage split about **how far**, not whether:
+  - Chwalisz argued for sortition models that *"fundamentally restructure power — a near-5 endorsement"* (`citizen:003`, challenged, high energy);
+  - Alexander *"Takes a softer position (~4)"*: sortition that complements elected institutions (`citizen:004`).
+- The abstract loses that split.
+- **Correction from the first version:** "misstates the room" overstated it. The cluster also pools 10 reflection items, e.g. `mpga:013`, which prefers subsidiarity to sortition. The claim that "nearly the whole room scored 4 or 5" is a second-hand report at Beastopia (`beastopia:005`). "Across the 1–5 spectrum" is loose, not false.
 
-In one case, the abstract **misstates** where the room stood:
-- N3 cluster_002 (25 items, the largest cluster of the run) says the items *"engage the prompt …, taking positions across the 1–5 spectrum"*.
-- The extractions say otherwise: *"nearly the whole room scored 4 or 5 out of 5"* (`beastopia:005`), *"a unanimous-5 group"* (`citizen:013`), *"Takes a softer position (~4) than Claudia"* (`citizen:004`).
+### 3. The Researcher's own noticing doesn't survive grouping
 
-The room was near-unanimous. "Across the spectrum" is the neutral reporter's habit of making every room look plural (inference, but the ids above show the gap).
+- The clustering prompt names a **"shared blind spot"** binding: items that *"all assume something without arguing it"*. **0 of 86 Athens clusters use it** (CONFIRMED; every regex hit was a content word).
+- The extraction layer does notice, in its synthesized open questions: `hdid_audio:010` and `:011`, above; `clash:021`, *"the panel does not specify what would falsify that diagnosis"*; `act_one:021`, *"all presented in close succession without direct dialogue."*
+- Clustering files these as one item among many. Example: N1 cluster_002 ends *"— with one item flagging selection-effect worries about the optimistic finding"*. That one item is `hdid_audio:011`.
 
-### 3. The grammar of the abstracts is an inventory
+### 4. Positions appear only where they are borrowed from one speaker
 
-CONFIRMED from `textstats.py`:
-- **Cluster abstracts:** 86 of 86 take the items as subject ("Items …", "All …", "Eight items …", "Arc …"). 74 of 86 carry an em-dash list, and 17 contain a trailing qualifier ("with one item …", "while …", "without resolving …"). Typical: N1 cluster_002, *"All argue or test the claim that AI can be designed … as a thinking partner … — with one item flagging selection-effect worries about the optimistic finding."* The one sharp item (`hdid_audio:011`, above) survives as a trailing clause.
-- **Theme abstracts:** 24 of 24 cite cluster ids inline. Only 5 contain any claim verb ("reveal", "argue that", "show that"), and in those the claim is the speakers' claim restated. Typical: N1 theme_001, *"cluster_001, cluster_005, and cluster_006 together challenge the prevailing framings of AI from three different angles — … (cluster_001), … (cluster_005), … (cluster_006)."* That is a table of contents with the cluster ids in brackets.
-- **Titles:** read like conference-report headings: "Myth as analytical lens", "Late-life flourishing reframed", "Inhabiting the future", "Democracy's deeper conditions". None could be disagreed with.
+- The only cluster titles with a position in them restate a single speaker's thesis, because the cluster *is* that speaker's talk:
+  - "Civilization as Goliath: collapse and inequality" (N2 cluster_028, Luke Kemp's talk);
+  - "Predictions and surveillance as veiled commands" (N2 cluster_025, *"Véliz's frame"*);
+  - "AI-driven layoffs as cover, not transition" (N2 cluster_019, the Clash panel's shared view).
+- 55 of 86 clusters draw on a single session. On Night 2 the dominant session supplies 94% of a cluster's items on average. So a cluster is mostly one session's digest on one topic. (MSC also had 21 of 25 single-session clusters: this is how the method works, not an Athens regression.)
+- **Theme level.** Reading all 24 abstracts, only about five make a claim of the Researcher's own, and every one is about **how clusters relate**:
+  - N3 theme_004: clusters 012 and 013 *"are two vocabularies for the same practice"*, which settles a question the speakers left open;
+  - N3 theme_002: cluster_014 *"supplies the structural answer"* to cluster_009;
+  - N3 theme_003: a "progressive-depth" ordering;
+  - N3 theme_005: the technology is *"more ready than the discourse admits"*;
+  - N1 theme_011: *"does not directly converse with the other clusters"*.
+- **None says what the room settled, avoided or left unanswered.** (Correction: the first version said "zero findings". There are a few, all of this relational kind.)
+- **Contrast with MSC.** Its six theme abstracts each end on a claim about the debate:
+  - *"no participant can stabilize"*;
+  - *"undermines the center's institutional ground for resistance"*;
+  - *"an unexamined left-right convergence on critique that neither conventional side has confronted"*, which is a blind-spot finding at theme level;
+  - *"exposing a widening gap"*.
+- This is the real difference between the runs: **content, not grammar.** See point 5.
 
-### 4. The Researcher's own noticing doesn't survive grouping
+### 5. The grammar is the prompt's house style, not the symptom
 
-- The clustering prompt names a **"shared blind spot"** binding: items that *"all assume something without arguing it"*. **0 of 86 Athens clusters use it** (CONFIRMED: every regex hit for "assum/blind spot/never/nobody" was a content word, not the binding).
-- Yet the extraction layer does notice. For example:
-  - N3 `mpga:025`: *"The session contains both diagnoses but no engagement between proponents of each path."*
-  - N1 `hdid_audio:010`: the many-AIs claim was *"never tested against the structural reality of AI market concentration."*
-- These synthesized open questions are where the Researcher already does what the operator is asking for. Clustering files them as one item among many.
+- The first version counted items-as-subject (86/86), em-dash lists and inline cluster ids (24/24) as evidence of flatness.
+- **MSC does the same**: 25 of 25 items-as-subject, 21 of 25 with an em-dash, 6 of 6 inline ids (review, recounted).
+- These counts describe the house style the prompts ask for. They explain why every abstract *reads* like a table of contents, but they do not show Athens is worse. **Withdrawn as a diagnostic.**
+- What does differ is compliance. Three Athens abstracts open *"Items articulating …"* (N1 cluster_001, _025, _030). That is the clustering prompt's own BAD "topic metadata" form (*"Items arguing that powerful states aren't held accountable"*). Part of the flatness is non-compliance, not design (CONFIRMED). Whether the model change contributes is untested.
 
-### 5. Where positions appear, they are borrowed from one speaker
+### 6. The Assembly in the room, and the Layer-3 question
 
-The only cluster titles with a position in them restate a single speaker's thesis, because the cluster *is* that speaker's talk:
-- "Civilization as Goliath: collapse and inequality" (N2 cluster_028; nine items from Luke Kemp's talk);
-- "Predictions and surveillance as veiled commands" (N2 cluster_025; *"Véliz's frame"*);
-- "AI-driven layoffs as cover, not transition" (N2 cluster_019; the Clash panel's shared view).
-
-55 of 86 clusters draw on a single session. On Night 2 the dominant session supplies 94% of a cluster's items on average. So a cluster is mostly **one session's digest on one topic**, and a theme is a list of session digests under a heading. That is why the output reads like a conference report: structurally, it is one.
-
-**Caveat:** the MSC validation run also had 21 of 25 single-session clusters. This is how the method works, not an Athens regression.
-
-### 6. The sharpest thing in the room gets flattened or dropped
-
-- **N1 `mthd:007`** (high energy, reinforced), the Assembly's octopus voice spoken into the room by its operator: *"the audience granted personhood to rivers and nature precisely because they cannot show up to claim power, and withheld it from AI because AI threatens to actually claim a position."* It is the most-cited extraction of Night 1 downstream (see A.4). Cluster_008 absorbs it as *"Items wrestling with whether non-human entities — rivers, forests, AI, octopus voices, AI-generated Cleopatras and Platos — can or should be granted voice"*: the diagnosis of the room's bias becomes a topic.
-- **N3 `beastopia:006`** (high energy): the report that *"An AI Assembly artifact, speaking in the voice of an octopus, intervened in a game show vote and visibly shifted the room."* It is **an isolate**. The Provocateur "does not process isolates" (spec), so it never reached a voice or the editor. In the explorer it is visible only inside its session's extraction list: `build_athens_data_graph.py` stores `theme_isolates` but draws no isolates section, and the theme view never shows it. This is the one piece of Layer-3 evidence (G6) in three nights of transcripts. A keyword search of every Night 2 and Night 3 transcript found no other audience reference to an Assembly artifact (CONFIRMED; the search script is inline in this session).
+- The sharpest single moment of Night 1 was the Assembly itself: the octopus voice, spoken into the room by its operator after the audience vote (`mthd:007`, reinforced, high energy): *"the audience granted personhood to rivers and nature precisely because they cannot show up to claim power, and withheld it from AI because AI threatens to actually claim a position."*
+- Cluster_008 absorbs it as a topic: *"whether non-human entities — rivers, forests, AI, octopus voices … — can or should be granted voice"*.
+- **Correction:** `beastopia:006` is **not attendee evidence** for G6. It is the operator (transcript: *"Unidentified Speaker 16"*, confidence low, introduced as Matthias) retelling that same Night-1 moment on Night 3. His words were *"people appreciated it for a second, it shifted the conversation a little bit"*. The extraction's context, *"visibly shifted the room"*, is the Researcher's gloss.
+- It is still an isolate, so the Provocateur never passed it on. In the explorer it appears only inside its session's list: the stored isolates list is never rendered.
+- **What stands for G6:** a search of every Night 2 and Night 3 transcript for references to the Assembly or its artifacts finds only this operator turn (CONFIRMED by the independent review too).
+- So **no attendee referenced an Assembly artifact on stage** in the recorded sessions. That absence is itself Layer-3 data. **The Researcher cannot report it, because nothing tells it to look.**
 
 ### Operational definition
 
-The six points above add up to one test. **A finding is a sentence about the day that a participant could dispute.** "Twenty-eight defences of democracy and not one was challenged" is disputable: someone could point to a challenge. "These clusters wrestle with what modern democracy is for" is not.
+**A finding is a sentence about the day that a participant could dispute.**
+- "The board meeting was called to reject a plan that nobody on stage defended" is disputable: someone could point to a defender.
+- "These four clusters build a coherent governance argument" is not.
 
-By that test, the Researcher's grouping layer produced **zero findings of its own** across 24 themes. This is an inference from reading all 24 abstracts; the five that contain a claim restate the speakers' claims. The extraction layer produced several, all in synthesized open questions.
+By that test, the grouping layer produced a few relational findings and **no findings about the room.** The extraction layer produced several, in its synthesized open questions.
 
 ## A.3 The contrast: what the Researcher could have said
 
-**These are illustrations, not proposals for prompt text.** Each is written only from the extractions in that cluster or theme; the evidence is listed so each sentence can be checked.
+**These are illustrations, not proposals for prompt text.** Each is written only from panel extractions, with every supporting id listed.
 
-### Illustration 1: N1 theme_005 (5 clusters, 28 extractions)
+**Revision note:** the first version's Illustrations 1 and 2 rested on reflection material, and Illustration 3 contradicted `mthd:007`'s own label. All three are rebuilt. The error behind Illustration 3 is explained in the change list. **Each illustration is a checkable claim about the room, so each must be checked**; see the support-check requirement in A.6.
 
-**As produced:**
-> **Diagnosing modern democracy's hollowness** — These clusters wrestle with what modern democracy is for and whether it is dying — cluster_009 takes the obituary frame seriously, cluster_013 diagnoses drift and hollowing, cluster_014 argues for active defense as still the best system, and cluster_010 and cluster_011 redirect the underlying purpose toward aliveness and the productive holding of tension rather than resolution by vote.
+### Illustration 1: N2 theme_004 plus cluster_019 (*Clash of the Titans*, 30 panel extractions)
 
-**Positioned (illustration):**
-> **The day agreed democracy is worth saving without agreeing what it is.** Twenty-eight extractions across six sessions defend or diagnose democracy; none was challenged. They use the word for at least four things — a procedure that settles tension by vote (cluster_011), aliveness and flourishing (cluster_010), the holding of opposing views (cluster_011), and a regime under attack that must be defended (cluster_014). The one objection to the day's own premise — that "human democracy is dead" presumes a democracy Black women in the U.S. never had — drew no response. At stake: a defence that has not said what it defends cannot tell reform from replacement.
-
-**Evidence:**
-- engagement counts from `textstats.py`;
-- N1 `hdid_refl:003` (Participant 15, `unengaged`);
-- N1 `birthplace:010` (aliveness, picked up by `:011`, `:012`);
-- N1 `birthplace:005` and `:007` (harmony as holding);
-- cluster_014 (defend democracy).
-
-**Note:** the Provocateur independently wrote nearly this finding twice:
-- for Plato: *"each was reinforced rather than examined"*, formulation `theme_005__plato`;
-- for Marley: *"one sister said plain that democracy was never in full effect for Black women in America, and the room moved on"*, `theme_005__bob_marley`.
-
-### Illustration 2: N3 cluster_002 in theme_003 (25 extractions, 3 sessions)
-
-**As produced:**
-> **Sortition and citizens' assemblies** — Twenty-five items engage the prompt of whether to expand sortition-based democracy beyond elected representation, taking positions across the 1–5 spectrum, specifying success conditions (paideia, payment design, disenfranchised opt-in, government commitment to outcomes), probing scope and limits (…), proposing AI as deliberation aid, and asking whether sortition presupposes or builds the democratic culture it requires.
+**As produced (theme_004):**
+> **Board governance for the long term** — These four clusters build a coherent governance argument: cluster_020 establishes that boards owe duty to non-shareholder stakeholders, cluster_022 supplies the public narrative for justifying long-horizon decisions, cluster_021 names the operational practices needed under crisis pressure, and cluster_023 surfaces the unresolved dilemmas …
 
 **Positioned (illustration):**
-> **Sortition won the room; its hard questions came from the floor and went unanswered.** A session led by two of sortition's best-known advocates ended with nearly everyone scoring 4 or 5 out of 5. The objections came from small groups and the later reflection session, not the stage: that it may only work in mature democracies, that elected officials still choose the question, that governments can ignore the result as in Paris. The panel answered none of them. The live fault line is no longer sortition versus election, which the room settled, but whether sortition presupposes the democratic culture it is supposed to build.
+> **The Clash of the Titans staged a board fight with one side missing.** The session was a fictional board meeting called on an interns' plan to cut 5,000 jobs with AI. Every board voice rejected it — as short-termism, as unevidenced, as management's own failure, as cover for over-hiring, as a red herring for a product problem — and no one on stage argued for it: 30 extractions, none challenged. The case for the cuts existed only as the script the panel had been asked to reject. What the consensus left open is what would make it testable: how a board holds out when capital markets reward fast cuts, and how outsiders could tell a real productivity transition from cover.
 
 **Evidence:**
-- `beastopia:005` (context: *"nearly the whole room scored 4 or 5"*);
-- `citizen:013`;
-- `mpga:003` (the one `challenged` reflection);
-- `citizen:009`;
+- `clash:001` (context: fictional board meeting);
+- `clash:002` (context: the interns' pitch);
+- the rejections: `clash:003`, `:004`, `:005`, `clash:010`, `:011`;
+- engagement recount: 0 challenged;
+- `clash:020`, `clash:021` (context: *"the panel does not specify what would falsify that diagnosis"*), `clash_a2:008` (Gelles *"explicitly says he doesn't have the answer"*).
+
+**Downstream:** theme_004 was dropped below quorum. The one Night-2 narrative that mentions the session calls it a place where *"speakers converged on a defense of human work"* (`theme_002__octopus`); none notes the missing side.
+
+### Illustration 2: the Citizen Assembly workshop (N3 `citizen`, 15 panel extractions, 3 challenged)
+
+**As produced (cluster_002, pooled from three sessions):**
+> **Sortition and citizens' assemblies** — Twenty-five items engage the prompt of whether to expand sortition-based democracy beyond elected representation, taking positions across the 1–5 spectrum, specifying success conditions …, probing scope and limits …, proposing AI as deliberation aid, and asking whether sortition presupposes or builds the democratic culture it requires.
+
+**Positioned (illustration):**
+> **On stage, sortition's advocates split on how far, not whether; the hard questions came from the small groups.** Chwalisz argued for sortition bodies that restructure power ("a near-5"); Alexander for assemblies that complement elected institutions ("~4"). A participant's challenge — that sortition needs civic competence cultivated first — was answered with a flat rebuttal that the contrary view "is bullshit." The small groups' reportbacks raised who chooses the question, cultures of obedience, and whether the disenfranchised opt in at all; the one the record marks as never addressed by the panelists is what happens when a government ignores an assembly's work, as in Paris. Scores reported in-session: one unanimous-5 group, one that started at 3+.
+
+**Evidence:**
+- `citizen:003` (challenged, high);
+- `citizen:004`;
+- `citizen:006`, `:007` (both challenged, high);
+- `citizen:009`, `:010`, `:015`;
 - `citizen:014` (context: *"never directly addressed by the panelists"*);
-- `mpga:023`.
+- `citizen:013`.
 
-### Illustration 3: N1 cluster_008 in theme_004 (8 extractions)
+**What it no longer claims:** that "the room settled sortition versus election". Across the day it plainly did not: `mpga:013` and `mpga:025` (reflections) record a subsidiarity-and-reform camp with *"no engagement between proponents of each path."*
+
+### Illustration 3: N1 cluster_008, panel items only (5 of 8)
 
 **As produced:**
 > **Non-human standing in deliberation** — Items wrestling with whether non-human entities — rivers, forests, AI, octopus voices, AI-generated Cleopatras and Platos — can or should be granted voice in democratic deliberation, including the rights-based pushback that any commons requires curated values rather than indiscriminate inclusion.
 
-**Positioned (illustration):**
-> **The room's own vote is the finding: personhood for rivers, not for AI.** Asked in turn, the Marathon room granted legal personhood to rivers and forests easily and withheld it from AI. The only explanation offered — standing goes to what cannot claim it — came from the Assembly's own octopus voice, and nobody took it up or answered it. Nor did anyone answer the one objection to the expansion case: that a commons without curated, rights-based values collapses into people talking past each other. Half of this cluster's eight items are the Assembly speaking, or the room asking about the Assembly.
+**Positioned (illustration, corrected):**
+> **The room's vote is the material: personhood for rivers, not for AI — and the explanation that landed came from the Assembly itself.** After the audience granted legal personhood to rivers and forests and withheld it from AI, the Assembly's octopus voice, spoken by its operator, named the asymmetry: standing is given to what cannot claim it. The room took the point up. What it left open was the principle: on what ground AI should be granted or denied standing. Of the five panel items in this cluster, three are the Assembly's own voices, spoken by its operator, and two are the Researcher's questions about them.
 
 **Evidence:**
-- `mthd:007`, `mthd:021` (context: *"Never resolved"*);
-- `hdid_refl:017` (high energy, `unengaged`);
-- `hdid_refl:023`;
-- `mthd:020`, `act_one:015`, `act_one:021` (the three other Assembly-voice or Assembly-about items).
+- `mthd:007` (context: *"Delivered after a vote …"*; reinforced, high energy);
+- `mthd:021` (context: *"Never resolved"*);
+- `mthd:020` (Cleopatra channelled);
+- `act_one:015` (Arendt channelled);
+- `act_one:021` (context: *"presented in close succession without direct dialogue"*);
+- the operator's own account, which agrees: *"people appreciated it for a second"* (`beastopia` transcript, turn 56).
+- The reflection items in this cluster (`hdid_refl:012`, `:017`, `:023`) are left out.
 
 ### What the three have in common
 
 Each positioned version:
-- states what the room did (settled, split, voted, moved on);
+- states what the room did (rejected, split, voted, took up);
 - names what nobody answered;
 - says what is at stake.
 
-**None says who is right about democracy, sortition or personhood.** That distinction is the key to handling the plurality risk in A.5.
+None says who is right about layoffs, sortition or personhood. **Position the Researcher on the room, never on the question** (A.6).
 
 ## A.4 Why it's like this
 
-### Neutrality was intended, explicitly and at every level (CONFIRMED)
+### Neutrality was intended (CONFIRMED)
 
-- **Briefing, Stage 1:** *"The Researcher is unbiased — it does not know the council's composition, the audience's profile, or the closing-show matrices. It captures faithfully what the day's sessions contained."*
-- **Researcher spec:** *"It is a design research instrument, not an editorial voice."* And under Scope: *"It does not formulate questions or propositions — that's the Provocateur."*
-- **Provocateur spec:** *"The Provocateur is the strategic, editorial agent in the pipeline. Unlike the Researcher (content-faithful, council-unaware) … It makes choices designed to produce the strongest possible artifacts."*
-- **`DATA_INVENTORY.md`** adds a second job: stages 1–2 are *"general-purpose conference data"*, *"a clean record of what was said on stage and what positions were taken"*, usable for archive and research.
+- **Briefing, Stage 1:** *"The Researcher is unbiased … It captures faithfully what the day's sessions contained."*
+- **Researcher spec:** *"a design research instrument, not an editorial voice."* Under Scope: *"It does not formulate questions or propositions — that's the Provocateur."*
+- **Provocateur spec:** *"the strategic, editorial agent … Unlike the Researcher (content-faithful, council-unaware)"*.
+- **`DATA_INVENTORY.md`** adds a second job: stages 1–2 are *"general-purpose conference data"*.
 
-So the division of labour is deliberate: the Researcher reports, the Provocateur supplies the edge.
+So the division of labour is deliberate: the Researcher reports, the Provocateur supplies the edge. **The operator's complaint is about the Researcher output read on its own**, as the record, and there the design gives it nothing to say.
 
-**The operator's complaint is about the Researcher output read on its own**, as the "conference record" and in the explorer's Conference Data page. There the design gives it nothing to say.
+### The specific decisions and conditions behind the flatness
 
-### The specific decisions that produce the flatness
-
-1. **Clusters are forbidden from stating findings** (CONFIRMED).
-   - Spec: the cluster abstract is *"not a caption, not a summary, and not a 'declarative finding' that states the answer the cluster points to."*
-   - Prompt, BAD examples: *"Declarative findings (state an answer, not the binding — this is the theme-level move, not the cluster-level move)."*
-   - Changelog §G: v2.4 is *"replacing the v2.2 'declarative finding' framing."*
-   - So a finding layer existed in v2.2 and was removed on purpose.
-2. **The question asked is a classification question.**
-   - Both grouping prompts ask *"why these belong together"*. On agreeable material the honest answer is "they agree" or "they're about the same thing", and that is what 86 abstracts say.
-   - The theme prompt allows a finding in principle; its good examples include *"reveal that the administration's position fails on its own terms"*. But it frames the job as naming the binding and rewards inline cluster citations. The result is 24 of 24 routing tables.
-   - PLAUSIBLE, from the method's literature, not from this repo: Kawakita's original KJ method asks each group label to state the gist of its cards as a sentence rather than name a category. The spec kept KJ's grouping and dropped its statement.
-3. **Round 1 is blind to disagreement by construction** (CONFIRMED, `cluster_extractions`).
-   - The clusterer sees only `{ref, extraction, context}`. Speaker, lens, `engagement`, `responds_to` and `energy` are stripped.
-   - It cannot tell a contested exchange from five people agreeing. It cannot see that `mthd:007` was high energy, or that `hdid_refl:017` went unanswered. It only knows a claim was disputed if the `context` text happens to say so.
-   - This was a sound fix for v2.3's session-local clustering. At Athens, clusters are session-local anyway (55 of 86), because Athens sessions were topically distinct. So the stripping cost the disagreement signal without buying cross-session clusters.
-4. **Round 2 sees only Round 1's abstracts.** An inventory of inventories can only be a heading.
-5. **Engagement is the only position signal, and it is thin.**
-   - `challenged / reinforced / unengaged` records whether the room responded, not what was at stake.
-   - On reflections it is inferred between separately recorded contributions: `birthplace:006`, `:007` and `:008` are all `responds_to: birthplace:005` and "reinforced", though each is a separate vendor recording. That the participants did not hear one another is PLAUSIBLE, not verified from the vendor format.
-6. **The method was validated on an argumentative conference and deployed at a hospitable one.** This is the central causal point.
-   - The same prompts (unchanged since 2026-04-16) and the same model (`claude-opus-4-7`, adaptive thinking, per `model_routing.json`) produced positioned themes on MSC material with 32% challenged items. For example: *"These clusters form a multi-sided contest over Western identity that no participant can stabilize"*; *"cluster_021's direct challenge to the EU's democratic legitimacy undermines the center's institutional ground for resistance"*.
-   - At Athens (6% challenged) they produced headings.
-   - **Inference, strongly supported:** the method mirrors the room. It is exactly as positioned as the room's own disagreements, and it adds nothing of its own. In a room built on intellectual hospitality (G7), a faithful mirror reproduces the hospitality: every position gets a seat, none is weighed, agreement reads as convergence. The Researcher performs the failure mode the rest of the project is designed against.
-7. **The Researcher does not know the Assembly exists.**
-   - Being council-unaware, it has no reason to treat *"our AI Assembly … chimed in in the voice of the octopus"* as special. `beastopia:006` fitted no cluster, so it became an isolate.
-   - The Briefing's success criterion (G6) assumes the Researcher captures these references so later nights can respond. Nothing in any prompt looks for them.
+1. **Extraction is told not to record room dynamics.**
+   - The extraction prompt: *"Do not extract observations about group dynamics, tone, or process as findings."* Such signals may only raise the energy flag.
+   - This is the most direct prompt-level ban on what a room reading does. (Added in revision; the first version missed it.)
+2. **Clusters are forbidden from stating findings.**
+   - The spec: the cluster abstract is *"not a 'declarative finding'"*.
+   - The prompt's BAD examples: *"Declarative findings (state an answer, not the binding — this is the theme-level move, not the cluster-level move)."*
+   - Changelog §G: v2.4 replaced the earlier "declarative finding" framing. The spec calls that framing v2.2; the MSC manifest calls it v2.3.
+3. **The theme prompt invites findings, and Athens mostly didn't deliver them.**
+   - Its first GOOD example is a finding: *"cluster_001 and cluster_004 together reveal that the administration's position fails on its own terms"*.
+   - MSC (Opus 4.6) delivered such findings in 6 of 6 themes. Athens (Opus 4.7 by default) delivered relational claims in about 5 of 24 and room claims in none (A.2.4).
+   - So **"designed" is right for clusters and only partly right for themes.** At theme level it looks like non-compliance, and the model change is a candidate cause. PLAUSIBLE; untested.
+4. **Round 1 is blind to disagreement.**
+   - The clusterer sees only `{ref, extraction, context}` (`researcher_flow.py:383-385`). Speaker, lens, engagement, `responds_to` and energy are stripped.
+   - It cannot tell a contested exchange from five people agreeing, unless `context` happens to say so.
+   - This fixed v2.3's session-local clustering. At Athens clusters are session-local anyway (55 of 86), because the sessions were topically distinct.
+5. **Round 2 sees only Round 1's abstracts**, so it summarises summaries.
+6. **Engagement labels on reflections are not observations.**
+   - Per C68 A1 the takeaways arrived labelled as a panel with a blank title. The Researcher then linked separate recordings with `responds_to` and "reinforced": `birthplace:006` and `:007` both respond to `:005` as "reinforced" (`:008` responds to it as "unengaged").
+   - Any finding built on reflection engagement, including the first version's theme_005 "0 of 28", is an artifact of that format.
+7. **The contestation contrast, with its confounds.**
+   - On panels alone, Athens has 6.6% challenged; MSC has 32%. The gap is real in the data.
+   - Whether it *causes* the flat themes is **PLAUSIBLE only**, for three reasons:
+     - the model differs (4.6 vs 4.7);
+     - 19% of Athens extractions are mislabelled reflections;
+     - the control is a single run of three MSC panels.
+   - The MSC manifest itself describes Opus 4.6 themes, compared with Sonnet's, as *"taxonomic/architectural … structuring the disagreement without taking sides"*. So even the control was not strongly positioned. It just contained more of the room's own conflict to transmit.
+   - Withdrawn from the first version: "same model", and "strongly supported".
+8. **The Researcher does not know the Assembly exists.** It has no reason to mark the Assembly speaking in the room (`mthd:007`, `:020`, `act_one:015`), or to note that no attendee quoted it later (G6).
 
 ## A.5 Downstream: did the flatness carry, or did later stages recover the edge?
 
@@ -281,162 +323,173 @@ So the division of labour is deliberate: the Researcher reports, the Provocateur
 
 ### Carried: Triage Part B and Selection, which read abstracts only (CONFIRMED)
 
-**The flags don't discriminate:**
-- 24 of 24 themes flagged `worth_surfacing`;
-- 22 of 24 `fault_line_present`;
-- 17 of 24 `audience_friction: high`.
-
-**All 22 fault-line descriptions start "Whether …", and 21 are "A, B or C" menus that restate the theme's clusters.** For example, N1 theme_001's fault line, *"Whether AI's problem is ontological …, political …, or economic …"*, is the theme abstract's three clusters in the same order.
-
-**So Selection's multipliers are nearly constant**, and Selection runs on voice-profile quorum alone. The spec already calls the multipliers *"symbolic in expressing editorial priority more than numerically load-bearing."*
-
-**The cost shows in what was dropped:**
-- **N1 theme_008** ("Business and leadership reframed…") held **5 of Night 1's 14 challenged extractions**, the most contested theme of the night: the survivorship-bias dispute in cluster_023, and values frame versus business case in cluster_024. It was dropped as *"below quorum"*.
-- **N2 theme_006** (late life) held 3 of Night 2's 13 challenged items. Dropped.
-- **N2 theme_004** (the no-clash board meeting). Dropped.
-
-**Caveat:** quorum, not the Researcher, is the proximate cause. But flat abstracts gave triage no way to rank the material itself.
+- **The flags don't discriminate:** 24 of 24 themes are flagged `worth_surfacing`, 22 of 24 `fault_line_present`, and 17 of 24 `audience_friction: high`.
+- **No signal measures whether the room disagreed.** This is by design, not by accident: `provocateur_triage_flags.md` defines FAULT_LINE as *"territory where the council's traditions would visibly diverge"*. Friction is about the audience.
+- All 22 fault lines start "Whether …". 12 offer three or more options; 10 are binary. (Correction: the first version said 21 were "A, B or C" menus.)
+- Some mirror the theme's cluster list. N1 theme_001: *"Whether AI's problem is ontological …, political …, or economic"*, the abstract's three clusters in order.
+- **The cost shows in what was dropped** (proximate cause: voice quorum):
+  - **N1 theme_008** held **5 of Night 1's 14 challenged extractions**, all from panels, including the survivorship-bias dispute (cluster_023). It was the night's most contested theme. Dropped.
+  - **N2 theme_006** held 3 of 13. Dropped.
+  - **N2 theme_004**, the one-sided Clash. Dropped. Some of its items still reached voices through N2 theme_002 (cluster_019).
 
 ### Recovered: Formulation, which reads raw extractions (CONFIRMED)
 
-- The formulations and context narratives state findings the Researcher's abstracts don't. A regex for explicit room-gap phrases ("moved on", "never addressed", "rather than examined", "no one asked", …) hits **23 of 128** formulation-plus-narrative texts; this is a lower bound. Examples:
-  - N1 `theme_005__plato`: *"each was reinforced rather than examined"*.
-  - N1 `theme_006__bob_marley`: *"When one voice mentioned that the whole thing rested on slave labour, the room moved on"*.
-  - N3 `theme_003__cleopatra` narrative: *"participants surfaced the same unresolved worry … and the panel never addressed it"*.
-  - N3 `theme_003__ibn_battuta` narrative: *"The room scored near-unanimous 4s and 5s. But the small-group reportbacks kept surfacing a different question underneath the enthusiasm"*.
-  - N3 `theme_003__whanganui_river`: the Marathon's deliberations *"never reasoned from a river, a mountain, or a catchment as a tupuna with standing"*. This is a finding about the whole event that the Researcher, reading the same extractions, did not make.
-- **The voices then develop it.** Plato's N1 Step 1 on theme_005: *"The word was passed around the table like a torch in a relay, and no one asked: torch of what?"*
+The formulations and context narratives state findings the Researcher's abstracts don't. By my regex (Appendix A), 23 of 128 formulation-plus-narrative texts name a room gap explicitly; the review's narrower regex finds 16.
+
+**Examples grounded in panels:**
+- N3 `theme_003__cleopatra` narrative: participants raised the Paris worry *"and the panel never addressed it"* (`citizen:014`).
+- N2 `theme_003__octopus` narrative, on the Reality Tunnels panel: *"the architectural question, the one about access points and centres, never quite got asked"* (grounded in `tunnels` and `tunnels_a2` items).
+- N3 `theme_003__whanganui_river`: the Marathon's deliberations *"never reasoned from a river, a mountain, or a catchment as a tupuna with standing."*
+
+**Examples grounded mostly in reflections** (named as such, per the review):
+- N1 `theme_005__plato`: *"each was reinforced rather than examined"*. 6 of its 7 grounding ids are reflections.
+- N1 `theme_006__bob_marley`: *"the room moved on"*. 5 of 6 grounding ids are reflections.
+- Plato's Step 1 *"torch of what?"* develops the first of these. The Provocateur here reads a "room" that was, in fact, separate takeaways. The C68 A1 mislabel propagates this far.
 
 ### What the recovery costs
 
-1. **The finding is re-derived per voice and never stated once.**
-   - N3 theme_003 has nine context narratives, each a partial reading angled at its voice.
-   - N1 theme_004: eight of nine formulations open with the same octopus reframing (`mthd:007`); only Cleopatra's does not. One finding pushed to eight voices; the rest of the cluster (the rights-based objection `hdid_refl:017`, Miller's life-conditions test) is secondary in most.
-2. **It is invisible in the record.** The explorer's Conference Data page shows the Researcher layer; the findings sit inside per-voice briefings on the Assembly Output page. Someone reading "what the conference said" sees headings. This is the operator's exact experience.
-3. **Findings in dropped themes are lost**, e.g. the survivorship-bias dispute.
-4. **The flat abstract still reaches every voice**, as `theme_abstract_from_researcher` in `full_theme_record`.
-5. **Recursion is hidden (G5).**
-   - Night 1's most-used "finding of the room" was the Assembly's own live intervention, attributed to "Matthias Peschel" and fed back to eight voices as what "the room" said.
-   - That may be the Assembly entering the conversation (G6), or the pipeline reading its own echo. Nothing in the data marks which, because the Researcher cannot tell.
+1. **The finding is re-derived per voice and never stated once.** N1 theme_004: eight of nine formulations open with the same octopus reframing (`mthd:007`); only Cleopatra's does not.
+2. **It is invisible in the record.** The explorer's Conference Data page shows only the Researcher layer. The findings sit inside per-voice briefings.
+3. **Findings in dropped themes are lost**, e.g. the survivorship-bias dispute and the one-sided Clash.
+4. **The flat abstract still reaches every voice**, as `theme_abstract_from_researcher` (`provocateur_flow.py:1386`).
+5. **Recursion is hidden (G5).** Night 1's most-used "finding of the room" was the Assembly's own intervention, attributed to "Matthias Peschel". It was fed back to eight voices as what the room said. Nothing in the data marks it as the Assembly hearing itself.
 
 ### Verdict for the Researcher (scoped to Part A)
 
-- The flatness is intended.
-- It is mostly recovered for the voices, at Formulation.
-- It is lost in three places: the record, the triage and selection of themes, and the capture of Layer-3 evidence.
-- **Whether the Researcher is the bottleneck overall is Part B's synthesis.**
+- Flat by design at cluster level; at theme level, apparently by non-compliance.
+- Mostly recovered for the voices at Formulation.
+- Lost in the record, in theme triage and selection, and in any account of the Assembly's presence in the room.
+- **Whether the Researcher is the overall bottleneck is Part B's synthesis.**
 
-Side note, CONFIRMED and harmless: extractions store `lens: "open question"` with a space, while the spec, the interface contract and `provocateur_flow.py`'s `LENS_ORDER` expect `open_question`. Real briefings still sort open questions last, apparently through the unknown-key fallback. Worth a one-line spec or prompt fix, not a finding.
+Side note, CONFIRMED and harmless: Athens extractions store `lens: "open question"`; MSC and `LENS_ORDER` use `open_question`. Sorting still works through the `.get(…, 99)` fallback.
 
 ## A.6 What could be different
 
-**The main risk throughout:** a Researcher that takes positions could pre-empt the voices' reading and flatten the plurality the Assembly exists for.
+**Principle for every option:** position the Researcher **on the room, never on the question**. "The room settled X, left Y open, never answered Z" is a claim about the material. "X is right" belongs to the voices.
 
-**The principle that manages the risk**, visible in A.3: **position the Researcher on the room, never on the question.**
-- "The room settled X, left Y open, never answered Z" is a claim about the material, checkable against extraction ids.
-- "X is right" is a claim about the world, and belongs to the voices.
+**Two risks to manage:**
+- **Plurality:** a positioned Researcher could pre-empt the voices' reading.
+- **Accuracy** (added in revision): the first version's own illustrations contained one wrong and two doubtful claims about the room. A room reading can be wrong, and a check that cited ids exist would not catch it.
 
-Each option below is judged against that line.
+**Preconditions for any room-level option:**
+- **C68 A1 fixed**, so the session format reaches the Researcher.
+- **Session-kind awareness**: reflection takeaways, a staged meeting with a scripted pitch, a scored workshop, an operator channelling the Assembly.
+- **An operator decision** to lift or bypass the extraction prompt's ban on group-dynamics observations (A.4 #1).
+
+### Option 0a (new): deterministic room statistics in the explorer, no LLM
+
+**What changes:** only `build_athens_data_graph.py`. Per theme and per cluster, show:
+- the challenged, unengaged and high-energy counts, split by panel versus reflection;
+- the Researcher's own synthesized open questions (`speaker: null`), listed rather than buried;
+- extraction isolates;
+- items where the Assembly is channelled (context mentions "Channeling" or "AI Assembly").
+
+**Example:** "N2 theme_004 · 15 panel extractions · 0 challenged · 4 open questions: …".
+
+**Risks:** none to the pipeline. It shows the evidence for a finding without stating it.
+
+**Plurality:** none.
+
+### Option 0b (new): test whether the theme prompt's existing invitation works
+
+**What changes:** nothing permanent. A capped API trial re-runs Researcher Rounds 1–2 on Athens Night 2 panel extractions under Opus 4.6 and under the current model. Compare how many themes state a finding of the MSC kind.
+- If findings return, the fix is a model choice or a prompt nudge, with no new layer.
+- If not, the room hypothesis gains weight.
+
+**Risks:** API cost (small). It needs the operator's spend cap.
 
 ### Option 1: extraction also records what is at stake
 
-**What changes:** extraction schema and prompt. Three fields per extraction:
-- `at_stake`: what follows if this is right;
-- `contested_by`: extraction ids, or `"no one"`;
-- `assumes`: the premise it doesn't argue.
-
-**Example output**, for N1 `hdid_refl:003`:
-- `at_stake`: *"if true, the day's obituary mourns a privilege; the remedy is extension, not restoration"*;
-- `contested_by`: *"no one"*;
-- `assumes`: *"that the 'human democracy' being mourned was the same thing for everyone."*
+**What changes:** extraction fields `at_stake`, `contested_by` and `assumes`.
 
 **Risks:**
-- 529 interpretive fields a night, each a place to hallucinate.
-- Speakers' positions get glossed item by item.
-- The voices, who read raw extractions, would read the Researcher's gloss as part of what was said.
+- 529 interpretive fields a night, each a place to hallucinate;
+- the voices read raw extractions as the room.
 
-**Plurality:** medium risk. The glosses are local, but they sit inside the evidence the voices treat as the room.
+**Plurality:** medium.
 
-**Verdict:** useful only for `contested_by`. That one is nearly deterministic, can be filled from `engagement` and `responds_to` in Python, and is what clustering currently can't see.
+**Verdict:** only a `contested_by` field is worth considering. Note that `responds_to` has no polarity and links only within a session, so filling it in Python is only partial.
 
 ### Option 2: cluster by fault line instead of by topic
 
-**What changes:** the Round 1 prompt and input. Round 1 would see lens, engagement and energy (speaker and session stay hidden). It would group items into disagreements with named sides, or into consensus, labelled as such.
-
-**Example output:** *"Personhood by vote — expansion (Participant 12; Miller `mthd:001`) vs curated commons (Participant 17, unanswered); the octopus explanation offered, not taken up."*
+**What changes:** Round 1 sees lens, engagement and energy, and groups items into disagreements with named sides, or into labelled consensus.
 
 **Risks:**
-- At 6% challenged, most clusters would have one side. A fault-line method on hospitable material either **manufactures controversy** or collapses back to topics.
-- Re-adding metadata re-opens the v2.3 session-local problem the minimal input fixed.
-- It re-validates the whole grouping, and the MSC baseline no longer applies.
+- At 6.6% challenged on panels, it would mostly produce one-sided clusters or invent controversy.
+- It re-opens the v2.3 session-local problem.
 
-**Plurality:** medium. The Researcher picks the axis, not the winner. But choosing the axis frames every voice's reading of the theme.
+**Plurality:** medium, because choosing the axis frames every voice's reading.
 
-**Verdict:** not as the primary change. Its one good idea, "consensus is a valid and reportable cluster state", belongs in Option 4.
+**Verdict:** not as the primary change. Its one good idea, "consensus is a reportable state", goes into Option 4.
 
-### Option 3: themes stated as propositions, or as questions with named sides
+### Option 3: themes as propositions, or questions with named sides
 
-**What changes:** the theme prompt. The title becomes a sentence (the KJ move). The abstract gives the claim, the strongest counter in the material, and what is untested.
+**What changes:** the theme prompt. Titles become sentences; abstracts give the claim, the strongest counter, and what is untested.
 
-**Example output:** *"Sortition won the room; its hard questions came from the floor and went unanswered"* (Illustration 2, compressed).
+**Risks:** built on inventory abstracts, likely generic. Titles are the most visible slot.
 
-**Risks:**
-- Round 2 still sees only cluster abstracts, which are inventories, so the propositions would be built on summaries. PLAUSIBLE that they come out generic ("tensions remain over…").
-- Titles are what every downstream reader sees first. A tilted title tilts triage, the explorer and, via `full_theme_record`, the voices.
+**Plurality:** medium to high.
 
-**Plurality:** medium to high. It's the highest-visibility slot.
+**Verdict:** superseded by 0b. If 0b shows the model can do theme-level findings, a prompt nudge in this direction is the cheapest fix.
 
-**Verdict:** worth doing cheaply for titles only if Option 4 is declined.
+### Option 4: a separate "room reading", neutral layer untouched
 
-### Option 4 (recommended): a separate "room reading", with the neutral layer untouched
+**What changes:** a new Round 3 call after theming. It reads themes plus raw extractions with full metadata **and session kind**, and writes `room_reading.json`:
+- **per theme**: `settled`, `open`, `unchallenged`, `unsaid` and `at_stake`, each with required evidence ids;
+- **per night**: three to five statements about the day, plus `assembly_in_the_room`, which lists every item where the Assembly speaks or is spoken about.
 
-**What changes:** a new Round 3 call after theming, plus a schema addition. `grouping.json` stays exactly as it is; the v2.4 validation and the "faithful map" contract hold.
-
-**What Round 3 reads:** themes, cluster abstracts and **raw extractions with full metadata** (engagement, responds_to, energy, speaker, lens).
-
-**What it writes:** `room_reading.json`.
-
-- **Per theme**, five short statements, each with required evidence ids:
-  - `settled`: what the room agreed on, including "nobody argued against X";
-  - `open`: what was asked and not answered;
-  - `unchallenged`: strong claims nobody contested;
-  - `unsaid`: what the material assumes and nobody named (the "shared blind spot" move, relocated);
-  - `at_stake`: one sentence.
-- **Per night**, three to five statements about the day as a whole, plus `assembly_in_the_room`: every extraction where the Assembly or a voice is quoted, reported or answered.
-
-**Example output:** Illustrations 1–3, in fields. For N3 theme_003:
-- `settled`: *"sortition over election (near-unanimous 4–5s; `beastopia:005`, `citizen:013`)"*;
-- `open`: *"what happens when governments ignore the result (`citizen:014`); who picks the question (`citizen:009`)"*;
-- `unsaid`: *"no speaker reasoned from a non-human participant in the Marathon's own democracy session"*. This one the Provocateur found for Whanganui; it would now be found once, for everyone.
+**Example:** Illustrations 1–3, in fields.
 
 **Routing, in order of risk:**
-1. **The record.** The explorer's Conference Data page shows the room reading beside each theme, typographically distinct, labelled "the Researcher's reading — contestable, with evidence". This answers the operator's complaint directly and serves G5.
-2. **Provocateur Triage Part B.** It reads the room reading instead of, or as well as, the abstracts. Fault lines come from `open`, not from cluster lists. `unchallenged` feeds the proposition test, whose condition 3 is literally "NOT ADEQUATELY CONTESTED in the room"; today that is judged per formulation from raw extractions. Friction and fault flags gain a basis to discriminate on.
-3. **Formulation**, optionally: as input the Provocateur may use or ignore.
-4. **The voices: not in a first trial.** They already get the Provocateur's angled reading; adding the Researcher's would give them two framings of one room.
+1. **The explorer**, labelled "the Researcher's reading — contestable, with evidence".
+2. **Provocateur Triage Part B**, as a **new, separate `room_contested` signal**. `fault_line_present` stays a measure of council divergence, as its prompt defines it; reusing it would silently change its meaning. (Corrected from the first version, which routed `open` into the fault lines.)
+3. **Formulation**, optionally.
+4. **Not to the voices** in a first trial.
 
 **Risks:**
-- one more Opus call per night (small next to the Researcher's ~$15–25 per night estimate in the spec);
-- a new artifact and prompt, which is additive surface under the net-complexity gate;
-- the room reading can be wrong about the room. Required evidence ids make that checkable by script, since every cited id must exist and support the statement, which is the same integrity pattern as `_validate_clusters`;
-- it may anchor the Provocateur's nine readings into one. Arguably that is the fix; arguably it costs variety. Measure it (below).
+- Accuracy. A **support check** is needed: an LLM judge or a human pass that confirms each statement is supported by its cited ids. `_validate_clusters`-style checks only confirm the ids exist. (Corrected from the first version, which said this was checkable by script.)
+- One more Opus call per night. The spec's ~$15–25 per night estimate is for six sessions; Athens nights had 8–12.
+- Additive surface, under the net-complexity gate.
 
-**Plurality:** lowest of the four. It claims only what the room did. It never reaches the voices directly, and the neutral layer stays for anyone who wants the map without the reading.
+**Plurality:** lowest of the positioned options. It claims only what the room did, and it doesn't reach the voices directly.
 
-**Deterministic companion (no LLM):** a Python flag on every extraction whose text or context mentions the Assembly or a voice (the regex from `assembly_refs.py`), exempting it from isolate-dropping and listing it in the night record. This alone would have kept `beastopia:006` alive. It bends "council-unaware" only as far as knowing the Assembly exists, not who is on it.
+**The deterministic Assembly flag, revised:** its value is marking channelled-Assembly items so the recursion is visible (G5), not catching attendee references. Its one "hit" at Athens was the operator's own retelling. A regex on voice names over-matches: Plato, Arendt and Cleopatra appear as topics.
 
-**A free benchmark already exists:**
-- The 128 Athens context narratives are the Provocateur's per-voice room readings of the same material.
-- A Round-3 trial on Athens Night 1 (with a spend cap, when the operator allows API calls) can be scored against them: does one room reading cover what the nine narratives found? Compare against Illustrations 1–3, which were written from the same ids.
-- Measure plurality before and after: do formulations on the same theme diverge less once triage reads a single room reading?
+### Recommendation (revised: sequenced cheapest first)
 
-### Recommendation
+1. **Fix C68 A1.** It is a precondition for any room-level claim and is already filed.
+2. **Option 0a**, deterministic room statistics in the explorer. No LLM. It partly answers the operator's complaint about the record.
+3. **Option 0b**, a capped trial under the operator's spend cap. It separates "model drift" from "hospitable room".
+4. **Option 4, only if 0a and 0b don't answer the complaint.** Build it with a support check, session-kind input and a separate `room_contested` flag, and after an operator decision on the group-dynamics ban.
 
-**Option 4 plus the deterministic Assembly-reference flag.** Route it to the record and Triage Part B first, and not to the voices. Keep Option 1's `contested_by` as a Python-filled field if cheap. Decline Option 2 as the primary change.
+**Decline Option 2** as the primary change.
 
-**Roadmap fit:** this is **new**, not part of Stage 4 (voice-card prompt backport) or Stage 5 (family of forms, split-card). The nearest home is Phase 2's "stage routing as function of input shape". It is additive, so under the net-complexity gate it is design-and-shelve unless the operator decides to build (the gate amendment of 2026-09-28 lets the operator's own decision count). Part B's synthesis will say whether it should outrank other stages' changes.
+**Roadmap fit:**
+- 0a is small explorer work.
+- 0b is a trial, like Stage 4's sentinel regens, needing a spend cap.
+- Option 4 is **new** and additive. Under the net-complexity gate it is design-and-shelve unless the operator decides to build.
+- Nothing here belongs to Stage 4 (voice-card backport) or Stage 5.
 
 ---
+
+## Changes in the 2026-09-29 revision
+
+1. **Model.** Removed "same model". MSC ran on Opus 4.6 (manifest). The Athens Researcher is not recorded; the code default was Opus 4.7 (`394029f`, `37e883b`). `model_routing.json` postdates both.
+2. **C68 A1** stated in the Method section and in A.4 #6; examples rebuilt on panel sessions only.
+3. **Illustration 1** replaced: theme_005 (24 of 28 items were reflections) became the *Clash of the Titans* (30 panel items, 0 challenged).
+4. **Illustration 2** rebuilt on the `citizen` workshop only. The "room settled sortition vs election" claim was removed; it contradicted `mpga:025` and `mpga:013`.
+5. **Illustration 3** corrected. The octopus explanation *was* taken up (`mthd:007`, reinforced); what stayed open was the principle (`mthd:021`). Reflection items were dropped.
+6. **`beastopia:006`** reclassified: the operator's retelling, not attendee evidence. G6 now rests on the absence of any attendee reference.
+7. **Grammar statistics** withdrawn as a diagnostic, since MSC shares the house style. The difference is now located in content (A.2.4) and compliance (A.2.5).
+8. **"Zero findings"** changed to "about five relational claims, none about the room".
+9. **Causal claim** ("mirrors the room") downgraded to PLAUSIBLE, with its three confounds.
+10. **"Designed"** qualified: true for clusters; at theme level, non-compliance (the "Items articulating…" abstracts).
+11. **Added** the extraction prompt's ban on group-dynamics observations (A.4 #1).
+12. **Fault lines** corrected: 12 of 22 have three or more options. By prompt definition they measure council divergence, so no signal measures room contestedness.
+13. **Recovery examples** split into panel-grounded and reflection-grounded.
+14. **Option 4:** a support check is now required; a separate `room_contested` flag; session-kind input.
+15. **Options 0a and 0b added**, and the recommendation re-sequenced cheapest first.
+16. **Small fixes:** MSC isolates are 4; `hdid_audio:010` is quoted exactly ("neither … tested"); `birthplace:008` is `unengaged`; the regexes are published (Appendix A).
 
 ## Checkpoint (Part A → Part B)
 
@@ -449,3 +502,20 @@ Part B (Transcription, Provocateur, Voice Step 1 and Step 2, Editor, published s
 # Synthesis and open operator decisions
 
 *Pending Part B.*
+
+---
+
+## Appendix A — how the counts were made (reproducible)
+
+All counts come from reading `runs/athens_night_{1,2,3}/02_researcher/{all_extractions,grouping}.json`, `03_provocateur/{triage_flags,selection}.json`, `03_provocateur/formulations/*.json` and `01_transcription/*/session_package.json`.
+
+| Count | Method |
+|---|---|
+| Panel vs reflection | Session is a reflection if its `session_package.json` has `metadata.source == "vendor"` or `metadata.audio_source == "vendor"` (5 sessions). |
+| Challenged per theme | Sum of `engagement == "challenged"` over the theme's clusters' `extraction_ids`, optionally restricted to panel sessions. |
+| Single-session cluster | The set of `id.split(":")[0]` over a cluster's `extraction_ids` has size 1. |
+| Shared-blind-spot use | Regex `blind spot\|assum\|without arguing\|nobody\|no one\|never\|unchallenged\|uncontested\|consensus\|agree` over cluster abstracts; every hit read by hand (all were content words). |
+| Theme-level claims | Read by hand, all 24 Athens and 6 MSC theme abstracts; classified as list-only, speakers' claim restated, relational claim of the Researcher's own, or claim about the room (A.2.4). No regex. |
+| Room-gap formulations (23 of 128) | Regex, case-insensitive, over `formulation + " " + context_narrative`: `moved on\|never (resolved\|answered\|asked\|addressed\|met\|examined)\|unanswered\|no one (asked\|answered\|named)\|nobody\|without meeting\|passed each other\|rather than examined\|went unasked\|left (open\|unasked\|unanswered)\|did not (answer\|ask\|notice)`. |
+| Fault-line options | All 22 `fault_line_description` values read by hand. 12 name three or more alternatives; 10 are binary. |
+| Assembly references in N2/N3 transcripts | Regex `\b(AI ?Assembly\|AIssembly\|the assembly\|octopus\|Scheherazade\|Cleopatra\|Whanganui\|Lovelace\|Dostoevsky\|Ibn Battuta\|Marley\|dossier\|newspaper\|broadsheet)\b` over every turn. Hits were read by hand; only `beastopia` turn 56 refers to the Assembly. |

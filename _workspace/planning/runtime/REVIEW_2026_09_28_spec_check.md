@@ -9,6 +9,15 @@
 All four sections below are complete. §5 lists six code issues found in passing, none of them filed.
 
 - **Checkout:** `phase0-fixes` at `4e61444` (detached; contains `0998fa2`). All `file:line` references are at that commit.
+- **Line shifts since then (revised 2026-09-29).** C67 (`02006f5`) moved several citations; per the independent review (`REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/05_spec_check.md`), add these offsets when applying fixes on `main`:
+  - `editor/routing.py`: +9 from about line 418 (e.g. refusal check 458 → 467).
+  - `editor_flow.py`: +1 to +2 from about 165 (CLI 321–356 → 323–358).
+  - `editor/dossier_generation.py`: +5 from about 137.
+  - `scripts/overnight_orchestrator.py`: +2 to +18 from about 202.
+  - `ingest/app.py`: +5 from about 458.
+  - Transcription spec: +2 from about 397.
+  - The Editor spec's own citations `routing.py:458-464` and `:542-551` are now off by 9 as well.
+- **Revised 2026-09-29** after that review. Each change is marked "(rev. 09-29)".
 - **Skipped per brief:** every row of runtime OPEN_ITEMS C67's table (rows 1–10, R1, the `CLAUDE.md` doc row), and model-choice statements.
 - **Read-only evidence:** athens-2026 (`runs/athens_night_{1,2,3}/05_editor/{theme_routing,manifest}.json`; the 13 published dossiers' `metadata`; one Step 2 artifact). Nothing there was written.
 - **Scratch script (offline, no API):** `<scratchpad>/dossier_costs.py` prices the 13 dossiers' token metadata at Opus 4.7 list rates: $5/MTok input, $25/MTok output, 1h cache write at 2× input, cache read at 0.1× input. These are the rates the spec and `_anthropic_call.py:121-123` use.
@@ -35,7 +44,7 @@ What the code does:
 Athens evidence:
 - All 29 routed entries across the three nights say `"Case A — Step 2 resolved primary_theme_id (authoritative)"`. That is 10 + 9 + 10; Night 2's Whanganui River was held.
 - This includes the five "Synthesise…" voices: N1 Dostoevsky and Scheherazade, N2 Octopus, N3 Cleopatra and Octopus.
-- N1 Dostoevsky's Step 2 lineage has `primary_theme_id_source: "synthesis-routed: The artifact directly answers theme_001's formulation …"`. So the router ran inside Voice Step 2 (CONFIRMED for that voice; PLAUSIBLE for the other four, which I did not open).
+- N1 Dostoevsky's Step 2 lineage has `primary_theme_id_source: "synthesis-routed: The artifact directly answers theme_001's formulation …"`. So the router ran inside Voice Step 2. CONFIRMED for all five: the review opened the other four, and each has `synthesis-routed: …` (rev. 09-29).
 
 > **Replacement for the italic note + first paragraph (443–445):**
 > Theme routing assigns each voice's Step 2 artifact to exactly one dossier (its primary theme). Most of the work happens upstream: Voice Step 2 resolves `lineage.primary_theme_id` when it writes the artifact (`runtime/flows/voice/step2_first_draft_artifact.py:196-296`) — a single-response session goes to its one theme; "Response N" is read against the order the voice saw its Step 1 outputs; a synthesis ("Synthesise…", "weave", "across all") is decided by one LLM call, the synthesis router (`runtime/flows/editor/synthesis_router.py`, step `runtime.synthesis_router` in `model_routing.json`). Editor Stage 1 takes that field as authoritative (`routing.py:143-146`) and only falls back to its own parser, and its own synthesis-router call, when Step 2 left it null. At Athens every routed voice (29 entries, three nights) came through the Step 2 field, including five synthesis voices.
@@ -50,7 +59,7 @@ Athens evidence:
 > **Replacement:**
 > - `<run_dir>/04_voice/step2_first_draft_artifacts/*.json` — `lineage.primary_theme_id` (authoritative), `lineage.themes_covered`, `focus_decision`, `artifact_text` (fallback router only), `selected_form` (refusal form)
 > - `<run_dir>/04_voice/operator_decisions/*.json` — voices with `hold_for_regen` are left out
-> - `<run_dir>/03_provocateur/briefings/<voice>.json` — the legacy Response-N lookup and the fallback router's candidate themes
+> - `<run_dir>/03_provocateur/briefings/<voice>.json` — each theme's `theme_title` for `themes_to_dossiers[]` (`routing.py:382-393`), the legacy Response-N lookup, and the fallback router's candidate themes
 > - `<PROJECT_ROOT>/council_config.json` — each voice's display name
 
 **E3 — Case table (454–481). CONFIRMED.** The case labels and one case do not exist in code:
@@ -83,6 +92,8 @@ Marker lists also differ:
 > Case 3 — anything else → lowest-numbered theme in themes_covered; warning logged
 > ```
 
+(rev. 09-29) This block documents the **current** order: the refusal substring check runs before `primary_theme_id`. If N2 (§5) is fixed, the order changes, so edit this block in the same change. Apply the spec edit now, and flag the order in the text as "subject to N2".
+
 **E4 — Sample note (483–489). CONFIRMED stale.** It cites the 2026-05-01 legitimacy test, which predates `primary_theme_id`. It also says "~25% land in Case C", but at Athens no voice reached the editor parser.
 
 > **Replacement:** "At Athens (29 routed entries over three nights) every voice was routed by Step 2's `primary_theme_id`; the editor's own parser and router never ran. Five of those were synthesis voices, which Step 2 sent through the synthesis router."
@@ -97,7 +108,7 @@ Informational: the Athens **run-dir** `theme_routing.json` files still carry pre
 
 > **Replacement example voice entry:** `{"voice_slug": "plato", "voice_name": "Voice of Plato", "primary_theme": "theme_001", "focus_decision_parsed": "Focus on Response 3.", "primary_theme_source": "Case A — Step 2 resolved primary_theme_id (authoritative)", "primary_dossier": 1}`; add `"dossier_lead_order_default": [1, 2, 3]` after `refusals`.
 
-**E6 — "v2 changes vs v1" (530–534). CONFIRMED, minor.** It says `dossier_lead_order` was dropped from routing.json. The code writes `dossier_lead_order_default` (E5). Add one line saying so, and note that the lead pick lives in Stage 3 (`edition.py`).
+**E6 — "v2 changes vs v1" (530–534). CONFIRMED, minor.** It says `dossier_lead_order` was dropped from routing.json. The code writes `dossier_lead_order_default` (E5). Add one line saying so, noting that nothing in `runtime/` reads it (review grep, rev. 09-29), and that the lead pick lives in Stage 3 (`edition.py`).
 
 **E7 — Operator override (536–538). CONFIRMED.**
 The spec says the window between Stage 1's write and Stage 2's read is the review surface. There is no such window:
@@ -111,8 +122,20 @@ Editing `voices_routing[].primary_theme` alone is also not enough:
 - `n_engaged_voices` and `primary_dossier` are not recomputed.
 - A rerun regenerates every dossier, which costs a full night's calls, unless `--single-dossier` is used.
 
+(rev. 09-29) The first version of this replacement left out two fields that other code reads. That was an oversight: I had not read their readers.
+- **`voices_routing[].primary_dossier`:** Stage 3's night index groups voices by it (`edition.py:142`), and so does `publish_flow` (`:704, 878`, at `main`).
+- **`themes_to_dossiers[].n_engaged_voices`:** the lead pick scores it (`edition.py:83, 117`).
+
 > **Replacement:**
-> "To change the routing: after a run, edit `05_editor/theme_routing.json` — `voices_routing[].primary_theme`, and add or remove the matching `themes_to_dossiers[]` entry (with `dossier_no`) if a theme gains or loses its only voice — then rerun with `--skip-routing`. Stage 2 generates one dossier per `themes_to_dossiers[]` entry, with the voices whose `primary_theme` matches; a voice pointed at an unlisted theme appears in no dossier. The rerun regenerates every dossier; use `--single-dossier <theme_id>` to redo one. Without `--skip-routing`, Stage 1 runs again and overwrites the edit."
+> "To change the routing: after a run, edit `05_editor/theme_routing.json`, then rerun with `--skip-routing`. For each voice you move, change **all** of:
+> 1. `voices_routing[].primary_theme` — the new theme;
+> 2. `voices_routing[].primary_dossier` — that theme's `dossier_no` (the night index, publish and the lead pick group voices by it);
+> 3. `themes_to_dossiers[].n_engaged_voices` on both the old and the new theme (the lead pick scores it);
+> 4. `themes_to_dossiers[]` itself — add an entry, with a new `dossier_no`, if the target theme has none, and remove the old theme's entry if it lost its only voice.
+>
+> Nothing recomputes these fields under `--skip-routing`. Stage 2 generates one dossier per `themes_to_dossiers[]` entry, with the voices whose `primary_theme` matches; a voice pointed at an unlisted theme appears in no dossier. The rerun regenerates every dossier; use `--single-dossier <theme_id>` to redo one. Without `--skip-routing`, Stage 1 runs again and overwrites the edit."
+>
+> A safer long-term fix is a small script that recomputes fields 2–4 from field 1. *(Suggestion, not filed.)*
 
 **E8 — Stage 2 intro (550). CONFIRMED; outside the three flagged parts, found in passing.** "The call generates all dossier components as structured output" contradicts Principle 7 and §"Output Schema" (prose-and-parse, `dossier_generation.py:378-403`).
 
@@ -207,7 +230,7 @@ The same line says Night 3's 8m44s voice-to-editor interval reflects "slower the
 > - `--bypass-gating` — skip the per-voice review gate; tests and one-off forces only
 > - `--project PATH` — PROJECT_ROOT override (else `AI_ASSEMBLY_PROJECT_ROOT`)
 >
-> Exit codes: 0 success · 2 one or more dossiers failed · 3 review gate blocked (`05_editor/gating_blocked.json` written).
+> Exit codes: 0 success · 1 uncaught error or a `SystemExit` message (e.g. `--skip-routing` with no file) · 2 one or more dossiers failed · 3 review gate blocked (`05_editor/gating_blocked.json` written). *(Exit 1 added rev. 09-29; the module docstring's CLI block also lacks `--bypass-gating`.)*
 > Athens production: `python flows/editor_flow.py <run_dir> --night N` (fired by the orchestrator, or by the dashboard when the last flagged voice is released or held). Stage 1 runs, then the first dossier alone, then the rest in parallel.
 
 **E14 — Defensive checks. CONFIRMED.** One check exists, two don't:
@@ -226,7 +249,7 @@ Unlisted behaviour:
 > - `assert_run_dir_night_matches(run_dir, night)` — refuses a `--night` that contradicts the run_dir name; run_dirs without a night in the name are not checked
 > - Per-voice review gate (Stage 0, `routing.py::gating_status`) — refuses to run while any voice with a Step 2 artifact has neither a PASS verdict nor an operator decision; writes `05_editor/gating_blocked.json`, exit 3. It does not check that every voice produced a Step 2 artifact — the orchestrator's wait for `04_voice/manifest.json` covers that when the editor is fired by the orchestrator.
 > - Tim's card missing → `FileNotFoundError` (no schema check)
-> - `council_config.json` / `conference_facts.json` missing → the deployment block is left out of the system prompt without a warning
+> - `conference_facts.json` missing → THE GATHERING and YOUR ROLE are left out; `council_config.json` missing → THE PANEL is left out; no warning either way (`card_assembly.py:260-281`). Both files are resolved from `AI_ASSEMBLY_PROJECT_ROOT`, not `--project` (§5 N3). *(Per-file precision added rev. 09-29.)*
 > - `--skip-routing` with no `theme_routing.json`, or `--single-dossier` naming an unrouted theme → exit with a message
 
 **E15 — System prompt assembly (936). CONFIRMED.** The spec says the breakpoint lets calls share the prefix "even when their step-specific tails differ slightly (per-dossier `theme` injection)". The tail is identical for every call of a night: the per-dossier material is in the user prompt (`card_assembly.py:23-26, 353-367`). Both blocks carry a 1h breakpoint (the spec's own line 556). The deployment block sits in the prefix after BOUNDARIES (`:340-351`).
@@ -266,7 +289,7 @@ The tracker already records each of these decisions (B2–B9). The fix is a stat
 | One broadsheet front page per night, "one of eleven artifacts" | 3–5 per-theme dossiers per night (`editor_flow.py`; 13 across Athens). The night's lead is picked by Stage 3 (`editor/edition.py`, B3 narrowed to a lead picker). |
 | A fictional organisation ("Assembly News"; "no such organisation exists") | Dossiers are published under the House of Beautiful Business, a real organisation, with Tim Leberecht as "the unnamed editor" (`runtime/flows/shared/prompts/editor_dossier.md:27`) |
 | Masthead "Vol. CXIV. No. 39,288" with an incrementing issue number (51, 69, 95, 99) | No masthead, volume or issue number; dropped 2026-05-05 (`641e31d`; Editor spec §"The Publication") |
-| Per-voice headlines with "headline poetics" (61, 103, 230) | One `kicker` + `headline` per dossier, by Tim. The per-voice torque survives only in each headnote's `artifact_title`, via Tim's card field `translation_protocol` (B9: per-voice broadsheet headline dropped 2026-05-04 PM). No headline-poetics field exists in any persona schema (repo search: no match). |
+| Per-voice headlines with "headline poetics" (61, 103, 230) | One `kicker` + `headline` per dossier, by Tim. **Per-voice headline poetics were not carried over** (rev. 09-29).<br>• The prompt routes each headnote's `artifact_title` through Tim's `translation_protocol` (`editor_dossier.md:175, 203`).<br>• That field (3,123 characters) names no voice and never mentions headlines (checked 09-29).<br>• B9 had planned the per-voice content for Claudia's card; it never reached Tim's.<br>• What remains is a generic register translation.<br>• No headline-poetics field exists in any persona schema (repo search: no match). |
 | Wire-service unavailability paragraph and strikethrough, at most once each per edition (105) | Neither exists: no such field, and no strikethrough in the closing prompt or any published dossier (Editor spec §"The Publication") |
 | "The paper points; the artifact is the destination" (97) | Dossiers **embed** each artifact verbatim (`headnotes[].artifact_text`, since `8b84e58`) |
 
@@ -294,7 +317,7 @@ The tracker already records each of these decisions (B2–B9). The fix is a stat
 **F8 — docs/README's FU#61 note ("the strip rule needs to be voice-register-conditional").** This refers to the micro-site's stripped artifact pages (89). It is a design follow-up, not a code discrepancy; left as is.
 
 > **Proposed status block, inserted after the title (no body rewrite):**
-> **Status (2026-09-28):** pre-Athens concept, kept as the record of intent. What shipped differs: the broadsheet became the Editor Pipeline's per-theme dossiers, published under the House of Beautiful Business with Tim Leberecht as unnamed editor — no masthead, issue numbers, wire-service paragraph or strikethrough, and artifacts embedded rather than pointed at (`AI_Assembly_Editor_Pipeline.md`); the Substack was dropped (runtime OPEN_ITEMS B4); per-voice headline poetics survive only as each headnote's `artifact_title` (B9); the closing-show pipelines and the Day 4 goodbye were not built in this repo (B5, B6); the micro-site is built outside this repo (B2). The "new documents" listed at the end were not written.
+> **Status (2026-09-28):** pre-Athens concept, kept as the record of intent. What shipped differs: the broadsheet became the Editor Pipeline's per-theme dossiers, published under the House of Beautiful Business with Tim Leberecht as unnamed editor — no masthead, issue numbers, wire-service paragraph or strikethrough, and artifacts embedded rather than pointed at (`AI_Assembly_Editor_Pipeline.md`); the Substack was dropped (runtime OPEN_ITEMS B4); per-voice headline poetics were not carried over — Tim titles each headnote (`artifact_title`) in his own register, with no per-voice headline rules (B9); the closing-show pipelines and the Day 4 goodbye were not built in this repo (B5, B6); the micro-site is built outside this repo (B2). The "new documents" listed at the end were not written.
 >
 > **Inline notes:** at §"Surface 2" and §"Production implications" → "Broadsheet mini-concept + Edition Pipeline" — *"Superseded: see the Editor Pipeline spec and B3/B9."* At §"Surface 3" — *"Dropped 2026-05-04 (B4)."* In "Related documents" — update the persona pipeline to v4, the Voice line to "Steps 1–3 (Step 3 skipped for Athens)", add `AI_Assembly_Editor_Pipeline.md`, and mark `Till_Briefing…` as not in the repo.
 
@@ -328,12 +351,17 @@ The spec has no numbered §7 today. Its v2.2 changelog uses "§7 Step 1 ingest" 
 - Step 4's reflection prompt context (changelog line 29).
 - Constraints line 531: "Reflections are first-class … same schema, same processing".
 
-No reflection audio file was ever processed, and no code parses `__reflection__` filenames. (PLAUSIBLE: not searched repo-wide beyond `runtime/ingest` and `runtime/flows`.)
+Two more places describe reflections as audio (rev. 09-29, from the review): line 280 (phone-quality WER) and line 355 (walking-reflection Speaker ID accuracy).
+
+No reflection audio file was ever processed. No code or prompt contains `__reflection__` or `recording_type`. That is CONFIRMED repo-wide by the review (rev. 09-29), so `recording_type` should be removed, not kept conditionally.
 
 **T4 — Step 1 Storage and Trigger (88–114, 163–185) are also wrong for audio. CONFIRMED. Outside the brief's reflection scope, but it changes the trust rating.**
 - The spec describes a Google Drive folder mounted with rclone, a `watchdog` file watcher, `/transcripts/dayN/` and `/review/dayN/`, and it cites the archived `Infrastructure_Setup.md`.
 - The code has a FastAPI upload form. It writes `<run_dir>/01_transcription/<session_id>/`, then ffmpeg normalizes to `audio.m4a`, then `state=normalized`, then the orchestrator dispatches (§4, L2).
 - The Lifecycle spec and `AI_Assembly_Infrastructure.md` describe the real path.
+- **Also stale (rev. 09-29, from the review):**
+  - "Pre-conference setup" (115–151). Its `/metadata/sessions.json` example shows `session_title`, `session_description` and `roster`. That is the translated per-session `session.json` shape (`ingest/sessions.py::build_session_json`), not `reference/sessions.json`, which uses `title`, `description` and `speakers`. The same confusion sits behind C68 A1. Relabel it as the `session.json` shape and point at the translation.
+  - Line 191ff places normalization in "a Prefect task". It is ingest's ffmpeg step (`ingest/pipeline.py:299`).
 
 **What the reflection text should say now.** Replace lines 157–159 and the reflection parts of 101–102, 167–168, 178 and 181 with one subsection under Step 1:
 
@@ -341,15 +369,15 @@ No reflection audio file was ever processed, and no code parses `__reflection__`
 > Participant reflections do not come in as audio. A vendor collects them and delivers one JSON file per session in the operator's `Reflection Import Format` (`source`, `session_id`, `collected_at`, `reflections[]` of `{participant_id, duration_seconds, text, language?}`). Such sessions are marked `audio_source: "vendor"` in `reference/sessions.json`; the upload form refuses them.
 >
 > The operator lands each one in two steps, and the session then skips Steps 1–5 entirely:
-> 1. `python runtime/scripts/reflections_to_session_package.py <vendor.json> --session-id <session_id> --project-root <PROJECT_ROOT> --out <PROJECT_ROOT>/vendor_inbox/<session_id>.json` — one turn per reflection (`speaker` "Participant {i+1}", `role` audience, `confidence` high, text verbatim; `language` and the vendor's participant id and duration kept as `_vendor_*` fields), session metadata merged from `reference/sessions.json`. Use `--session-id` whenever the vendor sends its own id (every Athens file did); the vendor's id is kept as `_vendor_internal_session_id`.
-> 2. `python runtime/flows/vendor_intake.py --night N --sweep` (or `<file> --run-dir <run_dir> --session-id <id>` for one file) — validates the package and writes `session_package.json`, `status.json` (`done`, `source: vendor`) and `vendor.flag` / `vendor.warnings` / `vendor.error` under `01_transcription/<session_id>/`. From there the orchestrator and the Researcher treat it exactly like a transcribed audio session.
+> 1. `python runtime/scripts/reflections_to_session_package.py <vendor.json> --session-id <session_id> --project-root <PROJECT_ROOT> --out <PROJECT_ROOT>/vendor_inbox/<session_id>.json` — one turn per reflection (`speaker` "Participant {i+1}", `role` audience, `confidence` high, text verbatim; `language` kept as `language`; the vendor's participant id and duration kept as `_vendor_participant_id` / `_vendor_duration_seconds`), session metadata merged from `reference/sessions.json`. Use `--session-id` whenever the vendor sends its own id (every Athens file did); the vendor's id is kept as `_vendor_internal_session_id`.
+> 2. `python runtime/flows/vendor_intake.py --night N --sweep --project <PROJECT_ROOT>` (or `<file> --run-dir <run_dir> --session-id <id> --project <PROJECT_ROOT>` for one file; `--project` is needed unless `AI_ASSEMBLY_PROJECT_ROOT` is set, and `code/.env` doesn't set it — rev. 09-29) — validates the package and writes `session_package.json`, `status.json` (`done`, `source: vendor`) and `vendor.flag` / `vendor.warnings` / `vendor.error` under `01_transcription/<session_id>/`. From there the orchestrator and the Researcher treat it exactly like a transcribed audio session.
 >
 > **Known gap (runtime OPEN_ITEMS C68 A1):** the preprocessor writes `title` rather than `session_title`, and no description, format, track or roster, so the Researcher sees reflection sessions with a blank title and description and format "panel". Until A1 is fixed, the metadata contract of Step 5 does not hold for reflections.
 
 Alongside:
 - **Line 68:** "…and, in some cases, participant reflections delivered as vendor-transcribed JSON (§"Reflections")".
 - **Line 70:** "recordings (audio or video files) delivered after the session ends; reflections arrive separately as JSON".
-- **Remove:** the `__reflection__` rows in Step 1 Output (252, 265, 267) and the storage tree (101–102). Keep `recording_type` only if the Cleaning prompt still branches on it; not checked.
+- **Remove:** the `__reflection__` rows in Step 1 Output (252, 265, 267), `recording_type` (no code reads it), the storage-tree entries (101–102), and the reflection clauses at 280 and 355.
 - **Line 531:** "Reflections are first-class inputs: they may be a session's only record, and they reach the Researcher in the same session-package schema — but by the vendor route, not through ASR."
 - **v2.2 changelog lines 14, 25 and 31:** correct per T1 and T2.
 - **Step 1 Storage and Trigger (T4):** replace with a short pointer. "Audio arrives through the ingest upload form, is normalized by ingest, and is dispatched by the overnight orchestrator — see `AI_Assembly_Runtime_Lifecycle.md` Stages 1–2."
@@ -406,7 +434,10 @@ The spec says ingest spawns normalize and transcribe at upload, via `_launch_sta
 **L6 — Publish done-detection and the night's end state (§1 line 41; Stage 7 line 167; §3 line 219). CONFIRMED in the orchestrator.**
 - The orchestrator treats publish as done when `published_artifacts/traces/publish_manifest_night_<N>.json` exists (`overnight_orchestrator.py:385-393`).
 - Its comment gives the reason: `nights/night_<N>/_index.json` is now written at the end of `voice_flow` itself (post-C32). Using it as the signal skipped the editor and publish in a dry run.
-- So `nights/.../_index.json` existing does not mean the night is published. The operational query at line 219 would report "publish done" right after Voice. (The claim that `voice_flow` writes it comes from that comment; not re-read in `voice_flow.py`.)
+- So `nights/.../_index.json` existing does not mean the night is published. The operational query at line 219 would report "publish done" right after Voice. (`voice_flow.py:555-570` writes that index; confirmed by the review, rev. 09-29.)
+- **Athens caveat (rev. 09-29, from the review; I confirmed the listing).** athens-2026 `published_artifacts/` has no `traces/`, `extractions/` or `voices/`. So the sentinel and Publish's run record never existed at Athens, and the Stage 7 write list (untraced here) describes files the Athens record lacks.
+  - Whether `publish_flow` ever completed at Athens is **unverified**. Check that before rewriting Stage 7.
+  - The End-state replacement below describes the code, not Athens.
 
 > **Replacement for line 41:** "**End state:** `<PROJECT_ROOT>/published_artifacts/traces/publish_manifest_night_<N>.json` exists (Publish's own run record; the orchestrator's sentinel). `nights/night_<N>/_index.json` is not a completion signal: Voice writes a first version of it before the editor runs."
 > Stage 7 done detection and the §3 query: use the same file.
@@ -421,7 +452,10 @@ The spec says ingest spawns normalize and transcribe at upload, via `_launch_sta
 - **Self-contradiction:** "no artifact written under one night's run_dir is ever read by another night's pipeline" contradicts item 2. Provocateur reads earlier run dirs' `03_provocateur/selection.json`, and the orchestrator passes those dirs (`overnight_orchestrator.py:443-451`).
 - **A fourth thread is missing:** the editor reads every earlier night's published dossiers as `prior_editions` (`editor/publish.py:61-99`).
 
-> **Replacement for the closing sentence:** "Apart from these, each `runs/athens_night_<N>/` tree is self-contained: the only cross-night reads are prior run dirs' `03_provocateur/selection.json` (item 2), the continuity overlays under `voices/` (item 1), and the published dossiers under `published_artifacts/dossiers/` (item 4)."
+> **Replacement for the closing sentence (corrected rev. 09-29):** "Apart from these, each `runs/athens_night_<N>/` tree is self-contained. The cross-night reads are: prior run dirs' `03_provocateur/selection.json` (item 2), the continuity overlays under `voices/` (item 1), the published dossiers under `published_artifacts/dossiers/` (item 4), and the prior night's published voice page `published_artifacts/nights/night_<N-1>/<slug>.json`, which the Step 2 validator's cross-night-echo pillar reads on Nights 2–3 (item 5)."
+> **Add item 5:** "**Step 2 validator cross-night echo.** On Nights 2–3 each voice's new artifact is compared with its own published artifact from the night before."
+>
+> *My first version said "the only cross-night reads are…" and missed item 5 (`voice/step2_validation.py:379-403`, used at `:432-446`). The review was right.*
 > **Add item 4:** "**Editor prior editions.** On Nights 2–3 the editor reads the kicker, headline and body of every dossier published on earlier nights (`published_artifacts/dossiers/night_<M>/`, M < N) as `prior_editions`."
 
 **L9 — §8 Athens specifics (401–452). CONFIRMED against STATE and docs/README.**
@@ -430,7 +464,9 @@ The spec says ingest spawns normalize and transcribe at upload, via `_launch_sta
 - **The 2026-09-28 editor timing note (439).** It repeats "slower theme routing" for Night 3 (see E10). The editor itself ran 220 s and 212 s.
 - **Editor cost, "$1–2" per night (449).** Measured $2.09–4.54 as run (E9).
 
-> **Replacement for "Operator commands per night":** "Athens ran from the operator's laptop; the VM (`orchestrator@<N>.service`) was specified but never provisioned (B10). Night 1 used the orchestrator (`python runtime/scripts/overnight_orchestrator.py --night 1`); Nights 2–3 were fired stage by stage (§7), and the orchestrator was not started alongside, since it would dispatch duplicate transcriptions."
+> **Replacement for "Operator commands per night" (corrected rev. 09-29):** "Athens ran from the operator's laptop; the VM (`orchestrator@<N>.service`) was specified but never provisioned (B10). All three nights were fired stage by stage (§7). The orchestrator left no trace on Nights 1 and 3; Night 2 shows one aborted start (`_orchestrator_logs/status.json`: idle at 'transcription 2/12 done'). Don't run the orchestrator alongside manual fires: it dispatches duplicate transcriptions. On a laptop the orchestrator is `python runtime/scripts/overnight_orchestrator.py --night N --project <PROJECT_ROOT>`."
+>
+> *My first version said "Night 1 used the orchestrator". That had no source: I inferred it because STATE says only Nights 2–3 were manual. The run dirs contradict it: `athens_night_1/` and `athens_night_3/` have no `_orchestrator_logs/`, and `athens_night_2/` has one stuck status file (checked 09-29).*
 > **Editor note:** replace "slower theme routing that night" with "most of it waiting for operator releases; the editor itself ran 212 s".
 > **Editor cost row:** "$2–4.5 as run at Athens; ≈ $2.5 with the C66 cache fix". The other stages' timing and cost rows: see L10.
 
@@ -438,7 +474,7 @@ The spec says ingest spawns normalize and transcribe at upload, via `_launch_sta
 - `load_council_config` defaults to `$PROJECT_ROOT/council_config.json` (`flows/shared/io.py:264-282`);
 - athens-2026 has `council_config.json` at its root, next to `conference_facts.json`, `panel_roster.json` and `audience_profile.json`.
 
-Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_profile.json`. At runtime it reads the profiles as wired into `council_config.json` `members[]` (CLAUDE.md "Cross-repo handoff"). PLAUSIBLE: not traced in `provocateur_flow.py`.
+Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_profile.json`. At runtime it reads the profiles as wired into `council_config.json` `members[]` (CLAUDE.md "Cross-repo handoff"). CONFIRMED by the review: `provocateur_flow.py` never reads `06_derive` (rev. 09-29).
 
 > **Stage 4 reads:** replace lines 99–100 with "`<PROJECT_ROOT>/council_config.json` — panel members, including each voice's Provocateur profile (wired in from `voices/<slug>/06_derive/01_provocateur_profile.json` at build time)".
 > **§4 layout:** move `council_config.json` to the root, and add `conference_facts.json`, `panel_roster.json` and `audience_profile.json` beside it.
@@ -468,7 +504,9 @@ Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_prof
 - **Orchestrator won't re-fire:** once `05_editor/manifest.json` exists, the orchestrator never re-fires the editor.
 - **Missing pointer:** `runtime/scripts/reset_run.py`, which exists for these resets and whose caveats are C68 A2 / A8.
 
-> **Replacement for the comment block:** "Every flow takes the run_dir as its first argument. `voice_flow`, `editor_flow` and `publish_flow` also take `--project`; `researcher_flow` and `provocateur_flow` resolve PROJECT_ROOT from `AI_ASSEMBLY_PROJECT_ROOT`. Researcher, Provocateur and Voice checkpoint their work, so a rerun resumes. The editor does not: a rerun regenerates every dossier (use `--single-dossier <theme_id>` for one) and pays for each call."
+> **Replacement for the comment block (corrected rev. 09-29):** "Every flow takes the run_dir as its first argument. `voice_flow`, `editor_flow` and `publish_flow` also take `--project`. `provocateur_flow` resolves PROJECT_ROOT from `AI_ASSEMBLY_PROJECT_ROOT`. `researcher_flow` reads only the run_dir. Voice Step 2 skips voices whose artifact already exists (`voice/step2_first_draft_artifact.py:316-319`). The editor does not skip anything: a rerun regenerates every dossier (use `--single-dossier <theme_id>` for one) and pays for each call."
+>
+> *Resume behaviour for Researcher, Provocateur and Voice Step 1 is not traced; my first version carried the old spec's "each has internal checkpointing" over unchecked. Confirm it before writing it into the spec.*
 > Drop `[--skip-validation]` from the Voice line. Add: "To reset a stage and everything after it, see `runtime/scripts/reset_run.py` (read its caveats in runtime OPEN_ITEMS C68 A2 and A8 first)."
 
 **L14 — §8 tables. CONFIRMED where stated.**
@@ -481,7 +519,18 @@ Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_prof
 > **Session table:** replace the counts with the landed counts from STATE and a note: "(`sessions.json` now also lists hand-added `__audio2` duplicates for double-captured sessions and 5 vendor reflection sessions; 32 `ai_assembly` entries.)"
 > **Timing row, Voice:** "~30–60 min for a clean 10-voice pass (Night 1: 26 min); per-call medians in the Voice spec". **Cost rows:** Voice "~$23–25 (measured)", Editor "$2–4.5 as run; ≈ $2.5 with C66", Researcher "estimate; the Researcher spec says $15–25".
 
-**L15 — Test counts (§6 line 347; §9 line 467). CONFIRMED correct:** 9 tests in `test_run_dir_night_check.py` and 22 in `test_orchestrator.py`. The design doc link (`_workspace/archive/specs/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) resolves.
+**L15 — Test counts (§6 line 347; §9 line 467).**
+- 9 tests in `test_run_dir_night_check.py`: correct.
+- `test_orchestrator.py` had 22 at `4e61444`. It has **23** on `main` since C67 (`02006f5`); checked 09-29. §9 needs "23".
+- The design doc link (`_workspace/archive/specs/AUTOMATION_ORCHESTRATOR_DESIGN_2026_05_02.md`) resolves.
+
+**L16 — C67 changes the Lifecycle must also absorb (rev. 09-29).** These come from the review; not re-read here.
+- **Stage 2 / L2:** the `status.json` `"warnings"` field (Speaker ID auto-passthrough), the dashboard badge for it, and the orchestrator's warning line at Researcher dispatch.
+- **§6 "One session transcription errors":** a Speaker ID decode failure now degrades and flags (C49 + C67) instead of halting.
+
+**L17 — Seam with the already-fixed Stage 6 section (rev. 09-29).** Once §8 is corrected, two lines in Stage 6 contradict it, so change them in the same edit:
+- "Cost: ~$1-2 across one night": use "$2–4.5 as run; ≈ $2.5 with C66".
+- "Fired by: orchestrator": add "or by the dashboard when the last flagged voice is released or held".
 
 ---
 
@@ -492,7 +541,8 @@ Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_prof
 - **N1 — The orchestrator's gate and the editor's gate disagree (CONFIRMED by reading; not run).**
   - The orchestrator's gate opens when no WARN/HOLD voice lacks a decision. It is fully open when `step2_validation/` doesn't exist (`overnight_orchestrator.py:270-277, 286-295`).
   - The editor's gate needs every voice with a Step 2 artifact to have a PASS verdict or a decision (`routing.py:315-331`).
-  - **Failure case:** `voice_flow.py --skip-step2-validation` (`voice_flow.py:711-712`) leaves no validation files. The orchestrator then fires the editor, the editor exits 3 (every voice pending), and the orchestrator reports `failed:editor` and halts. The same happens if one voice's validation file is missing (PLAUSIBLE: not checked whether the validator writes a file when it fails).
+  - **Failure case:** `voice_flow.py --skip-step2-validation` (`voice_flow.py:711-712`) leaves no validation files. The orchestrator then fires the editor, the editor exits 3 (every voice pending), and the orchestrator reports `failed:editor` and halts.
+  - **Other triggers (rev. 09-29, per the review):** a pillar API error still writes a WARN file (`step2_validation.py:457-464, 487`). So one missing file arises only if `run_step2_validation` itself raises (`voice_flow.py:481-485`). `--skip-step2-validation` is the realistic trigger.
   - **Not a problem:** the validator emits only PASS / WARN / HOLD (`step2_validation.py:357-376`), so the FAIL that `routing.py:260` documents never occurs. That docstring is stale.
   - **Fix direction:** one shared gate function, used by both.
 - **N2 — The refusal check is a substring match that runs before everything else (CONFIRMED by reading).**
@@ -500,9 +550,18 @@ Line 100 also says Provocateur reads each voice's `06_derive/01_provocateur_prof
   - A flagged voice is dropped from every dossier, even though `primary_theme_id` is set.
   - At Athens no `focus_decision` tripped it: `refusals[]` was empty all three nights.
 - **N3 — `council_config` / `conference_facts` for Tim's prompt ignore `--project`.** `load_council_config()` and `load_conference_facts()` resolve PROJECT_ROOT from the environment (`io.py:379-381`). A failure is swallowed (`card_assembly.py:207-216`), so with `--project` and no env var, Tim's prompt silently loses THE GATHERING / YOUR ROLE / THE PANEL. This is next to C67 row 10 (a different call site), not the same finding.
-- **N4 — Night 1–3 hard limits.** These are in `editor_flow.py:324`, `card_assembly.py:308-309`, `voice_flow.py:697` and `overnight_orchestrator.py:66-71, 580`. They are likely covered by C52; not re-filed.
+  - **Worse case (rev. 09-29, from the review):** with `--project` A and `AI_ASSEMBLY_PROJECT_ROOT` = B, Tim silently gets **project B's** conference facts and panel.
+  - **Still open on `main` after C67:** its #10 fix threaded `project_root` into `route_themes` and `generate_dossier` only, not into `assemble_system_prompt`.
+- **N4 — Night 1–3 hard limits.** These are in `editor_flow.py:324`, `card_assembly.py:308-309`, `voice_flow.py:697` and `overnight_orchestrator.py:66-71, 580`. C52 covers the three-night ceiling but doesn't name these sites. **Add them to C52** rather than filing separately (rev. 09-29).
 - **N5 — `orchestrator@.service` restarts on the orchestrator's own failure exits (CONFIRMED by reading; systemd semantics, not run).** See L12. The comment at `:22-25` is wrong about `Restart=on-failure`. **Fix direction:** add `RestartPreventExitStatus=1 2` (or `Restart=on-abnormal`), and correct the comment. It only matters once a VM exists (B10). It is separate from C68 A4, which covers the sandbox paths in the same file.
 - **N6 — Editor output headroom (PLAUSIBLE risk).** Measured output reached 24,401 of the 32,000-token ceiling (E12). No dossier has hit it yet.
+
+**Filing priority (rev. 09-29, recommendation):**
+- **File now:** N3 and N1. Both bite on today's laptop runs: N3 whenever `--project` and the environment disagree; N1 on any `--skip-step2-validation` run under the orchestrator.
+- **File now, low priority:** N2. It is latent (never tripped at Athens), but the fix is cheap and it decides the E3 spec text.
+- **Fold N5 into C68 A4** (same file, same trigger: the VM, B10) instead of a new item.
+- **N4:** into C52.
+- **N6:** note only.
 
 ---
 

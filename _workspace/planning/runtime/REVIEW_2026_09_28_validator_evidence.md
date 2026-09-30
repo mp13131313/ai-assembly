@@ -2,7 +2,9 @@
 
 **For:** the C42 / C60 decision and roadmap §1.3 (validator economy).
 **Written:** 2026-09-28 by a Fable 5.1 session (brief `BRIEF_2026_09_28_fable_batch2.md`, Task 2).
-**Data:** `athens-2026/runs/athens_night_{1,2,3}/04_voice/{step2_validation,operator_decisions,step2_first_draft_artifacts}/`, the 10 shipped cards, `published_artifacts/`, plus the two pre-Athens dryruns in `runs/_archive/`. Code and prompts at `phase0-fixes` `40fe490`.
+**Data:** `athens-2026/runs/athens_night_{1,2,3}/04_voice/{step2_validation,operator_decisions,step2_first_draft_artifacts}/`, the 10 shipped cards, `published_artifacts/`, plus the two pre-Athens dryruns in `runs/_archive/`. Code and prompts at commit `40fe490`.
+**Revised 2026-09-29** after an independent Opus review (`REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/08_validator_evidence.md`). The change list is at the end (§10).
+**Scope limit (survivorship):** the classifications cover **final-fire** validation files only. At least 9 voice-nights were redrafted or re-validated while the gate was open (N1: Cleopatra, Battuta, Whanganui; N2: Scheherazade, Whanganui; N3: Cleopatra, Scheherazade, Whanganui, plus Battuta and Plato re-validated). `run_step2_validation` returns early if an output exists (`step2_validation.py:424`), so every rerun deleted the first-fire record. What triggered the N2/N3 redrafts isn't recorded anywhere I could find. Precision below is therefore computed on survivors.
 **Method:** offline scripts only (no model calls). They read every validation JSON, match each flag to the artifact text and the card rule it cites, count word lengths, grep the Researcher extractions, and compare validated text with published text.
 **Labels:** **CONFIRMED** = seen in data or code. **PLAUSIBLE** = consistent with the evidence but not proven. Anything marked *inference* is my reading.
 
@@ -10,14 +12,19 @@
 
 ## 1. Outcome first
 
-1. **The gate changed one publication outcome in 30 voice-nights.** The Whanganui River on Night 2 was held (`hold_for_regen`). The flag behind it was a real card breach: the `hard_limits` rule against using Tupua te Kawa as the voice's own argument engine. The other 22 flagged voice-nights were released with the text unchanged. All 30 published texts are byte-identical to the validated `artifact_text` (CONFIRMED). *PLAUSIBLE second case:* the Night-1 rerun of Battuta, Whanganui and Cleopatra to remove AI self-acknowledgment. Those first-fire validation files were overwritten, so the record can't show what fired.
+1. **Among final-fire records, the gate changed no voice page and one dossier decision.**
+   - The Whanganui River on Night 2 was held (`hold_for_regen`, 12:41:56Z). The flag behind it was a real card breach: the `hard_limits` rule against using Tupua te Kawa as the voice's own argument engine.
+   - **But its voice page had already been published** at 12:39:33Z (`published_artifacts/nights/night_2/whanganui_river.json`, `generated_at 15:39:33+0300`), with the flagged passage in it. It is in the Night-2 index. The hold only kept it out of the dossiers (STATE.md:96).
+   - This is a **gate-order defect** (new): the rerun path publishes before the operator decides.
+   - All 30 published texts are byte-identical to the validated `artifact_text`, the held one included (CONFIRMED).
+   - Redrafts before the decision (see *Scope limit*) are the other way the gate may have changed outcomes. That's confirmed for the Night-1 AI-self-ack trio (handoff); for the others the triggers aren't recorded.
 2. **Two of the four checks were dead at Athens and nobody noticed.** CONFIRMED:
    - **Cross-night echo never ran**, on any of the 20 Night-2 and Night-3 checks. The loader reads `artifact_text` / `body`, but the published voice page stores the text at `artifact.text`. The unit tests use a made-up fixture shape, so they pass.
    - **Length compliance never ran.** Every card's `length_and_format_constraints` is prose, not a `{min, max}` object. This one is already known (roadmap §0.2).
 3. **Most of the noise comes from three systematic causes, not from judgement:**
-   - **The voice-fidelity prompt turns the card's move repertoire into a checklist.** Cards list 8–13 moves; the prompt says the voice "MUST perform" every one, and any miss means WARN. Result: 20 of 30 voice-nights WARN, 85 of 288 move checks "not performed".
+   - **Voice fidelity sits on the gate and warns on 20 of 30.** The WARNs are driven mostly by the **criteria**: 18 of 20 fail at least one criterion, 1 is a parse fallback, and only Dostoevsky N2 warns on moves alone. The move checklist (8–13 moves "MUST" be performed) inflates every report, with 85 of 288 moves "not performed" across 25 voice-nights, but it isn't the cause of the WARN rate. The prompt also contradicts itself: `:38` says any miss means WARN, `:41` says 4 of 5 moves is PASS. As a result, 7 voice-fidelity results carry misses yet say PASS. The gate saving comes from taking voice fidelity **off the gate**, not from rewording it.
    - **The grounding check is blind.** It gets extraction IDs and session slugs, never the extraction text, and it gets the union of all themes even though 25 of 30 artifacts deliberately focus on one response.
-   - **The safeguards stance rules lag the cards (C42).** They produced 8 false alarms: all 6 presence-leak voice-nights, and both AI self-acknowledgment HOLDs.
+   - **The safeguards stance rules lag the cards (C42).** They produced 6 false-alarm pillar flags on 5 distinct voice-nights: 4 of the 5 presence-leak voice-nights (Octopus N2 is ambiguous), plus both AI self-acknowledgment HOLDs.
 4. **The one check that earned its keep is `hard_limits`.** It fired on 5 voice-nights and was right against the card on 3 of them, including the only hold. It also **missed** the same breach on Night 3: the Whanganui kawa-as-diagnostic passage was caught only by a voice-fidelity criterion, while safeguards flagged the wrong thing (AI self-acknowledgment).
 5. **Recommendation.** Take the prune-and-fix side of C60, option (A):
    - Gate on the fixed safeguards pillar only, with each hard limit judged one by one.
@@ -25,7 +32,7 @@
    - Either fix the grounding check's input or drop it.
    - Make the cheap checks deterministic, and repair the echo loader.
 
-   Replayed on the Athens record, the gate would have flagged **5 of 30** voice-nights instead of 23, all of them worth a look, and kept the one hold. Agentic triage (C60 B) isn't supported by this evidence for any deployment. §5 has the reasoning.
+   A **hand projection** (not a replay; no model call) gives **5 of 30** flagged voice-nights instead of 23, all of them worth a look. It assumes the per-limit verdicts add no new flags, and it doesn't include the real Whanganui N3 breach unless per-limit verdicts catch it. Agentic triage (C60 B) isn't supported by this evidence for any deployment. §5 has the reasoning.
 6. **The C42 draft fixes the AI self-acknowledgment and presence-leak misfires, but it needs two corrections before it lands:**
    - One of its "PASS" anchors (Whanganui N3) is the same kawa-as-engine breach the operator held on Night 2.
    - Its continuity-block exemption can't be implemented. The validator sees only the artifact, and the flagged phrases are text the voice wrote in reaction to the notice.
@@ -132,15 +139,15 @@
 | Pillar · rule | Fired | REAL | QUALITY | False alarm | Ambig. | Changed an outcome? | Missed without it? |
 |---|---|---|---|---|---|---|---|
 | Safeguards · AI self-ack (HOLD) | 2 | 0 | – | 2 | 0 | No (both released) | Nothing in the preserved record. PLAUSIBLY it prompted the Night-1 3-voice rerun; files overwritten. |
-| Safeguards · presence leak | 6 (10 instances) | 0 | – | 5 | 1 | No | Nothing |
-| Safeguards · `hard_limits` | 5 | **3** | – | 0 | 2 | **Yes, 1 hold** | **The Whanganui N2 hold.** Cleopatra "trauma" and Marley N3 were caught but released. |
+| Safeguards · presence leak | 5 (10 instances) | 0 | – | 4 | 1 | No | Nothing |
+| Safeguards · `hard_limits` | 5 | **3** | – | 0 | 2 | 1 dossier exclusion (the page was already published) | **The Whanganui N2 hold.** Cleopatra "trauma" and Marley N3 were caught but released. |
 | Safeguards · `banned_modes` | 4 | 1 (duplicate of a hard limit) | – | 2 | 1 | No | Nothing that the hard-limits check didn't also catch |
 | Safeguards · banned-language AI-slop list | 0 | – | – | – | – | – | Untestable. The filtered list is **empty for 8 of 10 voices**, and 0 lexicon hits across all 30 artifacts (offline grep). |
 | Safeguards · topics requiring care / defamation (HOLD) | 0 | – | – | – | – | – | No evidence either way. Keep: the downside is asymmetric. |
 | Engagement · form fidelity | 4 | 0 | 4 | 0 | 0 | No | Nothing for publication. Useful as build feedback. |
 | Engagement · grounding | 9 | 0 | 0 | 3 confirmed | 6 | No | Nothing. Structurally blind (§4.2). |
-| Engagement · length (mechanical) | 0 (dead) | – | – | – | – | – | If fixed as-is, it would flag **18 of 30** (e.g. Whanganui N3 at 819 words against 350–550). |
-| Voice fidelity · moves | 20 WARN (85 of 288 items) | 0 | some | most | – | No | Nothing |
+| Engagement · length (mechanical) | 0 (dead) | – | – | – | – | – | If fixed as-is, it would flag **17–18 of 30**, depending on the word-count method (e.g. Whanganui N3 at 819 words against 350–550). |
+| Voice fidelity · moves | missed on 25 voice-nights (85 of 288 items); sole WARN cause on 1 (Dostoevsky N2) | 0 | some | most | – | No | Nothing |
 | Voice fidelity · criteria | 19 (40 of 154 items) | **1** (Whanganui N3 transmission fidelity) | ~38 | 1 (parse) | – | No | The only place the Whanganui N3 breach appeared |
 | Cross-night echo | 0 of 20 ran (dead) | – | – | – | – | – | Unknown. Echo was never measured at Athens. |
 
@@ -164,7 +171,7 @@
 - The card schema defines `characteristic_moves` as "3–5 signature patterns a reader would recognise" (`docs/AI_Assembly_Persona_Card_v2.md:704`). Plato's own quality criterion asks that "at least two of my `characteristic_moves` operate visibly" (`:953`).
 - The shipped cards carry 8–13 moves each.
 - The prompt says: "a list of signature moves the voice MUST perform in its artifact … For each move on the list, check whether the artifact actually performed it". Any `performed: false` means WARN (`voice_step2_validation_voice_fidelity.md:9-11, 38`).
-- A 350–750-word piece can't perform 11 moves, so WARN is close to structural. 20 of 30 voice-nights warned. Only one warned on moves alone, but the move lists inflate every report the operator reads.
+- A 350–750-word piece can't perform 11 moves. But the WARN rate isn't driven by moves: 18 of the 20 WARNs also fail a criterion, and only Dostoevsky N2 warns on moves alone. The prompt contradicts itself (`:38` says any miss means WARN; `:41` says "4/5 moves … is PASS"), and the model applied it inconsistently: 7 results carry misses yet say PASS (N1 Dostoevsky, Plato, Scheherazade; N2 Arendt, Plato; N3 Battuta, Octopus). Coordinate any rewording with the other audit's F4 proposal to compute the verdict in code, under which voice fidelity would warn on 26 of 30.
 - The **criteria** results are the valuable part, and they are consistent night after night:
   - Ada: no cosmic close, no Byronic thread (3 of 3 nights).
   - Cleopatra: argues rather than issues (3 of 3).
@@ -206,8 +213,8 @@
 ### Move off the gate and into a per-voice report
 
 8. **Voice fidelity:**
-   - Change the prompt from "MUST perform each" to the schema's intent: "the artifact shows at least two of these moves visibly; list which".
-   - Stop issuing WARN on moves.
+   - Change the prompt from "MUST perform each" to the schema's intent: "the artifact shows at least two of these moves visibly; list which". This fixes the reports, not the WARN rate. The WARN rate falls only because the pillar leaves the gate.
+   - Stop issuing WARN on moves, and compute any verdict in code (with the F4 audit).
    - Keep the per-criterion results, aggregated **across nights per voice** as build feedback (Ada ×3, Cleopatra ×3, Whanganui ×3), feeding voices §1.1 and batch Task 3.
    - Exception: a criterion that restates a hard limit (Whanganui's transmission fidelity) should be judged in safeguards (item 1).
 9. **Form fidelity:** report-only until roadmap §1.2 (family of forms) lands. After §1.2, the declared form comes from `selected_form`, not the one canonical medium, and the check should compare against that.
@@ -224,13 +231,13 @@
 
 11. **Add a `reason` field** (free text, optional `flag_refs`) to `operator_decisions/*.json`. Without it, precision can only be rebuilt by inference, as here. The Whanganui N2 rationale is lost.
 
-### What the pruned gate would have flagged at Athens (replayed on the record)
+### What the pruned gate would have flagged at Athens (hand projection, not a replay)
 
-Replay: safeguards only, with C42 applied, `medium` visible, and per-hard-limit verdicts. Voice-nights flagged: **Cleopatra N2** ("trauma"), **Octopus N2** ("four nights", ambiguous), **Whanganui N2** (kawa: the hold), **Marley N2** (I-and-I pronoun, ambiguous), **Marley N3** (Jah-indwelling). That's 5 of 30, against 23.
+Projection: safeguards only, with C42 applied, `medium` visible, and per-hard-limit verdicts. Voice-nights flagged: **Cleopatra N2** ("trauma"), **Octopus N2** ("four nights", ambiguous), **Whanganui N2** (kawa: the hold), **Marley N2** (I-and-I pronoun, ambiguous), **Marley N3** (Jah-indwelling). That's 5 of 30, against 23.
 
 PLAUSIBLY a 6th, **Whanganui N3**, if per-limit verdicts catch the breach the Night-3 pillar missed. That would be a gain in recall.
 
-Nothing REAL in §3 would be lost.
+Whanganui N3 (REAL) is caught only if the per-limit change works as intended; that's untested. The projection also assumes per-limit verdicts (5–9 limits × 30) add no new flags. A small offline replay design should settle both before the smoke test. On the final-fire record, the projection keeps the Whanganui N2 flag; that flag's effect was dossier exclusion only.
 
 ### Does the C42 draft fix the misfires?
 
@@ -240,6 +247,7 @@ Nothing REAL in §3 would be lost.
 | Presence leak on observing the room (Hannah N1, Whanganui N2 "Agora", Marley N3, Dostoevsky N3 ×5) | Item 2: the assembly-fiction stance; only first-person *entry as participant* warns | **Fixes it.** Dostoevsky's "I sit at the back watching" is the edge case. Add it as an explicit PASS anchor. |
 | The "final-night notice" false positive | Item 3: exempt continuity-block phrasing | **Can't be implemented as written.** The validator sees only `artifact_text`. The flagged phrases ("Last night of the assembly…") are voice-written prose, so there's no injected text to exempt. Item 2 already covers them. Drop item 3. |
 | The Whanganui N3 anchor | Lists "Walk the kawa against a large language model … As diagnostic" as a PASS anchor | **Needs a correction.** It passes for AI self-ack, but the same passage breaches the kawa hard limit the operator held on Night 2. As written, the anchor could teach the validator the kawa-diagnostic is fine. Keep it as an AI-ack PASS anchor, labelled "AI-ack PASS; hard-limit check still applies", or swap in another anchor. |
+| The Battuta N1 anchor | "synthetic-counsellor critique through wakāla / tazkiyya / wijāda" | **Refers to the published rerun**, going by content: the on-disk N1 draft uses wakāla ×3, tazkiyya ×6, wijāda ×6, and it passed safeguards. The first-fire v1 the operator rerun away isn't preserved, so the anchor is valid but wasn't a flagged-then-released case. Label it that way. |
 | Card-mandated form elements flagged (riddim) | Not covered | Needs item 3 of this proposal. |
 | Voice fidelity checklist, grounding blindness, dead echo and length checks | Not covered (outside safeguards) | This proposal, items 5–10. |
 
@@ -251,7 +259,7 @@ The roadmap §0.2 smoke test, re-firing Hannah N1 and Whanganui N3 through the n
 
 **The evidence supports (A), prune and fix, for every deployment in view. It doesn't support (B) now.**
 
-- **The misfires are systematic, not situational.** The same rule misfires the same way every night: presence leak 6 of 6, AI self-ack 2 of 2, the moves checklist 20 of 30, grounding blindness 9 of 9. Each one is fixed once in a prompt or in the input wiring. A triage agent would re-derive the same "this is a misfire" judgement every night, at added cost, added surface and less reproducibility. That is what the net-complexity gate warns against.
+- **The misfires are systematic, not situational.** The same rule misfires the same way every night: presence leak 4 of 5 (1 ambiguous), AI self-ack 2 of 2, grounding blindness 9 of 9, and voice fidelity recurring per voice across nights. Each one is fixed once in a prompt or in the input wiring. A triage agent would re-derive the same "this is a misfire" judgement every night, at added cost, added surface and less reproducibility. That is what the net-complexity gate warns against.
 - **What survives the prune is the part an agent shouldn't decide.** The five flags left in the replay are card hard limits on sacred grammar, clinical vocabulary and narrative time. Three of the five are Marley / Whanganui sacred-grammar questions. The reader gates (voices §24/§28) exist because the construction's builders can't adjudicate them. Auto-releasing them is the wrong default; auto-holding them is a deterministic policy, not an agent.
 - **For an unattended deployment** (vatican, a future no-operator run), the evidence argues for a **policy table**, not triage. Per voice, per rule:
   - hard-limit breach on a reader-gated voice → drop the voice from the edition, or hold;
@@ -270,6 +278,7 @@ The roadmap §0.2 smoke test, re-firing Hannah N1 and Whanganui N3 through the n
 Source: `athens-2026/voices/<slug>/05_validation/` (CONFIRMED unless marked).
 
 - **7a and 7a FINAL both returned `REVISION_NEEDED` for all 10 shipped cards.** Every card shipped on operator review (`_operator_review_passed.flag`), not on a validator PASS. Scheherazade ran **8 rounds** of 7a FINAL (`06_pass_7a_final.ROUND0…ROUND6.json` plus the final); the issue count went 8 → 10 → 7 → 7 → 6 → 6 → 6 → 6 and never reached PASS. As a *verdict*, the pass carries no gating information. Its value, if any, is in the `field_issues` list.
+- (File names: `ROUND0`, `ROUND1`, `ROUND1-POSTPATCH`, `ROUND2-POSTPATCH`, `ROUND4-FINAL`, `ROUND5`, `ROUND6`, plus the final. There's no ROUND2 or ROUND3, so "8 rounds" means 8 files.)
 - **The field overlap between 7a and 7a FINAL is low.** In 6 of 10 voices they flag **no field in common**; the most is 4 (Cleopatra). 7a's findings were either fixed between the passes or were noise. FINAL mostly finds *new* issues on the assembled card. *Inference:* folding per-pass 7a into 7a FINAL (roadmap §1.3) loses nothing this data can see, since FINAL already sees the whole assembled card.
 - **A systematic 7a FINAL false positive:** "`council_member_name` … missing" in 5 of 10 builds (Dostoevsky, Hannah, Battuta, Octopus, Scheherazade). The field is present in every shipped card (e.g. Hannah: `"Hannah Arendt"`). Already diagnosed and fixed in code: the field was stripped from the FINAL input (`personas/run_persona_pipeline.py:1899`, voices §32.2). This is the persona-side twin of the grounding-blindness pattern: a validator judging a field it wasn't given.
 - **7c `projection_warnings`** are computed for every voice, 51 in total (2–8 each), and **consumed nowhere**: no card carries a projection key. That confirms roadmap §1.3's dead-QC finding. Wire them into a build report, or delete the output.
@@ -290,6 +299,8 @@ Source: `athens-2026/voices/<slug>/05_validation/` (CONFIRMED unless marked).
   - operator decisions without reasons (§5 item 11);
   - the C42 draft's Whanganui N3 anchor and its unimplementable item 3 (§5).
 - **C20a:** its deferral leaned on an echo check that never ran. Reopen, or re-justify.
+- **New: gate order.** The rerun path publishes the voice page before the operator decides (Whanganui N2: page 12:39:33Z, hold 12:41:56Z). Either publish only after the decision, or have a hold unpublish the page.
+- **New: reruns delete the first-fire validation record** (early return at `step2_validation.py:424`). Archive the first fire instead (e.g. `<voice>.fire1.json`).
 
 ## 9. Open operator decisions
 
@@ -299,3 +310,18 @@ Source: `athens-2026/voices/<slug>/05_validation/` (CONFIRMED unless marked).
 4. **The Whanganui kawa-as-diagnostic move:** Night 2 held it, Night 3 released it. Which is the policy? This belongs to the iwi-orbit reader gate (voices §28). The validator anchor in the C42 draft shouldn't settle it by default.
 5. **Marley's sacred-grammar flags** (N2 I-and-I pronoun, N3 Jah-indwelling): same question for the Rastafari-orbit reader gate (voices §24).
 6. **C60:** confirm (A) now and (B) shelved, with the reopening condition in §6.
+
+---
+
+## 10. Changes in the 2026-09-29 revision (after the Opus review)
+
+1. **Headline §1.1:** the Whanganui N2 hold didn't stop the page, which was published at 12:39:33Z, before the hold at 12:41:56Z. The hold only excluded the voice from the dossiers. Added the gate-order defect as a new item (§8).
+2. **Survivorship disclosed:** at least 9 redrafted or re-validated voice-nights; the precision figures cover survivors only. Rerun-deletes-record added as a new item (§8).
+3. **Voice-fidelity cause corrected:** criteria, not the move checklist, drive 18 of 20 WARNs; the moves-only WARN is Dostoevsky N2. Added the `:38`/`:41` prompt contradiction, the 7 PASS-with-misses results, and the F4 coordination (§1, §4, §4.3, §5 item 8, §6).
+4. **Presence leak:** 5 voice-nights, not 6; C42-class false alarms are 6 pillar flags on 5 voice-nights, not 8.
+5. **"Replayed" changed to "hand projection";** removed "nothing REAL lost" and "kept the one hold".
+6. **Length:** 17–18 of 30, depending on the word-count method.
+7. **C42 Battuta anchor:** refers to the published rerun (§5 table).
+8. **Minor fixes:** the commit is cited instead of the branch name; the Scheherazade 7a FINAL file naming; the moves row reports "25 voice-nights".
+
+**Where I still differ:** none on facts. On emphasis, the dossier exclusion was a real outcome (it's where readers meet the voices), so I report "no page changed, one dossier decision changed" rather than "zero outcomes".

@@ -11,13 +11,16 @@
 - Two read-only subagents took two slices: the Pass 1.1–1.7 merge prompts against their schemas, and the Pass 0a/0b/1a/1b research prompts. I re-checked every finding of theirs that appears below against the code, the schema or the Athens files. Items I could not re-check are marked PLAUSIBLE.
 - Athens data under `projects/athens-2026` was read, never written.
 
+**Revised 2026-09-29** after an independent Opus review (`_workspace/planning/REVIEWS_OF_FABLE_DELIVERABLES_2026_09_29/01_prompts_correctness.md`). The changes are listed in §7. **Line numbers are as at `4e61444`.** No prompt file changed between `4e61444` and `main` `86998b4`, but code lines have drifted: `personas/run_persona_pipeline.py` is +5 after about line 390 (1044→1049, 922→927, 1091→1096, 1366→1371), and `runtime/flows/voice/step3_amended_artifact.py` 121→127.
+
 ---
 
 ## 1. Verdict
 
-**No BLOCKER. 3 MAJOR, 19 MINOR, 11 NIT (a few NITs are grouped).**
+**No BLOCKER. 3 MAJOR, 18 MINOR, 12 NIT (a few NITs are grouped).**
 
-- **The plumbing is sound.** All 75 prompt files are loaded by live code, so there are no dead files. Every Jinja placeholder and every runtime `{{x}}` fill is supplied by its render call. Every runtime output contract matches its parser.
+- **The plumbing is sound.** All 75 prompt files are loaded by live code, so there are no dead files. Every Jinja placeholder and every runtime `{{x}}` fill is supplied by its render call. Every *active* runtime output contract matches its parser. The two exceptions are the dormant Step 3 prompt (#21) and Speaker ID's missing UNIDENTIFIED enum value (N7).
+- **Variables the code passes that no prompt uses:** all harmless, listed in §6. Two of them are behavior gaps, and both are filed: `hostile_sources` never reaches Pass 1.1 (#17) or Pass 4a (voices §23 P1).
 - **The three MAJORs are all prompts that don't reach, or don't act on, what they were written for.** Each is silent, and nothing in the trackers covers it:
   1. The cross-night echo validator never ran at Athens: the loader reads the wrong key.
   2. The per-section Deep Research prompts, the ones actually pasted for every voice, lose each type's framing block and the curator's emphasis note.
@@ -31,7 +34,7 @@
 Labels:
 - **CONFIRMED:** I read both sides (prompt and code, schema or data), or reproduced the problem offline.
 - **PLAUSIBLE:** the defect is confirmed but its runtime effect is inferred.
-- **Voice-writing:** the prompt shapes card or artifact text. Changing it needs a sentinel regeneration first (brief, common rules), and `personas/scripts/sentinel_regen.py` can't run today (voices §37 A5).
+- **Voice-writing:** the prompt shapes card or artifact text. Changing it needs a sentinel regeneration first (brief, common rules). `personas/scripts/sentinel_regen.py` could not run at `4e61444` (voices §37 A5); `f7e0d4c` fixed it. The gate compares pass outputs, not assembled cards, so card-level effects (#10, #11) and Derive output (#6) need a separate check.
 
 | # | Sev. | Finding | Main location |
 |---|---|---|---|
@@ -40,7 +43,7 @@ Labels:
 | 3 | MAJOR | Pass 1.7 edit paths silently skipped; a fix is recorded as applied | `pass_1_7_coherence.md:141-142`, `:223-255` |
 | 4 | MINOR | Echo validator reads the continuity memory as instructions | `voice_step2_validation_cross_night_echo.md:6,21,27,51` |
 | 5 | MINOR | Pipeline `cluster_NNN` ids in all 24 published theme abstracts | `researcher_theming.md:36`, `publish_flow.py:352` |
-| 6 | MINOR | Raw-loaded prompts send their developer headers to the model | `persona_derive.md:1-6`, `persona_pass_7a_*.md` |
+| 6 | MINOR | Three raw-loaded prompts send their developer headers to the model | `persona_derive.md:1-6`, `persona_pass_7a_*.md` |
 | 7 | MINOR | Step 1 prompt promises "editorial flags" that the code strips | `voice_step1_reasoning.md:2,50` |
 | 8 | MINOR | Merge prompts name fields/values the schemas reject (retry cost) | 1.2, 1.3, 1.4, 1.6 merge prompts |
 | 9 | MINOR | Merge prompts route content to fields that don't exist (silent drop) | 1.1, 1.3, 1.5 merge prompts |
@@ -48,7 +51,7 @@ Labels:
 | 11 | MINOR | Six prompts and the strip code disagree on which inline tags a card carries | Pass 3, 0b-fictional, 7a, 7-pre, `bracket_strip.py` |
 | 12 | MINOR | Pass 3/4a user prompts ask for scholarly attribution their system prompts strip | `persona_pass_3_user.md:29-33,58`, `persona_pass_4a_user.md:49-51` |
 | 13 | MINOR | Pass 2 system prompt uses inputs its user prompt doesn't send | `persona_pass_2_identity_boundaries.md:12-19,320` |
-| 14 | MINOR | Pass 4b `medium` guardrail contradicts its own musical-corpus variant | `persona_pass_4b_artifact.md:87-93` vs `:122-165` |
+| 14 | NIT | Pass 4b `medium` guardrail contradicts its own musical-corpus variant (downgraded 2026-09-29) | `persona_pass_4b_artifact.md:87-93` vs `:122-165` |
 | 15 | MINOR | Pass 7 anachronism `PERIOD:` gets a truncated dict, never dates | `run_persona_pipeline.py:1044` |
 | 16 | MINOR | Editor told `fault_line_present` means the panel split; it means the council | `editor_dossier.md:12` |
 | 17 | MINOR | Research/merge prompts branch on voice_config values they never receive | 1.1, 0b-organism, 0b header, 0a |
@@ -67,6 +70,7 @@ Labels:
   - All 20 Night-2/3 validation records have `cross_night_echo: null`, although every Night-1 file existed from `dcaf7ce` (2026-05-08), before Night 2 was validated (2026-05-09).
   - The published file's keys were `artifact.{title,subtitle,text,…}` at that commit.
   - The Voice spec's own call counts agree: 29/30/30 validator calls on Nights 1/2/3, i.e. three pillars, no echo (`docs/AI_Assembly_Voice_Pipeline.md:1274`).
+- **Did echo get through at Athens? (added 2026-09-29)** No verbatim rehash did. An offline check (`echo_overlap.py`, session scratchpad) compared the 8-word spans each voice shared with its previous night's published artifact, over all 20 Night-2/3 pairs. The most was 4 shared spans (Whanganui, Night 3; 0.5% of the piece), and 17 pairs shared none. So the validator's HOLD tier ("same paragraphs … core claim repeated verbatim") would not have fired. Argument-level ("moderate") echo can't be measured this way and is unknown.
 - **Fix direction:** read `prior["artifact"]["text"]` first, keep the old keys as fallbacks, and build the test fixture from a real published file. Land it together with #4, or the first run will raise false flags.
 
 ### 2.2 MAJOR: the per-section Deep Research prompts lose the type framing and the curator note
@@ -92,8 +96,9 @@ Labels:
   - Its own Example A (`:223-245`) would fail Concept validation (another skip). It has `gloss` and `loadbearing`, which are VocabEntry fields; it lacks the required `definition` and `evidence_tag` (`schemas/pass_1_2.py:103-118`). Its citations lack the required `tier` (`schemas/_conventions.py:61`).
 - **What goes wrong:** a resolve-by-edit on any of those five chunks is dropped while the flag reads "Resolved by edit".
 - **Evidence, CONFIRMED:**
-  - Whanganui `02_merge/_coherence_audit.json`: `edits_applied 4, edits_skipped 6`. The six were CF-02's `passages[...].work_title` sets.
+  - Whanganui `02_merge/_coherence_audit.json`: `edits_applied 4, edits_skipped 6`. The four applied are CF-01's two concepts and CF-03's two vocabulary entries. CF-02's resolution cites "edits[2-7]", six `work_title` sets, and none of the six passages it names was changed.
   - 11 of 22 Whanganui passages still carry a `work_title` that matches no work.
+  - **The cause of the skips is inferred, not logged.** No Pass 1.7 stdout log exists (`voices/whanganui_river/_pipeline_logs/` is empty), and the audit keeps no reasons. The inference rests on two things: CF-02 records its path in the short form `passages[].work_title`, and a `work_title` string can't fail validation. A `KeyError` from the short path fits both. A different failure in `_route_edit_to_chunk_file` can't be ruled out without a re-run.
   - Arendt's run wrote the correct wrapper path (`passages.passages[8].work_title`) and applied, so the example is what decides. The other nine voices skipped 0.
 - **Fix direction:** correct the example paths, list which chunks are wrappers, and make Example A schema-valid. Either make skipped edits loud (non-zero exit, or a `skipped_reasons` field in the audit), or change the prompt's "fails loudly" claim to match.
 
@@ -115,16 +120,20 @@ Labels:
 - **What goes wrong:** a reader-facing `abstract` field carries internal ids. Whether the microsite shows it is unknown (C68 R3).
 - **Fix direction:** keep the prompt (the ids anchor the synthesis) and publish a clean display abstract. Either use the Editor's `theme_abstract_for_dossier` when one exists, or strip `cluster_\d+` references at publish. Operator decision, §5.
 
-### 2.6 MINOR: prompts loaded raw send their developer headers to the model
+### 2.6 MINOR: three prompts loaded raw send their developer headers to the model
 
 - **Where:** `personas/flows/shared/io.py:71-76` reads the file as-is, and nothing strips Jinja comments. So the `{# … #}` block is part of the system prompt for:
   - `persona_derive.md:1-6`: "Claude Sonnet 4.6 … Pure compression task — Sonnet is correct here, no thinking needed". This goes to the Derive call, which runs with thinking on (`run_persona_pipeline.py:922-928`).
   - `persona_pass_7a_cross_model.md:1-7` (`:1091`).
   - `persona_pass_7a_fix.md:1-15` (`:1366`).
-  - `pass_0a_voice_config.md` (read with `read_text`, `run_pass0a_voice_config.py:207`) sends a literal `{% if hostile_sources %}` (`:98`) and "Phase B" and CLI-flag notes (`:1,16,38,62,136`).
+- **Not Pass 0a (corrected 2026-09-29).** An earlier version also listed `pass_0a_voice_config.md`. Its cited lines (`:1,16,38,62,136`) are real instructions to the model. The literal `{% if hostile_sources %}` at `:98` is prose describing the downstream branch; sent raw, it is harmless.
 - **What goes wrong:** the model reads stale developer notes as instructions, e.g. "no thinking needed" and "8 fields" for Derive, and model names. CONFIRMED by reading the call path.
 - **Tracker overlap:** the roadmap (0.4) calls the Derive header "harmless at runtime (code wins)", and voices §36 files the model names inside prompt text. The mechanism that makes both model-facing is not filed.
-- **Fix direction:** render these files through `prompt_render.render()` (none has variables, so it's a drop-in), or strip `{#…#}` in `load_prompt`. Derive and 7a-FIX shape card text, so treat them as voice-writing.
+- **Fix direction:**
+  - Render **only these three files** through `prompt_render.render()`. They have no variables and parse as Jinja, so this is a drop-in.
+  - Or strip `{#…#}` inside `load_prompt`.
+  - **Do not render `pass_0a_voice_config.md`.** Its `{% if %}` at `:98` is never closed, so Jinja fails to parse the file ("Unexpected end of template"), as `prompt_vars.py` showed at the start of this review.
+  - Derive and 7a-FIX shape card text, so treat them as voice-writing.
 
 ### 2.7 MINOR: the Step 1 prompt promises "editorial flags" and a "STRUCTURED REASONING SURFACE" that the voice never gets
 
@@ -174,7 +183,11 @@ No pass-1 schema sets `extra`, so Pydantic's default ignores unknown keys. CONFI
 
 - **Pass 3, provenance tags:** `persona_pass_3_intellectual_core.md:55-58` strips `[stated]` / `[scholarly_consensus]` / `[inference]` / `[attributed by narrative function]`. Its fictional branch (`:277-279`) requires exactly those tags. Result, CONFIRMED: Scheherazade's shipped constitution carries `evidence_tag` (scholarly_consensus 11, stated 5) on 16 of 17 principles, rendered into her runtime system prompt.
 - **Pass 3, category tags:** its human branch (`:273-275`) forces `[ontological]` / `[epistemological]` / `[ethical-political]` on every human voice. That overrides the observational (`[experiential]` / `[artistic]`) and narratival rules in `:247-258`. Cleopatra (observational), and Dostoevsky and Battuta (narratival), shipped with the philosophical categories. Marley shipped with none.
-- **Pass 6.5-clean (`bracket_strip.py:22-30,80-99`) strips all of these category and provenance tags** after Pass 6, yet:
+- **Pass 6.5-clean (`bracket_strip.py:22-30,80-99`) runs after Pass 6 and strips inline `[ontological]` / `[epistemological]` / `[ethical-political]` / `[unique]` and `[stated]` / `[scholarly_consensus]` / `[inference]` / `[contested]`.**
+  - It does **not** strip `[experiential]`, `[artistic]`, `[attributed by narrative function]` or `[scholarly consensus]` (with a space). *(Narrowed 2026-09-29: an earlier version said "all of these".)*
+  - It also leaves JSON keys alone, so Scheherazade's `evidence_tag` values survive it.
+
+  Yet three prompts assume otherwise:
   - Pass 3's comment (`:223-231`) says category tags "should remain";
   - Pass 7a (`persona_pass_7a_cross_model.md:47-65`) tells the validator that `[scholarly_consensus]` / `[stated]` / `[inference]` / `[contested]` are "LEGITIMATE … preserved by Pass 6.5-clean's allowlist". They are on the strip list, not the keep list;
   - Pass 7-pre's observational mode classifies claims by `[scholarly_consensus]` / `[inference]` tags (`persona_pass_7pre_extract.md:77-78`, `persona_pass_7pre_verify_batch.md:39-40`). Those tags are gone before 7-pre runs (`run_persona_pipeline.py:832-835`).
@@ -193,7 +206,10 @@ No pass-1 schema sets `extra`, so Pydantic's default ignores unknown keys. CONFI
 - **What goes wrong, PLAUSIBLE:** `character` is built without the voice-move material it is told to use.
 - **Fix direction:** pass `moves` and `register` to Pass 2, or drop the references. The `banned_language` / `banned_modes` block in Pass 2 (`:178-193`) is for Pass 4a's fields and can go.
 
-### 2.14 MINOR: Pass 4b's `medium` guardrail contradicts its own musical-corpus variant (voice-writing)
+### 2.14 NIT (downgraded 2026-09-29): Pass 4b's `medium` guardrail contradicts its own musical-corpus variant (voice-writing)
+
+*Why downgraded:* the variant opens with "Override the field-spec defaults above", and the shipped Marley card follows it. The precedence is not fully explicit, though: the conflicting line is a BLOCK 2 guardrail, not a BLOCK 3 field spec. So the text is still worth fixing when Pass 4b is next edited.
+
 
 - **Where:** `persona_pass_4b_artifact.md:87-93`, unconditional: for `lyrics_patterns_only`, "the medium IS the song … (lyric + Suno-style kind-hint). Do NOT bridge song → prose."
 - **The conflict:** the conditional variant (`:122-165`) specifies prose plus an instrumental-only direction string, "No new lyrics composed". `persona_pass_4a_voice.md:111-115` agrees with the variant.
@@ -241,7 +257,7 @@ All CONFIRMED.
 ### 2.20 MINOR: the prompts disagree on Te Awa Tupua Act section numbers
 
 - **Where:** `pass_0b_non_human_system.md:148` says "section 18 (Tupua te Kawa values), sections 19–20 (Te Pou Tupua)", and asks DR to quote them verbatim.
-- **The others:** Pass 2 (`persona_pass_2_identity_boundaries.md:526,531`, "the four kawa of s.13"), `persona_pass_1a_non_human_system.md:273` and `persona_pass_1d_excerpt_selection.md:45-46` say s.13 is Tupua te Kawa, with Te Pou Tupua from s.18.
+- **The others:** Pass 2 (`persona_pass_2_identity_boundaries.md:526,531`, "the four kawa of s.13"), and `persona_pass_1a_non_human_system.md:273-276` say s.13 is Tupua te Kawa, with Te Pou Tupua from s.18. (`persona_pass_1d_excerpt_selection.md:45-46` gives only the range "sections 12–20"; corrected 2026-09-29.)
 - **Evidence:** the disagreement is CONFIRMED. That s.13 is correct is from my knowledge of the Act (PLAUSIBLE); verify before editing.
 - **Fix direction:** correct the 0b line.
 
@@ -264,7 +280,7 @@ All CONFIRMED.
 - **N1.** `persona_pass_7_anachronism.md:93-94` says REVISION_NEEDED makes "the pipeline's revision loop re-run Pass 2 / 4a / 5". The loop was replaced by 7a-FIX (FU#13). This is the twin of the filed 7a "max 2 revision loops" line (roadmap 0.4), which is `persona_pass_7a_cross_model.md:145-147`.
 - **N2.** `persona_pass_2_identity_boundaries.md:71` ("`header`, `why_selected` … NEVER in runtime card") and `persona_pass_7a_fix.md:99-101` ("`header` (for cited_passages — strip these entirely)", a retired field name) contradict Pass 6, which requires both on every passage. All 10 shipped cards keep both. Latent: a 7a-FIX patch could strip them.
 - **N3.** The Pass 7a field→pass map (`persona_pass_7a_cross_model.md:109-110`) lists three Pass 3 fields and omits `finds_compelling` and `resists`. The FU#51 guard corrects the routing from disk (`run_persona_pipeline.py:1292-1318`), so there's no effect.
-- **N4.** Derive: the user prompt says "Provocateur Profile (8 fields)" (`persona_derive_user.md:5`); the system prompt says 9 (`persona_derive.md:9`), and the validator has 9. The cross-reference "`runtime/flows/shared/io.py` line ~117" is now `:244`.
+- **N4.** Derive: the cross-reference "`runtime/flows/shared/io.py` line ~117" is now `:244`. The 8-vs-9 field count is already filed (roadmap `PLAN_2026_06_12_post_athens_roadmap.md:65`, "just whether `name` is counted"). The only thing to add is that the prompt pair contradicts itself in front of the model: the user prompt says "(8 fields)" (`persona_derive_user.md:5`), the system prompt says 9 (`persona_derive.md:9`).
 - **N5.** `persona_pass_1d_excerpt_selection.md:69` says "four explicit inputs" and lists five. `persona_pass_4a_voice.md:213` names "Tang, Thiel", who aren't on the council. The Provocateur-side Thiel is filed as C68 A14; this persona-side one isn't.
 - **N6.** The 7-pre verify user prompt labels the dossier "Pass 1a/1a-DR/1b" (`persona_pass_7pre_verify_batch_user.md:8`); it is the Phase-B chunked merge. The standard branch says "Extract every direct quote" (`persona_pass_7pre_verify_batch.md:46`), against "you do NOT re-extract" (`:11`).
 - **N7.** Speaker ID defines an UNIDENTIFIED tier (`transcription_speaker_id.md:17`), but the `confidence` enum (`:59`) has no value for it.
@@ -317,7 +333,7 @@ These are not prompt findings, and I didn't check them beyond what is stated. Ea
    - (b) Change the theming prompt, which touches the Researcher spec's deliberate design.
    - Either way, check whether the microsite renders `abstract` (ties to C68 R3).
 4. **Re-run the Athens record?** Not recommended for #1, #2 or #3. The published record and the shipped cards stand; each fix is forward-only. The one data item is Whanganui's unapplied CF-02 (orphan `work_title`s in merge data, not in the card). It needs no action unless Whanganui is rebuilt.
-5. **Order.** #1 and #4 together first: runtime code plus a validator prompt, testable offline, no voice text involved. Then #2, #3, #8, #9, #17–#20 (research and merge plumbing), which affect only the next build. The voice-writing items (#6 Derive/7a-FIX, #7, #10–#16) go into Stage 4 behind the sentinel gate, which needs voices §37 A5 fixed first.
+5. **Order.** #1 and #4 together first: runtime code plus a validator prompt, testable offline, no voice text involved. Then #2, #3, #8, #9, #17–#20 (research and merge plumbing), which affect only the next build. The voice-writing items (#6 Derive/7a-FIX, #7, #10–#13, #15, #16) go into Stage 4 behind the sentinel gate. The gate runs again since `f7e0d4c`, but it compares pass outputs, not assembled cards. #10 and #11 also need a card-level diff, and #6 a Derive-output check.
 
 ---
 
@@ -340,4 +356,33 @@ These are not prompt findings, and I didn't check them beyond what is stated. Ea
 - Trackers: runtime OPEN_ITEMS (C20a, C38, C42, C62–C68, section headings), voices OPEN_ITEMS §23, §24, §31–§37, the roadmap Phase 0–1 and its read log, and the doc backlog (prompt rows). Searched for each finding before filing it.
 - Inline model-facing prompts in code (e.g. `editor/synthesis_router.py:53`, the one-line system prompts at `run_persona_pipeline.py:476,591`) are outside the 75 files and were not reviewed.
 
-**Athens data, read-only:** 30 Step-2 validation records (Nights 1–3), 10 cards, 10 `_coherence_audit.json` files, per-voice DR prompt files (5 voices), 24 published theme files, 3 grouping files, Plato's `continuity_night_2.json`, Marley's card, and the Whanganui merge chunks.
+**Athens data, read-only:** 30 Step-2 validation records (Nights 1–3), 10 cards, 10 `_coherence_audit.json` files, per-voice DR prompt files (5 voices), 24 published theme files, 3 grouping files, Plato's `continuity_night_2.json`, Marley's card, the Whanganui merge chunks, and (2026-09-29) the 30 published night artifacts.
+
+**Variables the code passes that no prompt uses.** I compared `render_calls.py` against `prompt_vars.py` and found no case where a variable reaches a template that ignores it with any effect on output. The unused ones:
+- Pass 2 system: `voice_mode`.
+- Pass 4a system: `subtype`, `hostile_sources`. Pass 4a has no hostile branch (voices §23 P1, filed).
+- Pass 4b system: `name`.
+- 1b fictional and 1b system: `hostile_sources`.
+- Merges:
+  - `voice_mode`: unused by 1.1, 1.5, 1.6.
+  - `hostile_sources`: unused by 1.1 (#17), 1.2, 1.3, 1.4.
+  - `corpus_constraint`: unused by 1.1–1.5.
+- 0b header (per-section render): `voice_mode`, `corpus_constraint`, `hostile_sources`.
+- 0b monolithic render: `voice_mode`.
+- `_per_chunk_vars` builds `interpretive_methods`, which no prompt reads.
+
+## 7. Changes made 2026-09-29, after the Opus review
+
+- §1:
+  - counts changed to 18 MINOR / 12 NIT;
+  - "every runtime output contract matches its parser" narrowed to *active* contracts (#21, N7 excepted);
+  - the unused-variables result added.
+- Header: line numbers are pinned to `4e61444`, and the code drift since then is listed.
+- Labels paragraph and §5.5: `sentinel_regen.py` no longer described as broken (fixed in `f7e0d4c`). Added that the gate compares pass outputs, not cards.
+- #1: added the offline echo check (no verbatim echo got through).
+- #3: the cause of the six skips is marked as inferred, and why.
+- #6: Pass 0a removed. The fix is now "render only Derive, 7a and 7a-FIX", with a warning that rendering Pass 0a breaks it.
+- #11: the strip list is narrowed to what `bracket_strip.py` actually removes.
+- #14: downgraded to NIT.
+- #20: 1d no longer cited as saying s.13.
+- N4: the filed 8-vs-9 count is cited as filed (roadmap `:65`).
